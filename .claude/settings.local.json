@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "WebFetch(domain:api.alquran.cloud)",
+      "Bash(python download_and_generate.py:*)",
+      "Bash(sqlite3:*)",
+      "Bash(./gradlew assembleDebug:*)",
+      "Bash(python download_full_data.py:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "Bash(find:*)",
+      "Bash(du:*)",
+      "Bash(wc:*)",
+      "Bash(dir /s \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\app\\\\src\\\\main\\\\res\")",
+      "Bash(./gradlew compileDebugKotlin:*)",
+      "Bash(.\\\\gradlew assembleDebug:*)",
+      "Bash(gradlew.bat:*)",
+      "Bash(dir \"C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens\")",
+      "Bash(dir \"C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-html-screens\")"
+    ]
+  }
+}

@@ -1,0 +1,182 @@
+[
+  {
+    "id": 1,
+    "name_english": "Islamic New Year",
+    "name_arabic": "رأس السنة الهجرية",
+    "hijri_month": 1,
+    "hijri_day": 1,
+    "event_type": "HOLIDAY",
+    "description": "The first day of the Islamic calendar, marking the migration of Prophet Muhammad (ﷺ) from Mecca to Medina.",
+    "is_holiday": true
+  },
+  {
+    "id": 2,
+    "name_english": "Day of Ashura",
+    "name_arabic": "يوم عاشوراء",
+    "hijri_month": 1,
+    "hijri_day": 10,
+    "event_type": "FASTING",
+    "description": "A day of fasting commemorating when Allah saved Prophet Musa (Moses) and the Children of Israel from Pharaoh.",
+    "is_holiday": false
+  },
+  {
+    "id": 3,
+    "name_english": "Mawlid an-Nabi",
+    "name_arabic": "المولد النبوي",
+    "hijri_month": 3,
+    "hijri_day": 12,
+    "event_type": "CELEBRATION",
+    "description": "The birthday of Prophet Muhammad (ﷺ).",
+    "is_holiday": true
+  },
+  {
+    "id": 4,
+    "name_english": "Isra and Mi'raj",
+    "name_arabic": "الإسراء والمعراج",
+    "hijri_month": 7,
+    "hijri_day": 27,
+    "event_type": "CELEBRATION",
+    "description": "The night journey of Prophet Muhammad (ﷺ) from Mecca to Jerusalem and his ascension to the heavens.",
+    "is_holiday": false
+  },
+  {
+    "id": 5,
+    "name_english": "Laylat al-Bara'at",
+    "name_arabic": "ليلة البراءة",
+    "hijri_month": 8,
+    "hijri_day": 15,
+    "event_type": "NIGHT",
+    "description": "The Night of Forgiveness, a night of prayer and seeking forgiveness.",
+    "is_holiday": false
+  },
+  {
+    "id": 6,
+    "name_english": "Start of Ramadan",
+    "name_arabic": "بداية رمضان",
+    "hijri_month": 9,
+    "hijri_day": 1,
+    "event_type": "FASTING",
+    "description": "The beginning of the holy month of fasting.",
+    "is_holiday": false
+  },
+  {
+    "id": 7,
+    "name_english": "Laylat al-Qadr",
+    "name_arabic": "ليلة القدر",
+    "hijri_month": 9,
+    "hijri_day": 27,
+    "event_type": "NIGHT",
+    "description": "The Night of Power, better than a thousand months, when the Quran was first revealed.",
+    "is_holiday": false
+  },
+  {
+    "id": 8,
+    "name_english": "Eid al-Fitr (Day 1)",
+    "name_arabic": "عيد الفطر",
+    "hijri_month": 10,
+    "hijri_day": 1,
+    "event_type": "HOLIDAY",
+    "description": "The Festival of Breaking the Fast, celebrating the end of Ramadan.",
+    "is_holiday": true
+  },
+  {
+    "id": 9,
+    "name_english": "Eid al-Fitr (Day 2)",
+    "name_arabic": "عيد الفطر",
+    "hijri_month": 10,
+    "hijri_day": 2,
+    "event_type": "HOLIDAY",
+    "description": "Second day of Eid al-Fitr celebrations.",
+    "is_holiday": true
+  },
+  {
+    "id": 10,
+    "name_english": "Eid al-Fitr (Day 3)",
+    "name_arabic": "عيد الفطر",
+    "hijri_month": 10,
+    "hijri_day": 3,
+    "event_type": "HOLIDAY",
+    "description": "Third day of Eid al-Fitr celebrations.",
+    "is_holiday": true
+  },
+  {
+    "id": 11,
+    "name_english": "Day of Arafah",
+    "name_arabic": "يوم عرفة",
+    "hijri_month": 12,
+    "hijri_day": 9,
+    "event_type": "FASTING",
+    "description": "A blessed day of fasting for those not performing Hajj. Standing at Arafah is the most important pillar of Hajj.",
+    "is_holiday": false
+  },
+  {
+    "id": 12,
+    "name_english": "Eid al-Adha (Day 1)",
+    "name_arabic": "عيد الأضحى",
+    "hijri_month": 12,
+    "hijri_day": 10,
+    "event_type": "HOLIDAY",
+    "description": "The Festival of Sacrifice, commemorating Prophet Ibrahim's willingness to sacrifice his son.",
+    "is_holiday": true
+  },
+  {
+    "id": 13,
+    "name_english": "Eid al-Adha (Day 2)",
+    "name_arabic": "عيد الأضحى",
+    "hijri_month": 12,
+    "hijri_day": 11,
+    "event_type": "HOLIDAY",
+    "description": "Second day of Eid al-Adha (Days of Tashreeq).",
+    "is_holiday": true
+  },
+  {
+    "id": 14,
+    "name_english": "Eid al-Adha (Day 3)",
+    "name_arabic": "عيد الأضحى",
+    "hijri_month": 12,
+    "hijri_day": 12,
+    "event_type": "HOLIDAY",
+    "description": "Third day of Eid al-Adha (Days of Tashreeq).",
+    "is_holiday": true
+  },
+  {
+    "id": 15,
+    "name_english": "Eid al-Adha (Day 4)",
+    "name_arabic": "عيد الأضحى",
+    "hijri_month": 12,
+    "hijri_day": 13,
+    "event_type": "HOLIDAY",
+    "description": "Fourth day of Eid al-Adha (Days of Tashreeq).",
+    "is_holiday": true
+  },
+  {
+    "id": 16,
+    "name_english": "White Days Fast (13th)",
+    "name_arabic": "صيام الأيام البيض",
+    "hijri_month": 0,
+    "hijri_day": 13,
+    "event_type": "FASTING",
+    "description": "Recommended fasting on the 13th day of every lunar month.",
+    "is_holiday": false
+  },
+  {
+    "id": 17,
+    "name_english": "White Days Fast (14th)",
+    "name_arabic": "صيام الأيام البيض",
+    "hijri_month": 0,
+    "hijri_day": 14,
+    "event_type": "FASTING",
+    "description": "Recommended fasting on the 14th day of every lunar month.",
+    "is_holiday": false
+  },
+  {
+    "id": 18,
+    "name_english": "White Days Fast (15th)",
+    "name_arabic": "صيام الأيام البيض",
+    "hijri_month": 0,
+    "hijri_day": 15,
+    "event_type": "FASTING",
+    "description": "Recommended fasting on the 15th day of every lunar month.",
+    "is_holiday": false
+  }
+]

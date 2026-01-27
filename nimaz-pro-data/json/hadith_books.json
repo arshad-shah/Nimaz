@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "name_english": "Sahih al-Bukhari",
+    "name_arabic": "صحيح البخاري",
+    "author": "Imam Muhammad al-Bukhari",
+    "hadith_count": 7563,
+    "description": "The most authentic collection of Hadith, compiled by Imam Bukhari.",
+    "icon": "📗"
+  },
+  {
+    "id": 2,
+    "name_english": "Sahih Muslim",
+    "name_arabic": "صحيح مسلم",
+    "author": "Imam Muslim ibn al-Hajjaj",
+    "hadith_count": 7500,
+    "description": "The second most authentic hadith collection after Bukhari.",
+    "icon": "📘"
+  },
+  {
+    "id": 3,
+    "name_english": "Sunan Abu Dawud",
+    "name_arabic": "سنن أبي داود",
+    "author": "Imam Abu Dawud al-Sijistani",
+    "hadith_count": 5274,
+    "description": "A collection focusing on legal hadiths.",
+    "icon": "📙"
+  },
+  {
+    "id": 4,
+    "name_english": "Jami at-Tirmidhi",
+    "name_arabic": "جامع الترمذي",
+    "author": "Imam at-Tirmidhi",
+    "hadith_count": 3956,
+    "description": "Known for categorizing hadiths by their authenticity.",
+    "icon": "📕"
+  },
+  {
+    "id": 5,
+    "name_english": "Sunan an-Nasai",
+    "name_arabic": "سنن النسائي",
+    "author": "Imam an-Nasai",
+    "hadith_count": 5758,
+    "description": "A collection with strict authentication criteria.",
+    "icon": "📓"
+  },
+  {
+    "id": 6,
+    "name_english": "Sunan Ibn Majah",
+    "name_arabic": "سنن ابن ماجه",
+    "author": "Imam Ibn Majah",
+    "hadith_count": 4341,
+    "description": "The sixth of the six major hadith collections.",
+    "icon": "📔"
+  }
+]

@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "name_english": "Morning Adhkar",
+    "name_arabic": "أذكار الصباح",
+    "icon": "🌅",
+    "display_order": 1,
+    "dua_count": 15
+  },
+  {
+    "id": 2,
+    "name_english": "Evening Adhkar",
+    "name_arabic": "أذكار المساء",
+    "icon": "🌙",
+    "display_order": 2,
+    "dua_count": 5
+  },
+  {
+    "id": 3,
+    "name_english": "After Prayer",
+    "name_arabic": "أذكار بعد الصلاة",
+    "icon": "🤲",
+    "display_order": 3,
+    "dua_count": 8
+  },
+  {
+    "id": 4,
+    "name_english": "Waking Up",
+    "name_arabic": "دعاء الاستيقاظ",
+    "icon": "☀️",
+    "display_order": 4,
+    "dua_count": 3
+  },
+  {
+    "id": 5,
+    "name_english": "Before Sleep",
+    "name_arabic": "دعاء النوم",
+    "icon": "😴",
+    "display_order": 5,
+    "dua_count": 5
+  },
+  {
+    "id": 6,
+    "name_english": "Entering Home",
+    "name_arabic": "دعاء دخول المنزل",
+    "icon": "🏠",
+    "display_order": 6,
+    "dua_count": 2
+  },
+  {
+    "id": 7,
+    "name_english": "Leaving Home",
+    "name_arabic": "دعاء الخروج من المنزل",
+    "icon": "🚪",
+    "display_order": 7,
+    "dua_count": 2
+  },
+  {
+    "id": 8,
+    "name_english": "Entering Mosque",
+    "name_arabic": "دعاء دخول المسجد",
+    "icon": "🕌",
+    "display_order": 8,
+    "dua_count": 1
+  },
+  {
+    "id": 9,
+    "name_english": "Leaving Mosque",
+    "name_arabic": "دعاء الخروج من المسجد",
+    "icon": "🕋",
+    "display_order": 9,
+    "dua_count": 1
+  },
+  {
+    "id": 10,
+    "name_english": "Before Eating",
+    "name_arabic": "دعاء قبل الطعام",
+    "icon": "🍽️",
+    "display_order": 10,
+    "dua_count": 3
+  },
+  {
+    "id": 11,
+    "name_english": "After Eating",
+    "name_arabic": "دعاء بعد الطعام",
+    "icon": "✨",
+    "display_order": 11,
+    "dua_count": 2
+  },
+  {
+    "id": 12,
+    "name_english": "Traveling",
+    "name_arabic": "دعاء السفر",
+    "icon": "✈️",
+    "display_order": 12,
+    "dua_count": 4
+  },
+  {
+    "id": 13,
+    "name_english": "Rain",
+    "name_arabic": "دعاء المطر",
+    "icon": "🌧️",
+    "display_order": 13,
+    "dua_count": 4
+  },
+  {
+    "id": 14,
+    "name_english": "Distress & Anxiety",
+    "name_arabic": "دعاء الكرب والهم",
+    "icon": "💚",
+    "display_order": 14,
+    "dua_count": 5
+  },
+  {
+    "id": 15,
+    "name_english": "Forgiveness",
+    "name_arabic": "الاستغفار",
+    "icon": "🙏",
+    "display_order": 15,
+    "dua_count": 4
+  }
+]

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget Colors - Dark Mode -->
+    <color name="widget_background">#1C1917</color>
+    <color name="widget_text">#FFFFFF</color>
+    <color name="widget_text_secondary">#A8A29E</color>
+    <color name="widget_primary">#14B8A6</color>
+    <color name="widget_primary_dim">#2614B8A6</color>
+</resources>

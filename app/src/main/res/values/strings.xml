@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Nimaz</string>
+
+    <!-- Widget Descriptions -->
+    <string name="widget_hijri_date_description">Shows the current Hijri date</string>
+    <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
+    <string name="widget_prayer_times_description">Shows all prayer times for today</string>
+
+    <!-- Widget Names -->
+    <string name="widget_prayer_times_name">Prayer Times</string>
+    <string name="widget_next_prayer_name">Next Prayer</string>
+    <string name="widget_hijri_date_name">Hijri Date</string>
+</resources>

@@ -1,0 +1,102 @@
+[
+  {
+    "id": 1,
+    "name": "SubhanAllah",
+    "arabic": "سُبْحَانَ اللَّهِ",
+    "transliteration": "SubhanAllah",
+    "translation": "Glory be to Allah",
+    "target_count": 33,
+    "is_custom": false,
+    "display_order": 1
+  },
+  {
+    "id": 2,
+    "name": "Alhamdulillah",
+    "arabic": "الْحَمْدُ لِلَّهِ",
+    "transliteration": "Alhamdulillah",
+    "translation": "All praise is for Allah",
+    "target_count": 33,
+    "is_custom": false,
+    "display_order": 2
+  },
+  {
+    "id": 3,
+    "name": "Allahu Akbar",
+    "arabic": "اللَّهُ أَكْبَرُ",
+    "transliteration": "Allahu Akbar",
+    "translation": "Allah is the Greatest",
+    "target_count": 34,
+    "is_custom": false,
+    "display_order": 3
+  },
+  {
+    "id": 4,
+    "name": "La ilaha illallah",
+    "arabic": "لَا إِلَٰهَ إِلَّا اللَّهُ",
+    "transliteration": "La ilaha illallah",
+    "translation": "There is no god but Allah",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 4
+  },
+  {
+    "id": 5,
+    "name": "Astaghfirullah",
+    "arabic": "أَسْتَغْفِرُ اللَّهَ",
+    "transliteration": "Astaghfirullah",
+    "translation": "I seek forgiveness from Allah",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 5
+  },
+  {
+    "id": 6,
+    "name": "La hawla wa la quwwata illa billah",
+    "arabic": "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+    "transliteration": "La hawla wa la quwwata illa billah",
+    "translation": "There is no power nor strength except with Allah",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 6
+  },
+  {
+    "id": 7,
+    "name": "Salawat on Prophet",
+    "arabic": "اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ",
+    "transliteration": "Allahumma salli 'ala Muhammad",
+    "translation": "O Allah, send blessings upon Muhammad",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 7
+  },
+  {
+    "id": 8,
+    "name": "SubhanAllahi wa bihamdihi",
+    "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+    "transliteration": "SubhanAllahi wa bihamdihi",
+    "translation": "Glory be to Allah and praise be to Him",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 8
+  },
+  {
+    "id": 9,
+    "name": "SubhanAllahil Adhim",
+    "arabic": "سُبْحَانَ اللَّهِ الْعَظِيمِ",
+    "transliteration": "SubhanAllahil-Adhim",
+    "translation": "Glory be to Allah the Magnificent",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 9
+  },
+  {
+    "id": 10,
+    "name": "Hasbunallahu wa ni'mal wakil",
+    "arabic": "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",
+    "transliteration": "Hasbunallahu wa ni'mal wakil",
+    "translation": "Allah is sufficient for us, and He is the Best Disposer of affairs",
+    "target_count": 100,
+    "is_custom": false,
+    "display_order": 10
+  }
+]

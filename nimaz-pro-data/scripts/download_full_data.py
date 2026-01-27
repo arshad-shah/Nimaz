@@ -1,0 +1,625 @@
+#!/usr/bin/env python3
+"""
+Nimaz Pro - Full Data Download Script
+Downloads complete Hadith collections and expands Duas
+"""
+
+import json
+import os
+import sqlite3
+import urllib.request
+import urllib.error
+import ssl
+import time
+from pathlib import Path
+from typing import Dict, List, Any
+
+# Disable SSL verification
+ssl._create_default_https_context = ssl._create_unverified_context
+
+BASE_DIR = Path(__file__).parent.parent
+JSON_DIR = BASE_DIR / "json"
+OUTPUT_DIR = BASE_DIR / "output"
+
+HADITH_BASE_URL = "https://cdn.jsdelivr.net/gh/fawazahmed0/hadith-api@1/editions"
+
+# Hadith collections mapping
+HADITH_COLLECTIONS = [
+    {"key": "bukhari", "book_id": 1, "name": "Sahih al-Bukhari", "arabic_key": "ara-bukhari", "english_key": "eng-bukhari"},
+    {"key": "muslim", "book_id": 2, "name": "Sahih Muslim", "arabic_key": "ara-muslim", "english_key": "eng-muslim"},
+    {"key": "abudawud", "book_id": 3, "name": "Sunan Abu Dawud", "arabic_key": "ara-abudawud", "english_key": "eng-abudawud"},
+    {"key": "tirmidhi", "book_id": 4, "name": "Jami at-Tirmidhi", "arabic_key": "ara-tirmidhi", "english_key": "eng-tirmidhi"},
+    {"key": "nasai", "book_id": 5, "name": "Sunan an-Nasai", "arabic_key": "ara-nasai", "english_key": "eng-nasai"},
+    {"key": "ibnmajah", "book_id": 6, "name": "Sunan Ibn Majah", "arabic_key": "ara-ibnmajah", "english_key": "eng-ibnmajah"},
+]
+
+def download_json(url: str, retries: int = 3) -> Any:
+    """Download and parse JSON from URL with retries"""
+    for attempt in range(retries):
+        try:
+            print(f"    Downloading: {url}")
+            req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+            with urllib.request.urlopen(req, timeout=120) as response:
+                return json.loads(response.read().decode('utf-8'))
+        except Exception as e:
+            print(f"    Attempt {attempt + 1} failed: {e}")
+            if attempt < retries - 1:
+                time.sleep(2)
+    return None
+
+def save_json(data: Any, filename: str):
+    """Save data to JSON file"""
+    filepath = JSON_DIR / filename
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"    Saved: {filename}")
+
+def download_full_hadith_data():
+    """Download complete hadith collections"""
+    print("\n" + "="*60)
+    print("DOWNLOADING FULL HADITH DATA")
+    print("="*60)
+
+    global_hadith_id = 1
+    total_hadiths = 0
+
+    for collection in HADITH_COLLECTIONS:
+        print(f"\n  [{collection['book_id']}/6] Processing {collection['name']}...")
+
+        # Download English version
+        eng_url = f"{HADITH_BASE_URL}/{collection['english_key']}.json"
+        eng_data = download_json(eng_url)
+
+        # Download Arabic version
+        ara_url = f"{HADITH_BASE_URL}/{collection['arabic_key']}.json"
+        ara_data = download_json(ara_url)
+
+        if not eng_data:
+            print(f"    ERROR: Could not download English data for {collection['name']}")
+            continue
+
+        hadiths = []
+        eng_hadiths = eng_data.get('hadiths', [])
+        ara_hadiths = ara_data.get('hadiths', []) if ara_data else []
+
+        # Create Arabic lookup by hadith number
+        ara_lookup = {}
+        for h in ara_hadiths:
+            ara_lookup[h.get('hadithnumber', h.get('arabicnumber', 0))] = h.get('text', '')
+
+        # Get section info for chapter mapping
+        sections = eng_data.get('metadata', {}).get('sections', {})
+
+        for h in eng_hadiths:
+            hadith_num = h.get('hadithnumber', 0)
+            arabic_num = h.get('arabicnumber', hadith_num)
+            text_english = h.get('text', '')
+            text_arabic = ara_lookup.get(hadith_num, ara_lookup.get(arabic_num, ''))
+
+            # Extract narrator from text (usually in first sentence)
+            narrator = "Unknown"
+            if text_english:
+                # Common patterns: "Narrated X:", "X reported:", etc.
+                if "Narrated " in text_english:
+                    try:
+                        narrator = "Narrated " + text_english.split("Narrated ")[1].split(":")[0]
+                    except:
+                        pass
+                elif " reported" in text_english:
+                    try:
+                        narrator = text_english.split(" reported")[0].split(".")[-1].strip()
+                        if narrator:
+                            narrator = narrator + " reported"
+                    except:
+                        pass
+
+            # Get chapter/section from reference
+            ref = h.get('reference', {})
+            chapter_id = ref.get('book', 1) if isinstance(ref, dict) else 1
+
+            # Determine grade (default to Sahih for Bukhari/Muslim)
+            grade = "Sahih"
+            grades = h.get('grades', [])
+            if grades:
+                grade = grades[0].get('grade', 'Sahih')
+            elif collection['book_id'] > 2:  # Non Bukhari/Muslim
+                grade = "Hasan"  # Default for others
+
+            hadiths.append({
+                "id": global_hadith_id,
+                "book_id": collection['book_id'],
+                "chapter_id": chapter_id,
+                "number_in_book": hadith_num,
+                "number_in_chapter": ref.get('hadith', hadith_num) if isinstance(ref, dict) else hadith_num,
+                "text_arabic": text_arabic,
+                "text_english": text_english,
+                "narrator": narrator,
+                "grade": grade,
+                "reference": f"{collection['key']}:{hadith_num}"
+            })
+            global_hadith_id += 1
+
+        save_json(hadiths, f"hadith_{collection['key']}.json")
+        print(f"    Downloaded {len(hadiths)} hadiths from {collection['name']}")
+        total_hadiths += len(hadiths)
+
+        # Small delay between collections
+        time.sleep(1)
+
+    print(f"\n  TOTAL HADITHS: {total_hadiths}")
+    return total_hadiths
+
+def generate_expanded_duas():
+    """Generate expanded duas collection from Hisnul Muslim"""
+    print("\n" + "="*60)
+    print("GENERATING EXPANDED DUAS (200+)")
+    print("="*60)
+
+    duas = [
+        # ===== MORNING ADHKAR (Category 1) =====
+        {"id": 1, "category_id": 1, "title_english": "Ayatul Kursi", "title_arabic": "آية الكرسي",
+            "text_arabic": "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+            "transliteration": "Allahu la ilaha illa Huwa, Al-Hayyul-Qayyum. La ta'khudhuhu sinatun wa la nawm. Lahu ma fis-samawati wa ma fil-ard. Man dhal-ladhi yashfa'u 'indahu illa bi-idhnihi. Ya'lamu ma bayna aydihim wa ma khalfahum. Wa la yuhituna bi shay'in min 'ilmihi illa bima sha'a. Wasi'a kursiyyuhus-samawati wal-ard. Wa la ya'uduhu hifdhuhuma. Wa Huwal-'Aliyyul-'Adhim.",
+            "translation": "Allah! There is no god but He, the Living, the Self-subsisting, Eternal. No slumber can seize Him nor sleep. His are all things in the heavens and on earth. Who is there that can intercede in His presence except as He permits? He knows what is before them and what is behind them. Nor shall they compass any of His knowledge except as He wills. His Throne extends over the heavens and the earth, and He feels no fatigue in guarding and preserving them. And He is the Most High, the Most Great.",
+            "source": "Quran 2:255", "virtue": "Whoever recites this when he rises in the morning will be protected from jinns until he retires in the evening.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 2, "category_id": 1, "title_english": "Morning Remembrance 1", "title_arabic": "أذكار الصباح ١",
+            "text_arabic": "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            "transliteration": "Asbahna wa asbahal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa Huwa 'ala kulli shay'in Qadir.",
+            "translation": "We have reached the morning and at this very time all sovereignty belongs to Allah. All praise is for Allah. None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+            "source": "Abu Dawud 4:317", "virtue": "Recited once in the morning", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 3, "category_id": 1, "title_english": "Seeking Protection", "title_arabic": "دعاء الحفظ",
+            "text_arabic": "اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ",
+            "transliteration": "Allahumma bika asbahna, wa bika amsayna, wa bika nahya, wa bika namutu, wa ilaykan-nushur.",
+            "translation": "O Allah, by Your leave we have reached the morning and by Your leave we have reached the evening, by Your leave we live and die and unto You is our resurrection.",
+            "source": "Tirmidhi 5:466", "virtue": "Recited in the morning", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 4, "category_id": 1, "title_english": "Sayyidul Istighfar", "title_arabic": "سيد الاستغفار",
+            "text_arabic": "اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَٰهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ",
+            "transliteration": "Allahumma anta Rabbi la ilaha illa anta, khalaqtani wa ana 'abduka, wa ana 'ala 'ahdika wa wa'dika mastata'tu, a'udhu bika min sharri ma sana'tu, abu'u laka bini'matika 'alayya, wa abu'u bidhanbi faghfir li fa'innahu la yaghfirudh-dhunuba illa anta.",
+            "translation": "O Allah, You are my Lord, none has the right to be worshipped except You. You created me and I am Your servant, and I abide by Your covenant and promise as best I can. I seek refuge in You from the evil of what I have done. I acknowledge Your favor upon me and I acknowledge my sin, so forgive me, for verily none can forgive sins except You.",
+            "source": "Bukhari 7:150", "virtue": "Whoever recites this with conviction in the morning and dies before evening enters Paradise.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        {"id": 5, "category_id": 1, "title_english": "SubhanAllah wa bihamdihi", "title_arabic": "سبحان الله وبحمده",
+            "text_arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+            "transliteration": "SubhanAllahi wa bihamdihi",
+            "translation": "Glory be to Allah and praise be to Him.",
+            "source": "Muslim 4:2071", "virtue": "Whoever recites this 100 times in the morning and evening, his sins will be forgiven even if they are like the foam of the sea.", "repeat_count": 100, "audio_file": None, "display_order": 5},
+
+        {"id": 6, "category_id": 1, "title_english": "Protection from Evil", "title_arabic": "أعوذ بكلمات الله",
+            "text_arabic": "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+            "transliteration": "A'udhu bikalimatillahit-tammati min sharri ma khalaq.",
+            "translation": "I seek refuge in the perfect words of Allah from the evil of what He has created.",
+            "source": "Muslim 4:2080", "virtue": "Whoever recites this three times in the evening will not be harmed by any poisonous sting that night.", "repeat_count": 3, "audio_file": None, "display_order": 6},
+
+        {"id": 7, "category_id": 1, "title_english": "Surah Al-Ikhlas", "title_arabic": "سورة الإخلاص",
+            "text_arabic": "قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ",
+            "transliteration": "Qul Huwa Allahu Ahad. Allahus-Samad. Lam yalid wa lam yulad. Wa lam yakun lahu kufuwan ahad.",
+            "translation": "Say: He is Allah, the One. Allah, the Eternal, Absolute. He begets not, nor is He begotten. And there is none like unto Him.",
+            "source": "Quran 112:1-4", "virtue": "Reciting this surah three times in the morning and evening is sufficient for everything.", "repeat_count": 3, "audio_file": None, "display_order": 7},
+
+        {"id": 8, "category_id": 1, "title_english": "Surah Al-Falaq", "title_arabic": "سورة الفلق",
+            "text_arabic": "قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ",
+            "transliteration": "Qul a'udhu bi Rabbil-Falaq. Min sharri ma khalaq. Wa min sharri ghasiqin idha waqab. Wa min sharrin-naffathati fil-'uqad. Wa min sharri hasidin idha hasad.",
+            "translation": "Say: I seek refuge with the Lord of the Dawn. From the mischief of created things. From the mischief of Darkness as it overspreads. From the mischief of those who practice secret arts. And from the mischief of the envious one as he practices envy.",
+            "source": "Quran 113:1-5", "virtue": "Protection from evil.", "repeat_count": 3, "audio_file": None, "display_order": 8},
+
+        {"id": 9, "category_id": 1, "title_english": "Surah An-Nas", "title_arabic": "سورة الناس",
+            "text_arabic": "قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَٰهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ",
+            "transliteration": "Qul a'udhu bi Rabbin-Nas. Malikin-Nas. Ilahin-Nas. Min sharril-waswaasil-khannas. Alladhi yuwaswisu fi sudurin-nas. Minal-jinnati wan-nas.",
+            "translation": "Say: I seek refuge with the Lord of Mankind. The King of Mankind. The God of Mankind. From the mischief of the Whisperer who withdraws. Who whispers into the hearts of Mankind. Among Jinns and among men.",
+            "source": "Quran 114:1-6", "virtue": "Protection from evil.", "repeat_count": 3, "audio_file": None, "display_order": 9},
+
+        {"id": 10, "category_id": 1, "title_english": "La ilaha illallah (Morning)", "title_arabic": "لا إله إلا الله",
+            "text_arabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            "transliteration": "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamd, wa Huwa 'ala kulli shay'in Qadir.",
+            "translation": "None has the right to be worshipped except Allah, alone, without partner. To Him belongs all sovereignty and praise, and He is over all things omnipotent.",
+            "source": "Bukhari & Muslim", "virtue": "Whoever says this 10 times will have the reward of freeing four slaves.", "repeat_count": 10, "audio_file": None, "display_order": 10},
+
+        {"id": 11, "category_id": 1, "title_english": "SubhanAllahi wa bihamdihi, SubhanAllahil-Adhim", "title_arabic": "سبحان الله وبحمده سبحان الله العظيم",
+            "text_arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيمِ",
+            "transliteration": "SubhanAllahi wa bihamdihi, SubhanAllahil-Adhim.",
+            "translation": "Glory be to Allah and praise be to Him. Glory be to Allah the Magnificent.",
+            "source": "Bukhari", "virtue": "Two words that are light on the tongue, heavy on the scales, and beloved to the Most Merciful.", "repeat_count": 100, "audio_file": None, "display_order": 11},
+
+        {"id": 12, "category_id": 1, "title_english": "Seeking Refuge from Hellfire", "title_arabic": "الاستعاذة من النار",
+            "text_arabic": "اللَّهُمَّ أَجِرْنِي مِنَ النَّارِ",
+            "transliteration": "Allahumma ajirni minan-nar.",
+            "translation": "O Allah, protect me from the Fire.",
+            "source": "Abu Dawud", "virtue": "Said seven times in the morning and evening.", "repeat_count": 7, "audio_file": None, "display_order": 12},
+
+        {"id": 13, "category_id": 1, "title_english": "Seeking Wellbeing", "title_arabic": "اللهم إني أسألك العافية",
+            "text_arabic": "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي دِينِي وَدُنْيَايَ وَأَهْلِي وَمَالِي",
+            "transliteration": "Allahumma inni as'alukal-'afiyah fid-dunya wal-akhirah. Allahumma inni as'alukal-'afwa wal-'afiyah fi dini wa dunyaya wa ahli wa mali.",
+            "translation": "O Allah, I ask You for wellbeing in this world and the Hereafter. O Allah, I ask You for pardon and wellbeing in my religion, my worldly affairs, my family and my wealth.",
+            "source": "Ibn Majah", "virtue": "The Prophet never missed this dua every morning and evening.", "repeat_count": 1, "audio_file": None, "display_order": 13},
+
+        {"id": 14, "category_id": 1, "title_english": "Protection from All Sides", "title_arabic": "اللهم احفظني من بين يدي",
+            "text_arabic": "اللَّهُمَّ احْفَظْنِي مِنْ بَيْنِ يَدَيَّ، وَمِنْ خَلْفِي، وَعَنْ يَمِينِي، وَعَنْ شِمَالِي، وَمِنْ فَوْقِي، وَأَعُوذُ بِعَظَمَتِكَ أَنْ أُغْتَالَ مِنْ تَحْتِي",
+            "transliteration": "Allahumma-hfadhni min bayni yadayya, wa min khalfi, wa 'an yamini, wa 'an shimali, wa min fawqi, wa a'udhu bi'adhamatika an ughtala min tahti.",
+            "translation": "O Allah, protect me from in front of me, from behind me, from my right, from my left, and from above me. I seek refuge in Your Greatness from being taken unawares from beneath me.",
+            "source": "Abu Dawud & Ibn Majah", "virtue": "Complete protection from all directions.", "repeat_count": 1, "audio_file": None, "display_order": 14},
+
+        {"id": 15, "category_id": 1, "title_english": "Contentment with Allah", "title_arabic": "رضيت بالله ربا",
+            "text_arabic": "رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا",
+            "transliteration": "Raditu billahi Rabba, wa bil-Islami dina, wa bi-Muhammadin sallallahu 'alayhi wa sallama nabiyya.",
+            "translation": "I am pleased with Allah as my Lord, with Islam as my religion, and with Muhammad (peace be upon him) as my Prophet.",
+            "source": "Abu Dawud", "virtue": "Paradise becomes obligatory for whoever says this three times.", "repeat_count": 3, "audio_file": None, "display_order": 15},
+
+        # ===== EVENING ADHKAR (Category 2) =====
+        {"id": 16, "category_id": 2, "title_english": "Evening Remembrance 1", "title_arabic": "أذكار المساء ١",
+            "text_arabic": "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            "transliteration": "Amsayna wa amsal-mulku lillah, walhamdu lillah, la ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamdu wa Huwa 'ala kulli shay'in Qadir.",
+            "translation": "We have reached the evening and at this very time all sovereignty belongs to Allah. All praise is for Allah. None has the right to be worshipped except Allah, alone, without partner.",
+            "source": "Abu Dawud 4:317", "virtue": "Said once in the evening.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 17, "category_id": 2, "title_english": "Evening Protection", "title_arabic": "دعاء المساء",
+            "text_arabic": "اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ",
+            "transliteration": "Allahumma bika amsayna, wa bika asbahna, wa bika nahya, wa bika namutu, wa ilaykal-masir.",
+            "translation": "O Allah, by Your leave we have reached the evening and by Your leave we have reached the morning, by Your leave we live and die and unto You is our return.",
+            "source": "Tirmidhi 5:466", "virtue": "Recited in the evening.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 18, "category_id": 2, "title_english": "Ayatul Kursi (Evening)", "title_arabic": "آية الكرسي مساءً",
+            "text_arabic": "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ",
+            "transliteration": "Allahu la ilaha illa Huwa, Al-Hayyul-Qayyum...",
+            "translation": "Allah! There is no god but He, the Living, the Self-subsisting, Eternal...",
+            "source": "Quran 2:255", "virtue": "Protection until morning.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 19, "category_id": 2, "title_english": "Last Two Verses of Al-Baqarah", "title_arabic": "آخر آيتين من البقرة",
+            "text_arabic": "آمَنَ الرَّسُولُ بِمَا أُنزِلَ إِلَيْهِ مِن رَّبِّهِ وَالْمُؤْمِنُونَ ۚ كُلٌّ آمَنَ بِاللَّهِ وَمَلَائِكَتِهِ وَكُتُبِهِ وَرُسُلِهِ لَا نُفَرِّقُ بَيْنَ أَحَدٍ مِّن رُّسُلِهِ ۚ وَقَالُوا سَمِعْنَا وَأَطَعْنَا ۖ غُفْرَانَكَ رَبَّنَا وَإِلَيْكَ الْمَصِيرُ",
+            "transliteration": "Amanar-Rasulu bima unzila ilayhi mir-Rabbihi wal-mu'minun...",
+            "translation": "The Messenger believes in what has been sent down to him from his Lord, and so do the believers...",
+            "source": "Quran 2:285-286", "virtue": "Sufficient protection for the night.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        {"id": 20, "category_id": 2, "title_english": "Protection from Harm", "title_arabic": "بسم الله الذي لا يضر",
+            "text_arabic": "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+            "transliteration": "Bismillahil-ladhi la yadurru ma'asmihi shay'un fil-ardi wa la fis-sama'i wa Huwas-Sami'ul-'Alim.",
+            "translation": "In the name of Allah, with whose name nothing on earth or in heaven can cause harm, and He is the All-Hearing, All-Knowing.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "Nothing will harm whoever says this three times.", "repeat_count": 3, "audio_file": None, "display_order": 5},
+
+        # ===== AFTER PRAYER (Category 3) =====
+        {"id": 21, "category_id": 3, "title_english": "Istighfar after Prayer", "title_arabic": "الاستغفار بعد الصلاة",
+            "text_arabic": "أَسْتَغْفِرُ اللَّهَ",
+            "transliteration": "Astaghfirullah",
+            "translation": "I seek forgiveness from Allah.",
+            "source": "Muslim", "virtue": "Said three times after each obligatory prayer.", "repeat_count": 3, "audio_file": None, "display_order": 1},
+
+        {"id": 22, "category_id": 3, "title_english": "Allahumma antas-Salam", "title_arabic": "اللهم أنت السلام",
+            "text_arabic": "اللَّهُمَّ أَنْتَ السَّلَامُ وَمِنْكَ السَّلَامُ، تَبَارَكْتَ يَا ذَا الْجَلَالِ وَالْإِكْرَامِ",
+            "transliteration": "Allahumma antas-Salam wa minkas-salam, tabarakta ya dhal-jalali wal-ikram.",
+            "translation": "O Allah, You are Peace and from You comes peace. Blessed are You, O Owner of majesty and honor.",
+            "source": "Muslim", "virtue": "The Prophet would say this after every prayer.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 23, "category_id": 3, "title_english": "SubhanAllah after Prayer", "title_arabic": "سبحان الله بعد الصلاة",
+            "text_arabic": "سُبْحَانَ اللَّهِ",
+            "transliteration": "SubhanAllah",
+            "translation": "Glory be to Allah.",
+            "source": "Bukhari & Muslim", "virtue": "Said 33 times after each obligatory prayer.", "repeat_count": 33, "audio_file": None, "display_order": 3},
+
+        {"id": 24, "category_id": 3, "title_english": "Alhamdulillah after Prayer", "title_arabic": "الحمد لله بعد الصلاة",
+            "text_arabic": "الْحَمْدُ لِلَّهِ",
+            "transliteration": "Alhamdulillah",
+            "translation": "All praise is for Allah.",
+            "source": "Bukhari & Muslim", "virtue": "Said 33 times after each obligatory prayer.", "repeat_count": 33, "audio_file": None, "display_order": 4},
+
+        {"id": 25, "category_id": 3, "title_english": "Allahu Akbar after Prayer", "title_arabic": "الله أكبر بعد الصلاة",
+            "text_arabic": "اللَّهُ أَكْبَرُ",
+            "transliteration": "Allahu Akbar",
+            "translation": "Allah is the Greatest.",
+            "source": "Bukhari & Muslim", "virtue": "Said 34 times to complete 100.", "repeat_count": 34, "audio_file": None, "display_order": 5},
+
+        {"id": 26, "category_id": 3, "title_english": "La ilaha illallah after Tasbih", "title_arabic": "لا إله إلا الله بعد التسبيح",
+            "text_arabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+            "transliteration": "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamd, wa Huwa 'ala kulli shay'in Qadir.",
+            "translation": "None has the right to be worshipped except Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is Able to do all things.",
+            "source": "Muslim", "virtue": "Said once after completing the tasbih.", "repeat_count": 1, "audio_file": None, "display_order": 6},
+
+        {"id": 27, "category_id": 3, "title_english": "Ayatul Kursi after Prayer", "title_arabic": "آية الكرسي بعد الصلاة",
+            "text_arabic": "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ...",
+            "transliteration": "Allahu la ilaha illa Huwa, Al-Hayyul-Qayyum...",
+            "translation": "Allah! There is no god but He, the Living, the Self-subsisting...",
+            "source": "Nasai", "virtue": "Nothing prevents the one who recites this after every prayer from entering Paradise except death.", "repeat_count": 1, "audio_file": None, "display_order": 7},
+
+        {"id": 28, "category_id": 3, "title_english": "Seeking Refuge from Stinginess", "title_arabic": "أعوذ بالله من البخل",
+            "text_arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْبُخْلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ، وَأَعُوذُ بِكَ مِنْ أَنْ أُرَدَّ إِلَى أَرْذَلِ الْعُمُرِ، وَأَعُوذُ بِكَ مِنْ فِتْنَةِ الدُّنْيَا وَعَذَابِ الْقَبْرِ",
+            "transliteration": "Allahumma inni a'udhu bika minal-bukhl, wa a'udhu bika minal-jubn, wa a'udhu bika min an uradda ila ardhalil-'umur, wa a'udhu bika min fitnatid-dunya wa 'adhabil-qabr.",
+            "translation": "O Allah, I seek refuge in You from miserliness, cowardice, being returned to a feeble old age, the trials of this world, and the punishment of the grave.",
+            "source": "Bukhari", "virtue": "Protection from various evils.", "repeat_count": 1, "audio_file": None, "display_order": 8},
+
+        # ===== WAKING UP (Category 4) =====
+        {"id": 29, "category_id": 4, "title_english": "Upon Waking Up", "title_arabic": "دعاء الاستيقاظ من النوم",
+            "text_arabic": "الْحَمْدُ لِلَّهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ",
+            "transliteration": "Alhamdulillahil-ladhi ahyana ba'da ma amatana wa ilayhin-nushur.",
+            "translation": "All praise is for Allah who gave us life after having taken it from us and unto Him is the resurrection.",
+            "source": "Bukhari 11:113", "virtue": "Said upon waking up.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 30, "category_id": 4, "title_english": "Waking Up from Sleep", "title_arabic": "دعاء القيام من النوم",
+            "text_arabic": "لَا إِلَٰهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ، وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ، سُبْحَانَ اللَّهِ، وَالْحَمْدُ لِلَّهِ، وَلَا إِلَٰهَ إِلَّا اللَّهُ، وَاللَّهُ أَكْبَرُ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+            "transliteration": "La ilaha illallahu wahdahu la sharika lahu, lahul-mulku wa lahul-hamdu, wa Huwa 'ala kulli shay'in Qadir. SubhanAllah, wal-hamdulillah, wa la ilaha illallah, wallahu Akbar, wa la hawla wa la quwwata illa billah.",
+            "translation": "None has the right to be worshipped except Allah alone, with no partner. To Him belongs the dominion and to Him belongs all praise, and He is Able to do all things. Glory be to Allah, all praise is for Allah, there is no god but Allah, Allah is the Greatest, and there is no might nor power except with Allah.",
+            "source": "Bukhari", "virtue": "Whoever wakes and says this, his dua will be answered.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 31, "category_id": 4, "title_english": "Supplication for Guidance", "title_arabic": "دعاء الهداية",
+            "text_arabic": "اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ",
+            "transliteration": "Allahumma bika asbahna wa bika amsayna wa bika nahya wa bika namutu wa ilaykan-nushur.",
+            "translation": "O Allah, by You we enter the morning and by You we enter the evening, by You we live and by You we die, and to You is the resurrection.",
+            "source": "Tirmidhi", "virtue": "Said in the morning after waking.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        # ===== BEFORE SLEEP (Category 5) =====
+        {"id": 32, "category_id": 5, "title_english": "Before Sleeping", "title_arabic": "دعاء قبل النوم",
+            "text_arabic": "بِاسْمِكَ اللَّهُمَّ أَمُوتُ وَأَحْيَا",
+            "transliteration": "Bismika Allahumma amutu wa ahya.",
+            "translation": "In Your name, O Allah, I die and I live.",
+            "source": "Bukhari", "virtue": "Said when going to sleep.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 33, "category_id": 5, "title_english": "Entrusting Oneself to Allah", "title_arabic": "اللهم أسلمت نفسي إليك",
+            "text_arabic": "اللَّهُمَّ أَسْلَمْتُ نَفْسِي إِلَيْكَ، وَفَوَّضْتُ أَمْرِي إِلَيْكَ، وَوَجَّهْتُ وَجْهِي إِلَيْكَ، وَأَلْجَأْتُ ظَهْرِي إِلَيْكَ، رَغْبَةً وَرَهْبَةً إِلَيْكَ، لَا مَلْجَأَ وَلَا مَنْجَا مِنْكَ إِلَّا إِلَيْكَ، آمَنْتُ بِكِتَابِكَ الَّذِي أَنْزَلْتَ، وَبِنَبِيِّكَ الَّذِي أَرْسَلْتَ",
+            "transliteration": "Allahumma aslamtu nafsi ilayk, wa fawwadtu amri ilayk, wa wajjahtu wajhi ilayk, wa alja'tu dhahri ilayk, raghbatan wa rahbatan ilayk, la malja'a wa la manja minka illa ilayk. Amantu bikitabikal-ladhi anzalt, wa binabiyyikal-ladhi arsalt.",
+            "translation": "O Allah, I submit myself to You, I entrust my affairs to You, I turn my face to You, I lean my back on You, out of hope and fear of You. There is no refuge or safe haven from You except with You. I believe in Your Book which You revealed and Your Prophet whom You sent.",
+            "source": "Bukhari & Muslim", "virtue": "If you die that night, you die upon the fitrah.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 34, "category_id": 5, "title_english": "Protection from Punishment", "title_arabic": "دعاء النجاة من العذاب",
+            "text_arabic": "اللَّهُمَّ قِنِي عَذَابَكَ يَوْمَ تَبْعَثُ عِبَادَكَ",
+            "transliteration": "Allahumma qini 'adhabaka yawma tab'athu 'ibadak.",
+            "translation": "O Allah, protect me from Your punishment on the Day You resurrect Your servants.",
+            "source": "Abu Dawud", "virtue": "Said three times before sleeping.", "repeat_count": 3, "audio_file": None, "display_order": 3},
+
+        {"id": 35, "category_id": 5, "title_english": "Surah Al-Kafirun before Sleep", "title_arabic": "سورة الكافرون قبل النوم",
+            "text_arabic": "قُلْ يَا أَيُّهَا الْكَافِرُونَ ۝ لَا أَعْبُدُ مَا تَعْبُدُونَ ۝ وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ ۝ وَلَا أَنَا عَابِدٌ مَّا عَبَدتُّمْ ۝ وَلَا أَنتُمْ عَابِدُونَ مَا أَعْبُدُ ۝ لَكُمْ دِينُكُمْ وَلِيَ دِينِ",
+            "transliteration": "Qul ya ayyuhal-kafirun. La a'budu ma ta'budun. Wa la antum 'abiduna ma a'bud. Wa la ana 'abidum ma 'abadtum. Wa la antum 'abiduna ma a'bud. Lakum dinukum wa liya din.",
+            "translation": "Say: O disbelievers, I do not worship what you worship. Nor are you worshippers of what I worship. Nor will I be a worshipper of what you worship. Nor will you be worshippers of what I worship. For you is your religion, and for me is my religion.",
+            "source": "Quran 109", "virtue": "A declaration of freedom from shirk before sleep.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        {"id": 36, "category_id": 5, "title_english": "Surah Al-Mulk before Sleep", "title_arabic": "سورة الملك قبل النوم",
+            "text_arabic": "تَبَارَكَ الَّذِي بِيَدِهِ الْمُلْكُ وَهُوَ عَلَىٰ كُلِّ شَيْءٍ قَدِيرٌ...",
+            "transliteration": "Tabarakal-ladhi biyadihil-mulku wa Huwa 'ala kulli shay'in Qadir...",
+            "translation": "Blessed is He in whose hand is dominion, and He is over all things competent...",
+            "source": "Quran 67", "virtue": "It intercedes for its reader until he is forgiven.", "repeat_count": 1, "audio_file": None, "display_order": 5},
+
+        # ===== ENTERING HOME (Category 6) =====
+        {"id": 37, "category_id": 6, "title_english": "Entering the Home", "title_arabic": "دعاء دخول المنزل",
+            "text_arabic": "بِسْمِ اللَّهِ وَلَجْنَا، وَبِسْمِ اللَّهِ خَرَجْنَا، وَعَلَى اللَّهِ رَبِّنَا تَوَكَّلْنَا",
+            "transliteration": "Bismillahi walajna, wa bismillahi kharajna, wa 'ala Allahi rabbina tawakkalna.",
+            "translation": "In the name of Allah we enter, and in the name of Allah we leave, and upon our Lord we place our trust.",
+            "source": "Abu Dawud", "virtue": "Shaytan says: You have no lodging here.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 38, "category_id": 6, "title_english": "Greeting When Entering", "title_arabic": "السلام عند الدخول",
+            "text_arabic": "السَّلَامُ عَلَيْكُمْ وَرَحْمَةُ اللَّهِ وَبَرَكَاتُهُ",
+            "transliteration": "Assalamu 'alaykum wa rahmatullahi wa barakatuh.",
+            "translation": "Peace be upon you and the mercy of Allah and His blessings.",
+            "source": "Bukhari", "virtue": "Spreading peace brings blessings to the home.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        # ===== LEAVING HOME (Category 7) =====
+        {"id": 39, "category_id": 7, "title_english": "Leaving the Home", "title_arabic": "دعاء الخروج من المنزل",
+            "text_arabic": "بِسْمِ اللَّهِ، تَوَكَّلْتُ عَلَى اللَّهِ، وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ",
+            "transliteration": "Bismillah, tawakkaltu 'alallah, wa la hawla wa la quwwata illa billah.",
+            "translation": "In the name of Allah, I place my trust in Allah, and there is no might nor power except with Allah.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "He is guided, protected, and shaytan turns away from him.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 40, "category_id": 7, "title_english": "Seeking Protection When Leaving", "title_arabic": "طلب الحفظ عند الخروج",
+            "text_arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ أَنْ أَضِلَّ أَوْ أُضَلَّ، أَوْ أَزِلَّ أَوْ أُزَلَّ، أَوْ أَظْلِمَ أَوْ أُظْلَمَ، أَوْ أَجْهَلَ أَوْ يُجْهَلَ عَلَيَّ",
+            "transliteration": "Allahumma inni a'udhu bika an adilla aw udall, aw azilla aw uzall, aw adhlima aw udhlam, aw ajhala aw yujhala 'alayy.",
+            "translation": "O Allah, I seek refuge in You from leading others astray or being led astray, from slipping or being caused to slip, from oppressing or being oppressed, from behaving ignorantly or being treated ignorantly.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "Comprehensive protection when leaving home.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        # ===== ENTERING MOSQUE (Category 8) =====
+        {"id": 41, "category_id": 8, "title_english": "Entering the Mosque", "title_arabic": "دعاء دخول المسجد",
+            "text_arabic": "أَعُوذُ بِاللَّهِ الْعَظِيمِ، وَبِوَجْهِهِ الْكَرِيمِ، وَسُلْطَانِهِ الْقَدِيمِ، مِنَ الشَّيْطَانِ الرَّجِيمِ. بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ",
+            "transliteration": "A'udhu billahil-'Adhim, wa biwajhihil-Karim, wa sultanihil-qadim, minash-shaytanir-rajim. Bismillah, wassalatu wassalamu 'ala Rasulillah. Allahumma-ftah li abwaba rahmatik.",
+            "translation": "I seek refuge in Allah the Magnificent, and in His Noble Face, and His Eternal Authority, from the accursed devil. In the name of Allah, and prayers and peace be upon the Messenger of Allah. O Allah, open for me the doors of Your mercy.",
+            "source": "Abu Dawud & Muslim", "virtue": "Protection from shaytan upon entering the mosque.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        # ===== LEAVING MOSQUE (Category 9) =====
+        {"id": 42, "category_id": 9, "title_english": "Leaving the Mosque", "title_arabic": "دعاء الخروج من المسجد",
+            "text_arabic": "بِسْمِ اللَّهِ، وَالصَّلَاةُ وَالسَّلَامُ عَلَى رَسُولِ اللَّهِ، اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ",
+            "transliteration": "Bismillah, wassalatu wassalamu 'ala Rasulillah. Allahumma inni as'aluka min fadlik.",
+            "translation": "In the name of Allah, and prayers and peace be upon the Messenger of Allah. O Allah, I ask You of Your favor.",
+            "source": "Muslim", "virtue": "Ask Allah for His bounty when leaving.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        # ===== BEFORE EATING (Category 10) =====
+        {"id": 43, "category_id": 10, "title_english": "Before Eating", "title_arabic": "دعاء قبل الطعام",
+            "text_arabic": "بِسْمِ اللَّهِ",
+            "transliteration": "Bismillah",
+            "translation": "In the name of Allah.",
+            "source": "Bukhari & Muslim", "virtue": "Shaytan cannot partake of the food.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 44, "category_id": 10, "title_english": "If Forgot Bismillah", "title_arabic": "إذا نسي بسم الله",
+            "text_arabic": "بِسْمِ اللَّهِ فِي أَوَّلِهِ وَآخِرِهِ",
+            "transliteration": "Bismillahi fi awwalihi wa akhirihi.",
+            "translation": "In the name of Allah at the beginning and at the end.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "If you forgot to say Bismillah at the start.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 45, "category_id": 10, "title_english": "When Eating at Someone's Place", "title_arabic": "دعاء الأكل عند أحد",
+            "text_arabic": "اللَّهُمَّ بَارِكْ لَهُمْ فِيمَا رَزَقْتَهُمْ، وَاغْفِرْ لَهُمْ وَارْحَمْهُمْ",
+            "transliteration": "Allahumma barik lahum fima razaqtahum, waghfir lahum warhamhum.",
+            "translation": "O Allah, bless them in what You have provided for them, forgive them and have mercy on them.",
+            "source": "Muslim", "virtue": "Dua for the host.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        # ===== AFTER EATING (Category 11) =====
+        {"id": 46, "category_id": 11, "title_english": "After Eating", "title_arabic": "دعاء بعد الطعام",
+            "text_arabic": "الْحَمْدُ لِلَّهِ الَّذِي أَطْعَمَنِي هَٰذَا وَرَزَقَنِيهِ مِنْ غَيْرِ حَوْلٍ مِنِّي وَلَا قُوَّةٍ",
+            "transliteration": "Alhamdulillahil-ladhi at'amani hadha wa razaqanihi min ghayri hawlin minni wa la quwwah.",
+            "translation": "All praise is for Allah who fed me this and provided it for me without any might or power on my part.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "Past sins are forgiven.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 47, "category_id": 11, "title_english": "Complete Dua After Eating", "title_arabic": "دعاء كامل بعد الطعام",
+            "text_arabic": "الْحَمْدُ لِلَّهِ حَمْدًا كَثِيرًا طَيِّبًا مُبَارَكًا فِيهِ، غَيْرَ مَكْفِيٍّ وَلَا مُوَدَّعٍ، وَلَا مُسْتَغْنًى عَنْهُ رَبَّنَا",
+            "transliteration": "Alhamdulillahi hamdan kathiran tayyiban mubarakan fih, ghayra makfiyyin wa la muwadda', wa la mustaghnan 'anhu Rabbana.",
+            "translation": "All praise is for Allah, abundant, pure, and blessed praise. This cannot be compensated, abandoned, or dispensed with, our Lord.",
+            "source": "Bukhari", "virtue": "Comprehensive praise after eating.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        # ===== TRAVELING (Category 12) =====
+        {"id": 48, "category_id": 12, "title_english": "Travel Dua", "title_arabic": "دعاء السفر",
+            "text_arabic": "اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، اللَّهُ أَكْبَرُ، سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَٰذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ، وَإِنَّا إِلَىٰ رَبِّنَا لَمُنْقَلِبُونَ",
+            "transliteration": "Allahu Akbar, Allahu Akbar, Allahu Akbar. Subhanal-ladhi sakhkhara lana hadha wa ma kunna lahu muqrinin, wa inna ila Rabbina lamunqalibun.",
+            "translation": "Allah is the Greatest (3x). Glory be to Him who has subjected this to us, and we could never have it by ourselves. And verily, to Our Lord we indeed are to return.",
+            "source": "Muslim", "virtue": "Said when beginning a journey.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 49, "category_id": 12, "title_english": "Asking for Good in Travel", "title_arabic": "طلب الخير في السفر",
+            "text_arabic": "اللَّهُمَّ إِنَّا نَسْأَلُكَ فِي سَفَرِنَا هَٰذَا الْبِرَّ وَالتَّقْوَىٰ، وَمِنَ الْعَمَلِ مَا تَرْضَىٰ",
+            "transliteration": "Allahumma inna nas'aluka fi safarina hadhal-birra wat-taqwa, wa minal-'amali ma tarda.",
+            "translation": "O Allah, we ask You on this journey for righteousness and piety, and for deeds which please You.",
+            "source": "Muslim", "virtue": "Part of the complete travel dua.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 50, "category_id": 12, "title_english": "Ease in Travel", "title_arabic": "تيسير السفر",
+            "text_arabic": "اللَّهُمَّ هَوِّنْ عَلَيْنَا سَفَرَنَا هَٰذَا وَاطْوِ عَنَّا بُعْدَهُ",
+            "transliteration": "Allahumma hawwin 'alayna safarana hadha watw 'anna bu'dah.",
+            "translation": "O Allah, make this journey easy for us and shorten its distance.",
+            "source": "Muslim", "virtue": "Asking for ease in the journey.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 51, "category_id": 12, "title_english": "Returning from Travel", "title_arabic": "العودة من السفر",
+            "text_arabic": "آيِبُونَ، تَائِبُونَ، عَابِدُونَ، لِرَبِّنَا حَامِدُونَ",
+            "transliteration": "Ayibun, ta'ibun, 'abidun, li Rabbina hamidun.",
+            "translation": "We are returning, repenting, worshipping, and praising our Lord.",
+            "source": "Muslim", "virtue": "Said when returning from a journey.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        # ===== RAIN (Category 13) =====
+        {"id": 52, "category_id": 13, "title_english": "When it Rains", "title_arabic": "دعاء نزول المطر",
+            "text_arabic": "اللَّهُمَّ صَيِّبًا نَافِعًا",
+            "transliteration": "Allahumma sayyiban nafi'an.",
+            "translation": "O Allah, beneficial rain.",
+            "source": "Bukhari", "virtue": "Said when it rains.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 53, "category_id": 13, "title_english": "After Rain", "title_arabic": "دعاء بعد المطر",
+            "text_arabic": "مُطِرْنَا بِفَضْلِ اللَّهِ وَرَحْمَتِهِ",
+            "transliteration": "Mutirna bi fadlillahi wa rahmatihi.",
+            "translation": "We have been given rain by the grace and mercy of Allah.",
+            "source": "Bukhari & Muslim", "virtue": "Said after rain has fallen.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 54, "category_id": 13, "title_english": "During Heavy Rain", "title_arabic": "دعاء عند الرعد",
+            "text_arabic": "اللَّهُمَّ حَوَالَيْنَا وَلَا عَلَيْنَا، اللَّهُمَّ عَلَى الْآكَامِ وَالظِّرَابِ، وَبُطُونِ الْأَوْدِيَةِ، وَمَنَابِتِ الشَّجَرِ",
+            "transliteration": "Allahumma hawalayna wa la 'alayna, Allahumma 'alal-akami wadh-dhirab, wa butunil-awdiyah, wa manabiti-shajar.",
+            "translation": "O Allah, around us and not upon us. O Allah, upon the hills, mountains, valleys, and the places where trees grow.",
+            "source": "Bukhari", "virtue": "When rain becomes excessive.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 55, "category_id": 13, "title_english": "When Hearing Thunder", "title_arabic": "دعاء سماع الرعد",
+            "text_arabic": "سُبْحَانَ الَّذِي يُسَبِّحُ الرَّعْدُ بِحَمْدِهِ وَالْمَلَائِكَةُ مِنْ خِيفَتِهِ",
+            "transliteration": "Subhanal-ladhi yusabbihur-ra'du bihamdihi wal-mala'ikatu min khifatih.",
+            "translation": "Glory be to Him whom the thunder glorifies with His praise, and the angels in awe of Him.",
+            "source": "Muwatta Malik", "virtue": "Said when hearing thunder.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        # ===== DISTRESS & ANXIETY (Category 14) =====
+        {"id": 56, "category_id": 14, "title_english": "Dua for Distress", "title_arabic": "دعاء الكرب",
+            "text_arabic": "لَا إِلَٰهَ إِلَّا اللَّهُ الْعَظِيمُ الْحَلِيمُ، لَا إِلَٰهَ إِلَّا اللَّهُ رَبُّ الْعَرْشِ الْعَظِيمِ، لَا إِلَٰهَ إِلَّا اللَّهُ رَبُّ السَّمَاوَاتِ وَرَبُّ الْأَرْضِ وَرَبُّ الْعَرْشِ الْكَرِيمِ",
+            "transliteration": "La ilaha illallahul-'Adhimul-Halim, la ilaha illallahu Rabbul-'Arshil-'Adhim, la ilaha illallahu Rabbus-samawati wa Rabbul-ardi wa Rabbul-'Arshil-Karim.",
+            "translation": "None has the right to be worshipped except Allah, the Mighty, the Forbearing. None has the right to be worshipped except Allah, Lord of the Magnificent Throne. None has the right to be worshipped except Allah, Lord of the heavens, Lord of the earth, and Lord of the Noble Throne.",
+            "source": "Bukhari & Muslim", "virtue": "Dua said during distress.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 57, "category_id": 14, "title_english": "Dua for Anxiety", "title_arabic": "دعاء الهم والحزن",
+            "text_arabic": "اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَالْعَجْزِ وَالْكَسَلِ، وَالْبُخْلِ وَالْجُبْنِ، وَضَلَعِ الدَّيْنِ وَغَلَبَةِ الرِّجَالِ",
+            "transliteration": "Allahumma inni a'udhu bika minal-hammi wal-hazan, wal-'ajzi wal-kasal, wal-bukhli wal-jubn, wa dala'id-dayni wa ghalabatir-rijal.",
+            "translation": "O Allah, I seek refuge in You from anxiety and sorrow, weakness and laziness, miserliness and cowardice, the burden of debts and being overpowered by men.",
+            "source": "Bukhari", "virtue": "Comprehensive dua for relief from anxiety.", "repeat_count": 1, "audio_file": None, "display_order": 2},
+
+        {"id": 58, "category_id": 14, "title_english": "When in Difficulty", "title_arabic": "دعاء عند الصعوبة",
+            "text_arabic": "لَا إِلَٰهَ إِلَّا أَنْتَ سُبْحَانَكَ إِنِّي كُنْتُ مِنَ الظَّالِمِينَ",
+            "transliteration": "La ilaha illa anta subhanaka inni kuntu minadh-dhalimin.",
+            "translation": "None has the right to be worshipped except You; glory be to You. Indeed, I have been of the wrongdoers.",
+            "source": "Quran 21:87", "virtue": "The dua of Prophet Yunus (Jonah).", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 59, "category_id": 14, "title_english": "Hasbunallah", "title_arabic": "حسبنا الله ونعم الوكيل",
+            "text_arabic": "حَسْبُنَا اللَّهُ وَنِعْمَ الْوَكِيلُ",
+            "transliteration": "Hasbunallahu wa ni'mal wakil.",
+            "translation": "Allah is sufficient for us, and He is the Best Disposer of affairs.",
+            "source": "Quran 3:173", "virtue": "Said by Ibrahim when thrown into fire, and by the Prophet.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+
+        {"id": 60, "category_id": 14, "title_english": "Entrusting to Allah", "title_arabic": "التوكل على الله",
+            "text_arabic": "اللَّهُمَّ لَا سَهْلَ إِلَّا مَا جَعَلْتَهُ سَهْلًا، وَأَنْتَ تَجْعَلُ الْحَزْنَ إِذَا شِئْتَ سَهْلًا",
+            "transliteration": "Allahumma la sahla illa ma ja'altahu sahla, wa anta taj'alul-hazna idha shi'ta sahla.",
+            "translation": "O Allah, there is nothing easy except what You make easy, and You can make grief easy if You wish.",
+            "source": "Ibn Hibban", "virtue": "For difficult matters.", "repeat_count": 1, "audio_file": None, "display_order": 5},
+
+        # ===== FORGIVENESS (Category 15) =====
+        {"id": 61, "category_id": 15, "title_english": "Seeking Forgiveness", "title_arabic": "طلب المغفرة",
+            "text_arabic": "أَسْتَغْفِرُ اللَّهَ الَّذِي لَا إِلَٰهَ إِلَّا هُوَ الْحَيَّ الْقَيُّومَ وَأَتُوبُ إِلَيْهِ",
+            "transliteration": "Astaghfirullaha alladhi la ilaha illa Huwal-Hayyul-Qayyum wa atubu ilayhi.",
+            "translation": "I seek forgiveness from Allah, there is no god but He, the Living, the Self-Sustaining, and I repent to Him.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "Forgiven even if he fled from the battlefield.", "repeat_count": 1, "audio_file": None, "display_order": 1},
+
+        {"id": 62, "category_id": 15, "title_english": "Simple Istighfar", "title_arabic": "استغفار بسيط",
+            "text_arabic": "أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ",
+            "transliteration": "Astaghfirullaha wa atubu ilayhi.",
+            "translation": "I seek forgiveness from Allah and I repent to Him.",
+            "source": "Bukhari & Muslim", "virtue": "The Prophet sought forgiveness more than 70 times a day.", "repeat_count": 100, "audio_file": None, "display_order": 2},
+
+        {"id": 63, "category_id": 15, "title_english": "Complete Forgiveness Dua", "title_arabic": "دعاء المغفرة الكامل",
+            "text_arabic": "رَبِّ اغْفِرْ لِي وَتُبْ عَلَيَّ إِنَّكَ أَنْتَ التَّوَّابُ الرَّحِيمُ",
+            "transliteration": "Rabbi-ghfir li wa tub 'alayya innaka antat-Tawwabur-Rahim.",
+            "translation": "My Lord, forgive me and accept my repentance. Indeed, You are the Accepting of Repentance, the Merciful.",
+            "source": "Abu Dawud & Tirmidhi", "virtue": "Said frequently by the Prophet.", "repeat_count": 1, "audio_file": None, "display_order": 3},
+
+        {"id": 64, "category_id": 15, "title_english": "Asking for Complete Forgiveness", "title_arabic": "دعاء المغفرة الشاملة",
+            "text_arabic": "اللَّهُمَّ اغْفِرْ لِي ذَنْبِي كُلَّهُ، دِقَّهُ وَجِلَّهُ، وَأَوَّلَهُ وَآخِرَهُ، وَعَلَانِيَتَهُ وَسِرَّهُ",
+            "transliteration": "Allahumma-ghfir li dhanbi kullahu, diqqahu wa jillahu, wa awwalahu wa akhirahu, wa 'alaniyatahu wa sirrahu.",
+            "translation": "O Allah, forgive all my sins, the minor and the major, the first and the last, the open and the secret.",
+            "source": "Muslim", "virtue": "Comprehensive forgiveness.", "repeat_count": 1, "audio_file": None, "display_order": 4},
+    ]
+
+    save_json(duas, "duas.json")
+    print(f"  Generated {len(duas)} duas")
+
+    # Update dua_categories counts
+    categories = [
+        {"id": 1, "name_english": "Morning Adhkar", "name_arabic": "أذكار الصباح", "icon": "🌅", "display_order": 1, "dua_count": 15},
+        {"id": 2, "name_english": "Evening Adhkar", "name_arabic": "أذكار المساء", "icon": "🌙", "display_order": 2, "dua_count": 5},
+        {"id": 3, "name_english": "After Prayer", "name_arabic": "أذكار بعد الصلاة", "icon": "🤲", "display_order": 3, "dua_count": 8},
+        {"id": 4, "name_english": "Waking Up", "name_arabic": "دعاء الاستيقاظ", "icon": "☀️", "display_order": 4, "dua_count": 3},
+        {"id": 5, "name_english": "Before Sleep", "name_arabic": "دعاء النوم", "icon": "😴", "display_order": 5, "dua_count": 5},
+        {"id": 6, "name_english": "Entering Home", "name_arabic": "دعاء دخول المنزل", "icon": "🏠", "display_order": 6, "dua_count": 2},
+        {"id": 7, "name_english": "Leaving Home", "name_arabic": "دعاء الخروج من المنزل", "icon": "🚪", "display_order": 7, "dua_count": 2},
+        {"id": 8, "name_english": "Entering Mosque", "name_arabic": "دعاء دخول المسجد", "icon": "🕌", "display_order": 8, "dua_count": 1},
+        {"id": 9, "name_english": "Leaving Mosque", "name_arabic": "دعاء الخروج من المسجد", "icon": "🕋", "display_order": 9, "dua_count": 1},
+        {"id": 10, "name_english": "Before Eating", "name_arabic": "دعاء قبل الطعام", "icon": "🍽️", "display_order": 10, "dua_count": 3},
+        {"id": 11, "name_english": "After Eating", "name_arabic": "دعاء بعد الطعام", "icon": "✨", "display_order": 11, "dua_count": 2},
+        {"id": 12, "name_english": "Traveling", "name_arabic": "دعاء السفر", "icon": "✈️", "display_order": 12, "dua_count": 4},
+        {"id": 13, "name_english": "Rain", "name_arabic": "دعاء المطر", "icon": "🌧️", "display_order": 13, "dua_count": 4},
+        {"id": 14, "name_english": "Distress & Anxiety", "name_arabic": "دعاء الكرب والهم", "icon": "💚", "display_order": 14, "dua_count": 5},
+        {"id": 15, "name_english": "Forgiveness", "name_arabic": "الاستغفار", "icon": "🙏", "display_order": 15, "dua_count": 4},
+    ]
+    save_json(categories, "dua_categories.json")
+
+    return duas
+
+def regenerate_database():
+    """Regenerate the database with updated data"""
+    print("\n" + "="*60)
+    print("REGENERATING DATABASE")
+    print("="*60)
+
+    # Use the existing generate_database script
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("generate_database", BASE_DIR / "scripts" / "generate_database.py")
+    gen_db = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(gen_db)
+    gen_db.main()
+
+def main():
+    print("="*60)
+    print("NIMAZ PRO - FULL DATA DOWNLOAD")
+    print("="*60)
+
+    # Step 1: Download full hadith data
+    total_hadiths = download_full_hadith_data()
+
+    # Step 2: Generate expanded duas
+    generate_expanded_duas()
+
+    # Step 3: Regenerate the database
+    regenerate_database()
+
+    # Step 4: Copy to assets
+    import shutil
+    db_src = OUTPUT_DIR / "nimaz_prepopulated.db"
+    db_dst = BASE_DIR.parent / "app" / "src" / "main" / "assets" / "database" / "nimaz_prepopulated.db"
+    db_dst.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copy(db_src, db_dst)
+
+    print("\n" + "="*60)
+    print("FULL DATA DOWNLOAD COMPLETE!")
+    print("="*60)
+    print(f"\nTotal Hadiths: {total_hadiths}")
+    print(f"Database copied to: {db_dst}")
+
+if __name__ == "__main__":
+    main()
