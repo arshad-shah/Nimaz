@@ -184,7 +184,6 @@ fun NavGraph() {
 
             composable<Route.Quran> {
                 QuranHomeScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToSurah = { surahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber))
                     },
@@ -220,7 +219,6 @@ fun NavGraph() {
             composable<Route.More> {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 MoreMenuScreen(
-                    onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
@@ -249,6 +247,9 @@ fun NavGraph() {
                     onRateApp = {
                         val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
                         context.startActivity(intent)
+                    },
+                    onDeleteAllData = {
+                        // TODO: Implement delete all data via SettingsViewModel
                     }
                 )
             }
@@ -716,39 +717,8 @@ fun NavGraph() {
             }
 
             composable<Route.SettingsHelp> {
-                val context = androidx.compose.ui.platform.LocalContext.current
-                AboutScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToPrivacyPolicy = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/privacy-policy"))
-                        context.startActivity(intent)
-                    },
-                    onNavigateToTerms = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/terms-of-service"))
-                        context.startActivity(intent)
-                    },
-                    onNavigateToLicenses = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/licenses"))
-                        context.startActivity(intent)
-                    },
-                    onRateApp = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
-                        context.startActivity(intent)
-                    },
-                    onShareApp = {
-                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
-                        }
-                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
-                    },
-                    onContactUs = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:support@nimazapp.com")
-                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
-                        }
-                        context.startActivity(intent)
-                    }
+                com.arshadshah.nimaz.presentation.screens.help.HelpSupportScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 

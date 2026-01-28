@@ -72,6 +72,13 @@ class PreferencesDataStore @Inject constructor(
         val NOTIFICATION_REMINDER_MINUTES = intPreferencesKey("notification_reminder_minutes")
         val SHOW_REMINDER_BEFORE = booleanPreferencesKey("show_reminder_before")
         val PERSISTENT_NOTIFICATION = booleanPreferencesKey("persistent_notification")
+        val SELECTED_ADHAN_SOUND = stringPreferencesKey("selected_adhan_sound")
+        val FAJR_NOTIFICATION_ENABLED = booleanPreferencesKey("fajr_notification_enabled")
+        val SUNRISE_NOTIFICATION_ENABLED = booleanPreferencesKey("sunrise_notification_enabled")
+        val DHUHR_NOTIFICATION_ENABLED = booleanPreferencesKey("dhuhr_notification_enabled")
+        val ASR_NOTIFICATION_ENABLED = booleanPreferencesKey("asr_notification_enabled")
+        val MAGHRIB_NOTIFICATION_ENABLED = booleanPreferencesKey("maghrib_notification_enabled")
+        val ISHA_NOTIFICATION_ENABLED = booleanPreferencesKey("isha_notification_enabled")
 
         // Quran Settings
         val QURAN_TRANSLATOR_ID = stringPreferencesKey("quran_translator_id")
@@ -300,6 +307,36 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setAdhanEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ADHAN_ENABLED] = enabled
+        }
+    }
+
+    val selectedAdhanSound: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SELECTED_ADHAN_SOUND] ?: "MISHARY"
+    }
+
+    suspend fun setSelectedAdhanSound(sound: String) {
+        dataStore.edit { it[PreferencesKeys.SELECTED_ADHAN_SOUND] = sound }
+    }
+
+    val fajrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.FAJR_NOTIFICATION_ENABLED] ?: true }
+    val sunriseNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED] ?: false }
+    val dhuhrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.DHUHR_NOTIFICATION_ENABLED] ?: true }
+    val asrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ASR_NOTIFICATION_ENABLED] ?: true }
+    val maghribNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED] ?: true }
+    val ishaNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ISHA_NOTIFICATION_ENABLED] ?: true }
+
+    suspend fun setPrayerNotificationEnabled(prayer: String, enabled: Boolean) {
+        dataStore.edit { prefs ->
+            val key = when (prayer.lowercase()) {
+                "fajr" -> PreferencesKeys.FAJR_NOTIFICATION_ENABLED
+                "sunrise" -> PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED
+                "dhuhr" -> PreferencesKeys.DHUHR_NOTIFICATION_ENABLED
+                "asr" -> PreferencesKeys.ASR_NOTIFICATION_ENABLED
+                "maghrib" -> PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED
+                "isha" -> PreferencesKeys.ISHA_NOTIFICATION_ENABLED
+                else -> return@edit
+            }
+            prefs[key] = enabled
         }
     }
 

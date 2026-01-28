@@ -19,6 +19,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -120,7 +121,7 @@ class QuranViewModel @Inject constructor(
         loadBookmarks()
         loadFavorites()
         loadFavoriteAyahIds()
-        loadQuranSettings()
+        observeQuranSettings()
     }
 
     fun onEvent(event: QuranEvent) {
@@ -152,35 +153,62 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    private fun loadQuranSettings() {
+    private fun observeQuranSettings() {
         viewModelScope.launch {
-            val translatorId = preferencesDataStore.quranTranslatorId.first()
-            val showTranslation = preferencesDataStore.showTranslation.first()
-            val showTransliteration = preferencesDataStore.showTransliteration.first()
-            val arabicFontSize = preferencesDataStore.quranArabicFontSize.first()
-            val translationFontSize = preferencesDataStore.quranTranslationFontSize.first()
-            val continuousReading = preferencesDataStore.continuousReading.first()
-            val keepScreenOn = preferencesDataStore.keepScreenOn.first()
+            // Split into two groups of 4 to use typed combine overloads
+            val displayFlow = combine(
+                preferencesDataStore.quranTranslatorId,
+                preferencesDataStore.showTranslation,
+                preferencesDataStore.showTransliteration,
+                preferencesDataStore.quranArabicFontSize
+            ) { translatorId: String, showTrans: Boolean, showTranslit: Boolean, arabicSize: Float ->
+                QuranDisplaySettings(translatorId, showTrans, showTranslit, arabicSize)
+            }
 
-            val reciterId = preferencesDataStore.selectedReciterId.first()
-            audioManager.setReciter(reciterId)
+            val behaviorFlow = combine(
+                preferencesDataStore.quranTranslationFontSize,
+                preferencesDataStore.continuousReading,
+                preferencesDataStore.keepScreenOn,
+                preferencesDataStore.selectedReciterId
+            ) { transSize: Float, continuous: Boolean, keepOn: Boolean, reciter: String? ->
+                QuranBehaviorSettings(transSize, continuous, keepOn, reciter)
+            }
 
-            _readerState.update {
-                it.copy(
-                    selectedTranslatorId = translatorId,
-                    showTranslation = showTranslation,
-                    showTransliteration = showTransliteration,
-                    arabicFontSize = arabicFontSize,
-                    fontSize = translationFontSize,
-                    continuousReading = continuousReading,
-                    keepScreenOn = keepScreenOn
-                )
+            combine(displayFlow, behaviorFlow) { display, behavior ->
+                Pair(display, behavior)
+            }.collect { (display, behavior) ->
+                audioManager.setReciter(behavior.reciterId)
+                _readerState.update {
+                    it.copy(
+                        selectedTranslatorId = display.translatorId,
+                        showTranslation = display.showTranslation,
+                        showTransliteration = display.showTransliteration,
+                        arabicFontSize = display.arabicFontSize,
+                        fontSize = behavior.translationFontSize,
+                        continuousReading = behavior.continuousReading,
+                        keepScreenOn = behavior.keepScreenOn
+                    )
+                }
             }
         }
     }
 
+    private data class QuranDisplaySettings(
+        val translatorId: String,
+        val showTranslation: Boolean,
+        val showTransliteration: Boolean,
+        val arabicFontSize: Float
+    )
+
+    private data class QuranBehaviorSettings(
+        val translationFontSize: Float,
+        val continuousReading: Boolean,
+        val keepScreenOn: Boolean,
+        val reciterId: String?
+    )
+
     fun refreshSettings() {
-        loadQuranSettings()
+        // Settings are now observed reactively; just reload current surah if needed
         _readerState.value.surahWithAyahs?.let { current ->
             if (_readerState.value.readingMode == ReadingMode.SURAH) {
                 loadSurah(current.surah.number)
@@ -313,7 +341,7 @@ class QuranViewModel @Inject constructor(
                 readingMode = ReadingMode.JUZ,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
-                title = "",
+                title = "Juz $juzNumber",
                 subtitle = ""
             )
         }
@@ -323,6 +351,7 @@ class QuranViewModel @Inject constructor(
                     _readerState.update {
                         it.copy(
                             ayahs = ayahs,
+                            title = "Juz $juzNumber",
                             subtitle = "${ayahs.size} Ayahs",
                             isLoading = false
                         )

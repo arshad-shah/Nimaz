@@ -24,7 +24,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -159,7 +159,7 @@ class QiblaViewModel @Inject constructor(
     }
 
     init {
-        loadCurrentLocation()
+        observeLocation()
         registerSensors()
     }
 
@@ -191,7 +191,7 @@ class QiblaViewModel @Inject constructor(
             is QiblaEvent.SetVibrationEnabled -> _settingsState.update { it.copy(vibrationEnabled = event.enabled) }
             is QiblaEvent.SetSoundEnabled -> _settingsState.update { it.copy(soundEnabled = event.enabled) }
             is QiblaEvent.SetQiblaThreshold -> _settingsState.update { it.copy(qiblaThreshold = event.threshold) }
-            QiblaEvent.RefreshLocation -> loadCurrentLocation()
+            QiblaEvent.RefreshLocation -> { /* Location is observed reactively */ }
             QiblaEvent.ShowLocationPicker -> _qiblaState.update { it.copy(showLocationPicker = true) }
             QiblaEvent.HideLocationPicker -> _qiblaState.update { it.copy(showLocationPicker = false) }
             QiblaEvent.ShowCalibrationDialog -> _qiblaState.update { it.copy(showCalibrationDialog = true) }
@@ -214,17 +214,15 @@ class QiblaViewModel @Inject constructor(
         _qiblaState.update { it.copy(isCompassReady = false, animatedAzimuth = 0f) }
     }
 
-    private fun loadCurrentLocation() {
+    private fun observeLocation() {
         viewModelScope.launch {
-            // Try DB location first
-            val dbLocation = prayerRepository.getCurrentLocationSync()
-            if (dbLocation != null) {
-                setLocation(dbLocation)
-            } else {
-                // Fall back to DataStore lat/lng
-                val lat = preferencesDataStore.latitude.first()
-                val lng = preferencesDataStore.longitude.first()
-                val name = preferencesDataStore.locationName.first()
+            combine(
+                preferencesDataStore.latitude,
+                preferencesDataStore.longitude,
+                preferencesDataStore.locationName
+            ) { lat, lng, name ->
+                Triple(lat, lng, name)
+            }.collect { (lat, lng, name) ->
                 if (lat != 0.0 || lng != 0.0) {
                     setLocationFromCoords(lat, lng, name.ifEmpty { "Current Location" })
                 } else {

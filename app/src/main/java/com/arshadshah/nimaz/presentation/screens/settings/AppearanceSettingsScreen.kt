@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,7 +18,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,14 +34,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
@@ -92,28 +85,6 @@ fun AppearanceSettingsScreen(
                 )
             }
 
-            // Accent Color Section
-            item {
-                SectionTitle(text = "Accent Color")
-            }
-            item {
-                AccentColorCard(
-                    selectedAccentColor = generalState.accentColor,
-                    onColorSelected = { viewModel.onEvent(SettingsEvent.SetAccentColor(it)) }
-                )
-            }
-
-            // App Icon Section
-            item {
-                SectionTitle(text = "App Icon", showProBadge = true)
-            }
-            item {
-                AppIconCard(
-                    selectedAppIcon = generalState.appIcon,
-                    onIconSelected = { viewModel.onEvent(SettingsEvent.SetAppIcon(it)) }
-                )
-            }
-
             // Display Section
             item {
                 SectionTitle(text = "Display")
@@ -146,16 +117,8 @@ fun AppearanceSettingsScreen(
             item {
                 HomeScreenSettingsCard(
                     useHijriPrimary = generalState.useHijriPrimary,
-                    showCountdown = generalState.showCountdown,
-                    showQuickActions = generalState.showQuickActions,
                     onHijriPrimaryToggle = {
                         viewModel.onEvent(SettingsEvent.SetHijriPrimary(!generalState.useHijriPrimary))
-                    },
-                    onCountdownToggle = {
-                        viewModel.onEvent(SettingsEvent.SetShowCountdown(!generalState.showCountdown))
-                    },
-                    onQuickActionsToggle = {
-                        viewModel.onEvent(SettingsEvent.SetShowQuickActions(!generalState.showQuickActions))
                     }
                 )
             }
@@ -377,148 +340,6 @@ private fun ThemePreviewContent(contentColor: Color) {
     }
 }
 
-// --- Accent Color ---
-
-@Composable
-private fun AccentColorCard(
-    selectedAccentColor: String,
-    onColorSelected: (String) -> Unit
-) {
-    val colors = listOf(
-        "Teal" to Color(0xFF14B8A6),
-        "Gold" to Color(0xFFEAB308),
-        "Purple" to Color(0xFFA855F7),
-        "Blue" to Color(0xFF3B82F6),
-        "Rose" to Color(0xFFF43F5E)
-    )
-
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            colors.forEach { (name, color) ->
-                val isSelected = name == selectedAccentColor
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(CircleShape)
-                        .background(color)
-                        .then(
-                            if (isSelected) {
-                                Modifier.border(
-                                    3.dp,
-                                    MaterialTheme.colorScheme.onSurface,
-                                    CircleShape
-                                )
-                            } else {
-                                Modifier
-                            }
-                        )
-                        .clickable { onColorSelected(name) },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isSelected) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-// --- App Icon ---
-
-private data class AppIconOption(
-    val name: String,
-    val emoji: String,
-    val gradientColors: List<Color>
-)
-
-@Composable
-private fun AppIconCard(
-    selectedAppIcon: String,
-    onIconSelected: (String) -> Unit
-) {
-    val iconOptions = listOf(
-        AppIconOption("Default", "\uD83D\uDD4C", listOf(Color(0xFF14B8A6), Color(0xFF115E59))),
-        AppIconOption("Dark", "\uD83D\uDD4C", listOf(Color(0xFF1C1917), Color(0xFF0C0A09))),
-        AppIconOption("Ramadan", "\uD83C\uDF19", listOf(Color(0xFFEAB308), Color(0xFFCA8A04))),
-        AppIconOption("Minimal", "\u2728", listOf(Color(0xFFA855F7), Color(0xFF7C3AED)))
-    )
-
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .horizontalScroll(rememberScrollState()),
-            horizontalArrangement = Arrangement.spacedBy(15.dp)
-        ) {
-            iconOptions.forEach { option ->
-                val isSelected = option.name == selectedAppIcon
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { onIconSelected(option.name) }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(64.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = option.gradientColors,
-                                    start = Offset.Zero,
-                                    end = Offset(Float.POSITIVE_INFINITY, Float.POSITIVE_INFINITY)
-                                )
-                            )
-                            .then(
-                                if (isSelected) {
-                                    Modifier.border(
-                                        3.dp,
-                                        MaterialTheme.colorScheme.primary,
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                } else {
-                                    Modifier
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = option.emoji,
-                            fontSize = 28.sp
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = option.name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-    }
-}
-
 // --- Display Settings ---
 
 @Composable
@@ -576,13 +397,8 @@ private fun DisplaySettingsCard(
 @Composable
 private fun HomeScreenSettingsCard(
     useHijriPrimary: Boolean,
-    showCountdown: Boolean,
-    showQuickActions: Boolean,
-    onHijriPrimaryToggle: () -> Unit,
-    onCountdownToggle: () -> Unit,
-    onQuickActionsToggle: () -> Unit
+    onHijriPrimaryToggle: () -> Unit
 ) {
-
     Card(
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
@@ -595,20 +411,6 @@ private fun HomeScreenSettingsCard(
                 description = "Display Hijri calendar",
                 isEnabled = useHijriPrimary,
                 onToggle = onHijriPrimaryToggle
-            )
-            SettingDivider()
-            SettingToggleItem(
-                label = "Show Countdown",
-                description = "Next prayer countdown",
-                isEnabled = showCountdown,
-                onToggle = onCountdownToggle
-            )
-            SettingDivider()
-            SettingToggleItem(
-                label = "Show Quick Actions",
-                description = "Quran, Tasbih, Qibla buttons",
-                isEnabled = showQuickActions,
-                onToggle = onQuickActionsToggle
             )
         }
     }

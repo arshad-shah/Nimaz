@@ -41,9 +41,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -92,14 +90,8 @@ fun NotificationSettingsScreen(
         PrayerNotificationData("Isha", "isha", IshaColor, notificationState.ishaNotification, notificationState.adhanEnabled)
     )
 
-    var selectedAdhanIndex by remember { mutableIntStateOf(0) }
-
-    val adhanOptions = listOf(
-        "Mishary Rashid Alafasy" to "Kuwait",
-        "Abdul Basit Abdul Samad" to "Egypt",
-        "Makkah (Masjid al-Haram)" to "Saudi Arabia",
-        "Simple Beep" to "System sound"
-    )
+    val adhanSounds = com.arshadshah.nimaz.data.audio.AdhanSound.entries
+    val selectedAdhanName = notificationState.selectedAdhanSound
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -210,17 +202,20 @@ fun NotificationSettingsScreen(
                         color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
                         Column {
-                            adhanOptions.forEachIndexed { index, (name, location) ->
+                            adhanSounds.forEachIndexed { index, sound ->
                                 AdhanOptionRow(
-                                    name = name,
-                                    location = location,
-                                    isSelected = index == selectedAdhanIndex,
-                                    onSelect = { selectedAdhanIndex = index },
+                                    name = sound.displayName,
+                                    location = sound.origin,
+                                    isSelected = sound.name == selectedAdhanName,
+                                    onSelect = {
+                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
+                                    },
                                     onPlay = {
-                                        Toast.makeText(context, "Audio preview coming soon", Toast.LENGTH_SHORT).show()
+                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
+                                        viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
                                     }
                                 )
-                                if (index < adhanOptions.lastIndex) {
+                                if (index < adhanSounds.lastIndex) {
                                     Box(
                                         Modifier
                                             .fillMaxWidth()

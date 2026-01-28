@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.data.audio.AdhanAudioManager
+import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -90,7 +92,8 @@ data class NotificationSettingsUiState(
     val vibrationEnabled: Boolean = true,
     val reminderMinutes: Int = 15,
     val showReminderBefore: Boolean = true,
-    val persistentNotification: Boolean = false
+    val persistentNotification: Boolean = false,
+    val selectedAdhanSound: String = "MISHARY"
 )
 
 data class QuranSettingsUiState(
@@ -150,6 +153,9 @@ sealed interface SettingsEvent {
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetShowReminderBefore(val enabled: Boolean) : SettingsEvent
     data class SetPersistentNotification(val enabled: Boolean) : SettingsEvent
+    data class SetAdhanSound(val sound: String) : SettingsEvent
+    data object PreviewAdhanSound : SettingsEvent
+    data object StopAdhanPreview : SettingsEvent
 
     // Quran
     data class SetTranslator(val translatorId: String) : SettingsEvent
@@ -187,7 +193,8 @@ sealed interface SettingsEvent {
 class SettingsViewModel @Inject constructor(
     private val prayerRepository: PrayerRepository,
     private val preferencesDataStore: PreferencesDataStore,
-    private val prayerNotificationScheduler: PrayerNotificationScheduler
+    private val prayerNotificationScheduler: PrayerNotificationScheduler,
+    val adhanAudioManager: AdhanAudioManager
 ) : ViewModel() {
 
     private val _generalState = MutableStateFlow(GeneralSettingsUiState())
@@ -230,6 +237,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetLanguage -> {
                 _generalState.update { it.copy(language = event.language) }
                 viewModelScope.launch { preferencesDataStore.setAppLanguage(event.language.code) }
+                // Locale change is applied by the language settings screen via LocaleHelper
             }
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }
@@ -311,7 +319,10 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.SetPrayerNotification -> {
                 updatePrayerNotification(event.prayer, event.enabled)
-                viewModelScope.launch { rescheduleNotifications() }
+                viewModelScope.launch {
+                    preferencesDataStore.setPrayerNotificationEnabled(event.prayer, event.enabled)
+                    rescheduleNotifications()
+                }
             }
             is SettingsEvent.SetAdhanEnabled -> {
                 _notificationState.update { it.copy(adhanEnabled = event.enabled) }
@@ -341,6 +352,17 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetPersistentNotification -> {
                 _notificationState.update { it.copy(persistentNotification = event.enabled) }
                 viewModelScope.launch { preferencesDataStore.setPersistentNotification(event.enabled) }
+            }
+            is SettingsEvent.SetAdhanSound -> {
+                _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
+                viewModelScope.launch { preferencesDataStore.setSelectedAdhanSound(event.sound) }
+            }
+            SettingsEvent.PreviewAdhanSound -> {
+                val sound = AdhanSound.fromName(_notificationState.value.selectedAdhanSound)
+                adhanAudioManager.preview(sound)
+            }
+            SettingsEvent.StopAdhanPreview -> {
+                adhanAudioManager.stopPreview()
             }
 
             // Quran
@@ -482,6 +504,13 @@ class SettingsViewModel @Inject constructor(
             val reminderMin = preferencesDataStore.notificationReminderMinutes.first()
             val showReminder = preferencesDataStore.showReminderBefore.first()
             val persistent = preferencesDataStore.persistentNotification.first()
+            val adhanSoundName = preferencesDataStore.selectedAdhanSound.first()
+            val fajrNotif = preferencesDataStore.fajrNotificationEnabled.first()
+            val sunriseNotif = preferencesDataStore.sunriseNotificationEnabled.first()
+            val dhuhrNotif = preferencesDataStore.dhuhrNotificationEnabled.first()
+            val asrNotif = preferencesDataStore.asrNotificationEnabled.first()
+            val maghribNotif = preferencesDataStore.maghribNotificationEnabled.first()
+            val ishaNotif = preferencesDataStore.ishaNotificationEnabled.first()
 
             _notificationState.update {
                 it.copy(
@@ -490,7 +519,14 @@ class SettingsViewModel @Inject constructor(
                     vibrationEnabled = vibration,
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
-                    persistentNotification = persistent
+                    persistentNotification = persistent,
+                    selectedAdhanSound = adhanSoundName,
+                    fajrNotification = fajrNotif,
+                    sunriseNotification = sunriseNotif,
+                    dhuhrNotification = dhuhrNotif,
+                    asrNotification = asrNotif,
+                    maghribNotification = maghribNotif,
+                    ishaNotification = ishaNotif
                 )
             }
 

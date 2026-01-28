@@ -35,7 +35,10 @@
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read2.ps1\")",
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read3.ps1\")",
       "Bash(tree:*)",
-      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")"
+      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")",
+      "Bash(findstr:*)",
+      "Bash(.gradlew assembleDebug:*)",
+      "Bash(./gradlew.bat assembleDebug:*)"
     ]
   }
 }

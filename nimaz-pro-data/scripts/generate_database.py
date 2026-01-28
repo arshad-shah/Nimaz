@@ -45,6 +45,7 @@ def create_tables(conn):
             page INTEGER NOT NULL,
             sajda INTEGER NOT NULL DEFAULT 0,
             sajda_type TEXT,
+            transliteration TEXT,
             FOREIGN KEY (surah_id) REFERENCES surahs(id)
         )
     ''')
@@ -149,6 +150,54 @@ def create_tables(conn):
         )
     ''')
 
+    # Surah Info
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS surah_info (
+            surahNumber INTEGER PRIMARY KEY,
+            description TEXT NOT NULL,
+            themes TEXT NOT NULL
+        )
+    ''')
+
+    # Reading Progress
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS reading_progress (
+            id INTEGER PRIMARY KEY,
+            lastReadSurah INTEGER NOT NULL,
+            lastReadAyah INTEGER NOT NULL,
+            lastReadPage INTEGER NOT NULL,
+            lastReadJuz INTEGER NOT NULL,
+            totalAyahsRead INTEGER NOT NULL,
+            currentKhatmaCount INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL
+        )
+    ''')
+
+    # Quran Bookmarks
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quran_bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ayahId INTEGER NOT NULL,
+            surahNumber INTEGER NOT NULL,
+            ayahNumber INTEGER NOT NULL,
+            note TEXT,
+            color TEXT,
+            createdAt INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS idx_bookmarks_ayah ON quran_bookmarks(ayahId)')
+
+    # Quran Favorites
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS quran_favorites (
+            ayahId INTEGER PRIMARY KEY,
+            surahNumber INTEGER NOT NULL,
+            ayahNumber INTEGER NOT NULL,
+            createdAt INTEGER NOT NULL
+        )
+    ''')
+
     # Create indices
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_ayahs_surah ON ayahs(surah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS idx_ayahs_juz ON ayahs(juz)')
@@ -184,11 +233,21 @@ def populate_database(conn):
     ayahs = load_json('ayahs.json')
     for a in ayahs:
         cursor.execute('''
-            INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
         ''', (a['id'], a['surah_id'], a['number_in_surah'], a['number_global'],
               a['text_arabic'], a['text_uthmani'], a['juz'], a['hizb'],
-              a['page'], 1 if a.get('sajda') else 0, a.get('sajda_type')))
+              a['page'], 1 if a.get('sajda') else 0, a.get('sajda_type'),
+              a.get('transliteration')))
     print(f"Inserted {len(ayahs)} ayahs")
+
+    # Surah Info
+    surah_info = load_json('surah_info.json')
+    if surah_info:
+        for si in surah_info:
+            cursor.execute('''
+                INSERT OR REPLACE INTO surah_info VALUES (?,?,?)
+            ''', (si['surahNumber'], si['description'], si['themes']))
+        print(f"Inserted {len(surah_info)} surah info entries")
 
     # Translations
     translations = load_json('translations.json')

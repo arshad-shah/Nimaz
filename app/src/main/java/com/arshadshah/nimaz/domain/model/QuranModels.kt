@@ -27,7 +27,8 @@ data class Ayah(
     val sajdaType: SajdaType?,
     val sajdaNumber: Int?,
     val translation: String? = null,
-    val isBookmarked: Boolean = false
+    val isBookmarked: Boolean = false,
+    val transliteration: String? = null
 ) {
     // Aliases for backwards compatibility
     val numberInSurah: Int get() = ayahNumber

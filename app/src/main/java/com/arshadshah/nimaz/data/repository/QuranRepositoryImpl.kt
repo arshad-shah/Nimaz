@@ -287,7 +287,8 @@ class QuranRepositoryImpl @Inject constructor(
             rubNumber = 0, // Not available in database
             pageNumber = page,
             sajdaType = SajdaType.fromString(sajdaType),
-            sajdaNumber = if (sajda > 0) sajda else null
+            sajdaNumber = if (sajda > 0) sajda else null,
+            transliteration = transliteration
         )
     }
 

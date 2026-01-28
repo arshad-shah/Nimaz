@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.screens.quran
 import android.content.Intent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -167,7 +168,7 @@ fun QuranReaderScreen(
     val headerTitle = when (state.readingMode) {
         ReadingMode.SURAH -> state.surahWithAyahs?.surah?.nameEnglish ?: ""
         ReadingMode.JUZ -> state.title
-        ReadingMode.PAGE -> "Page ${pageNumber ?: ""}"
+        ReadingMode.PAGE -> "Al Quran"
     }
     val headerMeta = when (state.readingMode) {
         ReadingMode.PAGE -> "" // Page view has its own nav bar with page info
@@ -340,6 +341,7 @@ fun QuranReaderScreen(
                                     AyahItem(
                                         ayah = ayah,
                                         showTranslation = state.showTranslation,
+                                        showTransliteration = state.showTransliteration,
                                         arabicFontSize = state.arabicFontSize,
                                         fontSize = state.fontSize,
                                         isHighlighted = isHighlighted,
@@ -448,6 +450,7 @@ fun QuranReaderScreen(
                             AyahItem(
                                 ayah = ayah,
                                 showTranslation = state.showTranslation,
+                                showTransliteration = state.showTransliteration,
                                 arabicFontSize = state.arabicFontSize,
                                 fontSize = state.fontSize,
                                 isHighlighted = isHighlighted,
@@ -486,31 +489,35 @@ fun QuranReaderScreen(
             }
 
             // Compact bottom bar — unified play/audio controls
-            CompactBottomBar(
-                isAudioActive = audioState.isActive,
-                isPlaying = audioState.isPlaying,
-                isDownloading = audioState.isDownloading,
-                audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
-                progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
-                onPlayClick = {
-                    if (audioState.isActive) {
-                        viewModel.onEvent(QuranEvent.PauseAudio)
-                    } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
-                        val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
-                        viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
-                    } else if (displayAyahs.isNotEmpty()) {
-                        viewModel.onEvent(
-                            QuranEvent.PlayAyahAudio(
-                                ayahGlobalId = displayAyahs.first().id,
-                                surahNumber = displayAyahs.first().surahNumber,
-                                ayahNumber = displayAyahs.first().ayahNumber
-                            )
-                        )
-                    }
-                },
-                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) },
+            AnimatedVisibility(
+                visible = audioState.isActive,
                 modifier = Modifier.align(Alignment.BottomCenter)
-            )
+            ) {
+                CompactBottomBar(
+                    isAudioActive = audioState.isActive,
+                    isPlaying = audioState.isPlaying,
+                    isDownloading = audioState.isDownloading,
+                    audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
+                    progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
+                    onPlayClick = {
+                        if (audioState.isActive) {
+                            viewModel.onEvent(QuranEvent.PauseAudio)
+                        } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
+                            val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
+                            viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
+                        } else if (displayAyahs.isNotEmpty()) {
+                            viewModel.onEvent(
+                                QuranEvent.PlayAyahAudio(
+                                    ayahGlobalId = displayAyahs.first().id,
+                                    surahNumber = displayAyahs.first().surahNumber,
+                                    ayahNumber = displayAyahs.first().ayahNumber
+                                )
+                            )
+                        }
+                    },
+                    onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
+                )
+            }
         }
     }
 }
@@ -634,14 +641,14 @@ private fun JuzPageBanner(
                 text = title,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = Color(0xFFEAB308)
             )
             if (subtitle.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = subtitle,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    color = Color(0xFFEAB308).copy(alpha = 0.8f)
                 )
             }
         }
@@ -681,7 +688,7 @@ private fun SurahBanner(
             ArabicText(
                 text = surahNameArabic,
                 size = ArabicTextSize.EXTRA_LARGE,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = Color(0xFFEAB308)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -690,13 +697,13 @@ private fun SurahBanner(
                 text = surahNameEnglish,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = Color(0xFFEAB308)
             )
 
             Text(
                 text = surahMeaning,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                color = Color(0xFFEAB308).copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -925,6 +932,7 @@ private fun PageSurahSeparator(
 private fun AyahItem(
     ayah: Ayah,
     showTranslation: Boolean,
+    showTransliteration: Boolean = false,
     arabicFontSize: Float,
     fontSize: Float,
     isHighlighted: Boolean = false,
@@ -1056,6 +1064,25 @@ private fun AyahItem(
                         lineHeight = (fontSize * 1.5f).sp
                     ),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(12.dp)
+                )
+            }
+        }
+
+        // Transliteration
+        if (showTransliteration && ayah.transliteration != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
+            ) {
+                Text(
+                    text = ayah.transliteration,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontSize = fontSize.sp,
+                        lineHeight = (fontSize * 1.5f).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.padding(12.dp)
                 )
             }

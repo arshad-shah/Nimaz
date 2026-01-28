@@ -16,6 +16,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
@@ -72,7 +73,7 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
     init {
-        loadSavedLocation()
+        observeLocation()
         loadPrayerRecords()
         loadFastingStatus()
         loadDailyHadith()
@@ -153,36 +154,35 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadSavedLocation() {
+    private fun observeLocation() {
         viewModelScope.launch {
-            try {
-                val prefs = preferencesDataStore.userPreferences.first()
-
-                // Use saved location or default to Dublin, Ireland
-                val hasLocation = prefs.latitude != 0.0 && prefs.longitude != 0.0
-                val latitude = if (hasLocation) prefs.latitude else DEFAULT_LATITUDE
-                val longitude = if (hasLocation) prefs.longitude else DEFAULT_LONGITUDE
-                val locationName = if (hasLocation && prefs.locationName.isNotBlank()) {
-                    prefs.locationName
-                } else {
-                    DEFAULT_LOCATION_NAME
+            combine(
+                preferencesDataStore.latitude,
+                preferencesDataStore.longitude,
+                preferencesDataStore.locationName
+            ) { lat: Double, lng: Double, name: String ->
+                Triple(lat, lng, name)
+            }.combine(
+                combine(
+                    preferencesDataStore.calculationMethod,
+                    preferencesDataStore.asrCalculation,
+                    preferencesDataStore.highLatitudeRule
+                ) { calc: String, asr: String, high: String ->
+                    Triple(calc, asr, high)
                 }
+            ) { location, _ ->
+                location
+            }.collect { (lat, lng, name) ->
+                val hasLocation = lat != 0.0 && lng != 0.0
+                val latitude = if (hasLocation) lat else DEFAULT_LATITUDE
+                val longitude = if (hasLocation) lng else DEFAULT_LONGITUDE
+                val locationName = if (hasLocation && name.isNotBlank()) name else DEFAULT_LOCATION_NAME
 
                 _state.update {
                     it.copy(
                         latitude = latitude,
                         longitude = longitude,
                         locationName = locationName
-                    )
-                }
-                calculatePrayerTimes()
-            } catch (e: Exception) {
-                // On error, use default location
-                _state.update {
-                    it.copy(
-                        latitude = DEFAULT_LATITUDE,
-                        longitude = DEFAULT_LONGITUDE,
-                        locationName = DEFAULT_LOCATION_NAME
                     )
                 }
                 calculatePrayerTimes()
