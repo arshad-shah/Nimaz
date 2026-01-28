@@ -17,10 +17,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Favorite
@@ -153,9 +163,9 @@ fun QuranHomeScreen(
                     }
                 }
             } else {
-                // Top-level tabs: Home / Browse
+                // Top-level tabs: Home / Browse / Favorites / Bookmarks
                 NimazPillTabs(
-                    tabs = listOf("Home", "Browse"),
+                    tabs = listOf("Home", "Browse", "Favorites", "Bookmarks"),
                     selectedIndex = state.topTab,
                     onTabSelect = { viewModel.onEvent(QuranEvent.SetTopTab(it)) },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -178,15 +188,20 @@ fun QuranHomeScreen(
                         )
                         1 -> BrowseTabContent(
                             state = state,
-                            favorites = state.favorites,
-                            surahs = state.surahs,
-                            bookmarks = bookmarksState.bookmarks,
                             onNavigateToSurah = onNavigateToSurah,
                             onNavigateToJuz = onNavigateToJuz,
                             onNavigateToPage = onNavigateToPage,
                             onTabSelect = { viewModel.onEvent(QuranEvent.SetTab(it)) },
-                            onNavigateToSurahInfo = onNavigateToSurahInfo,
-                            onNavigateToBookmarks = onNavigateToBookmarks
+                            onNavigateToSurahInfo = onNavigateToSurahInfo
+                        )
+                        2 -> FavoritesTabContent(
+                            favorites = state.favorites,
+                            surahs = state.surahs,
+                            onNavigateToSurah = onNavigateToSurah
+                        )
+                        3 -> BookmarksTabContent(
+                            bookmarks = bookmarksState.bookmarks,
+                            onNavigateToSurah = onNavigateToSurah
                         )
                     }
                 }
@@ -330,23 +345,19 @@ private fun HomeTabContent(
 @Composable
 private fun BrowseTabContent(
     state: com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState,
-    favorites: List<QuranFavorite>,
-    surahs: List<Surah>,
-    bookmarks: List<QuranBookmark>,
     onNavigateToSurah: (Int) -> Unit,
     onNavigateToJuz: (Int) -> Unit,
     onNavigateToPage: (Int) -> Unit,
     onTabSelect: (Int) -> Unit,
-    onNavigateToSurahInfo: (Int) -> Unit = {},
-    onNavigateToBookmarks: () -> Unit = {}
+    onNavigateToSurahInfo: (Int) -> Unit = {}
 ) {
     Column {
-        // Sticky TabRow outside LazyColumn
+        // Sticky TabRow outside LazyColumn - only Surah/Juz/Page
         TabRow(
             selectedTabIndex = state.selectedTab,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
-            listOf("Surah", "Juz", "Page", "Favorites", "Bookmarks").forEachIndexed { index, title ->
+            listOf("Surah", "Juz", "Page").forEachIndexed { index, title ->
                 Tab(
                     selected = state.selectedTab == index,
                     onClick = { onTabSelect(index) },
@@ -378,98 +389,118 @@ private fun BrowseTabContent(
                     }
                 }
                 2 -> {
-                    item(key = "page_grid") {
-                        PageGrid(onNavigateToPage = onNavigateToPage)
+                    // Page grid items added directly to avoid nested LazyColumn
+                    pageGridItems(onNavigateToPage = onNavigateToPage)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun FavoritesTabContent(
+    favorites: List<QuranFavorite>,
+    surahs: List<Surah>,
+    onNavigateToSurah: (Int) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (favorites.isEmpty()) {
+            item(key = "no_favorites") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "No favorite ayahs yet",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Tap the heart icon on any ayah to add it here",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                     }
                 }
-                3 -> {
-                    if (favorites.isEmpty()) {
-                        item(key = "no_favorites") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.Favorite,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(48.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = "No favorite ayahs yet",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "Tap the heart icon on any ayah to add it here",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        items(
-                            items = favorites,
-                            key = { "fav_${it.ayahId}" }
-                        ) { favorite ->
-                            val surahName = surahs.find { it.number == favorite.surahNumber }?.nameEnglish
-                                ?: "Surah ${favorite.surahNumber}"
-                            FavoriteAyahItem(
-                                surahName = surahName,
-                                ayahNumber = favorite.ayahNumber,
-                                surahNumber = favorite.surahNumber,
-                                onClick = { onNavigateToSurah(favorite.surahNumber) }
-                            )
-                        }
+            }
+        } else {
+            items(
+                items = favorites,
+                key = { "fav_${it.ayahId}" }
+            ) { favorite ->
+                val surahName = surahs.find { it.number == favorite.surahNumber }?.nameEnglish
+                    ?: "Surah ${favorite.surahNumber}"
+                FavoriteAyahItem(
+                    surahName = surahName,
+                    ayahNumber = favorite.ayahNumber,
+                    surahNumber = favorite.surahNumber,
+                    onClick = { onNavigateToSurah(favorite.surahNumber) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun BookmarksTabContent(
+    bookmarks: List<QuranBookmark>,
+    onNavigateToSurah: (Int) -> Unit
+) {
+    LazyColumn(
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        if (bookmarks.isEmpty()) {
+            item(key = "no_bookmarks") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = "No bookmarks yet",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "Tap the bookmark icon on any ayah to add it here",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                     }
                 }
-                4 -> {
-                    if (bookmarks.isEmpty()) {
-                        item(key = "no_bookmarks") {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 32.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Icon(
-                                        imageVector = Icons.Default.Bookmark,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                                        modifier = Modifier.size(48.dp)
-                                    )
-                                    Spacer(modifier = Modifier.height(12.dp))
-                                    Text(
-                                        text = "No bookmarks yet",
-                                        style = MaterialTheme.typography.bodyLarge,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Text(
-                                        text = "Tap the bookmark icon on any ayah to add it here",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    )
-                                }
-                            }
-                        }
-                    } else {
-                        items(
-                            items = bookmarks,
-                            key = { "bm_${it.id}" }
-                        ) { bookmark ->
-                            BookmarkListItem(
-                                bookmark = bookmark,
-                                onClick = { onNavigateToSurah(bookmark.surahNumber) }
-                            )
-                        }
-                    }
-                }
+            }
+        } else {
+            items(
+                items = bookmarks,
+                key = { "bm_${it.id}" }
+            ) { bookmark ->
+                BookmarkListItem(
+                    bookmark = bookmark,
+                    onClick = { onNavigateToSurah(bookmark.surahNumber) }
+            )
             }
         }
     }
@@ -790,18 +821,111 @@ private fun JuzGrid(
     }
 }
 
-@Composable
-private fun PageGrid(
-    onNavigateToPage: (Int) -> Unit,
-    modifier: Modifier = Modifier
+// Juz to page mapping (approximate start pages for each Juz)
+private val juzStartPages = listOf(
+    1, 22, 42, 62, 82, 102, 121, 142, 162, 182,
+    201, 222, 242, 262, 282, 302, 322, 342, 362, 382,
+    402, 422, 442, 462, 482, 502, 522, 542, 562, 582
+)
+
+private fun getJuzForPage(page: Int): Int {
+    for (i in juzStartPages.indices.reversed()) {
+        if (page >= juzStartPages[i]) return i + 1
+    }
+    return 1
+}
+
+private fun getJuzStartPage(juz: Int): Int = juzStartPages.getOrElse(juz - 1) { 1 }
+
+private fun getJuzEndPage(juz: Int): Int = if (juz < 30) juzStartPages[juz] - 1 else 604
+
+/**
+ * Adds page grid items directly to a LazyListScope to avoid nested scrolling.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private fun LazyListScope.pageGridItems(
+    onNavigateToPage: (Int) -> Unit
 ) {
     val columns = 5
-    val pageNumbers = (1..604).toList()
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        pageNumbers.chunked(columns).forEach { row ->
+
+    // Jump-to-page input as first item
+    item(key = "page_jump_input") {
+        var jumpToPage by remember { mutableStateOf("") }
+        OutlinedTextField(
+            value = jumpToPage,
+            onValueChange = { newValue ->
+                if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                    jumpToPage = newValue
+                }
+            },
+            label = { Text("Jump to Page (1-604)") },
+            placeholder = { Text("Enter page number") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Go
+            ),
+            keyboardActions = KeyboardActions(
+                onGo = {
+                    jumpToPage.toIntOrNull()?.let { page ->
+                        if (page in 1..604) {
+                            onNavigateToPage(page)
+                        }
+                    }
+                }
+            ),
+            trailingIcon = {
+                IconButton(
+                    onClick = {
+                        jumpToPage.toIntOrNull()?.let { page ->
+                            if (page in 1..604) {
+                                onNavigateToPage(page)
+                            }
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = "Go to page",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            shape = RoundedCornerShape(12.dp)
+        )
+    }
+
+    // Add items for each Juz section
+    (1..30).forEach { juz ->
+        val startPage = getJuzStartPage(juz)
+        val endPage = getJuzEndPage(juz)
+
+        // Juz header
+        item(key = "page_juz_header_$juz") {
+            Surface(
+                color = MaterialTheme.colorScheme.primaryContainer,
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Juz $juz (Pages $startPage-$endPage)",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
+                )
+            }
+        }
+
+        // Pages in this Juz, chunked into rows
+        val pagesInJuz = (startPage..endPage).toList()
+        items(
+            items = pagesInJuz.chunked(columns),
+            key = { row -> "page_row_${row.first()}" }
+        ) { row ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -830,6 +954,7 @@ private fun PageGrid(
                         }
                     }
                 }
+                // Fill remaining space if row is incomplete
                 repeat(columns - row.size) {
                     Spacer(modifier = Modifier.weight(1f))
                 }

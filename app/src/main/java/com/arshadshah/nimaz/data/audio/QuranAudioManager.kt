@@ -48,8 +48,9 @@ class QuranAudioManager @Inject constructor(
     private val _audioState = MutableStateFlow(AudioState())
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
 
-    // Reciter CDN ID - dynamically set from preferences
-    private var reciterCdnId = "7" // Default: Mishary Rashid Alafasy
+    // Reciter CDN ID and bitrate - dynamically set from preferences
+    private var reciterCdnId = "ar.alafasy" // Default: Mishary Rashid Alafasy
+    private var reciterBitrate = 128 // Default bitrate
 
     // Monotonically increasing generation counter. Each time we start a new track,
     // we bump this. The STATE_ENDED handler captures the generation at the time the
@@ -61,25 +62,34 @@ class QuranAudioManager @Inject constructor(
     // Sequential playback state
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
     private var currentPlaylistIndex: Int = -1
+    private val failedAyahs = mutableSetOf<Int>()
 
     companion object {
+        // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
+        // Pair: (cdnId, bitrate) - some reciters only have 64kbps, others have 128kbps
         val RECITER_CDN_MAP = mapOf(
-            "mishary" to "7",
-            "sudais" to "2",
-            "abdulbasit" to "4",
-            "ghamdi" to "9",
-            "muaiqly" to "6",
-            "hussary" to "8",
-            "minshawi" to "5",
-            "ajamy" to "3",
-            "shuraim" to "10",
-            "dosari" to "1",
-            "maher" to "6"
+            "alafasy" to Pair("ar.alafasy", 128),
+            "mishary" to Pair("ar.alafasy", 128),
+            "sudais" to Pair("ar.abdurrahmaansudais", 64),
+            "abdulbasit" to Pair("ar.abdulsamad", 64),
+            "muaiqly" to Pair("ar.mahermuaiqly", 128),
+            "maher" to Pair("ar.mahermuaiqly", 128),
+            "hussary" to Pair("ar.husary", 128),
+            "minshawi" to Pair("ar.minshawi", 128),
+            "ajamy" to Pair("ar.ahmedajamy", 128),
+            "shuraim" to Pair("ar.saoodshuraym", 64),
+            "hudhaify" to Pair("ar.hudhaify", 128),
+            "ayyoub" to Pair("ar.muhammadayyoub", 128),
+            "jibreel" to Pair("ar.muhammadjibreel", 128),
+            "shaatree" to Pair("ar.shaatree", 128),
+            "basfar" to Pair("ar.abdullahbasfar", 64)
         )
     }
 
     fun setReciter(reciterId: String?) {
-        reciterCdnId = RECITER_CDN_MAP[reciterId] ?: "7"
+        val (cdnId, bitrate) = RECITER_CDN_MAP[reciterId] ?: Pair("ar.alafasy", 128)
+        reciterCdnId = cdnId
+        reciterBitrate = bitrate
         _audioState.update {
             it.copy(reciterName = getReciterDisplayName(reciterId))
         }
@@ -87,17 +97,19 @@ class QuranAudioManager @Inject constructor(
 
     private fun getReciterDisplayName(reciterId: String?): String {
         return when (reciterId) {
-            "mishary" -> "Mishary Rashid Alafasy"
+            "alafasy", "mishary" -> "Mishary Rashid Alafasy"
             "sudais" -> "Abdul Rahman Al-Sudais"
             "abdulbasit" -> "Abdul Basit Abdul Samad"
-            "ghamdi" -> "Saad Al-Ghamdi"
-            "muaiqly" -> "Maher Al-Muaiqly"
+            "muaiqly", "maher" -> "Maher Al-Muaiqly"
             "hussary" -> "Mahmoud Khalil Al-Hussary"
             "minshawi" -> "Muhammad Siddiq Al-Minshawi"
             "ajamy" -> "Ahmed Al-Ajamy"
             "shuraim" -> "Saud Al-Shuraim"
-            "dosari" -> "Yasser Al-Dosari"
-            "maher" -> "Maher Al Muaiqly"
+            "hudhaify" -> "Ali Al-Hudhaify"
+            "ayyoub" -> "Muhammad Ayyoub"
+            "jibreel" -> "Muhammad Jibreel"
+            "shaatree" -> "Abu Bakr Al-Shaatree"
+            "basfar" -> "Abdullah Basfar"
             else -> "Mishary Rashid Alafasy"
         }
     }
@@ -170,12 +182,14 @@ class QuranAudioManager @Inject constructor(
      * Each ayah is highlighted as it plays, then auto-advances to the next.
      */
     fun playAyahsSequentially(ayahs: List<AyahAudioItem>, startIndex: Int = 0, title: String = "") {
+        failedAyahs.clear() // Clear failed ayahs at start of new playlist
         ayahPlaylist = ayahs
         currentPlaylistIndex = startIndex - 1 // will be incremented by playNextInPlaylist
         _audioState.update {
             it.copy(
                 isActive = true,
-                currentTitle = title
+                currentTitle = title,
+                error = null
             )
         }
         playNextInPlaylist()
@@ -183,11 +197,23 @@ class QuranAudioManager @Inject constructor(
 
     private fun playNextInPlaylist() {
         currentPlaylistIndex++
+
+        // Skip any previously failed ayahs
+        while (currentPlaylistIndex < ayahPlaylist.size) {
+            if (ayahPlaylist[currentPlaylistIndex].ayahGlobalId in failedAyahs) {
+                currentPlaylistIndex++
+                continue
+            }
+            break
+        }
+
         if (currentPlaylistIndex >= ayahPlaylist.size) {
-            // Done
+            // Done - playlist finished
             _audioState.update { it.copy(isActive = false, isPlaying = false, currentAyahId = 0) }
+            failedAyahs.clear()
             return
         }
+
         val item = ayahPlaylist[currentPlaylistIndex]
         scope.launch {
             _audioState.update {
@@ -204,19 +230,20 @@ class QuranAudioManager @Inject constructor(
             if (!audioFile.exists()) {
                 // Try downloading with 1 retry
                 val downloaded = downloadFileWithRetry(
-                    url = "https://cdn.islamic.network/quran/audio/128/$reciterCdnId/${item.ayahGlobalId}.mp3",
+                    url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
                     destination = audioFile
                 )
                 if (!downloaded) {
-                    // Emit error and stop instead of cascading through playlist
+                    // Mark as failed and skip to next ayah instead of stopping
+                    failedAyahs.add(item.ayahGlobalId)
                     _audioState.update {
                         it.copy(
                             isDownloading = false,
-                            isPlaying = false,
-                            isActive = false,
-                            error = "Failed to download audio for Ayah ${item.ayahNumber}"
+                            error = "Skipped Ayah ${item.ayahNumber} (download failed)"
                         )
                     }
+                    // Continue to next ayah
+                    playNextInPlaylist()
                     return@launch
                 }
             }
@@ -224,14 +251,15 @@ class QuranAudioManager @Inject constructor(
             if (audioFile.exists()) {
                 playFile(audioFile)
             } else {
+                // Mark as failed and skip to next ayah
+                failedAyahs.add(item.ayahGlobalId)
                 _audioState.update {
                     it.copy(
                         isDownloading = false,
-                        isPlaying = false,
-                        isActive = false,
-                        error = "Audio file not available"
+                        error = "Skipped Ayah ${item.ayahNumber} (file unavailable)"
                     )
                 }
+                playNextInPlaylist()
             }
         }
     }
@@ -295,6 +323,7 @@ class QuranAudioManager @Inject constructor(
         positionTrackingJob?.cancel()
         ayahPlaylist = emptyList()
         currentPlaylistIndex = -1
+        failedAyahs.clear()
         _audioState.update { AudioState() }
     }
 

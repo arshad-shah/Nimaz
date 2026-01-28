@@ -97,7 +97,7 @@ data class NotificationSettingsUiState(
 )
 
 data class QuranSettingsUiState(
-    val selectedTranslatorId: String = "en.sahih",
+    val selectedTranslatorId: String = "sahih_international",
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val arabicFontSize: Float = 28f,

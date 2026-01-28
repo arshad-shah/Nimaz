@@ -22,8 +22,8 @@ interface QuranRepository {
     // Ayah operations
     fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>>
     suspend fun getAyahById(ayahId: Int): Ayah?
-    fun getAyahsByJuz(juzNumber: Int): Flow<List<Ayah>>
-    fun getAyahsByPage(pageNumber: Int): Flow<List<Ayah>>
+    fun getAyahsByJuz(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
+    fun getAyahsByPage(pageNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     fun getSajdaAyahs(): Flow<List<Ayah>>
 
     // Surah with Ayahs

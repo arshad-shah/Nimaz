@@ -35,13 +35,15 @@ class GetSurahWithAyahsUseCase @Inject constructor(
 class GetAyahsByJuzUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
-    operator fun invoke(juzNumber: Int): Flow<List<Ayah>> = repository.getAyahsByJuz(juzNumber)
+    operator fun invoke(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>> =
+        repository.getAyahsByJuz(juzNumber, translatorId)
 }
 
 class GetAyahsByPageUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
-    operator fun invoke(pageNumber: Int): Flow<List<Ayah>> = repository.getAyahsByPage(pageNumber)
+    operator fun invoke(pageNumber: Int, translatorId: String? = null): Flow<List<Ayah>> =
+        repository.getAyahsByPage(pageNumber, translatorId)
 }
 
 class GetSajdaAyahsUseCase @Inject constructor(

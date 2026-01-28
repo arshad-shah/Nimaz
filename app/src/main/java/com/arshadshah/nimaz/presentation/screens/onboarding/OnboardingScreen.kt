@@ -203,19 +203,14 @@ fun OnboardingScreen(
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.onSurface,
-                            MaterialTheme.colorScheme.onSurface
-                        )
-                    )
-                )
+                .background(MaterialTheme.colorScheme.background)
         ) {
             Column(
                 modifier = Modifier.fillMaxSize()
@@ -312,7 +307,7 @@ fun OnboardingScreen(
                                 .clip(CircleShape)
                                 .background(
                                     if (isSelected) pages[index].color
-                                    else MaterialTheme.colorScheme.onSurfaceVariant
+                                    else MaterialTheme.colorScheme.surfaceVariant
                                 )
                         )
                     }
@@ -338,7 +333,7 @@ fun OnboardingScreen(
                                 }
                             },
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = Color.White
+                                contentColor = MaterialTheme.colorScheme.onBackground
                             )
                         ) {
                             Text("Back")
@@ -431,7 +426,7 @@ private fun OnboardingPageContent(
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
             textAlign = TextAlign.Center,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onBackground
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -452,7 +447,7 @@ private fun OnboardingPageContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.onSurface
+                    containerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
             ) {
                 Column(
@@ -559,7 +554,7 @@ private fun FeatureRow(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
+            color = MaterialTheme.colorScheme.onSurface
         )
     }
 }

@@ -15,12 +15,18 @@ import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,8 +38,8 @@ data class QuranHomeUiState(
     val surahs: List<Surah> = emptyList(),
     val filteredSurahs: List<Surah> = emptyList(),
     val searchQuery: String = "",
-    val topTab: Int = 0, // 0 = Home, 1 = Browse
-    val selectedTab: Int = 0, // Browse sub-tab: Surah/Juz/Page/Favorites
+    val topTab: Int = 0, // 0 = Home, 1 = Browse, 2 = Favorites, 3 = Bookmarks
+    val selectedTab: Int = 0, // Browse sub-tab: 0=Surah, 1=Juz, 2=Page
     val readingProgress: ReadingProgress? = null,
     val favorites: List<QuranFavorite> = emptyList(),
     val isLoading: Boolean = true,
@@ -51,7 +57,7 @@ data class QuranReaderUiState(
     val error: String? = null,
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
-    val selectedTranslatorId: String = "en.sahih",
+    val selectedTranslatorId: String = "sahih_international",
     val fontSize: Float = 16f,
     val arabicFontSize: Float = 28f,
     val keepScreenOn: Boolean = true,
@@ -86,6 +92,7 @@ sealed interface QuranEvent {
     data class PlaySurahAudio(val surahNumber: Int, val surahName: String) : QuranEvent
     data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) : QuranEvent
     data object PauseAudio : QuranEvent
+    data object ResumeAudio : QuranEvent
     data object StopAudio : QuranEvent
     data class PlaySurahFromInfo(val surahNumber: Int) : QuranEvent
     data class LoadSurahInfo(val surahNumber: Int) : QuranEvent
@@ -115,6 +122,10 @@ class QuranViewModel @Inject constructor(
 
     val audioState: StateFlow<AudioState> = audioManager.audioState
 
+    // Debounced search support
+    private val searchQueryFlow = MutableStateFlow("")
+    private var searchJob: Job? = null
+
     init {
         loadSurahs()
         loadReadingProgress()
@@ -122,6 +133,16 @@ class QuranViewModel @Inject constructor(
         loadFavorites()
         loadFavoriteAyahIds()
         observeQuranSettings()
+        setupDebouncedSearch()
+    }
+
+    @OptIn(FlowPreview::class)
+    private fun setupDebouncedSearch() {
+        searchQueryFlow
+            .debounce(300L)
+            .distinctUntilChanged()
+            .onEach { query -> performSearch(query) }
+            .launchIn(viewModelScope)
     }
 
     fun onEvent(event: QuranEvent) {
@@ -147,6 +168,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.PlaySurahAudio -> playSurahAudio(event.surahNumber, event.surahName)
             is QuranEvent.PlayAyahAudio -> playAyahAudio(event.ayahGlobalId, event.surahNumber, event.ayahNumber)
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
+            QuranEvent.ResumeAudio -> audioManager.togglePlayPause()
             QuranEvent.StopAudio -> audioManager.stop()
             is QuranEvent.PlaySurahFromInfo -> playSurahFromInfo(event.surahNumber)
             is QuranEvent.LoadSurahInfo -> loadSurahInfo(event.surahNumber)
@@ -346,7 +368,7 @@ class QuranViewModel @Inject constructor(
             )
         }
         viewModelScope.launch {
-            quranUseCases.getAyahsByJuz(juzNumber)
+            quranUseCases.getAyahsByJuz(juzNumber, _readerState.value.selectedTranslatorId)
                 .collect { ayahs ->
                     _readerState.update {
                         it.copy(
@@ -368,12 +390,12 @@ class QuranViewModel @Inject constructor(
                 readingMode = ReadingMode.PAGE,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
-                title = "",
+                title = "Page $pageNumber",
                 subtitle = ""
             )
         }
         viewModelScope.launch {
-            quranUseCases.getAyahsByPage(pageNumber)
+            quranUseCases.getAyahsByPage(pageNumber, _readerState.value.selectedTranslatorId)
                 .collect { ayahs ->
                     _readerState.update {
                         it.copy(
@@ -389,21 +411,44 @@ class QuranViewModel @Inject constructor(
     private fun search(query: String) {
         _homeState.update { it.copy(searchQuery = query) }
 
-        if (query.isBlank()) {
-            _homeState.update { it.copy(filteredSurahs = filterSurahs(it.surahs, "")) }
-            _searchState.update { QuranSearchUiState() }
-            return
-        }
-
+        // Always update filtered surahs immediately (no debounce needed for filtering)
         _homeState.update { state ->
             state.copy(filteredSurahs = filterSurahs(state.surahs, query))
         }
 
+        if (query.isBlank()) {
+            _searchState.update { QuranSearchUiState() }
+            searchQueryFlow.value = ""
+            return
+        }
+
+        // Mark as searching and trigger debounced search
         _searchState.update { it.copy(query = query, isSearching = true) }
-        viewModelScope.launch {
+        searchQueryFlow.value = query
+    }
+
+    private fun performSearch(query: String) {
+        if (query.isBlank()) {
+            _searchState.update { QuranSearchUiState() }
+            return
+        }
+
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
             quranUseCases.searchQuran(query, _readerState.value.selectedTranslatorId)
                 .collect { results ->
-                    _searchState.update { it.copy(results = results, isSearching = false) }
+                    // Populate surah names and limit results to 50 for performance
+                    val surahs = _homeState.value.surahs
+                    val enrichedResults = results.take(50).map { result ->
+                        if (result.surahName.isEmpty()) {
+                            val surahName = surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
+                                ?: "Surah ${result.ayah.surahNumber}"
+                            result.copy(surahName = surahName)
+                        } else {
+                            result
+                        }
+                    }
+                    _searchState.update { it.copy(results = enrichedResults, isSearching = false) }
                 }
         }
     }

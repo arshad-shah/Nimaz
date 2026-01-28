@@ -78,7 +78,7 @@ fun QuranSettingsScreen(
     // "en.yusufali" - Yusuf Ali (English)
     // Add more from: https://api.alquran.cloud/v1/edition?format=text&type=translation
     val translationOptions = listOf(
-        "Sahih International" to "en.sahih"
+        "Sahih International" to "sahih_international"
     )
 
     // === ADDING NEW ARABIC FONTS ===
@@ -331,14 +331,39 @@ private fun PreviewCard(
         )
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Text(
-                text = "PREVIEW",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 1.sp,
-                fontWeight = FontWeight.Medium
-            )
+            // Header row with verse number badge
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "PREVIEW",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    letterSpacing = 1.sp,
+                    fontWeight = FontWeight.Medium
+                )
+                // Verse number badge (like in reader)
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "1",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+
             Spacer(modifier = Modifier.height(15.dp))
+
+            // Arabic text - matching reader style
             Text(
                 text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0650\u064A\u0645\u0650",
                 style = MaterialTheme.typography.headlineLarge,
@@ -348,24 +373,50 @@ private fun PreviewCard(
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Transliteration - styled like reader
             if (showTransliteration) {
-                Spacer(modifier = Modifier.height(15.dp))
-                Text(
-                    text = "Bismillahir-Rahmanir-Rahim",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
+                ) {
+                    Text(
+                        text = "Bismillahir-Rahmanir-Rahim",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             }
+
+            // Translation - styled like reader
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = "In the name of Allah, the Most Gracious, the Most Merciful",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 24.sp
-                )
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                ) {
+                    Text(
+                        text = "In the name of Allah, the Most Gracious, the Most Merciful",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp,
+                        modifier = Modifier.padding(12.dp)
+                    )
+                }
             }
+
+            // Juz/Page info like in reader
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = "Juz 1 \u2022 Page 1",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.End
+            )
         }
     }
 }

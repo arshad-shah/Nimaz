@@ -374,7 +374,7 @@ class PreferencesDataStore @Inject constructor(
 
     // Quran Settings
     val quranTranslatorId: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "en.sahih"
+        preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "sahih_international"
     }
 
     suspend fun setQuranTranslatorId(translatorId: String) {
@@ -501,7 +501,7 @@ class PreferencesDataStore @Inject constructor(
             longitude = preferences[PreferencesKeys.LONGITUDE] ?: 0.0,
             locationName = preferences[PreferencesKeys.LOCATION_NAME] ?: "",
             prayerNotificationsEnabled = preferences[PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED] ?: true,
-            quranTranslatorId = preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "en.sahih",
+            quranTranslatorId = preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "sahih_international",
             showTranslation = preferences[PreferencesKeys.SHOW_TRANSLATION] ?: true
         )
     }

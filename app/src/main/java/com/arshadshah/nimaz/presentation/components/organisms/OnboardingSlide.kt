@@ -504,7 +504,7 @@ fun WelcomeSlide(
                 Brush.verticalGradient(
                     colors = listOf(
                         MaterialTheme.colorScheme.primary,
-                        MaterialTheme.colorScheme.primary
+                        MaterialTheme.colorScheme.primaryContainer
                     )
                 )
             ),
@@ -518,13 +518,13 @@ fun WelcomeSlide(
                 modifier = Modifier
                     .size(120.dp)
                     .clip(RoundedCornerShape(28.dp))
-                    .background(Color.White.copy(alpha = 0.2f)),
+                    .background(MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Mosque,
                     contentDescription = null,
-                    tint = Color.White,
+                    tint = MaterialTheme.colorScheme.onPrimary,
                     modifier = Modifier.size(64.dp)
                 )
             }
@@ -535,7 +535,7 @@ fun WelcomeSlide(
                 text = appName,
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -543,7 +543,7 @@ fun WelcomeSlide(
             Text(
                 text = tagline,
                 style = MaterialTheme.typography.bodyLarge,
-                color = Color.White.copy(alpha = 0.8f)
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
     }

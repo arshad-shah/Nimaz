@@ -78,15 +78,33 @@ class QuranRepositoryImpl @Inject constructor(
         return quranDao.getAyahById(ayahId)?.toDomain()
     }
 
-    override fun getAyahsByJuz(juzNumber: Int): Flow<List<Ayah>> {
+    override fun getAyahsByJuz(juzNumber: Int, translatorId: String?): Flow<List<Ayah>> {
         return quranDao.getAyahsByJuz(juzNumber).map { entities ->
-            entities.map { it.toDomain() }
+            // Fetch translations if translatorId is provided
+            val translationMap = if (translatorId != null && entities.isNotEmpty()) {
+                val ayahIds = entities.map { it.id }
+                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                    .first()
+                    .associate { it.ayahId to it.text }
+            } else {
+                emptyMap()
+            }
+            entities.map { it.toDomain(translationMap[it.id]) }
         }
     }
 
-    override fun getAyahsByPage(pageNumber: Int): Flow<List<Ayah>> {
+    override fun getAyahsByPage(pageNumber: Int, translatorId: String?): Flow<List<Ayah>> {
         return quranDao.getAyahsByPage(pageNumber).map { entities ->
-            entities.map { it.toDomain() }
+            // Fetch translations if translatorId is provided
+            val translationMap = if (translatorId != null && entities.isNotEmpty()) {
+                val ayahIds = entities.map { it.id }
+                quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                    .first()
+                    .associate { it.ayahId to it.text }
+            } else {
+                emptyMap()
+            }
+            entities.map { it.toDomain(translationMap[it.id]) }
         }
     }
 

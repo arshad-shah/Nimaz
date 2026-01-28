@@ -71,12 +71,12 @@ private val popularReciters = listOf(
     ReciterInfo("sudais", "Abdul Rahman Al-Sudais", "Saudi Arabia", "Murattal"),
     ReciterInfo("abdulbasit", "Abdul Basit Abdul Samad", "Egypt", "Mujawwad"),
     ReciterInfo("maher", "Maher Al Muaiqly", "Saudi Arabia", "Murattal"),
-    ReciterInfo("ghamdi", "Saad Al-Ghamdi", "Saudi Arabia", "Murattal"),
     ReciterInfo("minshawi", "Muhammad Siddiq Al-Minshawi", "Egypt", "Mujawwad"),
-    ReciterInfo("dosari", "Yasser Al-Dosari", "Saudi Arabia", "Murattal"),
     ReciterInfo("hussary", "Mahmoud Khalil Al-Hussary", "Egypt", "Murattal"),
     ReciterInfo("ajamy", "Ahmed Al-Ajamy", "Saudi Arabia", "Murattal"),
-    ReciterInfo("shuraim", "Saud Al-Shuraim", "Saudi Arabia", "Murattal")
+    ReciterInfo("shuraim", "Saud Al-Shuraim", "Saudi Arabia", "Murattal"),
+    ReciterInfo("shaatree", "Abu Bakr Al-Shaatree", "Saudi Arabia", "Murattal"),
+    ReciterInfo("hudhaify", "Ali Al-Hudhaify", "Saudi Arabia", "Murattal")
 )
 
 @OptIn(ExperimentalMaterial3Api::class)

@@ -119,28 +119,31 @@ fun QuranReaderScreen(
         }
     }
 
-    // Track reading position (surah mode only)
+    // Track reading position (all modes: SURAH, JUZ, PAGE)
     val currentAyahIndex by remember {
         derivedStateOf { listState.firstVisibleItemIndex }
     }
 
-    LaunchedEffect(currentAyahIndex) {
-        if (state.readingMode == ReadingMode.SURAH) {
-            val ayahs = state.surahWithAyahs?.ayahs ?: return@LaunchedEffect
-            // Offset for banner + settings bar items
-            val ayahIdx = (currentAyahIndex - 2).coerceIn(0, ayahs.size - 1)
-            if (ayahs.isNotEmpty()) {
-                val ayah = ayahs[ayahIdx]
-                viewModel.onEvent(
-                    QuranEvent.UpdateReadingPosition(
-                        surah = surahNumber ?: ayah.surahNumber,
-                        ayah = ayah.numberInSurah,
-                        page = ayah.page,
-                        juz = ayah.juz
-                    )
-                )
-            }
+    LaunchedEffect(currentAyahIndex, state.readingMode) {
+        // Get ayahs for the current reading mode
+        val ayahs = when (state.readingMode) {
+            ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: return@LaunchedEffect
+            ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
         }
+        if (ayahs.isEmpty()) return@LaunchedEffect
+
+        // Offset for banner item (index 0 is the banner)
+        val ayahIdx = (currentAyahIndex - 1).coerceIn(0, ayahs.size - 1)
+        val ayah = ayahs[ayahIdx]
+
+        viewModel.onEvent(
+            QuranEvent.UpdateReadingPosition(
+                surah = ayah.surahNumber,
+                ayah = ayah.numberInSurah,
+                page = ayah.page,
+                juz = ayah.juz
+            )
+        )
     }
 
     // Auto-scroll to currently playing ayah
@@ -488,36 +491,35 @@ fun QuranReaderScreen(
                 }
             }
 
-            // Compact bottom bar — unified play/audio controls
-            AnimatedVisibility(
-                visible = audioState.isActive,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            ) {
-                CompactBottomBar(
-                    isAudioActive = audioState.isActive,
-                    isPlaying = audioState.isPlaying,
-                    isDownloading = audioState.isDownloading,
-                    audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
-                    progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
-                    onPlayClick = {
-                        if (audioState.isActive) {
-                            viewModel.onEvent(QuranEvent.PauseAudio)
-                        } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
-                            val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
-                            viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
-                        } else if (displayAyahs.isNotEmpty()) {
-                            viewModel.onEvent(
-                                QuranEvent.PlayAyahAudio(
-                                    ayahGlobalId = displayAyahs.first().id,
-                                    surahNumber = displayAyahs.first().surahNumber,
-                                    ayahNumber = displayAyahs.first().ayahNumber
-                                )
+            // Compact bottom bar — unified play/audio controls (always visible)
+            CompactBottomBar(
+                isAudioActive = audioState.isActive,
+                isPlaying = audioState.isPlaying,
+                isDownloading = audioState.isDownloading,
+                audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
+                progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
+                onPlayClick = {
+                    if (audioState.isPlaying) {
+                        viewModel.onEvent(QuranEvent.PauseAudio)
+                    } else if (audioState.isActive) {
+                        // Resume paused audio
+                        viewModel.onEvent(QuranEvent.ResumeAudio)
+                    } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
+                        val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
+                        viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
+                    } else if (displayAyahs.isNotEmpty()) {
+                        viewModel.onEvent(
+                            QuranEvent.PlayAyahAudio(
+                                ayahGlobalId = displayAyahs.first().id,
+                                surahNumber = displayAyahs.first().surahNumber,
+                                ayahNumber = displayAyahs.first().ayahNumber
                             )
-                        }
-                    },
-                    onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
-                )
-            }
+                        )
+                    }
+                },
+                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) },
+                modifier = Modifier.align(Alignment.BottomCenter)
+            )
         }
     }
 }
@@ -1160,7 +1162,7 @@ private fun AyahItem(
 }
 
 // ---------------------------------------------------------------------------
-// Compact Bottom Bar: unified play / audio controls
+// Compact Bottom Bar: unified play / audio controls (always visible)
 // ---------------------------------------------------------------------------
 @Composable
 private fun CompactBottomBar(
@@ -1196,12 +1198,17 @@ private fun CompactBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 16.dp, vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isAudioActive) {
-                    // Show audio info
-                    Column(modifier = Modifier.weight(1f)) {
+                // Left side: audio info or prompt
+                Column(modifier = Modifier.weight(1f)) {
+                    if (isAudioActive) {
+                        Text(
+                            text = "Now Playing",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                         Text(
                             text = audioTitle,
                             style = MaterialTheme.typography.bodySmall,
@@ -1210,9 +1217,13 @@ private fun CompactBottomBar(
                             overflow = TextOverflow.Ellipsis,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                    } else {
+                        Text(
+                            text = "Tap to play audio",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                        )
                     }
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
 
                 // Play/Pause button
@@ -1220,12 +1231,12 @@ private fun CompactBottomBar(
                     shape = CircleShape,
                     color = MaterialTheme.colorScheme.primary,
                     onClick = onPlayClick,
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                         if (isDownloading) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(22.dp),
                                 strokeWidth = 2.dp,
                                 color = MaterialTheme.colorScheme.onPrimary
                             )
@@ -1234,28 +1245,30 @@ private fun CompactBottomBar(
                                 imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                                 contentDescription = if (isPlaying) "Pause" else "Play",
                                 tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(24.dp)
                             )
                         }
                     }
                 }
 
-                // Close button (only when audio active)
+                // Stop button (only when audio active)
                 if (isAudioActive) {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    IconButton(
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
                         onClick = onStopClick,
-                        modifier = Modifier.size(36.dp)
+                        modifier = Modifier.size(40.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = "Stop",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Stop",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     }
-                } else {
-                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
