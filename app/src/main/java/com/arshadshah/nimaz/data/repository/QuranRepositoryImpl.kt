@@ -104,9 +104,25 @@ class QuranRepositoryImpl @Inject constructor(
         return surahFlow.map { surah ->
             if (surah != null) {
                 val surahEntity = quranDao.getSurahByNumber(surahNumber)
-                val ayahs = surahEntity?.let {
-                    quranDao.getAyahsBySurah(it.id).first().map { ayah -> ayah.toDomain() }
+                val ayahEntities = surahEntity?.let {
+                    quranDao.getAyahsBySurah(it.id).first()
                 } ?: emptyList()
+
+                // Fetch translations if translatorId is provided
+                val translationMap = if (translatorId != null && ayahEntities.isNotEmpty()) {
+                    val ayahIds = ayahEntities.map { it.id }
+                    quranDao.getTranslationsForAyahs(ayahIds, translatorId)
+                        .first()
+                        .associate { it.ayahId to it.text }
+                } else {
+                    emptyMap()
+                }
+
+                // Map ayahs with translations
+                val ayahs = ayahEntities.map { ayah ->
+                    ayah.toDomain(translationMap[ayah.id])
+                }
+
                 SurahWithAyahs(surah = surah, ayahs = ayahs)
             } else {
                 null
@@ -275,7 +291,7 @@ class QuranRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun AyahEntity.toDomain(): Ayah {
+    private fun AyahEntity.toDomain(translation: String? = null): Ayah {
         return Ayah(
             id = id,
             surahNumber = surahId,
@@ -288,6 +304,7 @@ class QuranRepositoryImpl @Inject constructor(
             pageNumber = page,
             sajdaType = SajdaType.fromString(sajdaType),
             sajdaNumber = if (sajda > 0) sajda else null,
+            translation = translation,
             transliteration = transliteration
         )
     }

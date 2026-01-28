@@ -1,0 +1,572 @@
+[
+  {
+    "surahNumber": 1,
+    "description": "Al-Fatiha (The Opening) is the most recited surah, serving as the essence of the Quran. It includes praise of Allah, seeking guidance, and supplication for the straight path.",
+    "themes": "Praise,Guidance,Supplication,Mercy,Divine Attributes"
+  },
+  {
+    "surahNumber": 2,
+    "description": "Al-Baqarah (The Cow) is the longest surah, covering fundamental Islamic teachings including faith, law, and guidance. It addresses believers, disbelievers, and hypocrites, establishing rules for worship, family, and society.",
+    "themes": "Faith,Law,Guidance,Stories of Prophets,Social Justice"
+  },
+  {
+    "surahNumber": 3,
+    "description": "Al-Imran (The Family of Imran) discusses the stories of Mary and Jesus, the Battle of Uhud, and principles of faith. It emphasizes unity among believers and steadfastness in trials.",
+    "themes": "Prophets,Unity,Battle of Uhud,Patience,Divine Will"
+  },
+  {
+    "surahNumber": 4,
+    "description": "An-Nisa (The Women) focuses on women's rights, family law, inheritance, and social justice. It establishes guidelines for marriage, orphans, and equitable treatment.",
+    "themes": "Women's Rights,Family Law,Inheritance,Justice,Social Ethics"
+  },
+  {
+    "surahNumber": 5,
+    "description": "Al-Ma'idah (The Table Spread) covers dietary laws, legal rulings, and the covenant with Allah. It includes stories of Jesus' disciples and the table spread from heaven.",
+    "themes": "Dietary Laws,Covenants,Legal Rulings,Jesus,Gratitude"
+  },
+  {
+    "surahNumber": 6,
+    "description": "Al-An'am (The Cattle) emphasizes monotheism and refutes idolatry through arguments about creation and divine signs. It discusses Allah's sovereignty and the consequences of disbelief.",
+    "themes": "Monotheism,Creation,Divine Signs,Idolatry,Accountability"
+  },
+  {
+    "surahNumber": 7,
+    "description": "Al-A'raf (The Heights) narrates the stories of various prophets including Adam, Noah, Moses, and others. It warns against arrogance and emphasizes following divine guidance.",
+    "themes": "Prophets' Stories,Adam,Moses,Guidance,Warning"
+  },
+  {
+    "surahNumber": 8,
+    "description": "Al-Anfal (The Spoils of War) addresses the Battle of Badr, rules of warfare, and distribution of war spoils. It emphasizes reliance on Allah and unity among believers.",
+    "themes": "Battle of Badr,Warfare Ethics,Unity,Divine Help,Victory"
+  },
+  {
+    "surahNumber": 9,
+    "description": "At-Tawbah (The Repentance) discusses treaties, warfare against aggressors, and hypocrisy. It calls for sincere repentance and striving in Allah's cause.",
+    "themes": "Repentance,Warfare,Hypocrisy,Treaties,Striving"
+  },
+  {
+    "surahNumber": 10,
+    "description": "Yunus (Jonah) focuses on the story of Prophet Jonah and his people who repented. It emphasizes Allah's mercy, the reality of revelation, and consequences of denial.",
+    "themes": "Prophet Jonah,Repentance,Mercy,Revelation,Divine Signs"
+  },
+  {
+    "surahNumber": 11,
+    "description": "Hud tells the stories of Noah, Hud, Saleh, Abraham, Lot, and Shu'ayb. It warns against injustice and urges patience in conveying the message.",
+    "themes": "Prophets,Noah,Abraham,Patience,Divine Justice"
+  },
+  {
+    "surahNumber": 12,
+    "description": "Yusuf (Joseph) narrates the complete story of Prophet Joseph from his childhood dreams to becoming a ruler in Egypt. It demonstrates patience, trust in Allah, and eventual triumph.",
+    "themes": "Prophet Joseph,Patience,Dreams,Trials,Divine Plan"
+  },
+  {
+    "surahNumber": 13,
+    "description": "Ar-Ra'd (The Thunder) describes Allah's power through natural phenomena and emphasizes the truth of revelation. It contrasts believers with disbelievers regarding their ultimate fate.",
+    "themes": "Divine Power,Thunder,Revelation,Nature,Afterlife"
+  },
+  {
+    "surahNumber": 14,
+    "description": "Ibrahim (Abraham) recounts Prophet Abraham's supplication and message of monotheism. It warns against ingratitude and highlights Allah's blessings.",
+    "themes": "Prophet Abraham,Monotheism,Gratitude,Blessings,Supplication"
+  },
+  {
+    "surahNumber": 15,
+    "description": "Al-Hijr discusses the destruction of past nations, creation of humanity, and protection of the Quran. It emphasizes Allah's knowledge and power over all things.",
+    "themes": "Past Nations,Creation,Quran Preservation,Divine Knowledge,Warning"
+  },
+  {
+    "surahNumber": 16,
+    "description": "An-Nahl (The Bee) highlights Allah's countless blessings in nature and creation. It encourages gratitude, patience, and following the straight path.",
+    "themes": "Blessings,Nature,Gratitude,Patience,Divine Favors"
+  },
+  {
+    "surahNumber": 17,
+    "description": "Al-Isra (The Night Journey) describes Prophet Muhammad's miraculous journey and contains moral and ethical teachings. It emphasizes worship of Allah alone and respect for parents.",
+    "themes": "Night Journey,Ethics,Worship,Parents,Moral Guidance"
+  },
+  {
+    "surahNumber": 18,
+    "description": "Al-Kahf (The Cave) contains four stories: the People of the Cave, the two gardens, Moses and Khidr, and Dhul-Qarnayn. It teaches lessons about faith, patience, and knowledge.",
+    "themes": "Cave Dwellers,Moses and Khidr,Patience,Knowledge,Trials"
+  },
+  {
+    "surahNumber": 19,
+    "description": "Maryam (Mary) narrates the stories of Mary, Jesus, Zechariah, Abraham, and other prophets. It emphasizes the mercy of Allah and the truth of prophethood.",
+    "themes": "Mary,Jesus,Prophets,Mercy,Monotheism"
+  },
+  {
+    "surahNumber": 20,
+    "description": "Ta-Ha recounts Moses' story from his calling at the burning bush to leading the Israelites. It also mentions Adam's story and emphasizes remembrance of Allah.",
+    "themes": "Prophet Moses,Pharaoh,Remembrance,Patience,Divine Mission"
+  },
+  {
+    "surahNumber": 21,
+    "description": "Al-Anbiya (The Prophets) mentions numerous prophets and their struggles against disbelief. It emphasizes the unity of the prophetic message and accountability on the Day of Judgment.",
+    "themes": "Prophets,Unity of Message,Judgment Day,Patience,Divine Support"
+  },
+  {
+    "surahNumber": 22,
+    "description": "Al-Hajj (The Pilgrimage) discusses the pilgrimage rituals, resurrection, and struggle in Allah's cause. It describes signs of Allah's power and the fate of believers versus disbelievers.",
+    "themes": "Pilgrimage,Resurrection,Struggle,Divine Power,Rituals"
+  },
+  {
+    "surahNumber": 23,
+    "description": "Al-Mu'minun (The Believers) describes the characteristics of successful believers and narrates stories of past prophets. It emphasizes prayer, humility, and moral excellence.",
+    "themes": "Believers' Traits,Prophets,Prayer,Humility,Success"
+  },
+  {
+    "surahNumber": 24,
+    "description": "An-Nur (The Light) establishes laws regarding modesty, slander, and proper conduct. It includes the verse of Light and emphasizes moral purity in society.",
+    "themes": "Modesty,Social Ethics,Slander,Light,Purity"
+  },
+  {
+    "surahNumber": 25,
+    "description": "Al-Furqan (The Criterion) describes the Quran as a criterion between truth and falsehood. It refutes disbelievers' arguments and highlights the mercy of Allah.",
+    "themes": "Quran,Truth,Mercy,Servants of the Most Merciful,Guidance"
+  },
+  {
+    "surahNumber": 26,
+    "description": "Ash-Shu'ara (The Poets) narrates stories of Moses, Abraham, Noah, Hud, Saleh, Lot, and Shu'ayb confronting their people. It emphasizes the consistent message of all prophets.",
+    "themes": "Prophets,Moses,Abraham,Rejection,Divine Message"
+  },
+  {
+    "surahNumber": 27,
+    "description": "An-Naml (The Ant) tells stories of Solomon, the Queen of Sheba, and other prophets. It highlights Allah's signs in creation and the wisdom He grants to His servants.",
+    "themes": "Prophet Solomon,Queen of Sheba,Wisdom,Divine Signs,Gratitude"
+  },
+  {
+    "surahNumber": 28,
+    "description": "Al-Qasas (The Stories) provides detailed accounts of Moses' life from infancy through prophethood. It discusses divine wisdom in apparent difficulties and ultimate triumph of truth.",
+    "themes": "Moses,Pharaoh,Divine Wisdom,Trials,Truth"
+  },
+  {
+    "surahNumber": 29,
+    "description": "Al-Ankabut (The Spider) uses the spider's weak web as a metaphor for false reliance on anything besides Allah. It emphasizes trials as a test of faith and mentions various prophets.",
+    "themes": "Trials,Faith,Prophets,False Gods,Patience"
+  },
+  {
+    "surahNumber": 30,
+    "description": "Ar-Rum (The Romans) prophesies the Romans' victory and discusses signs of Allah in creation. It emphasizes resurrection and the natural disposition toward monotheism.",
+    "themes": "Romans,Divine Signs,Resurrection,Creation,Natural Faith"
+  },
+  {
+    "surahNumber": 31,
+    "description": "Luqman recounts the wise advice of Luqman to his son, including monotheism, gratitude, and good conduct. It emphasizes wisdom and moral guidance.",
+    "themes": "Wisdom,Parental Advice,Gratitude,Monotheism,Moral Conduct"
+  },
+  {
+    "surahNumber": 32,
+    "description": "As-Sajdah (The Prostration) discusses creation, revelation, and resurrection. It emphasizes the reality of the hereafter and prostration to Allah alone.",
+    "themes": "Creation,Prostration,Resurrection,Revelation,Hereafter"
+  },
+  {
+    "surahNumber": 33,
+    "description": "Al-Ahzab (The Combined Forces) addresses the Battle of the Trench, rules for the Prophet's household, and social conduct. It establishes important Islamic laws and etiquette.",
+    "themes": "Battle of the Trench,Prophet's Wives,Social Conduct,Hijab,Ethics"
+  },
+  {
+    "surahNumber": 34,
+    "description": "Saba (Sheba) discusses the kingdom of Sheba, David, Solomon, and Allah's signs in creation. It warns against arrogance and emphasizes gratitude for blessings.",
+    "themes": "Sheba,David,Solomon,Gratitude,Divine Signs"
+  },
+  {
+    "surahNumber": 35,
+    "description": "Fatir (The Originator) emphasizes Allah as the creator and sustainer of all. It contrasts believers with disbelievers and highlights Satan as an enemy.",
+    "themes": "Creation,Divine Attributes,Satan,Believers vs Disbelievers,Sustenance"
+  },
+  {
+    "surahNumber": 36,
+    "description": "Ya-Sin discusses resurrection, divine signs, and the story of a town that rejected messengers. It emphasizes the Quran's role as a warning and reminder.",
+    "themes": "Resurrection,Divine Signs,Messengers,Warning,Hereafter"
+  },
+  {
+    "surahNumber": 37,
+    "description": "As-Saffat (Those Ranged in Ranks) describes angels praising Allah and mentions stories of Noah, Abraham, Moses, and Jonah. It emphasizes monotheism and the reality of judgment.",
+    "themes": "Angels,Prophets,Abraham,Monotheism,Judgment"
+  },
+  {
+    "surahNumber": 38,
+    "description": "Sad narrates stories of David, Solomon, and Job, highlighting patience and repentance. It discusses Satan's arrogance and the creation of Adam.",
+    "themes": "David,Solomon,Job,Patience,Satan"
+  },
+  {
+    "surahNumber": 39,
+    "description": "Az-Zumar (The Groups) emphasizes sincere worship of Allah alone and describes the Day of Judgment when people will be grouped. It highlights repentance and Allah's mercy.",
+    "themes": "Sincere Worship,Repentance,Judgment Day,Mercy,Monotheism"
+  },
+  {
+    "surahNumber": 40,
+    "description": "Ghafir (The Forgiver) describes Allah's forgiveness and power, and the story of Moses versus Pharaoh. It mentions the believer from Pharaoh's family who defended Moses.",
+    "themes": "Forgiveness,Moses,Pharaoh,Divine Power,Faith"
+  },
+  {
+    "surahNumber": 41,
+    "description": "Fussilat (Explained in Detail) discusses the Quran's clarity, creation of heavens and earth, and warnings to past nations. It emphasizes Allah's signs and the response of the righteous.",
+    "themes": "Quran,Creation,Divine Signs,Warning,Righteous"
+  },
+  {
+    "surahNumber": 42,
+    "description": "Ash-Shura (The Consultation) emphasizes consultation in affairs, unity of prophetic message, and Allah's attributes. It discusses revelation and the balance between hope and fear.",
+    "themes": "Consultation,Unity,Revelation,Divine Attributes,Balance"
+  },
+  {
+    "surahNumber": 43,
+    "description": "Az-Zukhruf (The Gold Adornments) warns against being deceived by worldly luxuries and refutes false beliefs about Allah. It mentions Abraham's rejection of idolatry and Jesus' true nature.",
+    "themes": "Worldly Luxuries,Abraham,Jesus,Idolatry,Truth"
+  },
+  {
+    "surahNumber": 44,
+    "description": "Ad-Dukhan (The Smoke) describes the smoke as a sign of the Day of Judgment and mentions Pharaoh's destruction. It emphasizes the Quran as a blessed revelation.",
+    "themes": "Smoke,Judgment Day,Pharaoh,Quran,Divine Signs"
+  },
+  {
+    "surahNumber": 45,
+    "description": "Al-Jathiyah (The Kneeling) describes how all nations will kneel on Judgment Day and emphasizes Allah's signs in creation. It warns against following desires and denying resurrection.",
+    "themes": "Judgment Day,Creation,Divine Signs,Desires,Resurrection"
+  },
+  {
+    "surahNumber": 46,
+    "description": "Al-Ahqaf (The Wind-Curved Sand Dunes) narrates the destruction of the people of Ad and emphasizes belief in resurrection. It mentions the jinn who heard the Quran and believed.",
+    "themes": "People of Ad,Jinn,Resurrection,Quran,Divine Punishment"
+  },
+  {
+    "surahNumber": 47,
+    "description": "Muhammad discusses rules of warfare, hypocrisy, and the characteristics of believers versus disbelievers. It emphasizes striving in Allah's cause and sincerity.",
+    "themes": "Warfare,Hypocrisy,Believers,Striving,Sincerity"
+  },
+  {
+    "surahNumber": 48,
+    "description": "Al-Fath (The Victory) celebrates the Treaty of Hudaybiyyah as a clear victory and prophesies the conquest of Makkah. It praises the companions' loyalty and faith.",
+    "themes": "Treaty of Hudaybiyyah,Victory,Companions,Loyalty,Conquest"
+  },
+  {
+    "surahNumber": 49,
+    "description": "Al-Hujurat (The Rooms) establishes etiquette in dealing with the Prophet and fellow Muslims. It emphasizes unity, avoiding suspicion, and equality of all people.",
+    "themes": "Etiquette,Unity,Equality,Social Conduct,Brotherhood"
+  },
+  {
+    "surahNumber": 50,
+    "description": "Qaf discusses resurrection, creation, and the Day of Judgment using the letter Qaf. It describes the recording angels and emphasizes reflection on divine signs.",
+    "themes": "Resurrection,Creation,Judgment Day,Angels,Reflection"
+  },
+  {
+    "surahNumber": 51,
+    "description": "Adh-Dhariyat (The Scattering Winds) swears by various natural phenomena and emphasizes the reality of resurrection. It mentions stories of Abraham and other prophets.",
+    "themes": "Natural Phenomena,Resurrection,Abraham,Divine Promise,Creation"
+  },
+  {
+    "surahNumber": 52,
+    "description": "At-Tur (The Mount) swears by Mount Sinai and describes the inevitable punishment for disbelievers. It details Paradise and encourages patience in worship.",
+    "themes": "Mount Sinai,Judgment,Paradise,Patience,Worship"
+  },
+  {
+    "surahNumber": 53,
+    "description": "An-Najm (The Star) describes the Prophet's vision, refutes idol worship, and emphasizes that no soul bears another's burden. It discusses divine knowledge and power.",
+    "themes": "Prophet's Vision,Idolatry,Responsibility,Divine Knowledge,Mi'raj"
+  },
+  {
+    "surahNumber": 54,
+    "description": "Al-Qamar (The Moon) describes the splitting of the moon as a sign and narrates the destruction of past nations. It emphasizes the Quran as an easy reminder.",
+    "themes": "Moon Splitting,Past Nations,Warning,Quran,Divine Signs"
+  },
+  {
+    "surahNumber": 55,
+    "description": "Ar-Rahman (The Most Merciful) repeatedly asks which of Allah's favors we would deny while describing His blessings. It describes Paradise and Hell in vivid detail.",
+    "themes": "Mercy,Blessings,Paradise,Hell,Gratitude"
+  },
+  {
+    "surahNumber": 56,
+    "description": "Al-Waqi'ah (The Inevitable Event) describes three groups on Judgment Day and their respective fates. It emphasizes the Quran's honor and the reality of resurrection.",
+    "themes": "Judgment Day,Three Groups,Paradise,Hell,Resurrection"
+  },
+  {
+    "surahNumber": 57,
+    "description": "Al-Hadid (The Iron) emphasizes Allah's power, the fleeting nature of worldly life, and the importance of charity. It mentions iron and encourages striving for the hereafter.",
+    "themes": "Divine Power,Worldly Life,Charity,Iron,Striving"
+  },
+  {
+    "surahNumber": 58,
+    "description": "Al-Mujadilah (The Pleading Woman) addresses the case of a woman pleading about her husband's unjust oath. It discusses secret consultations and establishes rulings on oaths and proper conduct.",
+    "themes": "Women's Rights,Oaths,Secret Consultations,Justice,Social Conduct"
+  },
+  {
+    "surahNumber": 59,
+    "description": "Al-Hashr (The Exile) discusses the exile of the Jewish tribe Banu Nadir and rules of war spoils. It emphasizes Allah's beautiful names and the Quran's impact.",
+    "themes": "Exile,War Spoils,Divine Names,Quran,Unity"
+  },
+  {
+    "surahNumber": 60,
+    "description": "Al-Mumtahanah (The Examined One) establishes rules for dealing with disbelievers and accepting women who migrate. It emphasizes testing the faith of female emigrants.",
+    "themes": "Loyalty,Migration,Women,Testing Faith,Treaties"
+  },
+  {
+    "surahNumber": 61,
+    "description": "As-Saff (The Ranks) emphasizes unity and standing in firm ranks for Allah's cause. It mentions Jesus' prophecy of Prophet Muhammad and calls to sincere striving.",
+    "themes": "Unity,Striving,Jesus,Prophecy,Sincerity"
+  },
+  {
+    "surahNumber": 62,
+    "description": "Al-Jumu'ah (The Friday) emphasizes the importance of Friday prayer and warns against being distracted by worldly affairs. It describes the purpose of the Prophet's mission.",
+    "themes": "Friday Prayer,Worship,Worldly Distractions,Prophet's Mission,Remembrance"
+  },
+  {
+    "surahNumber": 63,
+    "description": "Al-Munafiqun (The Hypocrites) exposes the characteristics and dangers of hypocrites. It warns believers against being deceived by appearances and encourages spending in charity.",
+    "themes": "Hypocrisy,Warning,Charity,Deception,Sincerity"
+  },
+  {
+    "surahNumber": 64,
+    "description": "At-Taghabun (The Mutual Loss and Gain) describes Judgment Day as a day of mutual loss and gain. It emphasizes trials in family and wealth, and encourages forgiveness and charity.",
+    "themes": "Judgment Day,Trials,Family,Charity,Forgiveness"
+  },
+  {
+    "surahNumber": 65,
+    "description": "At-Talaq (The Divorce) establishes detailed rules for divorce, waiting periods, and maintenance. It emphasizes taqwa (God-consciousness) and trust in Allah.",
+    "themes": "Divorce,Waiting Period,Maintenance,Taqwa,Divine Provision"
+  },
+  {
+    "surahNumber": 66,
+    "description": "At-Tahrim (The Prohibition) addresses an incident in the Prophet's household and calls for repentance. It provides examples of disbelieving and believing women.",
+    "themes": "Repentance,Prophet's Wives,Examples,Faith,Sincerity"
+  },
+  {
+    "surahNumber": 67,
+    "description": "Al-Mulk (The Sovereignty) emphasizes Allah's dominion over all and describes creation's perfection. It warns of Hell's punishment and encourages reflection on divine signs.",
+    "themes": "Divine Sovereignty,Creation,Hell,Reflection,Divine Signs"
+  },
+  {
+    "surahNumber": 68,
+    "description": "Al-Qalam (The Pen) defends the Prophet against accusations and narrates the story of the owners of the garden. It emphasizes patience and moral excellence.",
+    "themes": "Prophet's Character,Patience,Garden Owners,Pen,Moral Excellence"
+  },
+  {
+    "surahNumber": 69,
+    "description": "Al-Haqqah (The Inevitable Reality) describes the Day of Judgment and the destruction of past nations. It emphasizes the Quran's truth and the Prophet's honesty.",
+    "themes": "Judgment Day,Past Nations,Quran's Truth,Accountability,Certainty"
+  },
+  {
+    "surahNumber": 70,
+    "description": "Al-Ma'arij (The Ascending Stairways) describes the Day of Judgment and characteristics of successful believers. It emphasizes prayer, patience, and moral conduct.",
+    "themes": "Judgment Day,Prayer,Patience,Moral Conduct,Believers' Traits"
+  },
+  {
+    "surahNumber": 71,
+    "description": "Nuh (Noah) narrates Prophet Noah's persistent call to his people over 950 years. It emphasizes patience in da'wah and the consequences of persistent rejection.",
+    "themes": "Prophet Noah,Patience,Da'wah,Rejection,Divine Punishment"
+  },
+  {
+    "surahNumber": 72,
+    "description": "Al-Jinn describes how a group of jinn listened to the Quran and believed. It discusses the jinn's testimony and their diversity in belief.",
+    "themes": "Jinn,Quran,Testimony,Belief,Divine Message"
+  },
+  {
+    "surahNumber": 73,
+    "description": "Al-Muzzammil (The Enshrouded One) commands the Prophet to pray at night and recite the Quran. It later eases the command and emphasizes charity and good deeds.",
+    "themes": "Night Prayer,Quran Recitation,Worship,Charity,Ease"
+  },
+  {
+    "surahNumber": 74,
+    "description": "Al-Muddaththir (The Cloaked One) commands the Prophet to arise and warn, and describes Hell and its guardians. It emphasizes human stubbornness and divine power.",
+    "themes": "Warning,Hell,Divine Power,Stubbornness,Resurrection"
+  },
+  {
+    "surahNumber": 75,
+    "description": "Al-Qiyamah (The Resurrection) emphasizes the certainty of resurrection and describes the Day of Judgment. It warns against being distracted by worldly life.",
+    "themes": "Resurrection,Judgment Day,Certainty,Accountability,Human Nature"
+  },
+  {
+    "surahNumber": 76,
+    "description": "Al-Insan (The Human) describes the creation of humans and rewards of Paradise for the righteous. It emphasizes patience, worship, and fulfilling vows.",
+    "themes": "Human Creation,Paradise,Patience,Worship,Righteousness"
+  },
+  {
+    "surahNumber": 77,
+    "description": "Al-Mursalat (The Emissaries) swears by various phenomena and repeatedly warns of Judgment Day. It describes the fate of deniers and the rewards of the righteous.",
+    "themes": "Judgment Day,Warning,Righteous,Deniers,Divine Signs"
+  },
+  {
+    "surahNumber": 78,
+    "description": "An-Naba (The Great News) describes resurrection and Judgment Day in detail. It emphasizes divine signs in creation and the reality of accountability.",
+    "themes": "Resurrection,Judgment Day,Creation,Accountability,Divine Signs"
+  },
+  {
+    "surahNumber": 79,
+    "description": "An-Nazi'at (Those Who Pull Out) swears by angels and describes the Day of Judgment. It mentions Moses' story with Pharaoh and emphasizes resurrection.",
+    "themes": "Angels,Judgment Day,Moses,Pharaoh,Resurrection"
+  },
+  {
+    "surahNumber": 80,
+    "description": "Abasa (He Frowned) recounts when the Prophet frowned at a blind man and teaches prioritizing the sincere seeker. It describes human ingratitude and resurrection.",
+    "themes": "Prophet's Lesson,Equality,Human Ingratitude,Resurrection,Priorities"
+  },
+  {
+    "surahNumber": 81,
+    "description": "At-Takwir (The Overthrowing) describes cosmic events of Judgment Day and affirms the Quran's revelation through Gabriel. It emphasizes the inevitability of accountability.",
+    "themes": "Judgment Day,Cosmic Events,Gabriel,Quran,Accountability"
+  },
+  {
+    "surahNumber": 82,
+    "description": "Al-Infitar (The Cleaving) describes the splitting of the sky on Judgment Day and the recording angels. It warns of accountability and divine justice.",
+    "themes": "Judgment Day,Recording Angels,Accountability,Divine Justice,Cosmic Events"
+  },
+  {
+    "surahNumber": 83,
+    "description": "Al-Mutaffifin (The Defrauders) condemns cheating in weights and measures and describes the records of the wicked and righteous. It warns against mocking believers.",
+    "themes": "Honesty in Trade,Accountability,Records,Mockery,Justice"
+  },
+  {
+    "surahNumber": 84,
+    "description": "Al-Inshiqaq (The Splitting Open) describes the splitting of the heavens on Judgment Day. It emphasizes that humans are striving toward their Lord and will meet Him.",
+    "themes": "Judgment Day,Striving,Meeting Allah,Accountability,Cosmic Events"
+  },
+  {
+    "surahNumber": 85,
+    "description": "Al-Buruj (The Constellations) narrates the story of believers burned in ditches and emphasizes Allah's protection of the Quran. It warns oppressors of divine punishment.",
+    "themes": "Believers' Trials,Divine Protection,Quran Preservation,Oppression,Punishment"
+  },
+  {
+    "surahNumber": 86,
+    "description": "At-Tariq (The Night Comer) swears by the night star and describes human creation. It emphasizes that every soul has a protector and the Quran's decisive nature.",
+    "themes": "Night Star,Human Creation,Protection,Quran,Divine Power"
+  },
+  {
+    "surahNumber": 87,
+    "description": "Al-A'la (The Most High) glorifies Allah and emphasizes ease in religion. It mentions Abraham and Moses, and stresses preference for the eternal life over the worldly.",
+    "themes": "Divine Glorification,Ease in Religion,Prophets,Hereafter,Remembrance"
+  },
+  {
+    "surahNumber": 88,
+    "description": "Al-Ghashiyah (The Overwhelming Event) describes the contrasting conditions of people on Judgment Day. It encourages reflection on divine signs in creation.",
+    "themes": "Judgment Day,Paradise,Hell,Divine Signs,Reflection"
+  },
+  {
+    "surahNumber": 89,
+    "description": "Al-Fajr (The Dawn) swears by dawn and describes the destruction of past nations. It discusses human nature regarding wealth and emphasizes accountability.",
+    "themes": "Dawn,Past Nations,Wealth,Accountability,Human Nature"
+  },
+  {
+    "surahNumber": 90,
+    "description": "Al-Balad (The City) swears by Makkah and describes the difficult path to righteousness. It emphasizes freeing slaves, feeding the poor, and choosing the right path.",
+    "themes": "Makkah,Righteousness,Charity,Difficult Path,Social Justice"
+  },
+  {
+    "surahNumber": 91,
+    "description": "Ash-Shams (The Sun) swears by celestial and earthly phenomena and discusses the soul's potential for good and evil. It mentions the people of Thamud and their destruction.",
+    "themes": "Sun,Soul,Good and Evil,Thamud,Self-Purification"
+  },
+  {
+    "surahNumber": 92,
+    "description": "Al-Layl (The Night) contrasts the night and day, and describes different paths for the generous and the miserly. It emphasizes accountability and divine guidance.",
+    "themes": "Night,Generosity,Miserliness,Accountability,Contrasts"
+  },
+  {
+    "surahNumber": 93,
+    "description": "Ad-Duha (The Morning Brightness) consoles the Prophet, reminding him of Allah's past favors. It commands kindness to orphans and beggars, and proclaiming Allah's blessings.",
+    "themes": "Consolation,Divine Favors,Orphans,Gratitude,Kindness"
+  },
+  {
+    "surahNumber": 94,
+    "description": "Ash-Sharh (The Relief) reassures the Prophet that with hardship comes ease. It mentions the opening of his chest and elevation of his mention.",
+    "themes": "Relief,Hardship and Ease,Prophet's Status,Comfort,Hope"
+  },
+  {
+    "surahNumber": 95,
+    "description": "At-Tin (The Fig) swears by sacred places and discusses human creation in the best form. It emphasizes the consequences of straying from righteousness.",
+    "themes": "Human Creation,Sacred Places,Righteousness,Deeds,Best Form"
+  },
+  {
+    "surahNumber": 96,
+    "description": "Al-Alaq (The Clot) contains the first revelation to the Prophet, commanding him to read. It condemns arrogance and emphasizes seeking knowledge and prostration.",
+    "themes": "First Revelation,Knowledge,Reading,Arrogance,Prostration"
+  },
+  {
+    "surahNumber": 97,
+    "description": "Al-Qadr (The Power) describes the Night of Decree as better than a thousand months. It emphasizes peace and the descent of angels during this blessed night.",
+    "themes": "Laylat al-Qadr,Angels,Blessings,Peace,Worship"
+  },
+  {
+    "surahNumber": 98,
+    "description": "Al-Bayyinah (The Clear Evidence) describes the Prophet as clear evidence and discusses the People of the Book. It emphasizes sincere worship and describes the fate of believers and disbelievers.",
+    "themes": "Clear Evidence,People of the Book,Sincere Worship,Fate,Truth"
+  },
+  {
+    "surahNumber": 99,
+    "description": "Az-Zalzalah (The Earthquake) describes the earth's violent shaking on Judgment Day. It emphasizes that even the smallest deeds will be accounted for.",
+    "themes": "Earthquake,Judgment Day,Accountability,Small Deeds,Records"
+  },
+  {
+    "surahNumber": 100,
+    "description": "Al-Adiyat (The Charging Horses) swears by war horses and describes human ingratitude. It warns of resurrection and exposure of secrets.",
+    "themes": "War Horses,Ingratitude,Resurrection,Accountability,Human Nature"
+  },
+  {
+    "surahNumber": 101,
+    "description": "Al-Qari'ah (The Striking Calamity) describes Judgment Day as a striking calamity when deeds are weighed. It contrasts the fate of those with heavy versus light scales.",
+    "themes": "Judgment Day,Deeds Weighed,Calamity,Fate,Balance"
+  },
+  {
+    "surahNumber": 102,
+    "description": "At-Takathur (The Rivalry in Worldly Increase) warns against being distracted by competition for worldly gains. It emphasizes the certainty of death and accountability.",
+    "themes": "Worldly Competition,Distraction,Death,Accountability,Hell"
+  },
+  {
+    "surahNumber": 103,
+    "description": "Al-Asr (The Time) states that humans are in loss except those who believe, do good deeds, and counsel each other in truth and patience. It emphasizes time's value.",
+    "themes": "Time,Loss,Faith,Good Deeds,Mutual Counsel"
+  },
+  {
+    "surahNumber": 104,
+    "description": "Al-Humazah (The Slanderer) condemns those who slander, backbite, and hoard wealth. It describes the Crushing Fire as punishment for such behavior.",
+    "themes": "Slander,Backbiting,Wealth,Punishment,Hell"
+  },
+  {
+    "surahNumber": 105,
+    "description": "Al-Fil (The Elephant) narrates how Allah protected the Ka'bah from Abraha's army with the elephant. It demonstrates divine power and protection of the sacred house.",
+    "themes": "Elephant Army,Divine Protection,Ka'bah,Miracle,Power"
+  },
+  {
+    "surahNumber": 106,
+    "description": "Quraysh mentions the Quraysh tribe's trading journeys and calls them to worship Allah who provided them security and sustenance. It emphasizes gratitude for blessings.",
+    "themes": "Quraysh,Trade,Security,Sustenance,Gratitude"
+  },
+  {
+    "surahNumber": 107,
+    "description": "Al-Ma'un (The Small Kindnesses) condemns those who deny the Judgment, mistreat orphans, and neglect prayer while being ostentatious. It emphasizes practical faith and helping others.",
+    "themes": "Judgment Denial,Orphans,Prayer,Hypocrisy,Small Kindnesses"
+  },
+  {
+    "surahNumber": 108,
+    "description": "Al-Kawthar (The Abundance) promises the Prophet abundant good and commands prayer and sacrifice. It states that his enemies will be cut off from posterity.",
+    "themes": "Abundance,Prayer,Sacrifice,Prophet's Enemies,Divine Gift"
+  },
+  {
+    "surahNumber": 109,
+    "description": "Al-Kafirun (The Disbelievers) establishes clear distinction between the worship of believers and disbelievers. It emphasizes religious freedom and mutual respect while maintaining distinct beliefs.",
+    "themes": "Disbelievers,Worship,Distinction,Religious Freedom,Clarity"
+  },
+  {
+    "surahNumber": 110,
+    "description": "An-Nasr (The Divine Support) announces the coming victory and people entering Islam in multitudes. It commands glorification of Allah and seeking forgiveness.",
+    "themes": "Victory,Islam's Spread,Glorification,Forgiveness,Prophet's Mission"
+  },
+  {
+    "surahNumber": 111,
+    "description": "Al-Masad (The Palm Fiber) condemns Abu Lahab and his wife for their hostility to Islam. It declares their punishment in the Fire with a rope of palm fiber around her neck.",
+    "themes": "Abu Lahab,Punishment,Enemies of Islam,Fire,Divine Justice"
+  },
+  {
+    "surahNumber": 112,
+    "description": "Al-Ikhlas (The Sincerity) defines pure monotheism, declaring Allah as One, Eternal, not begetting nor begotten. It is considered equivalent to one-third of the Quran in meaning.",
+    "themes": "Monotheism,Tawhid,Divine Attributes,Oneness,Purity of Faith"
+  },
+  {
+    "surahNumber": 113,
+    "description": "Al-Falaq (The Daybreak) is a prayer seeking refuge in Allah from the evil of creation, darkness, sorcery, and envy. It emphasizes divine protection.",
+    "themes": "Seeking Refuge,Protection,Evil,Sorcery,Envy"
+  },
+  {
+    "surahNumber": 114,
+    "description": "An-Nas (Mankind) is a prayer seeking refuge in Allah from the whisperings of Satan and evil suggestions. It emphasizes Allah as Lord, King, and God of mankind.",
+    "themes": "Seeking Refuge,Satan,Whisperings,Divine Lordship,Protection"
+  }
+]

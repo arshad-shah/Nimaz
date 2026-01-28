@@ -38,7 +38,10 @@
       "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")",
       "Bash(findstr:*)",
       "Bash(.gradlew assembleDebug:*)",
-      "Bash(./gradlew.bat assembleDebug:*)"
+      "Bash(./gradlew.bat assembleDebug:*)",
+      "Bash(python parse_surah_info.py:*)",
+      "Bash(python download_transliteration.py:*)",
+      "Bash(python:*)"
     ]
   }
 }
