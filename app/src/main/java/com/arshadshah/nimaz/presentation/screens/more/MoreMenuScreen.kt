@@ -81,7 +81,6 @@ fun MoreMenuScreen(
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToQadaPrayers: () -> Unit,
-    onNavigateToMakeupFasts: () -> Unit,
     onDeleteAllData: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -143,13 +142,6 @@ fun MoreMenuScreen(
                         subtitle = "Fasting tracker and schedule",
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Makeup Fasts",
-                        subtitle = "Track missed fasts",
-                        icon = Icons.Default.Restore,
-                        onClick = onNavigateToMakeupFasts
                     )
                     MenuDivider()
                     MenuItem(

@@ -21,19 +21,58 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.first
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import kotlin.time.Clock
+import kotlin.time.Duration
+
+// Data classes for widget preview
+private data class WidgetPreviewData(
+    val nextPrayerName: String = "—",
+    val nextPrayerTime: String = "—",
+    val countdown: String = "—",
+    val prayers: List<PrayerPreview> = emptyList(),
+    val hijriDate: String = "—",
+    val hijriDay: Int = 1,
+    val hijriMonth: String = "—",
+    val hijriYear: Int = 1446,
+    val gregorianDate: String = "—",
+    val dayOfWeek: String = "—",
+    val locationName: String = "—"
+)
+
+private data class PrayerPreview(
+    val name: String,
+    val time: String,
+    val isNext: Boolean = false,
+    val isPassed: Boolean = false
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,6 +81,18 @@ fun WidgetsScreen(
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val widgetState by viewModel.widgetState.collectAsState()
+    val context = LocalContext.current
+
+    // State for dynamic widget preview data
+    var previewData by remember { mutableStateOf(WidgetPreviewData()) }
+
+    // Load real prayer times data
+    LaunchedEffect(Unit) {
+        while (true) {
+            previewData = loadWidgetPreviewData(context)
+            delay(1000) // Update every second for countdown
+        }
+    }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -69,41 +120,53 @@ fun WidgetsScreen(
                 )
             }
 
-            // Small Widget (2x2)
+            // Next Prayer Widget (2x2)
             item {
                 WidgetSection(
-                    title = "Small Widget (2\u00D72)",
+                    title = "Next Prayer Widget (2\u00D72)",
                     infoName = "Next Prayer",
-                    infoSize = "2\u00D72 \u2022 Shows countdown",
-                    infoEmoji = "\u2B1C",
-                    preview = { SmallWidgetPreview() }
+                    infoSize = "2\u00D72 \u2022 Shows countdown to next prayer",
+                    infoEmoji = "\u23F0",
+                    preview = { NextPrayerWidgetPreview(previewData) }
                 )
             }
 
-            // Medium Widget (4x2)
+            // Prayer Times Widget (4x2)
             item {
                 WidgetSection(
-                    title = "Medium Widget (4\u00D72)",
+                    title = "Prayer Times Widget (4\u00D72)",
                     infoName = "Prayer Times",
                     infoSize = "4\u00D72 \u2022 All prayers + countdown",
                     infoEmoji = "\uD83D\uDCCB",
-                    preview = { MediumWidgetPreview() }
+                    preview = { PrayerTimesWidgetPreview(previewData) }
                 )
             }
 
-            // Large Widget (4x4)
+            // Hijri Date Widget (2x2)
             item {
                 WidgetSection(
-                    title = "Large Widget (4\u00D74)",
-                    infoName = "Full Prayer Dashboard",
-                    infoSize = "4\u00D74 \u2022 Complete overview",
-                    infoEmoji = "\uD83D\uDCF1",
-                    preview = { LargeWidgetPreview() }
+                    title = "Hijri Date Widget (2\u00D72)",
+                    infoName = "Hijri Date",
+                    infoSize = "2\u00D72 \u2022 Islamic calendar date",
+                    infoEmoji = "\uD83D\uDCC5",
+                    preview = { HijriDateWidgetPreview(previewData) }
+                )
+            }
+
+            // Prayer Tracker Widget (4x1)
+            item {
+                WidgetSection(
+                    title = "Prayer Tracker Widget (4\u00D71)",
+                    infoName = "Prayer Tracker",
+                    infoSize = "4\u00D71 \u2022 Tap to mark prayers completed",
+                    infoEmoji = "\u2705",
+                    preview = { PrayerTrackerWidgetPreview() }
                 )
             }
 
             // How to Add Widgets
             item {
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "How to Add Widgets",
                     style = MaterialTheme.typography.titleMedium,
@@ -203,131 +266,140 @@ private fun WidgetSection(
 }
 
 @Composable
-private fun SmallWidgetPreview(modifier: Modifier = Modifier) {
+private fun NextPrayerWidgetPreview(
+    data: WidgetPreviewData,
+    modifier: Modifier = Modifier
+) {
     Box(
         modifier = modifier
             .size(160.dp)
             .background(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(20.dp)
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
             )
-            .padding(15.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column {
+            Text(
+                text = "Next Prayer",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = data.nextPrayerName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = data.nextPrayerTime,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .background(
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            ) {
                 Text(
-                    text = "Next Prayer",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = "Maghrib",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                Text(
-                    text = "6:18 PM \u2022 2h 15m",
+                    text = "in ${data.countdown}",
                     style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary
                 )
             }
-            Text(
-                text = "Dublin, Ireland",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
         }
     }
 }
 
 @Composable
-private fun MediumWidgetPreview(modifier: Modifier = Modifier) {
-    Row(
+private fun PrayerTimesWidgetPreview(
+    data: WidgetPreviewData,
+    modifier: Modifier = Modifier
+) {
+    Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(160.dp)
+            .height(100.dp)
             .background(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(20.dp)
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
             )
-            .padding(15.dp),
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+            .padding(12.dp)
     ) {
-        // Left side
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Column {
-                Text(
-                    text = "Next Prayer",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                )
-                Text(
-                    text = "Maghrib",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "6:18 PM",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Text(
-                text = "2h 15m remaining",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-
-        // Right side - prayer list
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            val prayers = listOf(
-                "Fajr" to "5:23",
-                "Dhuhr" to "1:15",
-                "Asr" to "4:02",
-                "Maghrib" to "6:18",
-                "Isha" to "8:45"
-            )
-            prayers.forEachIndexed { index, (name, time) ->
-                val isActive = index == 3 // Maghrib
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(
-                            color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                            shape = RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 10.dp, vertical = 6.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
+                        text = data.locationName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
+                    Text(
+                        text = "${data.hijriDay} ${data.hijriMonth}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+                Column(horizontalAlignment = Alignment.End) {
+                    Text(
+                        text = data.nextPrayerName,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text(
+                        text = "in ${data.countdown}",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Prayer times row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                data.prayers.filter { it.name != "Rise" }.forEach { prayer ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = prayer.name,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (prayer.isPassed)
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        Text(
+                            text = prayer.time,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = if (prayer.isPassed)
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            else if (prayer.isNext)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.onSurface
+                        )
+                    }
                 }
             }
         }
@@ -335,116 +407,132 @@ private fun MediumWidgetPreview(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun LargeWidgetPreview(modifier: Modifier = Modifier) {
-    Column(
+private fun HijriDateWidgetPreview(
+    data: WidgetPreviewData,
+    modifier: Modifier = Modifier
+) {
+    Box(
         modifier = modifier
-            .fillMaxWidth()
+            .size(160.dp)
             .background(
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-                shape = RoundedCornerShape(20.dp)
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
             )
-            .padding(20.dp)
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        // Header row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Saturday, Jan 25",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
-            Text(
-                text = "\u0661\u0668 \u0631\u062C\u0628 \u0661\u0664\u0664\u0667",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        // Countdown center
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 15.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Next Prayer",
-                style = MaterialTheme.typography.labelMedium,
+                text = data.dayOfWeek,
+                style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
-            Spacer(modifier = Modifier.height(5.dp))
+            Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Maghrib",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "6:18 PM",
+                text = data.hijriDay.toString(),
                 style = MaterialTheme.typography.displaySmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(5.dp))
-            Text(
-                text = "2 hours 15 minutes remaining",
-                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary
             )
-        }
-
-        // Divider
-        Spacer(modifier = Modifier.height(8.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
-        )
-        Spacer(modifier = Modifier.height(15.dp))
-
-        // Prayer grid
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val prayers = listOf(
-                "Fajr" to "5:23",
-                "Dhuhr" to "1:15",
-                "Asr" to "4:02",
-                "Maghrib" to "6:18",
-                "Isha" to "8:45"
+            Text(
+                text = "${data.hijriMonth} ${data.hijriYear}",
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
             )
-            prayers.forEachIndexed { index, (name, time) ->
-                val isActive = index == 3
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(
-                            color = if (isActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
-                            shape = RoundedCornerShape(10.dp)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = data.gregorianDate,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun PrayerTrackerWidgetPreview(
+    modifier: Modifier = Modifier
+) {
+    val checkedColor = Color(0xFF22C55E) // Green
+    val uncheckedColor = MaterialTheme.colorScheme.surfaceVariant
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(70.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Header
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Today",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "3/5",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Checkboxes
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Sample data: Fajr, Dhuhr, Asr checked; Maghrib, Isha unchecked
+                listOf(
+                    "F" to true,
+                    "D" to true,
+                    "A" to true,
+                    "M" to false,
+                    "I" to false
+                ).forEach { (name, isChecked) ->
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(if (isChecked) checkedColor else uncheckedColor),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isChecked) {
+                                Text(
+                                    text = "\u2713",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 14.sp
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = if (isChecked) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isChecked)
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                         )
-                        .padding(vertical = 10.dp, horizontal = 5.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = time,
-                        style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                    }
                 }
             }
         }
@@ -466,7 +554,7 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
         val steps = listOf(
             "Long press on an empty area of your home screen",
             "Tap \"Widgets\" from the menu that appears",
-            "Search for \"Nimaz Pro\" and select your preferred widget size",
+            "Search for \"Nimaz Pro\" and select your preferred widget",
             "Drag the widget to your desired location"
         )
 
@@ -502,4 +590,130 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
             }
         }
     }
+}
+
+private suspend fun loadWidgetPreviewData(context: android.content.Context): WidgetPreviewData {
+    return try {
+        val prefs = PreferencesDataStore(context)
+        val userPrefs = prefs.userPreferences.first()
+
+        val latitude = userPrefs.latitude.takeIf { it != 0.0 } ?: 53.3498
+        val longitude = userPrefs.longitude.takeIf { it != 0.0 } ?: -6.2603
+        val locationName = userPrefs.locationName.takeIf { it.isNotBlank() }?.split(",")?.firstOrNull()?.trim()
+            ?: "Dublin"
+
+        val calculator = PrayerTimeCalculator()
+        val prayerTimes = calculator.getPrayerTimes(latitude, longitude)
+
+        val currentTime = Clock.System.now()
+        val timeZone = TimeZone.currentSystemDefault()
+        val localTime = currentTime.toLocalDateTime(timeZone)
+
+        // Build prayer list (excluding Sunrise for the main 5 prayers display)
+        val prayers = prayerTimes.mapNotNull { prayerTime ->
+            val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
+            val isPassed = prayerLocalTime.time < localTime.time
+            val name = prayerTime.type.displayName
+
+            // Skip sunrise for main prayer list
+            if (name.lowercase() == "sunrise") return@mapNotNull null
+
+            PrayerPreview(
+                name = getShortPrayerName(name),
+                time = formatWidgetTime(prayerLocalTime.hour, prayerLocalTime.minute),
+                isPassed = isPassed,
+                isNext = false
+            )
+        }
+
+        // Find next prayer
+        val nextPrayerIndex = prayerTimes.indexOfFirst { prayerTime ->
+            val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
+            prayerLocalTime.time > localTime.time
+        }
+
+        val nextPrayer = prayerTimes.getOrNull(nextPrayerIndex)
+        val nextPrayerName = nextPrayer?.type?.displayName ?: "Fajr"
+        val nextPrayerLocalTime = nextPrayer?.time?.toLocalDateTime(timeZone)
+        val nextPrayerTimeStr = nextPrayerLocalTime?.let {
+            formatWidgetTime(it.hour, it.minute)
+        } ?: "—"
+
+        // Calculate countdown
+        val countdown = if (nextPrayer != null) {
+            val diff: Duration = nextPrayer.time - currentTime
+            val totalSeconds = diff.inWholeSeconds
+            val hours = totalSeconds / 3600
+            val minutes = (totalSeconds % 3600) / 60
+            val seconds = totalSeconds % 60
+            when {
+                hours > 0 -> "${hours}h ${minutes}m"
+                minutes > 0 -> "${minutes}m ${seconds}s"
+                else -> "${seconds}s"
+            }
+        } else "—"
+
+        // Mark next prayer in the list
+        val prayersWithNext = prayers.map { prayer ->
+            prayer.copy(isNext = prayer.name == getShortPrayerName(nextPrayerName))
+        }
+
+        // Get dates
+        val hijriDate = HijriDateCalculator.today()
+        val today = LocalDate.now()
+        val gregorianDate = "${today.dayOfMonth} ${today.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }}"
+        val dayOfWeek = today.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+
+        WidgetPreviewData(
+            nextPrayerName = nextPrayerName,
+            nextPrayerTime = nextPrayerTimeStr,
+            countdown = countdown,
+            prayers = prayersWithNext,
+            hijriDate = "${hijriDate.day} ${hijriDate.monthName} ${hijriDate.year}",
+            hijriDay = hijriDate.day,
+            hijriMonth = hijriDate.monthName,
+            hijriYear = hijriDate.year,
+            gregorianDate = gregorianDate,
+            dayOfWeek = dayOfWeek,
+            locationName = locationName
+        )
+    } catch (e: Exception) {
+        // Return fallback data
+        WidgetPreviewData(
+            nextPrayerName = "Maghrib",
+            nextPrayerTime = "6:15 PM",
+            countdown = "2h 30m",
+            prayers = listOf(
+                PrayerPreview("Fajr", "5:30", isPassed = true),
+                PrayerPreview("Dhuhr", "12:45", isPassed = true),
+                PrayerPreview("Asr", "3:30", isPassed = true),
+                PrayerPreview("Mgrb", "6:15", isNext = true),
+                PrayerPreview("Isha", "7:45")
+            ),
+            hijriDate = "15 Rajab 1446",
+            hijriDay = 15,
+            hijriMonth = "Rajab",
+            hijriYear = 1446,
+            gregorianDate = "28 Jan",
+            dayOfWeek = "Tuesday",
+            locationName = "Dublin"
+        )
+    }
+}
+
+private fun getShortPrayerName(name: String): String {
+    return when (name.lowercase()) {
+        "fajr" -> "Fajr"
+        "sunrise" -> "Rise"
+        "dhuhr" -> "Dhuhr"
+        "asr" -> "Asr"
+        "maghrib" -> "Mgrb"
+        "isha" -> "Isha"
+        else -> name.take(5)
+    }
+}
+
+private fun formatWidgetTime(hour: Int, minute: Int): String {
+    val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
+    return String.format("%d:%02d", h, minute)
 }

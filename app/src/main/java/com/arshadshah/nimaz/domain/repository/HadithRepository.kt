@@ -9,6 +9,9 @@ import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import kotlinx.coroutines.flow.Flow
 
 interface HadithRepository {
+    // Hadith of the day
+    suspend fun getHadithOfTheDay(): Hadith?
+
     // Book operations
     fun getAllBooks(): Flow<List<HadithBook>>
     suspend fun getBookById(bookId: String): HadithBook?

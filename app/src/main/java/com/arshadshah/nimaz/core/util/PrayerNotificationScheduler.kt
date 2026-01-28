@@ -215,6 +215,34 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     /**
+     * Send test notifications for all prayers to validate the notification system.
+     * Notifications are staggered by 500ms to ensure they all appear.
+     */
+    fun sendAllPrayerTestNotifications() {
+        val prayers = listOf(
+            PrayerType.FAJR to "05:30 AM",
+            PrayerType.SUNRISE to "06:45 AM",
+            PrayerType.DHUHR to "12:30 PM",
+            PrayerType.ASR to "03:45 PM",
+            PrayerType.MAGHRIB to "06:15 PM",
+            PrayerType.ISHA to "07:45 PM"
+        )
+
+        prayers.forEachIndexed { index, (prayerType, time) ->
+            // Create the intent that would be received by BootReceiver
+            val intent = Intent(ACTION_PRAYER_NOTIFICATION).apply {
+                setPackage(context.packageName)
+                putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
+                putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
+                putExtra(EXTRA_PRAYER_TIME, time)
+            }
+
+            // Send the broadcast to trigger the full notification flow (including adhan)
+            context.sendBroadcast(intent)
+        }
+    }
+
+    /**
      * Schedule a midnight alarm to reschedule tomorrow's prayers.
      */
     private fun scheduleMidnightReschedule() {

@@ -23,8 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -53,7 +53,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
 
@@ -62,8 +61,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
 fun DuasCollectionScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCategory: (String) -> Unit,
-    onNavigateToFavorites: () -> Unit,
-    onNavigateToSearch: () -> Unit,
+    onNavigateToBookmarks: () -> Unit,
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectionState.collectAsState()
@@ -83,16 +81,10 @@ fun DuasCollectionScreen(
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
-                    IconButton(onClick = onNavigateToSearch) {
+                    IconButton(onClick = onNavigateToBookmarks) {
                         Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
-                        )
-                    }
-                    IconButton(onClick = onNavigateToFavorites) {
-                        Icon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = "Favorites"
+                            imageVector = Icons.Default.Bookmark,
+                            contentDescription = "Bookmarks"
                         )
                     }
                 }
@@ -115,20 +107,6 @@ fun DuasCollectionScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                // Search Bar
-                item {
-                    NimazSearchBar(
-                        query = state.searchQuery,
-                        onQueryChange = { viewModel.onEvent(DuaEvent.SearchCategories(it)) },
-                        placeholder = "Search duas...",
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 8.dp),
-                        showClearButton = state.searchQuery.isNotEmpty(),
-                        onClear = { viewModel.onEvent(DuaEvent.ClearSearch) }
-                    )
-                }
-
                 // Featured Dua of the Day Card
                 item {
                     val featuredFavorite = favoritesState.favorites.firstOrNull()

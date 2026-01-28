@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -11,7 +12,9 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -62,6 +65,7 @@ sealed interface HomeEvent {
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerRepository: PrayerRepository,
     private val preferencesDataStore: PreferencesDataStore,
@@ -75,7 +79,7 @@ class HomeViewModel @Inject constructor(
     init {
         observeLocation()
         loadPrayerRecords()
-        loadFastingStatus()
+        observeFastingStatus()
         loadDailyHadith()
         startTimeUpdates()
     }
@@ -90,14 +94,15 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun loadFastingStatus() {
+    private fun observeFastingStatus() {
         viewModelScope.launch {
-            try {
-                val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
-                val record = fastingDao.getFastRecordForDate(todayEpoch)
-                _state.update { it.copy(fastingToday = record?.status == "fasted") }
-            } catch (_: Exception) {
-                // No fasting data available
+            val today = LocalDate.now()
+            val startOfDay = today.toEpochDay() * 86400000L
+            val endOfDay = startOfDay + 86400000L - 1
+
+            fastingDao.getFastRecordsInRange(startOfDay, endOfDay).collect { records ->
+                val todayRecord = records.firstOrNull()
+                _state.update { it.copy(fastingToday = todayRecord?.status == "fasted") }
             }
         }
     }
@@ -105,12 +110,26 @@ class HomeViewModel @Inject constructor(
     private fun loadDailyHadith() {
         viewModelScope.launch {
             try {
-                val dayOfYear = java.time.LocalDate.now().dayOfYear
-                val hadith = hadithDao.getHadithByNumber(1, dayOfYear % 50 + 1)
+                val totalHadiths = hadithDao.getHadithCount()
+                if (totalHadiths == 0) return@launch
+
+                // Use day of year + year to create a unique offset that doesn't repeat within a year
+                val today = java.time.LocalDate.now()
+                val dayOfYear = today.dayOfYear
+                val year = today.year
+
+                // Create a seed based on day and year for deterministic but varied selection
+                // This ensures: 1) Same hadith every time on the same day
+                //               2) Different hadith each day of the year
+                //               3) Different sequence each year
+                val seed = (dayOfYear + year * 367L) % totalHadiths
+                val offset = seed.toInt()
+
+                val hadith = hadithDao.getHadithByOffset(offset)
                 _state.update {
                     it.copy(
-                        dailyHadith = hadith?.textEnglish?.take(120)?.let { text ->
-                            if (text.length >= 120) "$text..." else text
+                        dailyHadith = hadith?.textEnglish?.take(150)?.let { text ->
+                            if (text.length >= 150) "$text..." else text
                         }
                     )
                 }
@@ -131,6 +150,9 @@ class HomeViewModel @Inject constructor(
     }
 
     private fun togglePrayerStatus(prayerType: PrayerType) {
+        // Sunrise is not a prayer - don't allow toggling
+        if (prayerType == PrayerType.SUNRISE) return
+
         viewModelScope.launch {
             val prayerName = PrayerName.valueOf(prayerType.name)
             val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
@@ -151,6 +173,9 @@ class HomeViewModel @Inject constructor(
                     }
                 )
             }
+
+            // Notify widget to refresh via WorkManager
+            PrayerTrackerWorker.enqueueImmediateWork(context)
         }
     }
 

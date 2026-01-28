@@ -80,6 +80,14 @@ class PreferencesDataStore @Inject constructor(
         val MAGHRIB_NOTIFICATION_ENABLED = booleanPreferencesKey("maghrib_notification_enabled")
         val ISHA_NOTIFICATION_ENABLED = booleanPreferencesKey("isha_notification_enabled")
 
+        // Per-prayer adhan/sound enabled
+        val FAJR_ADHAN_ENABLED = booleanPreferencesKey("fajr_adhan_enabled")
+        val DHUHR_ADHAN_ENABLED = booleanPreferencesKey("dhuhr_adhan_enabled")
+        val ASR_ADHAN_ENABLED = booleanPreferencesKey("asr_adhan_enabled")
+        val MAGHRIB_ADHAN_ENABLED = booleanPreferencesKey("maghrib_adhan_enabled")
+        val ISHA_ADHAN_ENABLED = booleanPreferencesKey("isha_adhan_enabled")
+        // Note: Sunrise always uses beep only, no full adhan option
+
         // Quran Settings
         val QURAN_TRANSLATOR_ID = stringPreferencesKey("quran_translator_id")
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
@@ -337,6 +345,43 @@ class PreferencesDataStore @Inject constructor(
                 else -> return@edit
             }
             prefs[key] = enabled
+        }
+    }
+
+    // Per-prayer adhan enabled
+    val fajrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.FAJR_ADHAN_ENABLED] ?: true }
+    val dhuhrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.DHUHR_ADHAN_ENABLED] ?: true }
+    val asrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ASR_ADHAN_ENABLED] ?: true }
+    val maghribAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADHAN_ENABLED] ?: true }
+    val ishaAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ISHA_ADHAN_ENABLED] ?: true }
+
+    suspend fun setPrayerAdhanEnabled(prayer: String, enabled: Boolean) {
+        dataStore.edit { prefs ->
+            val key = when (prayer.lowercase()) {
+                "fajr" -> PreferencesKeys.FAJR_ADHAN_ENABLED
+                "dhuhr" -> PreferencesKeys.DHUHR_ADHAN_ENABLED
+                "asr" -> PreferencesKeys.ASR_ADHAN_ENABLED
+                "maghrib" -> PreferencesKeys.MAGHRIB_ADHAN_ENABLED
+                "isha" -> PreferencesKeys.ISHA_ADHAN_ENABLED
+                else -> return@edit
+            }
+            prefs[key] = enabled
+        }
+    }
+
+    /**
+     * Check if adhan is enabled for a specific prayer.
+     * Sunrise always returns false (uses beep only).
+     */
+    fun isAdhanEnabledForPrayer(prayer: String): Flow<Boolean> {
+        return when (prayer.lowercase()) {
+            "fajr" -> fajrAdhanEnabled
+            "dhuhr" -> dhuhrAdhanEnabled
+            "asr" -> asrAdhanEnabled
+            "maghrib" -> maghribAdhanEnabled
+            "isha" -> ishaAdhanEnabled
+            "sunrise" -> kotlinx.coroutines.flow.flowOf(false) // Sunrise never gets adhan
+            else -> kotlinx.coroutines.flow.flowOf(false)
         }
     }
 

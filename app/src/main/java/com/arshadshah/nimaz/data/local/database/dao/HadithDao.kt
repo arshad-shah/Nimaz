@@ -48,6 +48,18 @@ interface HadithDao {
     @Query("SELECT DISTINCT chapter_id FROM hadiths WHERE book_id = :bookId ORDER BY chapter_id ASC")
     fun getChapterIdsForBook(bookId: Int): Flow<List<Int>>
 
+    // Get all hadiths (for hadith of the day)
+    @Query("SELECT * FROM hadiths")
+    fun getAllHadiths(): Flow<List<HadithEntity>>
+
+    // Get total hadith count (more efficient for hadith of the day calculation)
+    @Query("SELECT COUNT(*) FROM hadiths")
+    suspend fun getHadithCount(): Int
+
+    // Get hadith by offset (for hadith of the day - deterministic selection)
+    @Query("SELECT * FROM hadiths LIMIT 1 OFFSET :offset")
+    suspend fun getHadithByOffset(offset: Int): HadithEntity?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHadiths(hadiths: List<HadithEntity>)
 

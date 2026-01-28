@@ -3,8 +3,11 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import android.content.Context
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
+import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
+import dagger.hilt.android.qualifiers.ApplicationContext
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -89,6 +92,13 @@ data class NotificationSettingsUiState(
     val maghribNotification: Boolean = true,
     val ishaNotification: Boolean = true,
     val adhanEnabled: Boolean = false,
+    // Per-prayer adhan settings
+    val fajrAdhanEnabled: Boolean = true,
+    val dhuhrAdhanEnabled: Boolean = true,
+    val asrAdhanEnabled: Boolean = true,
+    val maghribAdhanEnabled: Boolean = true,
+    val ishaAdhanEnabled: Boolean = true,
+    // Sunrise always uses beep only (no toggle needed)
     val vibrationEnabled: Boolean = true,
     val reminderMinutes: Int = 15,
     val showReminderBefore: Boolean = true,
@@ -149,6 +159,7 @@ sealed interface SettingsEvent {
     data class SetNotificationsEnabled(val enabled: Boolean) : SettingsEvent
     data class SetPrayerNotification(val prayer: String, val enabled: Boolean) : SettingsEvent
     data class SetAdhanEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetPrayerAdhanEnabled(val prayer: String, val enabled: Boolean) : SettingsEvent
     data class SetVibrationEnabled(val enabled: Boolean) : SettingsEvent
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetShowReminderBefore(val enabled: Boolean) : SettingsEvent
@@ -186,11 +197,13 @@ sealed interface SettingsEvent {
     data object ExportSettings : SettingsEvent
     data object ImportSettings : SettingsEvent
     data object TestNotification : SettingsEvent
+    data object TestAllNotifications : SettingsEvent
     data object ResetNotifications : SettingsEvent
 }
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val prayerRepository: PrayerRepository,
     private val preferencesDataStore: PreferencesDataStore,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
@@ -331,6 +344,12 @@ class SettingsViewModel @Inject constructor(
                     rescheduleNotifications()
                 }
             }
+            is SettingsEvent.SetPrayerAdhanEnabled -> {
+                updatePrayerAdhanEnabled(event.prayer, event.enabled)
+                viewModelScope.launch {
+                    preferencesDataStore.setPrayerAdhanEnabled(event.prayer, event.enabled)
+                }
+            }
             is SettingsEvent.SetVibrationEnabled -> {
                 _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
                 viewModelScope.launch { preferencesDataStore.setNotificationVibration(event.enabled) }
@@ -355,11 +374,29 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
-                viewModelScope.launch { preferencesDataStore.setSelectedAdhanSound(event.sound) }
+                viewModelScope.launch {
+                    preferencesDataStore.setSelectedAdhanSound(event.sound)
+                    // Download the selected adhan if not already downloaded
+                    val sound = AdhanSound.fromName(event.sound)
+                    if (!adhanAudioManager.isFullyDownloaded(sound)) {
+                        AdhanDownloadService.downloadSelected(context, sound)
+                    }
+                }
             }
             SettingsEvent.PreviewAdhanSound -> {
                 val sound = AdhanSound.fromName(_notificationState.value.selectedAdhanSound)
-                adhanAudioManager.preview(sound)
+                viewModelScope.launch {
+                    // Check if downloaded, if not download first
+                    if (!adhanAudioManager.isDownloaded(sound, false)) {
+                        // Download the regular adhan first
+                        val success = adhanAudioManager.downloadAdhan(sound, false)
+                        if (!success) {
+                            return@launch
+                        }
+                    }
+                    // Now play the preview
+                    adhanAudioManager.preview(sound, false)
+                }
             }
             SettingsEvent.StopAdhanPreview -> {
                 adhanAudioManager.stopPreview()
@@ -419,6 +456,9 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.ImportSettings -> importSettings()
             SettingsEvent.TestNotification -> {
                 prayerNotificationScheduler.sendTestNotification()
+            }
+            SettingsEvent.TestAllNotifications -> {
+                prayerNotificationScheduler.sendAllPrayerTestNotifications()
             }
             SettingsEvent.ResetNotifications -> {
                 viewModelScope.launch {
@@ -512,10 +552,22 @@ class SettingsViewModel @Inject constructor(
             val maghribNotif = preferencesDataStore.maghribNotificationEnabled.first()
             val ishaNotif = preferencesDataStore.ishaNotificationEnabled.first()
 
+            // Per-prayer adhan settings
+            val fajrAdhan = preferencesDataStore.fajrAdhanEnabled.first()
+            val dhuhrAdhan = preferencesDataStore.dhuhrAdhanEnabled.first()
+            val asrAdhan = preferencesDataStore.asrAdhanEnabled.first()
+            val maghribAdhan = preferencesDataStore.maghribAdhanEnabled.first()
+            val ishaAdhan = preferencesDataStore.ishaAdhanEnabled.first()
+
             _notificationState.update {
                 it.copy(
                     notificationsEnabled = notifEnabled,
                     adhanEnabled = adhanEnabled,
+                    fajrAdhanEnabled = fajrAdhan,
+                    dhuhrAdhanEnabled = dhuhrAdhan,
+                    asrAdhanEnabled = asrAdhan,
+                    maghribAdhanEnabled = maghribAdhan,
+                    ishaAdhanEnabled = ishaAdhan,
                     vibrationEnabled = vibration,
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
@@ -621,6 +673,19 @@ class SettingsViewModel @Inject constructor(
                 "asr" -> state.copy(asrNotification = enabled)
                 "maghrib" -> state.copy(maghribNotification = enabled)
                 "isha" -> state.copy(ishaNotification = enabled)
+                else -> state
+            }
+        }
+    }
+
+    private fun updatePrayerAdhanEnabled(prayer: String, enabled: Boolean) {
+        _notificationState.update { state ->
+            when (prayer.lowercase()) {
+                "fajr" -> state.copy(fajrAdhanEnabled = enabled)
+                "dhuhr" -> state.copy(dhuhrAdhanEnabled = enabled)
+                "asr" -> state.copy(asrAdhanEnabled = enabled)
+                "maghrib" -> state.copy(maghribAdhanEnabled = enabled)
+                "isha" -> state.copy(ishaAdhanEnabled = enabled)
                 else -> state
             }
         }

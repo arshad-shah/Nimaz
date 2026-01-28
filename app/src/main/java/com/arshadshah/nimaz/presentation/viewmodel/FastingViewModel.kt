@@ -2,20 +2,26 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.repository.FastingRepository
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import java.time.Duration
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
@@ -27,6 +33,9 @@ data class FastingTrackerUiState(
     val selectedFastType: FastType = FastType.VOLUNTARY,
     val suhoorTime: String = "--:-- AM",
     val iftarTime: String = "--:-- PM",
+    val timeUntilIftar: String = "",
+    val timeUntilSuhoor: String = "",
+    val isSuhoorTime: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -90,7 +99,8 @@ sealed interface FastingEvent {
 @HiltViewModel
 class FastingViewModel @Inject constructor(
     private val fastingRepository: FastingRepository,
-    private val prayerRepository: PrayerRepository
+    private val prayerTimeCalculator: PrayerTimeCalculator,
+    private val preferencesDataStore: PreferencesDataStore
 ) : ViewModel() {
 
     private val _trackerState = MutableStateFlow(FastingTrackerUiState())
@@ -110,30 +120,107 @@ class FastingViewModel @Inject constructor(
 
     private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
+    companion object {
+        // Default location: Dublin, Ireland (fallback)
+        private const val DEFAULT_LATITUDE = 53.3498
+        private const val DEFAULT_LONGITUDE = -6.2603
+    }
+
     init {
         loadToday()
-        loadPrayerTimes()
+        observeLocationAndLoadPrayerTimes()
         loadCalendarMonth()
         loadMakeupFasts()
         loadStats()
     }
 
-    private fun loadPrayerTimes() {
+    private fun observeLocationAndLoadPrayerTimes() {
         viewModelScope.launch {
-            try {
-                val location = prayerRepository.getCurrentLocationSync() ?: return@launch
-                val today = LocalDate.now()
-                val prayerTimes = prayerRepository.getPrayerTimesForDate(today, location)
+            combine(
+                preferencesDataStore.latitude,
+                preferencesDataStore.longitude
+            ) { lat, lng -> Pair(lat, lng) }
+                .collect { (lat, lng) ->
+                    val latitude = if (lat != 0.0) lat else DEFAULT_LATITUDE
+                    val longitude = if (lng != 0.0) lng else DEFAULT_LONGITUDE
+                    loadPrayerTimes(latitude, longitude)
+                }
+        }
+    }
+
+    private fun loadPrayerTimes(latitude: Double, longitude: Double) {
+        try {
+            val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
+            val timeZone = TimeZone.currentSystemDefault()
+
+            val fajrPrayer = prayerTimes.find { it.type.name == "FAJR" }
+            val maghribPrayer = prayerTimes.find { it.type.name == "MAGHRIB" }
+
+            if (fajrPrayer != null && maghribPrayer != null) {
+                val fajrLocalTime = fajrPrayer.time.toLocalDateTime(timeZone)
+                val maghribLocalTime = maghribPrayer.time.toLocalDateTime(timeZone)
+
+                val suhoorTimeStr = formatTime(fajrLocalTime.hour, fajrLocalTime.minute)
+                val iftarTimeStr = formatTime(maghribLocalTime.hour, maghribLocalTime.minute)
+
+                val now = LocalDateTime.now()
+                val fajrJavaTime = LocalDateTime.of(now.toLocalDate(), java.time.LocalTime.of(fajrLocalTime.hour, fajrLocalTime.minute))
+                val maghribJavaTime = LocalDateTime.of(now.toLocalDate(), java.time.LocalTime.of(maghribLocalTime.hour, maghribLocalTime.minute))
+
+                val (countdown, isSuhoor) = calculateCountdown(now, fajrJavaTime, maghribJavaTime)
+
                 _trackerState.update {
                     it.copy(
-                        suhoorTime = prayerTimes.fajr.format(timeFormatter),
-                        iftarTime = prayerTimes.maghrib.format(timeFormatter)
+                        suhoorTime = suhoorTimeStr,
+                        iftarTime = iftarTimeStr,
+                        timeUntilIftar = if (!isSuhoor) countdown else "",
+                        timeUntilSuhoor = if (isSuhoor) countdown else "",
+                        isSuhoorTime = isSuhoor
                     )
                 }
-            } catch (_: Exception) {
-                // Keep default placeholder times
+            }
+        } catch (_: Exception) {
+            // Keep default placeholder times
+        }
+    }
+
+    private fun formatTime(hour: Int, minute: Int): String {
+        val amPm = if (hour < 12) "AM" else "PM"
+        val displayHour = when {
+            hour == 0 -> 12
+            hour > 12 -> hour - 12
+            else -> hour
+        }
+        return String.format("%d:%02d %s", displayHour, minute, amPm)
+    }
+
+    private fun calculateCountdown(
+        now: LocalDateTime,
+        fajr: LocalDateTime,
+        maghrib: LocalDateTime
+    ): Pair<String, Boolean> {
+        return when {
+            now.isBefore(fajr) -> {
+                // Before Fajr - count down to Suhoor end
+                val duration = Duration.between(now, fajr)
+                formatDuration(duration) to true
+            }
+            now.isBefore(maghrib) -> {
+                // After Fajr, before Maghrib - count down to Iftar
+                val duration = Duration.between(now, maghrib)
+                formatDuration(duration) to false
+            }
+            else -> {
+                // After Maghrib - fasting period completed
+                "Completed" to false
             }
         }
+    }
+
+    private fun formatDuration(duration: Duration): String {
+        val hours = duration.toHours()
+        val minutes = duration.toMinutes() % 60
+        return "${hours}h ${minutes}m remaining"
     }
 
     fun onEvent(event: FastingEvent) {

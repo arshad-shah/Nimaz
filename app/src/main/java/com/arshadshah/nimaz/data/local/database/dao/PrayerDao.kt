@@ -13,6 +13,9 @@ interface PrayerDao {
     @Query("SELECT * FROM prayer_records WHERE date = :date ORDER BY scheduledTime ASC")
     fun getPrayerRecordsForDate(date: Long): Flow<List<PrayerRecordEntity>>
 
+    @Query("SELECT * FROM prayer_records WHERE date = :date ORDER BY scheduledTime ASC")
+    suspend fun getPrayerRecordsForDateSync(date: Long): List<PrayerRecordEntity>
+
     @Query("SELECT * FROM prayer_records WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC, scheduledTime ASC")
     fun getPrayerRecordsInRange(startDate: Long, endDate: Long): Flow<List<PrayerRecordEntity>>
 

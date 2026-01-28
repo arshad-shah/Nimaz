@@ -12,9 +12,10 @@
     <!-- Vibration for Tasbih -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Foreground Service for Audio -->
+    <!-- Foreground Service for Audio and Downloads -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Schedule exact alarms for prayer notifications -->
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
@@ -44,6 +45,18 @@
         android:theme="@style/Theme.Nimaz"
         tools:targetApi="34">
 
+        <!-- Disable default WorkManager initializer to use Hilt -->
+        <provider
+            android:name="androidx.startup.InitializationProvider"
+            android:authorities="${applicationId}.androidx-startup"
+            android:exported="false"
+            tools:node="merge">
+            <meta-data
+                android:name="androidx.work.WorkManagerInitializer"
+                android:value="androidx.startup"
+                tools:node="remove" />
+        </provider>
+
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -63,11 +76,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.arshadshah.nimaz.PRAYER_NOTIFICATION" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE" />
+            </intent-filter>
         </receiver>
 
         <!-- Prayer Times Widget -->
         <receiver
-            android:name=".widget.PrayerTimesWidgetReceiver"
+            android:name=".widget.prayertimes.PrayerTimesWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_prayer_times_name">
             <intent-filter>
@@ -80,7 +99,7 @@
 
         <!-- Next Prayer Widget -->
         <receiver
-            android:name=".widget.NextPrayerWidgetReceiver"
+            android:name=".widget.nextprayer.NextPrayerWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_next_prayer_name">
             <intent-filter>
@@ -93,7 +112,7 @@
 
         <!-- Hijri Date Widget -->
         <receiver
-            android:name=".widget.HijriDateWidgetReceiver"
+            android:name=".widget.hijridate.HijriDateWidgetReceiver"
             android:exported="true"
             android:label="@string/widget_hijri_date_name">
             <intent-filter>
@@ -103,6 +122,33 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/hijri_date_widget_info" />
         </receiver>
+
+        <!-- Prayer Tracker Widget -->
+        <receiver
+            android:name=".widget.prayertracker.PrayerTrackerWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_prayer_tracker_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_tracker_widget_info" />
+        </receiver>
+
+        <!-- Adhan Download Service -->
+        <service
+            android:name=".data.audio.AdhanDownloadService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- Adhan Playback Service -->
+        <service
+            android:name=".data.audio.AdhanPlaybackService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
     </application>
 

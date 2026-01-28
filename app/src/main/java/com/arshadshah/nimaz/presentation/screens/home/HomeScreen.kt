@@ -681,6 +681,7 @@ private fun PrayerTimeCard(
 ) {
     val prayerColor = getPrayerColor(prayer.type)
     val isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED
+    val isSunrise = prayer.type == PrayerType.SUNRISE
 
     Card(
         modifier = modifier
@@ -748,29 +749,34 @@ private fun PrayerTimeCard(
 
             Spacer(modifier = Modifier.width(15.dp))
 
-            // Prayer Status - toggleable independently
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .clickable(onClick = onToggle)
-                    .then(
-                        if (isPrayed) {
-                            Modifier.background(MaterialTheme.colorScheme.primary)
-                        } else {
-                            Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
-                        }
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                if (isPrayed) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Prayed",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(14.dp)
-                    )
+            // Prayer Status - toggleable independently (but not for Sunrise)
+            if (!isSunrise) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .clickable(onClick = onToggle)
+                        .then(
+                            if (isPrayed) {
+                                Modifier.background(MaterialTheme.colorScheme.primary)
+                            } else {
+                                Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
+                            }
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (isPrayed) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Prayed",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(14.dp)
+                        )
+                    }
                 }
+            } else {
+                // Empty spacer to maintain layout consistency for Sunrise
+                Spacer(modifier = Modifier.size(24.dp))
             }
         }
     }

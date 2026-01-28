@@ -19,10 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +46,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import com.arshadshah.nimaz.data.audio.DownloadState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -69,7 +74,8 @@ private data class PrayerNotificationData(
     val key: String,
     val accentColor: Color,
     val isEnabled: Boolean,
-    val isSoundOn: Boolean
+    val isSoundOn: Boolean,
+    val isSunrise: Boolean = false // Sunrise only gets beep, no sound toggle
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -80,14 +86,38 @@ fun NotificationSettingsScreen(
 ) {
     val context = LocalContext.current
     val notificationState by viewModel.notificationState.collectAsState()
+    val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
+    val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
+    val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    // Individual prayer settings with per-prayer adhan toggles
     val prayers = listOf(
-        PrayerNotificationData("Fajr", "fajr", FajrColor, notificationState.fajrNotification, notificationState.adhanEnabled),
-        PrayerNotificationData("Dhuhr", "dhuhr", DhuhrColor, notificationState.dhuhrNotification, notificationState.adhanEnabled),
-        PrayerNotificationData("Asr", "asr", AsrColor, notificationState.asrNotification, notificationState.adhanEnabled),
-        PrayerNotificationData("Maghrib", "maghrib", MaghribColor, notificationState.maghribNotification, notificationState.adhanEnabled),
-        PrayerNotificationData("Isha", "isha", IshaColor, notificationState.ishaNotification, notificationState.adhanEnabled)
+        PrayerNotificationData(
+            "Fajr", "fajr", FajrColor,
+            notificationState.fajrNotification,
+            notificationState.adhanEnabled && notificationState.fajrAdhanEnabled
+        ),
+        PrayerNotificationData(
+            "Dhuhr", "dhuhr", DhuhrColor,
+            notificationState.dhuhrNotification,
+            notificationState.adhanEnabled && notificationState.dhuhrAdhanEnabled
+        ),
+        PrayerNotificationData(
+            "Asr", "asr", AsrColor,
+            notificationState.asrNotification,
+            notificationState.adhanEnabled && notificationState.asrAdhanEnabled
+        ),
+        PrayerNotificationData(
+            "Maghrib", "maghrib", MaghribColor,
+            notificationState.maghribNotification,
+            notificationState.adhanEnabled && notificationState.maghribAdhanEnabled
+        ),
+        PrayerNotificationData(
+            "Isha", "isha", IshaColor,
+            notificationState.ishaNotification,
+            notificationState.adhanEnabled && notificationState.ishaAdhanEnabled
+        )
     )
 
     val adhanSounds = com.arshadshah.nimaz.data.audio.AdhanSound.entries
@@ -172,8 +202,18 @@ fun NotificationSettingsScreen(
                                         )
                                     },
                                     onSoundToggle = {
-                                        viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
-                                    }
+                                        // Toggle individual prayer's adhan setting
+                                        val currentState = when (prayer.key) {
+                                            "fajr" -> notificationState.fajrAdhanEnabled
+                                            "dhuhr" -> notificationState.dhuhrAdhanEnabled
+                                            "asr" -> notificationState.asrAdhanEnabled
+                                            "maghrib" -> notificationState.maghribAdhanEnabled
+                                            "isha" -> notificationState.ishaAdhanEnabled
+                                            else -> true
+                                        }
+                                        viewModel.onEvent(SettingsEvent.SetPrayerAdhanEnabled(prayer.key, !currentState))
+                                    },
+                                    globalAdhanEnabled = notificationState.adhanEnabled
                                 )
                                 if (index < prayers.lastIndex) {
                                     Box(
@@ -203,16 +243,28 @@ fun NotificationSettingsScreen(
                     ) {
                         Column {
                             adhanSounds.forEachIndexed { index, sound ->
+                                val soundDownloadState = downloadState[sound]
+                                val isThisPlaying = isPlaying && currentlyPlaying == sound
+                                val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
+
                                 AdhanOptionRow(
                                     name = sound.displayName,
                                     location = sound.origin,
                                     isSelected = sound.name == selectedAdhanName,
+                                    isDownloaded = isDownloaded,
+                                    isDownloading = soundDownloadState is DownloadState.Downloading,
+                                    downloadProgress = (soundDownloadState as? DownloadState.Downloading)?.progress,
+                                    isPlaying = isThisPlaying,
                                     onSelect = {
                                         viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
                                     },
                                     onPlay = {
-                                        viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
-                                        viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
+                                        if (isThisPlaying) {
+                                            viewModel.onEvent(SettingsEvent.StopAdhanPreview)
+                                        } else {
+                                            viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
+                                            viewModel.onEvent(SettingsEvent.PreviewAdhanSound)
+                                        }
                                     }
                                 )
                                 if (index < adhanSounds.lastIndex) {
@@ -326,6 +378,26 @@ fun NotificationSettingsScreen(
                                 Text("Test Notification")
                             }
 
+                            Button(
+                                onClick = {
+                                    viewModel.onEvent(SettingsEvent.TestAllNotifications)
+                                    Toast.makeText(context, "Testing all prayer notifications...", Toast.LENGTH_SHORT).show()
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondary
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Notifications,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text("Test All Prayers")
+                            }
+
                             OutlinedButton(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.ResetNotifications)
@@ -399,7 +471,8 @@ private fun SectionTitle(title: String) {
 private fun PrayerNotificationRow(
     prayer: PrayerNotificationData,
     onToggle: () -> Unit,
-    onSoundToggle: () -> Unit
+    onSoundToggle: () -> Unit,
+    globalAdhanEnabled: Boolean
 ) {
     Row(
         modifier = Modifier
@@ -433,20 +506,27 @@ private fun PrayerNotificationRow(
             )
         }
 
-        // Sound button
+        // Sound button - only show if global adhan is enabled
         IconButton(
             onClick = onSoundToggle,
+            enabled = globalAdhanEnabled, // Disable if global adhan is off
             modifier = Modifier.size(36.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                containerColor = if (globalAdhanEnabled)
+                    MaterialTheme.colorScheme.surfaceContainerHighest
+                else
+                    MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
             )
         ) {
             Icon(
                 imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
                 else Icons.AutoMirrored.Filled.VolumeOff,
                 contentDescription = if (prayer.isSoundOn) "Sound on" else "Sound off",
-                tint = if (prayer.isSoundOn) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
+                tint = when {
+                    !globalAdhanEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    prayer.isSoundOn -> MaterialTheme.colorScheme.primary
+                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                },
                 modifier = Modifier.size(18.dp)
             )
         }
@@ -466,6 +546,10 @@ private fun AdhanOptionRow(
     name: String,
     location: String,
     isSelected: Boolean,
+    isDownloaded: Boolean,
+    isDownloading: Boolean,
+    downloadProgress: Int?,
+    isPlaying: Boolean,
     onSelect: () -> Unit,
     onPlay: () -> Unit
 ) {
@@ -497,27 +581,69 @@ private fun AdhanOptionRow(
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = location,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Text(
+                    text = location,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (isDownloaded) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Downloaded",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(12.dp)
+                    )
+                }
+            }
         }
 
-        // Play button
+        // Play/Download button
         IconButton(
             onClick = onPlay,
+            enabled = !isDownloading,
             modifier = Modifier.size(36.dp),
             colors = IconButtonDefaults.iconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
+                containerColor = if (isPlaying) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceContainerHighest
             )
         ) {
-            Icon(
-                imageVector = Icons.Default.PlayArrow,
-                contentDescription = "Preview",
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(16.dp)
-            )
+            when {
+                isDownloading -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                isPlaying -> {
+                    Icon(
+                        imageVector = Icons.Default.Stop,
+                        contentDescription = "Stop",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                !isDownloaded -> {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Download and Play",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+                else -> {
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Preview",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
         }
     }
 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -22,6 +23,17 @@ import javax.inject.Singleton
 class HadithRepositoryImpl @Inject constructor(
     private val hadithDao: HadithDao
 ) : HadithRepository {
+
+    override suspend fun getHadithOfTheDay(): Hadith? {
+        val totalHadiths = hadithDao.getHadithCount()
+        if (totalHadiths == 0) return null
+
+        // Use day of year to get a deterministic but daily-changing hadith
+        val dayOfYear = LocalDate.now().dayOfYear
+        val offset = dayOfYear % totalHadiths
+
+        return hadithDao.getHadithByOffset(offset)?.toDomain()
+    }
 
     override fun getAllBooks(): Flow<List<HadithBook>> {
         return hadithDao.getAllBooks().map { entities ->

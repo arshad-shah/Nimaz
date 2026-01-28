@@ -6,4 +6,6 @@
     <color name="widget_text_secondary">#A8A29E</color>
     <color name="widget_primary">#14B8A6</color>
     <color name="widget_primary_dim">#2614B8A6</color>
+    <color name="widget_checked">#22C55E</color>
+    <color name="widget_unchecked">#3F3F46</color>
 </resources>

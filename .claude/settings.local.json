@@ -41,7 +41,12 @@
       "Bash(./gradlew.bat assembleDebug:*)",
       "Bash(python parse_surah_info.py:*)",
       "Bash(python download_transliteration.py:*)",
-      "Bash(python:*)"
+      "Bash(python:*)",
+      "Bash(ls -la \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\app\\\\src\\\\main\\\\assets\"\" 2>/dev/null || dir \"C:UsersshahaAndroidStudioProjectsnimazproappsrcmainassets\" 2>nul || echo \"assets folder may not exist \")",
+      "WebFetch(domain:aladhan.com)",
+      "WebFetch(domain:www.islamcan.com)",
+      "WebFetch(domain:www.assabile.com)",
+      "WebFetch(domain:archive.org)"
     ]
   }
 }

@@ -5,9 +5,11 @@
     <string name="widget_hijri_date_description">Shows the current Hijri date</string>
     <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
     <string name="widget_prayer_times_description">Shows all prayer times for today</string>
+    <string name="widget_prayer_tracker_description">Track your daily prayers with tap-to-check boxes</string>
 
     <!-- Widget Names -->
     <string name="widget_prayer_times_name">Prayer Times</string>
     <string name="widget_next_prayer_name">Next Prayer</string>
     <string name="widget_hijri_date_name">Hijri Date</string>
+    <string name="widget_prayer_tracker_name">Prayer Tracker</string>
 </resources>

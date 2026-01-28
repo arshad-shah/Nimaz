@@ -19,6 +19,7 @@ import javax.inject.Inject
 
 data class HadithCollectionUiState(
     val books: List<HadithBook> = emptyList(),
+    val hadithOfTheDay: Hadith? = null,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -97,6 +98,7 @@ class HadithViewModel @Inject constructor(
     init {
         loadAllBooks()
         loadBookmarks()
+        loadHadithOfTheDay()
     }
 
     fun onEvent(event: HadithEvent) {
@@ -130,6 +132,13 @@ class HadithViewModel @Inject constructor(
                     it.copy(books = books, isLoading = false)
                 }
             }
+        }
+    }
+
+    private fun loadHadithOfTheDay() {
+        viewModelScope.launch {
+            val hadith = hadithRepository.getHadithOfTheDay()
+            _collectionState.update { it.copy(hadithOfTheDay = hadith) }
         }
     }
 

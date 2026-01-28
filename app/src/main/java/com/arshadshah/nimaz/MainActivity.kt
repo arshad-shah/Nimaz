@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -11,6 +12,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.arshadshah.nimaz.core.navigation.NavGraph
+import com.arshadshah.nimaz.core.util.BootReceiver
+import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -26,6 +29,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        // Check if opened from prayer notification - stop adhan if so
+        handleIntent(intent)
+
         setContent {
             val themeModeString by preferencesDataStore.themeMode.collectAsState(initial = "system")
             val dynamicColor by preferencesDataStore.dynamicColor.collectAsState(initial = false)
@@ -44,6 +51,21 @@ class MainActivity : ComponentActivity() {
                     NavGraph()
                 }
             }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    /**
+     * Handle intents - specifically for stopping adhan when opened from notification.
+     */
+    private fun handleIntent(intent: Intent?) {
+        if (intent?.getBooleanExtra(BootReceiver.EXTRA_STOP_ADHAN, false) == true) {
+            // Stop the adhan playback service
+            AdhanPlaybackService.stopAdhan(this)
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,16 +21,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -54,23 +60,34 @@ import androidx.compose.ui.unit.sp
 import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
+import com.arshadshah.nimaz.domain.model.MakeupFast
+import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
+import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.Month
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+import java.time.temporal.TemporalAdjusters
 import java.util.Locale
+
+// Color constants for makeup fasts
+private val OrangeAccent = Color(0xFFF97316)
+private val OrangeDark = Color(0xFFEA580C)
+private val GreenAccent = Color(0xFF22C55E)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FastTrackerScreen(
     onNavigateBack: () -> Unit,
-    onNavigateToMakeup: () -> Unit,
     onNavigateToHistory: () -> Unit,
     viewModel: FastingViewModel = hiltViewModel()
 ) {
@@ -88,16 +105,7 @@ fun FastTrackerScreen(
         topBar = {
             NimazBackTopAppBar(
                 title = "Fasting",
-                onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+                onBackClick = onNavigateBack
             )
         }
     ) { paddingValues ->
@@ -110,113 +118,180 @@ fun FastTrackerScreen(
         ) {
             // Tabs
             item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                TabRow(
+                    selectedTabIndex = selectedTab,
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.primary,
+                    divider = {}
                 ) {
                     tabs.forEachIndexed { index, title ->
-                        FilterChip(
+                        Tab(
                             selected = selectedTab == index,
                             onClick = {
                                 selectedTab = index
                                 when (index) {
                                     0 -> viewModel.onEvent(FastingEvent.LoadRamadan)
-                                    2 -> {
-                                        viewModel.onEvent(FastingEvent.LoadMakeupFasts)
-                                        onNavigateToMakeup()
-                                    }
+                                    1 -> viewModel.onEvent(FastingEvent.SetFastType(FastType.VOLUNTARY))
+                                    2 -> viewModel.onEvent(FastingEvent.LoadMakeupFasts)
                                 }
                             },
-                            label = {
+                            text = {
                                 Text(
                                     text = title,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
                                 )
-                            },
-                            modifier = Modifier.weight(1f),
-                            colors = FilterChipDefaults.filterChipColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant,
-                                labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ),
-                            border = FilterChipDefaults.filterChipBorder(
-                                borderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f),
-                                selectedBorderColor = MaterialTheme.colorScheme.primary,
-                                enabled = true,
-                                selected = selectedTab == index
-                            ),
-                            shape = RoundedCornerShape(12.dp)
+                            }
                         )
                     }
                 }
             }
 
-            // Ramadan Banner
-            if (ramadanState.isRamadan) {
-                item {
-                    RamadanBanner(
-                        fastedDays = ramadanState.fastedDays,
-                        totalDays = ramadanState.fastedDays + ramadanState.missedDays + ramadanState.remainingDays,
-                        currentDay = ramadanState.currentDay
-                    )
+            // Content based on selected tab
+            when (selectedTab) {
+                0 -> {
+                    // Ramadan Tab
+                    if (ramadanState.isRamadan) {
+                        // During Ramadan - show banner and stats
+                        item {
+                            RamadanBanner(
+                                fastedDays = ramadanState.fastedDays,
+                                totalDays = ramadanState.fastedDays + ramadanState.missedDays + ramadanState.remainingDays,
+                                currentDay = ramadanState.currentDay
+                            )
+                        }
+
+                        // Stats Grid
+                        item {
+                            StatsGrid(
+                                fasted = ramadanState.fastedDays,
+                                missed = ramadanState.missedDays,
+                                remaining = ramadanState.remainingDays
+                            )
+                        }
+
+                        // Missed Fasts Alert (if any days are missed/not logged)
+                        item {
+                            RamadanMissedFastsTracker(
+                                currentDay = ramadanState.currentDay,
+                                fastedDays = ramadanState.fastedDays,
+                                records = calendarState.records
+                            )
+                        }
+                    } else {
+                        // Before/After Ramadan - show countdown
+                        item {
+                            RamadanCountdownCard()
+                        }
+                    }
+
+                    // Today's Fast
+                    item {
+                        TodayFastSection(
+                            isFasting = state.isFastingToday,
+                            fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
+                            fastType = state.selectedFastType,
+                            selectedDate = state.selectedDate,
+                            ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
+                            suhoorTime = state.suhoorTime,
+                            iftarTime = state.iftarTime,
+                            timeUntilIftar = state.timeUntilIftar,
+                            timeUntilSuhoor = state.timeUntilSuhoor,
+                            isSuhoorTime = state.isSuhoorTime,
+                            onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                        )
+                    }
+
+                    // Calendar with Ramadan indicators
+                    item {
+                        FastingCalendarSection(
+                            records = calendarState.records,
+                            selectedMonth = calendarState.selectedMonth,
+                            selectedYear = calendarState.selectedYear,
+                            onPreviousMonth = {
+                                val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
+                                val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                            },
+                            onNextMonth = {
+                                val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
+                                val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                            },
+                            onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) },
+                            showRamadanIndicators = true
+                        )
+                    }
+
+                    // Log Fast Button
+                    item {
+                        LogFastButton(
+                            onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                        )
+                    }
                 }
-            }
+                1 -> {
+                    // Voluntary Tab - Simplified view
+                    // Today's Fast
+                    item {
+                        TodayFastSection(
+                            isFasting = state.isFastingToday,
+                            fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
+                            fastType = FastType.VOLUNTARY,
+                            selectedDate = state.selectedDate,
+                            ramadanDay = null,
+                            suhoorTime = state.suhoorTime,
+                            iftarTime = state.iftarTime,
+                            timeUntilIftar = state.timeUntilIftar,
+                            timeUntilSuhoor = state.timeUntilSuhoor,
+                            isSuhoorTime = state.isSuhoorTime,
+                            onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                        )
+                    }
 
-            // Stats Grid
-            item {
-                StatsGrid(
-                    fasted = ramadanState.fastedDays,
-                    missed = ramadanState.missedDays,
-                    remaining = ramadanState.remainingDays
-                )
-            }
+                    // Calendar
+                    item {
+                        FastingCalendarSection(
+                            records = calendarState.records,
+                            selectedMonth = calendarState.selectedMonth,
+                            selectedYear = calendarState.selectedYear,
+                            onPreviousMonth = {
+                                val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
+                                val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                            },
+                            onNextMonth = {
+                                val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
+                                val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
+                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                            },
+                            onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) }
+                        )
+                    }
 
-            // Today's Fast
-            item {
-                TodayFastSection(
-                    isFasting = state.isFastingToday,
-                    fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
-                    fastType = state.selectedFastType,
-                    selectedDate = state.selectedDate,
-                    ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
-                    suhoorTime = state.suhoorTime,
-                    iftarTime = state.iftarTime,
-                    onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
-                )
-            }
+                    // Recommended Fasts
+                    item {
+                        RecommendedFastsSection()
+                    }
 
-            // Calendar
-            item {
-                FastingCalendarSection(
-                    records = calendarState.records,
-                    selectedMonth = calendarState.selectedMonth,
-                    selectedYear = calendarState.selectedYear,
-                    onPreviousMonth = {
-                        val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
-                        val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
-                        viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                    },
-                    onNextMonth = {
-                        val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
-                        val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
-                        viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                    },
-                    onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) }
-                )
-            }
-
-            // Recommended Fasts
-            item {
-                RecommendedFastsSection()
-            }
-
-            // Log Fast Button
-            item {
-                LogFastButton(
-                    onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
-                )
+                    // Log Fast Button
+                    item {
+                        LogFastButton(
+                            onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                        )
+                    }
+                }
+                2 -> {
+                    // Makeup Tab - Show makeup fasts inline
+                    item {
+                        MakeupFastsContent(
+                            makeupState = makeupState,
+                            onCompleteMakeupFast = { makeupFastId ->
+                                viewModel.onEvent(FastingEvent.CompleteMakeupFast(makeupFastId))
+                            }
+                        )
+                    }
+                }
             }
 
             item {
@@ -282,6 +357,131 @@ private fun RamadanBanner(
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RamadanCountdownCard(
+    modifier: Modifier = Modifier
+) {
+    val daysUntilRamadan = HijriDateCalculator.daysUntilNextRamadan()
+    val hijriToday = HijriDateCalculator.today()
+
+    // Get the target Ramadan year
+    val targetYear = if (hijriToday.month >= 9) hijriToday.year + 1 else hijriToday.year
+    val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(targetYear)
+    val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy")
+
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        NimazColors.FastingColors.Ramadan,
+                        NimazColors.FastingColors.Ramadan.copy(alpha = 0.8f)
+                    )
+                )
+            )
+            .padding(24.dp)
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "RAMADAN STARTS IN",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.8f),
+                letterSpacing = 2.sp
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "$daysUntilRamadan",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White
+            )
+            Text(
+                text = if (daysUntilRamadan == 1) "day" else "days",
+                style = MaterialTheme.typography.titleMedium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = ramadanStart.format(dateFormatter),
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.8f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun RamadanMissedFastsTracker(
+    currentDay: Int,
+    fastedDays: Int,
+    records: List<FastRecord>,
+    modifier: Modifier = Modifier
+) {
+    val today = LocalDate.now()
+
+    // Calculate how many past Ramadan days have no logged fast
+    // currentDay is the current day of Ramadan (1-30)
+    // fastedDays is the number of days logged as fasted
+    // Past days without a record are considered missed
+
+    val pastDaysInRamadan = currentDay - 1 // Days before today in Ramadan
+    val recordedDays = records.count { record ->
+        val recordDate = LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
+        recordDate.isBefore(today) && HijriDateCalculator.isRamadan(recordDate)
+    }
+
+    val unloggedDays = (pastDaysInRamadan - recordedDays).coerceAtLeast(0)
+
+    if (unloggedDays > 0) {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            color = Color(0xFFEF4444).copy(alpha = 0.1f),
+            border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f))
+        ) {
+            Row(
+                modifier = Modifier.padding(15.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFEF4444).copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "$unloggedDays",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFEF4444)
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (unloggedDays == 1) "Unlogged Day" else "Unlogged Days",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Tap on calendar dates to log your fasts",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         }
     }
@@ -359,6 +559,9 @@ private fun TodayFastSection(
     ramadanDay: Int?,
     suhoorTime: String,
     iftarTime: String,
+    timeUntilIftar: String,
+    timeUntilSuhoor: String,
+    isSuhoorTime: Boolean,
     onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -470,7 +673,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = "Completed",
+                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else "Completed",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -500,7 +703,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = "4h 32m remaining",
+                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) "Waiting" else "Completed",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -520,6 +723,7 @@ private fun FastingCalendarSection(
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
     onSelectDate: (LocalDate) -> Unit,
+    showRamadanIndicators: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
@@ -531,6 +735,18 @@ private fun FastingCalendarSection(
     val recordMap = remember(records) {
         records.associateBy { record ->
             LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
+        }
+    }
+
+    // Check which days are in Ramadan for indicators
+    val ramadanDaysInMonth = remember(selectedMonth, selectedYear) {
+        if (showRamadanIndicators) {
+            (1..daysInMonth).filter { day ->
+                val date = LocalDate.of(selectedYear, selectedMonth, day)
+                HijriDateCalculator.isRamadan(date)
+            }.toSet()
+        } else {
+            emptySet()
         }
     }
 
@@ -624,6 +840,7 @@ private fun FastingCalendarSection(
                                 val isFuture = date.isAfter(today)
                                 val isFasted = record?.status == FastStatus.FASTED
                                 val isMissed = record?.status == FastStatus.MAKEUP_DUE
+                                val isRamadanDay = dayNumber in ramadanDaysInMonth
 
                                 Box(
                                     modifier = Modifier
@@ -632,8 +849,11 @@ private fun FastingCalendarSection(
                                         .padding(2.dp)
                                         .clip(RoundedCornerShape(10.dp))
                                         .background(
-                                            if (isToday) MaterialTheme.colorScheme.primaryContainer
-                                            else Color.Transparent
+                                            when {
+                                                isToday -> MaterialTheme.colorScheme.primaryContainer
+                                                isRamadanDay -> NimazColors.FastingColors.Ramadan.copy(alpha = 0.15f)
+                                                else -> Color.Transparent
+                                            }
                                         )
                                         .clickable { onSelectDate(date) },
                                     contentAlignment = Alignment.Center
@@ -645,9 +865,10 @@ private fun FastingCalendarSection(
                                         Text(
                                             text = dayNumber.toString(),
                                             style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = if (isToday) FontWeight.SemiBold else FontWeight.Normal,
+                                            fontWeight = if (isToday || isRamadanDay) FontWeight.SemiBold else FontWeight.Normal,
                                             color = when {
                                                 isToday -> MaterialTheme.colorScheme.onPrimaryContainer
+                                                isRamadanDay && !isFuture -> NimazColors.FastingColors.Ramadan
                                                 isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
                                                 else -> MaterialTheme.colorScheme.onSurface
                                             }
@@ -683,8 +904,12 @@ private fun FastingCalendarSection(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     LegendItem(color = NimazColors.FastingColors.Fasted, label = "Fasted")
-                    Spacer(modifier = Modifier.width(20.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     LegendItem(color = Color(0xFFEF4444), label = "Missed")
+                    if (ramadanDaysInMonth.isNotEmpty()) {
+                        Spacer(modifier = Modifier.width(16.dp))
+                        LegendItem(color = NimazColors.FastingColors.Ramadan, label = "Ramadan")
+                    }
                 }
             }
         }
@@ -720,7 +945,20 @@ private fun LegendItem(
 private fun RecommendedFastsSection(
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    val today = LocalDate.now()
+    val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
+
+    // Calculate next Monday
+    val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
+    val mondayText = if (nextMonday == today) "Today" else "Next: ${nextMonday.format(dateFormatter)}"
+
+    // Calculate next Thursday
+    val nextThursday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
+    val thursdayText = if (nextThursday == today) "Today" else "Next: ${nextThursday.format(dateFormatter)}"
+
+    // Calculate Ayyam al-Beed status (13th, 14th, 15th of lunar month)
+    val ayyamText = calculateAyyamAlBeedStatus(today)
+
     Column(modifier = modifier) {
         Text(
             text = "Recommended Fasts",
@@ -736,25 +974,43 @@ private fun RecommendedFastsSection(
                 iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 name = "Monday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
-                nextDate = "Next: Mon",
-                onClick = { Toast.makeText(context, "Monday fasting details coming soon", Toast.LENGTH_SHORT).show() }
+                nextDate = mondayText
             )
             RecommendedFastCard(
                 icon = "\uD83D\uDCC5",
                 iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
                 name = "Thursday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
-                nextDate = "Next: Thu",
-                onClick = { Toast.makeText(context, "Thursday fasting details coming soon", Toast.LENGTH_SHORT).show() }
+                nextDate = thursdayText
             )
             RecommendedFastCard(
                 icon = "\uD83C\uDF15",
                 iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                 name = "Ayyam al-Beed",
-                description = "13th, 14th, 15th of each month",
-                nextDate = "Completed",
-                onClick = { Toast.makeText(context, "Ayyam al-Beed details coming soon", Toast.LENGTH_SHORT).show() }
+                description = "13th, 14th, 15th of lunar month",
+                nextDate = ayyamText
             )
+        }
+    }
+}
+
+private fun calculateAyyamAlBeedStatus(today: LocalDate): String {
+    val hijriDate = HijriDateCalculator.toHijri(today)
+    val hijriDay = hijriDate.day
+
+    return when (hijriDay) {
+        13, 14, 15 -> "Today" // Currently Ayyam al-Beed
+        in 1..12 -> {
+            // Calculate days until 13th
+            val daysUntil = 13 - hijriDay
+            if (daysUntil == 1) "Tomorrow" else "In $daysUntil days"
+        }
+        else -> {
+            // After the 15th, calculate days until next month's 13th
+            val daysInMonth = HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
+            val daysUntilNextMonth = daysInMonth - hijriDay
+            val daysUntil = daysUntilNextMonth + 13
+            "In $daysUntil days"
         }
     }
 }
@@ -766,7 +1022,6 @@ private fun RecommendedFastCard(
     name: String,
     description: String,
     nextDate: String,
-    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -774,7 +1029,6 @@ private fun RecommendedFastCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick)
             .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -844,5 +1098,483 @@ private fun LogFastButton(
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold
         )
+    }
+}
+
+// Makeup Fasts Content Components
+@Composable
+private fun MakeupFastsContent(
+    makeupState: com.arshadshah.nimaz.presentation.viewmodel.MakeupFastsUiState,
+    onCompleteMakeupFast: (Long) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val context = LocalContext.current
+
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        if (makeupState.allMakeupFasts.isEmpty()) {
+            MakeupEmptyState()
+        } else {
+            val completedFasts = makeupState.allMakeupFasts.filter {
+                it.status == MakeupFastStatus.COMPLETED || it.status == MakeupFastStatus.FIDYA_PAID
+            }
+            val completedCount = completedFasts.size
+            val totalCount = makeupState.allMakeupFasts.size
+
+            // Summary Card
+            MakeupSummaryCard(pendingCount = makeupState.pendingCount)
+
+            // Stats Grid
+            MakeupStatsGrid(
+                completedCount = completedCount,
+                pendingCount = makeupState.pendingCount,
+                totalCount = totalCount
+            )
+
+            // Info Banner
+            MakeupInfoBanner()
+
+            // Pending Section
+            if (makeupState.pendingMakeupFasts.isNotEmpty()) {
+                MakeupSectionHeader(
+                    title = "Pending",
+                    count = "${makeupState.pendingCount} pending"
+                )
+
+                makeupState.pendingMakeupFasts.forEach { makeupFast ->
+                    MakeupPendingFastCard(
+                        makeupFast = makeupFast,
+                        onComplete = { onCompleteMakeupFast(makeupFast.id) },
+                        onEdit = {
+                            Toast.makeText(context, "Edit makeup fast dialog coming soon", Toast.LENGTH_SHORT).show()
+                        }
+                    )
+                }
+            }
+
+            // Completed Section
+            if (completedFasts.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                MakeupSectionHeader(
+                    title = "Completed",
+                    count = "${completedFasts.size} fasts"
+                )
+
+                completedFasts.forEach { makeupFast ->
+                    MakeupCompletedFastItem(makeupFast = makeupFast)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MakeupSummaryCard(
+    pendingCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(20.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(OrangeAccent, OrangeDark)
+                )
+            )
+            .padding(25.dp)
+    ) {
+        Column {
+            Text(
+                text = "Fasts to Make Up",
+                style = MaterialTheme.typography.labelMedium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = "$pendingCount",
+                style = MaterialTheme.typography.displaySmall.copy(
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "remaining to complete",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun MakeupStatsGrid(
+    completedCount: Int,
+    pendingCount: Int,
+    totalCount: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        MakeupStatCard(
+            value = "$completedCount",
+            label = "Completed",
+            valueColor = GreenAccent,
+            modifier = Modifier.weight(1f)
+        )
+        MakeupStatCard(
+            value = "$pendingCount",
+            label = "Pending",
+            valueColor = OrangeAccent,
+            modifier = Modifier.weight(1f)
+        )
+        MakeupStatCard(
+            value = "$totalCount",
+            label = "Total",
+            valueColor = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun MakeupStatCard(
+    value: String,
+    label: String,
+    valueColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = value,
+                style = MaterialTheme.typography.headlineSmall.copy(
+                    fontWeight = FontWeight.Bold
+                ),
+                color = valueColor
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@Composable
+private fun MakeupInfoBanner(modifier: Modifier = Modifier) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+        border = BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+        )
+    ) {
+        Row(
+            modifier = Modifier.padding(15.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Info,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Text(
+                text = "Makeup fasts should ideally be completed before the next Ramadan. Fasting on Mondays and Thursdays is recommended.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 20.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun MakeupSectionHeader(
+    title: String,
+    count: String,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = count,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+@Composable
+private fun MakeupPendingFastCard(
+    makeupFast: MakeupFast,
+    onComplete: () -> Unit,
+    onEdit: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+    val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .format(formatter)
+
+    val displayDate = makeupFast.originalHijriDate ?: missedDate
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp)
+        ) {
+            // Header: date + reason on left, status badge on right
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = displayDate,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = makeupFast.reason,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(
+                    shape = RoundedCornerShape(8.dp),
+                    color = OrangeAccent.copy(alpha = 0.2f)
+                ) {
+                    Text(
+                        text = "Pending",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = OrangeAccent,
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Action buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                // Edit button
+                Surface(
+                    onClick = onEdit,
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Edit",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Mark Complete button
+                Surface(
+                    onClick = onComplete,
+                    shape = RoundedCornerShape(10.dp),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = "Mark Complete",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun MakeupCompletedFastItem(
+    makeupFast: MakeupFast,
+    modifier: Modifier = Modifier
+) {
+    val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
+    val missedDate = Instant.ofEpochMilli(makeupFast.originalDate)
+        .atZone(ZoneId.systemDefault())
+        .toLocalDate()
+        .format(formatter)
+
+    val completedDateText = makeupFast.completedDate?.let {
+        val date = Instant.ofEpochMilli(it)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .format(formatter)
+        if (makeupFast.status == MakeupFastStatus.FIDYA_PAID)
+            "Fidya paid on $date"
+        else
+            "Made up on $date"
+    } ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) "Fidya paid" else "Completed"
+
+    val originalLabel = makeupFast.originalHijriDate?.let {
+        "Originally: $it"
+    } ?: "Originally: $missedDate"
+
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
+            // Green check icon
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(GreenAccent.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = GreenAccent,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = completedDateText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = originalLabel,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun MakeupEmptyState(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 40.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(GreenAccent.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = GreenAccent,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "No Makeup Fasts",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "All your fasts are up to date!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }

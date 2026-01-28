@@ -13,13 +13,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -51,8 +49,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
+import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -65,6 +67,7 @@ fun HadithCollectionScreen(
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectionState.collectAsState()
+    val bookmarksState by viewModel.bookmarksState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val context = LocalContext.current
 
@@ -112,27 +115,42 @@ fun HadithCollectionScreen(
                 item {
                     StatsRow(
                         readToday = 0,
-                        bookmarked = state.books.size,
+                        bookmarked = bookmarksState.bookmarks.size,
                         dayStreak = 0
                     )
                 }
 
                 // Hadith of the Day
                 item {
+                    val hadithOfTheDay = state.hadithOfTheDay
                     HadithOfTheDayCard(
-                        arabicText = null,
-                        translationText = null,
-                        source = null,
+                        hadith = hadithOfTheDay,
                         onBookmarkClick = {
-                            Toast.makeText(context, "Bookmarking coming soon", Toast.LENGTH_SHORT).show()
+                            hadithOfTheDay?.let { hadith ->
+                                viewModel.onEvent(
+                                    HadithEvent.ToggleBookmark(
+                                        hadithId = hadith.id,
+                                        bookId = hadith.bookId,
+                                        hadithNumber = hadith.hadithNumberInBook
+                                    )
+                                )
+                            }
                         },
                         onShareClick = {
                             val shareText = buildString {
-                                appendLine("\u0645\u064e\u0646\u0652 \u0643\u064e\u0627\u0646\u064e \u064a\u064f\u0624\u0652\u0645\u0650\u0646\u064f \u0628\u0650\u0627\u0644\u0644\u064e\u0651\u0647\u0650 \u0648\u064e\u0627\u0644\u0652\u064a\u064e\u0648\u0652\u0645\u0650 \u0627\u0644\u0652\u0622\u062e\u0650\u0631\u0650 \u0641\u064e\u0644\u0652\u064a\u064e\u0642\u064f\u0644\u0652 \u062e\u064e\u064a\u0652\u0631\u064b\u0627 \u0623\u064e\u0648\u0652 \u0644\u0650\u064a\u064e\u0635\u0652\u0645\u064f\u062a\u0652")
-                                appendLine()
-                                appendLine("\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\"")
-                                appendLine()
-                                appendLine("Sahih al-Bukhari 6018")
+                                if (hadithOfTheDay != null) {
+                                    appendLine(hadithOfTheDay.textArabic)
+                                    appendLine()
+                                    appendLine(hadithOfTheDay.textEnglish)
+                                    appendLine()
+                                    appendLine(hadithOfTheDay.reference ?: "")
+                                } else {
+                                    appendLine("مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ")
+                                    appendLine()
+                                    appendLine("\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\"")
+                                    appendLine()
+                                    appendLine("Sahih al-Bukhari 6018")
+                                }
                             }
                             val sendIntent = Intent().apply {
                                 action = Intent.ACTION_SEND
@@ -162,30 +180,6 @@ fun HadithCollectionScreen(
                     BooksGrid(
                         books = state.books,
                         onBookClick = onNavigateToBook,
-                        modifier = Modifier.padding(horizontal = 20.dp)
-                    )
-                }
-
-                // Categories Section Header
-                item {
-                    SectionHeader(
-                        title = "Browse by Topic",
-                        showSeeAll = false,
-                        modifier = Modifier.padding(
-                            start = 20.dp,
-                            end = 20.dp,
-                            top = 16.dp,
-                            bottom = 8.dp
-                        )
-                    )
-                }
-
-                // Categories List
-                item {
-                    CategoriesList(
-                        onCategoryClick = { categoryName ->
-                            Toast.makeText(context, "Category browsing coming soon", Toast.LENGTH_SHORT).show()
-                        },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
@@ -262,13 +256,16 @@ private fun StatCard(
 
 @Composable
 private fun HadithOfTheDayCard(
-    arabicText: String?,
-    translationText: String?,
-    source: String?,
+    hadith: Hadith?,
     onBookmarkClick: () -> Unit = {},
     onShareClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    // Fallback values when hadith is null
+    val arabicText = hadith?.textArabic ?: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ"
+    val translationText = hadith?.textEnglish ?: "\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\""
+    val source = hadith?.reference ?: "Sahih al-Bukhari 6018"
+
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
@@ -318,13 +315,11 @@ private fun HadithOfTheDayCard(
 
                 Spacer(modifier = Modifier.height(15.dp))
 
-                // Arabic text
-                Text(
-                    text = arabicText ?: "\u0645\u064e\u0646\u0652 \u0643\u064e\u0627\u0646\u064e \u064a\u064f\u0624\u0652\u0645\u0650\u0646\u064f \u0628\u0650\u0627\u0644\u0644\u064e\u0651\u0647\u0650 \u0648\u064e\u0627\u0644\u0652\u064a\u064e\u0648\u0652\u0645\u0650 \u0627\u0644\u0652\u0622\u062e\u0650\u0631\u0650 \u0641\u064e\u0644\u0652\u064a\u064e\u0642\u064f\u0644\u0652 \u062e\u064e\u064a\u0652\u0631\u064b\u0627 \u0623\u064e\u0648\u0652 \u0644\u0650\u064a\u064e\u0635\u0652\u0645\u064f\u062a\u0652",
-                    style = MaterialTheme.typography.headlineSmall,
-                    textAlign = TextAlign.End,
+                // Arabic text - using HadithArabicText for proper Amiri font rendering
+                HadithArabicText(
+                    text = arabicText,
+                    size = ArabicTextSize.MEDIUM,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                    lineHeight = 40.sp,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -332,7 +327,7 @@ private fun HadithOfTheDayCard(
 
                 // English translation
                 Text(
-                    text = translationText ?: "\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\"",
+                    text = translationText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 24.sp
@@ -347,7 +342,7 @@ private fun HadithOfTheDayCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = source ?: "Sahih al-Bukhari 6018",
+                        text = source,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Medium
@@ -526,99 +521,6 @@ private fun BookCard(
 
 private fun formatNumber(number: Int): String {
     return String.format("%,d", number)
-}
-
-@Composable
-private fun CategoriesList(
-    onCategoryClick: (String) -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    val categories = listOf(
-        CategoryData("Faith & Belief", "847 hadith"),
-        CategoryData("Prayer & Worship", "1,243 hadith"),
-        CategoryData("Good Character", "632 hadith"),
-        CategoryData("Family & Marriage", "423 hadith"),
-        CategoryData("Business & Trade", "318 hadith")
-    )
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        categories.forEach { category ->
-            CategoryItem(
-                name = category.name,
-                count = category.count,
-                onClick = { onCategoryClick(category.name) }
-            )
-        }
-    }
-}
-
-private data class CategoryData(val name: String, val count: String)
-
-@Composable
-private fun CategoryItem(
-    name: String,
-    count: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Category icon
-            Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(15.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = name,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = count,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Icon(
-                imageVector = Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
 }
 
 @Composable

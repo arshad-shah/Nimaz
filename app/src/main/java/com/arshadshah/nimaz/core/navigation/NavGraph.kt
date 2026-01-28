@@ -39,10 +39,11 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
-import com.arshadshah.nimaz.presentation.screens.fasting.MakeupFastsScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
@@ -233,7 +234,6 @@ fun NavGraph() {
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
                     onNavigateToQadaPrayers = { navController.navigate(Route.QadaPrayers) },
-                    onNavigateToMakeupFasts = { navController.navigate(Route.MakeupFasts) },
                     onShareApp = {
                         val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -337,13 +337,12 @@ fun NavGraph() {
 
             composable<Route.HadithBook> { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HadithBook>()
-                HadithCollectionScreen(
+                HadithChaptersScreen(
+                    bookId = args.bookId,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToBook = { bookId ->
-                        navController.navigate(Route.HadithBook(bookId))
-                    },
-                    onNavigateToSearch = { navController.navigate(Route.HadithSearch) },
-                    onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) }
+                    onNavigateToChapter = { bookId, chapterId ->
+                        navController.navigate(Route.HadithChapter(bookId, chapterId))
+                    }
                 )
             }
 
@@ -405,20 +404,18 @@ fun NavGraph() {
                     onNavigateToCategory = { categoryId ->
                         navController.navigate(Route.DuaCategory(categoryId))
                     },
-                    onNavigateToFavorites = { navController.navigate(Route.DuaFavorites) },
-                    onNavigateToSearch = { navController.navigate(Route.DuaSearch) }
+                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) }
                 )
             }
 
             composable<Route.DuaCategory> { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.DuaCategory>()
-                DuasCollectionScreen(
+                DuaCategoryScreen(
+                    categoryId = args.categoryId,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToCategory = { categoryId ->
-                        navController.navigate(Route.DuaCategory(categoryId))
-                    },
-                    onNavigateToFavorites = { navController.navigate(Route.DuaFavorites) },
-                    onNavigateToSearch = { navController.navigate(Route.DuaSearch) }
+                    onNavigateToDua = { duaId ->
+                        navController.navigate(Route.DuaReader(duaId))
+                    }
                 )
             }
 
@@ -436,8 +433,7 @@ fun NavGraph() {
                     onNavigateToCategory = { categoryId ->
                         navController.navigate(Route.DuaCategory(categoryId))
                     },
-                    onNavigateToFavorites = { },
-                    onNavigateToSearch = { navController.navigate(Route.DuaSearch) }
+                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) }
                 )
             }
 
@@ -499,7 +495,6 @@ fun NavGraph() {
             composable<Route.FastingHome> {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToMakeup = { navController.navigate(Route.MakeupFasts) },
                     onNavigateToHistory = { navController.navigate(Route.FastingStats) }
                 )
             }
@@ -507,7 +502,6 @@ fun NavGraph() {
             composable<Route.FastingTracker> {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToMakeup = { navController.navigate(Route.MakeupFasts) },
                     onNavigateToHistory = { navController.navigate(Route.FastingStats) }
                 )
             }
@@ -515,14 +509,7 @@ fun NavGraph() {
             composable<Route.FastingStats> {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToMakeup = { navController.navigate(Route.MakeupFasts) },
                     onNavigateToHistory = { }
-                )
-            }
-
-            composable<Route.MakeupFasts> {
-                MakeupFastsScreen(
-                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
