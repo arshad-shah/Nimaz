@@ -36,9 +36,11 @@ class PrayerNotificationScheduler @Inject constructor(
         const val EXTRA_PRAYER_TYPE = "prayer_type"
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_TIME = "prayer_time"
+        const val EXTRA_IS_PRE_REMINDER = "is_pre_reminder"
 
         // Request codes for different prayers (use prayer ordinal * 10 for different notification types)
         private const val REQUEST_CODE_BASE = 1000
+        private const val PRE_REMINDER_REQUEST_CODE_BASE = 2000
         private const val TEST_NOTIFICATION_ID = 8888
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
@@ -82,12 +84,16 @@ class PrayerNotificationScheduler @Inject constructor(
      * This should be called after boot, when settings change, or at midnight.
      *
      * @param enabledPrayers If provided, only schedule for these prayer types. If null, schedule all non-sunrise prayers.
+     * @param preReminderEnabled If true, schedule pre-reminder notifications.
+     * @param preReminderMinutes Minutes before prayer to show pre-reminder.
      */
     fun scheduleTodaysPrayerNotifications(
         latitude: Double,
         longitude: Double,
         notificationsEnabled: Boolean,
-        enabledPrayers: Set<PrayerType>? = null
+        enabledPrayers: Set<PrayerType>? = null,
+        preReminderEnabled: Boolean = false,
+        preReminderMinutes: Int = 15
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
@@ -99,7 +105,10 @@ class PrayerNotificationScheduler @Inject constructor(
         }
 
         // Cancel all first, then reschedule only enabled ones
-        PrayerType.entries.forEach { cancelPrayerNotification(it) }
+        PrayerType.entries.forEach {
+            cancelPrayerNotification(it)
+            cancelPreReminderNotification(it)
+        }
 
         val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude, LocalDate.now())
         val now = LocalDateTime.now()
@@ -117,11 +126,85 @@ class PrayerNotificationScheduler @Inject constructor(
             // Only schedule if prayer time is in the future
             if (prayerLocalDateTime.isAfter(now)) {
                 schedulePrayerNotification(prayerTime.type, prayerLocalDateTime)
+
+                // Schedule pre-reminder if enabled (not for sunrise)
+                if (preReminderEnabled && prayerTime.type != PrayerType.SUNRISE) {
+                    val preReminderTime = prayerLocalDateTime.minusMinutes(preReminderMinutes.toLong())
+                    if (preReminderTime.isAfter(now)) {
+                        schedulePreReminderNotification(prayerTime.type, preReminderTime)
+                    }
+                }
             }
         }
 
         // Schedule midnight reschedule for tomorrow
         scheduleMidnightReschedule()
+    }
+
+    /**
+     * Schedule a pre-reminder notification for a prayer.
+     */
+    private fun schedulePreReminderNotification(
+        prayerType: PrayerType,
+        reminderTime: LocalDateTime
+    ) {
+        // Use explicit intent for BootReceiver (required for Android 8.0+)
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_PRAYER_NOTIFICATION
+            putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
+            putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
+            putExtra(EXTRA_PRAYER_TIME, reminderTime.toString())
+            putExtra(EXTRA_IS_PRE_REMINDER, true)
+        }
+
+        val requestCode = PRE_REMINDER_REQUEST_CODE_BASE + prayerType.ordinal
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val triggerTimeMillis = reminderTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        }
+    }
+
+    /**
+     * Cancel pre-reminder notification for a specific prayer.
+     */
+    private fun cancelPreReminderNotification(prayerType: PrayerType) {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_PRAYER_NOTIFICATION
+        }
+
+        val requestCode = PRE_REMINDER_REQUEST_CODE_BASE + prayerType.ordinal
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            requestCode,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+            it.cancel()
+        }
     }
 
     /**
@@ -131,8 +214,9 @@ class PrayerNotificationScheduler @Inject constructor(
         prayerType: PrayerType,
         prayerTime: LocalDateTime
     ) {
-        val intent = Intent(ACTION_PRAYER_NOTIFICATION).apply {
-            setPackage(context.packageName)
+        // Use explicit intent for BootReceiver (required for Android 8.0+)
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_PRAYER_NOTIFICATION
             putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
             putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
             putExtra(EXTRA_PRAYER_TIME, prayerTime.toString())
@@ -171,8 +255,8 @@ class PrayerNotificationScheduler @Inject constructor(
      * Cancel notification for a specific prayer.
      */
     fun cancelPrayerNotification(prayerType: PrayerType) {
-        val intent = Intent(ACTION_PRAYER_NOTIFICATION).apply {
-            setPackage(context.packageName)
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_PRAYER_NOTIFICATION
         }
 
         val requestCode = REQUEST_CODE_BASE + prayerType.ordinal
@@ -195,6 +279,7 @@ class PrayerNotificationScheduler @Inject constructor(
     fun cancelAllPrayerNotifications() {
         PrayerType.entries.forEach { prayerType ->
             cancelPrayerNotification(prayerType)
+            cancelPreReminderNotification(prayerType)
         }
         cancelMidnightReschedule()
     }
@@ -216,7 +301,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
     /**
      * Send test notifications for all prayers to validate the notification system.
-     * Notifications are staggered by 500ms to ensure they all appear.
+     * Uses explicit broadcasts to ensure BootReceiver receives them on Android 8.0+.
      */
     fun sendAllPrayerTestNotifications() {
         val prayers = listOf(
@@ -228,16 +313,16 @@ class PrayerNotificationScheduler @Inject constructor(
             PrayerType.ISHA to "07:45 PM"
         )
 
-        prayers.forEachIndexed { index, (prayerType, time) ->
-            // Create the intent that would be received by BootReceiver
-            val intent = Intent(ACTION_PRAYER_NOTIFICATION).apply {
-                setPackage(context.packageName)
+        prayers.forEach { (prayerType, time) ->
+            // Create explicit intent for BootReceiver (required for Android 8.0+)
+            val intent = Intent(context, BootReceiver::class.java).apply {
+                action = ACTION_PRAYER_NOTIFICATION
                 putExtra(EXTRA_PRAYER_TYPE, prayerType.name)
                 putExtra(EXTRA_PRAYER_NAME, prayerType.displayName)
                 putExtra(EXTRA_PRAYER_TIME, time)
             }
 
-            // Send the broadcast to trigger the full notification flow (including adhan)
+            // Send explicit broadcast to trigger the full notification flow
             context.sendBroadcast(intent)
         }
     }
@@ -246,8 +331,9 @@ class PrayerNotificationScheduler @Inject constructor(
      * Schedule a midnight alarm to reschedule tomorrow's prayers.
      */
     private fun scheduleMidnightReschedule() {
-        val intent = Intent(ACTION_MIDNIGHT_RESCHEDULE).apply {
-            setPackage(context.packageName)
+        // Use explicit intent for BootReceiver (required for Android 8.0+)
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_MIDNIGHT_RESCHEDULE
         }
 
         val pendingIntent = PendingIntent.getBroadcast(
@@ -280,8 +366,8 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun cancelMidnightReschedule() {
-        val intent = Intent(ACTION_MIDNIGHT_RESCHEDULE).apply {
-            setPackage(context.packageName)
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_MIDNIGHT_RESCHEDULE
         }
 
         val pendingIntent = PendingIntent.getBroadcast(

@@ -646,7 +646,9 @@ class SettingsViewModel @Inject constructor(
             latitude = lat,
             longitude = lng,
             notificationsEnabled = notifState.notificationsEnabled,
-            enabledPrayers = enabledPrayers
+            enabledPrayers = enabledPrayers,
+            preReminderEnabled = notifState.showReminderBefore,
+            preReminderMinutes = notifState.reminderMinutes
         )
     }
 

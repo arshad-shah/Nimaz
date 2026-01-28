@@ -221,39 +221,76 @@ class AdhanAudioManager @Inject constructor(
     }
 
     /**
-     * Generates a simple beep sound and saves it as a WAV file.
-     * MediaPlayer can play WAV files regardless of the file extension.
+     * Generates a gentle, pleasant chime sound and saves it as a WAV file.
+     * Creates a soft, melodic notification tone instead of a harsh beep.
      */
     private fun generateBeepSound(outputFile: File): Boolean {
         return try {
             updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Downloading(0))
 
             val sampleRate = 44100
-            val durationMs = 1500 // 1.5 second beep
-            val frequency = 800.0 // Hz
-            val numSamples = (sampleRate * durationMs) / 1000
 
-            // Generate sine wave samples with fade in/out
+            // Create a gentle 3-note chime pattern
+            // Using pentatonic scale frequencies for a pleasant, harmonious sound
+            val chimeNotes = listOf(
+                ChimeNote(frequency = 523.25, durationMs = 400, delayMs = 0),      // C5 - soft start
+                ChimeNote(frequency = 659.25, durationMs = 400, delayMs = 350),    // E5 - rising
+                ChimeNote(frequency = 783.99, durationMs = 600, delayMs = 700)     // G5 - gentle end
+            )
+
+            // Calculate total duration
+            val totalDurationMs = chimeNotes.maxOf { it.delayMs + it.durationMs } + 200 // Extra 200ms for tail
+            val numSamples = (sampleRate * totalDurationMs) / 1000
+
             val samples = ShortArray(numSamples)
-            val fadeLength = numSamples / 10 // 10% fade
 
-            for (i in 0 until numSamples) {
-                val angle = 2.0 * Math.PI * i / (sampleRate / frequency)
-                var amplitude = sin(angle) * Short.MAX_VALUE * 0.7
+            updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Downloading(30))
 
-                // Apply fade in
-                if (i < fadeLength) {
-                    amplitude *= i.toDouble() / fadeLength
+            // Generate each chime note and mix them together
+            for (note in chimeNotes) {
+                val noteStartSample = (sampleRate * note.delayMs) / 1000
+                val noteSamples = (sampleRate * note.durationMs) / 1000
+                val fadeInLength = noteSamples / 8   // Quick fade in (12.5%)
+                val fadeOutLength = noteSamples / 3  // Long, gentle fade out (33%)
+
+                for (i in 0 until noteSamples) {
+                    val sampleIndex = noteStartSample + i
+                    if (sampleIndex >= numSamples) break
+
+                    val angle = 2.0 * Math.PI * i / (sampleRate / note.frequency)
+
+                    // Mix fundamental with soft overtones for a warmer sound
+                    var amplitude = sin(angle) * 0.6                    // Fundamental
+                    amplitude += sin(angle * 2) * 0.15                  // 2nd harmonic (soft)
+                    amplitude += sin(angle * 3) * 0.05                  // 3rd harmonic (very soft)
+
+                    amplitude *= Short.MAX_VALUE * 0.35  // Lower overall volume for gentleness
+
+                    // Smooth envelope with longer fade out
+                    val envelope = when {
+                        i < fadeInLength -> {
+                            // Smooth sine fade in
+                            val t = i.toDouble() / fadeInLength
+                            (1 - kotlin.math.cos(t * Math.PI)) / 2
+                        }
+                        i > noteSamples - fadeOutLength -> {
+                            // Exponential fade out for natural decay
+                            val t = (noteSamples - i).toDouble() / fadeOutLength
+                            t * t  // Quadratic decay
+                        }
+                        else -> 1.0
+                    }
+
+                    amplitude *= envelope
+
+                    // Mix with existing sample (additive)
+                    val existingValue = samples[sampleIndex].toInt()
+                    val newValue = (existingValue + amplitude.toInt()).coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                    samples[sampleIndex] = newValue.toShort()
                 }
-                // Apply fade out
-                if (i > numSamples - fadeLength) {
-                    amplitude *= (numSamples - i).toDouble() / fadeLength
-                }
-
-                samples[i] = amplitude.toInt().toShort()
             }
 
-            updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Downloading(50))
+            updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Downloading(70))
 
             // Write directly to output file (WAV format, MediaPlayer handles it fine)
             writeWavFile(outputFile, samples, sampleRate)
@@ -266,6 +303,12 @@ class AdhanAudioManager @Inject constructor(
             false
         }
     }
+
+    private data class ChimeNote(
+        val frequency: Double,
+        val durationMs: Int,
+        val delayMs: Int
+    )
 
     /**
      * Writes audio samples to a WAV file.

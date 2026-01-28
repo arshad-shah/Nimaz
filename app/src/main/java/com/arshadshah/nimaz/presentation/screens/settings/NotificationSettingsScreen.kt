@@ -235,14 +235,53 @@ fun NotificationSettingsScreen(
                     SectionTitle(title = "ADHAN SOUND")
                 }
 
+                // Global Adhan Toggle
                 item {
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(16.dp),
                         color = MaterialTheme.colorScheme.surfaceContainer
                     ) {
-                        Column {
-                            adhanSounds.forEachIndexed { index, sound ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = "Enable Adhan Sound",
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Play adhan at prayer times",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = notificationState.adhanEnabled,
+                                onCheckedChange = {
+                                    viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                // Muezzin Selection (only show if adhan is enabled)
+                if (notificationState.adhanEnabled) {
+                    item {
+                        Surface(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(16.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainer
+                        ) {
+                            Column {
+                                adhanSounds.forEachIndexed { index, sound ->
                                 val soundDownloadState = downloadState[sound]
                                 val isThisPlaying = isPlaying && currentlyPlaying == sound
                                 val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
@@ -281,6 +320,7 @@ fun NotificationSettingsScreen(
                     }
                     Spacer(modifier = Modifier.height(24.dp))
                 }
+                } // End of if (notificationState.adhanEnabled)
 
                 // Additional Alerts Section
                 item {

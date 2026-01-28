@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
@@ -149,7 +150,16 @@ class AdhanPlaybackService : Service(), MediaPlayer.OnCompletionListener, MediaP
             requestAudioFocus()
 
             // Start foreground with notification
-            startForeground(NOTIFICATION_ID, createPlaybackNotification(prayerName))
+            // On Android 14+, must specify the foreground service type
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    NOTIFICATION_ID,
+                    createPlaybackNotification(prayerName),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                )
+            } else {
+                startForeground(NOTIFICATION_ID, createPlaybackNotification(prayerName))
+            }
 
             // Create and configure MediaPlayer
             mediaPlayer = MediaPlayer().apply {

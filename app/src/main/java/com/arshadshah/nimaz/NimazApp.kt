@@ -47,10 +47,27 @@ class NimazApp : Application(), Configuration.Provider {
             try {
                 val prefs = preferencesDataStore.userPreferences.first()
                 if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
+                    // Build enabled prayers set
+                    val enabledPrayers = buildSet {
+                        if (preferencesDataStore.fajrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.FAJR)
+                        if (preferencesDataStore.sunriseNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.SUNRISE)
+                        if (preferencesDataStore.dhuhrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.DHUHR)
+                        if (preferencesDataStore.asrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ASR)
+                        if (preferencesDataStore.maghribNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.MAGHRIB)
+                        if (preferencesDataStore.ishaNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ISHA)
+                    }
+
+                    // Get pre-reminder settings
+                    val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
+                    val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+
                     prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
                         latitude = prefs.latitude,
                         longitude = prefs.longitude,
-                        notificationsEnabled = prefs.prayerNotificationsEnabled
+                        notificationsEnabled = prefs.prayerNotificationsEnabled,
+                        enabledPrayers = enabledPrayers,
+                        preReminderEnabled = preReminderEnabled,
+                        preReminderMinutes = preReminderMinutes
                     )
                 }
             } catch (e: Exception) {
