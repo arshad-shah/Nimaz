@@ -173,20 +173,20 @@ fun QiblaScreen(
                     // Outer rings (static)
                     CompassRings(modifier = Modifier.fillMaxSize())
 
-                    // Rotating group: direction markers + dial + ticks + qibla arrow
+                    // Rotating group: dial + ticks + qibla arrow + direction markers
                     Box(
                         modifier = Modifier
                             .size(280.dp)
                             .rotate(-animatedAzimuth),
                         contentAlignment = Alignment.Center
                     ) {
-                        DirectionMarkers(modifier = Modifier.fillMaxSize())
                         CompassDial(
                             qiblaBearing = state.qiblaDirection?.bearing?.toFloat() ?: 0f,
                             isFacingQibla = state.isFacingQibla,
                             goldColor = goldColor,
                             modifier = Modifier.size(250.dp)
                         )
+                        DirectionMarkers(modifier = Modifier.fillMaxSize())
                     }
 
                     // Center dot (static — stays in center)
@@ -496,7 +496,7 @@ private fun DirectionMarkers(modifier: Modifier = Modifier) {
             )
             val textResult = textMeasurer.measure(label, style)
             val angle = Math.toRadians(angleDeg.toDouble())
-            val markerRadius = radius - 18.dp.toPx()
+            val markerRadius = radius - 30.dp.toPx()
             val x = center.x + (markerRadius * sin(angle)).toFloat() - textResult.size.width / 2
             val y = center.y - (markerRadius * cos(angle)).toFloat() - textResult.size.height / 2
 

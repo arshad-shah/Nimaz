@@ -255,6 +255,8 @@ class QuranViewModel @Inject constructor(
                             ayahNumber = ayah.ayahNumber
                         )
                     }
+                    // SurahInfoScreen always plays full surah continuously
+                    audioManager.setContinuousPlayback(true)
                     audioManager.playSurah(surahNumber, surahWithAyahs.surah.nameEnglish, audioItems)
                 }
         }
@@ -272,6 +274,8 @@ class QuranViewModel @Inject constructor(
                 ayahNumber = ayah.ayahNumber
             )
         }
+        // Respect continuousReading setting from QuranReaderScreen
+        audioManager.setContinuousPlayback(_readerState.value.continuousReading)
         audioManager.playSurah(surahNumber, surahName, audioItems)
     }
 
@@ -287,6 +291,8 @@ class QuranViewModel @Inject constructor(
             )
         }
         val title = _readerState.value.title.ifEmpty { "Surah $surahNumber" }
+        // Respect continuousReading setting from QuranReaderScreen
+        audioManager.setContinuousPlayback(_readerState.value.continuousReading)
         audioManager.playFromAyah(ayahGlobalId, audioItems, title)
     }
 

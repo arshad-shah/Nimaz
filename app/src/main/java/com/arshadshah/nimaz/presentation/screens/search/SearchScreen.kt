@@ -101,7 +101,8 @@ fun SearchScreen(
                     placeholder = "Search Quran, Hadith, Duas...",
                     modifier = Modifier.fillMaxWidth(),
                     showClearButton = state.query.isNotEmpty(),
-                    onClear = { viewModel.onEvent(SearchEvent.ClearSearch) }
+                    onClear = { viewModel.onEvent(SearchEvent.ClearSearch) },
+                    onSearch = { viewModel.onEvent(SearchEvent.ExecuteSearch) }
                 )
             }
 

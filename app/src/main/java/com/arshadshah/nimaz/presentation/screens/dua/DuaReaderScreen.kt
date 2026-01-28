@@ -175,9 +175,6 @@ fun DuaReaderScreen(
 
                     // Bottom actions
                     BottomActions(
-                        onAudioClick = {
-                            Toast.makeText(context, "Audio playback coming soon", Toast.LENGTH_SHORT).show()
-                        },
                         onShareClick = {
                             val textToShare = buildString {
                                 appendLine(dua.titleEnglish)
@@ -585,7 +582,6 @@ private fun VirtueCard(
 
 @Composable
 private fun BottomActions(
-    onAudioClick: () -> Unit,
     onShareClick: () -> Unit,
     onDoneClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -601,33 +597,6 @@ private fun BottomActions(
                 .padding(horizontal = 20.dp, vertical = 15.dp),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // Audio button
-            Surface(
-                onClick = onAudioClick,
-                modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHighest
-            ) {
-                Row(
-                    modifier = Modifier.padding(vertical = 14.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Audio",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
             // Share button
             Surface(
                 onClick = onShareClick,

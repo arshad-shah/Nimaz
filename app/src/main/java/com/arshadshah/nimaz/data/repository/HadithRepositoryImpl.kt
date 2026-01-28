@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -115,12 +116,18 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override fun searchHadiths(query: String): Flow<List<HadithSearchResult>> {
-        return hadithDao.searchHadiths(query).map { entities ->
+        return combine(
+            hadithDao.getAllBooks(),
+            hadithDao.searchHadiths(query)
+        ) { books, entities ->
+            // Create a map from book id to book name for lookup
+            val bookMap = books.associate { it.id to it.nameEnglish }
+
             entities.map { hadith ->
                 HadithSearchResult(
                     hadith = hadith.toDomain(),
-                    bookName = "",
-                    chapterName = "",
+                    bookName = bookMap[hadith.bookId] ?: "Book ${hadith.bookId}",
+                    chapterName = "Chapter ${hadith.chapterId}",
                     matchedText = hadith.textEnglish
                 )
             }
@@ -128,12 +135,17 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override fun searchHadithsInBook(bookId: String, query: String): Flow<List<HadithSearchResult>> {
-        return hadithDao.searchHadithsInBook(bookId.toIntOrNull() ?: 0, query).map { entities ->
+        return combine(
+            hadithDao.getAllBooks(),
+            hadithDao.searchHadithsInBook(bookId.toIntOrNull() ?: 0, query)
+        ) { books, entities ->
+            val bookMap = books.associate { it.id to it.nameEnglish }
+
             entities.map { hadith ->
                 HadithSearchResult(
                     hadith = hadith.toDomain(),
-                    bookName = "",
-                    chapterName = "",
+                    bookName = bookMap[hadith.bookId] ?: "Book ${hadith.bookId}",
+                    chapterName = "Chapter ${hadith.chapterId}",
                     matchedText = hadith.textEnglish
                 )
             }

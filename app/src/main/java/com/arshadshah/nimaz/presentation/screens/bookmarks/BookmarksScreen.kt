@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -75,15 +74,6 @@ fun BookmarksScreen(
             NimazBackTopAppBar(
                 title = "Bookmarks",
                 onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = { /* Search action */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
                 scrollBehavior = scrollBehavior
             )
         }

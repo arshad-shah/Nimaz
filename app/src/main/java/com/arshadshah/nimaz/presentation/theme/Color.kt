@@ -104,6 +104,7 @@ object NimazColors {
         val Jamaah = Color(0xFF2196F3)
         val Late = Color(0xFFFF9800)         // Orange for late prayers
         val Active = Color(0xFF4CAF50)        // Green for active state
+        val Partial = Color(0xFFFFA726)       // Orange for partial completion (some prayers prayed)
     }
 
     // Fasting Colors

@@ -32,10 +32,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -65,15 +68,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.QuranBookmark
-import com.arshadshah.nimaz.domain.model.QuranSearchResult
-import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
-import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -87,11 +87,11 @@ fun QuranHomeScreen(
     onNavigateToBookmarks: () -> Unit,
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSurahInfo: (Int) -> Unit = {},
+    onNavigateToSearch: () -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
     val bookmarksState by viewModel.bookmarksState.collectAsState()
-    val searchState by viewModel.searchState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
@@ -101,6 +101,33 @@ fun QuranHomeScreen(
                 title = "Quran",
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    // Search icon
+                    IconButton(onClick = onNavigateToSearch) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search"
+                        )
+                    }
+                    // Bookmarks icon with badge - navigates to dedicated bookmarks screen
+                    IconButton(onClick = onNavigateToBookmarks) {
+                        BadgedBox(
+                            badge = {
+                                if (bookmarksState.bookmarks.isNotEmpty()) {
+                                    Badge {
+                                        Text(
+                                            text = bookmarksState.bookmarks.size.toString(),
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Bookmark,
+                                contentDescription = "Bookmarks"
+                            )
+                        }
+                    }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -116,94 +143,42 @@ fun QuranHomeScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            // Search Bar
-            NimazSearchBar(
-                query = state.searchQuery,
-                onQueryChange = { viewModel.onEvent(QuranEvent.Search(it)) },
-                placeholder = "Search surah, ayah, or keyword...",
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                showClearButton = state.searchQuery.isNotEmpty(),
-                onClear = { viewModel.onEvent(QuranEvent.ClearSearch) }
+            // Top-level tabs: Home / Browse / Favorites (Bookmarks moved to topbar icon)
+            NimazPillTabs(
+                tabs = listOf("Home", "Browse", "Favorites"),
+                selectedIndex = state.topTab.coerceIn(0, 2),
+                onTabSelect = { viewModel.onEvent(QuranEvent.SetTopTab(it)) },
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
             )
 
-            // Show search results when query is active
-            if (state.searchQuery.isNotEmpty() && (searchState.results.isNotEmpty() || searchState.isSearching)) {
-                if (searchState.isSearching) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        item {
-                            Text(
-                                text = "${searchState.results.size} results found",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                        items(
-                            items = searchState.results,
-                            key = { "search_${it.ayah.id}_${it.searchType}" }
-                        ) { result ->
-                            SearchResultItem(
-                                result = result,
-                                onClick = { onNavigateToSurah(result.ayah.surahNumber) }
-                            )
-                        }
-                    }
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             } else {
-                // Top-level tabs: Home / Browse / Favorites / Bookmarks
-                NimazPillTabs(
-                    tabs = listOf("Home", "Browse", "Favorites", "Bookmarks"),
-                    selectedIndex = state.topTab,
-                    onTabSelect = { viewModel.onEvent(QuranEvent.SetTopTab(it)) },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                )
-
-                if (state.isLoading) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    when (state.topTab) {
-                        0 -> HomeTabContent(
-                            state = state,
-                            bookmarks = bookmarksState.bookmarks,
-                            onNavigateToSurah = onNavigateToSurah,
-                            onNavigateToBookmarks = onNavigateToBookmarks
-                        )
-                        1 -> BrowseTabContent(
-                            state = state,
-                            onNavigateToSurah = onNavigateToSurah,
-                            onNavigateToJuz = onNavigateToJuz,
-                            onNavigateToPage = onNavigateToPage,
-                            onTabSelect = { viewModel.onEvent(QuranEvent.SetTab(it)) },
-                            onNavigateToSurahInfo = onNavigateToSurahInfo
-                        )
-                        2 -> FavoritesTabContent(
-                            favorites = state.favorites,
-                            surahs = state.surahs,
-                            onNavigateToSurah = onNavigateToSurah
-                        )
-                        3 -> BookmarksTabContent(
-                            bookmarks = bookmarksState.bookmarks,
-                            onNavigateToSurah = onNavigateToSurah
-                        )
-                    }
+                when (state.topTab.coerceIn(0, 2)) {
+                    0 -> HomeTabContent(
+                        state = state,
+                        bookmarks = bookmarksState.bookmarks,
+                        onNavigateToSurah = onNavigateToSurah,
+                        onNavigateToBookmarks = onNavigateToBookmarks
+                    )
+                    1 -> BrowseTabContent(
+                        state = state,
+                        onNavigateToSurah = onNavigateToSurah,
+                        onNavigateToJuz = onNavigateToJuz,
+                        onNavigateToPage = onNavigateToPage,
+                        onTabSelect = { viewModel.onEvent(QuranEvent.SetTab(it)) },
+                        onNavigateToSurahInfo = onNavigateToSurahInfo
+                    )
+                    2 -> FavoritesTabContent(
+                        favorites = state.favorites,
+                        surahs = state.surahs,
+                        onNavigateToSurah = onNavigateToSurah
+                    )
                 }
             }
         }
@@ -1193,70 +1168,3 @@ private fun SurahListItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun SearchResultItem(
-    result: QuranSearchResult,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (result.surahName.isNotEmpty()) result.surahName else "Surah ${result.ayah.surahNumber}",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = if (result.searchType == SearchType.ARABIC)
-                        MaterialTheme.colorScheme.primaryContainer
-                    else
-                        MaterialTheme.colorScheme.tertiaryContainer
-                ) {
-                    Text(
-                        text = if (result.searchType == SearchType.ARABIC) "Arabic" else "Translation",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (result.searchType == SearchType.ARABIC)
-                            MaterialTheme.colorScheme.onPrimaryContainer
-                        else
-                            MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Verse ${result.ayah.ayahNumber}",
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = result.matchedText,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 3,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}

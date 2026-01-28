@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
@@ -59,7 +60,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.TasbihPreset
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
@@ -67,7 +70,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihScreen(
-    onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
     onNavigateToAddPreset: () -> Unit = {},
     onNavigateToSettings: () -> Unit,
@@ -81,9 +83,8 @@ fun TasbihScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            NimazBackTopAppBar(
+            NimazTopAppBar(
                 title = "Tasbih",
-                onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToHistory) {
@@ -127,9 +128,12 @@ fun TasbihScreen(
 
             Spacer(modifier = Modifier.weight(0.3f))
 
-            // Stats Row
+            // Stats Row - compute live "Today" total
+            val currentSessionCount = counterState.count + (counterState.laps * counterState.targetCount)
+            val liveTotalToday = statsState.baseTotalToday + currentSessionCount
+
             StatsRow(
-                totalToday = statsState.totalToday,
+                totalToday = liveTotalToday,
                 laps = counterState.laps,
                 completedSessions = statsState.completedSessions,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -205,16 +209,16 @@ private fun DhikrDisplay(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Arabic text in gold
-        Text(
-            text = selectedPreset?.arabicText ?: "",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                fontSize = 36.sp
-            ),
-            color = NimazColors.TasbihColors.Milestone,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.padding(horizontal = 24.dp)
-        )
+        // Arabic text in gold with Amiri font
+        if (!selectedPreset?.arabicText.isNullOrEmpty()) {
+            ArabicText(
+                text = selectedPreset?.arabicText ?: "",
+                size = ArabicTextSize.EXTRA_LARGE,
+                color = NimazColors.TasbihColors.Milestone,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 24.dp)
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -445,15 +449,15 @@ private fun PresetChip(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = preset.arabicText ?: "",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontSize = 18.sp
-                ),
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            if (!preset.arabicText.isNullOrEmpty()) {
+                ArabicText(
+                    text = preset.arabicText ?: "",
+                    size = ArabicTextSize.SMALL,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
             Text(
                 text = "${preset.targetCount}x",
                 style = MaterialTheme.typography.labelSmall,
@@ -526,7 +530,7 @@ private fun ControlButtons(
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
-                    imageVector = Icons.Default.VolumeUp,
+                    imageVector = Icons.Default.PhoneAndroid,
                     contentDescription = "Toggle Vibration",
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                         alpha = if (vibrationEnabled) 1f else 0.4f

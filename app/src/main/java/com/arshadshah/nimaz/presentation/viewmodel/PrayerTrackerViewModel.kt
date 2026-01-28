@@ -91,6 +91,7 @@ class PrayerTrackerViewModel @Inject constructor(
     val historyState: StateFlow<PrayerHistoryUiState> = _historyState.asStateFlow()
 
     private var currentLocation: Location? = null
+    private var dateRecordsJob: kotlinx.coroutines.Job? = null
 
     init {
         loadCurrentLocation()
@@ -141,7 +142,9 @@ class PrayerTrackerViewModel @Inject constructor(
 
         val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
 
-        viewModelScope.launch {
+        // Cancel previous date's Flow collection before starting new one
+        dateRecordsJob?.cancel()
+        dateRecordsJob = viewModelScope.launch {
             // Load prayer records for the date
             prayerRepository.getPrayerRecordsForDate(dateEpoch).collect { records ->
                 _trackerState.update {

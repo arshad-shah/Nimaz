@@ -53,6 +53,8 @@ import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.HijriMonth
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
@@ -202,7 +204,7 @@ private fun TodayHeroCard(
                 Text(
                     text = "Today",
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onPrimary
                 )
                 Spacer(modifier = Modifier.height(10.dp))
                 Text(
@@ -213,17 +215,17 @@ private fun TodayHeroCard(
                 )
                 Spacer(modifier = Modifier.height(5.dp))
                 if (monthArabic.isNotEmpty()) {
-                    Text(
+                    ArabicText(
                         text = "$hijriDay $monthArabic $hijriYear",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
+                        size = ArabicTextSize.SMALL,
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                 }
                 Text(
                     text = selectedDate.format(formatter),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
                 )
             }
         }
@@ -253,10 +255,11 @@ private fun CalendarMonthNavigator(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Text(
+            ArabicText(
                 text = monthNameArabic,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                size = ArabicTextSize.SMALL,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Start
             )
         }
 
@@ -530,6 +533,14 @@ private fun EventDetailCard(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (event.nameArabic.isNotEmpty()) {
+                    ArabicText(
+                        text = event.nameArabic,
+                        size = ArabicTextSize.SMALL,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Start
+                    )
+                }
                 event.description?.let { desc ->
                     Text(
                         text = desc,
@@ -594,6 +605,14 @@ private fun UpcomingEventCard(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+                if (event.nameArabic.isNotEmpty()) {
+                    ArabicText(
+                        text = event.nameArabic,
+                        size = ArabicTextSize.SMALL,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Start
+                    )
+                }
                 event.description?.let { desc ->
                     Text(
                         text = desc,

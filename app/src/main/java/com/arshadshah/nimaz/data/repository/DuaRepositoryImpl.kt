@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -51,11 +52,17 @@ class DuaRepositoryImpl @Inject constructor(
     }
 
     override fun searchDuas(query: String): Flow<List<DuaSearchResult>> {
-        return duaDao.searchDuas(query).map { entities ->
+        return combine(
+            duaDao.getAllCategories(),
+            duaDao.searchDuas(query)
+        ) { categories, entities ->
+            // Create a map from category id to category name for lookup
+            val categoryMap = categories.associate { it.id to it.nameEnglish }
+
             entities.map { dua ->
                 DuaSearchResult(
                     dua = dua.toDomain(),
-                    categoryName = "",
+                    categoryName = categoryMap[dua.categoryId] ?: "",
                     matchedText = dua.translation
                 )
             }

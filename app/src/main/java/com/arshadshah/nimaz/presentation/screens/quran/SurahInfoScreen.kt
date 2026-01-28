@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -79,9 +80,16 @@ fun SurahInfoScreen(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
                 isDownloading = audioState.isDownloading,
-                audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
-                progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
-                onPlayAudio = { viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber)) },
+                currentAyah = audioState.currentAyahIndex + 1,
+                totalAyahs = audioState.totalAyahs,
+                surahProgress = audioState.surahProgress,
+                onPlayAudio = {
+                    // Only start new playback if not already active
+                    if (!audioState.isActive) {
+                        viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber))
+                    }
+                },
+                onResumeAudio = { viewModel.onEvent(QuranEvent.ResumeAudio) },
                 onPauseAudio = { viewModel.onEvent(QuranEvent.PauseAudio) },
                 onStopAudio = { viewModel.onEvent(QuranEvent.StopAudio) },
                 onStartReading = onStartReading
@@ -432,9 +440,11 @@ private fun BottomActions(
     isAudioActive: Boolean,
     isPlaying: Boolean,
     isDownloading: Boolean,
-    audioTitle: String,
-    progress: Float,
+    currentAyah: Int,
+    totalAyahs: Int,
+    surahProgress: Float,
     onPlayAudio: () -> Unit,
+    onResumeAudio: () -> Unit,
     onPauseAudio: () -> Unit,
     onStopAudio: () -> Unit,
     onStartReading: () -> Unit,
@@ -443,26 +453,17 @@ private fun BottomActions(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.background
-                    ),
-                    startY = 0f,
-                    endY = 100f
-                )
-            )
+            .background(MaterialTheme.colorScheme.background)
     ) {
-        // Audio control bar when playing
+        // Audio control bar when playing (full-width, dedicated)
         if (isAudioActive) {
-            AudioControlBar(
+            SurahAudioControlBar(
                 isPlaying = isPlaying,
                 isDownloading = isDownloading,
-                audioTitle = audioTitle,
-                progress = progress,
-                onPlayPauseClick = { if (isPlaying) onPauseAudio() else onPlayAudio() },
+                currentAyah = currentAyah,
+                totalAyahs = totalAyahs,
+                surahProgress = surahProgress,
+                onPlayPauseClick = { if (isPlaying) onPauseAudio() else onResumeAudio() },
                 onStopClick = onStopAudio
             )
         }
@@ -478,66 +479,35 @@ private fun BottomActions(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                // Listen button - changes based on audio state
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            if (isAudioActive)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.surfaceContainerHigh
-                        )
-                        .clickable(onClick = {
-                            if (isAudioActive) {
-                                if (isPlaying) onPauseAudio() else onPlayAudio()
-                            } else {
-                                onPlayAudio()
-                            }
-                        })
-                        .padding(vertical = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                // Listen button - only shows when audio is NOT active
+                if (!isAudioActive) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .clickable(onClick = onPlayAudio)
+                            .padding(vertical = 16.dp),
+                        contentAlignment = Alignment.Center
                     ) {
-                        if (isDownloading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        } else {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
                             Icon(
-                                imageVector = if (isAudioActive && isPlaying)
-                                    Icons.Default.Pause
-                                else
-                                    Icons.Default.PlayArrow,
+                                imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
-                                tint = if (isAudioActive)
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                else
-                                    MaterialTheme.colorScheme.onSurface,
+                                tint = MaterialTheme.colorScheme.onSurface,
                                 modifier = Modifier.size(20.dp)
                             )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Listen",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = when {
-                                isDownloading -> "Loading..."
-                                isAudioActive && isPlaying -> "Pause"
-                                isAudioActive -> "Resume"
-                                else -> "Listen"
-                            },
-                            style = MaterialTheme.typography.labelLarge,
-                            fontWeight = FontWeight.SemiBold,
-                            color = if (isAudioActive)
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            else
-                                MaterialTheme.colorScheme.onSurface
-                        )
                     }
                 }
 
@@ -580,11 +550,12 @@ private fun BottomActions(
 }
 
 @Composable
-private fun AudioControlBar(
+private fun SurahAudioControlBar(
     isPlaying: Boolean,
     isDownloading: Boolean,
-    audioTitle: String,
-    progress: Float,
+    currentAyah: Int,
+    totalAyahs: Int,
+    surahProgress: Float,
     onPlayPauseClick: () -> Unit,
     onStopClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -592,70 +563,85 @@ private fun AudioControlBar(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        // Progress bar
+        // Surah progress bar
         LinearProgressIndicator(
-            progress = { progress },
+            progress = { surahProgress },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(3.dp),
+                .height(4.dp),
             color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            trackColor = MaterialTheme.colorScheme.primaryContainer,
         )
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Audio info
+            // Audio info with surah progress
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Now Playing",
+                    text = if (isPlaying) "Now Playing" else "Paused",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
                 Text(
-                    text = audioTitle,
+                    text = "Ayah $currentAyah of $totalAyahs",
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = "${(surahProgress * 100).toInt()}% complete",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
             }
 
             // Play/Pause button
-            IconButton(
-                onClick = onPlayPauseClick,
-                modifier = Modifier.size(40.dp)
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .clickable(onClick = onPlayPauseClick),
+                contentAlignment = Alignment.Center
             ) {
                 if (isDownloading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
                     Icon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isPlaying) "Pause" else "Play",
-                        tint = MaterialTheme.colorScheme.primary,
+                        contentDescription = if (isPlaying) "Pause" else "Resume",
+                        tint = MaterialTheme.colorScheme.onPrimary,
                         modifier = Modifier.size(28.dp)
                     )
                 }
             }
 
+            Spacer(modifier = Modifier.width(8.dp))
+
             // Stop button
-            IconButton(
-                onClick = onStopClick,
-                modifier = Modifier.size(40.dp)
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f))
+                    .clickable(onClick = onStopClick),
+                contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Stop",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(24.dp)
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }

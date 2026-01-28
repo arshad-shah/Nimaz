@@ -26,6 +26,8 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -91,6 +93,10 @@ fun SelectReciterScreen(
     var searchQuery by remember { mutableStateOf("") }
     val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    // Track audio state for preview feedback
+    val audioState by quranViewModel.audioState.collectAsState()
+    var previewingReciterId by remember { mutableStateOf<String?>(null) }
 
     val filteredReciters = remember(searchQuery) {
         if (searchQuery.isBlank()) popularReciters
@@ -323,21 +329,48 @@ fun SelectReciterScreen(
                             }
                         }
 
-                        IconButton(onClick = {
-                            // Preview: play Al-Fatiha verse 1 with this reciter
-                            val cdnId = QuranAudioManager.RECITER_CDN_MAP[reciter.id] ?: "7"
-                            quranViewModel.audioManager.setReciter(reciter.id)
-                            quranViewModel.onEvent(QuranEvent.PlayAyahAudio(
-                                ayahGlobalId = 1,
-                                surahNumber = 1,
-                                ayahNumber = 1
-                            ))
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = "Preview",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                        IconButton(
+                            onClick = {
+                                if (previewingReciterId == reciter.id && audioState.isPlaying) {
+                                    // Stop current preview
+                                    quranViewModel.onEvent(QuranEvent.StopAudio)
+                                    previewingReciterId = null
+                                } else {
+                                    // Start preview: play Al-Fatiha verse 1 with this reciter
+                                    previewingReciterId = reciter.id
+                                    quranViewModel.audioManager.setReciter(reciter.id)
+                                    quranViewModel.onEvent(QuranEvent.PlayAyahAudio(
+                                        ayahGlobalId = 1,
+                                        surahNumber = 1,
+                                        ayahNumber = 1
+                                    ))
+                                }
+                            },
+                            enabled = !(previewingReciterId != null && previewingReciterId != reciter.id && audioState.isDownloading)
+                        ) {
+                            when {
+                                previewingReciterId == reciter.id && audioState.isDownloading -> {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(20.dp),
+                                        strokeWidth = 2.dp,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                previewingReciterId == reciter.id && audioState.isPlaying -> {
+                                    Icon(
+                                        imageVector = Icons.Default.Stop,
+                                        contentDescription = "Stop preview",
+                                        tint = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                else -> {
+                                    Icon(
+                                        imageVector = Icons.Default.PlayArrow,
+                                        contentDescription = "Preview",
+                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
                         }
                     }
                 }

@@ -25,7 +25,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.CheckCircle
@@ -85,8 +84,13 @@ fun HadithReaderScreen(
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
 
-    LaunchedEffect(chapterId) {
-        viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
+    LaunchedEffect(chapterId, bookId) {
+        // If bookId is empty and chapterId doesn't contain "_", it's a hadithId from search
+        if (bookId.isEmpty() && !chapterId.contains("_")) {
+            viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
+        } else {
+            viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
+        }
     }
 
     val currentHadith = state.hadiths.getOrNull(state.currentHadithIndex)
@@ -154,9 +158,6 @@ fun HadithReaderScreen(
                             }
                         }
                         clipboardManager.setText(AnnotatedString(text))
-                    },
-                    onAudioClick = {
-                        Toast.makeText(context, "Audio playback coming soon", Toast.LENGTH_SHORT).show()
                     }
                 )
             }
@@ -625,7 +626,6 @@ private fun BottomActionBar(
     onBookmarkClick: () -> Unit,
     onShareClick: () -> Unit,
     onCopyClick: () -> Unit,
-    onAudioClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -694,19 +694,6 @@ private fun BottomActionBar(
                 },
                 label = "Copy",
                 onClick = onCopyClick,
-                modifier = Modifier.weight(1f)
-            )
-
-            ActionButton(
-                icon = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                        contentDescription = "Audio",
-                        modifier = Modifier.size(22.dp)
-                    )
-                },
-                label = "Audio",
-                onClick = onAudioClick,
                 modifier = Modifier.weight(1f)
             )
         }

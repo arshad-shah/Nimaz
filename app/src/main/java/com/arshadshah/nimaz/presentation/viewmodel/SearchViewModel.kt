@@ -10,13 +10,12 @@ import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 sealed class UnifiedSearchResult {
@@ -76,8 +75,8 @@ class SearchViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(SearchStatsUiState())
     val statsState: StateFlow<SearchStatsUiState> = _statsState.asStateFlow()
 
-    private var searchJob: Job? = null
     private val recentSearchesList = mutableListOf<String>()
+    private val pendingSearchCount = AtomicInteger(0)
 
     fun onEvent(event: SearchEvent) {
         when (event) {
@@ -94,14 +93,8 @@ class SearchViewModel @Inject constructor(
     private fun updateQuery(query: String) {
         _searchState.update { it.copy(query = query) }
 
-        // Debounce search
-        searchJob?.cancel()
-        if (query.length >= 2) {
-            searchJob = viewModelScope.launch {
-                delay(300) // Debounce delay
-                executeSearch()
-            }
-        } else if (query.isEmpty()) {
+        // Only clear results when query is emptied, don't auto-search
+        if (query.isEmpty()) {
             clearResults()
         }
     }
@@ -148,20 +141,29 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun searchAll(query: String) {
-        // Search Quran
+        val totalSearches = 4
+        pendingSearchCount.set(totalSearches)
+
+        fun onSearchComplete() {
+            if (pendingSearchCount.decrementAndGet() <= 0) {
+                _searchState.update { it.copy(isSearching = false) }
+            }
+        }
+
+        // Search Quran (include translations for English search terms)
         viewModelScope.launch {
-            quranRepository.searchQuran(query, null).collect { results ->
+            quranRepository.searchQuran(query, "sahih_international").collect { results ->
                 _searchState.update { state ->
                     val unified = state.allResults.filterNot { it is UnifiedSearchResult.QuranResult } +
                             results.map { UnifiedSearchResult.QuranResult(it) }
                     state.copy(
                         quranResults = results,
                         allResults = unified,
-                        filteredResults = applyFilter(unified, state.selectedFilter),
-                        isSearching = false
+                        filteredResults = applyFilter(unified, state.selectedFilter)
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
 
@@ -178,6 +180,7 @@ class SearchViewModel @Inject constructor(
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
 
@@ -194,6 +197,7 @@ class SearchViewModel @Inject constructor(
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
 
@@ -210,23 +214,33 @@ class SearchViewModel @Inject constructor(
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
     }
 
     private fun searchQuranOnly(query: String) {
+        val totalSearches = 2
+        pendingSearchCount.set(totalSearches)
+
+        fun onSearchComplete() {
+            if (pendingSearchCount.decrementAndGet() <= 0) {
+                _searchState.update { it.copy(isSearching = false) }
+            }
+        }
+
         viewModelScope.launch {
-            quranRepository.searchQuran(query, null).collect { results ->
+            quranRepository.searchQuran(query, "sahih_international").collect { results ->
                 val unified = results.map { UnifiedSearchResult.QuranResult(it) }
                 _searchState.update {
                     it.copy(
                         quranResults = results,
                         allResults = unified,
-                        filteredResults = unified,
-                        isSearching = false
+                        filteredResults = unified
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
 
@@ -242,6 +256,7 @@ class SearchViewModel @Inject constructor(
                     )
                 }
                 updateStats()
+                onSearchComplete()
             }
         }
     }
@@ -290,7 +305,6 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun clearSearch() {
-        searchJob?.cancel()
         _searchState.update {
             SearchUiState(recentSearches = it.recentSearches)
         }

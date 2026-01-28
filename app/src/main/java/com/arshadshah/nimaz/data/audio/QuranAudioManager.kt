@@ -34,8 +34,19 @@ data class AudioState(
     val currentSubtitle: String? = null,
     val reciterName: String = "Mishary Rashid Alafasy",
     val isActive: Boolean = false,
-    val error: String? = null
-)
+    val error: String? = null,
+    // Playlist progress for surah-level tracking
+    val currentAyahIndex: Int = 0,
+    val totalAyahs: Int = 0
+) {
+    // Calculate surah progress as percentage (0.0 to 1.0)
+    val surahProgress: Float
+        get() = if (totalAyahs > 0) {
+            val completedAyahs = currentAyahIndex.toFloat()
+            val currentAyahProgress = if (duration > 0) position.toFloat() / duration else 0f
+            (completedAyahs + currentAyahProgress) / totalAyahs
+        } else 0f
+}
 
 @Singleton
 class QuranAudioManager @Inject constructor(
@@ -63,6 +74,17 @@ class QuranAudioManager @Inject constructor(
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
     private var currentPlaylistIndex: Int = -1
     private val failedAyahs = mutableSetOf<Int>()
+
+    // Controls whether audio auto-advances to next ayah
+    private var continuousPlayback: Boolean = true
+
+    /**
+     * Set whether audio should auto-advance to next ayah when current one ends.
+     * When false, playback stops after the current ayah completes.
+     */
+    fun setContinuousPlayback(enabled: Boolean) {
+        continuousPlayback = enabled
+    }
 
     companion object {
         // CDN identifiers and bitrates from https://api.alquran.cloud/v1/edition?format=audio&type=versebyverse
@@ -145,10 +167,13 @@ class QuranAudioManager @Inject constructor(
                             // Only auto-advance if this callback belongs to the current generation.
                             // If generation has moved on, this is a stale callback from stop().
                             if (listenerGeneration == playbackGeneration) {
-                                if (currentPlaylistIndex >= 0 && currentPlaylistIndex < ayahPlaylist.size - 1) {
+                                // Check continuousPlayback before auto-advancing
+                                if (continuousPlayback &&
+                                    currentPlaylistIndex >= 0 &&
+                                    currentPlaylistIndex < ayahPlaylist.size - 1) {
                                     playNextInPlaylist()
                                 } else {
-                                    // Playlist finished
+                                    // Single ayah or continuous disabled - stop here
                                     _audioState.update { it.copy(isActive = false, currentAyahId = 0) }
                                 }
                             }
@@ -189,10 +214,33 @@ class QuranAudioManager @Inject constructor(
             it.copy(
                 isActive = true,
                 currentTitle = title,
-                error = null
+                error = null,
+                totalAyahs = ayahs.size,
+                currentAyahIndex = startIndex
             )
         }
+        // Preload first few ayahs in background
+        preloadUpcomingAyahs(startIndex)
         playNextInPlaylist()
+    }
+
+    /**
+     * Preload upcoming ayahs to reduce gap between playback.
+     */
+    private fun preloadUpcomingAyahs(startIndex: Int) {
+        scope.launch {
+            // Preload next 3 ayahs
+            for (i in startIndex until minOf(startIndex + 3, ayahPlaylist.size)) {
+                val item = ayahPlaylist[i]
+                val audioFile = getCachedFile("ayah_${item.ayahGlobalId}.mp3")
+                if (!audioFile.exists()) {
+                    downloadFileWithRetry(
+                        url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
+                        destination = audioFile
+                    )
+                }
+            }
+        }
     }
 
     private fun playNextInPlaylist() {
@@ -209,7 +257,15 @@ class QuranAudioManager @Inject constructor(
 
         if (currentPlaylistIndex >= ayahPlaylist.size) {
             // Done - playlist finished
-            _audioState.update { it.copy(isActive = false, isPlaying = false, currentAyahId = 0) }
+            _audioState.update {
+                it.copy(
+                    isActive = false,
+                    isPlaying = false,
+                    currentAyahId = 0,
+                    currentAyahIndex = 0,
+                    totalAyahs = 0
+                )
+            }
             failedAyahs.clear()
             return
         }
@@ -222,7 +278,8 @@ class QuranAudioManager @Inject constructor(
                     isActive = true,
                     error = null,
                     currentAyahId = item.ayahGlobalId,
-                    currentSubtitle = "Surah ${item.surahNumber}, Ayah ${item.ayahNumber}"
+                    currentAyahIndex = currentPlaylistIndex,
+                    currentSubtitle = "Ayah ${item.ayahNumber} of ${ayahPlaylist.size}"
                 )
             }
 
@@ -248,6 +305,9 @@ class QuranAudioManager @Inject constructor(
                 }
             }
 
+            // Preload next ayah while current one plays
+            preloadNextAyah()
+
             if (audioFile.exists()) {
                 playFile(audioFile)
             } else {
@@ -260,6 +320,22 @@ class QuranAudioManager @Inject constructor(
                     )
                 }
                 playNextInPlaylist()
+            }
+        }
+    }
+
+    private fun preloadNextAyah() {
+        val nextIndex = currentPlaylistIndex + 1
+        if (nextIndex < ayahPlaylist.size) {
+            scope.launch {
+                val item = ayahPlaylist[nextIndex]
+                val audioFile = getCachedFile("ayah_${item.ayahGlobalId}.mp3")
+                if (!audioFile.exists()) {
+                    downloadFileWithRetry(
+                        url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
+                        destination = audioFile
+                    )
+                }
             }
         }
     }

@@ -20,7 +20,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-
+import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
@@ -35,6 +35,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,6 +65,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -93,7 +95,15 @@ fun PrayerTrackerScreen(
             NimazBackTopAppBar(
                 title = "Prayer Tracker",
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = onNavigateToStats) {
+                        Icon(
+                            imageVector = Icons.Default.BarChart,
+                            contentDescription = "View Statistics"
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -104,17 +114,8 @@ fun PrayerTrackerScreen(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            // Stats Grid (2x2)
-            item {
-                StatsGrid(
-                    statsState = statsState,
-                    prayerRecords = state.prayerRecords
-                )
-            }
-
             // Streak Card
             item {
-                Spacer(modifier = Modifier.height(12.dp))
                 StreakCard(currentStreak = statsState.currentStreak)
             }
 
@@ -158,113 +159,6 @@ fun PrayerTrackerScreen(
             item {
                 Spacer(modifier = Modifier.height(30.dp))
             }
-        }
-    }
-}
-
-// --- Stats Grid ---
-
-@Composable
-private fun StatsGrid(
-    statsState: com.arshadshah.nimaz.presentation.viewmodel.PrayerStatsUiState,
-    prayerRecords: List<PrayerRecord>
-) {
-    val stats = statsState.stats
-    val totalPrayed = stats?.totalPrayed ?: 0
-    val totalExpected = if (stats != null) (stats.totalPrayed + stats.totalMissed) else 0
-    val weeklyPercent = if (totalExpected > 0) (totalPrayed * 100 / totalExpected) else 0
-    val monthlyStats = statsState.monthlyStats
-    val monthlyPrayed = monthlyStats?.totalPrayed ?: 0
-    val monthlyExpected = if (monthlyStats != null) (monthlyStats.totalPrayed + monthlyStats.totalMissed) else 0
-    val monthlyPercent = if (monthlyExpected > 0) (monthlyPrayed * 100 / monthlyExpected) else 0
-    val perfectDays = if (stats != null) {
-        // Approximate: totalPrayed / 5 gives max possible perfect days
-        stats.totalPrayed / 5
-    } else 0
-
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Left column
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Highlight card - This Week
-            StatCard(
-                label = "This Week",
-                value = "$weeklyPercent%",
-                isHighlight = true
-            )
-            // Total Prayers
-            StatCard(
-                label = "Total Prayers",
-                value = "${stats?.totalPrayed ?: 0}",
-                isHighlight = false
-            )
-        }
-        // Right column
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // This Month
-            StatCard(
-                label = "This Month",
-                value = "$monthlyPercent%",
-                isHighlight = false
-            )
-            // Perfect Days
-            StatCard(
-                label = "Perfect Days",
-                value = "$perfectDays",
-                isHighlight = false
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatCard(
-    label: String,
-    value: String,
-    isHighlight: Boolean
-) {
-    val containerColor = if (isHighlight) {
-        MaterialTheme.colorScheme.primaryContainer
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHigh
-    }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = containerColor)
-    ) {
-        Column(
-            modifier = Modifier.padding(18.dp)
-        ) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isHighlight) {
-                    MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                }
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineLarge,
-                fontWeight = FontWeight.Bold,
-                color = if (isHighlight) {
-                    MaterialTheme.colorScheme.onPrimaryContainer
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
         }
     }
 }
@@ -449,6 +343,28 @@ private fun CalendarSection(
                         val isToday = day == today
                         val isSelected = day == selectedDate
 
+                        // Calculate completion status for the day using historyRecords
+                        val dayEpoch = day.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                        val dayRecords = historyRecords.filter { it.date == dayEpoch && it.prayerName != PrayerName.SUNRISE }
+                        val completedCount = dayRecords.count { record ->
+                            record.status == PrayerStatus.PRAYED ||
+                            record.status == PrayerStatus.LATE ||
+                            record.status == PrayerStatus.QADA
+                        }
+                        val missedCount = dayRecords.count { record ->
+                            record.status == PrayerStatus.MISSED
+                        }
+                        val totalExpected = 5 // 5 daily prayers (excluding sunrise)
+                        val hasRecords = dayRecords.isNotEmpty()
+
+                        val badgeColor = when {
+                            !hasRecords -> null // No records for this day
+                            completedCount == totalExpected -> NimazColors.StatusColors.Prayed // Green - all completed
+                            completedCount > 0 -> NimazColors.StatusColors.Partial // Orange - partial completion
+                            missedCount > 0 -> NimazColors.StatusColors.Missed // Red - all missed
+                            else -> null
+                        }
+
                         Box(
                             modifier = Modifier
                                 .weight(1f)
@@ -488,15 +404,15 @@ private fun CalendarSection(
                                     else -> MaterialTheme.colorScheme.onSurface
                                 }
                             )
-                            // Day badge for past days in current month
-                            if (isCurrentMonth && day.isBefore(today)) {
+                            // Day badge for past days based on actual completion status
+                            if (day.isBefore(today) && badgeColor != null) {
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(2.dp)
                                         .size(8.dp)
                                         .clip(CircleShape)
-                                        .background(NimazColors.StatusColors.Prayed)
+                                        .background(badgeColor)
                                 )
                             }
                         }
@@ -534,7 +450,7 @@ private fun SelectedDayDetail(
     val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
     val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
     val prayedCount = prayerRecords.count {
-        it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE
+        it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA
     }
 
     Card(
@@ -571,7 +487,7 @@ private fun SelectedDayDetail(
                     val record = prayerRecords.find { it.prayerName == prayerName }
                     val status = record?.status ?: PrayerStatus.NOT_PRAYED
                     val isCompleted =
-                        status == PrayerStatus.PRAYED || status == PrayerStatus.LATE
+                        status == PrayerStatus.PRAYED || status == PrayerStatus.LATE || status == PrayerStatus.QADA
                     val prayerTime = prayerTimes?.let { times ->
                         when (prayerName) {
                             PrayerName.FAJR -> times.fajr
@@ -592,6 +508,7 @@ private fun SelectedDayDetail(
                             PrayerStatus.PRAYED -> "On time"
                             PrayerStatus.LATE -> "Late"
                             PrayerStatus.MISSED -> "Missed"
+                            PrayerStatus.QADA -> "Made up"
                             else -> "Upcoming"
                         },
                         onClick = { onTogglePrayer(prayerName, status) }

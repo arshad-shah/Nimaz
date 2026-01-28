@@ -327,9 +327,11 @@ class CalendarViewModel @Inject constructor(
         // Get all events that fall within this Gregorian month
         val firstDay = LocalDate.of(year, month, 1)
         val lastDay = firstDay.plusMonths(1).minusDays(1)
+        // Get the Hijri year for the first day of the month
+        val hijriYear = HijriDateCalculator.toHijri(firstDay).year
 
         return cachedEvents.filter { event ->
-            val eventGregorian = getApproximateGregorianDate(event, year)
+            val eventGregorian = getApproximateGregorianDate(event, hijriYear)
             eventGregorian != null && !eventGregorian.isBefore(firstDay) && !eventGregorian.isAfter(lastDay)
         }
     }
@@ -337,20 +339,22 @@ class CalendarViewModel @Inject constructor(
     private fun getUpcomingIslamicEvents(): List<IslamicEvent> {
         val today = LocalDate.now()
         val threeMonthsLater = today.plusMonths(3)
+        // Get the current Hijri year
+        val currentHijriYear = HijriDateCalculator.toHijri(today).year
 
         return cachedEvents.mapNotNull { event ->
-            val eventDate = getApproximateGregorianDate(event, today.year)
+            val eventDate = getApproximateGregorianDate(event, currentHijriYear)
             if (eventDate != null && !eventDate.isBefore(today) && !eventDate.isAfter(threeMonthsLater)) {
                 event.copy(gregorianDate = eventDate)
             } else null
-        }.sortedBy { getApproximateGregorianDate(it, today.year) }
+        }.sortedBy { getApproximateGregorianDate(it, currentHijriYear) }
     }
 
-    private fun getApproximateGregorianDate(event: IslamicEvent, year: Int): LocalDate? {
+    private fun getApproximateGregorianDate(event: IslamicEvent, hijriYear: Int): LocalDate? {
         return HijriDateCalculator.toGregorian(
             event.hijriDay,
             event.hijriMonth,
-            _hijriState.value.currentHijriYear
+            hijriYear
         )
     }
 }

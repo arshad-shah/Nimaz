@@ -29,12 +29,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -75,9 +74,7 @@ fun HomeScreen(
     onNavigateToFasting: () -> Unit,
     onNavigateToZakat: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
-    onNavigateToSearch: () -> Unit,
     onNavigateToSettings: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -111,7 +108,6 @@ fun HomeScreen(
                         nextPrayer = state.nextPrayer,
                         nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: "",
                         timeUntilNextPrayer = state.timeUntilNextPrayer,
-                        onNotificationClick = onNavigateToNotifications,
                         onSettingsClick = onNavigateToSettings
                     )
                 }
@@ -186,7 +182,6 @@ private fun HomeHeader(
     nextPrayer: PrayerType?,
     nextPrayerTime: String,
     timeUntilNextPrayer: String,
-    onNotificationClick: () -> Unit,
     onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -235,10 +230,6 @@ private fun HomeHeader(
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    HeaderIconButton(
-                        icon = Icons.Default.Notifications,
-                        onClick = onNotificationClick
-                    )
                     HeaderIconButton(
                         icon = Icons.Default.Settings,
                         onClick = onSettingsClick

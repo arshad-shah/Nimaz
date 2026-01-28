@@ -1047,7 +1047,7 @@ private fun AyahItem(
         QuranVerseText(
             arabicText = ayah.textArabic,
             verseNumber = ayah.numberInSurah,
-            size = ArabicTextSize.QURAN,
+            customFontSize = arabicFontSize,
             color = MaterialTheme.colorScheme.onBackground,
             modifier = Modifier.fillMaxWidth()
         )

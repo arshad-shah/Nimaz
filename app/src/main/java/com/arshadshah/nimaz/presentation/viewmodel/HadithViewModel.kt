@@ -58,6 +58,7 @@ data class HadithBookmarksUiState(
 sealed interface HadithEvent {
     data class LoadBook(val bookId: String) : HadithEvent
     data class LoadChapter(val chapterId: String) : HadithEvent
+    data class LoadHadithById(val hadithId: String) : HadithEvent
     data class LoadHadithByNumber(val bookId: String, val hadithNumber: Int) : HadithEvent
     data class Search(val query: String) : HadithEvent
     data class SearchInBook(val bookId: String, val query: String) : HadithEvent
@@ -102,6 +103,7 @@ class HadithViewModel @Inject constructor(
         when (event) {
             is HadithEvent.LoadBook -> loadBook(event.bookId)
             is HadithEvent.LoadChapter -> loadChapter(event.chapterId)
+            is HadithEvent.LoadHadithById -> loadHadithById(event.hadithId)
             is HadithEvent.LoadHadithByNumber -> loadHadithByNumber(event.bookId, event.hadithNumber)
             is HadithEvent.Search -> search(event.query)
             is HadithEvent.SearchInBook -> searchInBook(event.bookId, event.query)
@@ -164,6 +166,38 @@ class HadithViewModel @Inject constructor(
                     _readerState.update {
                         it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = 0)
                     }
+                }
+            } catch (e: Exception) {
+                _readerState.update { it.copy(error = e.message, isLoading = false) }
+            }
+        }
+    }
+
+    private fun loadHadithById(hadithId: String) {
+        _readerState.update { it.copy(isLoading = true, error = null) }
+        viewModelScope.launch {
+            try {
+                val hadith = hadithRepository.getHadithById(hadithId)
+                if (hadith != null) {
+                    // Load the chapter containing this hadith to get context
+                    val chapterId = "${hadith.bookId}_${hadith.chapterId}"
+                    val chapter = hadithRepository.getChapterById(chapterId)
+
+                    // Get all hadiths in this chapter
+                    hadithRepository.getHadithsByChapter(chapterId).collect { hadiths ->
+                        // Find the index of the target hadith
+                        val index = hadiths.indexOfFirst { it.id == hadithId }
+                        _readerState.update {
+                            it.copy(
+                                chapter = chapter,
+                                hadiths = hadiths,
+                                currentHadithIndex = if (index >= 0) index else 0,
+                                isLoading = false
+                            )
+                        }
+                    }
+                } else {
+                    _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
                 }
             } catch (e: Exception) {
                 _readerState.update { it.copy(error = e.message, isLoading = false) }

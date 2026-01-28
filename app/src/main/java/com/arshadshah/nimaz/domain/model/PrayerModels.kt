@@ -212,6 +212,7 @@ data class PrayerStats(
     val missedByPrayer: Map<PrayerName, Int>,
     val currentStreak: Int,
     val longestStreak: Int,
+    val perfectDays: Int,
     val startDate: Long,
     val endDate: Long
 )

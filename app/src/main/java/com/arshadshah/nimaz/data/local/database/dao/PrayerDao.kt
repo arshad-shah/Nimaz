@@ -60,26 +60,39 @@ interface PrayerDao {
     @Query("SELECT prayerName, COUNT(*) as count FROM prayer_records WHERE status = 'missed' AND date BETWEEN :startDate AND :endDate GROUP BY prayerName")
     suspend fun getMissedCountByPrayer(startDate: Long, endDate: Long): List<PrayerStatCount>
 
-    // Streak calculation
+    // Perfect days queries - days where all 5 prayers (excluding sunrise) were completed
     @Query("""
-        SELECT COUNT(DISTINCT date) FROM prayer_records
-        WHERE status = 'prayed'
-        AND date <= :currentDate
-        AND date >= (
-            SELECT COALESCE(MAX(date), 0) FROM prayer_records
-            WHERE status = 'missed' AND date <= :currentDate
-        )
+        SELECT date FROM prayer_records
+        WHERE status IN ('prayed', 'late')
+        AND prayerName != 'sunrise'
+        GROUP BY date
+        HAVING COUNT(DISTINCT prayerName) = 5
+        ORDER BY date DESC
     """)
-    suspend fun getCurrentStreak(currentDate: Long): Int
+    suspend fun getPerfectDays(): List<Long>
 
+    // Count perfect days in range
     @Query("""
-        SELECT MAX(streak) FROM (
-            SELECT COUNT(*) as streak FROM prayer_records
-            WHERE status = 'prayed'
+        SELECT COUNT(*) FROM (
+            SELECT date FROM prayer_records
+            WHERE status IN ('prayed', 'late')
+            AND prayerName != 'sunrise'
+            AND date BETWEEN :startDate AND :endDate
             GROUP BY date
+            HAVING COUNT(DISTINCT prayerName) = 5
         )
     """)
-    suspend fun getLongestStreak(): Int?
+    suspend fun getPerfectDaysCount(startDate: Long, endDate: Long): Int
+
+    // Mark past pending/not_prayed prayers as missed (for dates before today)
+    @Query("""
+        UPDATE prayer_records
+        SET status = 'missed', updatedAt = :timestamp
+        WHERE date < :todayDate
+        AND status IN ('pending', 'not_prayed')
+        AND prayerName != 'sunrise'
+    """)
+    suspend fun markPastPrayersAsMissed(todayDate: Long, timestamp: Long = System.currentTimeMillis()): Int
 }
 
 data class PrayerStatCount(

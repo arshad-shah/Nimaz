@@ -78,6 +78,9 @@ interface QuranDao {
     @Query("SELECT * FROM quran_bookmarks ORDER BY createdAt DESC")
     fun getAllBookmarks(): Flow<List<QuranBookmarkEntity>>
 
+    @Query("SELECT ayahId FROM quran_bookmarks")
+    suspend fun getAllBookmarkIds(): List<Int>
+
     @Query("SELECT * FROM quran_bookmarks WHERE ayahId = :ayahId LIMIT 1")
     suspend fun getBookmarkByAyahId(ayahId: Int): QuranBookmarkEntity?
 

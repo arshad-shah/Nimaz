@@ -79,13 +79,33 @@ class PrayerRepositoryImpl @Inject constructor(
         prayedAt: Long?,
         isJamaah: Boolean
     ) {
-        prayerDao.updatePrayerStatus(
-            date = date,
-            prayerName = prayerName.name.lowercase(),
-            status = status.name.lowercase(),
-            prayedAt = prayedAt,
-            isJamaah = isJamaah
-        )
+        // Check if record exists, if not create it first
+        val existingRecord = prayerDao.getPrayerRecord(date, prayerName.name.lowercase())
+        if (existingRecord == null) {
+            // Create a new record
+            val newRecord = PrayerRecordEntity(
+                id = 0, // Auto-generate
+                date = date,
+                prayerName = prayerName.name.lowercase(),
+                status = status.name.lowercase(),
+                prayedAt = prayedAt,
+                scheduledTime = date, // Use date as scheduled time placeholder
+                isJamaah = isJamaah,
+                isQadaFor = null,
+                note = null,
+                createdAt = System.currentTimeMillis(),
+                updatedAt = System.currentTimeMillis()
+            )
+            prayerDao.insertPrayerRecord(newRecord)
+        } else {
+            prayerDao.updatePrayerStatus(
+                date = date,
+                prayerName = prayerName.name.lowercase(),
+                status = status.name.lowercase(),
+                prayedAt = prayedAt,
+                isJamaah = isJamaah
+            )
+        }
     }
 
     override suspend fun getPrayerStats(startDate: Long, endDate: Long): PrayerStats {
@@ -97,25 +117,96 @@ class PrayerRepositoryImpl @Inject constructor(
         val missedByPrayer = prayerDao.getMissedCountByPrayer(startDate, endDate)
             .associate { PrayerName.fromString(it.prayerName) to it.count }
 
+        // Get perfect days list for streak calculation
+        val perfectDays = prayerDao.getPerfectDays()
+        val perfectDaysCount = prayerDao.getPerfectDaysCount(startDate, endDate)
+
+        // Calculate current streak and longest streak from perfect days
+        val (currentStreak, longestStreak) = calculateStreaks(perfectDays)
+
         return PrayerStats(
             totalPrayed = prayedCount,
             totalMissed = missedCount,
             totalJamaah = jamaahCount,
             prayedByPrayer = prayedByPrayer,
             missedByPrayer = missedByPrayer,
-            currentStreak = prayerDao.getCurrentStreak(System.currentTimeMillis()),
-            longestStreak = prayerDao.getLongestStreak() ?: 0,
+            currentStreak = currentStreak,
+            longestStreak = longestStreak,
+            perfectDays = perfectDaysCount,
             startDate = startDate,
             endDate = endDate
         )
     }
 
     override suspend fun getCurrentStreak(currentDate: Long): Int {
-        return prayerDao.getCurrentStreak(currentDate)
+        val perfectDays = prayerDao.getPerfectDays()
+        return calculateStreaks(perfectDays).first
     }
 
     override suspend fun getLongestStreak(): Int {
-        return prayerDao.getLongestStreak() ?: 0
+        val perfectDays = prayerDao.getPerfectDays()
+        return calculateStreaks(perfectDays).second
+    }
+
+    override suspend fun markPastPrayersAsMissed(): Int {
+        val today = LocalDate.now()
+        val todayEpoch = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+        return prayerDao.markPastPrayersAsMissed(todayEpoch)
+    }
+
+    /**
+     * Calculate current streak and longest streak from a list of perfect days.
+     * Perfect days are dates (epoch millis at start of day) where all 5 prayers were completed.
+     * The list is sorted descending (most recent first).
+     *
+     * @return Pair of (currentStreak, longestStreak)
+     */
+    private fun calculateStreaks(perfectDays: List<Long>): Pair<Int, Int> {
+        if (perfectDays.isEmpty()) return Pair(0, 0)
+
+        val today = LocalDate.now()
+        val todayEpoch = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+        val yesterdayEpoch = today.minusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+        val oneDayMillis = 24 * 60 * 60 * 1000L
+
+        // Convert to sorted set for efficient lookup (ascending order)
+        val perfectDaysSet = perfectDays.toSortedSet()
+
+        // Calculate current streak - count consecutive days from today or yesterday backwards
+        var currentStreak = 0
+        val startingDay = if (perfectDaysSet.contains(todayEpoch)) {
+            todayEpoch
+        } else if (perfectDaysSet.contains(yesterdayEpoch)) {
+            yesterdayEpoch
+        } else {
+            null
+        }
+
+        if (startingDay != null) {
+            var checkDay = startingDay
+            while (perfectDaysSet.contains(checkDay)) {
+                currentStreak++
+                checkDay -= oneDayMillis
+            }
+        }
+
+        // Calculate longest streak
+        var longestStreak = 0
+        var tempStreak = 0
+        var previousDay: Long? = null
+
+        for (day in perfectDaysSet) {
+            if (previousDay == null || day - previousDay == oneDayMillis) {
+                tempStreak++
+            } else {
+                longestStreak = maxOf(longestStreak, tempStreak)
+                tempStreak = 1
+            }
+            previousDay = day
+        }
+        longestStreak = maxOf(longestStreak, tempStreak)
+
+        return Pair(currentStreak, longestStreak)
     }
 
     // Location operations

@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -89,7 +90,13 @@ class QuranRepositoryImpl @Inject constructor(
             } else {
                 emptyMap()
             }
-            entities.map { it.toDomain(translationMap[it.id]) }
+            // Fetch bookmark IDs to set isBookmarked correctly
+            val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+            entities.map { entity ->
+                entity.toDomain(translationMap[entity.id]).copy(
+                    isBookmarked = entity.id in bookmarkedIds
+                )
+            }
         }
     }
 
@@ -104,7 +111,13 @@ class QuranRepositoryImpl @Inject constructor(
             } else {
                 emptyMap()
             }
-            entities.map { it.toDomain(translationMap[it.id]) }
+            // Fetch bookmark IDs to set isBookmarked correctly
+            val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+            entities.map { entity ->
+                entity.toDomain(translationMap[entity.id]).copy(
+                    isBookmarked = entity.id in bookmarkedIds
+                )
+            }
         }
     }
 
@@ -136,9 +149,14 @@ class QuranRepositoryImpl @Inject constructor(
                     emptyMap()
                 }
 
-                // Map ayahs with translations
+                // Fetch bookmark IDs to set isBookmarked correctly
+                val bookmarkedIds = quranDao.getAllBookmarkIds().toSet()
+
+                // Map ayahs with translations and bookmark status
                 val ayahs = ayahEntities.map { ayah ->
-                    ayah.toDomain(translationMap[ayah.id])
+                    ayah.toDomain(translationMap[ayah.id]).copy(
+                        isBookmarked = ayah.id in bookmarkedIds
+                    )
                 }
 
                 SurahWithAyahs(surah = surah, ayahs = ayahs)
@@ -165,36 +183,36 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override fun searchQuran(query: String, translatorId: String?): Flow<List<QuranSearchResult>> {
-        val arabicSearchFlow = quranDao.searchAyahs(query).map { ayahs ->
-            ayahs.map { ayah ->
+        return flow {
+            // Get all surahs for name lookup
+            val surahs = quranDao.getAllSurahs().first()
+            val surahMap = surahs.associate { it.id to it.nameEnglish }
+
+            // Search Arabic text
+            val arabicResults = quranDao.searchAyahs(query).first().map { ayah ->
                 QuranSearchResult(
                     ayah = ayah.toDomain(),
-                    surahName = "", // Will be populated later
+                    surahName = surahMap[ayah.surahId] ?: "Surah ${ayah.surahId}",
                     matchedText = ayah.textArabic,
                     searchType = SearchType.ARABIC
                 )
             }
-        }
 
-        return if (translatorId != null) {
-            val translationSearchFlow = quranDao.searchTranslations(query, translatorId).map { translations ->
-                translations.mapNotNull { translation ->
+            // If translatorId provided, also search translations
+            val translationResults = if (translatorId != null) {
+                quranDao.searchTranslations(query, translatorId).first().mapNotNull { translation ->
                     quranDao.getAyahById(translation.ayahId)?.let { ayah ->
                         QuranSearchResult(
                             ayah = ayah.toDomain(),
-                            surahName = "",
+                            surahName = surahMap[ayah.surahId] ?: "Surah ${ayah.surahId}",
                             matchedText = translation.text,
                             searchType = SearchType.TRANSLATION
                         )
                     }
                 }
-            }
+            } else emptyList()
 
-            combine(arabicSearchFlow, translationSearchFlow) { arabicResults, translationResults ->
-                (arabicResults + translationResults).distinctBy { it.ayah.id }
-            }
-        } else {
-            arabicSearchFlow
+            emit((arabicResults + translationResults).distinctBy { it.ayah.id })
         }
     }
 

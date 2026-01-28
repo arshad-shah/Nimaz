@@ -131,16 +131,13 @@ fun PrayerStatsScreen(
                         }
                     }
 
-                    // Count perfect days (days where all 5 prayers were completed)
-                    val perfectDays = stats.prayedByPrayer.values.minOrNull() ?: 0
-
                     OverviewCard(
                         completionPercent = completionRate,
                         completionText = "${stats.totalPrayed} of $totalPrayers prayers completed",
                         periodLabel = periodLabel,
                         prayed = stats.totalPrayed,
                         missed = stats.totalMissed,
-                        perfectDays = perfectDays
+                        perfectDays = stats.perfectDays
                     )
                 }
             }

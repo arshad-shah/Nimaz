@@ -51,7 +51,12 @@ fun TasbihHistoryScreen(
 ) {
     val historyState by viewModel.historyState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
+    val counterState by viewModel.counterState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    // Compute live "Today" total
+    val currentSessionCount = counterState.count + (counterState.laps * counterState.targetCount)
+    val liveTotalToday = statsState.baseTotalToday + currentSessionCount
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -83,7 +88,7 @@ fun TasbihHistoryScreen(
                 // Stats Summary
                 item(key = "stats_summary") {
                     StatsSummaryCard(
-                        totalToday = statsState.totalToday,
+                        totalToday = liveTotalToday,
                         completedSessions = statsState.completedSessions,
                         totalThisWeek = statsState.totalThisWeek
                     )

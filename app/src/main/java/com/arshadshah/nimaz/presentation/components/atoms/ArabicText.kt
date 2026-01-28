@@ -84,6 +84,7 @@ fun QuranVerseText(
     verseNumber: Int? = null,
     modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.QURAN,
+    customFontSize: Float? = null,
     color: Color = MaterialTheme.colorScheme.onSurface,
     showVerseNumber: Boolean = true
 ) {
@@ -93,6 +94,10 @@ fun QuranVerseText(
         arabicText
     }
 
+    // Use customFontSize if provided, otherwise use enum
+    val actualFontSize = customFontSize?.sp ?: size.fontSize
+    val actualLineHeight = customFontSize?.let { (it * 2).sp } ?: size.lineHeight
+
     ArabicText(
         text = displayText,
         modifier = modifier.fillMaxWidth(),
@@ -100,8 +105,8 @@ fun QuranVerseText(
         color = color,
         textAlign = TextAlign.Center,
         style = ArabicTextStyles.quranLarge.copy(
-            fontSize = size.fontSize,
-            lineHeight = size.lineHeight
+            fontSize = actualFontSize,
+            lineHeight = actualLineHeight
         )
     )
 }

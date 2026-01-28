@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -17,13 +18,16 @@ import javax.inject.Inject
  * Also handles midnight reschedule events for daily prayer notification updates.
  */
 @AndroidEntryPoint
-class BootReceiver : BroadcastReceiver() {
+class  BootReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var preferencesDataStore: PreferencesDataStore
 
     @Inject
     lateinit var prayerNotificationScheduler: PrayerNotificationScheduler
+
+    @Inject
+    lateinit var prayerRepository: PrayerRepository
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
 
@@ -38,8 +42,9 @@ class BootReceiver : BroadcastReceiver() {
             }
 
             PrayerNotificationScheduler.ACTION_MIDNIGHT_RESCHEDULE -> {
-                // Midnight reschedule - schedule today's new prayer notifications
-                reschedulePrayerNotifications()
+                // Midnight reschedule - mark yesterday's unprayed prayers as missed
+                // and schedule today's new prayer notifications
+                markMissedPrayersAndReschedule()
             }
 
             PrayerNotificationScheduler.ACTION_PRAYER_NOTIFICATION -> {
@@ -52,6 +57,30 @@ class BootReceiver : BroadcastReceiver() {
     private fun reschedulePrayerNotifications() {
         scope.launch {
             try {
+                val prefs = preferencesDataStore.userPreferences.first()
+                val notificationsEnabled = prefs.prayerNotificationsEnabled
+                val latitude = prefs.latitude
+                val longitude = prefs.longitude
+
+                prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
+                    latitude = latitude,
+                    longitude = longitude,
+                    notificationsEnabled = notificationsEnabled
+                )
+            } catch (e: Exception) {
+                // Log error but don't crash
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun markMissedPrayersAndReschedule() {
+        scope.launch {
+            try {
+                // Mark any past pending/not_prayed prayers as missed
+                prayerRepository.markPastPrayersAsMissed()
+
+                // Then reschedule today's notifications
                 val prefs = preferencesDataStore.userPreferences.first()
                 val notificationsEnabled = prefs.prayerNotificationsEnabled
                 val latitude = prefs.latitude

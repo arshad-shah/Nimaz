@@ -50,6 +50,7 @@ import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.QadaPrayersScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
@@ -176,14 +177,13 @@ fun NavGraph() {
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
-                    onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
 
             composable<Route.Quran> {
                 QuranHomeScreen(
+                    onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
                     onNavigateToSurah = { surahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber))
                     },
@@ -203,7 +203,6 @@ fun NavGraph() {
 
             composable<Route.Tasbih> {
                 TasbihScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
@@ -219,7 +218,6 @@ fun NavGraph() {
             composable<Route.More> {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 MoreMenuScreen(
-                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
                     onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
@@ -234,7 +232,6 @@ fun NavGraph() {
                     onNavigateToDuas = { navController.navigate(Route.DuaHome) },
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
-                    onNavigateToPrayerStats = { navController.navigate(Route.PrayerStats) },
                     onNavigateToQadaPrayers = { navController.navigate(Route.QadaPrayers) },
                     onNavigateToMakeupFasts = { navController.navigate(Route.MakeupFasts) },
                     onShareApp = {
@@ -475,8 +472,6 @@ fun NavGraph() {
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
-                    onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
@@ -495,9 +490,8 @@ fun NavGraph() {
             }
 
             composable<Route.QadaPrayers> {
-                PrayerTrackerScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToStats = { navController.navigate(Route.PrayerStats) }
+                QadaPrayersScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -535,7 +529,6 @@ fun NavGraph() {
             // Tasbih screens
             composable<Route.TasbihHome> {
                 TasbihScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
@@ -545,7 +538,6 @@ fun NavGraph() {
             composable<Route.TasbihCounter> { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.TasbihCounter>()
                 TasbihScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
@@ -553,7 +545,6 @@ fun NavGraph() {
 
             composable<Route.TasbihPresets> {
                 TasbihScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
@@ -561,7 +552,6 @@ fun NavGraph() {
 
             composable<Route.TasbihStats> {
                 TasbihScreen(
-                    onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )

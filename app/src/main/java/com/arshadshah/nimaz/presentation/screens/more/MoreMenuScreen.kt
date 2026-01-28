@@ -16,7 +16,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.DarkMode
@@ -27,7 +26,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.QueryStats
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
@@ -66,7 +64,6 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreMenuScreen(
-    onNavigateToBookmarks: () -> Unit,
     onNavigateToCalendar: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToAppearance: () -> Unit,
@@ -83,7 +80,6 @@ fun MoreMenuScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
-    onNavigateToPrayerStats: () -> Unit,
     onNavigateToQadaPrayers: () -> Unit,
     onNavigateToMakeupFasts: () -> Unit,
     onDeleteAllData: () -> Unit
@@ -122,24 +118,10 @@ fun MoreMenuScreen(
                     )
                     MenuDivider()
                     MenuItem(
-                        title = "Prayer Stats",
-                        subtitle = "Prayer history and streaks",
-                        icon = Icons.Default.QueryStats,
-                        onClick = onNavigateToPrayerStats
-                    )
-                    MenuDivider()
-                    MenuItem(
                         title = "Qada Prayers",
                         subtitle = "Missed prayers to make up",
                         icon = Icons.Default.Restore,
                         onClick = onNavigateToQadaPrayers
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Bookmarks",
-                        subtitle = "Saved ayahs, hadith, and duas",
-                        icon = Icons.Default.Bookmark,
-                        onClick = onNavigateToBookmarks
                     )
                     MenuDivider()
                     MenuItem(
