@@ -7,13 +7,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler.Companion.MIDNIGHT_REQUEST_CODE
+import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
-import java.time.ZoneOffset
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -40,6 +39,7 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Request codes for different prayers (use prayer ordinal * 10 for different notification types)
         private const val REQUEST_CODE_BASE = 1000
+        private const val TEST_NOTIFICATION_ID = 8888
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
@@ -78,13 +78,16 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     /**
-     * Schedule notifications for all prayers today.
+     * Schedule notifications for today's prayers.
      * This should be called after boot, when settings change, or at midnight.
+     *
+     * @param enabledPrayers If provided, only schedule for these prayer types. If null, schedule all non-sunrise prayers.
      */
     fun scheduleTodaysPrayerNotifications(
         latitude: Double,
         longitude: Double,
-        notificationsEnabled: Boolean
+        notificationsEnabled: Boolean,
+        enabledPrayers: Set<PrayerType>? = null
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
@@ -95,14 +98,21 @@ class PrayerNotificationScheduler @Inject constructor(
             return // No location set
         }
 
+        // Cancel all first, then reschedule only enabled ones
+        PrayerType.entries.forEach { cancelPrayerNotification(it) }
+
         val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude, LocalDate.now())
         val now = LocalDateTime.now()
 
         prayerTimes.forEach { prayerTime ->
-            // Skip Sunrise as it's not a prayer
-            if (prayerTime.type == PrayerType.SUNRISE) return@forEach
+            // Skip Sunrise by default, or skip if not in enabledPrayers set
+            if (enabledPrayers != null) {
+                if (prayerTime.type !in enabledPrayers) return@forEach
+            } else {
+                if (prayerTime.type == PrayerType.SUNRISE) return@forEach
+            }
 
-            val prayerLocalDateTime = prayerTime.time.toLocalDateTime(ZoneOffset.systemDefault() as ZoneOffset)
+            val prayerLocalDateTime = prayerTime.time.toLocalDateTime()
 
             // Only schedule if prayer time is in the future
             if (prayerLocalDateTime.isAfter(now)) {
@@ -190,6 +200,21 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     /**
+     * Send an immediate test notification to verify notifications are working.
+     */
+    fun sendTestNotification() {
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
+            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setContentTitle("Test Notification")
+            .setContentText("Prayer notifications are working correctly")
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .build()
+
+        notificationManager.notify(TEST_NOTIFICATION_ID, notification)
+    }
+
+    /**
      * Schedule a midnight alarm to reschedule tomorrow's prayers.
      */
     private fun scheduleMidnightReschedule() {
@@ -245,7 +270,7 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     // Extension to convert kotlinx.datetime.Instant to LocalDateTime
-    private fun kotlinx.datetime.Instant.toLocalDateTime(zone: java.time.ZoneOffset): LocalDateTime {
+    private fun kotlinx.datetime.Instant.toLocalDateTime(): LocalDateTime {
         return java.time.Instant.ofEpochMilli(this.toEpochMilliseconds())
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()

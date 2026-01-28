@@ -8,6 +8,7 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -16,6 +17,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class FastingTrackerUiState(
@@ -23,6 +25,8 @@ data class FastingTrackerUiState(
     val todayRecord: FastRecord? = null,
     val isFastingToday: Boolean = false,
     val selectedFastType: FastType = FastType.VOLUNTARY,
+    val suhoorTime: String = "--:-- AM",
+    val iftarTime: String = "--:-- PM",
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -85,7 +89,8 @@ sealed interface FastingEvent {
 
 @HiltViewModel
 class FastingViewModel @Inject constructor(
-    private val fastingRepository: FastingRepository
+    private val fastingRepository: FastingRepository,
+    private val prayerRepository: PrayerRepository
 ) : ViewModel() {
 
     private val _trackerState = MutableStateFlow(FastingTrackerUiState())
@@ -103,11 +108,32 @@ class FastingViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(FastingStatsUiState())
     val statsState: StateFlow<FastingStatsUiState> = _statsState.asStateFlow()
 
+    private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
+
     init {
         loadToday()
+        loadPrayerTimes()
         loadCalendarMonth()
         loadMakeupFasts()
         loadStats()
+    }
+
+    private fun loadPrayerTimes() {
+        viewModelScope.launch {
+            try {
+                val location = prayerRepository.getCurrentLocationSync() ?: return@launch
+                val today = LocalDate.now()
+                val prayerTimes = prayerRepository.getPrayerTimesForDate(today, location)
+                _trackerState.update {
+                    it.copy(
+                        suhoorTime = prayerTimes.fajr.format(timeFormatter),
+                        iftarTime = prayerTimes.maghrib.format(timeFormatter)
+                    )
+                }
+            } catch (_: Exception) {
+                // Keep default placeholder times
+            }
+        }
     }
 
     fun onEvent(event: FastingEvent) {

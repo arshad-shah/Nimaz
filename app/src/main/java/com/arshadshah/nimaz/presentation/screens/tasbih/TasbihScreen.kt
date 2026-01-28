@@ -69,6 +69,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 fun TasbihScreen(
     onNavigateBack: () -> Unit,
     onNavigateToHistory: () -> Unit,
+    onNavigateToAddPreset: () -> Unit = {},
     onNavigateToSettings: () -> Unit,
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
@@ -91,7 +92,7 @@ fun TasbihScreen(
                             contentDescription = "History"
                         )
                     }
-                    IconButton(onClick = onNavigateToSettings) {
+                    IconButton(onClick = onNavigateToAddPreset) {
                         Icon(
                             imageVector = Icons.Default.Add,
                             contentDescription = "Add Preset"

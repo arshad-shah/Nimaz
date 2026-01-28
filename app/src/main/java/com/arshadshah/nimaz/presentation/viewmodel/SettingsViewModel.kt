@@ -2,14 +2,17 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -52,7 +55,13 @@ data class GeneralSettingsUiState(
     val useHijriPrimary: Boolean = false,
     val use24HourFormat: Boolean = false,
     val showSeconds: Boolean = false,
-    val hapticFeedback: Boolean = true
+    val hapticFeedback: Boolean = true,
+    val accentColor: String = "Teal",
+    val appIcon: String = "Default",
+    val showIslamicPatterns: Boolean = true,
+    val animationsEnabled: Boolean = true,
+    val showCountdown: Boolean = true,
+    val showQuickActions: Boolean = true
 )
 
 data class PrayerSettingsUiState(
@@ -118,6 +127,12 @@ sealed interface SettingsEvent {
     data class Set24HourFormat(val enabled: Boolean) : SettingsEvent
     data class SetShowSeconds(val enabled: Boolean) : SettingsEvent
     data class SetHapticFeedback(val enabled: Boolean) : SettingsEvent
+    data class SetAccentColor(val color: String) : SettingsEvent
+    data class SetAppIcon(val icon: String) : SettingsEvent
+    data class SetShowIslamicPatterns(val enabled: Boolean) : SettingsEvent
+    data class SetAnimationsEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetShowCountdown(val enabled: Boolean) : SettingsEvent
+    data class SetShowQuickActions(val enabled: Boolean) : SettingsEvent
 
     // Prayer
     data class SetCalculationMethod(val method: CalculationMethod) : SettingsEvent
@@ -164,12 +179,15 @@ sealed interface SettingsEvent {
     data object ResetToDefaults : SettingsEvent
     data object ExportSettings : SettingsEvent
     data object ImportSettings : SettingsEvent
+    data object TestNotification : SettingsEvent
+    data object ResetNotifications : SettingsEvent
 }
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore
+    private val preferencesDataStore: PreferencesDataStore,
+    private val prayerNotificationScheduler: PrayerNotificationScheduler
 ) : ViewModel() {
 
     private val _generalState = MutableStateFlow(GeneralSettingsUiState())
@@ -209,38 +227,155 @@ class SettingsViewModel @Inject constructor(
                     preferencesDataStore.setThemeMode(modeString)
                 }
             }
-            is SettingsEvent.SetLanguage -> _generalState.update { it.copy(language = event.language) }
-            is SettingsEvent.SetHijriPrimary -> _generalState.update { it.copy(useHijriPrimary = event.enabled) }
-            is SettingsEvent.Set24HourFormat -> _generalState.update { it.copy(use24HourFormat = event.enabled) }
+            is SettingsEvent.SetLanguage -> {
+                _generalState.update { it.copy(language = event.language) }
+                viewModelScope.launch { preferencesDataStore.setAppLanguage(event.language.code) }
+            }
+            is SettingsEvent.SetHijriPrimary -> {
+                _generalState.update { it.copy(useHijriPrimary = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setUseHijriPrimary(event.enabled) }
+            }
+            is SettingsEvent.Set24HourFormat -> {
+                _generalState.update { it.copy(use24HourFormat = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setUse24HourFormat(event.enabled) }
+            }
             is SettingsEvent.SetShowSeconds -> _generalState.update { it.copy(showSeconds = event.enabled) }
-            is SettingsEvent.SetHapticFeedback -> _generalState.update { it.copy(hapticFeedback = event.enabled) }
+            is SettingsEvent.SetHapticFeedback -> {
+                _generalState.update { it.copy(hapticFeedback = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setHapticFeedback(event.enabled) }
+            }
+            is SettingsEvent.SetAccentColor -> {
+                _generalState.update { it.copy(accentColor = event.color) }
+                viewModelScope.launch { preferencesDataStore.setAccentColor(event.color) }
+            }
+            is SettingsEvent.SetAppIcon -> {
+                _generalState.update { it.copy(appIcon = event.icon) }
+                viewModelScope.launch { preferencesDataStore.setAppIcon(event.icon) }
+            }
+            is SettingsEvent.SetShowIslamicPatterns -> {
+                _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowIslamicPatterns(event.enabled) }
+            }
+            is SettingsEvent.SetAnimationsEnabled -> {
+                _generalState.update { it.copy(animationsEnabled = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setAnimationsEnabled(event.enabled) }
+            }
+            is SettingsEvent.SetShowCountdown -> {
+                _generalState.update { it.copy(showCountdown = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowCountdown(event.enabled) }
+            }
+            is SettingsEvent.SetShowQuickActions -> {
+                _generalState.update { it.copy(showQuickActions = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowQuickActions(event.enabled) }
+            }
 
             // Prayer
-            is SettingsEvent.SetCalculationMethod -> _prayerState.update { it.copy(calculationMethod = event.method) }
-            is SettingsEvent.SetAsrMethod -> _prayerState.update { it.copy(asrMethod = event.method) }
-            is SettingsEvent.SetHighLatitudeRule -> _prayerState.update { it.copy(highLatitudeRule = event.rule) }
+            is SettingsEvent.SetCalculationMethod -> {
+                _prayerState.update { it.copy(calculationMethod = event.method) }
+                viewModelScope.launch {
+                    preferencesDataStore.setCalculationMethod(event.method.name)
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetAsrMethod -> {
+                _prayerState.update { it.copy(asrMethod = event.method) }
+                viewModelScope.launch {
+                    preferencesDataStore.setAsrCalculation(event.method.name.lowercase())
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetHighLatitudeRule -> {
+                _prayerState.update { it.copy(highLatitudeRule = event.rule) }
+                viewModelScope.launch {
+                    preferencesDataStore.setHighLatitudeRule(event.rule.name)
+                    rescheduleNotifications()
+                }
+            }
             is SettingsEvent.SetFajrAngle -> _prayerState.update { it.copy(fajrAngle = event.angle) }
             is SettingsEvent.SetIshaAngle -> _prayerState.update { it.copy(ishaAngle = event.angle) }
-            is SettingsEvent.SetPrayerAdjustment -> updatePrayerAdjustment(event.prayer, event.minutes)
+            is SettingsEvent.SetPrayerAdjustment -> {
+                updatePrayerAdjustment(event.prayer, event.minutes)
+                viewModelScope.launch {
+                    preferencesDataStore.setPrayerAdjustment(event.prayer, event.minutes)
+                    rescheduleNotifications()
+                }
+            }
 
             // Notifications
-            is SettingsEvent.SetNotificationsEnabled -> _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
-            is SettingsEvent.SetPrayerNotification -> updatePrayerNotification(event.prayer, event.enabled)
-            is SettingsEvent.SetAdhanEnabled -> _notificationState.update { it.copy(adhanEnabled = event.enabled) }
-            is SettingsEvent.SetVibrationEnabled -> _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
-            is SettingsEvent.SetReminderMinutes -> _notificationState.update { it.copy(reminderMinutes = event.minutes) }
-            is SettingsEvent.SetShowReminderBefore -> _notificationState.update { it.copy(showReminderBefore = event.enabled) }
-            is SettingsEvent.SetPersistentNotification -> _notificationState.update { it.copy(persistentNotification = event.enabled) }
+            is SettingsEvent.SetNotificationsEnabled -> {
+                _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
+                viewModelScope.launch {
+                    preferencesDataStore.setPrayerNotificationsEnabled(event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetPrayerNotification -> {
+                updatePrayerNotification(event.prayer, event.enabled)
+                viewModelScope.launch { rescheduleNotifications() }
+            }
+            is SettingsEvent.SetAdhanEnabled -> {
+                _notificationState.update { it.copy(adhanEnabled = event.enabled) }
+                viewModelScope.launch {
+                    preferencesDataStore.setAdhanEnabled(event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetVibrationEnabled -> {
+                _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setNotificationVibration(event.enabled) }
+            }
+            is SettingsEvent.SetReminderMinutes -> {
+                _notificationState.update { it.copy(reminderMinutes = event.minutes) }
+                viewModelScope.launch {
+                    preferencesDataStore.setNotificationReminderMinutes(event.minutes)
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetShowReminderBefore -> {
+                _notificationState.update { it.copy(showReminderBefore = event.enabled) }
+                viewModelScope.launch {
+                    preferencesDataStore.setShowReminderBefore(event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+            is SettingsEvent.SetPersistentNotification -> {
+                _notificationState.update { it.copy(persistentNotification = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setPersistentNotification(event.enabled) }
+            }
 
             // Quran
-            is SettingsEvent.SetTranslator -> _quranState.update { it.copy(selectedTranslatorId = event.translatorId) }
-            is SettingsEvent.SetShowTranslation -> _quranState.update { it.copy(showTranslation = event.enabled) }
-            is SettingsEvent.SetShowTransliteration -> _quranState.update { it.copy(showTransliteration = event.enabled) }
-            is SettingsEvent.SetArabicFontSize -> _quranState.update { it.copy(arabicFontSize = event.size) }
-            is SettingsEvent.SetTranslationFontSize -> _quranState.update { it.copy(translationFontSize = event.size) }
-            is SettingsEvent.SetContinuousReading -> _quranState.update { it.copy(continuousReading = event.enabled) }
-            is SettingsEvent.SetKeepScreenOn -> _quranState.update { it.copy(keepScreenOn = event.enabled) }
-            is SettingsEvent.SetReciter -> _quranState.update { it.copy(selectedReciterId = event.reciterId) }
+            is SettingsEvent.SetTranslator -> {
+                _quranState.update { it.copy(selectedTranslatorId = event.translatorId) }
+                viewModelScope.launch { preferencesDataStore.setQuranTranslatorId(event.translatorId) }
+            }
+            is SettingsEvent.SetShowTranslation -> {
+                _quranState.update { it.copy(showTranslation = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowTranslation(event.enabled) }
+            }
+            is SettingsEvent.SetShowTransliteration -> {
+                _quranState.update { it.copy(showTransliteration = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowTransliteration(event.enabled) }
+            }
+            is SettingsEvent.SetArabicFontSize -> {
+                _quranState.update { it.copy(arabicFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setQuranArabicFontSize(event.size) }
+            }
+            is SettingsEvent.SetTranslationFontSize -> {
+                _quranState.update { it.copy(translationFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setQuranTranslationFontSize(event.size) }
+            }
+            is SettingsEvent.SetContinuousReading -> {
+                _quranState.update { it.copy(continuousReading = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setContinuousReading(event.enabled) }
+            }
+            is SettingsEvent.SetKeepScreenOn -> {
+                _quranState.update { it.copy(keepScreenOn = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setKeepScreenOn(event.enabled) }
+            }
+            is SettingsEvent.SetReciter -> {
+                _quranState.update { it.copy(selectedReciterId = event.reciterId) }
+                viewModelScope.launch { preferencesDataStore.setSelectedReciterId(event.reciterId) }
+            }
 
             // Location
             is SettingsEvent.SetCurrentLocation -> setCurrentLocation(event.location)
@@ -260,29 +395,127 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.ResetToDefaults -> resetToDefaults()
             SettingsEvent.ExportSettings -> exportSettings()
             SettingsEvent.ImportSettings -> importSettings()
-        }
-
-        // Save settings after each change
-        saveSettings()
-    }
-
-    private fun loadSettings() {
-        viewModelScope.launch {
-            preferencesDataStore.themeMode.collect { themeMode ->
-                val theme = when (themeMode) {
-                    "light" -> AppTheme.LIGHT
-                    "dark" -> AppTheme.DARK
-                    else -> AppTheme.SYSTEM
+            SettingsEvent.TestNotification -> {
+                prayerNotificationScheduler.sendTestNotification()
+            }
+            SettingsEvent.ResetNotifications -> {
+                viewModelScope.launch {
+                    prayerNotificationScheduler.cancelAllPrayerNotifications()
+                    rescheduleNotifications()
                 }
-                _generalState.update { it.copy(theme = theme) }
             }
         }
     }
 
-    private fun saveSettings() {
-        // In production, this would persist to DataStore
+    private fun loadSettings() {
         viewModelScope.launch {
-            // Save to DataStore
+            // General settings
+            val theme = when (preferencesDataStore.themeMode.first()) {
+                "light" -> AppTheme.LIGHT
+                "dark" -> AppTheme.DARK
+                else -> AppTheme.SYSTEM
+            }
+            val langCode = preferencesDataStore.appLanguage.first()
+            val language = AppLanguage.entries.find { it.code == langCode } ?: AppLanguage.ENGLISH
+            val accentColor = preferencesDataStore.accentColor.first()
+            val appIcon = preferencesDataStore.appIcon.first()
+            val showIslamicPatterns = preferencesDataStore.showIslamicPatterns.first()
+            val animationsEnabled = preferencesDataStore.animationsEnabled.first()
+            val showCountdown = preferencesDataStore.showCountdown.first()
+            val showQuickActions = preferencesDataStore.showQuickActions.first()
+            val hapticFeedback = preferencesDataStore.hapticFeedback.first()
+            val use24Hour = preferencesDataStore.use24HourFormat.first()
+            val useHijri = preferencesDataStore.useHijriPrimary.first()
+
+            _generalState.update {
+                it.copy(
+                    theme = theme,
+                    language = language,
+                    accentColor = accentColor,
+                    appIcon = appIcon,
+                    showIslamicPatterns = showIslamicPatterns,
+                    animationsEnabled = animationsEnabled,
+                    showCountdown = showCountdown,
+                    showQuickActions = showQuickActions,
+                    hapticFeedback = hapticFeedback,
+                    use24HourFormat = use24Hour,
+                    useHijriPrimary = useHijri
+                )
+            }
+
+            // Prayer settings
+            val calcMethodStr = preferencesDataStore.calculationMethod.first()
+            val calcMethod = try { CalculationMethod.valueOf(calcMethodStr) } catch (_: Exception) { CalculationMethod.MUSLIM_WORLD_LEAGUE }
+            val asrStr = preferencesDataStore.asrCalculation.first()
+            val asrMethod = when (asrStr.lowercase()) {
+                "hanafi" -> AsrJuristicMethod.HANAFI
+                else -> AsrJuristicMethod.STANDARD
+            }
+            val highLatStr = preferencesDataStore.highLatitudeRule.first()
+            val highLat = try { HighLatitudeRule.valueOf(highLatStr) } catch (_: Exception) { HighLatitudeRule.MIDDLE_OF_NIGHT }
+
+            val fajrAdj = preferencesDataStore.fajrAdjustment.first()
+            val sunriseAdj = preferencesDataStore.sunriseAdjustment.first()
+            val dhuhrAdj = preferencesDataStore.dhuhrAdjustment.first()
+            val asrAdj = preferencesDataStore.asrAdjustment.first()
+            val maghribAdj = preferencesDataStore.maghribAdjustment.first()
+            val ishaAdj = preferencesDataStore.ishaAdjustment.first()
+
+            _prayerState.update {
+                it.copy(
+                    calculationMethod = calcMethod,
+                    asrMethod = asrMethod,
+                    highLatitudeRule = highLat,
+                    fajrAdjustment = fajrAdj,
+                    sunriseAdjustment = sunriseAdj,
+                    dhuhrAdjustment = dhuhrAdj,
+                    asrAdjustment = asrAdj,
+                    maghribAdjustment = maghribAdj,
+                    ishaAdjustment = ishaAdj
+                )
+            }
+
+            // Notification settings
+            val notifEnabled = preferencesDataStore.prayerNotificationsEnabled.first()
+            val adhanEnabled = preferencesDataStore.adhanEnabled.first()
+            val vibration = preferencesDataStore.notificationVibration.first()
+            val reminderMin = preferencesDataStore.notificationReminderMinutes.first()
+            val showReminder = preferencesDataStore.showReminderBefore.first()
+            val persistent = preferencesDataStore.persistentNotification.first()
+
+            _notificationState.update {
+                it.copy(
+                    notificationsEnabled = notifEnabled,
+                    adhanEnabled = adhanEnabled,
+                    vibrationEnabled = vibration,
+                    reminderMinutes = reminderMin,
+                    showReminderBefore = showReminder,
+                    persistentNotification = persistent
+                )
+            }
+
+            // Quran settings
+            val translatorId = preferencesDataStore.quranTranslatorId.first()
+            val showTranslation = preferencesDataStore.showTranslation.first()
+            val showTransliteration = preferencesDataStore.showTransliteration.first()
+            val arabicFontSize = preferencesDataStore.quranArabicFontSize.first()
+            val translationFontSize = preferencesDataStore.quranTranslationFontSize.first()
+            val continuousReading = preferencesDataStore.continuousReading.first()
+            val keepScreenOn = preferencesDataStore.keepScreenOn.first()
+            val reciterId = preferencesDataStore.selectedReciterId.first()
+
+            _quranState.update {
+                it.copy(
+                    selectedTranslatorId = translatorId,
+                    showTranslation = showTranslation,
+                    showTransliteration = showTransliteration,
+                    arabicFontSize = arabicFontSize,
+                    translationFontSize = translationFontSize,
+                    continuousReading = continuousReading,
+                    keepScreenOn = keepScreenOn,
+                    selectedReciterId = reciterId
+                )
+            }
         }
     }
 
@@ -304,6 +537,29 @@ class SettingsViewModel @Inject constructor(
                 _locationState.update { it.copy(favoriteLocations = favorites) }
             }
         }
+    }
+
+    private suspend fun rescheduleNotifications() {
+        val prefs = preferencesDataStore.userPreferences.first()
+        val lat = prefs.latitude
+        val lng = prefs.longitude
+        val notifState = _notificationState.value
+
+        val enabledPrayers = buildSet {
+            if (notifState.fajrNotification) add(PrayerType.FAJR)
+            if (notifState.dhuhrNotification) add(PrayerType.DHUHR)
+            if (notifState.asrNotification) add(PrayerType.ASR)
+            if (notifState.maghribNotification) add(PrayerType.MAGHRIB)
+            if (notifState.ishaNotification) add(PrayerType.ISHA)
+            if (notifState.sunriseNotification) add(PrayerType.SUNRISE)
+        }
+
+        prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
+            latitude = lat,
+            longitude = lng,
+            notificationsEnabled = notifState.notificationsEnabled,
+            enabledPrayers = enabledPrayers
+        )
     }
 
     private fun updatePrayerAdjustment(prayer: String, minutes: Int) {
@@ -365,18 +621,15 @@ class SettingsViewModel @Inject constructor(
         _notificationState.update { NotificationSettingsUiState() }
         _quranState.update { QuranSettingsUiState() }
         _widgetState.update { WidgetSettingsUiState() }
-        saveSettings()
     }
 
     private fun exportSettings() {
-        // Export settings to JSON
         viewModelScope.launch {
             // Implementation would export all settings to a shareable format
         }
     }
 
     private fun importSettings() {
-        // Import settings from JSON
         viewModelScope.launch {
             // Implementation would import settings from a file
         }

@@ -2,10 +2,12 @@ package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.Translator
 import kotlinx.coroutines.flow.Flow
@@ -43,10 +45,18 @@ interface QuranRepository {
     suspend fun updateBookmark(bookmark: QuranBookmark)
     suspend fun deleteBookmark(ayahId: Int)
 
+    // Favorite operations
+    fun getAllFavorites(): Flow<List<QuranFavorite>>
+    fun getFavoriteAyahIds(): Flow<List<Int>>
+    suspend fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int)
+
     // Reading progress
     fun getReadingProgress(): Flow<ReadingProgress?>
     suspend fun updateReadingPosition(surah: Int, ayah: Int, page: Int, juz: Int)
     suspend fun incrementAyahsRead(count: Int)
+
+    // Surah info
+    suspend fun getSurahInfo(surahNumber: Int): SurahInfo?
 
     // Data initialization
     suspend fun initializeQuranData()

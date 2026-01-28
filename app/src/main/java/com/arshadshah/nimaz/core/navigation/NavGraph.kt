@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.navigation
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -145,7 +146,11 @@ fun NavGraph() {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            modifier = Modifier.padding(innerPadding)
+            // Only apply bottom padding (for nav bar). Each screen's own
+            // Scaffold/TopAppBar handles the top status bar inset.
+            modifier = Modifier.padding(
+                PaddingValues(bottom = innerPadding.calculateBottomPadding())
+            )
         ) {
             // Onboarding
             composable<Route.Onboarding> {
@@ -183,14 +188,25 @@ fun NavGraph() {
                     onNavigateToSurah = { surahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber))
                     },
-                    onNavigateToBookmarks = { navController.navigate(Route.QuranBookmarks) }
+                    onNavigateToJuz = { juzNumber ->
+                        navController.navigate(Route.QuranJuz(juzNumber))
+                    },
+                    onNavigateToPage = { pageNumber ->
+                        navController.navigate(Route.QuranPage(pageNumber))
+                    },
+                    onNavigateToBookmarks = { navController.navigate(Route.QuranBookmarks) },
+                    onNavigateToSettings = { navController.navigate(Route.SettingsQuran) },
+                    onNavigateToSurahInfo = { surahNumber ->
+                        navController.navigate(Route.SurahInfo(surahNumber))
+                    }
                 )
             }
 
             composable<Route.Tasbih> {
                 TasbihScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
+                    onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -202,6 +218,7 @@ fun NavGraph() {
             }
 
             composable<Route.More> {
+                val context = androidx.compose.ui.platform.LocalContext.current
                 MoreMenuScreen(
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
@@ -217,10 +234,22 @@ fun NavGraph() {
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToDuas = { navController.navigate(Route.DuaHome) },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onShareApp = { /* Implement share intent */ },
-                    onRateApp = { /* Implement rate intent */ }
+                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
+                    onNavigateToPrayerStats = { navController.navigate(Route.PrayerStats) },
+                    onNavigateToQadaPrayers = { navController.navigate(Route.QadaPrayers) },
+                    onNavigateToMakeupFasts = { navController.navigate(Route.MakeupFasts) },
+                    onShareApp = {
+                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
+                    },
+                    onRateApp = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                        context.startActivity(intent)
+                    }
                 )
             }
 
@@ -229,7 +258,8 @@ fun NavGraph() {
                 val args = backStackEntry.toRoute<Route.QuranReader>()
                 QuranReaderScreen(
                     surahNumber = args.surahNumber,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
                 )
             }
 
@@ -240,26 +270,25 @@ fun NavGraph() {
                     onNavigateBack = { navController.popBackStack() },
                     onStartReading = {
                         navController.navigate(Route.QuranReader(args.surahNumber))
-                    },
-                    onPlayAudio = { /* TODO: Implement audio playback */ }
+                    }
                 )
             }
 
             composable<Route.QuranPage> { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QuranPage>()
-                // TODO: Implement page-based navigation
                 QuranReaderScreen(
-                    surahNumber = 1,
-                    onNavigateBack = { navController.popBackStack() }
+                    pageNumber = args.pageNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
                 )
             }
 
             composable<Route.QuranJuz> { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QuranJuz>()
-                // TODO: Implement juz-based navigation
                 QuranReaderScreen(
-                    surahNumber = 1,
-                    onNavigateBack = { navController.popBackStack() }
+                    juzNumber = args.juzNumber,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
                 )
             }
 
@@ -506,7 +535,8 @@ fun NavGraph() {
             composable<Route.TasbihHome> {
                 TasbihScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
+                    onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
@@ -533,6 +563,18 @@ fun NavGraph() {
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
+                )
+            }
+
+            composable<Route.TasbihHistory> {
+                com.arshadshah.nimaz.presentation.screens.tasbih.TasbihHistoryScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Route.TasbihAddPreset> {
+                com.arshadshah.nimaz.presentation.screens.tasbih.AddPresetScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -588,7 +630,8 @@ fun NavGraph() {
 
             composable<Route.SettingsPrayerCalculation> {
                 PrayerSettingsScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) }
                 )
             }
 
@@ -636,26 +679,76 @@ fun NavGraph() {
             }
 
             composable<Route.SettingsAbout> {
+                val context = androidx.compose.ui.platform.LocalContext.current
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToPrivacyPolicy = { /* TODO: Open privacy policy */ },
-                    onNavigateToTerms = { /* TODO: Open terms */ },
-                    onNavigateToLicenses = { /* TODO: Show licenses */ },
-                    onRateApp = { /* TODO: Open Play Store */ },
-                    onShareApp = { /* TODO: Share intent */ },
-                    onContactUs = { /* TODO: Email intent */ }
+                    onNavigateToPrivacyPolicy = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/privacy-policy"))
+                        context.startActivity(intent)
+                    },
+                    onNavigateToTerms = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/terms-of-service"))
+                        context.startActivity(intent)
+                    },
+                    onNavigateToLicenses = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/licenses"))
+                        context.startActivity(intent)
+                    },
+                    onRateApp = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                        context.startActivity(intent)
+                    },
+                    onShareApp = {
+                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
+                    },
+                    onContactUs = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                            data = android.net.Uri.parse("mailto:support@nimazapp.com")
+                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
+                        }
+                        context.startActivity(intent)
+                    }
                 )
             }
 
             composable<Route.SettingsHelp> {
+                val context = androidx.compose.ui.platform.LocalContext.current
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToPrivacyPolicy = { },
-                    onNavigateToTerms = { },
-                    onNavigateToLicenses = { },
-                    onRateApp = { },
-                    onShareApp = { },
-                    onContactUs = { }
+                    onNavigateToPrivacyPolicy = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/privacy-policy"))
+                        context.startActivity(intent)
+                    },
+                    onNavigateToTerms = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/terms-of-service"))
+                        context.startActivity(intent)
+                    },
+                    onNavigateToLicenses = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/licenses"))
+                        context.startActivity(intent)
+                    },
+                    onRateApp = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                        context.startActivity(intent)
+                    },
+                    onShareApp = {
+                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+                            type = "text/plain"
+                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                        }
+                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
+                    },
+                    onContactUs = {
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                            data = android.net.Uri.parse("mailto:support@nimazapp.com")
+                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
+                        }
+                        context.startActivity(intent)
+                    }
                 )
             }
 

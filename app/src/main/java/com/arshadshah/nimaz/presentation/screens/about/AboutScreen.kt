@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -211,11 +213,12 @@ private fun LinksCard(
             onClick = onContactUs,
             showDivider = true
         )
+        val uriHandler = LocalUriHandler.current
         LinkItem(
             emoji = "\uD83C\uDF10",
             title = "Website",
             subtitle = "nimazpro.app",
-            onClick = { },
+            onClick = { uriHandler.openUri("https://nimazpro.app") },
             showDivider = true
         )
         LinkItem(
@@ -343,13 +346,19 @@ private fun CreditsCard(modifier: Modifier = Modifier) {
 
 @Composable
 private fun SocialLinksRow(modifier: Modifier = Modifier) {
+    val uriHandler = LocalUriHandler.current
+    val socials = listOf(
+        "X" to "https://x.com/nimazpro",
+        "IG" to "https://instagram.com/nimazpro",
+        "YT" to "https://youtube.com/@nimazpro"
+    )
+
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val socials = listOf("X", "IG", "YT")
-        socials.forEachIndexed { index, label ->
+        socials.forEachIndexed { index, (label, url) ->
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -358,7 +367,7 @@ private fun SocialLinksRow(modifier: Modifier = Modifier) {
                         shape = RoundedCornerShape(14.dp)
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .clickable { },
+                    .clickable { uriHandler.openUri(url) },
                 contentAlignment = Alignment.Center
             ) {
                 Text(

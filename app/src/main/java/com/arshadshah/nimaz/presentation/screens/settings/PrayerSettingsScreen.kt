@@ -18,11 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
@@ -60,6 +57,7 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 @Composable
 fun PrayerSettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToNotifications: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val prayerState by viewModel.prayerState.collectAsState()
@@ -88,40 +86,6 @@ fun PrayerSettingsScreen(
             contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // Location Section
-            item {
-                SettingsSection(title = "LOCATION") {
-                    SettingsCard {
-                        SettingItem(
-                            icon = Icons.Default.LocationOn,
-                            iconTinted = true,
-                            label = "Current Location",
-                            value = locationState.currentLocation?.let {
-                                listOfNotNull(it.city, it.country).joinToString(", ")
-                            } ?: "Not set",
-                            onClick = { }
-                        )
-                        SettingsDivider()
-                        SettingToggleItem(
-                            icon = Icons.Default.Public,
-                            label = "Auto-detect Location",
-                            value = "Updates automatically",
-                            checked = locationState.autoDetectLocation,
-                            onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetAutoDetectLocation(it))
-                            }
-                        )
-                        SettingsDivider()
-                        SettingItem(
-                            icon = Icons.Default.Edit,
-                            label = "Set Manual Location",
-                            value = "Search city or coordinates",
-                            onClick = { }
-                        )
-                    }
-                }
-            }
-
             // Calculation Method Section
             item {
                 SettingsSection(title = "CALCULATION METHOD") {
@@ -231,14 +195,14 @@ fun PrayerSettingsScreen(
                             icon = Icons.Default.Notifications,
                             label = "Adhan Notifications",
                             value = "All prayers enabled",
-                            onClick = { }
+                            onClick = onNavigateToNotifications
                         )
                         SettingsDivider()
                         SettingItem(
                             icon = Icons.Default.Schedule,
                             label = "Pre-Adhan Reminder",
                             value = "15 minutes before",
-                            onClick = { }
+                            onClick = onNavigateToNotifications
                         )
                     }
                 }

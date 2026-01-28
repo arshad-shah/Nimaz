@@ -29,6 +29,7 @@ data class PrayerTrackerUiState(
 
 data class PrayerStatsUiState(
     val stats: PrayerStats? = null,
+    val monthlyStats: PrayerStats? = null,
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val period: StatsPeriod = StatsPeriod.WEEK,
@@ -216,14 +217,21 @@ class PrayerTrackerViewModel @Inject constructor(
         val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
         val currentEpoch = now.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
 
+        // Always load monthly stats
+        val monthStart = now.minusMonths(1)
+        val monthStartEpoch = monthStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val monthEndEpoch = now.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
         viewModelScope.launch {
             val stats = prayerRepository.getPrayerStats(startEpoch, endEpoch)
+            val monthlyStats = prayerRepository.getPrayerStats(monthStartEpoch, monthEndEpoch)
             val currentStreak = prayerRepository.getCurrentStreak(currentEpoch)
             val longestStreak = prayerRepository.getLongestStreak()
 
             _statsState.update {
                 it.copy(
                     stats = stats,
+                    monthlyStats = monthlyStats,
                     currentStreak = currentStreak,
                     longestStreak = longestStreak,
                     isLoading = false

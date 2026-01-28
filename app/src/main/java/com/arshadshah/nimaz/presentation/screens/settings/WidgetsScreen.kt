@@ -32,7 +32,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -132,6 +134,8 @@ private fun WidgetSection(
     preview: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -202,7 +206,13 @@ private fun WidgetSection(
             }
 
             Button(
-                onClick = { /* Add widget action */ },
+                onClick = {
+                    Toast.makeText(
+                        context,
+                        "Long press your home screen to add widgets",
+                        Toast.LENGTH_LONG
+                    ).show()
+                },
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary

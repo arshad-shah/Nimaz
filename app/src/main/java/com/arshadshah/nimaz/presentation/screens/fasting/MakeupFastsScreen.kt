@@ -36,6 +36,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import android.widget.Toast
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -67,6 +69,7 @@ fun MakeupFastsScreen(
 ) {
     val state by viewModel.makeupState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -80,7 +83,9 @@ fun MakeupFastsScreen(
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Add makeup fast dialog */ },
+                onClick = {
+                    Toast.makeText(context, "Add makeup fast dialog coming soon", Toast.LENGTH_SHORT).show()
+                },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary,
                 shape = RoundedCornerShape(16.dp)
@@ -149,7 +154,9 @@ fun MakeupFastsScreen(
                             onComplete = {
                                 viewModel.onEvent(FastingEvent.CompleteMakeupFast(makeupFast.id))
                             },
-                            onEdit = { /* Edit dialog */ }
+                            onEdit = {
+                            Toast.makeText(context, "Edit makeup fast dialog coming soon", Toast.LENGTH_SHORT).show()
+                        }
                         )
                     }
                 }

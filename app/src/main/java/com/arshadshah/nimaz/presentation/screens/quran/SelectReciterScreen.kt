@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -51,6 +53,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -78,11 +83,13 @@ private val popularReciters = listOf(
 @Composable
 fun SelectReciterScreen(
     onNavigateBack: () -> Unit,
-    viewModel: SettingsViewModel = hiltViewModel()
+    viewModel: SettingsViewModel = hiltViewModel(),
+    quranViewModel: QuranViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsState()
     val selectedReciterId = quranState.selectedReciterId ?: "mishary"
     var searchQuery by remember { mutableStateOf("") }
+    val context = LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     val filteredReciters = remember(searchQuery) {
@@ -316,7 +323,16 @@ fun SelectReciterScreen(
                             }
                         }
 
-                        IconButton(onClick = { /* Preview playback */ }) {
+                        IconButton(onClick = {
+                            // Preview: play Al-Fatiha verse 1 with this reciter
+                            val cdnId = QuranAudioManager.RECITER_CDN_MAP[reciter.id] ?: "7"
+                            quranViewModel.audioManager.setReciter(reciter.id)
+                            quranViewModel.onEvent(QuranEvent.PlayAyahAudio(
+                                ayahGlobalId = 1,
+                                surahNumber = 1,
+                                ayahNumber = 1
+                            ))
+                        }) {
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = "Preview",

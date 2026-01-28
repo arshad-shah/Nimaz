@@ -121,6 +121,10 @@ class DuaRepositoryImpl @Inject constructor(
         duaDao.incrementDuaProgress(duaId.toIntOrNull() ?: return, date, targetCount)
     }
 
+    override suspend fun decrementDuaProgress(duaId: String, date: Long) {
+        duaDao.decrementDuaProgress(duaId.toIntOrNull() ?: return, date)
+    }
+
     override suspend fun initializeDuaData() {
         // Data is pre-populated in the database
     }

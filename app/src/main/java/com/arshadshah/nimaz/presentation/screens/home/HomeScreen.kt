@@ -29,17 +29,18 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.RadioButtonChecked
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -55,8 +56,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 // Prayer-specific accent colors matching the design prototype
+import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import java.time.format.DateTimeFormatter
@@ -80,21 +83,23 @@ fun HomeScreen(
 ) {
     val state by viewModel.state.collectAsState()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        if (state.isLoading) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center),
-                color = MaterialTheme.colorScheme.primary
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(bottom = 100.dp)
-            ) {
+    Scaffold { innerPadding ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding)
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            if (state.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
                 // Header with Prayer Info
                 item {
                     HomeHeader(
@@ -119,19 +124,17 @@ fun HomeScreen(
                     )
                 }
 
-                // Quick Actions
+                // Today Info Cards
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     SectionHeader(
-                        title = "Quick Actions",
+                        title = "Today",
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
-                    QuickActionsGrid(
-                        onQuranClick = onNavigateToQuran,
-                        onTasbihClick = onNavigateToTasbih,
-                        onQiblaClick = onNavigateToQibla,
-                        onHadithClick = onNavigateToHadith,
+                    TodayInfoCards(
+                        fastingToday = state.fastingToday,
+                        dailyHadith = state.dailyHadith,
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
@@ -163,14 +166,14 @@ fun HomeScreen(
                         prayer = prayer,
                         isActive = prayer.type == state.nextPrayer,
                         onClick = { onNavigateToPrayerTracker() },
+                        onToggle = {
+                            viewModel.onEvent(HomeEvent.TogglePrayerStatus(prayer.type))
+                        },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                     )
                 }
-
-                item {
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
             }
+        }
         }
     }
 }
@@ -202,7 +205,7 @@ private fun HomeHeader(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp)
+                .padding(vertical = 20.dp, horizontal = 8.dp)
         ) {
             // Top row with location and actions
             Row(
@@ -252,7 +255,7 @@ private fun HomeHeader(
             ) {
                 // Islamic Date
                 Text(
-                    text = hijriDate.ifEmpty { "\u0662\u0664 \u0631\u062C\u0628 \u0661\u0664\u0664\u0667" },
+                    text = hijriDate.ifEmpty { "" },
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
@@ -281,7 +284,7 @@ private fun HomeHeader(
 
                 // Prayer Name
                 Text(
-                    text = nextPrayer?.name ?: "\u2014",
+                    text = nextPrayer?.displayName ?: "\u2014",
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
@@ -437,7 +440,7 @@ private fun TodaysProgressCard(
     val mainPrayers = prayerTimes.filter {
         it.type in listOf(PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR, PrayerType.MAGHRIB, PrayerType.ISHA)
     }
-    val completedCount = mainPrayers.count { it.isPassed }
+    val completedCount = mainPrayers.count { it.prayerStatus == PrayerStatus.PRAYED }
     val totalCount = mainPrayers.size
     val progress = if (totalCount > 0) completedCount.toFloat() / totalCount else 0f
 
@@ -516,7 +519,7 @@ private fun TodaysProgressCard(
                     mainPrayers.forEach { prayer ->
                         ProgressPrayerDot(
                             label = prayer.name.take(5),
-                            isCompleted = prayer.isPassed,
+                            isCompleted = prayer.prayerStatus == PrayerStatus.PRAYED,
                             isCurrent = prayer.isCurrent
                         )
                     }
@@ -573,94 +576,106 @@ private fun SectionHeader(
 }
 
 @Composable
-private fun QuickActionsGrid(
-    onQuranClick: () -> Unit,
-    onTasbihClick: () -> Unit,
-    onQiblaClick: () -> Unit,
-    onHadithClick: () -> Unit,
+private fun TodayInfoCards(
+    fastingToday: Boolean,
+    dailyHadith: String?,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        QuickActionButton(
-            icon = Icons.Default.MenuBook,
-            label = "Quran",
-            iconColor = MaterialTheme.colorScheme.primary,
-            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-            onClick = onQuranClick,
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            icon = Icons.Default.RadioButtonChecked,
-            label = "Tasbih",
-            iconColor = MaterialTheme.colorScheme.secondary,
-            backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-            onClick = onTasbihClick,
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            icon = Icons.Default.Explore,
-            label = "Qibla",
-            iconColor = MaterialTheme.colorScheme.tertiary,
-            backgroundColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.2f),
-            onClick = onQiblaClick,
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            icon = Icons.Default.Book,
-            label = "Hadith",
-            iconColor = Color(0xFF3B82F6),
-            backgroundColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
-            onClick = onHadithClick,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun QuickActionButton(
-    icon: ImageVector,
-    label: String,
-    iconColor: Color,
-    backgroundColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-        onClick = onClick
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(backgroundColor),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = iconColor,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(10.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = FontWeight.Medium
+        // Fasting Status Card
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LightMode,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Column {
+                    Text(
+                        text = "Fasting",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = if (fastingToday) "Today: Fasting" else "No fast today",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
+            }
+        }
+
+        // Daily Hadith Card
+        if (dailyHadith != null) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color(0xFF3B82F6).copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Book,
+                                contentDescription = null,
+                                tint = Color(0xFF3B82F6),
+                                modifier = Modifier.size(22.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Text(
+                            text = "Hadith of the Day",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(
+                        text = dailyHadith,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f),
+                        lineHeight = 18.sp
+                    )
+                }
+            }
         }
     }
 }
@@ -670,9 +685,11 @@ private fun PrayerTimeCard(
     prayer: PrayerTimeDisplay,
     isActive: Boolean,
     onClick: () -> Unit,
+    onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val prayerColor = getPrayerColor(prayer.type)
+    val isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED
 
     Card(
         modifier = modifier
@@ -740,13 +757,14 @@ private fun PrayerTimeCard(
 
             Spacer(modifier = Modifier.width(15.dp))
 
-            // Prayer Status
+            // Prayer Status - toggleable independently
             Box(
                 modifier = Modifier
                     .size(24.dp)
                     .clip(CircleShape)
+                    .clickable(onClick = onToggle)
                     .then(
-                        if (prayer.isPassed) {
+                        if (isPrayed) {
                             Modifier.background(MaterialTheme.colorScheme.primary)
                         } else {
                             Modifier.border(2.dp, MaterialTheme.colorScheme.outline, CircleShape)
@@ -754,7 +772,7 @@ private fun PrayerTimeCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (prayer.isPassed) {
+                if (isPrayed) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Prayed",
@@ -781,8 +799,15 @@ private fun getPrayerColor(prayerType: PrayerType?): Color {
 }
 
 private fun getPrayerIcon(prayerType: PrayerType?): ImageVector {
-    // Using default icons - in production, use custom icons
-    return Icons.Default.RadioButtonChecked
+    return when (prayerType) {
+        PrayerType.FAJR -> Icons.Default.DarkMode
+        PrayerType.SUNRISE -> Icons.Default.WbSunny
+        PrayerType.DHUHR -> Icons.Default.WbSunny
+        PrayerType.ASR -> Icons.Default.LightMode
+        PrayerType.MAGHRIB -> Icons.Default.WbSunny
+        PrayerType.ISHA -> Icons.Default.DarkMode
+        else -> Icons.Default.LightMode
+    }
 }
 
 private fun getArabicPrayerName(prayerType: PrayerType?): String {

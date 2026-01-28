@@ -56,12 +56,15 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Intent
+import android.widget.Toast
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -80,6 +83,7 @@ fun HadithReaderScreen(
     val state by viewModel.readerState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val clipboardManager = LocalClipboardManager.current
+    val context = LocalContext.current
 
     LaunchedEffect(chapterId) {
         viewModel.onEvent(HadithEvent.LoadChapter(chapterId))
@@ -114,7 +118,27 @@ fun HadithReaderScreen(
                             )
                         )
                     },
-                    onShareClick = { /* Share */ },
+                    onShareClick = {
+                        val shareText = buildString {
+                            appendLine(hadith.textArabic)
+                            appendLine()
+                            appendLine(hadith.textEnglish)
+                            hadith.narratorName?.let {
+                                appendLine()
+                                appendLine("Narrated by: $it")
+                            }
+                            hadith.reference?.let {
+                                appendLine()
+                                appendLine(it)
+                            }
+                        }
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, shareText)
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, "Share Hadith"))
+                    },
                     onCopyClick = {
                         val text = buildString {
                             appendLine(hadith.textArabic)
@@ -131,7 +155,9 @@ fun HadithReaderScreen(
                         }
                         clipboardManager.setText(AnnotatedString(text))
                     },
-                    onAudioClick = { /* Audio */ }
+                    onAudioClick = {
+                        Toast.makeText(context, "Audio playback coming soon", Toast.LENGTH_SHORT).show()
+                    }
                 )
             }
         }

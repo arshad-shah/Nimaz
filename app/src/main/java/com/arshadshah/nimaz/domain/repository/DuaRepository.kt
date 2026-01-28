@@ -36,6 +36,7 @@ interface DuaRepository {
     fun getProgressForDate(date: Long): Flow<List<DuaProgress>>
     fun getProgressHistoryForDua(duaId: String): Flow<List<DuaProgress>>
     suspend fun incrementDuaProgress(duaId: String, date: Long, targetCount: Int)
+    suspend fun decrementDuaProgress(duaId: String, date: Long)
 
     // Data initialization
     suspend fun initializeDuaData()

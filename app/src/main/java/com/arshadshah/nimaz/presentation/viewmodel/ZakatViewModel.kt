@@ -2,11 +2,13 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
+import com.arshadshah.nimaz.domain.repository.ZakatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -19,8 +21,8 @@ data class ZakatCalculatorUiState(
     val assets: ZakatAssets = ZakatAssets(),
     val liabilities: ZakatLiabilities = ZakatLiabilities(),
     val nisabType: NisabType = NisabType.GOLD,
-    val goldPricePerGram: Double = 65.0, // Default price in USD
-    val silverPricePerGram: Double = 0.80, // Default price in USD
+    val goldPricePerGram: Double = 65.0,
+    val silverPricePerGram: Double = 0.80,
     val currency: String = "USD",
     val calculation: ZakatCalculation? = null,
     val isCalculating: Boolean = false,
@@ -49,7 +51,6 @@ data class ZakatHistoryUiState(
 )
 
 sealed interface ZakatEvent {
-    // Asset updates
     data class UpdateCash(val amount: Double) : ZakatEvent
     data class UpdateBankBalance(val amount: Double) : ZakatEvent
     data class UpdateGold(val grams: Double) : ZakatEvent
@@ -59,20 +60,14 @@ sealed interface ZakatEvent {
     data class UpdateReceivables(val amount: Double) : ZakatEvent
     data class UpdateRentalIncome(val amount: Double) : ZakatEvent
     data class UpdateOtherAssets(val amount: Double) : ZakatEvent
-
-    // Liability updates
     data class UpdateDebts(val amount: Double) : ZakatEvent
     data class UpdateLoans(val amount: Double) : ZakatEvent
     data class UpdateBillsDue(val amount: Double) : ZakatEvent
     data class UpdateOtherLiabilities(val amount: Double) : ZakatEvent
-
-    // Settings
     data class SetNisabType(val nisabType: NisabType) : ZakatEvent
     data class UpdateGoldPrice(val pricePerGram: Double) : ZakatEvent
     data class UpdateSilverPrice(val pricePerGram: Double) : ZakatEvent
     data class SetCurrency(val currency: String) : ZakatEvent
-
-    // Actions
     data object Calculate : ZakatEvent
     data object ClearAll : ZakatEvent
     data object ToggleBreakdown : ZakatEvent
@@ -82,7 +77,9 @@ sealed interface ZakatEvent {
 }
 
 @HiltViewModel
-class ZakatViewModel @Inject constructor() : ViewModel() {
+class ZakatViewModel @Inject constructor(
+    private val zakatRepository: ZakatRepository
+) : ViewModel() {
 
     private val _calculatorState = MutableStateFlow(ZakatCalculatorUiState())
     val calculatorState: StateFlow<ZakatCalculatorUiState> = _calculatorState.asStateFlow()
@@ -90,13 +87,12 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
     private val _historyState = MutableStateFlow(ZakatHistoryUiState())
     val historyState: StateFlow<ZakatHistoryUiState> = _historyState.asStateFlow()
 
-    // In-memory history for now (would be persisted to Room in production)
-    private val historyList = mutableListOf<ZakatHistoryEntry>()
-    private var nextHistoryId = 1L
+    init {
+        loadHistory()
+    }
 
     fun onEvent(event: ZakatEvent) {
         when (event) {
-            // Asset updates
             is ZakatEvent.UpdateCash -> updateAsset { it.copy(cashOnHand = event.amount) }
             is ZakatEvent.UpdateBankBalance -> updateAsset { it.copy(bankBalance = event.amount) }
             is ZakatEvent.UpdateGold -> updateAsset { it.copy(goldGrams = event.grams) }
@@ -106,14 +102,10 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
             is ZakatEvent.UpdateReceivables -> updateAsset { it.copy(receivables = event.amount) }
             is ZakatEvent.UpdateRentalIncome -> updateAsset { it.copy(rentalIncome = event.amount) }
             is ZakatEvent.UpdateOtherAssets -> updateAsset { it.copy(otherAssets = event.amount) }
-
-            // Liability updates
             is ZakatEvent.UpdateDebts -> updateLiability { it.copy(debts = event.amount) }
             is ZakatEvent.UpdateLoans -> updateLiability { it.copy(loans = event.amount) }
             is ZakatEvent.UpdateBillsDue -> updateLiability { it.copy(billsDue = event.amount) }
             is ZakatEvent.UpdateOtherLiabilities -> updateLiability { it.copy(otherLiabilities = event.amount) }
-
-            // Settings
             is ZakatEvent.SetNisabType -> {
                 _calculatorState.update { it.copy(nisabType = event.nisabType) }
                 recalculate()
@@ -127,8 +119,6 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
                 recalculate()
             }
             is ZakatEvent.SetCurrency -> _calculatorState.update { it.copy(currency = event.currency) }
-
-            // Actions
             ZakatEvent.Calculate -> calculate()
             ZakatEvent.ClearAll -> clearAll()
             ZakatEvent.ToggleBreakdown -> _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
@@ -153,7 +143,6 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun recalculate() {
-        // Auto-recalculate if there are any values entered
         val state = _calculatorState.value
         if (state.assets.hasAnyValue() || state.liabilities.hasAnyValue()) {
             calculate()
@@ -166,12 +155,9 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
         viewModelScope.launch {
             try {
                 val state = _calculatorState.value
-
-                // Calculate gold and silver values
                 val goldValue = state.assets.goldGrams * state.goldPricePerGram
                 val silverValue = state.assets.silverGrams * state.silverPricePerGram
 
-                // Calculate total assets
                 val totalAssets = state.assets.cashOnHand +
                         state.assets.bankBalance +
                         goldValue +
@@ -182,22 +168,18 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
                         state.assets.rentalIncome +
                         state.assets.otherAssets
 
-                // Calculate total liabilities
                 val totalLiabilities = state.liabilities.debts +
                         state.liabilities.loans +
                         state.liabilities.billsDue +
                         state.liabilities.otherLiabilities
 
-                // Calculate net worth
                 val netWorth = totalAssets - totalLiabilities
 
-                // Calculate nisab threshold
                 val nisabValue = when (state.nisabType) {
                     NisabType.GOLD -> ZakatCalculator.GOLD_NISAB_GRAMS * state.goldPricePerGram
                     NisabType.SILVER -> ZakatCalculator.SILVER_NISAB_GRAMS * state.silverPricePerGram
                 }
 
-                // Calculate zakat
                 val isAboveNisab = netWorth >= nisabValue
                 val zakatDue = if (isAboveNisab) {
                     netWorth * ZakatCalculator.ZAKAT_RATE
@@ -242,51 +224,62 @@ class ZakatViewModel @Inject constructor() : ViewModel() {
     private fun saveCalculation() {
         val calculation = _calculatorState.value.calculation ?: return
 
-        val entry = ZakatHistoryEntry(
-            id = nextHistoryId++,
-            calculatedAt = calculation.calculatedAt,
-            totalAssets = calculation.totalAssets,
-            totalLiabilities = calculation.totalLiabilities,
-            netWorth = calculation.netWorth,
-            zakatDue = calculation.zakatDue,
-            nisabType = calculation.nisabType,
-            nisabValue = calculation.nisabValue
-        )
-
-        historyList.add(0, entry)
-        loadHistory()
+        viewModelScope.launch {
+            val entity = ZakatHistoryEntity(
+                calculatedAt = calculation.calculatedAt,
+                totalAssets = calculation.totalAssets,
+                totalLiabilities = calculation.totalLiabilities,
+                netWorth = calculation.netWorth,
+                zakatDue = calculation.zakatDue,
+                nisabType = calculation.nisabType.name,
+                nisabValue = calculation.nisabValue
+            )
+            zakatRepository.insertCalculation(entity)
+        }
     }
 
     private fun markAsPaid(entryId: Long) {
-        val index = historyList.indexOfFirst { it.id == entryId }
-        if (index >= 0) {
-            historyList[index] = historyList[index].copy(
-                isPaid = true,
-                paidAt = System.currentTimeMillis()
-            )
-            loadHistory()
+        viewModelScope.launch {
+            zakatRepository.markAsPaid(entryId, System.currentTimeMillis())
         }
     }
 
     private fun loadHistory() {
-        val totalPaid = historyList.filter { it.isPaid }.sumOf { it.zakatDue }
-        _historyState.update {
-            it.copy(
-                history = historyList.toList(),
-                totalZakatPaid = totalPaid,
-                isLoading = false
-            )
+        viewModelScope.launch {
+            zakatRepository.getAllHistory().collect { entities ->
+                val entries = entities.map { entity ->
+                    ZakatHistoryEntry(
+                        id = entity.id,
+                        calculatedAt = entity.calculatedAt,
+                        totalAssets = entity.totalAssets,
+                        totalLiabilities = entity.totalLiabilities,
+                        netWorth = entity.netWorth,
+                        zakatDue = entity.zakatDue,
+                        nisabType = try { NisabType.valueOf(entity.nisabType) } catch (_: Exception) { NisabType.GOLD },
+                        nisabValue = entity.nisabValue,
+                        isPaid = entity.isPaid,
+                        paidAt = entity.paidAt,
+                        notes = entity.notes
+                    )
+                }
+                val totalPaid = zakatRepository.getTotalPaid()
+                _historyState.update {
+                    it.copy(
+                        history = entries,
+                        totalZakatPaid = totalPaid,
+                        isLoading = false
+                    )
+                }
+            }
         }
     }
 
-    // Extension function to check if assets have any value
     private fun ZakatAssets.hasAnyValue(): Boolean {
         return cashOnHand > 0 || bankBalance > 0 || goldGrams > 0 || silverGrams > 0 ||
                 investments > 0 || businessInventory > 0 || receivables > 0 ||
                 rentalIncome > 0 || otherAssets > 0
     }
 
-    // Extension function to check if liabilities have any value
     private fun ZakatLiabilities.hasAnyValue(): Boolean {
         return debts > 0 || loans > 0 || billsDue > 0 || otherLiabilities > 0
     }

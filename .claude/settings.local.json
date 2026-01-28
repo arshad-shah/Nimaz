@@ -33,7 +33,9 @@
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read.ps1\")",
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -Command \"Get-ChildItem ''C:\\\\Users\\\\shaha\\\\Downloads\\\\nimaz-pro-html-screens'' -Recurse -Name\")",
       "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read2.ps1\")",
-      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read3.ps1\")"
+      "Bash(powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\temp_read3.ps1\")",
+      "Bash(tree:*)",
+      "Bash(cmd /c \"gradlew.bat assembleDebug 2>&1\")"
     ]
   }
 }

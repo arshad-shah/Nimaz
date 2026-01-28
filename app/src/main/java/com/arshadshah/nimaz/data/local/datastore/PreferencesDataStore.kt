@@ -6,6 +6,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -28,12 +30,25 @@ class PreferencesDataStore @Inject constructor(
         val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
 
         // Theme
-        val THEME_MODE = stringPreferencesKey("theme_mode") // "system", "light", "dark"
+        val THEME_MODE = stringPreferencesKey("theme_mode")
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
+
+        // Appearance
+        val ACCENT_COLOR = stringPreferencesKey("accent_color")
+        val APP_ICON = stringPreferencesKey("app_icon")
+        val SHOW_ISLAMIC_PATTERNS = booleanPreferencesKey("show_islamic_patterns")
+        val ANIMATIONS_ENABLED = booleanPreferencesKey("animations_enabled")
+
+        // Display
+        val SHOW_COUNTDOWN = booleanPreferencesKey("show_countdown")
+        val SHOW_QUICK_ACTIONS = booleanPreferencesKey("show_quick_actions")
+        val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
+        val USE_24_HOUR_FORMAT = booleanPreferencesKey("use_24_hour_format")
+        val USE_HIJRI_PRIMARY = booleanPreferencesKey("use_hijri_primary")
 
         // Language
         val APP_LANGUAGE = stringPreferencesKey("app_language")
-        val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size") // "small", "medium", "large"
+        val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size")
 
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
@@ -41,15 +56,32 @@ class PreferencesDataStore @Inject constructor(
         val HIGH_LATITUDE_RULE = stringPreferencesKey("high_latitude_rule")
         val CURRENT_LOCATION_ID = longPreferencesKey("current_location_id")
 
+        // Prayer Adjustments
+        val FAJR_ADJUSTMENT = intPreferencesKey("fajr_adjustment")
+        val SUNRISE_ADJUSTMENT = intPreferencesKey("sunrise_adjustment")
+        val DHUHR_ADJUSTMENT = intPreferencesKey("dhuhr_adjustment")
+        val ASR_ADJUSTMENT = intPreferencesKey("asr_adjustment")
+        val MAGHRIB_ADJUSTMENT = intPreferencesKey("maghrib_adjustment")
+        val ISHA_ADJUSTMENT = intPreferencesKey("isha_adjustment")
+
         // Notifications
         val PRAYER_NOTIFICATIONS_ENABLED = booleanPreferencesKey("prayer_notifications_enabled")
         val ADHAN_ENABLED = booleanPreferencesKey("adhan_enabled")
         val PRE_NOTIFICATION_MINUTES = stringPreferencesKey("pre_notification_minutes")
+        val NOTIFICATION_VIBRATION = booleanPreferencesKey("notification_vibration")
+        val NOTIFICATION_REMINDER_MINUTES = intPreferencesKey("notification_reminder_minutes")
+        val SHOW_REMINDER_BEFORE = booleanPreferencesKey("show_reminder_before")
+        val PERSISTENT_NOTIFICATION = booleanPreferencesKey("persistent_notification")
 
         // Quran Settings
         val QURAN_TRANSLATOR_ID = stringPreferencesKey("quran_translator_id")
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
         val SHOW_TRANSLITERATION = booleanPreferencesKey("show_transliteration")
+        val SELECTED_RECITER_ID = stringPreferencesKey("selected_reciter_id")
+        val QURAN_ARABIC_FONT_SIZE = floatPreferencesKey("quran_arabic_font_size")
+        val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
+        val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
+        val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
 
         // Tasbih Settings
         val TASBIH_VIBRATION_ENABLED = booleanPreferencesKey("tasbih_vibration_enabled")
@@ -91,6 +123,80 @@ class PreferencesDataStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DYNAMIC_COLOR] = enabled
         }
+    }
+
+    // Appearance
+    val accentColor: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal"
+    }
+
+    suspend fun setAccentColor(color: String) {
+        dataStore.edit { it[PreferencesKeys.ACCENT_COLOR] = color }
+    }
+
+    val appIcon: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.APP_ICON] ?: "Default"
+    }
+
+    suspend fun setAppIcon(icon: String) {
+        dataStore.edit { it[PreferencesKeys.APP_ICON] = icon }
+    }
+
+    val showIslamicPatterns: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_ISLAMIC_PATTERNS] ?: true
+    }
+
+    suspend fun setShowIslamicPatterns(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_ISLAMIC_PATTERNS] = enabled }
+    }
+
+    val animationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ANIMATIONS_ENABLED] ?: true
+    }
+
+    suspend fun setAnimationsEnabled(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.ANIMATIONS_ENABLED] = enabled }
+    }
+
+    // Display
+    val showCountdown: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_COUNTDOWN] ?: true
+    }
+
+    suspend fun setShowCountdown(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_COUNTDOWN] = enabled }
+    }
+
+    val showQuickActions: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_QUICK_ACTIONS] ?: true
+    }
+
+    suspend fun setShowQuickActions(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_QUICK_ACTIONS] = enabled }
+    }
+
+    val hapticFeedback: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HAPTIC_FEEDBACK] ?: true
+    }
+
+    suspend fun setHapticFeedback(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.HAPTIC_FEEDBACK] = enabled }
+    }
+
+    val use24HourFormat: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_24_HOUR_FORMAT] ?: false
+    }
+
+    suspend fun setUse24HourFormat(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.USE_24_HOUR_FORMAT] = enabled }
+    }
+
+    val useHijriPrimary: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.USE_HIJRI_PRIMARY] ?: false
+    }
+
+    suspend fun setUseHijriPrimary(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.USE_HIJRI_PRIMARY] = enabled }
     }
 
     // Language
@@ -135,6 +241,14 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
+    val highLatitudeRule: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HIGH_LATITUDE_RULE] ?: "MIDDLE_OF_NIGHT"
+    }
+
+    suspend fun setHighLatitudeRule(rule: String) {
+        dataStore.edit { it[PreferencesKeys.HIGH_LATITUDE_RULE] = rule }
+    }
+
     val currentLocationId: Flow<Long?> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.CURRENT_LOCATION_ID]
     }
@@ -142,6 +256,29 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setCurrentLocationId(id: Long) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.CURRENT_LOCATION_ID] = id
+        }
+    }
+
+    // Prayer Adjustments
+    val fajrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.FAJR_ADJUSTMENT] ?: 0 }
+    val sunriseAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.SUNRISE_ADJUSTMENT] ?: 0 }
+    val dhuhrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.DHUHR_ADJUSTMENT] ?: 0 }
+    val asrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ASR_ADJUSTMENT] ?: 0 }
+    val maghribAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADJUSTMENT] ?: 0 }
+    val ishaAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ISHA_ADJUSTMENT] ?: 0 }
+
+    suspend fun setPrayerAdjustment(prayer: String, minutes: Int) {
+        dataStore.edit { prefs ->
+            val key = when (prayer.lowercase()) {
+                "fajr" -> PreferencesKeys.FAJR_ADJUSTMENT
+                "sunrise" -> PreferencesKeys.SUNRISE_ADJUSTMENT
+                "dhuhr" -> PreferencesKeys.DHUHR_ADJUSTMENT
+                "asr" -> PreferencesKeys.ASR_ADJUSTMENT
+                "maghrib" -> PreferencesKeys.MAGHRIB_ADJUSTMENT
+                "isha" -> PreferencesKeys.ISHA_ADJUSTMENT
+                else -> return@edit
+            }
+            prefs[key] = minutes
         }
     }
 
@@ -164,6 +301,38 @@ class PreferencesDataStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ADHAN_ENABLED] = enabled
         }
+    }
+
+    val notificationVibration: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.NOTIFICATION_VIBRATION] ?: true
+    }
+
+    suspend fun setNotificationVibration(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.NOTIFICATION_VIBRATION] = enabled }
+    }
+
+    val notificationReminderMinutes: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.NOTIFICATION_REMINDER_MINUTES] ?: 15
+    }
+
+    suspend fun setNotificationReminderMinutes(minutes: Int) {
+        dataStore.edit { it[PreferencesKeys.NOTIFICATION_REMINDER_MINUTES] = minutes }
+    }
+
+    val showReminderBefore: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_REMINDER_BEFORE] ?: true
+    }
+
+    suspend fun setShowReminderBefore(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_REMINDER_BEFORE] = enabled }
+    }
+
+    val persistentNotification: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.PERSISTENT_NOTIFICATION] ?: false
+    }
+
+    suspend fun setPersistentNotification(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.PERSISTENT_NOTIFICATION] = enabled }
     }
 
     // Quran Settings
@@ -195,6 +364,49 @@ class PreferencesDataStore @Inject constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_TRANSLITERATION] = show
         }
+    }
+
+    val selectedReciterId: Flow<String?> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SELECTED_RECITER_ID]
+    }
+
+    suspend fun setSelectedReciterId(reciterId: String?) {
+        dataStore.edit {
+            if (reciterId != null) it[PreferencesKeys.SELECTED_RECITER_ID] = reciterId
+            else it.remove(PreferencesKeys.SELECTED_RECITER_ID)
+        }
+    }
+
+    val quranArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.QURAN_ARABIC_FONT_SIZE] ?: 28f
+    }
+
+    suspend fun setQuranArabicFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.QURAN_ARABIC_FONT_SIZE] = size }
+    }
+
+    val quranTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE] ?: 16f
+    }
+
+    suspend fun setQuranTranslationFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE] = size }
+    }
+
+    val continuousReading: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.CONTINUOUS_READING] ?: true
+    }
+
+    suspend fun setContinuousReading(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.CONTINUOUS_READING] = enabled }
+    }
+
+    val keepScreenOn: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.KEEP_SCREEN_ON] ?: true
+    }
+
+    suspend fun setKeepScreenOn(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.KEEP_SCREEN_ON] = enabled }
     }
 
     // Tasbih Settings

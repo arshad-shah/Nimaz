@@ -173,6 +173,10 @@ private fun StatsGrid(
     val totalPrayed = stats?.totalPrayed ?: 0
     val totalExpected = if (stats != null) (stats.totalPrayed + stats.totalMissed) else 0
     val weeklyPercent = if (totalExpected > 0) (totalPrayed * 100 / totalExpected) else 0
+    val monthlyStats = statsState.monthlyStats
+    val monthlyPrayed = monthlyStats?.totalPrayed ?: 0
+    val monthlyExpected = if (monthlyStats != null) (monthlyStats.totalPrayed + monthlyStats.totalMissed) else 0
+    val monthlyPercent = if (monthlyExpected > 0) (monthlyPrayed * 100 / monthlyExpected) else 0
     val perfectDays = if (stats != null) {
         // Approximate: totalPrayed / 5 gives max possible perfect days
         stats.totalPrayed / 5
@@ -208,7 +212,7 @@ private fun StatsGrid(
             // This Month
             StatCard(
                 label = "This Month",
-                value = "$weeklyPercent%",
+                value = "$monthlyPercent%",
                 isHighlight = false
             )
             // Perfect Days

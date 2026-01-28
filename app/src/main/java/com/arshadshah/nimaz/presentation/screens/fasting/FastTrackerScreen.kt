@@ -49,7 +49,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.domain.model.FastRecord
@@ -179,6 +181,8 @@ fun FastTrackerScreen(
                     fastType = state.selectedFastType,
                     selectedDate = state.selectedDate,
                     ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
+                    suhoorTime = state.suhoorTime,
+                    iftarTime = state.iftarTime,
                     onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
                 )
             }
@@ -353,6 +357,8 @@ private fun TodayFastSection(
     fastType: FastType,
     selectedDate: LocalDate,
     ramadanDay: Int?,
+    suhoorTime: String,
+    iftarTime: String,
     onToggleFast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -457,7 +463,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = "5:23 AM",
+                                text = suhoorTime,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = Color(0xFF818CF8) // Indigo for suhoor
@@ -487,7 +493,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = "6:18 PM",
+                                text = iftarTime,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
                                 color = NimazColors.FastingColors.Makeup // Orange
@@ -714,6 +720,7 @@ private fun LegendItem(
 private fun RecommendedFastsSection(
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Column(modifier = modifier) {
         Text(
             text = "Recommended Fasts",
@@ -729,21 +736,24 @@ private fun RecommendedFastsSection(
                 iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 name = "Monday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
-                nextDate = "Next: Mon"
+                nextDate = "Next: Mon",
+                onClick = { Toast.makeText(context, "Monday fasting details coming soon", Toast.LENGTH_SHORT).show() }
             )
             RecommendedFastCard(
                 icon = "\uD83D\uDCC5",
                 iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
                 name = "Thursday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
-                nextDate = "Next: Thu"
+                nextDate = "Next: Thu",
+                onClick = { Toast.makeText(context, "Thursday fasting details coming soon", Toast.LENGTH_SHORT).show() }
             )
             RecommendedFastCard(
                 icon = "\uD83C\uDF15",
                 iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                 name = "Ayyam al-Beed",
                 description = "13th, 14th, 15th of each month",
-                nextDate = "Completed"
+                nextDate = "Completed",
+                onClick = { Toast.makeText(context, "Ayyam al-Beed details coming soon", Toast.LENGTH_SHORT).show() }
             )
         }
     }
@@ -756,6 +766,7 @@ private fun RecommendedFastCard(
     name: String,
     description: String,
     nextDate: String,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -763,7 +774,7 @@ private fun RecommendedFastCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { }
+            .clickable(onClick = onClick)
             .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp)

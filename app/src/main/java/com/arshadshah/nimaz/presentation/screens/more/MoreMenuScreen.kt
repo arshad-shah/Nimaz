@@ -27,6 +27,9 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.QueryStats
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
@@ -55,7 +58,6 @@ fun MoreMenuScreen(
     onNavigateToSettings: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
     onNavigateToCalendar: () -> Unit,
-    onNavigateToLocation: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToAppearance: () -> Unit,
     onNavigateToLanguage: () -> Unit,
@@ -68,8 +70,12 @@ fun MoreMenuScreen(
     onNavigateToFasting: () -> Unit,
     onNavigateToZakat: () -> Unit,
     onNavigateToDuas: () -> Unit,
-    onNavigateToPrayerSettings: () -> Unit,
-    onNavigateToCalculationMethod: () -> Unit
+    onNavigateToLocation: () -> Unit,
+    onNavigateToCalculationMethod: () -> Unit,
+    onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToPrayerStats: () -> Unit,
+    onNavigateToQadaPrayers: () -> Unit,
+    onNavigateToMakeupFasts: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
@@ -97,6 +103,27 @@ fun MoreMenuScreen(
             }
             item {
                 GroupedCard {
+                    MenuItem(
+                        title = "Prayer Tracker",
+                        subtitle = "Track your daily prayers",
+                        icon = Icons.Default.Schedule,
+                        onClick = onNavigateToPrayerTracker
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Prayer Stats",
+                        subtitle = "Prayer history and streaks",
+                        icon = Icons.Default.QueryStats,
+                        onClick = onNavigateToPrayerStats
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Qada Prayers",
+                        subtitle = "Missed prayers to make up",
+                        icon = Icons.Default.Restore,
+                        onClick = onNavigateToQadaPrayers
+                    )
+                    MenuDivider()
                     MenuItem(
                         title = "Bookmarks",
                         subtitle = "Saved ayahs, hadith, and duas",
@@ -126,6 +153,13 @@ fun MoreMenuScreen(
                     )
                     MenuDivider()
                     MenuItem(
+                        title = "Makeup Fasts",
+                        subtitle = "Track missed fasts",
+                        icon = Icons.Default.Restore,
+                        onClick = onNavigateToMakeupFasts
+                    )
+                    MenuDivider()
+                    MenuItem(
                         title = "Zakat",
                         subtitle = "Zakat calculator",
                         icon = Icons.Default.Calculate,
@@ -148,17 +182,17 @@ fun MoreMenuScreen(
             item {
                 GroupedCard {
                     MenuItem(
-                        title = "Prayer Settings",
-                        subtitle = "Notifications and tracking preferences",
-                        icon = Icons.Default.Notifications,
-                        onClick = onNavigateToPrayerSettings
-                    )
-                    MenuDivider()
-                    MenuItem(
                         title = "Calculation Method",
                         subtitle = "Prayer time calculation parameters",
                         icon = Icons.Default.Settings,
                         onClick = onNavigateToCalculationMethod
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Notifications",
+                        subtitle = "Prayer alerts and reminders",
+                        icon = Icons.Default.Notifications,
+                        onClick = onNavigateToNotifications
                     )
                     MenuDivider()
                     MenuItem(
@@ -195,13 +229,6 @@ fun MoreMenuScreen(
                         subtitle = "App language preferences",
                         icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Notifications",
-                        subtitle = "Prayer alerts and reminders",
-                        icon = Icons.Default.Notifications,
-                        onClick = onNavigateToNotifications
                     )
                     MenuDivider()
                     MenuItem(

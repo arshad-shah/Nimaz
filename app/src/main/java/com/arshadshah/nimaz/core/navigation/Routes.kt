@@ -109,6 +109,12 @@ sealed interface Route {
     @Serializable
     data object TasbihStats : Route
 
+    @Serializable
+    data object TasbihHistory : Route
+
+    @Serializable
+    data object TasbihAddPreset : Route
+
     // Zakat screens
     @Serializable
     data object ZakatCalculator : Route

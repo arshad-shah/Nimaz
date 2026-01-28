@@ -37,6 +37,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
@@ -47,6 +49,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -63,6 +66,7 @@ fun HadithCollectionScreen(
 ) {
     val state by viewModel.collectionState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -119,6 +123,24 @@ fun HadithCollectionScreen(
                         arabicText = null,
                         translationText = null,
                         source = null,
+                        onBookmarkClick = {
+                            Toast.makeText(context, "Bookmarking coming soon", Toast.LENGTH_SHORT).show()
+                        },
+                        onShareClick = {
+                            val shareText = buildString {
+                                appendLine("\u0645\u064e\u0646\u0652 \u0643\u064e\u0627\u0646\u064e \u064a\u064f\u0624\u0652\u0645\u0650\u0646\u064f \u0628\u0650\u0627\u0644\u0644\u064e\u0651\u0647\u0650 \u0648\u064e\u0627\u0644\u0652\u064a\u064e\u0648\u0652\u0645\u0650 \u0627\u0644\u0652\u0622\u062e\u0650\u0631\u0650 \u0641\u064e\u0644\u0652\u064a\u064e\u0642\u064f\u0644\u0652 \u062e\u064e\u064a\u0652\u0631\u064b\u0627 \u0623\u064e\u0648\u0652 \u0644\u0650\u064a\u064e\u0635\u0652\u0645\u064f\u062a\u0652")
+                                appendLine()
+                                appendLine("\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\"")
+                                appendLine()
+                                appendLine("Sahih al-Bukhari 6018")
+                            }
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, shareText)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share Hadith"))
+                        },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
@@ -128,6 +150,9 @@ fun HadithCollectionScreen(
                     SectionHeader(
                         title = "Kutub al-Sittah",
                         showSeeAll = true,
+                        onSeeAllClick = {
+                            Toast.makeText(context, "All books are shown below", Toast.LENGTH_SHORT).show()
+                        },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
                 }
@@ -158,6 +183,9 @@ fun HadithCollectionScreen(
                 // Categories List
                 item {
                     CategoriesList(
+                        onCategoryClick = { categoryName ->
+                            Toast.makeText(context, "Category browsing coming soon", Toast.LENGTH_SHORT).show()
+                        },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
@@ -237,6 +265,8 @@ private fun HadithOfTheDayCard(
     arabicText: String?,
     translationText: String?,
     source: String?,
+    onBookmarkClick: () -> Unit = {},
+    onShareClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -326,11 +356,13 @@ private fun HadithOfTheDayCard(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HadithActionButton(
                             icon = Icons.Default.BookmarkBorder,
-                            contentDescription = "Bookmark"
+                            contentDescription = "Bookmark",
+                            onClick = onBookmarkClick
                         )
                         HadithActionButton(
                             icon = Icons.Default.Share,
-                            contentDescription = "Share"
+                            contentDescription = "Share",
+                            onClick = onShareClick
                         )
                     }
                 }
@@ -342,14 +374,15 @@ private fun HadithOfTheDayCard(
 @Composable
 private fun HadithActionButton(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: String
+    contentDescription: String,
+    onClick: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
             .size(36.dp)
             .clip(RoundedCornerShape(10.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable { },
+            .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
         Icon(
@@ -365,6 +398,7 @@ private fun HadithActionButton(
 private fun SectionHeader(
     title: String,
     showSeeAll: Boolean,
+    onSeeAllClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -383,7 +417,7 @@ private fun SectionHeader(
                 text = "See All",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable { }
+                modifier = Modifier.clickable(onClick = onSeeAllClick)
             )
         }
     }
@@ -495,7 +529,10 @@ private fun formatNumber(number: Int): String {
 }
 
 @Composable
-private fun CategoriesList(modifier: Modifier = Modifier) {
+private fun CategoriesList(
+    onCategoryClick: (String) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     val categories = listOf(
         CategoryData("Faith & Belief", "847 hadith"),
         CategoryData("Prayer & Worship", "1,243 hadith"),
@@ -512,7 +549,7 @@ private fun CategoriesList(modifier: Modifier = Modifier) {
             CategoryItem(
                 name = category.name,
                 count = category.count,
-                onClick = { }
+                onClick = { onCategoryClick(category.name) }
             )
         }
     }

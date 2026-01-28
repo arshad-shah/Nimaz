@@ -48,6 +48,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import android.content.Intent
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
@@ -60,6 +63,7 @@ fun DuaReaderScreen(
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(duaId) {
         viewModel.onEvent(DuaEvent.LoadDua(duaId))
@@ -120,8 +124,20 @@ fun DuaReaderScreen(
                     // Navigation bar
                     DuaNavigationBar(
                         currentIndex = dua.displayOrder,
-                        onPrevious = { /* nav prev */ },
-                        onNext = { /* nav next */ }
+                        onPrevious = {
+                            val prevId = (dua.id.toIntOrNull()?.minus(1))?.toString()
+                            if (prevId != null && prevId.toInt() > 0) {
+                                viewModel.onEvent(DuaEvent.LoadDua(prevId))
+                            } else {
+                                Toast.makeText(context, "This is the first dua", Toast.LENGTH_SHORT).show()
+                            }
+                        },
+                        onNext = {
+                            val nextId = (dua.id.toIntOrNull()?.plus(1))?.toString()
+                            if (nextId != null) {
+                                viewModel.onEvent(DuaEvent.LoadDua(nextId))
+                            }
+                        }
                     )
 
                     // Scrollable content
@@ -145,7 +161,9 @@ fun DuaReaderScreen(
                                         DuaEvent.IncrementProgress(dua.id, repeatCount)
                                     )
                                 },
-                                onDecrement = { /* decrement logic */ }
+                                onDecrement = {
+                                    viewModel.onEvent(DuaEvent.DecrementProgress(dua.id))
+                                }
                             )
                         }
 
@@ -157,9 +175,33 @@ fun DuaReaderScreen(
 
                     // Bottom actions
                     BottomActions(
-                        onAudioClick = { /* audio */ },
-                        onShareClick = { /* share */ },
-                        onDoneClick = { /* done */ }
+                        onAudioClick = {
+                            Toast.makeText(context, "Audio playback coming soon", Toast.LENGTH_SHORT).show()
+                        },
+                        onShareClick = {
+                            val textToShare = buildString {
+                                appendLine(dua.titleEnglish)
+                                appendLine()
+                                appendLine(dua.textArabic)
+                                appendLine()
+                                if (!dua.textTransliteration.isNullOrEmpty()) {
+                                    appendLine(dua.textTransliteration)
+                                    appendLine()
+                                }
+                                appendLine(dua.textEnglish)
+                                if (!dua.reference.isNullOrEmpty()) {
+                                    appendLine()
+                                    appendLine("Source: ${dua.reference}")
+                                }
+                            }
+                            val sendIntent = Intent().apply {
+                                action = Intent.ACTION_SEND
+                                putExtra(Intent.EXTRA_TEXT, textToShare)
+                                type = "text/plain"
+                            }
+                            context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                        },
+                        onDoneClick = onNavigateBack
                     )
                 }
             }

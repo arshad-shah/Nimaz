@@ -63,18 +63,35 @@ fun QuranSettingsScreen(
     val quranState by viewModel.quranState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    // === ADDING NEW TRANSLATIONS ===
+    // To add a new translation:
+    // 1. Ensure the translation data exists in the database (quran_translations table)
+    //    with the translator_id matching the value below
+    // 2. Add a new Pair to translationOptions: "Display Name" to "translator_id"
+    // 3. The QuranRepository.getSurahWithAyahs() will automatically load the selected
+    //    translator's text into Ayah.translation
+    //
+    // Available translator IDs in the Islamic Network API:
+    // "en.sahih" - Sahih International (English)
+    // "en.asad" - Muhammad Asad (English)
+    // "en.pickthall" - Pickthall (English)
+    // "en.yusufali" - Yusuf Ali (English)
+    // Add more from: https://api.alquran.cloud/v1/edition?format=text&type=translation
     val translationOptions = listOf(
-        "Sahih International" to "en.sahih",
-        "Muhammad Asad" to "en.asad",
-        "Pickthall" to "en.pickthall",
-        "Yusuf Ali" to "en.yusufali"
+        "Sahih International" to "en.sahih"
     )
 
-    val arabicFontOptions = listOf(
-        "Amiri Quran",
-        "KFGQPC Uthmanic Script",
-        "Scheherazade"
-    )
+    // === ADDING NEW ARABIC FONTS ===
+    // 1. Add the font file (.ttf/.otf) to app/src/main/res/font/
+    // 2. In presentation/theme/Type.kt, create a new FontFamily:
+    //    val NewFontFamily = FontFamily(Font(R.font.new_font_regular, FontWeight.Normal))
+    // 3. In presentation/components/atoms/ArabicText.kt, add the font to fontFamilyOptions map
+    // 4. Add a new entry to the arabicFontOptions list below
+    // 5. Add a SettingsEvent.SetArabicFontFamily(id) event and wire it through
+    //    SettingsViewModel -> PreferencesDataStore -> QuranViewModel -> ArabicText
+    //
+    // Currently using: Amiri (AmiriFontFamily from Type.kt)
+    // Font files: res/font/amiri_regular.ttf, res/font/amiri_bold.ttf
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -148,123 +165,25 @@ fun QuranSettingsScreen(
                         )
                     }
 
-                    // Font Options
-                    Column(
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    // Font: Amiri (see comments above for adding new fonts)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        arabicFontOptions.forEachIndexed { index, fontName ->
-                            val isSelected = index == 0 // First option selected by default
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                color = if (isSelected) {
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceContainerHighest
-                                },
-                                border = if (isSelected) {
-                                    BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                                } else {
-                                    null
-                                }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(12.dp, 12.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    // Radio circle
-                                    Box(
-                                        modifier = Modifier
-                                            .size(20.dp)
-                                            .clip(CircleShape)
-                                            .background(
-                                                color = if (isSelected)
-                                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                                else
-                                                    MaterialTheme.colorScheme.background,
-                                                shape = CircleShape
-                                            )
-                                            .then(
-                                                if (isSelected) Modifier
-                                                else Modifier
-                                            ),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Box(
-                                            modifier = Modifier
-                                                .size(20.dp)
-                                                .clip(CircleShape)
-                                                .background(
-                                                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(
-                                                        alpha = 0.0f
-                                                    ) else MaterialTheme.colorScheme.background,
-                                                    shape = CircleShape
-                                                )
-                                        ) {
-                                            // Outer ring
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(20.dp)
-                                                    .clip(CircleShape)
-                                                    .background(
-                                                        color = if (isSelected) MaterialTheme.colorScheme.primary
-                                                        else MaterialTheme.colorScheme.outline,
-                                                        shape = CircleShape
-                                                    ),
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .size(16.dp)
-                                                        .clip(CircleShape)
-                                                        .background(
-                                                            color = if (isSelected) MaterialTheme.colorScheme.primary.copy(
-                                                                alpha = 0.1f
-                                                            ) else MaterialTheme.colorScheme.surfaceContainerHighest,
-                                                            shape = CircleShape
-                                                        ),
-                                                    contentAlignment = Alignment.Center
-                                                ) {
-                                                    if (isSelected) {
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .size(10.dp)
-                                                                .clip(CircleShape)
-                                                                .background(
-                                                                    color = MaterialTheme.colorScheme.primary,
-                                                                    shape = CircleShape
-                                                                )
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-
-                                    Spacer(modifier = Modifier.width(15.dp))
-
-                                    Column {
-                                        Text(
-                                            text = fontName,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurface
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650",
-                                            style = MaterialTheme.typography.bodyLarge,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            fontSize = 18.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Arabic Font",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = "Amiri",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(30.dp))
@@ -298,7 +217,7 @@ fun QuranSettingsScreen(
                     SettingDivider()
                     DisplayToggleItem(
                         label = "Continuous Reading",
-                        subtitle = "Continue reading between surahs",
+                        subtitle = "Continue reading between surahs and auto-play next verse",
                         isEnabled = quranState.continuousReading,
                         onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
                     )
@@ -390,14 +309,7 @@ fun QuranSettingsScreen(
                             modifier = Modifier.size(20.dp)
                         )
                     }
-                    SettingDivider()
-                    // Auto-play toggle
-                    DisplayToggleItem(
-                        label = "Auto-play Next Verse",
-                        subtitle = "Continue to next verse",
-                        isEnabled = quranState.continuousReading,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
-                    )
+                    // Continuous reading also controls auto-play of next verse in audio mode
                 }
                 Spacer(modifier = Modifier.height(30.dp))
             }

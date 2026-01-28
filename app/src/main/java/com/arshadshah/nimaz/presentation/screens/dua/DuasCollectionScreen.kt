@@ -162,8 +162,8 @@ fun DuasCollectionScreen(
                         ) {
                             items(favoritesState.favorites.take(5)) { favorite ->
                                 FavoriteDuaChip(
-                                    title = favorite.duaId,
-                                    onClick = { /* Navigate to dua */ }
+                                    title = favorite.duaTitle ?: favorite.duaId,
+                                    onClick = { onNavigateToCategory(favorite.categoryId) }
                                 )
                             }
                         }

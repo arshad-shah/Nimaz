@@ -29,8 +29,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +41,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,6 +48,7 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -55,24 +57,31 @@ fun SurahInfoScreen(
     surahNumber: Int,
     onNavigateBack: () -> Unit,
     onStartReading: () -> Unit,
-    onPlayAudio: () -> Unit,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
-    val state by viewModel.readerState.collectAsState()
+    val homeState by viewModel.homeState.collectAsState()
+    val surahInfo by viewModel.surahInfo.collectAsState()
+    val surah = homeState.surahs.find { it.number == surahNumber }
 
-    state.surahWithAyahs?.let { surahWithAyahs ->
-        val surah = surahWithAyahs.surah
+    LaunchedEffect(surahNumber) {
+        viewModel.onEvent(QuranEvent.LoadSurahInfo(surahNumber))
+    }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        bottomBar = {
+            BottomActions(
+                onPlayAudio = { viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber)) },
+                onStartReading = onStartReading
+            )
+        }
+    ) { paddingValues ->
+        if (surah != null) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .padding(paddingValues)
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 100.dp)
             ) {
                 // Hero Header with gradient
                 HeroHeader(
@@ -88,7 +97,8 @@ fun SurahInfoScreen(
                     // About This Surah
                     SectionTitle("About This Surah")
                     InfoCard(
-                        text = getSurahDescription(surah.number)
+                        text = surahInfo?.description
+                            ?: "This surah contains divine guidance and wisdom for believers."
                     )
 
                     // Details Grid
@@ -97,16 +107,22 @@ fun SurahInfoScreen(
 
                     // Main Themes
                     SectionTitle("Main Themes")
-                    ThemesList(themes = getSurahThemes(surah.number))
+                    ThemesList(
+                        themes = surahInfo?.themes
+                            ?: listOf("Divine Guidance", "Worship", "Morality", "Remembrance")
+                    )
                 }
             }
-
-            // Bottom Action Buttons
-            BottomActions(
-                onPlayAudio = onPlayAudio,
-                onStartReading = onStartReading,
-                modifier = Modifier.align(Alignment.BottomCenter)
-            )
+        } else {
+            // Loading or surah not found
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material3.CircularProgressIndicator()
+            }
         }
     }
 }
@@ -490,23 +506,5 @@ private fun BottomActions(
                 }
             }
         }
-    }
-}
-
-private fun getSurahDescription(surahNumber: Int): String {
-    return when (surahNumber) {
-        1 -> "Al-Fatiha (The Opening) is the first chapter of the Quran and is recited in every unit of the Muslim prayer. It is often referred to as the essence of the Quran."
-        2 -> "Al-Baqarah (The Cow) is the longest surah in the Quran. It covers many topics including faith, guidance, and legal rulings."
-        3 -> "Aal-E-Imran (The Family of Imran) discusses the family of Imran, Jesus and Mary, and the importance of steadfastness in faith."
-        else -> "This surah contains divine guidance and wisdom for believers."
-    }
-}
-
-private fun getSurahThemes(surahNumber: Int): List<String> {
-    return when (surahNumber) {
-        1 -> listOf("Praise of Allah", "Guidance", "Worship", "The Straight Path")
-        2 -> listOf("Faith", "Guidance", "Law", "Stories of Prophets", "Patience")
-        3 -> listOf("Family of Imran", "Jesus and Mary", "Battle of Uhud", "Steadfastness")
-        else -> listOf("Divine Guidance", "Worship", "Morality", "Remembrance")
     }
 }

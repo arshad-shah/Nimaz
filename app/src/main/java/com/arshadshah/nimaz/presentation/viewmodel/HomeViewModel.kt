@@ -5,6 +5,10 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.database.dao.HadithDao
+import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +37,8 @@ data class HomeUiState(
     val locationName: String = "Location not set",
     val latitude: Double = 0.0,
     val longitude: Double = 0.0,
+    val fastingToday: Boolean = false,
+    val dailyHadith: String? = null,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -43,19 +49,23 @@ data class PrayerTimeDisplay(
     val time: String,
     val isPassed: Boolean,
     val isCurrent: Boolean,
-    val isNext: Boolean
+    val isNext: Boolean,
+    val prayerStatus: PrayerStatus = PrayerStatus.NOT_PRAYED
 )
 
 sealed interface HomeEvent {
     data class UpdateLocation(val latitude: Double, val longitude: Double, val name: String) : HomeEvent
     data object RefreshPrayerTimes : HomeEvent
+    data class TogglePrayerStatus(val prayerType: PrayerType) : HomeEvent
 }
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore
+    private val preferencesDataStore: PreferencesDataStore,
+    private val fastingDao: FastingDao,
+    private val hadithDao: HadithDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -63,13 +73,83 @@ class HomeViewModel @Inject constructor(
 
     init {
         loadSavedLocation()
+        loadPrayerRecords()
+        loadFastingStatus()
+        loadDailyHadith()
         startTimeUpdates()
     }
+
+    private fun loadPrayerRecords() {
+        viewModelScope.launch {
+            val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+            prayerRepository.getPrayerRecordsForDate(todayEpoch).collect { records ->
+                val recordMap = records.associate { it.prayerName to it.status }
+                _prayerRecords.update { recordMap }
+            }
+        }
+    }
+
+    private fun loadFastingStatus() {
+        viewModelScope.launch {
+            try {
+                val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+                val record = fastingDao.getFastRecordForDate(todayEpoch)
+                _state.update { it.copy(fastingToday = record?.status == "fasted") }
+            } catch (_: Exception) {
+                // No fasting data available
+            }
+        }
+    }
+
+    private fun loadDailyHadith() {
+        viewModelScope.launch {
+            try {
+                val dayOfYear = java.time.LocalDate.now().dayOfYear
+                val hadith = hadithDao.getHadithByNumber(1, dayOfYear % 50 + 1)
+                _state.update {
+                    it.copy(
+                        dailyHadith = hadith?.textEnglish?.take(120)?.let { text ->
+                            if (text.length >= 120) "$text..." else text
+                        }
+                    )
+                }
+            } catch (_: Exception) {
+                // No hadith data available
+            }
+        }
+    }
+
+    private val _prayerRecords = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
 
     fun onEvent(event: HomeEvent) {
         when (event) {
             is HomeEvent.UpdateLocation -> updateLocation(event.latitude, event.longitude, event.name)
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
+            is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+        }
+    }
+
+    private fun togglePrayerStatus(prayerType: PrayerType) {
+        viewModelScope.launch {
+            val prayerName = PrayerName.valueOf(prayerType.name)
+            val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+            val currentStatus = _prayerRecords.value[prayerName] ?: PrayerStatus.NOT_PRAYED
+            val newStatus = if (currentStatus == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
+            val prayedAt = if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
+
+            prayerRepository.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
+            _prayerRecords.update { it + (prayerName to newStatus) }
+
+            // Update displays with new status
+            _state.update { state ->
+                state.copy(
+                    prayerTimes = state.prayerTimes.map { display ->
+                        val name = PrayerName.valueOf(display.type.name)
+                        val status = _prayerRecords.value[name] ?: PrayerStatus.NOT_PRAYED
+                        display.copy(prayerStatus = status)
+                    }
+                )
+            }
         }
     }
 
@@ -173,25 +253,56 @@ class HomeViewModel @Inject constructor(
                     )
                 }
 
-                val nextPrayer = if (nextPrayerIndex >= 0) sortedPrayers[nextPrayerIndex].type else null
-                val nextPrayerTime = prayerTimes.find { it.type == nextPrayer }?.time
+                val nextPrayer: PrayerType?
+                val timeUntilNext: String
 
-                val timeUntilNext = if (nextPrayerTime != null) {
-                    val diff: Duration = nextPrayerTime - currentTime
-                    val totalSeconds = diff.inWholeSeconds
-                    val hours = totalSeconds / 3600
-                    val minutes = (totalSeconds % 3600) / 60
-                    val seconds = totalSeconds % 60
-                    when {
-                        hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
-                        minutes > 0 -> "${minutes}m ${seconds}s"
-                        else -> "${seconds}s"
-                    }
-                } else ""
+                if (nextPrayerIndex >= 0) {
+                    // There's a future prayer today
+                    nextPrayer = sortedPrayers[nextPrayerIndex].type
+                    val nextPrayerTime = prayerTimes.find { it.type == nextPrayer }?.time
+                    timeUntilNext = if (nextPrayerTime != null) {
+                        val diff: Duration = nextPrayerTime - currentTime
+                        val totalSeconds = diff.inWholeSeconds
+                        val hours = totalSeconds / 3600
+                        val minutes = (totalSeconds % 3600) / 60
+                        val seconds = totalSeconds % 60
+                        when {
+                            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
+                            minutes > 0 -> "${minutes}m ${seconds}s"
+                            else -> "${seconds}s"
+                        }
+                    } else ""
+                } else {
+                    // All prayers passed — wrap to tomorrow's Fajr
+                    nextPrayer = PrayerType.FAJR
+                    val tomorrowDate = java.time.LocalDate.now().plusDays(1)
+                    val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(latitude, longitude, tomorrowDate)
+                    val tomorrowFajr = tomorrowPrayers.find { it.type == PrayerType.FAJR }?.time
+                    timeUntilNext = if (tomorrowFajr != null) {
+                        val diff: Duration = tomorrowFajr - currentTime
+                        val totalSeconds = diff.inWholeSeconds
+                        val hours = totalSeconds / 3600
+                        val minutes = (totalSeconds % 3600) / 60
+                        val seconds = totalSeconds % 60
+                        when {
+                            hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
+                            minutes > 0 -> "${minutes}m ${seconds}s"
+                            else -> "${seconds}s"
+                        }
+                    } else ""
+                }
+
+                // Apply prayer records to displays
+                val records = _prayerRecords.value
+                val displaysWithStatus = updatedDisplays.map { display ->
+                    val prayerName = PrayerName.valueOf(display.type.name)
+                    val status = records[prayerName] ?: PrayerStatus.NOT_PRAYED
+                    display.copy(prayerStatus = status)
+                }
 
                 _state.update {
                     it.copy(
-                        prayerTimes = updatedDisplays,
+                        prayerTimes = displaysWithStatus,
                         currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
                         nextPrayer = nextPrayer,
                         timeUntilNextPrayer = timeUntilNext,

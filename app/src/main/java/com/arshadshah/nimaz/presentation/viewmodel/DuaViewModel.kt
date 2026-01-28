@@ -72,6 +72,7 @@ sealed interface DuaEvent {
     data class SearchCategories(val query: String) : DuaEvent
     data class ToggleFavorite(val duaId: String, val categoryId: String) : DuaEvent
     data class IncrementProgress(val duaId: String, val targetCount: Int) : DuaEvent
+    data class DecrementProgress(val duaId: String) : DuaEvent
     data class SetFontSize(val size: Float) : DuaEvent
     data class SetArabicFontSize(val size: Float) : DuaEvent
     data class LoadProgressForDate(val date: Long) : DuaEvent
@@ -122,6 +123,7 @@ class DuaViewModel @Inject constructor(
             is DuaEvent.SearchCategories -> searchCategories(event.query)
             is DuaEvent.ToggleFavorite -> toggleFavorite(event.duaId, event.categoryId)
             is DuaEvent.IncrementProgress -> incrementProgress(event.duaId, event.targetCount)
+            is DuaEvent.DecrementProgress -> decrementProgress(event.duaId)
             is DuaEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is DuaEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
             is DuaEvent.LoadProgressForDate -> loadProgressForDate(event.date)
@@ -245,6 +247,18 @@ class DuaViewModel @Inject constructor(
             // Reload progress
             val progress = duaRepository.getProgressForDuaOnDate(duaId, todayEpoch)
             _readerState.update { it.copy(progress = progress) }
+        }
+    }
+
+    private fun decrementProgress(duaId: String) {
+        viewModelScope.launch {
+            val currentCount = _readerState.value.progress?.completedCount ?: 0
+            if (currentCount > 0) {
+                val todayEpoch = getTodayEpoch()
+                duaRepository.decrementDuaProgress(duaId, todayEpoch)
+                val progress = duaRepository.getProgressForDuaOnDate(duaId, todayEpoch)
+                _readerState.update { it.copy(progress = progress) }
+            }
         }
     }
 

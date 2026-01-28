@@ -6,13 +6,16 @@ import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
 import com.arshadshah.nimaz.domain.model.HijriDate
 import com.arshadshah.nimaz.domain.model.HijriMonth
+import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
+import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
 import com.arshadshah.nimaz.domain.model.IslamicEvent
-import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -67,7 +70,11 @@ sealed interface CalendarEvent {
 }
 
 @HiltViewModel
-class CalendarViewModel @Inject constructor() : ViewModel() {
+class CalendarViewModel @Inject constructor(
+    private val islamicEventDao: IslamicEventDao
+) : ViewModel() {
+
+    private var cachedEvents: List<IslamicEvent> = emptyList()
 
     private val _calendarState = MutableStateFlow(CalendarUiState())
     val calendarState: StateFlow<CalendarUiState> = _calendarState.asStateFlow()
@@ -82,8 +89,21 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
     val yearState: StateFlow<YearOverviewUiState> = _yearState.asStateFlow()
 
     init {
-        loadToday()
-        loadUpcomingEvents()
+        loadEventsFromDatabase()
+    }
+
+    private fun loadEventsFromDatabase() {
+        viewModelScope.launch {
+            try {
+                cachedEvents = islamicEventDao.getAllEvents()
+                    .first()
+                    .map { it.toDomainModel() }
+                loadToday()
+                loadUpcomingEvents()
+            } catch (e: Exception) {
+                _calendarState.update { it.copy(error = "Failed to load events: ${e.message}", isLoading = false) }
+            }
+        }
     }
 
     fun onEvent(event: CalendarEvent) {
@@ -198,16 +218,17 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
 
     private fun navigateToPreviousMonth() {
         val current = _calendarState.value.currentMonth ?: return
-        val prevMonth = if (current.hijriMonth == 1) 12 else current.hijriMonth - 1
-        val prevYear = if (current.hijriMonth == 1) current.hijriYear - 1 else current.hijriYear
-        navigateToMonth(prevMonth, prevYear)
+        // Use the first day's gregorian date to determine current Gregorian month
+        val firstDay = current.days.firstOrNull()?.gregorianDate ?: return
+        val prev = firstDay.minusMonths(1)
+        navigateToMonth(prev.monthValue, prev.year)
     }
 
     private fun navigateToNextMonth() {
         val current = _calendarState.value.currentMonth ?: return
-        val nextMonth = if (current.hijriMonth == 12) 1 else current.hijriMonth + 1
-        val nextYear = if (current.hijriMonth == 12) current.hijriYear + 1 else current.hijriYear
-        navigateToMonth(nextMonth, nextYear)
+        val firstDay = current.days.firstOrNull()?.gregorianDate ?: return
+        val next = firstDay.plusMonths(1)
+        navigateToMonth(next.monthValue, next.year)
     }
 
     private fun navigateToPreviousYear() {
@@ -297,7 +318,7 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
     }
 
     private fun getEventsForDate(hijriDate: HijriDate): List<IslamicEvent> {
-        return IslamicEvents.events.filter { event ->
+        return cachedEvents.filter { event ->
             event.hijriMonth == hijriDate.month && event.hijriDay == hijriDate.day
         }
     }
@@ -307,7 +328,7 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
         val firstDay = LocalDate.of(year, month, 1)
         val lastDay = firstDay.plusMonths(1).minusDays(1)
 
-        return IslamicEvents.events.filter { event ->
+        return cachedEvents.filter { event ->
             val eventGregorian = getApproximateGregorianDate(event, year)
             eventGregorian != null && !eventGregorian.isBefore(firstDay) && !eventGregorian.isAfter(lastDay)
         }
@@ -317,7 +338,7 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
         val today = LocalDate.now()
         val threeMonthsLater = today.plusMonths(3)
 
-        return IslamicEvents.events.mapNotNull { event ->
+        return cachedEvents.mapNotNull { event ->
             val eventDate = getApproximateGregorianDate(event, today.year)
             if (eventDate != null && !eventDate.isBefore(today) && !eventDate.isAfter(threeMonthsLater)) {
                 event.copy(gregorianDate = eventDate)
@@ -332,4 +353,27 @@ class CalendarViewModel @Inject constructor() : ViewModel() {
             _hijriState.value.currentHijriYear
         )
     }
+}
+
+private fun IslamicEventEntity.toDomainModel(): IslamicEvent {
+    return IslamicEvent(
+        id = id.toString(),
+        nameArabic = nameArabic,
+        nameEnglish = nameEnglish,
+        description = description,
+        hijriMonth = hijriMonth,
+        hijriDay = hijriDay,
+        eventType = try {
+            IslamicEventType.valueOf(eventType.uppercase())
+        } catch (_: IllegalArgumentException) {
+            IslamicEventType.HOLIDAY
+        },
+        isHoliday = isHoliday == 1,
+        isFastingDay = eventType.equals("fast", ignoreCase = true),
+        isNightOfPower = eventType.equals("night", ignoreCase = true),
+        gregorianDate = null,
+        year = null,
+        notes = null,
+        priority = 0
+    )
 }

@@ -5,14 +5,17 @@ import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
@@ -199,6 +202,20 @@ class QuranRepositoryImpl @Inject constructor(
         quranDao.deleteBookmarkByAyahId(ayahId)
     }
 
+    override fun getAllFavorites(): Flow<List<QuranFavorite>> {
+        return quranDao.getAllFavorites().map { entities ->
+            entities.map { it.toDomain() }
+        }
+    }
+
+    override fun getFavoriteAyahIds(): Flow<List<Int>> {
+        return quranDao.getFavoriteAyahIds()
+    }
+
+    override suspend fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
+        quranDao.toggleFavorite(ayahId, surahNumber, ayahNumber)
+    }
+
     override fun getReadingProgress(): Flow<ReadingProgress?> {
         return quranDao.getReadingProgress().map { entity ->
             entity?.toDomain()
@@ -225,6 +242,15 @@ class QuranRepositoryImpl @Inject constructor(
 
     override suspend fun incrementAyahsRead(count: Int) {
         quranDao.incrementAyahsRead(count)
+    }
+
+    override suspend fun getSurahInfo(surahNumber: Int): SurahInfo? {
+        return quranDao.getSurahInfo(surahNumber)?.let { entity ->
+            SurahInfo(
+                description = entity.description,
+                themes = entity.themes.split(",").map { it.trim() }
+            )
+        }
     }
 
     override suspend fun initializeQuranData() {
@@ -288,6 +314,15 @@ class QuranRepositoryImpl @Inject constructor(
             color = color,
             createdAt = createdAt,
             updatedAt = updatedAt
+        )
+    }
+
+    private fun QuranFavoriteEntity.toDomain(): QuranFavorite {
+        return QuranFavorite(
+            ayahId = ayahId,
+            surahNumber = surahNumber,
+            ayahNumber = ayahNumber,
+            createdAt = createdAt
         )
     }
 

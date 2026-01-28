@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.bookmarks
 
+import android.content.Intent
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -143,8 +145,11 @@ fun BookmarksScreen(
                         },
                         onDelete = {
                             when (bookmark.type) {
-                                BookmarkType.QURAN -> bookmark.surahNumber?.let {
-                                    // Need ayahId for deletion
+                                BookmarkType.QURAN -> {
+                                    val ayahId = bookmark.id.removePrefix("quran_").toIntOrNull()
+                                    if (ayahId != null) {
+                                        viewModel.onEvent(BookmarksEvent.DeleteQuranBookmark(ayahId))
+                                    }
                                 }
                                 BookmarkType.HADITH -> bookmark.hadithBookId?.let {
                                     viewModel.onEvent(BookmarksEvent.DeleteHadithBookmark(bookmark.id.removePrefix("hadith_")))
@@ -290,6 +295,8 @@ private fun BookmarkCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+
     val typeLabel = when (bookmark.type) {
         BookmarkType.QURAN -> "Quran"
         BookmarkType.HADITH -> "Hadith"
@@ -367,7 +374,19 @@ private fun BookmarkCard(
 
                 // Action buttons
                 IconButton(
-                    onClick = { /* Share action */ },
+                    onClick = {
+                        val textToShare = buildString {
+                            append(bookmark.title)
+                            bookmark.arabicText?.let { append("\n\n$it") }
+                            bookmark.note?.let { append("\n\n$it") }
+                        }
+                        val sendIntent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, textToShare)
+                            type = "text/plain"
+                        }
+                        context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                    },
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(

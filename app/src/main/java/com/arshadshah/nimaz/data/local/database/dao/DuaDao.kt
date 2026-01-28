@@ -96,6 +96,20 @@ interface DuaDao {
     suspend fun updateProgress(progress: DuaProgressEntity)
 
     @Transaction
+    suspend fun decrementDuaProgress(duaId: Int, date: Long) {
+        val existing = getProgressForDuaOnDate(duaId, date)
+        if (existing != null && existing.completedCount > 0) {
+            val newCount = existing.completedCount - 1
+            updateProgress(
+                existing.copy(
+                    completedCount = newCount,
+                    isCompleted = newCount >= existing.targetCount
+                )
+            )
+        }
+    }
+
+    @Transaction
     suspend fun incrementDuaProgress(duaId: Int, date: Long, targetCount: Int) {
         val existing = getProgressForDuaOnDate(duaId, date)
         if (existing != null) {

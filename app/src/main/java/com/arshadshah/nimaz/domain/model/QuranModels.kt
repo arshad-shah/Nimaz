@@ -67,6 +67,13 @@ data class ReadingProgress(
     val lastAyah: Int get() = lastReadAyah
 }
 
+data class QuranFavorite(
+    val ayahId: Int,
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val createdAt: Long
+)
+
 data class Translation(
     val id: Long,
     val ayahId: Int,
@@ -130,6 +137,11 @@ data class JuzInfo(
     val startAyah: Int,
     val endSurah: Int,
     val endAyah: Int
+)
+
+data class SurahInfo(
+    val description: String,
+    val themes: List<String>
 )
 
 data class PageInfo(

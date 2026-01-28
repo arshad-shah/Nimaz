@@ -41,6 +41,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -202,22 +203,24 @@ fun OnboardingScreen(
 
     val pagerState = rememberPagerState(pageCount = { pages.size })
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.onSurface,
-                        MaterialTheme.colorScheme.onSurface
+    Scaffold { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .background(
+                    Brush.verticalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.onSurface,
+                            MaterialTheme.colorScheme.onSurface
+                        )
                     )
                 )
-            )
-    ) {
-        Column(
-            modifier = Modifier.fillMaxSize()
         ) {
-            // Skip Button
+            Column(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                // Skip Button
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -385,6 +388,7 @@ fun OnboardingScreen(
             hostState = snackbarHostState,
             modifier = Modifier.align(Alignment.BottomCenter)
         )
+        }
     }
 }
 

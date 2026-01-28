@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
@@ -24,11 +25,14 @@ import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
+import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 
 @Database(
     entities = [
@@ -37,7 +41,9 @@ import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
         AyahEntity::class,
         TranslationEntity::class,
         QuranBookmarkEntity::class,
+        QuranFavoriteEntity::class,
         ReadingProgressEntity::class,
+        SurahInfoEntity::class,
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
@@ -54,11 +60,13 @@ import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
         // Tasbih
         TasbihPresetEntity::class,
         TasbihSessionEntity::class,
+        // Zakat
+        ZakatHistoryEntity::class,
         // Other
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 1,
+    version = 4,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -70,6 +78,7 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun tasbihDao(): TasbihDao
     abstract fun locationDao(): LocationDao
     abstract fun islamicEventDao(): IslamicEventDao
+    abstract fun zakatDao(): ZakatDao
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"

@@ -8,8 +8,10 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
+import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -103,6 +105,45 @@ interface QuranDao {
 
     @Query("UPDATE reading_progress SET totalAyahsRead = totalAyahsRead + :count, updatedAt = :timestamp WHERE id = 1")
     suspend fun incrementAyahsRead(count: Int, timestamp: Long = System.currentTimeMillis())
+
+    // Favorite operations
+    @Query("SELECT * FROM quran_favorites ORDER BY createdAt DESC")
+    fun getAllFavorites(): Flow<List<QuranFavoriteEntity>>
+
+    @Query("SELECT ayahId FROM quran_favorites")
+    fun getFavoriteAyahIds(): Flow<List<Int>>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM quran_favorites WHERE ayahId = :ayahId)")
+    fun isAyahFavorite(ayahId: Int): Flow<Boolean>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFavorite(favorite: QuranFavoriteEntity)
+
+    @Query("DELETE FROM quran_favorites WHERE ayahId = :ayahId")
+    suspend fun deleteFavorite(ayahId: Int)
+
+    @Transaction
+    suspend fun toggleFavorite(ayahId: Int, surahNumber: Int, ayahNumber: Int) {
+        val exists = getFavoriteByAyahId(ayahId)
+        if (exists != null) {
+            deleteFavorite(ayahId)
+        } else {
+            insertFavorite(
+                QuranFavoriteEntity(
+                    ayahId = ayahId,
+                    surahNumber = surahNumber,
+                    ayahNumber = ayahNumber
+                )
+            )
+        }
+    }
+
+    @Query("SELECT * FROM quran_favorites WHERE ayahId = :ayahId LIMIT 1")
+    suspend fun getFavoriteByAyahId(ayahId: Int): QuranFavoriteEntity?
+
+    // Surah info operations
+    @Query("SELECT * FROM surah_info WHERE surahNumber = :surahNumber")
+    suspend fun getSurahInfo(surahNumber: Int): SurahInfoEntity?
 
     @Transaction
     suspend fun toggleBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int) {

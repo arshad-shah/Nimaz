@@ -61,9 +61,9 @@ object NimazColors {
     val OnSurfaceVariantLight = Color(0xFF757575)
 
     // Background & Surface - Dark Theme
-    val BackgroundDark = Color(0xFF121212)
-    val SurfaceDark = Color(0xFF1E1E1E)
-    val SurfaceVariantDark = Color(0xFF2C2C2C)
+    val BackgroundDark = Color(0xFF0C0A09)
+    val SurfaceDark = Color(0xFF1C1917)
+    val SurfaceVariantDark = Color(0xFF292524)
     val OnBackgroundDark = Color(0xFFE0E0E0)
     val OnSurfaceDark = Color(0xFFE0E0E0)
     val OnSurfaceVariantDark = Color(0xFFB0B0B0)
@@ -77,7 +77,7 @@ object NimazColors {
 
     // Outline
     val OutlineLight = Color(0xFFE0E0E0)
-    val OutlineDark = Color(0xFF424242)
+    val OutlineDark = Color(0xFF292524)
 
     // Prayer Time Colors (Updated to match prototype)
     object PrayerColors {

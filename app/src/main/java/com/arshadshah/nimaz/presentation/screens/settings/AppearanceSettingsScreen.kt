@@ -97,7 +97,10 @@ fun AppearanceSettingsScreen(
                 SectionTitle(text = "Accent Color")
             }
             item {
-                AccentColorCard()
+                AccentColorCard(
+                    selectedAccentColor = generalState.accentColor,
+                    onColorSelected = { viewModel.onEvent(SettingsEvent.SetAccentColor(it)) }
+                )
             }
 
             // App Icon Section
@@ -105,7 +108,10 @@ fun AppearanceSettingsScreen(
                 SectionTitle(text = "App Icon", showProBadge = true)
             }
             item {
-                AppIconCard()
+                AppIconCard(
+                    selectedAppIcon = generalState.appIcon,
+                    onIconSelected = { viewModel.onEvent(SettingsEvent.SetAppIcon(it)) }
+                )
             }
 
             // Display Section
@@ -116,11 +122,19 @@ fun AppearanceSettingsScreen(
                 DisplaySettingsCard(
                     hapticFeedback = generalState.hapticFeedback,
                     use24HourFormat = generalState.use24HourFormat,
+                    showIslamicPatterns = generalState.showIslamicPatterns,
+                    animationsEnabled = generalState.animationsEnabled,
                     onHapticFeedbackToggle = {
                         viewModel.onEvent(SettingsEvent.SetHapticFeedback(!generalState.hapticFeedback))
                     },
                     on24HourToggle = {
                         viewModel.onEvent(SettingsEvent.Set24HourFormat(!generalState.use24HourFormat))
+                    },
+                    onIslamicPatternsToggle = {
+                        viewModel.onEvent(SettingsEvent.SetShowIslamicPatterns(!generalState.showIslamicPatterns))
+                    },
+                    onAnimationsToggle = {
+                        viewModel.onEvent(SettingsEvent.SetAnimationsEnabled(!generalState.animationsEnabled))
                     }
                 )
             }
@@ -132,8 +146,16 @@ fun AppearanceSettingsScreen(
             item {
                 HomeScreenSettingsCard(
                     useHijriPrimary = generalState.useHijriPrimary,
+                    showCountdown = generalState.showCountdown,
+                    showQuickActions = generalState.showQuickActions,
                     onHijriPrimaryToggle = {
                         viewModel.onEvent(SettingsEvent.SetHijriPrimary(!generalState.useHijriPrimary))
+                    },
+                    onCountdownToggle = {
+                        viewModel.onEvent(SettingsEvent.SetShowCountdown(!generalState.showCountdown))
+                    },
+                    onQuickActionsToggle = {
+                        viewModel.onEvent(SettingsEvent.SetShowQuickActions(!generalState.showQuickActions))
                     }
                 )
             }
@@ -358,7 +380,10 @@ private fun ThemePreviewContent(contentColor: Color) {
 // --- Accent Color ---
 
 @Composable
-private fun AccentColorCard() {
+private fun AccentColorCard(
+    selectedAccentColor: String,
+    onColorSelected: (String) -> Unit
+) {
     val colors = listOf(
         "Teal" to Color(0xFF14B8A6),
         "Gold" to Color(0xFFEAB308),
@@ -366,7 +391,6 @@ private fun AccentColorCard() {
         "Blue" to Color(0xFF3B82F6),
         "Rose" to Color(0xFFF43F5E)
     )
-    var selectedAccentColor by remember { mutableStateOf("Teal") }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -398,7 +422,7 @@ private fun AccentColorCard() {
                                 Modifier
                             }
                         )
-                        .clickable { selectedAccentColor = name },
+                        .clickable { onColorSelected(name) },
                     contentAlignment = Alignment.Center
                 ) {
                     if (isSelected) {
@@ -424,14 +448,16 @@ private data class AppIconOption(
 )
 
 @Composable
-private fun AppIconCard() {
+private fun AppIconCard(
+    selectedAppIcon: String,
+    onIconSelected: (String) -> Unit
+) {
     val iconOptions = listOf(
         AppIconOption("Default", "\uD83D\uDD4C", listOf(Color(0xFF14B8A6), Color(0xFF115E59))),
         AppIconOption("Dark", "\uD83D\uDD4C", listOf(Color(0xFF1C1917), Color(0xFF0C0A09))),
         AppIconOption("Ramadan", "\uD83C\uDF19", listOf(Color(0xFFEAB308), Color(0xFFCA8A04))),
         AppIconOption("Minimal", "\u2728", listOf(Color(0xFFA855F7), Color(0xFF7C3AED)))
     )
-    var selectedAppIcon by remember { mutableStateOf("Default") }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -450,7 +476,7 @@ private fun AppIconCard() {
                 val isSelected = option.name == selectedAppIcon
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.clickable { selectedAppIcon = option.name }
+                    modifier = Modifier.clickable { onIconSelected(option.name) }
                 ) {
                     Box(
                         modifier = Modifier
@@ -499,11 +525,13 @@ private fun AppIconCard() {
 private fun DisplaySettingsCard(
     hapticFeedback: Boolean,
     use24HourFormat: Boolean,
+    showIslamicPatterns: Boolean,
+    animationsEnabled: Boolean,
     onHapticFeedbackToggle: () -> Unit,
-    on24HourToggle: () -> Unit
+    on24HourToggle: () -> Unit,
+    onIslamicPatternsToggle: () -> Unit,
+    onAnimationsToggle: () -> Unit
 ) {
-    var showIslamicPatterns by remember { mutableStateOf(true) }
-    var animationsEnabled by remember { mutableStateOf(true) }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -516,14 +544,14 @@ private fun DisplaySettingsCard(
                 label = "Islamic Patterns",
                 description = "Show decorative patterns",
                 isEnabled = showIslamicPatterns,
-                onToggle = { showIslamicPatterns = !showIslamicPatterns }
+                onToggle = onIslamicPatternsToggle
             )
             SettingDivider()
             SettingToggleItem(
                 label = "Animations",
                 description = "Enable smooth transitions",
                 isEnabled = animationsEnabled,
-                onToggle = { animationsEnabled = !animationsEnabled }
+                onToggle = onAnimationsToggle
             )
             SettingDivider()
             SettingToggleItem(
@@ -548,10 +576,12 @@ private fun DisplaySettingsCard(
 @Composable
 private fun HomeScreenSettingsCard(
     useHijriPrimary: Boolean,
-    onHijriPrimaryToggle: () -> Unit
+    showCountdown: Boolean,
+    showQuickActions: Boolean,
+    onHijriPrimaryToggle: () -> Unit,
+    onCountdownToggle: () -> Unit,
+    onQuickActionsToggle: () -> Unit
 ) {
-    var showCountdown by remember { mutableStateOf(true) }
-    var showQuickActions by remember { mutableStateOf(true) }
 
     Card(
         shape = RoundedCornerShape(16.dp),
@@ -571,14 +601,14 @@ private fun HomeScreenSettingsCard(
                 label = "Show Countdown",
                 description = "Next prayer countdown",
                 isEnabled = showCountdown,
-                onToggle = { showCountdown = !showCountdown }
+                onToggle = onCountdownToggle
             )
             SettingDivider()
             SettingToggleItem(
                 label = "Show Quick Actions",
                 description = "Quran, Tasbih, Qibla buttons",
                 isEnabled = showQuickActions,
-                onToggle = { showQuickActions = !showQuickActions }
+                onToggle = onQuickActionsToggle
             )
         }
     }

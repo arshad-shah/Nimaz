@@ -102,6 +102,21 @@ data class QuranBookmarkEntity(
     val updatedAt: Long = System.currentTimeMillis()
 )
 
+@Entity(tableName = "quran_favorites")
+data class QuranFavoriteEntity(
+    @PrimaryKey val ayahId: Int,
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(tableName = "surah_info")
+data class SurahInfoEntity(
+    @PrimaryKey val surahNumber: Int,
+    val description: String,
+    val themes: String // comma-separated
+)
+
 @Entity(tableName = "reading_progress")
 data class ReadingProgressEntity(
     @PrimaryKey
