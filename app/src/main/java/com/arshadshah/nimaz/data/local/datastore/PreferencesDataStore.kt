@@ -97,6 +97,7 @@ class PreferencesDataStore @Inject constructor(
         val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
+        val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
 
         // Tasbih Settings
         val TASBIH_VIBRATION_ENABLED = booleanPreferencesKey("tasbih_vibration_enabled")
@@ -489,6 +490,14 @@ class PreferencesDataStore @Inject constructor(
 
     suspend fun setKeepScreenOn(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.KEEP_SCREEN_ON] = enabled }
+    }
+
+    val showTajweed: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SHOW_TAJWEED] ?: false
+    }
+
+    suspend fun setShowTajweed(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.SHOW_TAJWEED] = enabled }
     }
 
     // Tasbih Settings

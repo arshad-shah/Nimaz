@@ -7,6 +7,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -90,6 +91,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDirection
+import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
@@ -117,10 +119,17 @@ private fun Ayah.getDisplayArabicText(): String {
  * Process ayah text to append Arabic numeral with ornamental brackets at the end
  */
 private fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
+    return "$arabicText ${formatAyahEndMarker(ayahNumber)}"
+}
+
+/**
+ * Format just the ayah end marker with ornamental brackets
+ */
+private fun formatAyahEndMarker(ayahNumber: Int): String {
     val unicodeAyaEndStart = "\uFD3F" // ﴿
     val unicodeAyaEndEnd = "\uFD3E"   // ﴾
     val arabicNumber = toArabicNumber(ayahNumber)
-    return "$arabicText $unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
+    return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -384,6 +393,7 @@ fun QuranReaderScreen(
                                 totalPages = totalPages,
                                 highlightedAyahId = highlightedAyahId,
                                 favoriteAyahIds = favoriteAyahIds,
+                                showTajweed = state.showTajweed,
                                 onNavigatePrevious = {
                                     coroutineScope.launch {
                                         if (pagerState.currentPage < totalPages - 1) {
@@ -503,6 +513,7 @@ fun QuranReaderScreen(
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
                             isFavorite = ayah.id in favoriteAyahIds,
+                            showTajweed = state.showTajweed,
                             onBookmarkClick = {
                                 viewModel.onEvent(
                                     QuranEvent.ToggleBookmark(
@@ -913,12 +924,14 @@ private fun AyahItem(
     fontSize: Float,
     isHighlighted: Boolean = false,
     isFavorite: Boolean = false,
+    showTajweed: Boolean = false,
     onBookmarkClick: () -> Unit,
     onFavoriteClick: () -> Unit = {},
     onPlayAyahClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val isDarkTheme = isSystemInDarkTheme()
 
     val bgColor by animateColorAsState(
         targetValue = if (isHighlighted)
@@ -1017,21 +1030,50 @@ private fun AyahItem(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Arabic text with ayah end marker
+        // Arabic text with ayah end marker (with optional tajweed colors)
         val displayText = ayah.getDisplayArabicText()
         val formattedText = formatAyahWithEndMarker(displayText, ayah.numberInSurah)
+        val textColor = MaterialTheme.colorScheme.onBackground
 
-        ArabicText(
-            text = formattedText,
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.onBackground,
-            style = TextStyle(
-                fontFamily = AmiriFontFamily,
-                fontSize = arabicFontSize.sp,
-                lineHeight = (arabicFontSize * 2).sp,
-                textDirection = TextDirection.Rtl
+        if (showTajweed && ayah.textTajweed != null) {
+            // Render with tajweed colors using ClickableText
+            val tajweedAnnotated = remember(ayah.textTajweed, isDarkTheme, ayah.numberInSurah) {
+                val parsed = TajweedParser.parse(
+                    tajweedText = ayah.textTajweed,
+                    isDarkTheme = isDarkTheme,
+                    defaultColor = textColor
+                )
+                // Append the end marker to the tajweed text
+                androidx.compose.ui.text.buildAnnotatedString {
+                    append(parsed)
+                    append(" ")
+                    append(formatAyahEndMarker(ayah.numberInSurah))
+                }
+            }
+            androidx.compose.foundation.text.BasicText(
+                text = tajweedAnnotated,
+                modifier = Modifier.fillMaxWidth(),
+                style = TextStyle(
+                    fontFamily = AmiriFontFamily,
+                    fontSize = arabicFontSize.sp,
+                    lineHeight = (arabicFontSize * 2).sp,
+                    textDirection = TextDirection.Rtl,
+                    color = textColor
+                )
             )
-        )
+        } else {
+            ArabicText(
+                text = formattedText,
+                modifier = Modifier.fillMaxWidth(),
+                color = textColor,
+                style = TextStyle(
+                    fontFamily = AmiriFontFamily,
+                    fontSize = arabicFontSize.sp,
+                    lineHeight = (arabicFontSize * 2).sp,
+                    textDirection = TextDirection.Rtl
+                )
+            )
+        }
 
         // Translation
         if (showTranslation && ayah.translation != null) {

@@ -46,6 +46,7 @@ def create_tables(conn):
             sajda INTEGER NOT NULL,
             sajda_type TEXT,
             transliteration TEXT,
+            text_tajweed TEXT,
             FOREIGN KEY (surah_id) REFERENCES surahs(id) ON DELETE CASCADE
         )
     ''')
@@ -403,19 +404,30 @@ def populate_database(conn):
     else:
         print("Warning: No transliteration data found")
 
-    # Ayahs (with transliteration)
+    # Load tajweed data
+    tajweed_data = load_json('tajweed.json')
+    if tajweed_data:
+        print(f"Loaded tajweed data for {len(tajweed_data)} ayahs")
+    else:
+        print("Warning: No tajweed data found")
+
+    # Ayahs (with transliteration and tajweed)
     ayahs = load_json('ayahs.json')
     for a in ayahs:
         # Get transliteration from transliteration.json using number_global
         # The JSON uses string keys, so convert to string
         transliteration = transliterations.get(str(a['number_global'])) if transliterations else None
 
+        # Get tajweed text using "surah:ayah" key format
+        tajweed_key = f"{a['surah_id']}:{a['number_in_surah']}"
+        text_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
+
         cursor.execute('''
-            INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+            INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
         ''', (a['id'], a['surah_id'], a['number_in_surah'], a['number_global'],
               a['text_arabic'], a['text_uthmani'], a['juz'], a['hizb'],
               a['page'], 1 if a.get('sajda') else 0, a.get('sajda_type'),
-              transliteration))
+              transliteration, text_tajweed))
     print(f"Inserted {len(ayahs)} ayahs")
 
     # Surah Info

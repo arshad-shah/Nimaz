@@ -62,7 +62,9 @@ data class AyahEntity(
     val sajda: Int, // 0 = no sajda, 1 = sajda
     @ColumnInfo(name = "sajda_type")
     val sajdaType: String?, // "obligatory", "recommended", or null
-    val transliteration: String? = null
+    val transliteration: String? = null,
+    @ColumnInfo(name = "text_tajweed")
+    val textTajweed: String? = null
 )
 
 @Entity(

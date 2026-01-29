@@ -140,6 +140,27 @@ object NimazColors {
         val Complete = Color(0xFF4CAF50)
         val Milestone = Color(0xFFFFC107)
     }
+
+    // Tajweed Colors for Quran pronunciation rules
+    object TajweedColors {
+        // Light theme colors
+        val GhunnahLight = Color(0xFF059669)    // Green - nasalization
+        val IkhfaLight = Color(0xFF7C3AED)      // Purple - hiding
+        val IdghamLight = Color(0xFFD97706)     // Amber - merging
+        val QalqalahLight = Color(0xFF2563EB)   // Blue - echoing
+        val MaddLight = Color(0xFFDC2626)       // Red - elongation
+        val IqlabLight = Color(0xFF7C3AED)      // Purple - conversion (same as Ikhfa)
+        val SilentLight = Color(0xFF64748B)     // Slate/Gray - silent letters
+
+        // Dark theme colors (brighter variants for better visibility)
+        val GhunnahDark = Color(0xFF34D399)
+        val IkhfaDark = Color(0xFFA78BFA)
+        val IdghamDark = Color(0xFFFBBF24)
+        val QalqalahDark = Color(0xFF60A5FA)
+        val MaddDark = Color(0xFFF87171)
+        val IqlabDark = Color(0xFFA78BFA)
+        val SilentDark = Color(0xFF94A3B8)
+    }
 }
 
 // Light Theme Colors

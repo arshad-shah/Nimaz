@@ -66,7 +66,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {

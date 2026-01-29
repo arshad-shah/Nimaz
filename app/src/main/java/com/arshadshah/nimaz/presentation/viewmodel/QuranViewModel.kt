@@ -63,7 +63,8 @@ data class QuranReaderUiState(
     val keepScreenOn: Boolean = true,
     val continuousReading: Boolean = true,
     val favoriteAyahIds: Set<Int> = emptySet(),
-    val pageCache: Map<Int, List<Ayah>> = emptyMap()
+    val pageCache: Map<Int, List<Ayah>> = emptyMap(),
+    val showTajweed: Boolean = false
 )
 
 data class QuranSearchUiState(
@@ -197,9 +198,9 @@ class QuranViewModel @Inject constructor(
                 QuranBehaviorSettings(transSize, continuous, keepOn, reciter)
             }
 
-            combine(displayFlow, behaviorFlow) { display, behavior ->
-                Pair(display, behavior)
-            }.collect { (display, behavior) ->
+            combine(displayFlow, behaviorFlow, preferencesDataStore.showTajweed) { display, behavior, showTajweed ->
+                Triple(display, behavior, showTajweed)
+            }.collect { (display, behavior, showTajweed) ->
                 audioManager.setReciter(behavior.reciterId)
                 _readerState.update {
                     it.copy(
@@ -209,7 +210,8 @@ class QuranViewModel @Inject constructor(
                         arabicFontSize = display.arabicFontSize,
                         fontSize = behavior.translationFontSize,
                         continuousReading = behavior.continuousReading,
-                        keepScreenOn = behavior.keepScreenOn
+                        keepScreenOn = behavior.keepScreenOn,
+                        showTajweed = showTajweed
                     )
                 }
             }

@@ -63,6 +63,7 @@ private val MushafGoldAccent = Color(0xFFEAB308)  // Gold accent
  * - Surah headers when a new surah starts
  * - Continuous Arabic text with clickable ayahs
  * - Bottom sheet for ayah actions (play, bookmark, favorite, share, copy)
+ * - Tajweed color coding when enabled
  *
  * @param pageNumber The Quran page number (1-604)
  * @param ayahs List of ayahs on this page
@@ -72,6 +73,7 @@ private val MushafGoldAccent = Color(0xFFEAB308)  // Gold accent
  * @param totalPages Total number of Quran pages (default 604)
  * @param highlightedAyahId ID of currently highlighted ayah (e.g., during audio playback)
  * @param favoriteAyahIds Set of ayah IDs that are favorited
+ * @param showTajweed Whether to show tajweed color markers
  * @param onNavigatePrevious Callback when previous page navigation is clicked
  * @param onNavigateNext Callback when next page navigation is clicked
  * @param onBookmarkClick Callback when bookmark action is clicked
@@ -91,6 +93,7 @@ fun MushafPage(
     totalPages: Int = 604,
     highlightedAyahId: Int? = null,
     favoriteAyahIds: Set<Int> = emptySet(),
+    showTajweed: Boolean = false,
     onNavigatePrevious: () -> Unit = {},
     onNavigateNext: () -> Unit = {},
     onBookmarkClick: (Ayah) -> Unit = {},
@@ -168,6 +171,7 @@ fun MushafPage(
                         },
                         highlightedAyahId = highlightedAyahId,
                         arabicFontSize = arabicFontSize,
+                        showTajweed = showTajweed,
                         modifier = Modifier.padding(horizontal = 4.dp)
                     )
 

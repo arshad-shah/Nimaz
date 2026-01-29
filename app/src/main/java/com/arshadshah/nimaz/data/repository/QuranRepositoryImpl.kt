@@ -341,7 +341,8 @@ class QuranRepositoryImpl @Inject constructor(
             sajdaType = SajdaType.fromString(sajdaType),
             sajdaNumber = if (sajda > 0) sajda else null,
             translation = translation,
-            transliteration = transliteration
+            transliteration = transliteration,
+            textTajweed = textTajweed
         )
     }
 

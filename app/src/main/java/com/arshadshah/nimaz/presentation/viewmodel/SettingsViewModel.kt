@@ -114,7 +114,8 @@ data class QuranSettingsUiState(
     val translationFontSize: Float = 16f,
     val continuousReading: Boolean = true,
     val keepScreenOn: Boolean = true,
-    val selectedReciterId: String? = null
+    val selectedReciterId: String? = null,
+    val showTajweed: Boolean = false
 )
 
 data class LocationSettingsUiState(
@@ -177,6 +178,7 @@ sealed interface SettingsEvent {
     data class SetContinuousReading(val enabled: Boolean) : SettingsEvent
     data class SetKeepScreenOn(val enabled: Boolean) : SettingsEvent
     data class SetReciter(val reciterId: String?) : SettingsEvent
+    data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
 
     // Location
     data class SetCurrentLocation(val location: Location) : SettingsEvent
@@ -435,6 +437,10 @@ class SettingsViewModel @Inject constructor(
                 _quranState.update { it.copy(selectedReciterId = event.reciterId) }
                 viewModelScope.launch { preferencesDataStore.setSelectedReciterId(event.reciterId) }
             }
+            is SettingsEvent.SetShowTajweed -> {
+                _quranState.update { it.copy(showTajweed = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setShowTajweed(event.enabled) }
+            }
 
             // Location
             is SettingsEvent.SetCurrentLocation -> setCurrentLocation(event.location)
@@ -591,6 +597,7 @@ class SettingsViewModel @Inject constructor(
             val continuousReading = preferencesDataStore.continuousReading.first()
             val keepScreenOn = preferencesDataStore.keepScreenOn.first()
             val reciterId = preferencesDataStore.selectedReciterId.first()
+            val showTajweed = preferencesDataStore.showTajweed.first()
 
             _quranState.update {
                 it.copy(
@@ -601,7 +608,8 @@ class SettingsViewModel @Inject constructor(
                     translationFontSize = translationFontSize,
                     continuousReading = continuousReading,
                     keepScreenOn = keepScreenOn,
-                    selectedReciterId = reciterId
+                    selectedReciterId = reciterId,
+                    showTajweed = showTajweed
                 )
             }
         }

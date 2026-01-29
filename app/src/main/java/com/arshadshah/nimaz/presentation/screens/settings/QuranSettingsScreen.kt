@@ -228,6 +228,13 @@ fun QuranSettingsScreen(
                         isEnabled = quranState.keepScreenOn,
                         onToggle = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
+                    SettingDivider()
+                    DisplayToggleItem(
+                        label = "Show Tajweed Colors",
+                        subtitle = "Color-coded pronunciation rules",
+                        isEnabled = quranState.showTajweed,
+                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
+                    )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
             }
