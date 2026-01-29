@@ -90,6 +90,7 @@ import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDirection
+import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 
@@ -118,9 +119,7 @@ private fun Ayah.getDisplayArabicText(): String {
 private fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
     val unicodeAyaEndStart = "\uFD3F" // ﴿
     val unicodeAyaEndEnd = "\uFD3E"   // ﴾
-    val arabicLocale = Locale.forLanguageTag("ar")
-    val nf: NumberFormat = NumberFormat.getInstance(arabicLocale)
-    val arabicNumber = nf.format(ayahNumber).replace("٬", "") // Remove Arabic comma separator
+    val arabicNumber = toArabicNumber(ayahNumber)
     return "$arabicText $unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
 }
 
@@ -306,24 +305,30 @@ fun QuranReaderScreen(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
                 isDownloading = audioState.isDownloading,
+                isPreparing = audioState.isPreparing,
+                downloadProgress = audioState.downloadProgress,
+                downloadedCount = audioState.downloadedCount,
+                totalToDownload = audioState.totalToDownload,
                 audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
                 progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
                 onPlayClick = {
                     if (audioState.isPlaying) {
                         viewModel.onEvent(QuranEvent.PauseAudio)
-                    } else if (audioState.isActive) {
+                    } else if (audioState.isActive && !audioState.isPreparing) {
                         viewModel.onEvent(QuranEvent.ResumeAudio)
-                    } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
-                        val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
-                        viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
-                    } else if (displayAyahs.isNotEmpty()) {
-                        viewModel.onEvent(
-                            QuranEvent.PlayAyahAudio(
-                                ayahGlobalId = displayAyahs.first().id,
-                                surahNumber = displayAyahs.first().surahNumber,
-                                ayahNumber = displayAyahs.first().ayahNumber
+                    } else if (!audioState.isPreparing) {
+                        if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
+                            val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
+                            viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
+                        } else if (displayAyahs.isNotEmpty()) {
+                            viewModel.onEvent(
+                                QuranEvent.PlayAyahAudio(
+                                    ayahGlobalId = displayAyahs.first().id,
+                                    surahNumber = displayAyahs.first().surahNumber,
+                                    ayahNumber = displayAyahs.first().ayahNumber
+                                )
                             )
-                        )
+                        }
                     }
                 },
                 onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
@@ -541,6 +546,10 @@ private fun AudioBottomBar(
     isAudioActive: Boolean,
     isPlaying: Boolean,
     isDownloading: Boolean,
+    isPreparing: Boolean,
+    downloadProgress: Float,
+    downloadedCount: Int,
+    totalToDownload: Int,
     audioTitle: String,
     progress: Float,
     onPlayClick: () -> Unit,
@@ -554,16 +563,27 @@ private fun AudioBottomBar(
         tonalElevation = 3.dp
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Progress bar (only when audio active)
-            if (isAudioActive) {
-                LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
+            // Progress bar - show download progress when preparing, playback progress otherwise
+            if (isAudioActive || isPreparing) {
+                if (isPreparing && totalToDownload > 0) {
+                    LinearProgressIndicator(
+                        progress = { downloadProgress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                } else {
+                    LinearProgressIndicator(
+                        progress = { progress },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(3.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                    )
+                }
             }
 
             Row(
@@ -574,7 +594,21 @@ private fun AudioBottomBar(
             ) {
                 // Left side: audio info or prompt
                 Column(modifier = Modifier.weight(1f)) {
-                    if (isAudioActive) {
+                    if (isPreparing && totalToDownload > 0) {
+                        Text(
+                            text = "Preparing Audio",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                        Text(
+                            text = "Downloading $downloadedCount of $totalToDownload ayahs...",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else if (isAudioActive) {
                         Text(
                             text = "Now Playing",
                             style = MaterialTheme.typography.labelSmall,
@@ -605,7 +639,7 @@ private fun AudioBottomBar(
                     modifier = Modifier.size(44.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        if (isDownloading) {
+                        if (isDownloading || isPreparing) {
                             CircularProgressIndicator(
                                 modifier = Modifier.size(22.dp),
                                 strokeWidth = 2.dp,
@@ -622,8 +656,8 @@ private fun AudioBottomBar(
                     }
                 }
 
-                // Stop button (only when audio active)
-                if (isAudioActive) {
+                // Stop button (only when audio active or preparing)
+                if (isAudioActive || isPreparing) {
                     Spacer(modifier = Modifier.width(8.dp))
                     Surface(
                         shape = CircleShape,

@@ -74,7 +74,12 @@ data class AudioPlayerState(
     val playbackSpeed: Float = 1.0f,
     val repeatMode: RepeatMode = RepeatMode.NONE,
     val isShuffleEnabled: Boolean = false,
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    // Download progress for batch downloads
+    val isPreparing: Boolean = false,
+    val downloadProgress: Float = 0f,
+    val downloadedCount: Int = 0,
+    val totalToDownload: Int = 0
 )
 
 enum class RepeatMode {
@@ -511,11 +516,20 @@ fun QuranAudioPlayer(
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
-                    Text(
-                        text = "Ayah $currentAyah of $totalAyahs",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    // Show download progress when preparing, otherwise show ayah count
+                    if (state.isPreparing && state.totalToDownload > 0) {
+                        Text(
+                            text = "Downloading ${state.downloadedCount}/${state.totalToDownload} ayahs...",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    } else {
+                        Text(
+                            text = "Ayah $currentAyah of $totalAyahs",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 IconButton(onClick = onCloseClick) {
                     Icon(
@@ -527,17 +541,29 @@ fun QuranAudioPlayer(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Progress
-            val progress = if (totalAyahs > 0) currentAyah.toFloat() / totalAyahs else 0f
-            LinearProgressIndicator(
-                progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-                color = NimazColors.QuranColors.Medinan,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            )
+            // Progress - show download progress when preparing, playback progress otherwise
+            if (state.isPreparing) {
+                LinearProgressIndicator(
+                    progress = { state.downloadProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            } else {
+                val progress = if (totalAyahs > 0) currentAyah.toFloat() / totalAyahs else 0f
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = NimazColors.QuranColors.Medinan,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -549,7 +575,7 @@ fun QuranAudioPlayer(
             ) {
                 IconButton(
                     onClick = onPreviousAyah,
-                    enabled = currentAyah > 1
+                    enabled = currentAyah > 1 && !state.isPreparing
                 ) {
                     Icon(
                         imageVector = Icons.Default.SkipPrevious,
@@ -565,21 +591,30 @@ fun QuranAudioPlayer(
                     modifier = Modifier
                         .size(56.dp)
                         .clip(CircleShape)
-                        .background(NimazColors.QuranColors.Medinan)
+                        .background(NimazColors.QuranColors.Medinan),
+                    enabled = !state.isPreparing
                 ) {
-                    Icon(
-                        imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (state.isPlaying) "Pause" else "Play",
-                        tint = Color.White,
-                        modifier = Modifier.size(32.dp)
-                    )
+                    if (state.isPreparing) {
+                        androidx.compose.material3.CircularProgressIndicator(
+                            modifier = Modifier.size(28.dp),
+                            strokeWidth = 3.dp,
+                            color = Color.White
+                        )
+                    } else {
+                        Icon(
+                            imageVector = if (state.isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (state.isPlaying) "Pause" else "Play",
+                            tint = Color.White,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))
 
                 IconButton(
                     onClick = onNextAyah,
-                    enabled = currentAyah < totalAyahs
+                    enabled = currentAyah < totalAyahs && !state.isPreparing
                 ) {
                     Icon(
                         imageVector = Icons.Default.SkipNext,

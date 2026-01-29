@@ -20,6 +20,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -37,7 +38,11 @@ data class AudioState(
     val error: String? = null,
     // Playlist progress for surah-level tracking
     val currentAyahIndex: Int = 0,
-    val totalAyahs: Int = 0
+    val totalAyahs: Int = 0,
+    // Download progress for batch downloads
+    val downloadedCount: Int = 0,
+    val totalToDownload: Int = 0,
+    val isPreparing: Boolean = false
 ) {
     // Calculate surah progress as percentage (0.0 to 1.0)
     val surahProgress: Float
@@ -55,6 +60,7 @@ class QuranAudioManager @Inject constructor(
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var player: ExoPlayer? = null
     private var positionTrackingJob: Job? = null
+    private var downloadJob: Job? = null
 
     private val _audioState = MutableStateFlow(AudioState())
     val audioState: StateFlow<AudioState> = _audioState.asStateFlow()
@@ -63,17 +69,12 @@ class QuranAudioManager @Inject constructor(
     private var reciterCdnId = "ar.alafasy" // Default: Mishary Rashid Alafasy
     private var reciterBitrate = 128 // Default bitrate
 
-    // Monotonically increasing generation counter. Each time we start a new track,
-    // we bump this. The STATE_ENDED handler captures the generation at the time the
-    // track started; if it doesn't match the current value, it means we've already
-    // moved on and the callback is stale.
-    @Volatile
-    private var playbackGeneration: Int = 0
-
     // Sequential playback state
     private var ayahPlaylist: List<AyahAudioItem> = emptyList()
     private var currentPlaylistIndex: Int = -1
-    private val failedAyahs = mutableSetOf<Int>()
+
+    // Track which files are currently being downloaded to avoid duplicate downloads
+    private val downloadingFiles = ConcurrentHashMap<String, Boolean>()
 
     // Controls whether audio auto-advances to next ayah
     private var continuousPlayback: Boolean = true
@@ -142,41 +143,38 @@ class QuranAudioManager @Inject constructor(
         val ayahNumber: Int
     )
 
+    @OptIn(UnstableApi::class)
     private fun getOrCreatePlayer(): ExoPlayer {
         return player ?: ExoPlayer.Builder(context).build().also { newPlayer ->
             player = newPlayer
-            // Track the generation at the time of listener registration
-            var listenerGeneration = playbackGeneration
 
             newPlayer.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     when (playbackState) {
                         Player.STATE_READY -> {
-                            // Sync this listener's generation to the current one
-                            listenerGeneration = playbackGeneration
                             _audioState.update {
                                 it.copy(
                                     duration = newPlayer.duration,
-                                    isDownloading = false
+                                    isDownloading = false,
+                                    isPreparing = false
                                 )
                             }
                             startPositionTracking()
                         }
                         Player.STATE_ENDED -> {
-                            _audioState.update { it.copy(isPlaying = false) }
-                            // Only auto-advance if this callback belongs to the current generation.
-                            // If generation has moved on, this is a stale callback from stop().
-                            if (listenerGeneration == playbackGeneration) {
-                                // Check continuousPlayback before auto-advancing
-                                if (continuousPlayback &&
-                                    currentPlaylistIndex >= 0 &&
-                                    currentPlaylistIndex < ayahPlaylist.size - 1) {
-                                    playNextInPlaylist()
-                                } else {
-                                    // Single ayah or continuous disabled - stop here
-                                    _audioState.update { it.copy(isActive = false, currentAyahId = 0) }
+                            // Playlist has fully ended
+                            if (!newPlayer.hasNextMediaItem()) {
+                                _audioState.update {
+                                    it.copy(
+                                        isPlaying = false,
+                                        isActive = false,
+                                        currentAyahId = 0
+                                    )
                                 }
                             }
+                        }
+                        Player.STATE_BUFFERING -> {
+                            // Could show buffering indicator if needed
                         }
                         else -> {}
                     }
@@ -184,6 +182,23 @@ class QuranAudioManager @Inject constructor(
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
                     _audioState.update { it.copy(isPlaying = isPlaying) }
+                }
+
+                override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+                    // This is called when transitioning to next ayah - gapless!
+                    val newIndex = newPlayer.currentMediaItemIndex
+                    if (newIndex >= 0 && newIndex < ayahPlaylist.size) {
+                        currentPlaylistIndex = newIndex
+                        val item = ayahPlaylist[newIndex]
+                        _audioState.update {
+                            it.copy(
+                                currentAyahId = item.ayahGlobalId,
+                                currentAyahIndex = newIndex,
+                                currentSubtitle = "Ayah ${item.ayahNumber} of ${ayahPlaylist.size}",
+                                position = 0L // Reset position for new ayah
+                            )
+                        }
+                    }
                 }
             })
         }
@@ -193,7 +208,7 @@ class QuranAudioManager @Inject constructor(
         positionTrackingJob?.cancel()
         positionTrackingJob = scope.launch {
             while (true) {
-                delay(500)
+                delay(100) // More frequent updates for smoother progress
                 val p = player ?: break
                 if (p.isPlaying) {
                     _audioState.update { it.copy(position = p.currentPosition) }
@@ -203,137 +218,146 @@ class QuranAudioManager @Inject constructor(
     }
 
     /**
-     * Play all ayahs sequentially, starting from the given list and index.
-     * Each ayah is highlighted as it plays, then auto-advances to the next.
+     * Download all ayahs for the playlist in parallel, then start playback.
+     * Shows download progress as files are downloaded.
      */
-    fun playAyahsSequentially(ayahs: List<AyahAudioItem>, startIndex: Int = 0, title: String = "") {
-        failedAyahs.clear() // Clear failed ayahs at start of new playlist
-        ayahPlaylist = ayahs
-        currentPlaylistIndex = startIndex - 1 // will be incremented by playNextInPlaylist
+    private suspend fun downloadAllAyahs(ayahs: List<AyahAudioItem>): List<File> {
+        val files = mutableListOf<File>()
+        val toDownload = mutableListOf<Pair<AyahAudioItem, File>>()
+
+        // First pass: check what needs downloading
+        for (ayah in ayahs) {
+            val audioFile = getCachedFile("ayah_${ayah.ayahGlobalId}.mp3")
+            files.add(audioFile)
+            if (!audioFile.exists() || audioFile.length() == 0L) {
+                toDownload.add(ayah to audioFile)
+            }
+        }
+
+        if (toDownload.isEmpty()) {
+            return files
+        }
+
         _audioState.update {
             it.copy(
-                isActive = true,
-                currentTitle = title,
-                error = null,
-                totalAyahs = ayahs.size,
-                currentAyahIndex = startIndex
+                isDownloading = true,
+                isPreparing = true,
+                downloadedCount = 0,
+                totalToDownload = toDownload.size
             )
         }
-        // Preload first few ayahs in background
-        preloadUpcomingAyahs(startIndex)
-        playNextInPlaylist()
+
+        // Download files with parallel downloads (limit concurrency to avoid overwhelming network)
+        val downloadedCount = java.util.concurrent.atomic.AtomicInteger(0)
+
+        withContext(Dispatchers.IO) {
+            // Use chunked parallel downloads - 5 concurrent downloads at a time
+            toDownload.chunked(5).forEach { chunk ->
+                val jobs = chunk.map { (ayah, file) ->
+                    scope.launch(Dispatchers.IO) {
+                        val url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
+                        downloadFileSilent(url, file)
+                        val count = downloadedCount.incrementAndGet()
+                        _audioState.update {
+                            it.copy(
+                                downloadedCount = count,
+                                downloadProgress = count.toFloat() / toDownload.size
+                            )
+                        }
+                    }
+                }
+                jobs.forEach { it.join() }
+            }
+        }
+
+        _audioState.update {
+            it.copy(
+                isDownloading = false,
+                downloadProgress = 1f
+            )
+        }
+
+        return files
     }
 
     /**
-     * Preload upcoming ayahs to reduce gap between playback.
+     * Play all ayahs sequentially using ExoPlayer's gapless playlist feature.
+     * Downloads all files first, then queues them for seamless playback.
      */
-    private fun preloadUpcomingAyahs(startIndex: Int) {
-        scope.launch {
-            // Preload next 3 ayahs
-            for (i in startIndex until minOf(startIndex + 3, ayahPlaylist.size)) {
-                val item = ayahPlaylist[i]
-                val audioFile = getCachedFile("ayah_${item.ayahGlobalId}.mp3")
-                if (!audioFile.exists()) {
-                    downloadFileWithRetry(
-                        url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
-                        destination = audioFile
-                    )
+    @OptIn(UnstableApi::class)
+    fun playAyahsSequentially(ayahs: List<AyahAudioItem>, startIndex: Int = 0, title: String = "") {
+        // Cancel any ongoing download job
+        downloadJob?.cancel()
+
+        ayahPlaylist = ayahs
+        currentPlaylistIndex = startIndex
+
+        _audioState.update {
+            it.copy(
+                isActive = true,
+                isPreparing = true,
+                currentTitle = title,
+                error = null,
+                totalAyahs = ayahs.size,
+                currentAyahIndex = startIndex,
+                currentAyahId = ayahs.getOrNull(startIndex)?.ayahGlobalId ?: 0
+            )
+        }
+
+        downloadJob = scope.launch {
+            try {
+                // Download all ayahs first
+                val files = downloadAllAyahs(ayahs)
+
+                // Filter out any files that failed to download
+                val validFiles = files.mapIndexedNotNull { index, file ->
+                    if (file.exists() && file.length() > 0) {
+                        index to file
+                    } else {
+                        null
+                    }
                 }
-            }
-        }
-    }
 
-    private fun playNextInPlaylist() {
-        currentPlaylistIndex++
-
-        // Skip any previously failed ayahs
-        while (currentPlaylistIndex < ayahPlaylist.size) {
-            if (ayahPlaylist[currentPlaylistIndex].ayahGlobalId in failedAyahs) {
-                currentPlaylistIndex++
-                continue
-            }
-            break
-        }
-
-        if (currentPlaylistIndex >= ayahPlaylist.size) {
-            // Done - playlist finished
-            _audioState.update {
-                it.copy(
-                    isActive = false,
-                    isPlaying = false,
-                    currentAyahId = 0,
-                    currentAyahIndex = 0,
-                    totalAyahs = 0
-                )
-            }
-            failedAyahs.clear()
-            return
-        }
-
-        val item = ayahPlaylist[currentPlaylistIndex]
-        scope.launch {
-            _audioState.update {
-                it.copy(
-                    isDownloading = true,
-                    isActive = true,
-                    error = null,
-                    currentAyahId = item.ayahGlobalId,
-                    currentAyahIndex = currentPlaylistIndex,
-                    currentSubtitle = "Ayah ${item.ayahNumber} of ${ayahPlaylist.size}"
-                )
-            }
-
-            val audioFile = getCachedFile("ayah_${item.ayahGlobalId}.mp3")
-            if (!audioFile.exists()) {
-                // Try downloading with 1 retry
-                val downloaded = downloadFileWithRetry(
-                    url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
-                    destination = audioFile
-                )
-                if (!downloaded) {
-                    // Mark as failed and skip to next ayah instead of stopping
-                    failedAyahs.add(item.ayahGlobalId)
+                if (validFiles.isEmpty()) {
                     _audioState.update {
                         it.copy(
-                            isDownloading = false,
-                            error = "Skipped Ayah ${item.ayahNumber} (download failed)"
+                            isPreparing = false,
+                            isActive = false,
+                            error = "Failed to download audio files"
                         )
                     }
-                    // Continue to next ayah
-                    playNextInPlaylist()
                     return@launch
                 }
-            }
 
-            // Preload next ayah while current one plays
-            preloadNextAyah()
+                // Build media items for all ayahs
+                val mediaItems = validFiles.map { (_, file) ->
+                    MediaItem.fromUri(file.toURI().toString())
+                }
 
-            if (audioFile.exists()) {
-                playFile(audioFile)
-            } else {
-                // Mark as failed and skip to next ayah
-                failedAyahs.add(item.ayahGlobalId)
+                // Find the adjusted start index after filtering
+                val adjustedStartIndex = validFiles.indexOfFirst { it.first >= startIndex }
+                    .takeIf { it >= 0 } ?: 0
+
+                // Setup player with all media items for gapless playback
+                withContext(Dispatchers.Main) {
+                    val exoPlayer = getOrCreatePlayer()
+                    exoPlayer.stop()
+                    exoPlayer.clearMediaItems()
+                    exoPlayer.addMediaItems(mediaItems)
+                    exoPlayer.seekTo(adjustedStartIndex, 0L)
+                    exoPlayer.prepare()
+                    exoPlayer.play()
+
+                    _audioState.update {
+                        it.copy(isPreparing = false)
+                    }
+                }
+            } catch (e: Exception) {
                 _audioState.update {
                     it.copy(
+                        isPreparing = false,
                         isDownloading = false,
-                        error = "Skipped Ayah ${item.ayahNumber} (file unavailable)"
-                    )
-                }
-                playNextInPlaylist()
-            }
-        }
-    }
-
-    private fun preloadNextAyah() {
-        val nextIndex = currentPlaylistIndex + 1
-        if (nextIndex < ayahPlaylist.size) {
-            scope.launch {
-                val item = ayahPlaylist[nextIndex]
-                val audioFile = getCachedFile("ayah_${item.ayahGlobalId}.mp3")
-                if (!audioFile.exists()) {
-                    downloadFileWithRetry(
-                        url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${item.ayahGlobalId}.mp3",
-                        destination = audioFile
+                        error = "Error preparing audio: ${e.message}"
                     )
                 }
             }
@@ -349,15 +373,39 @@ class QuranAudioManager @Inject constructor(
         // Single ayah play -- creates a 1-item playlist
         val item = AyahAudioItem(ayahGlobalNumber, surahNumber, ayahNumber)
         ayahPlaylist = listOf(item)
-        currentPlaylistIndex = -1
+        currentPlaylistIndex = 0
         _audioState.update {
             it.copy(
                 isActive = true,
                 currentTitle = "Ayah $ayahNumber",
-                currentSubtitle = "Surah $surahNumber"
+                currentSubtitle = "Surah $surahNumber",
+                totalAyahs = 1,
+                currentAyahIndex = 0
             )
         }
-        playNextInPlaylist()
+
+        scope.launch {
+            val audioFile = getCachedFile("ayah_${ayahGlobalNumber}.mp3")
+            if (!audioFile.exists()) {
+                _audioState.update { it.copy(isDownloading = true) }
+                val url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayahGlobalNumber}.mp3"
+                downloadFileSilent(url, audioFile)
+                _audioState.update { it.copy(isDownloading = false) }
+            }
+
+            if (audioFile.exists() && audioFile.length() > 0) {
+                withContext(Dispatchers.Main) {
+                    playFile(audioFile)
+                }
+            } else {
+                _audioState.update {
+                    it.copy(
+                        isActive = false,
+                        error = "Failed to download audio"
+                    )
+                }
+            }
+        }
     }
 
     /**
@@ -370,11 +418,32 @@ class QuranAudioManager @Inject constructor(
         }
     }
 
+    /**
+     * Skip to next ayah in the playlist.
+     */
+    fun skipToNext() {
+        val p = player ?: return
+        if (p.hasNextMediaItem()) {
+            p.seekToNextMediaItem()
+        }
+    }
+
+    /**
+     * Skip to previous ayah in the playlist.
+     */
+    fun skipToPrevious() {
+        val p = player ?: return
+        if (p.hasPreviousMediaItem()) {
+            p.seekToPreviousMediaItem()
+        } else {
+            // If at the beginning, restart current ayah
+            p.seekTo(0)
+        }
+    }
+
     @OptIn(UnstableApi::class)
     private fun playFile(file: File) {
         val exoPlayer = getOrCreatePlayer()
-        // Bump generation so any pending STATE_ENDED from the old track is ignored
-        playbackGeneration++
         exoPlayer.stop()
         exoPlayer.clearMediaItems()
         val mediaItem = MediaItem.fromUri(file.toURI().toString())
@@ -393,13 +462,14 @@ class QuranAudioManager @Inject constructor(
     }
 
     fun stop() {
-        playbackGeneration++ // Invalidate any pending callbacks
+        downloadJob?.cancel()
+        downloadJob = null
         player?.stop()
         player?.clearMediaItems()
         positionTrackingJob?.cancel()
         ayahPlaylist = emptyList()
         currentPlaylistIndex = -1
-        failedAyahs.clear()
+        downloadingFiles.clear()
         _audioState.update { AudioState() }
     }
 
@@ -413,54 +483,51 @@ class QuranAudioManager @Inject constructor(
         return File(dir, filename)
     }
 
-    private suspend fun downloadFile(url: String, destination: File) {
-        withContext(Dispatchers.IO) {
-            try {
-                val connection = URL(url).openConnection()
-                connection.connectTimeout = 15000
-                connection.readTimeout = 30000
-                val totalSize = connection.contentLength.toLong()
-                var downloaded = 0L
+    /**
+     * Download file without updating state (for batch downloads).
+     */
+    private suspend fun downloadFileSilent(url: String, destination: File) {
+        // Check if already downloading this file
+        val key = destination.absolutePath
+        if (downloadingFiles.putIfAbsent(key, true) != null) {
+            // Already downloading, wait for it
+            while (downloadingFiles.containsKey(key)) {
+                delay(100)
+            }
+            return
+        }
 
-                connection.getInputStream().use { input ->
-                    destination.outputStream().use { output ->
-                        val buffer = ByteArray(8192)
-                        var bytesRead: Int
-                        while (input.read(buffer).also { bytesRead = it } != -1) {
-                            output.write(buffer, 0, bytesRead)
-                            downloaded += bytesRead
-                            if (totalSize > 0) {
-                                _audioState.update {
-                                    it.copy(downloadProgress = downloaded.toFloat() / totalSize)
-                                }
+        try {
+            withContext(Dispatchers.IO) {
+                try {
+                    val connection = URL(url).openConnection()
+                    connection.connectTimeout = 15000
+                    connection.readTimeout = 30000
+
+                    connection.getInputStream().use { input ->
+                        destination.outputStream().use { output ->
+                            val buffer = ByteArray(8192)
+                            var bytesRead: Int
+                            while (input.read(buffer).also { bytesRead = it } != -1) {
+                                output.write(buffer, 0, bytesRead)
                             }
                         }
                     }
+                } catch (e: Exception) {
+                    destination.delete()
                 }
-            } catch (e: Exception) {
-                destination.delete()
-                _audioState.update { it.copy(isDownloading = false) }
             }
+        } finally {
+            downloadingFiles.remove(key)
         }
-    }
-
-    private suspend fun downloadFileWithRetry(url: String, destination: File, maxRetries: Int = 1): Boolean {
-        repeat(maxRetries + 1) { attempt ->
-            downloadFile(url, destination)
-            if (destination.exists() && destination.length() > 0) {
-                return true
-            }
-            if (attempt < maxRetries) {
-                delay(1000) // Wait 1s before retry
-            }
-        }
-        return false
     }
 
     fun release() {
+        downloadJob?.cancel()
         positionTrackingJob?.cancel()
         player?.release()
         player = null
+        downloadingFiles.clear()
         _audioState.update { AudioState() }
     }
 }
