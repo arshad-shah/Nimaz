@@ -19,4 +19,7 @@ interface ZakatDao {
 
     @Query("SELECT SUM(zakatDue) FROM zakat_history WHERE isPaid = 1")
     suspend fun getTotalPaid(): Double?
+
+    @Query("DELETE FROM zakat_history WHERE id = :id")
+    suspend fun deleteCalculation(id: Long)
 }

@@ -23,6 +23,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,6 +32,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -39,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Download state for reciter audio.
@@ -320,6 +323,45 @@ fun TranslatorItem(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ReciterItemPreview() {
+    NimazTheme {
+        Surface {
+            Column(modifier = Modifier.padding(16.dp)) {
+                ReciterItem(
+                    reciterName = "Mishary Rashid Alafasy",
+                    reciterNameArabic = "مشاري راشد العفاسي",
+                    style = "Murattal",
+                    bitrate = "128kbps",
+                    isSelected = false,
+                    onClick = {}
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                ReciterItem(
+                    reciterName = "AbdulBaset AbdulSamad",
+                    reciterNameArabic = "عبد الباسط عبد الصمد",
+                    style = "Mujawwad",
+                    isSelected = true,
+                    downloadState = ReciterDownloadState.DOWNLOADED,
+                    onClick = {},
+                    onPreviewClick = {},
+                    onDownloadClick = {}
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                ReciterItem(
+                    reciterName = "Abdur-Rahman as-Sudais",
+                    reciterNameArabic = "عبد الرحمن السديس",
+                    downloadState = ReciterDownloadState.DOWNLOADING,
+                    downloadProgress = 0.6f,
+                    onClick = {},
+                    onDownloadClick = {}
+                )
+            }
         }
     }
 }

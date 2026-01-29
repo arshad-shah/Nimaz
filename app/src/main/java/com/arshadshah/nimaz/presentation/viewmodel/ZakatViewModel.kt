@@ -73,6 +73,7 @@ sealed interface ZakatEvent {
     data object ToggleBreakdown : ZakatEvent
     data object SaveCalculation : ZakatEvent
     data class MarkAsPaid(val entryId: Long) : ZakatEvent
+    data class DeleteCalculation(val entryId: Long) : ZakatEvent
     data object LoadHistory : ZakatEvent
 }
 
@@ -124,6 +125,7 @@ class ZakatViewModel @Inject constructor(
             ZakatEvent.ToggleBreakdown -> _calculatorState.update { it.copy(showBreakdown = !it.showBreakdown) }
             ZakatEvent.SaveCalculation -> saveCalculation()
             is ZakatEvent.MarkAsPaid -> markAsPaid(event.entryId)
+            is ZakatEvent.DeleteCalculation -> deleteCalculation(event.entryId)
             ZakatEvent.LoadHistory -> loadHistory()
         }
     }
@@ -241,6 +243,12 @@ class ZakatViewModel @Inject constructor(
     private fun markAsPaid(entryId: Long) {
         viewModelScope.launch {
             zakatRepository.markAsPaid(entryId, System.currentTimeMillis())
+        }
+    }
+
+    private fun deleteCalculation(entryId: Long) {
+        viewModelScope.launch {
+            zakatRepository.deleteCalculation(entryId)
         }
     }
 

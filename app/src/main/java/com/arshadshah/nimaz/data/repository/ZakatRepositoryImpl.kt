@@ -27,4 +27,8 @@ class ZakatRepositoryImpl @Inject constructor(
     override suspend fun getTotalPaid(): Double {
         return zakatDao.getTotalPaid() ?: 0.0
     }
+
+    override suspend fun deleteCalculation(id: Long) {
+        zakatDao.deleteCalculation(id)
+    }
 }

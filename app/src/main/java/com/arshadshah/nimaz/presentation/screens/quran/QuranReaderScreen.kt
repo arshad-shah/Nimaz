@@ -91,6 +91,7 @@ import java.util.Locale
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDirection
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 
 // Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
 private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
@@ -331,8 +332,13 @@ fun QuranReaderScreen(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else if (state.readingMode == ReadingMode.PAGE && pagerState != null) {
-                // Page mode with HorizontalPager
+                // Page mode with HorizontalPager using MushafPage
                 val homeState by viewModel.homeState.collectAsState()
+
+                // Build surah map for MushafPage
+                val surahMap = remember(homeState.surahs) {
+                    homeState.surahs.associateBy { it.number }
+                }
 
                 CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
                     HorizontalPager(
@@ -351,91 +357,61 @@ fun QuranReaderScreen(
                         }
 
                         CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                            LazyColumn(
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(bottom = 16.dp)
-                            ) {
-                                // Page header with juz/hizb info
-                                item(key = "header_$page") {
-                                    val firstAyah = pageAyahs.firstOrNull()
-                                    PageHeaderBar(
-                                        pageNumber = pageNum,
-                                        juzNumber = firstAyah?.juzNumber ?: 0,
-                                        hizbNumber = firstAyah?.hizbNumber ?: 0,
-                                        ayahCount = pageAyahs.size
-                                    )
-                                }
+                            val highlightedAyahId = if (audioState.isActive) audioState.currentAyahId else null
 
-                                // Page navigation controls (below header)
-                                item(key = "nav_$page") {
-                                    PageNavigationBar(
-                                        pagerState = pagerState,
-                                        totalPages = totalPages,
-                                        coroutineScope = coroutineScope
-                                    )
-                                }
-
-                                // Render ayahs with surah separators
-                                var lastSurahNumber = -1
-                                pageAyahs.forEach { ayah ->
-                                    val showSurahSeparator = ayah.surahNumber != lastSurahNumber
-                                    lastSurahNumber = ayah.surahNumber
-
-                                    if (showSurahSeparator) {
-                                        item(key = "surah_sep_${page}_${ayah.surahNumber}") {
-                                            val surahName = homeState.surahs
-                                                .find { it.number == ayah.surahNumber }
-                                            PageSurahSeparator(
-                                                surahNumber = ayah.surahNumber,
-                                                surahNameArabic = surahName?.nameArabic ?: "",
-                                                surahNameEnglish = surahName?.nameEnglish ?: "Surah ${ayah.surahNumber}",
-                                                showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
-                                            )
+                            MushafPage(
+                                pageNumber = pageNum,
+                                ayahs = pageAyahs,
+                                surahMap = surahMap,
+                                arabicFontSize = state.arabicFontSize,
+                                totalPages = totalPages,
+                                highlightedAyahId = highlightedAyahId,
+                                favoriteAyahIds = favoriteAyahIds,
+                                onNavigatePrevious = {
+                                    coroutineScope.launch {
+                                        if (pagerState.currentPage < totalPages - 1) {
+                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
                                         }
                                     }
-
-                                    item(key = "page_${page}_${ayah.id}") {
-                                        val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
-
-                                        AyahItem(
-                                            ayah = ayah,
-                                            showTranslation = state.showTranslation,
-                                            showTransliteration = state.showTransliteration,
-                                            arabicFontSize = state.arabicFontSize,
-                                            fontSize = state.fontSize,
-                                            isHighlighted = isHighlighted,
-                                            isFavorite = ayah.id in favoriteAyahIds,
-                                            onBookmarkClick = {
-                                                viewModel.onEvent(
-                                                    QuranEvent.ToggleBookmark(
-                                                        ayahId = ayah.id,
-                                                        surahNumber = ayah.surahNumber,
-                                                        ayahNumber = ayah.numberInSurah
-                                                    )
-                                                )
-                                            },
-                                            onFavoriteClick = {
-                                                viewModel.onEvent(
-                                                    QuranEvent.ToggleFavorite(
-                                                        ayahId = ayah.id,
-                                                        surahNumber = ayah.surahNumber,
-                                                        ayahNumber = ayah.numberInSurah
-                                                    )
-                                                )
-                                            },
-                                            onPlayAyahClick = {
-                                                viewModel.onEvent(
-                                                    QuranEvent.PlayAyahAudio(
-                                                        ayahGlobalId = ayah.id,
-                                                        surahNumber = ayah.surahNumber,
-                                                        ayahNumber = ayah.numberInSurah
-                                                    )
-                                                )
-                                            }
-                                        )
+                                },
+                                onNavigateNext = {
+                                    coroutineScope.launch {
+                                        if (pagerState.currentPage > 0) {
+                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                        }
                                     }
-                                }
-                            }
+                                },
+                                onBookmarkClick = { ayah ->
+                                    viewModel.onEvent(
+                                        QuranEvent.ToggleBookmark(
+                                            ayahId = ayah.id,
+                                            surahNumber = ayah.surahNumber,
+                                            ayahNumber = ayah.numberInSurah
+                                        )
+                                    )
+                                },
+                                onFavoriteClick = { ayah ->
+                                    viewModel.onEvent(
+                                        QuranEvent.ToggleFavorite(
+                                            ayahId = ayah.id,
+                                            surahNumber = ayah.surahNumber,
+                                            ayahNumber = ayah.numberInSurah
+                                        )
+                                    )
+                                },
+                                onPlayClick = { ayah ->
+                                    viewModel.onEvent(
+                                        QuranEvent.PlayAyahAudio(
+                                            ayahGlobalId = ayah.id,
+                                            surahNumber = ayah.surahNumber,
+                                            ayahNumber = ayah.numberInSurah
+                                        )
+                                    )
+                                },
+                                onShareClick = { /* Share is handled in bottom sheet */ },
+                                onCopyClick = { /* Copy is handled in bottom sheet */ },
+                                modifier = Modifier.fillMaxSize()
+                            )
                         }
                     }
                 }

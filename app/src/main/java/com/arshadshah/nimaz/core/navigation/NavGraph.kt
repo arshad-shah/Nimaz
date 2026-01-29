@@ -68,6 +68,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
+import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 
 @Composable
@@ -565,9 +566,9 @@ fun NavGraph() {
             }
 
             composable<Route.ZakatHistory> {
-                ZakatCalculatorScreen(
+                ZakatHistoryScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToHistory = { }
+                    onNavigateToCalculator = { navController.navigate(Route.ZakatCalculator) }
                 )
             }
 

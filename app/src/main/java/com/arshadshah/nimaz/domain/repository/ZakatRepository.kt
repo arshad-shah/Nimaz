@@ -8,4 +8,5 @@ interface ZakatRepository {
     suspend fun insertCalculation(entry: ZakatHistoryEntity): Long
     suspend fun markAsPaid(id: Long, paidAt: Long)
     suspend fun getTotalPaid(): Double
+    suspend fun deleteCalculation(id: Long)
 }

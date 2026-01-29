@@ -64,6 +64,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
@@ -453,6 +455,11 @@ private fun SelectedDayDetail(
         it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA
     }
 
+    val now = LocalDateTime.now()
+    val today = LocalDate.now()
+    val isToday = selectedDate == today
+    val isPastDate = selectedDate.isBefore(today)
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -488,7 +495,9 @@ private fun SelectedDayDetail(
                     val status = record?.status ?: PrayerStatus.NOT_PRAYED
                     val isCompleted =
                         status == PrayerStatus.PRAYED || status == PrayerStatus.LATE || status == PrayerStatus.QADA
-                    val prayerTime = prayerTimes?.let { times ->
+
+                    // Get prayer time as LocalDateTime for comparison
+                    val prayerDateTime = prayerTimes?.let { times ->
                         when (prayerName) {
                             PrayerName.FAJR -> times.fajr
                             PrayerName.DHUHR -> times.dhuhr
@@ -497,20 +506,37 @@ private fun SelectedDayDetail(
                             PrayerName.ISHA -> times.isha
                             else -> null
                         }
-                    }?.format(DateTimeFormatter.ofPattern("h:mm a"))
+                    }
+
+                    val prayerTimeFormatted = prayerDateTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
+
+                    // Determine if prayer should show as missed based on time
+                    val isPrayerTimePassed = when {
+                        isPastDate -> true // All prayers on past dates have passed
+                        isToday && prayerDateTime != null -> now.isAfter(prayerDateTime)
+                        else -> false
+                    }
+
+                    // Determine the display status
+                    val displayStatus = when {
+                        status == PrayerStatus.PRAYED -> "On time"
+                        status == PrayerStatus.LATE -> "Late"
+                        status == PrayerStatus.MISSED -> "Missed"
+                        status == PrayerStatus.QADA -> "Made up"
+                        isPrayerTimePassed && status == PrayerStatus.NOT_PRAYED -> "Missed"
+                        else -> "Upcoming"
+                    }
+
+                    // For visual styling, treat auto-detected missed as missed
+                    val isMissed = displayStatus == "Missed"
 
                     PrayerCheckItem(
                         name = prayerName.name.lowercase()
                             .replaceFirstChar { it.uppercase() },
-                        time = prayerTime,
+                        time = prayerTimeFormatted,
                         isCompleted = isCompleted,
-                        statusText = when (status) {
-                            PrayerStatus.PRAYED -> "On time"
-                            PrayerStatus.LATE -> "Late"
-                            PrayerStatus.MISSED -> "Missed"
-                            PrayerStatus.QADA -> "Made up"
-                            else -> "Upcoming"
-                        },
+                        isMissed = isMissed,
+                        statusText = displayStatus,
                         onClick = { onTogglePrayer(prayerName, status) }
                     )
                 }
@@ -525,6 +551,7 @@ private fun PrayerCheckItem(
     name: String,
     time: String?,
     isCompleted: Boolean,
+    isMissed: Boolean = false,
     statusText: String,
     onClick: () -> Unit
 ) {
@@ -545,10 +572,10 @@ private fun PrayerCheckItem(
                     .size(24.dp)
                     .clip(CircleShape)
                     .then(
-                        if (isCompleted) {
-                            Modifier.background(NimazColors.StatusColors.Prayed)
-                        } else {
-                            Modifier.border(
+                        when {
+                            isCompleted -> Modifier.background(NimazColors.StatusColors.Prayed)
+                            isMissed -> Modifier.background(NimazColors.StatusColors.Missed)
+                            else -> Modifier.border(
                                 2.dp,
                                 MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                                 CircleShape
@@ -588,19 +615,19 @@ private fun PrayerCheckItem(
             // Status badge
             Surface(
                 shape = RoundedCornerShape(20.dp),
-                color = if (isCompleted) {
-                    NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
-                } else {
-                    MaterialTheme.colorScheme.surfaceContainerHigh
+                color = when {
+                    isCompleted -> NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
+                    isMissed -> NimazColors.StatusColors.Missed.copy(alpha = 0.2f)
+                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
                 }
             ) {
                 Text(
                     text = statusText,
                     style = MaterialTheme.typography.labelSmall,
-                    color = if (isCompleted) {
-                        NimazColors.StatusColors.Prayed
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                    color = when {
+                        isCompleted -> NimazColors.StatusColors.Prayed
+                        isMissed -> NimazColors.StatusColors.Missed
+                        else -> MaterialTheme.colorScheme.onSurfaceVariant
                     },
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
