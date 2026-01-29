@@ -451,7 +451,7 @@ class QuranAudioManager @Inject constructor(
                 return true
             }
             if (attempt < maxRetries) {
-                kotlinx.coroutines.delay(1000) // Wait 1s before retry
+                delay(1000) // Wait 1s before retry
             }
         }
         return false

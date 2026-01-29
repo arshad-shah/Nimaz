@@ -62,7 +62,8 @@ data class QuranReaderUiState(
     val arabicFontSize: Float = 28f,
     val keepScreenOn: Boolean = true,
     val continuousReading: Boolean = true,
-    val favoriteAyahIds: Set<Int> = emptySet()
+    val favoriteAyahIds: Set<Int> = emptySet(),
+    val pageCache: Map<Int, List<Ayah>> = emptyMap()
 )
 
 data class QuranSearchUiState(
@@ -389,13 +390,28 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun loadPage(pageNumber: Int) {
+        // Check cache first - no loading needed if already cached
+        val cached = _readerState.value.pageCache[pageNumber]
+        if (cached != null) {
+            _readerState.update {
+                it.copy(
+                    ayahs = cached,
+                    readingMode = ReadingMode.PAGE,
+                    title = "Page $pageNumber",
+                    subtitle = "${cached.size} Ayahs",
+                    isLoading = false
+                )
+            }
+            return
+        }
+
+        // Load from database - DON'T clear ayahs to prevent flicker
         _readerState.update {
             it.copy(
-                isLoading = true,
                 error = null,
                 readingMode = ReadingMode.PAGE,
                 surahWithAyahs = null,
-                ayahs = emptyList(),
+                // Keep existing ayahs to prevent flicker during page transition
                 title = "Page $pageNumber",
                 subtitle = ""
             )
@@ -406,6 +422,7 @@ class QuranViewModel @Inject constructor(
                     _readerState.update {
                         it.copy(
                             ayahs = ayahs,
+                            pageCache = it.pageCache + (pageNumber to ayahs),
                             subtitle = "${ayahs.size} Ayahs",
                             isLoading = false
                         )

@@ -91,7 +91,7 @@ fun SelectReciterScreen(
     val quranState by viewModel.quranState.collectAsState()
     val selectedReciterId = quranState.selectedReciterId ?: "mishary"
     var searchQuery by remember { mutableStateOf("") }
-    val context = LocalContext.current
+    LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Track audio state for preview feedback

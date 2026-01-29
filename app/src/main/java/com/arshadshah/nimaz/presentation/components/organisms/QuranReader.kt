@@ -58,6 +58,25 @@ import com.arshadshah.nimaz.presentation.components.atoms.BismillahText
 import com.arshadshah.nimaz.presentation.components.molecules.AyahCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
+// Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
+private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+
+/**
+ * Strip bismillah from first ayah's Arabic text for all surahs EXCEPT:
+ * - Surah 1 (Al-Fatiha) - bismillah IS ayah 1
+ * - Surah 9 (At-Tawbah) - has no bismillah
+ */
+private fun Ayah.getDisplayArabicText(): String {
+    return if (ayahNumber == 1 && surahNumber != 1 && surahNumber != 9) {
+        textArabic
+            .removePrefix("$BISMILLAH_TEXT ")
+            .removePrefix(BISMILLAH_TEXT)
+            .trim()
+    } else {
+        textArabic
+    }
+}
+
 /**
  * Complete Quran reader with scrollable ayahs and controls.
  */
@@ -115,7 +134,7 @@ fun QuranReader(
                     key = { it.id }
                 ) { ayah ->
                     AyahCard(
-                        arabicText = ayah.textArabic,
+                        arabicText = ayah.getDisplayArabicText(),
                         translation = ayah.translation ?: "",
                         surahNumber = ayah.surahNumber,
                         ayahNumber = ayah.ayahNumber,
@@ -419,7 +438,7 @@ fun QuranContinuousReader(
                 key = { "ayah_${it.surahNumber}_${it.ayahNumber}" }
             ) { ayah ->
                 AyahCard(
-                    arabicText = ayah.textArabic,
+                    arabicText = ayah.getDisplayArabicText(),
                     translation = ayah.translation ?: "",
                     surahNumber = ayah.surahNumber,
                     ayahNumber = ayah.ayahNumber,

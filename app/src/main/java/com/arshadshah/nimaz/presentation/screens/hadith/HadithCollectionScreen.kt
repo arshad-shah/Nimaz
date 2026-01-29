@@ -459,7 +459,7 @@ private fun BookCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bookColor = getBookColor(book.id)
+    getBookColor(book.id)
     val bookGradient = getBookGradient(book.id)
 
     Card(

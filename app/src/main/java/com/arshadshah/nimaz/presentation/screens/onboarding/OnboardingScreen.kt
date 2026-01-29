@@ -91,7 +91,7 @@ fun OnboardingScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Permission launchers

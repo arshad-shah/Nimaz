@@ -83,10 +83,10 @@ class AdhanPlaybackService : Service(), MediaPlayer.OnCompletionListener, MediaP
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-        audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+        audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         // Acquire wake lock to keep CPU running during playback
-        val powerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        val powerManager = getSystemService(POWER_SERVICE) as PowerManager
         wakeLock = powerManager.newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "nimaz:adhan_playback"

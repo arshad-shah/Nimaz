@@ -205,7 +205,7 @@ fun DottedDivider(
     // Simplified implementation using a thin dashed line
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = androidx.compose.foundation.layout.Arrangement.SpaceEvenly
+        horizontalArrangement = Arrangement.SpaceEvenly
     ) {
         repeat(30) {
             Box(

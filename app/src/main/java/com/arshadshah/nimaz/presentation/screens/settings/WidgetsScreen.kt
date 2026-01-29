@@ -80,7 +80,6 @@ fun WidgetsScreen(
     onNavigateBack: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
-    val widgetState by viewModel.widgetState.collectAsState()
     val context = LocalContext.current
 
     // State for dynamic widget preview data

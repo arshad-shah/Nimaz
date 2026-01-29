@@ -92,7 +92,6 @@ fun FastTrackerScreen(
     viewModel: FastingViewModel = hiltViewModel()
 ) {
     val state by viewModel.trackerState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
     val makeupState by viewModel.makeupState.collectAsState()
     val ramadanState by viewModel.ramadanState.collectAsState()
     val calendarState by viewModel.calendarState.collectAsState()
@@ -996,9 +995,7 @@ private fun RecommendedFastsSection(
 
 private fun calculateAyyamAlBeedStatus(today: LocalDate): String {
     val hijriDate = HijriDateCalculator.toHijri(today)
-    val hijriDay = hijriDate.day
-
-    return when (hijriDay) {
+    return when (val hijriDay = hijriDate.day) {
         13, 14, 15 -> "Today" // Currently Ayyam al-Beed
         in 1..12 -> {
             // Calculate days until 13th

@@ -141,7 +141,7 @@ fun SurahInfoScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                androidx.compose.material3.CircularProgressIndicator()
+                CircularProgressIndicator()
             }
         }
     }

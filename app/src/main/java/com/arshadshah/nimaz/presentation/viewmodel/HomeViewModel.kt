@@ -114,7 +114,7 @@ class HomeViewModel @Inject constructor(
                 if (totalHadiths == 0) return@launch
 
                 // Use day of year + year to create a unique offset that doesn't repeat within a year
-                val today = java.time.LocalDate.now()
+                val today = LocalDate.now()
                 val dayOfYear = today.dayOfYear
                 val year = today.year
 
@@ -300,7 +300,7 @@ class HomeViewModel @Inject constructor(
                 } else {
                     // All prayers passed — wrap to tomorrow's Fajr
                     nextPrayer = PrayerType.FAJR
-                    val tomorrowDate = java.time.LocalDate.now().plusDays(1)
+                    val tomorrowDate = LocalDate.now().plusDays(1)
                     val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(latitude, longitude, tomorrowDate)
                     val tomorrowFajr = tomorrowPrayers.find { it.type == PrayerType.FAJR }?.time
                     timeUntilNext = if (tomorrowFajr != null) {

@@ -523,7 +523,7 @@ fun NavGraph() {
             }
 
             composable<Route.TasbihCounter> { backStackEntry ->
-                val args = backStackEntry.toRoute<Route.TasbihCounter>()
+                backStackEntry.toRoute<Route.TasbihCounter>()
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
@@ -586,7 +586,7 @@ fun NavGraph() {
             }
 
             composable<Route.IslamicMonth> { backStackEntry ->
-                val args = backStackEntry.toRoute<Route.IslamicMonth>()
+                backStackEntry.toRoute<Route.IslamicMonth>()
                 IslamicCalendarScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )

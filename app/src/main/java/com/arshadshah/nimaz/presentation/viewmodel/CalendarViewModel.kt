@@ -269,7 +269,7 @@ class CalendarViewModel @Inject constructor(
         }
 
         val firstHijri = days.firstOrNull()?.hijriDate
-        val lastHijri = days.lastOrNull()?.hijriDate
+        days.lastOrNull()?.hijriDate
 
         return CalendarMonth(
             hijriMonth = firstHijri?.month ?: 1,
@@ -350,7 +350,7 @@ class CalendarViewModel @Inject constructor(
         }.sortedBy { getApproximateGregorianDate(it, currentHijriYear) }
     }
 
-    private fun getApproximateGregorianDate(event: IslamicEvent, hijriYear: Int): LocalDate? {
+    private fun getApproximateGregorianDate(event: IslamicEvent, hijriYear: Int): LocalDate {
         return HijriDateCalculator.toGregorian(
             event.hijriDay,
             event.hijriMonth,

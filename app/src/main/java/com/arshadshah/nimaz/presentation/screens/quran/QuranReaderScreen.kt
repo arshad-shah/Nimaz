@@ -3,12 +3,10 @@ package com.arshadshah.nimaz.presentation.screens.quran
 import android.content.Intent
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -26,41 +23,45 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.NavigateBefore
 import androidx.compose.material.icons.automirrored.filled.NavigateNext
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.runtime.rememberCoroutineScope
-import kotlinx.coroutines.launch
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,9 +69,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -79,12 +80,50 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import java.text.NumberFormat
+import java.util.Locale
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDirection
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 
+// Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
+private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
+
+/**
+ * Strip bismillah from first ayah's Arabic text for all surahs EXCEPT:
+ * - Surah 1 (Al-Fatiha) - bismillah IS ayah 1
+ * - Surah 9 (At-Tawbah) - has no bismillah
+ */
+private fun Ayah.getDisplayArabicText(): String {
+    return if (numberInSurah == 1 && surahNumber != 1 && surahNumber != 9) {
+        textArabic
+            .removePrefix("$BISMILLAH_TEXT ")
+            .removePrefix(BISMILLAH_TEXT)
+            .trim()
+    } else {
+        textArabic
+    }
+}
+
+/**
+ * Process ayah text to append Arabic numeral with ornamental brackets at the end
+ */
+private fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
+    val unicodeAyaEndStart = "\uFD3F" // ﴿
+    val unicodeAyaEndEnd = "\uFD3E"   // ﴾
+    val arabicLocale = Locale.forLanguageTag("ar")
+    val nf: NumberFormat = NumberFormat.getInstance(arabicLocale)
+    val arabicNumber = nf.format(ayahNumber).replace("٬", "") // Remove Arabic comma separator
+    return "$arabicText $unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun QuranReaderScreen(
     surahNumber: Int? = null,
@@ -98,6 +137,7 @@ fun QuranReaderScreen(
     val state by viewModel.readerState.collectAsState()
     val audioState by viewModel.audioState.collectAsState()
     val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     // Keep screen on based on settings
     DisposableEffect(state.keepScreenOn) {
@@ -125,14 +165,12 @@ fun QuranReaderScreen(
     }
 
     LaunchedEffect(currentAyahIndex, state.readingMode) {
-        // Get ayahs for the current reading mode
         val ayahs = when (state.readingMode) {
             ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: return@LaunchedEffect
             ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
         }
         if (ayahs.isEmpty()) return@LaunchedEffect
 
-        // Offset for banner item (index 0 is the banner)
         val ayahIdx = (currentAyahIndex - 1).coerceIn(0, ayahs.size - 1)
         val ayah = ayahs[ayahIdx]
 
@@ -155,7 +193,6 @@ fun QuranReaderScreen(
             }
             val idx = displayAyahs.indexOfFirst { it.id == audioState.currentAyahId }
             if (idx >= 0) {
-                // +2 for banner + settings bar items
                 listState.animateScrollToItem(idx + 2)
             }
         }
@@ -173,326 +210,86 @@ fun QuranReaderScreen(
         ReadingMode.JUZ -> state.title
         ReadingMode.PAGE -> "Al Quran"
     }
-    val headerMeta = when (state.readingMode) {
-        ReadingMode.PAGE -> "" // Page view has its own nav bar with page info
+    val headerSubtitle = when (state.readingMode) {
+        ReadingMode.PAGE -> ""
         else -> state.subtitle
     }
-    // Page view always knows its title from the route param, so never show loading for it
     val headerLoading = state.isLoading && state.readingMode != ReadingMode.PAGE
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                // Header
-                ReaderHeader(
-                    title = headerTitle,
-                    subtitle = headerMeta,
-                    isLoading = headerLoading,
-                    onBackClick = onNavigateBack,
-                    onSettingsClick = onNavigateToQuranSettings
-                )
+    // Page mode pager state
+    val totalPages = 604
+    val pagerState = if (state.readingMode == ReadingMode.PAGE && pageNumber != null) {
+        rememberPagerState(
+            initialPage = (pageNumber - 1).coerceIn(0, totalPages - 1),
+            pageCount = { totalPages }
+        )
+    } else null
 
-                // Content
-                if (state.isLoading) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                } else if (state.readingMode == ReadingMode.PAGE && pageNumber != null) {
-                    // Page mode: HorizontalPager for swipe navigation between pages
-                    val totalPages = 604 // Total pages in the Quran
-                    val pagerState = rememberPagerState(
-                        initialPage = (pageNumber - 1).coerceIn(0, totalPages - 1),
-                        pageCount = { totalPages }
-                    )
-
-                    // Load page when pager settles on a new page
-                    LaunchedEffect(pagerState.settledPage) {
-                        val newPageNumber = pagerState.settledPage + 1
-                        if (newPageNumber != pageNumber) {
-                            viewModel.onEvent(QuranEvent.LoadPage(newPageNumber))
-                        }
-                    }
-
-                    val coroutineScope = rememberCoroutineScope()
-
-                    // Page number indicator with navigation buttons (LTR for the nav bar)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    // In RTL pager, "previous page" visually means higher index
-                                    if (pagerState.currentPage < totalPages - 1) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                    }
-                                }
-                            },
-                            enabled = pagerState.currentPage < totalPages - 1,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.NavigateBefore,
-                                contentDescription = "Previous Page",
-                                tint = if (pagerState.currentPage < totalPages - 1)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-
-                        Text(
-                            text = "Page ${pagerState.settledPage + 1} of $totalPages",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-
-                        IconButton(
-                            onClick = {
-                                coroutineScope.launch {
-                                    // In RTL pager, "next page" visually means lower index
-                                    if (pagerState.currentPage > 0) {
-                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                    }
-                                }
-                            },
-                            enabled = pagerState.currentPage > 0,
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Filled.NavigateNext,
-                                contentDescription = "Next Page",
-                                tint = if (pagerState.currentPage > 0)
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                else
-                                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-
-                    // Access surah list for names in page view
-                    val homeState by viewModel.homeState.collectAsState()
-
-                    // RTL pager: swipe left = next page (higher number), matching mushaf direction
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f)
-                    ) { page ->
-                    // Restore LTR for page content so text/layout renders correctly
-                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 64.dp)
-                        ) {
-                            // Page header with juz/hizb info
-                            item(key = "header_$page") {
-                                val firstAyah = displayAyahs.firstOrNull()
-                                val juzNum = firstAyah?.juzNumber ?: 0
-                                val hizbNum = firstAyah?.hizbNumber ?: 0
-                                PageHeaderBar(
-                                    pageNumber = page + 1,
-                                    juzNumber = juzNum,
-                                    hizbNumber = hizbNum,
-                                    ayahCount = displayAyahs.size
-                                )
-                            }
-
-                            // Render ayahs with surah separators when surah changes
-                            var lastSurahNumber = -1
-                            displayAyahs.forEach { ayah ->
-                                val showSurahSeparator = ayah.surahNumber != lastSurahNumber
-                                lastSurahNumber = ayah.surahNumber
-
-                                if (showSurahSeparator) {
-                                    item(key = "surah_sep_${page}_${ayah.surahNumber}") {
-                                        val surahName = homeState.surahs
-                                            .find { it.number == ayah.surahNumber }
-                                        PageSurahSeparator(
-                                            surahNumber = ayah.surahNumber,
-                                            surahNameArabic = surahName?.nameArabic ?: "",
-                                            surahNameEnglish = surahName?.nameEnglish ?: "Surah ${ayah.surahNumber}",
-                                            showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
-                                        )
-                                    }
-                                }
-
-                                item(key = "page_${page}_${ayah.id}") {
-                                    val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
-
-                                    AyahItem(
-                                        ayah = ayah,
-                                        showTranslation = state.showTranslation,
-                                        showTransliteration = state.showTransliteration,
-                                        arabicFontSize = state.arabicFontSize,
-                                        fontSize = state.fontSize,
-                                        isHighlighted = isHighlighted,
-                                        isFavorite = ayah.id in favoriteAyahIds,
-                                        onBookmarkClick = {
-                                            viewModel.onEvent(
-                                                QuranEvent.ToggleBookmark(
-                                                    ayahId = ayah.id,
-                                                    surahNumber = ayah.surahNumber,
-                                                    ayahNumber = ayah.numberInSurah
-                                                )
-                                            )
-                                        },
-                                        onFavoriteClick = {
-                                            viewModel.onEvent(
-                                                QuranEvent.ToggleFavorite(
-                                                    ayahId = ayah.id,
-                                                    surahNumber = ayah.surahNumber,
-                                                    ayahNumber = ayah.numberInSurah
-                                                )
-                                            )
-                                        },
-                                        onPlayAyahClick = {
-                                            viewModel.onEvent(
-                                                QuranEvent.PlayAyahAudio(
-                                                    ayahGlobalId = ayah.id,
-                                                    surahNumber = ayah.surahNumber,
-                                                    ayahNumber = ayah.numberInSurah
-                                                )
-                                            )
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                    } // end LTR CompositionLocalProvider
-                    } // end HorizontalPager
-                    } // end RTL CompositionLocalProvider
-                } else {
-                    // Surah/Juz mode: standard LazyColumn
-                    // Precompute which ayah IDs start a new surah (for juz mode separators)
-                    val homeState by viewModel.homeState.collectAsState()
-                    val surahStartIds = remember(displayAyahs) {
-                        if (displayAyahs.isEmpty()) emptySet()
-                        else {
-                            val ids = mutableSetOf<Int>()
-                            var lastSurah = -1
-                            for (ayah in displayAyahs) {
-                                if (ayah.surahNumber != lastSurah) {
-                                    ids.add(ayah.id)
-                                    lastSurah = ayah.surahNumber
-                                }
-                            }
-                            ids
-                        }
-                    }
-
-                    LazyColumn(
-                        state = listState,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .weight(1f),
-                        contentPadding = PaddingValues(bottom = 64.dp)
-                    ) {
-                        // Surah Banner or Juz/Page Banner
-                        if (state.readingMode == ReadingMode.SURAH) {
-                            state.surahWithAyahs?.let { surahWithAyahs ->
-                                item(key = "banner") {
-                                    SurahBanner(
-                                        surahNameArabic = surahWithAyahs.surah.nameArabic,
-                                        surahNameEnglish = surahWithAyahs.surah.nameEnglish,
-                                        surahMeaning = surahWithAyahs.surah.nameTransliteration,
-                                        revelationType = surahWithAyahs.surah.revelationType,
-                                        ayahCount = surahWithAyahs.surah.numberOfAyahs,
-                                        showBismillah = (surahNumber ?: 0) != 9 && (surahNumber ?: 0) != 1
-                                    )
-                                }
-                            }
-                        } else {
-                            item(key = "banner") {
-                                JuzPageBanner(
-                                    title = state.title,
-                                    subtitle = state.subtitle
-                                )
-                            }
-                        }
-
-                        // Ayahs — with surah separators in Juz mode
-                        items(
-                            items = displayAyahs,
-                            key = { it.id }
-                        ) { ayah ->
-                            // Show surah separator for juz mode when surah changes
-                            if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
-                                val surah = homeState.surahs.find { it.number == ayah.surahNumber }
-                                PageSurahSeparator(
-                                    surahNumber = ayah.surahNumber,
-                                    surahNameArabic = surah?.nameArabic ?: "",
-                                    surahNameEnglish = surah?.nameEnglish ?: "Surah ${ayah.surahNumber}",
-                                    showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
-                                )
-                            }
-
-                            val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
-
-                            AyahItem(
-                                ayah = ayah,
-                                showTranslation = state.showTranslation,
-                                showTransliteration = state.showTransliteration,
-                                arabicFontSize = state.arabicFontSize,
-                                fontSize = state.fontSize,
-                                isHighlighted = isHighlighted,
-                                isFavorite = ayah.id in favoriteAyahIds,
-                                onBookmarkClick = {
-                                    viewModel.onEvent(
-                                        QuranEvent.ToggleBookmark(
-                                            ayahId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
-                                        )
-                                    )
-                                },
-                                onFavoriteClick = {
-                                    viewModel.onEvent(
-                                        QuranEvent.ToggleFavorite(
-                                            ayahId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
-                                        )
-                                    )
-                                },
-                                onPlayAyahClick = {
-                                    viewModel.onEvent(
-                                        QuranEvent.PlayAyahAudio(
-                                            ayahGlobalId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
-                                        )
-                                    )
-                                }
-                            )
-                        }
-                    }
-                }
+    // Load page when pager settles
+    pagerState?.let { ps ->
+        LaunchedEffect(ps.settledPage) {
+            val newPageNumber = ps.settledPage + 1
+            if (newPageNumber != pageNumber) {
+                viewModel.onEvent(QuranEvent.LoadPage(newPageNumber))
             }
+        }
+    }
 
-            // Compact bottom bar — unified play/audio controls (always visible)
-            CompactBottomBar(
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Column {
+                        if (headerLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(20.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        } else {
+                            Text(
+                                text = headerTitle,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            if (headerSubtitle.isNotEmpty()) {
+                                Text(
+                                    text = headerSubtitle,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                },
+                navigationIcon = {
+                    IconButton(onClick = onNavigateBack) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back"
+                        )
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToQuranSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = "Settings"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
+        },
+        bottomBar = {
+            AudioBottomBar(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
                 isDownloading = audioState.isDownloading,
@@ -502,7 +299,6 @@ fun QuranReaderScreen(
                     if (audioState.isPlaying) {
                         viewModel.onEvent(QuranEvent.PauseAudio)
                     } else if (audioState.isActive) {
-                        // Resume paused audio
                         viewModel.onEvent(QuranEvent.ResumeAudio)
                     } else if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
                         val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
@@ -517,96 +313,423 @@ fun QuranReaderScreen(
                         )
                     }
                 },
-                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) },
-                modifier = Modifier.align(Alignment.BottomCenter)
+                onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
             )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            if (state.isLoading && state.readingMode != ReadingMode.PAGE) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+            } else if (state.readingMode == ReadingMode.PAGE && pagerState != null) {
+                // Page mode with HorizontalPager
+                val homeState by viewModel.homeState.collectAsState()
+
+                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                    HorizontalPager(
+                        state = pagerState,
+                        modifier = Modifier.fillMaxSize()
+                    ) { page ->
+                        val pageNum = page + 1
+                        val pageAyahs = state.pageCache[pageNum] ?: displayAyahs.takeIf {
+                            pagerState.settledPage == page
+                        } ?: emptyList()
+
+                        LaunchedEffect(pageNum) {
+                            if (pageNum !in state.pageCache.keys) {
+                                viewModel.onEvent(QuranEvent.LoadPage(pageNum))
+                            }
+                        }
+
+                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                            LazyColumn(
+                                modifier = Modifier.fillMaxSize(),
+                                contentPadding = PaddingValues(bottom = 16.dp)
+                            ) {
+                                // Page header with juz/hizb info
+                                item(key = "header_$page") {
+                                    val firstAyah = pageAyahs.firstOrNull()
+                                    PageHeaderBar(
+                                        pageNumber = pageNum,
+                                        juzNumber = firstAyah?.juzNumber ?: 0,
+                                        hizbNumber = firstAyah?.hizbNumber ?: 0,
+                                        ayahCount = pageAyahs.size
+                                    )
+                                }
+
+                                // Page navigation controls (below header)
+                                item(key = "nav_$page") {
+                                    PageNavigationBar(
+                                        pagerState = pagerState,
+                                        totalPages = totalPages,
+                                        coroutineScope = coroutineScope
+                                    )
+                                }
+
+                                // Render ayahs with surah separators
+                                var lastSurahNumber = -1
+                                pageAyahs.forEach { ayah ->
+                                    val showSurahSeparator = ayah.surahNumber != lastSurahNumber
+                                    lastSurahNumber = ayah.surahNumber
+
+                                    if (showSurahSeparator) {
+                                        item(key = "surah_sep_${page}_${ayah.surahNumber}") {
+                                            val surahName = homeState.surahs
+                                                .find { it.number == ayah.surahNumber }
+                                            PageSurahSeparator(
+                                                surahNumber = ayah.surahNumber,
+                                                surahNameArabic = surahName?.nameArabic ?: "",
+                                                surahNameEnglish = surahName?.nameEnglish ?: "Surah ${ayah.surahNumber}",
+                                                showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
+                                            )
+                                        }
+                                    }
+
+                                    item(key = "page_${page}_${ayah.id}") {
+                                        val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
+
+                                        AyahItem(
+                                            ayah = ayah,
+                                            showTranslation = state.showTranslation,
+                                            showTransliteration = state.showTransliteration,
+                                            arabicFontSize = state.arabicFontSize,
+                                            fontSize = state.fontSize,
+                                            isHighlighted = isHighlighted,
+                                            isFavorite = ayah.id in favoriteAyahIds,
+                                            onBookmarkClick = {
+                                                viewModel.onEvent(
+                                                    QuranEvent.ToggleBookmark(
+                                                        ayahId = ayah.id,
+                                                        surahNumber = ayah.surahNumber,
+                                                        ayahNumber = ayah.numberInSurah
+                                                    )
+                                                )
+                                            },
+                                            onFavoriteClick = {
+                                                viewModel.onEvent(
+                                                    QuranEvent.ToggleFavorite(
+                                                        ayahId = ayah.id,
+                                                        surahNumber = ayah.surahNumber,
+                                                        ayahNumber = ayah.numberInSurah
+                                                    )
+                                                )
+                                            },
+                                            onPlayAyahClick = {
+                                                viewModel.onEvent(
+                                                    QuranEvent.PlayAyahAudio(
+                                                        ayahGlobalId = ayah.id,
+                                                        surahNumber = ayah.surahNumber,
+                                                        ayahNumber = ayah.numberInSurah
+                                                    )
+                                                )
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Surah/Juz mode: standard LazyColumn
+                val homeState by viewModel.homeState.collectAsState()
+                val surahStartIds = remember(displayAyahs) {
+                    if (displayAyahs.isEmpty()) emptySet()
+                    else {
+                        val ids = mutableSetOf<Int>()
+                        var lastSurah = -1
+                        for (ayah in displayAyahs) {
+                            if (ayah.surahNumber != lastSurah) {
+                                ids.add(ayah.id)
+                                lastSurah = ayah.surahNumber
+                            }
+                        }
+                        ids
+                    }
+                }
+
+                LazyColumn(
+                    state = listState,
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 16.dp)
+                ) {
+                    // Surah Banner or Juz Banner
+                    if (state.readingMode == ReadingMode.SURAH) {
+                        state.surahWithAyahs?.let { surahWithAyahs ->
+                            item(key = "banner") {
+                                SurahBanner(
+                                    surahNameArabic = surahWithAyahs.surah.nameArabic,
+                                    surahNameEnglish = surahWithAyahs.surah.nameEnglish,
+                                    surahMeaning = surahWithAyahs.surah.nameTransliteration,
+                                    revelationType = surahWithAyahs.surah.revelationType,
+                                    ayahCount = surahWithAyahs.surah.numberOfAyahs,
+                                    showBismillah = (surahNumber ?: 0) != 9 && (surahNumber ?: 0) != 1
+                                )
+                            }
+                        }
+                    } else {
+                        item(key = "banner") {
+                            JuzPageBanner(
+                                title = state.title,
+                                subtitle = state.subtitle
+                            )
+                        }
+                    }
+
+                    // Ayahs
+                    items(
+                        items = displayAyahs,
+                        key = { it.id }
+                    ) { ayah ->
+                        if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
+                            val surah = homeState.surahs.find { it.number == ayah.surahNumber }
+                            PageSurahSeparator(
+                                surahNumber = ayah.surahNumber,
+                                surahNameArabic = surah?.nameArabic ?: "",
+                                surahNameEnglish = surah?.nameEnglish ?: "Surah ${ayah.surahNumber}",
+                                showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
+                            )
+                        }
+
+                        val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
+
+                        AyahItem(
+                            ayah = ayah,
+                            showTranslation = state.showTranslation,
+                            showTransliteration = state.showTransliteration,
+                            arabicFontSize = state.arabicFontSize,
+                            fontSize = state.fontSize,
+                            isHighlighted = isHighlighted,
+                            isFavorite = ayah.id in favoriteAyahIds,
+                            onBookmarkClick = {
+                                viewModel.onEvent(
+                                    QuranEvent.ToggleBookmark(
+                                        ayahId = ayah.id,
+                                        surahNumber = ayah.surahNumber,
+                                        ayahNumber = ayah.numberInSurah
+                                    )
+                                )
+                            },
+                            onFavoriteClick = {
+                                viewModel.onEvent(
+                                    QuranEvent.ToggleFavorite(
+                                        ayahId = ayah.id,
+                                        surahNumber = ayah.surahNumber,
+                                        ayahNumber = ayah.numberInSurah
+                                    )
+                                )
+                            },
+                            onPlayAyahClick = {
+                                viewModel.onEvent(
+                                    QuranEvent.PlayAyahAudio(
+                                        ayahGlobalId = ayah.id,
+                                        surahNumber = ayah.surahNumber,
+                                        ayahNumber = ayah.numberInSurah
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }
 
 // ---------------------------------------------------------------------------
-// Header: back | title | settings
+// Page Navigation Bar (below header)
 // ---------------------------------------------------------------------------
 @Composable
-private fun ReaderHeader(
-    title: String,
-    subtitle: String,
-    isLoading: Boolean,
-    onBackClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+private fun PageNavigationBar(
+    pagerState: PagerState,
+    totalPages: Int,
+    coroutineScope: CoroutineScope,
     modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background,
-        shadowElevation = 2.dp
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                onClick = onBackClick
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        if (pagerState.currentPage < totalPages - 1) {
+                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                        }
+                    }
+                },
+                enabled = pagerState.currentPage < totalPages - 1,
+                modifier = Modifier.size(36.dp)
             ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.NavigateBefore,
+                    contentDescription = "Previous Page",
+                    tint = if (pagerState.currentPage < totalPages - 1)
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 12.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            Text(
+                text = "Page ${pagerState.settledPage + 1} of $totalPages",
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            IconButton(
+                onClick = {
+                    coroutineScope.launch {
+                        if (pagerState.currentPage > 0) {
+                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                        }
+                    }
+                },
+                enabled = pagerState.currentPage > 0,
+                modifier = Modifier.size(36.dp)
             ) {
-                if (isLoading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                } else {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    if (subtitle.isNotEmpty()) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.NavigateNext,
+                    contentDescription = "Next Page",
+                    tint = if (pagerState.currentPage > 0)
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Audio Bottom Bar using BottomAppBar
+// ---------------------------------------------------------------------------
+@Composable
+private fun AudioBottomBar(
+    isAudioActive: Boolean,
+    isPlaying: Boolean,
+    isDownloading: Boolean,
+    audioTitle: String,
+    progress: Float,
+    onPlayClick: () -> Unit,
+    onStopClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    BottomAppBar(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+        contentColor = MaterialTheme.colorScheme.onSurface,
+        tonalElevation = 3.dp
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Progress bar (only when audio active)
+            if (isAudioActive) {
+                LinearProgressIndicator(
+                    progress = { progress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Left side: audio info or prompt
+                Column(modifier = Modifier.weight(1f)) {
+                    if (isAudioActive) {
                         Text(
-                            text = subtitle,
+                            text = "Now Playing",
                             style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = audioTitle,
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.Medium,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    } else {
+                        Text(
+                            text = "Tap to play audio",
+                            style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
-            }
 
-            Surface(
-                modifier = Modifier.size(40.dp),
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                onClick = onSettingsClick
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = "Settings",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
+                // Play/Pause button
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    onClick = onPlayClick,
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                        if (isDownloading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(22.dp),
+                                strokeWidth = 2.dp,
+                                color = MaterialTheme.colorScheme.onPrimary
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                                contentDescription = if (isPlaying) "Pause" else "Play",
+                                tint = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                    }
+                }
+
+                // Stop button (only when audio active)
+                if (isAudioActive) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        onClick = onStopClick,
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Stop",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    }
                 }
             }
         }
@@ -721,7 +844,7 @@ private fun SurahBanner(
                     Text(
                         text = if (revelationType == RevelationType.MECCAN) "Meccan" else "Medinan",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onPrimary,
+                        color = Color.White,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                     )
                 }
@@ -729,7 +852,7 @@ private fun SurahBanner(
                 Text(
                     text = "$ayahCount Ayahs",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
+                    color = Color.White.copy(alpha = 0.8f)
                 )
             }
 
@@ -739,7 +862,7 @@ private fun SurahBanner(
                 Spacer(modifier = Modifier.height(20.dp))
 
                 ArabicText(
-                    text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650",
+                    text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
                     size = ArabicTextSize.LARGE,
                     color = Color(0xFFEAB308)
                 )
@@ -773,7 +896,6 @@ private fun PageHeaderBar(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Juz badge
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = juzNumber.toString(),
@@ -788,7 +910,6 @@ private fun PageHeaderBar(
                 )
             }
 
-            // Vertical divider
             Box(
                 modifier = Modifier
                     .width(1.dp)
@@ -796,7 +917,6 @@ private fun PageHeaderBar(
                     .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             )
 
-            // Hizb badge
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = hizbNumber.toString(),
@@ -811,7 +931,6 @@ private fun PageHeaderBar(
                 )
             }
 
-            // Vertical divider
             Box(
                 modifier = Modifier
                     .width(1.dp)
@@ -819,7 +938,6 @@ private fun PageHeaderBar(
                     .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             )
 
-            // Ayah count
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
                     text = ayahCount.toString(),
@@ -853,7 +971,6 @@ private fun PageSurahSeparator(
             .fillMaxWidth()
             .padding(horizontal = 12.dp, vertical = 6.dp)
     ) {
-        // Surah name card
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -871,7 +988,6 @@ private fun PageSurahSeparator(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left: number + English name
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -898,7 +1014,6 @@ private fun PageSurahSeparator(
                     )
                 }
 
-                // Right: Arabic name
                 if (surahNameArabic.isNotEmpty()) {
                     ArabicText(
                         text = surahNameArabic,
@@ -909,7 +1024,6 @@ private fun PageSurahSeparator(
             }
         }
 
-        // Bismillah
         if (showBismillah) {
             Box(
                 modifier = Modifier
@@ -918,7 +1032,7 @@ private fun PageSurahSeparator(
                 contentAlignment = Alignment.Center
             ) {
                 ArabicText(
-                    text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u0651\u064E\u0647\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650",
+                    text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
                     size = ArabicTextSize.LARGE,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -1043,13 +1157,20 @@ private fun AyahItem(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Arabic text with Amiri font and verse end markers
-        QuranVerseText(
-            arabicText = ayah.textArabic,
-            verseNumber = ayah.numberInSurah,
-            customFontSize = arabicFontSize,
+        // Arabic text with ayah end marker
+        val displayText = ayah.getDisplayArabicText()
+        val formattedText = formatAyahWithEndMarker(displayText, ayah.numberInSurah)
+
+        ArabicText(
+            text = formattedText,
+            modifier = Modifier.fillMaxWidth(),
             color = MaterialTheme.colorScheme.onBackground,
-            modifier = Modifier.fillMaxWidth()
+            style = TextStyle(
+                fontFamily = AmiriFontFamily,
+                fontSize = arabicFontSize.sp,
+                lineHeight = (arabicFontSize * 2).sp,
+                textDirection = TextDirection.Rtl
+            )
         )
 
         // Translation
@@ -1090,7 +1211,7 @@ private fun AyahItem(
             }
         }
 
-        // Indicators row: sajdah, hizb, rub, juz, page
+        // Indicators row
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1098,12 +1219,10 @@ private fun AyahItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left side: special indicators
             Row(
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Sajdah indicator
                 if (ayah.sajdaType != null) {
                     Surface(
                         shape = RoundedCornerShape(6.dp),
@@ -1119,9 +1238,7 @@ private fun AyahItem(
                     }
                 }
 
-                // Hizb quarter indicator (rub al-hizb)
                 if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0 && ayah.rubNumber % 1 == 0)) {
-                    val hizbQuarter = ((ayah.hizbNumber - 1) * 4 + ayah.rubNumber)
                     val quarterLabel = when (ayah.rubNumber) {
                         1 -> "Hizb ${ayah.hizbNumber}"
                         2 -> "\u00BC Hizb ${ayah.hizbNumber}"
@@ -1145,7 +1262,6 @@ private fun AyahItem(
                 }
             }
 
-            // Right side: juz / page
             Text(
                 text = "Juz ${ayah.juz} \u2022 Page ${ayah.page}",
                 style = MaterialTheme.typography.labelSmall,
@@ -1158,119 +1274,5 @@ private fun AyahItem(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
             thickness = 0.5.dp
         )
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Compact Bottom Bar: unified play / audio controls (always visible)
-// ---------------------------------------------------------------------------
-@Composable
-private fun CompactBottomBar(
-    isAudioActive: Boolean,
-    isPlaying: Boolean,
-    isDownloading: Boolean,
-    audioTitle: String,
-    progress: Float,
-    onPlayClick: () -> Unit,
-    onStopClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-        shadowElevation = 8.dp,
-        shape = RoundedCornerShape(topStart = 14.dp, topEnd = 14.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Progress bar (only when audio active)
-            if (isAudioActive) {
-                androidx.compose.material3.LinearProgressIndicator(
-                    progress = { progress },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp),
-                    color = MaterialTheme.colorScheme.primary,
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
-            }
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .navigationBarsPadding()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Left side: audio info or prompt
-                Column(modifier = Modifier.weight(1f)) {
-                    if (isAudioActive) {
-                        Text(
-                            text = "Now Playing",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = audioTitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    } else {
-                        Text(
-                            text = "Tap to play audio",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
-                }
-
-                // Play/Pause button
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
-                    onClick = onPlayClick,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        if (isDownloading) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(22.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(
-                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (isPlaying) "Pause" else "Play",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
-
-                // Stop button (only when audio active)
-                if (isAudioActive) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        onClick = onStopClick,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Stop",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
     }
 }
