@@ -82,6 +82,9 @@
             <intent-filter>
                 <action android:name="com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.arshadshah.nimaz.DAILY_SUMMARY" />
+            </intent-filter>
         </receiver>
 
         <!-- Prayer Times Widget -->

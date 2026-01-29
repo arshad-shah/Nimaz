@@ -16,6 +16,7 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import com.arshadshah.nimaz.R
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
@@ -280,7 +281,7 @@ class AdhanPlaybackService : Service(), MediaPlayer.OnCompletionListener, MediaP
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle("$prayerName Adhan")
             .setContentText("Tap to stop")
             .setPriority(NotificationCompat.PRIORITY_LOW)

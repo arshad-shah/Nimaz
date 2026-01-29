@@ -10,6 +10,7 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import com.arshadshah.nimaz.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -186,7 +187,7 @@ class AdhanDownloadService : Service() {
 
     private fun createNotification(message: String): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(android.R.drawable.stat_sys_download)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle("Downloading Adhan")
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_LOW)

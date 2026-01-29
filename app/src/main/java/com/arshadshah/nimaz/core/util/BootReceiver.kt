@@ -1,12 +1,20 @@
 package com.arshadshah.nimaz.core.util
 
+import android.app.Notification
+import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.graphics.BitmapFactory
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -14,14 +22,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.ZoneOffset
 import javax.inject.Inject
 
 /**
- * BroadcastReceiver that reschedules prayer notifications after device boot.
- * Also handles midnight reschedule events for daily prayer notification updates.
+ * BroadcastReceiver that handles prayer notifications, boot events, and daily summaries.
+ * Features enhanced notification layouts with Islamic greetings and motivational messages.
  */
 @AndroidEntryPoint
-class  BootReceiver : BroadcastReceiver() {
+class BootReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var preferencesDataStore: PreferencesDataStore
@@ -43,19 +53,19 @@ class  BootReceiver : BroadcastReceiver() {
             Intent.ACTION_LOCKED_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
             "com.htc.intent.action.QUICKBOOT_POWERON" -> {
-                // Device has booted, reschedule all prayer notifications
                 reschedulePrayerNotifications()
             }
 
             PrayerNotificationScheduler.ACTION_MIDNIGHT_RESCHEDULE -> {
-                // Midnight reschedule - mark yesterday's unprayed prayers as missed
-                // and schedule today's new prayer notifications
                 markMissedPrayersAndReschedule()
             }
 
             PrayerNotificationScheduler.ACTION_PRAYER_NOTIFICATION -> {
-                // Prayer time has arrived - show notification
                 handlePrayerNotification(context, intent)
+            }
+
+            PrayerNotificationScheduler.ACTION_DAILY_SUMMARY -> {
+                handleDailySummary(context)
             }
         }
     }
@@ -68,10 +78,7 @@ class  BootReceiver : BroadcastReceiver() {
                 val latitude = prefs.latitude
                 val longitude = prefs.longitude
 
-                // Build enabled prayers set
                 val enabledPrayers = buildEnabledPrayersSet()
-
-                // Get pre-reminder settings
                 val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
                 val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
 
@@ -84,7 +91,6 @@ class  BootReceiver : BroadcastReceiver() {
                     preReminderMinutes = preReminderMinutes
                 )
             } catch (e: Exception) {
-                // Log error but don't crash
                 e.printStackTrace()
             }
         }
@@ -93,19 +99,14 @@ class  BootReceiver : BroadcastReceiver() {
     private fun markMissedPrayersAndReschedule() {
         scope.launch {
             try {
-                // Mark any past pending/not_prayed prayers as missed
                 prayerRepository.markPastPrayersAsMissed()
 
-                // Then reschedule today's notifications
                 val prefs = preferencesDataStore.userPreferences.first()
                 val notificationsEnabled = prefs.prayerNotificationsEnabled
                 val latitude = prefs.latitude
                 val longitude = prefs.longitude
 
-                // Build enabled prayers set
                 val enabledPrayers = buildEnabledPrayersSet()
-
-                // Get pre-reminder settings
                 val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
                 val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
 
@@ -118,7 +119,6 @@ class  BootReceiver : BroadcastReceiver() {
                     preReminderMinutes = preReminderMinutes
                 )
             } catch (e: Exception) {
-                // Log error but don't crash
                 e.printStackTrace()
             }
         }
@@ -141,43 +141,39 @@ class  BootReceiver : BroadcastReceiver() {
         val prayerType = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_TYPE) ?: ""
         val isPreReminder = intent.getBooleanExtra(PrayerNotificationScheduler.EXTRA_IS_PRE_REMINDER, false)
 
-        // Check if this is Fajr prayer (uses special adhan with "prayer is better than sleep")
         val isFajr = prayerType.equals("FAJR", ignoreCase = true)
         val isSunrise = prayerType.equals("SUNRISE", ignoreCase = true)
 
         scope.launch {
             try {
-                // First check if this prayer's notification is enabled
                 val prayerNotificationEnabled = isPrayerNotificationEnabled(prayerType)
-                if (!prayerNotificationEnabled) {
-                    return@launch // Don't show notification if this prayer is disabled
-                }
+                if (!prayerNotificationEnabled) return@launch
 
-                // Get vibration setting
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
-                // For pre-reminders, show a simpler notification without adhan
                 if (isPreReminder) {
                     val reminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
-                    showPreReminderNotification(context, prayerName, reminderMinutes, vibrationEnabled)
+                    showEnhancedPreReminderNotification(context, prayerName, prayerType, reminderMinutes, vibrationEnabled)
                     return@launch
                 }
 
-                // Check global adhan setting AND per-prayer adhan setting
                 val globalAdhanEnabled = preferencesDataStore.adhanEnabled.first()
                 val prayerAdhanEnabled = preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
-                // Adhan plays only if both global AND per-prayer settings are enabled
-                // Sunrise never gets full adhan - only beep
                 val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise
                 val shouldPlayBeep = globalAdhanEnabled && isSunrise
 
-                // Show the notification
-                showPrayerNotification(context, prayerName, prayerTime, shouldPlayAdhan || shouldPlayBeep, vibrationEnabled)
+                showEnhancedPrayerNotification(
+                    context = context,
+                    prayerName = prayerName,
+                    prayerType = prayerType,
+                    prayerTime = prayerTime,
+                    adhanEnabled = shouldPlayAdhan || shouldPlayBeep,
+                    vibrationEnabled = vibrationEnabled
+                )
 
                 if (shouldPlayAdhan) {
-                    // Play full adhan for regular prayers
                     val adhanSound = AdhanSound.fromName(selectedAdhan)
                     val hasAdhan = adhanAudioManager.isDownloaded(adhanSound, isFajr) ||
                             adhanAudioManager.isDownloaded(adhanSound, false)
@@ -191,7 +187,6 @@ class  BootReceiver : BroadcastReceiver() {
                         )
                     }
                 } else if (shouldPlayBeep) {
-                    // Play only beep for sunrise
                     val beepSound = AdhanSound.SIMPLE_BEEP
                     if (adhanAudioManager.isDownloaded(beepSound, false)) {
                         AdhanPlaybackService.playAdhan(
@@ -204,8 +199,7 @@ class  BootReceiver : BroadcastReceiver() {
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
-                // Fallback: show notification without adhan
-                showPrayerNotification(context, prayerName, prayerTime, false, true)
+                showEnhancedPrayerNotification(context, prayerName, prayerType, prayerTime, false, true)
             }
         }
     }
@@ -222,28 +216,45 @@ class  BootReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun showPreReminderNotification(context: Context, prayerName: String, minutesBefore: Int, vibrationEnabled: Boolean) {
+    /**
+     * Show an enhanced pre-reminder notification with motivational content.
+     */
+    private fun showEnhancedPreReminderNotification(
+        context: Context,
+        prayerName: String,
+        prayerType: String,
+        minutesBefore: Int,
+        vibrationEnabled: Boolean
+    ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val openPendingIntent = mainIntent?.let {
-            android.app.PendingIntent.getActivity(
+            PendingIntent.getActivity(
                 context,
                 (prayerName + "_reminder").hashCode(),
                 it,
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
 
-        val notification = android.app.Notification.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
-            .setContentTitle("$prayerName in $minutesBefore minutes")
-            .setContentText("Prepare for $prayerName prayer")
+        val title = NotificationContentHelper.getPreReminderTitle(prayerName, minutesBefore)
+        val message = NotificationContentHelper.getPreReminderMessage(prayerName)
+        val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting()}"
+
+        val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_REMINDER)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .apply {
                 if (!vibrationEnabled) {
-                    setVibrate(longArrayOf(0L)) // No vibration
+                    setVibrate(longArrayOf(0L))
                 }
             }
             .build()
@@ -251,20 +262,29 @@ class  BootReceiver : BroadcastReceiver() {
         notificationManager.notify((prayerName + "_reminder").hashCode(), notification)
     }
 
-    private fun showPrayerNotification(context: Context, prayerName: String, prayerTime: String, adhanEnabled: Boolean = false, vibrationEnabled: Boolean = true) {
+    /**
+     * Show an enhanced prayer notification with Islamic greetings and motivational messages.
+     */
+    private fun showEnhancedPrayerNotification(
+        context: Context,
+        prayerName: String,
+        prayerType: String,
+        prayerTime: String,
+        adhanEnabled: Boolean = false,
+        vibrationEnabled: Boolean = true
+    ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
-        // Create intent to open app and stop adhan when notification is tapped
+        // Create intent to open app and stop adhan
         val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-            // Add action to stop adhan when app is opened
             putExtra(EXTRA_STOP_ADHAN, true)
         }
         val openPendingIntent = mainIntent?.let {
-            android.app.PendingIntent.getActivity(
+            PendingIntent.getActivity(
                 context,
                 prayerName.hashCode(),
                 it,
-                android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
         }
 
@@ -272,35 +292,157 @@ class  BootReceiver : BroadcastReceiver() {
         val dismissIntent = Intent(context, AdhanPlaybackService::class.java).apply {
             action = AdhanPlaybackService.ACTION_STOP
         }
-        val dismissPendingIntent = android.app.PendingIntent.getService(
+        val dismissPendingIntent = PendingIntent.getService(
             context,
             prayerName.hashCode() + 1000,
             dismissIntent,
-            android.app.PendingIntent.FLAG_UPDATE_CURRENT or android.app.PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Use adhan channel if adhan is enabled, otherwise use regular prayer channel
+        // Get enhanced content
+        val title = NotificationContentHelper.getPrayerTitle(prayerType)
+        val shortMessage = NotificationContentHelper.getShortMessage(prayerType)
+        val fullMessage = NotificationContentHelper.getPrayerMessage(prayerType, prayerTime)
+
+        // Build the big text with formatted time if available
+        // Don't say "Prayer time" for sunrise since it's not a prayer
+        val isSunrise = prayerType.equals("SUNRISE", ignoreCase = true)
+        val timeDisplay = if (prayerTime.isNotEmpty()) {
+            if (isSunrise) "\n\nSunrise: $prayerTime" else "\n\nPrayer time: $prayerTime"
+        } else ""
+        val bigText = "$fullMessage$timeDisplay"
+
         val channelId = if (adhanEnabled) {
             PrayerNotificationScheduler.CHANNEL_ID_ADHAN
         } else {
             PrayerNotificationScheduler.CHANNEL_ID_PRAYER
         }
 
-        val notification = android.app.Notification.Builder(context, channelId)
-            .setSmallIcon(android.R.drawable.ic_dialog_info) // Replace with app icon
-            .setContentTitle("$prayerName Time")
-            .setContentText("It's time for $prayerName prayer")
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
+            .setContentTitle(title)
+            .setContentText(shortMessage)
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(bigText)
+                .setBigContentTitle(title))
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
-            .setDeleteIntent(dismissPendingIntent) // Stop adhan when notification is dismissed
+            .setDeleteIntent(dismissPendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setColorized(true)
+            .setColor(getPrayerColor(prayerType))
             .apply {
                 if (!vibrationEnabled) {
-                    setVibrate(longArrayOf(0L)) // No vibration
+                    setVibrate(longArrayOf(0L))
                 }
+                // Add action to mark prayer as done (optional future feature)
+                // addAction(R.drawable.ic_check, "Prayed", markPrayedIntent)
             }
             .build()
 
         notificationManager.notify(prayerName.hashCode(), notification)
+    }
+
+    /**
+     * Handle the daily summary notification at 11 PM.
+     */
+    private fun handleDailySummary(context: Context) {
+        scope.launch {
+            try {
+                // Check if notifications are enabled
+                val prefs = preferencesDataStore.userPreferences.first()
+                if (!prefs.prayerNotificationsEnabled) return@launch
+
+                // Get today's prayer records
+                val todayEpoch = LocalDate.now()
+                    .atStartOfDay()
+                    .toEpochSecond(ZoneOffset.UTC) * 1000
+
+                val prayerRecords = prayerRepository.getPrayerRecordsForDate(todayEpoch).first()
+
+                // Count prayed and missed (excluding Sunrise)
+                val mainPrayers = prayerRecords.filter { it.prayerName != PrayerName.SUNRISE }
+                val prayedCount = mainPrayers.count { it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE }
+                val missedCount = mainPrayers.count { it.status == PrayerStatus.MISSED || it.status == PrayerStatus.NOT_PRAYED }
+                val missedPrayers = mainPrayers
+                    .filter { it.status == PrayerStatus.MISSED || it.status == PrayerStatus.NOT_PRAYED }
+                    .map { it.prayerName.displayName() }
+
+                // Get notification content
+                val summaryContent = NotificationContentHelper.getDailySummaryContent(
+                    prayedCount = prayedCount,
+                    missedCount = missedCount,
+                    missedPrayers = missedPrayers
+                )
+
+                showDailySummaryNotification(context, summaryContent)
+
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /**
+     * Show the daily summary notification.
+     */
+    private fun showDailySummaryNotification(
+        context: Context,
+        content: NotificationContentHelper.DailySummaryContent
+    ) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+
+        val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+        val openPendingIntent = mainIntent?.let {
+            PendingIntent.getActivity(
+                context,
+                "daily_summary".hashCode(),
+                it,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        // Choose color based on positive/negative outcome
+        val notificationColor = if (content.isPositive) {
+            0xFF4CAF50.toInt() // Green for positive
+        } else {
+            0xFFFF9800.toInt() // Orange for needs improvement
+        }
+
+        val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
+            .setContentTitle(content.title)
+            .setContentText(content.message)
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText(content.bigText)
+                .setBigContentTitle(content.title))
+            .setAutoCancel(true)
+            .setContentIntent(openPendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setCategory(NotificationCompat.CATEGORY_STATUS)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setColorized(true)
+            .setColor(notificationColor)
+            .build()
+
+        notificationManager.notify("daily_summary".hashCode(), notification)
+    }
+
+    /**
+     * Get a color for the prayer notification based on prayer type.
+     */
+    private fun getPrayerColor(prayerType: String): Int {
+        return when (prayerType.uppercase()) {
+            "FAJR" -> 0xFF3F51B5.toInt()     // Indigo - dawn
+            "SUNRISE" -> 0xFFFF9800.toInt()  // Orange - sun
+            "DHUHR" -> 0xFF2196F3.toInt()    // Blue - midday sky
+            "ASR" -> 0xFF009688.toInt()      // Teal - afternoon
+            "MAGHRIB" -> 0xFFE91E63.toInt()  // Pink - sunset
+            "ISHA" -> 0xFF673AB7.toInt()     // Deep Purple - night
+            else -> 0xFF4CAF50.toInt()       // Green - default
+        }
     }
 
     companion object {

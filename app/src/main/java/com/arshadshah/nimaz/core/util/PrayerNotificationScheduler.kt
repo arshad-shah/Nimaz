@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
@@ -31,8 +32,10 @@ class PrayerNotificationScheduler @Inject constructor(
     companion object {
         const val CHANNEL_ID_PRAYER = "prayer_notifications"
         const val CHANNEL_ID_ADHAN = "adhan_notifications"
+        const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
 
         const val ACTION_PRAYER_NOTIFICATION = "com.arshadshah.nimaz.PRAYER_NOTIFICATION"
+        const val ACTION_DAILY_SUMMARY = "com.arshadshah.nimaz.DAILY_SUMMARY"
         const val EXTRA_PRAYER_TYPE = "prayer_type"
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_TIME = "prayer_time"
@@ -42,6 +45,7 @@ class PrayerNotificationScheduler @Inject constructor(
         private const val REQUEST_CODE_BASE = 1000
         private const val PRE_REMINDER_REQUEST_CODE_BASE = 2000
         private const val TEST_NOTIFICATION_ID = 8888
+        private const val DAILY_SUMMARY_REQUEST_CODE = 8889
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
@@ -59,7 +63,7 @@ class PrayerNotificationScheduler @Inject constructor(
                 "Prayer Time Notifications",
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
-                description = "Notifications for prayer times"
+                description = "Notifications for prayer times with Islamic reminders"
                 enableVibration(true)
                 enableLights(true)
             }
@@ -75,7 +79,18 @@ class PrayerNotificationScheduler @Inject constructor(
                 enableLights(true)
             }
 
-            notificationManager.createNotificationChannels(listOf(prayerChannel, adhanChannel))
+            // Daily summary notification channel
+            val dailySummaryChannel = NotificationChannel(
+                CHANNEL_ID_DAILY_SUMMARY,
+                "Daily Prayer Summary",
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = "Nightly summary of your daily prayer completion"
+                enableVibration(true)
+                enableLights(true)
+            }
+
+            notificationManager.createNotificationChannels(listOf(prayerChannel, adhanChannel, dailySummaryChannel))
         }
     }
 
@@ -139,6 +154,75 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Schedule midnight reschedule for tomorrow
         scheduleMidnightReschedule()
+
+        // Schedule daily summary notification at 11 PM
+        scheduleDailySummary()
+    }
+
+    /**
+     * Schedule daily summary notification at 11 PM.
+     * This shows a summary of prayers completed/missed for the day.
+     */
+    private fun scheduleDailySummary() {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_DAILY_SUMMARY
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            DAILY_SUMMARY_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Schedule for 11:00 PM today (or tomorrow if already past 11 PM)
+        val now = LocalDateTime.now()
+        var summaryTime = LocalDate.now().atTime(23, 0) // 11:00 PM
+
+        if (now.isAfter(summaryTime)) {
+            // If it's already past 11 PM, schedule for tomorrow
+            summaryTime = LocalDate.now().plusDays(1).atTime(23, 0)
+        }
+
+        val triggerTimeMillis = summaryTime
+            .atZone(ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        } else {
+            alarmManager.setExact(
+                AlarmManager.RTC_WAKEUP,
+                triggerTimeMillis,
+                pendingIntent
+            )
+        }
+    }
+
+    /**
+     * Cancel the daily summary notification alarm.
+     */
+    fun cancelDailySummary() {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_DAILY_SUMMARY
+        }
+
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            DAILY_SUMMARY_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+            it.cancel()
+        }
     }
 
     /**
@@ -289,7 +373,7 @@ class PrayerNotificationScheduler @Inject constructor(
      */
     fun sendTestNotification() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
-            .setSmallIcon(android.R.drawable.ic_dialog_info)
+            .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle("Test Notification")
             .setContentText("Prayer notifications are working correctly")
             .setPriority(NotificationCompat.PRIORITY_HIGH)
