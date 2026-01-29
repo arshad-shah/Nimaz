@@ -7,15 +7,15 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
@@ -85,7 +85,7 @@ fun MushafContinuousText(
     arabicFontSize: Float = 28f,
     showRuledLines: Boolean = true,
     lineColor: Color = MushafLineColor,
-    highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+    highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
     textColor: Color = MaterialTheme.colorScheme.onBackground
 ) {
     val annotatedText = remember(ayahs, highlightedAyahId, highlightColor, textColor) {
@@ -97,12 +97,8 @@ fun MushafContinuousText(
         )
     }
 
-    // Calculate line height in pixels for drawing ruled lines
-    val density = LocalDensity.current
-    val lineHeightPx = with(density) { (arabicFontSize * 2).sp.toPx() }
-
-    // Track the number of lines for drawing
-    var lineCount by remember { mutableIntStateOf(0) }
+    // Store the full TextLayoutResult to get actual line positions
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(
@@ -113,7 +109,7 @@ fun MushafContinuousText(
                 style = TextStyle(
                     fontFamily = AmiriFontFamily,
                     fontSize = arabicFontSize.sp,
-                    lineHeight = (arabicFontSize * 2).sp,
+                    lineHeight = (arabicFontSize * 2.5).sp,
                     textDirection = TextDirection.Rtl,
                     textAlign = TextAlign.Justify,
                     color = textColor
@@ -128,25 +124,25 @@ fun MushafContinuousText(
                         ayahs.find { it.id == ayahId }?.let(onAyahClick)
                     }
                 },
-                onTextLayout = { textLayoutResult ->
-                    lineCount = textLayoutResult.lineCount
+                onTextLayout = { result ->
+                    textLayoutResult = result
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(
-                        if (showRuledLines && lineCount > 0) {
+                        if (showRuledLines) {
                             Modifier.drawBehind {
-                                // Draw horizontal ruled lines at each line position
-                                for (i in 0 until lineCount) {
-                                    // Position line at the baseline of each text line
-                                    // Offset slightly to sit below the text baseline
-                                    val y = (i + 1) * lineHeightPx - (lineHeightPx * 0.15f)
-                                    drawLine(
-                                        color = lineColor,
-                                        start = Offset(0f, y),
-                                        end = Offset(size.width, y),
-                                        strokeWidth = 1.5f
-                                    )
+                                textLayoutResult?.let { layout ->
+                                    for (i in 0 until layout.lineCount) {
+                                        // Use actual line bottom position from TextLayoutResult
+                                        val y = layout.getLineBottom(i)
+                                        drawLine(
+                                            color = lineColor,
+                                            start = Offset(0f, y),
+                                            end = Offset(size.width, y),
+                                            strokeWidth = 1.5f
+                                        )
+                                    }
                                 }
                             }
                         } else {

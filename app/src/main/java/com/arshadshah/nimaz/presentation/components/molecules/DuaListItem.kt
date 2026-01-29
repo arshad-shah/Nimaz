@@ -173,9 +173,9 @@ fun DuaCategoryItem(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
+                    ArabicText(
                         text = categoryNameArabic,
-                        style = MaterialTheme.typography.bodySmall,
+                        size = ArabicTextSize.SMALL,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(

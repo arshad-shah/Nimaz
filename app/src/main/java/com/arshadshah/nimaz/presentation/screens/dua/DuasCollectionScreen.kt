@@ -52,6 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.DuaCategory
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
@@ -271,11 +273,10 @@ private fun FeaturedDuaCard(
                 Spacer(modifier = Modifier.height(12.dp))
 
                 // Arabic text
-                Text(
+                ArabicText(
                     text = "\u0631\u064E\u0628\u064E\u0651\u0646\u064E\u0627 \u0622\u062A\u0650\u0646\u064E\u0627 \u0641\u0650\u064A \u0627\u0644\u062F\u064F\u0651\u0646\u0652\u064A\u064E\u0627 \u062D\u064E\u0633\u064E\u0646\u064E\u0629\u064B \u0648\u064E\u0641\u0650\u064A \u0627\u0644\u0652\u0622\u062E\u0650\u0631\u064E\u0629\u0650 \u062D\u064E\u0633\u064E\u0646\u064E\u0629\u064B \u0648\u064E\u0642\u0650\u0646\u064E\u0627 \u0639\u064E\u0630\u064E\u0627\u0628\u064E \u0627\u0644\u0646\u064E\u0651\u0627\u0631\u0650",
-                    style = MaterialTheme.typography.headlineSmall,
+                    size = ArabicTextSize.LARGE,
                     textAlign = TextAlign.End,
-                    lineHeight = 40.sp,
                     color = Color(0xFF1C1917),
                     modifier = Modifier.fillMaxWidth()
                 )

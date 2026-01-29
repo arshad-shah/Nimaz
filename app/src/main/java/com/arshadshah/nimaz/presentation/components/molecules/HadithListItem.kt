@@ -28,6 +28,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.style.TextAlign
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HadithGradeBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
@@ -114,12 +117,13 @@ fun HadithListItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Arabic text preview
-            Text(
+            ArabicText(
                 text = arabicText,
-                style = MaterialTheme.typography.bodyLarge,
+                size = ArabicTextSize.SMALL,
                 color = MaterialTheme.colorScheme.onSurface,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
                 modifier = Modifier.fillMaxWidth()
             )
 

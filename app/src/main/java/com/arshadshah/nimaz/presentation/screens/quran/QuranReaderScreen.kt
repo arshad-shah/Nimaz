@@ -130,6 +130,7 @@ fun QuranReaderScreen(
     surahNumber: Int? = null,
     juzNumber: Int? = null,
     pageNumber: Int? = null,
+    initialAyahNumber: Int = 1,
     onNavigateBack: () -> Unit,
     onNavigateToQuranSettings: () -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
@@ -195,6 +196,17 @@ fun QuranReaderScreen(
             val idx = displayAyahs.indexOfFirst { it.id == audioState.currentAyahId }
             if (idx >= 0) {
                 listState.animateScrollToItem(idx + 2)
+            }
+        }
+    }
+
+    // Scroll to initial ayah when content first loads (for search/bookmarks/favorites navigation)
+    LaunchedEffect(state.surahWithAyahs, initialAyahNumber) {
+        if (initialAyahNumber > 1 && state.readingMode == ReadingMode.SURAH) {
+            val ayahs = state.surahWithAyahs?.ayahs ?: return@LaunchedEffect
+            val idx = ayahs.indexOfFirst { it.numberInSurah == initialAyahNumber }
+            if (idx >= 0) {
+                listState.animateScrollToItem(idx + 1) // +1 for banner
             }
         }
     }
@@ -522,84 +534,6 @@ fun QuranReaderScreen(
 }
 
 // ---------------------------------------------------------------------------
-// Page Navigation Bar (below header)
-// ---------------------------------------------------------------------------
-@Composable
-private fun PageNavigationBar(
-    pagerState: PagerState,
-    totalPages: Int,
-    coroutineScope: CoroutineScope,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp, vertical = 4.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        if (pagerState.currentPage < totalPages - 1) {
-                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        }
-                    }
-                },
-                enabled = pagerState.currentPage < totalPages - 1,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.NavigateBefore,
-                    contentDescription = "Previous Page",
-                    tint = if (pagerState.currentPage < totalPages - 1)
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-
-            Text(
-                text = "Page ${pagerState.settledPage + 1} of $totalPages",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            IconButton(
-                onClick = {
-                    coroutineScope.launch {
-                        if (pagerState.currentPage > 0) {
-                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                        }
-                    }
-                },
-                enabled = pagerState.currentPage > 0,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.NavigateNext,
-                    contentDescription = "Next Page",
-                    tint = if (pagerState.currentPage > 0)
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    else
-                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
 // Audio Bottom Bar using BottomAppBar
 // ---------------------------------------------------------------------------
 @Composable
@@ -841,90 +775,6 @@ private fun SurahBanner(
                     text = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
                     size = ArabicTextSize.LARGE,
                     color = Color(0xFFEAB308)
-                )
-            }
-        }
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Page View: Header bar showing page, juz, hizb info
-// ---------------------------------------------------------------------------
-@Composable
-private fun PageHeaderBar(
-    pageNumber: Int,
-    juzNumber: Int,
-    hizbNumber: Int,
-    ayahCount: Int,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = juzNumber.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = "Juz",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(28.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-            )
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = hizbNumber.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-                Text(
-                    text = "Hizb",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(28.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
-            )
-
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    text = ayahCount.toString(),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "Ayahs",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -1214,7 +1064,7 @@ private fun AyahItem(
                     }
                 }
 
-                if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0 && ayah.rubNumber % 1 == 0)) {
+                if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0)) {
                     val quarterLabel = when (ayah.rubNumber) {
                         1 -> "Hizb ${ayah.hizbNumber}"
                         2 -> "\u00BC Hizb ${ayah.hizbNumber}"

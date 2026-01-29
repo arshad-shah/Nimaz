@@ -119,8 +119,12 @@ fun HadithArabicText(
     text: String,
     modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.MEDIUM,
+    customFontSize: Float? = null,
     color: Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val actualFontSize = customFontSize?.sp ?: size.fontSize
+    val actualLineHeight = customFontSize?.let { (it * 2.4f).sp } ?: size.lineHeight
+
     ArabicText(
         text = text,
         modifier = modifier.fillMaxWidth(),
@@ -128,8 +132,8 @@ fun HadithArabicText(
         color = color,
         textAlign = TextAlign.End,
         style = ArabicTextStyles.hadithArabic.copy(
-            fontSize = size.fontSize,
-            lineHeight = size.lineHeight
+            fontSize = actualFontSize,
+            lineHeight = actualLineHeight
         )
     )
 }
@@ -142,8 +146,12 @@ fun DuaArabicText(
     text: String,
     modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.LARGE,
+    customFontSize: Float? = null,
     color: Color = MaterialTheme.colorScheme.onSurface
 ) {
+    val actualFontSize = customFontSize?.sp ?: size.fontSize
+    val actualLineHeight = customFontSize?.let { (it * 2.4f).sp } ?: size.lineHeight
+
     ArabicText(
         text = text,
         modifier = modifier.fillMaxWidth(),
@@ -151,8 +159,8 @@ fun DuaArabicText(
         color = color,
         textAlign = TextAlign.Center,
         style = ArabicTextStyles.duaArabic.copy(
-            fontSize = size.fontSize,
-            lineHeight = size.lineHeight
+            fontSize = actualFontSize,
+            lineHeight = actualLineHeight
         )
     )
 }

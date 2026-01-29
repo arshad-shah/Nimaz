@@ -143,7 +143,7 @@ fun MushafPage(
                 .padding(horizontal = 8.dp)
         ) {
             Column(
-                modifier = Modifier.padding(vertical = 16.dp)
+                modifier = Modifier.padding(vertical = 8.dp)
             ) {
                 // Render each surah section
                 ayahsBySurah.forEach { (surahNumber, surahAyahs) ->
@@ -168,7 +168,7 @@ fun MushafPage(
                         },
                         highlightedAyahId = highlightedAyahId,
                         arabicFontSize = arabicFontSize,
-                        modifier = Modifier.padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 4.dp)
                     )
 
                     Spacer(modifier = Modifier.height(12.dp))
@@ -236,14 +236,6 @@ private fun MushafPageHeader(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Page number
-            HeaderInfoItem(
-                value = pageNumber.toString(),
-                label = "Page",
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            VerticalDivider()
 
             // Juz number
             HeaderInfoItem(

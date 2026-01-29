@@ -199,6 +199,9 @@ fun NavGraph() {
                     onNavigateToSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToSurahInfo = { surahNumber ->
                         navController.navigate(Route.SurahInfo(surahNumber))
+                    },
+                    onNavigateToQuranAyah = { surahNumber, ayahNumber ->
+                        navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
                     }
                 )
             }
@@ -257,6 +260,7 @@ fun NavGraph() {
                 val args = backStackEntry.toRoute<Route.QuranReader>()
                 QuranReaderScreen(
                     surahNumber = args.surahNumber,
+                    initialAyahNumber = args.ayahNumber,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
                 )

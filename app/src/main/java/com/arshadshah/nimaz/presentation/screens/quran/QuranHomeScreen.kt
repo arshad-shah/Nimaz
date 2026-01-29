@@ -88,6 +88,7 @@ fun QuranHomeScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSurahInfo: (Int) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
+    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -177,7 +178,7 @@ fun QuranHomeScreen(
                     2 -> FavoritesTabContent(
                         favorites = state.favorites,
                         surahs = state.surahs,
-                        onNavigateToSurah = onNavigateToSurah
+                        onNavigateToQuranAyah = onNavigateToQuranAyah
                     )
                 }
             }
@@ -376,7 +377,7 @@ private fun BrowseTabContent(
 private fun FavoritesTabContent(
     favorites: List<QuranFavorite>,
     surahs: List<Surah>,
-    onNavigateToSurah: (Int) -> Unit
+    onNavigateToQuranAyah: (Int, Int) -> Unit
 ) {
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -422,7 +423,7 @@ private fun FavoritesTabContent(
                     surahName = surahName,
                     ayahNumber = favorite.ayahNumber,
                     surahNumber = favorite.surahNumber,
-                    onClick = { onNavigateToSurah(favorite.surahNumber) }
+                    onClick = { onNavigateToQuranAyah(favorite.surahNumber, favorite.ayahNumber) }
                 )
             }
         }

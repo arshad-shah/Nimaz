@@ -52,6 +52,7 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.arshadshah.nimaz.domain.model.Dua
+import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
 
@@ -311,13 +312,9 @@ private fun DuaCard(
                     .padding(horizontal = 25.dp, vertical = 30.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                DuaArabicText(
                     text = dua.textArabic,
-                    style = MaterialTheme.typography.headlineMedium.copy(
-                        fontSize = arabicFontSize.sp,
-                        lineHeight = (arabicFontSize * 2.4f).sp
-                    ),
-                    textAlign = TextAlign.Center,
+                    customFontSize = arabicFontSize,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )

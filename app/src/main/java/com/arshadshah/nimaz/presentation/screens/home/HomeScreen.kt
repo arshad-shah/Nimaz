@@ -57,6 +57,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 // Prayer-specific accent colors matching the design prototype
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
@@ -283,9 +285,9 @@ private fun HomeHeader(
                 )
 
                 // Arabic Name
-                Text(
+                ArabicText(
                     text = getArabicPrayerName(nextPrayer),
-                    style = MaterialTheme.typography.titleLarge,
+                    size = ArabicTextSize.MEDIUM,
                     color = MaterialTheme.colorScheme.primary
                 )
 
@@ -732,9 +734,9 @@ private fun PrayerTimeCard(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                Text(
+                ArabicText(
                     text = getArabicPrayerName(prayer.type),
-                    style = MaterialTheme.typography.bodySmall,
+                    size = ArabicTextSize.SMALL,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

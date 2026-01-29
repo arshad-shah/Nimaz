@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.Dua
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
@@ -298,14 +300,12 @@ private fun DuaListItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             // Arabic text preview
-            Text(
+            ArabicText(
                 text = dua.textArabic,
-                style = MaterialTheme.typography.bodyLarge,
-                fontSize = 20.sp,
-                lineHeight = 36.sp,
-                textAlign = TextAlign.End,
+                size = ArabicTextSize.SMALL,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.End,
                 color = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.fillMaxWidth()
             )

@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -502,9 +503,9 @@ private fun BookCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
+            ArabicText(
                 text = book.nameArabic,
-                style = MaterialTheme.typography.bodyMedium,
+                size = ArabicTextSize.SMALL,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 

@@ -66,6 +66,7 @@ import android.content.Intent
 import android.widget.Toast
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithGrade
+import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
@@ -450,13 +451,9 @@ private fun HadithContentCard(
                     }
                     .padding(horizontal = 20.dp, vertical = 25.dp)
             ) {
-                Text(
+                HadithArabicText(
                     text = hadith.textArabic,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontSize = arabicFontSize.sp,
-                        lineHeight = (arabicFontSize * 2.4f).sp
-                    ),
-                    textAlign = TextAlign.End,
+                    customFontSize = arabicFontSize,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth()
                 )

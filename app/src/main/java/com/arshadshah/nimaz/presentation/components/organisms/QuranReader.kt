@@ -386,11 +386,11 @@ fun QuranPageReader(
                     .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
+                ArabicText(
                     text = ayahs.joinToString(" ") { it.textArabic },
-                    style = MaterialTheme.typography.headlineSmall,
+                    size = ArabicTextSize.LARGE,
                     textAlign = TextAlign.Center,
-                    lineHeight = MaterialTheme.typography.headlineSmall.lineHeight * 2
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
         }
