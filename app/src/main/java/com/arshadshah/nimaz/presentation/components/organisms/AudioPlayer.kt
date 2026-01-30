@@ -553,7 +553,12 @@ fun QuranAudioPlayer(
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
             } else {
-                val progress = if (totalAyahs > 0) currentAyah.toFloat() / totalAyahs else 0f
+                // Use total position/duration for smooth continuous progress
+                val progress = if (state.duration > 0) {
+                    state.currentPosition.toFloat() / state.duration
+                } else {
+                    0f
+                }
                 LinearProgressIndicator(
                     progress = { progress },
                     modifier = Modifier
