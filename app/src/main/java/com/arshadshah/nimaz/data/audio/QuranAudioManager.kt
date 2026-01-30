@@ -1,12 +1,12 @@
 package com.arshadshah.nimaz.data.audio
 
 import android.content.Context
+import android.media.MediaMetadataRetriever
 import androidx.annotation.OptIn
 import androidx.media3.common.ForwardingPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -75,6 +75,10 @@ class QuranAudioManager @Inject constructor(
     private var currentPlaylistIndex: Int = -1
     private var playlistTitle: String = "" // Surah/Juz name for dynamic titles
 
+    // Pre-computed durations (ms) for each playlist item, obtained from MediaMetadataRetriever
+    // before playback starts. This avoids relying on ExoPlayer's lazy timeline parsing.
+    private var precomputedDurations: List<Long> = emptyList()
+
     // ForwardingPlayer that reports total playlist position/duration to MediaSession
     private var forwardingPlayer: ForwardingPlayer? = null
 
@@ -93,37 +97,27 @@ class QuranAudioManager @Inject constructor(
     }
 
     /**
-     * Compute total duration across all playlist items from the ExoPlayer Timeline.
-     * Returns 0 if timeline is not yet available.
+     * Compute total duration across all playlist items.
+     * Uses pre-computed durations (from MediaMetadataRetriever) for accuracy,
+     * since ExoPlayer lazily parses item durations and may report 0 for unloaded items.
      */
-    private fun computeTotalDuration(player: ExoPlayer): Long {
-        val timeline = player.currentTimeline
-        if (timeline.isEmpty) return 0L
-        val window = Timeline.Window()
-        var total = 0L
-        for (i in 0 until timeline.windowCount) {
-            timeline.getWindow(i, window)
-            val dur = window.durationMs
-            if (dur > 0) total += dur
+    private fun computeTotalDuration(): Long {
+        if (precomputedDurations.isNotEmpty()) {
+            return precomputedDurations.sum()
         }
-        return total
+        return 0L
     }
 
     /**
      * Compute the cumulative position across all playlist items.
-     * = sum of durations of items before currentIndex + current item position.
+     * = sum of pre-computed durations of items before currentIndex + current item position.
      */
     private fun computeTotalPosition(player: ExoPlayer): Long {
-        val timeline = player.currentTimeline
-        if (timeline.isEmpty) return player.currentPosition
-        val window = Timeline.Window()
-        var cumulative = 0L
         val currentIndex = player.currentMediaItemIndex
-        for (i in 0 until currentIndex) {
-            if (i < timeline.windowCount) {
-                timeline.getWindow(i, window)
-                val dur = window.durationMs
-                if (dur > 0) cumulative += dur
+        var cumulative = 0L
+        if (precomputedDurations.isNotEmpty()) {
+            for (i in 0 until currentIndex.coerceAtMost(precomputedDurations.size)) {
+                cumulative += precomputedDurations[i]
             }
         }
         return cumulative + player.currentPosition
@@ -131,22 +125,19 @@ class QuranAudioManager @Inject constructor(
 
     /**
      * Seek to a total playlist position by finding the right media item and offset.
+     * Uses pre-computed durations for accurate item boundary calculation.
      */
     fun seekToTotal(totalPositionMs: Long) {
         val p = player ?: return
-        val timeline = p.currentTimeline
-        if (timeline.isEmpty) {
+        if (precomputedDurations.isEmpty()) {
             p.seekTo(totalPositionMs)
             return
         }
-        val window = Timeline.Window()
         var cumulative = 0L
-        for (i in 0 until timeline.windowCount) {
-            timeline.getWindow(i, window)
-            val dur = window.durationMs
+        for (i in precomputedDurations.indices) {
+            val dur = precomputedDurations[i]
             if (dur <= 0) continue
             if (cumulative + dur > totalPositionMs) {
-                // Target is within this item
                 val offset = totalPositionMs - cumulative
                 p.seekTo(i, offset)
                 return
@@ -154,10 +145,9 @@ class QuranAudioManager @Inject constructor(
             cumulative += dur
         }
         // Past end — seek to last item at its end
-        val lastIndex = timeline.windowCount - 1
+        val lastIndex = precomputedDurations.size - 1
         if (lastIndex >= 0) {
-            timeline.getWindow(lastIndex, window)
-            p.seekTo(lastIndex, window.durationMs)
+            p.seekTo(lastIndex, precomputedDurations[lastIndex])
         }
     }
 
@@ -226,7 +216,7 @@ class QuranAudioManager @Inject constructor(
                 override fun onPlaybackStateChanged(playbackState: Int) {
                     when (playbackState) {
                         Player.STATE_READY -> {
-                            val totalDur = computeTotalDuration(newPlayer)
+                            val totalDur = computeTotalDuration()
                             _audioState.update {
                                 it.copy(
                                     duration = if (totalDur > 0) totalDur else newPlayer.duration,
@@ -270,16 +260,6 @@ class QuranAudioManager @Inject constructor(
                     _audioState.update { it.copy(isPlaying = isPlaying) }
                 }
 
-                override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-                    // Recompute total duration when timeline updates (e.g. items finish buffering)
-                    if (!timeline.isEmpty) {
-                        val totalDur = computeTotalDuration(newPlayer)
-                        if (totalDur > 0) {
-                            _audioState.update { it.copy(duration = totalDur) }
-                        }
-                    }
-                }
-
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                     // This is called when transitioning to next ayah - gapless!
                     val newIndex = newPlayer.currentMediaItemIndex
@@ -315,7 +295,7 @@ class QuranAudioManager @Inject constructor(
                 val p = player ?: break
                 if (p.isPlaying) {
                     val totalPos = computeTotalPosition(p)
-                    val totalDur = computeTotalDuration(p)
+                    val totalDur = computeTotalDuration()
                     _audioState.update {
                         it.copy(
                             position = totalPos,
@@ -405,6 +385,7 @@ class QuranAudioManager @Inject constructor(
         forwardingPlayer = null
         player?.release()
         player = null
+        precomputedDurations = emptyList()
 
         ayahPlaylist = ayahs
         currentPlaylistIndex = startIndex
@@ -450,6 +431,26 @@ class QuranAudioManager @Inject constructor(
                     return@launch
                 }
 
+                // Pre-compute durations from files using MediaMetadataRetriever.
+                // This gives accurate total duration immediately, avoiding the issue where
+                // ExoPlayer lazily parses items and reports 0 for unloaded ones.
+                val durations = withContext(Dispatchers.IO) {
+                    validFiles.map { (_, file) ->
+                        val retriever = MediaMetadataRetriever()
+                        try {
+                            retriever.setDataSource(file.absolutePath)
+                            retriever.extractMetadata(
+                                MediaMetadataRetriever.METADATA_KEY_DURATION
+                            )?.toLongOrNull() ?: 0L
+                        } catch (_: Exception) {
+                            0L
+                        } finally {
+                            retriever.release()
+                        }
+                    }
+                }
+                precomputedDurations = durations
+
                 // Build media items with metadata for each ayah
                 val mediaItems = validFiles.map { (originalIndex, file) ->
                     val ayah = ayahs[originalIndex]
@@ -485,7 +486,10 @@ class QuranAudioManager @Inject constructor(
                     exoPlayer.play()
 
                     _audioState.update {
-                        it.copy(isPreparing = false)
+                        it.copy(
+                            isPreparing = false,
+                            duration = durations.sum()
+                        )
                     }
                 }
             } catch (e: Exception) {
@@ -627,15 +631,19 @@ class QuranAudioManager @Inject constructor(
         ayahPlaylist = emptyList()
         currentPlaylistIndex = -1
         playlistTitle = ""
+        precomputedDurations = emptyList()
         downloadingFiles.clear()
         _audioState.update { AudioState() }
-        // Stop the foreground service
-        QuranAudioService.stop(context)
+        // Don't call QuranAudioService.stop() here — the service's state observer
+        // detects isActive=false and calls stopSelf(). Sending a separate stop intent
+        // caused a race condition: the async ACTION_STOP could arrive after a new
+        // playback had already started, killing the new session.
     }
 
     /**
-     * Returns a ForwardingPlayer that reports total playlist position/duration.
-     * Used by QuranAudioService to bind a MediaSession so lock screen shows correct progress.
+     * Returns a ForwardingPlayer that reports total playlist position/duration
+     * and dynamic metadata from AudioState.
+     * Used by QuranAudioService to bind a MediaSession for notification & lock screen.
      */
     @OptIn(UnstableApi::class)
     fun getPlayer(): Player? {
@@ -650,7 +658,7 @@ class QuranAudioManager @Inject constructor(
         val manager = this
         return object : ForwardingPlayer(p) {
             override fun getDuration(): Long {
-                return manager.computeTotalDuration(p).takeIf { it > 0 } ?: super.getDuration()
+                return manager.computeTotalDuration().takeIf { it > 0 } ?: super.getDuration()
             }
 
             override fun getCurrentPosition(): Long {
@@ -662,7 +670,27 @@ class QuranAudioManager @Inject constructor(
             }
 
             override fun getContentDuration(): Long {
-                return manager.computeTotalDuration(p).takeIf { it > 0 } ?: super.getContentDuration()
+                return manager.computeTotalDuration().takeIf { it > 0 } ?: super.getContentDuration()
+            }
+
+            override fun getBufferedPosition(): Long {
+                val currentIndex = p.currentMediaItemIndex
+                var cumulative = 0L
+                for (i in 0 until currentIndex.coerceAtMost(manager.precomputedDurations.size)) {
+                    cumulative += manager.precomputedDurations[i]
+                }
+                return cumulative + p.bufferedPosition
+            }
+
+            override fun getMediaMetadata(): MediaMetadata {
+                // Return dynamic metadata built from current AudioState so that
+                // MediaSession always reflects the currently playing ayah title.
+                val state = manager._audioState.value
+                return MediaMetadata.Builder()
+                    .setTitle(state.currentTitle.ifEmpty { manager.playlistTitle })
+                    .setArtist(state.reciterName)
+                    .setAlbumTitle(manager.playlistTitle.ifEmpty { "Quran" })
+                    .build()
             }
 
             override fun seekTo(positionMs: Long) {
@@ -670,30 +698,11 @@ class QuranAudioManager @Inject constructor(
             }
 
             override fun seekTo(mediaItemIndex: Int, positionMs: Long) {
-                // If seeking to item 0 with a large position, treat as total seek
-                // Otherwise delegate to real player for prev/next item navigation
                 if (mediaItemIndex == 0 && p.mediaItemCount > 1) {
                     manager.seekToTotal(positionMs)
                 } else {
                     super.seekTo(mediaItemIndex, positionMs)
                 }
-            }
-
-            override fun getBufferedPosition(): Long {
-                // Report buffered position relative to total playlist
-                val timeline = p.currentTimeline
-                if (timeline.isEmpty) return super.getBufferedPosition()
-                val window = Timeline.Window()
-                var cumulative = 0L
-                val currentIndex = p.currentMediaItemIndex
-                for (i in 0 until currentIndex) {
-                    if (i < timeline.windowCount) {
-                        timeline.getWindow(i, window)
-                        val dur = window.durationMs
-                        if (dur > 0) cumulative += dur
-                    }
-                }
-                return cumulative + p.bufferedPosition
             }
 
             override fun isCurrentMediaItemSeekable(): Boolean = true
@@ -772,6 +781,7 @@ class QuranAudioManager @Inject constructor(
         player?.release()
         player = null
         playlistTitle = ""
+        precomputedDurations = emptyList()
         downloadingFiles.clear()
         _audioState.update { AudioState() }
     }

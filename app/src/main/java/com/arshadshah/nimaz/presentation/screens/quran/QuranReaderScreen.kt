@@ -225,7 +225,7 @@ fun QuranReaderScreen(
             }
             val idx = displayAyahs.indexOfFirst { it.id == audioState.currentAyahId }
             if (idx >= 0) {
-                listState.animateScrollToItem(idx + 2)
+                listState.animateScrollToItem(idx + 1)
             }
         }
     }
