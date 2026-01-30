@@ -87,6 +87,7 @@ class PreferencesDataStore @Inject constructor(
         val MAGHRIB_ADHAN_ENABLED = booleanPreferencesKey("maghrib_adhan_enabled")
         val ISHA_ADHAN_ENABLED = booleanPreferencesKey("isha_adhan_enabled")
         // Note: Sunrise always uses beep only, no full adhan option
+        val ADHAN_RESPECT_DND = booleanPreferencesKey("adhan_respect_dnd")
 
         // Quran Settings
         val QURAN_TRANSLATOR_ID = stringPreferencesKey("quran_translator_id")
@@ -384,6 +385,14 @@ class PreferencesDataStore @Inject constructor(
             "sunrise" -> kotlinx.coroutines.flow.flowOf(false) // Sunrise never gets adhan
             else -> kotlinx.coroutines.flow.flowOf(false)
         }
+    }
+
+    val adhanRespectDnd: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ADHAN_RESPECT_DND] ?: true
+    }
+
+    suspend fun setAdhanRespectDnd(enabled: Boolean) {
+        dataStore.edit { it[PreferencesKeys.ADHAN_RESPECT_DND] = enabled }
     }
 
     val notificationVibration: Flow<Boolean> = dataStore.data.map { preferences ->

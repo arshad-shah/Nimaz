@@ -37,8 +37,9 @@ class NextPrayerWorker @AssistedInject constructor(
 
         fun enqueuePeriodicWork(context: Context, force: Boolean = false) {
             val manager = WorkManager.getInstance(context)
+            // WorkManager minimum interval is 15 minutes; per-minute updates use AlarmManager
             val request = PeriodicWorkRequestBuilder<NextPrayerWorker>(
-                Duration.ofMinutes(1)
+                Duration.ofMinutes(15)
             ).build()
 
             val policy = if (force) {
@@ -101,6 +102,7 @@ class NextPrayerWorker @AssistedInject constructor(
 
             val data = if (nextPrayer != null) {
                 val prayerLocalTime = nextPrayer.time.toLocalDateTime(timeZone)
+                val epochMillis = nextPrayer.time.toEpochMilliseconds()
                 val diff: kotlin.time.Duration = nextPrayer.time - currentTime
                 val totalSeconds = diff.inWholeSeconds
                 val hours = totalSeconds / 3600
@@ -117,7 +119,8 @@ class NextPrayerWorker @AssistedInject constructor(
                     prayerName = nextPrayer.type.displayName,
                     prayerTime = formatTime(prayerLocalTime.hour, prayerLocalTime.minute),
                     countdown = countdown,
-                    isValid = true
+                    isValid = true,
+                    nextPrayerEpochMillis = epochMillis
                 )
             } else {
                 // All prayers passed, show Fajr for tomorrow
@@ -126,6 +129,7 @@ class NextPrayerWorker @AssistedInject constructor(
                 val tomorrowFajr = tomorrowPrayers.firstOrNull()
 
                 if (tomorrowFajr != null) {
+                    val epochMillis = tomorrowFajr.time.toEpochMilliseconds()
                     val diff: kotlin.time.Duration = tomorrowFajr.time - currentTime
                     val totalSeconds = diff.inWholeSeconds
                     val hours = totalSeconds / 3600
@@ -135,7 +139,8 @@ class NextPrayerWorker @AssistedInject constructor(
                         prayerName = "Fajr",
                         prayerTime = "Tomorrow",
                         countdown = "${hours}h ${minutes}m",
-                        isValid = true
+                        isValid = true,
+                        nextPrayerEpochMillis = epochMillis
                     )
                 } else {
                     NextPrayerData(

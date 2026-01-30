@@ -32,6 +32,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 
 class PrayerTimesWidget : GlanceAppWidget() {
 
@@ -150,8 +151,15 @@ private fun PrayerTimesSuccessContent(
                             fontWeight = FontWeight.Bold
                         )
                     )
+                    // Compute countdown live from stored epoch for freshness
+                    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
+                        val cd = WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
+                        if (cd != "—") "in $cd" else "—"
+                    } else {
+                        if (data.timeUntilNext.isNotEmpty()) "in ${data.timeUntilNext}" else "—"
+                    }
                     Text(
-                        text = if (data.timeUntilNext.isNotEmpty()) "in ${data.timeUntilNext}" else "—",
+                        text = liveCountdown,
                         style = TextStyle(color = textSecondary, fontSize = 10.sp)
                     )
                 }
@@ -213,10 +221,12 @@ class PrayerTimesWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
         PrayerTimesWorker.enqueuePeriodicWork(context, force = true)
+        WidgetUpdateScheduler.schedule(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
         PrayerTimesWorker.cancel(context)
+        WidgetUpdateScheduler.cancel(context)
     }
 }

@@ -381,6 +381,17 @@ fun NotificationSettingsScreen(
                                     viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
                                 }
                             )
+                            SettingDivider()
+
+                            // Honor Do Not Disturb
+                            SettingToggleRow(
+                                label = "Honor Do Not Disturb",
+                                value = "Skip adhan when DND is active",
+                                isEnabled = notificationState.respectDnd,
+                                onToggle = {
+                                    viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
+                                }
+                            )
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))

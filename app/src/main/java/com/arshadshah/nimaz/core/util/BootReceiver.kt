@@ -161,29 +161,47 @@ class BootReceiver : BroadcastReceiver() {
                 val prayerAdhanEnabled = preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
-                val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise
-                val shouldPlayBeep = globalAdhanEnabled && isSunrise
+                val respectDnd = preferencesDataStore.adhanRespectDnd.first()
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                val isDndActive = notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                val dndBlocksAdhan = respectDnd && isDndActive
 
-                showEnhancedPrayerNotification(
-                    context = context,
-                    prayerName = prayerName,
-                    prayerType = prayerType,
-                    prayerTime = prayerTime,
-                    adhanEnabled = shouldPlayAdhan || shouldPlayBeep,
-                    vibrationEnabled = vibrationEnabled
-                )
+                val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
+                val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
+
+                // Get notification content for merging into adhan service notification
+                val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType)
+                val notifMessage = NotificationContentHelper.getPrayerMessage(prayerType, prayerTime)
+                val notifColor = getPrayerColor(prayerType)
 
                 if (shouldPlayAdhan) {
                     val adhanSound = AdhanSound.fromName(selectedAdhan)
-                    val hasAdhan = adhanAudioManager.isDownloaded(adhanSound, isFajr) ||
+                    // Always check both variants so either can serve as fallback
+                    val hasAdhan = adhanAudioManager.isDownloaded(adhanSound, true) ||
                             adhanAudioManager.isDownloaded(adhanSound, false)
 
                     if (hasAdhan) {
+                        // Adhan service notification serves as both prayer + adhan notification
                         AdhanPlaybackService.playAdhan(
                             context = context,
                             adhanSound = adhanSound,
                             isFajr = isFajr,
-                            prayerName = prayerName
+                            prayerName = prayerName,
+                            prayerType = prayerType,
+                            prayerTime = prayerTime,
+                            notificationTitle = notifTitle,
+                            notificationMessage = notifMessage,
+                            notificationColor = notifColor
+                        )
+                    } else {
+                        // Adhan file not available, show standalone notification
+                        showEnhancedPrayerNotification(
+                            context = context,
+                            prayerName = prayerName,
+                            prayerType = prayerType,
+                            prayerTime = prayerTime,
+                            adhanEnabled = false,
+                            vibrationEnabled = vibrationEnabled
                         )
                     }
                 } else if (shouldPlayBeep) {
@@ -193,9 +211,33 @@ class BootReceiver : BroadcastReceiver() {
                             context = context,
                             adhanSound = beepSound,
                             isFajr = false,
-                            prayerName = prayerName
+                            prayerName = prayerName,
+                            prayerType = prayerType,
+                            prayerTime = prayerTime,
+                            notificationTitle = notifTitle,
+                            notificationMessage = notifMessage,
+                            notificationColor = notifColor
+                        )
+                    } else {
+                        showEnhancedPrayerNotification(
+                            context = context,
+                            prayerName = prayerName,
+                            prayerType = prayerType,
+                            prayerTime = prayerTime,
+                            adhanEnabled = false,
+                            vibrationEnabled = vibrationEnabled
                         )
                     }
+                } else {
+                    // No adhan - show standalone prayer notification
+                    showEnhancedPrayerNotification(
+                        context = context,
+                        prayerName = prayerName,
+                        prayerType = prayerType,
+                        prayerTime = prayerTime,
+                        adhanEnabled = false,
+                        vibrationEnabled = vibrationEnabled
+                    )
                 }
             } catch (e: Exception) {
                 e.printStackTrace()

@@ -17,14 +17,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,16 +40,18 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,11 +71,14 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -76,20 +88,17 @@ import java.util.Locale
 fun PrayerTrackerScreen(
     onNavigateBack: () -> Unit,
     onNavigateToStats: () -> Unit,
+    initialTab: Int = 0,
     viewModel: PrayerTrackerViewModel = hiltViewModel()
 ) {
-    val state by viewModel.trackerState.collectAsState()
-    val statsState by viewModel.statsState.collectAsState()
-    val historyState by viewModel.historyState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val pagerState = rememberPagerState(initialPage = initialTab) { 2 }
+    val coroutineScope = rememberCoroutineScope()
 
-    var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
-
-    LaunchedEffect(displayedMonth) {
-        val startDate = displayedMonth.atDay(1)
-        val endDate = displayedMonth.atEndOfMonth()
-        viewModel.onEvent(PrayerTrackerEvent.LoadHistory(startDate, endDate))
-    }
+    val tabs = listOf(
+        "Tracker" to Icons.Default.Schedule,
+        "Qada" to Icons.Default.Restore
+    )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -109,57 +118,361 @@ fun PrayerTrackerScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+                .padding(paddingValues)
         ) {
-            // Streak Card
-            item {
-                StreakCard(currentStreak = statsState.currentStreak)
+            // Tab Row
+            TabRow(
+                selectedTabIndex = pagerState.currentPage
+            ) {
+                tabs.forEachIndexed { index, (title, icon) ->
+                    Tab(
+                        selected = pagerState.currentPage == index,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                            }
+                        },
+                        text = { Text(title) },
+                        icon = {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = title,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    )
+                }
             }
 
-            // Calendar Section
+            // Pager Content
+            HorizontalPager(
+                state = pagerState,
+                modifier = Modifier.fillMaxSize()
+            ) { page ->
+                when (page) {
+                    0 -> TrackerTabContent(viewModel = viewModel)
+                    1 -> QadaTabContent(viewModel = viewModel)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TrackerTabContent(viewModel: PrayerTrackerViewModel) {
+    val state by viewModel.trackerState.collectAsState()
+    val statsState by viewModel.statsState.collectAsState()
+    val historyState by viewModel.historyState.collectAsState()
+
+    var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
+
+    LaunchedEffect(displayedMonth) {
+        val startDate = displayedMonth.atDay(1)
+        val endDate = displayedMonth.atEndOfMonth()
+        viewModel.onEvent(PrayerTrackerEvent.LoadHistory(startDate, endDate))
+    }
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(0.dp)
+    ) {
+        // Streak Card
+        item {
+            StreakCard(currentStreak = statsState.currentStreak)
+        }
+
+        // Calendar Section
+        item {
+            Spacer(modifier = Modifier.height(25.dp))
+            CalendarSection(
+                displayedMonth = displayedMonth,
+                selectedDate = state.selectedDate,
+                onMonthChange = { displayedMonth = it },
+                onDateSelected = { date ->
+                    viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
+                },
+                historyRecords = historyState.records
+            )
+        }
+
+        // Selected Day Detail
+        item {
+            Spacer(modifier = Modifier.height(12.dp))
+            SelectedDayDetail(
+                selectedDate = state.selectedDate,
+                prayerRecords = state.prayerRecords,
+                prayerTimes = state.prayerTimes,
+                onTogglePrayer = { prayerName, currentStatus ->
+                    if (currentStatus == PrayerStatus.PRAYED || currentStatus == PrayerStatus.LATE) {
+                        viewModel.onEvent(PrayerTrackerEvent.MarkPrayerMissed(prayerName))
+                    } else {
+                        viewModel.onEvent(
+                            PrayerTrackerEvent.MarkPrayerPrayed(
+                                prayerName,
+                                false
+                            )
+                        )
+                    }
+                }
+            )
+        }
+
+        item {
+            Spacer(modifier = Modifier.height(30.dp))
+        }
+    }
+}
+
+@Composable
+private fun QadaTabContent(viewModel: PrayerTrackerViewModel) {
+    val qadaState by viewModel.qadaState.collectAsState()
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Summary Card
+        item {
+            QadaSummaryCard(totalMissed = qadaState.totalMissed)
+        }
+
+        // Empty State
+        if (qadaState.missedPrayers.isEmpty() && !qadaState.isLoading) {
             item {
-                Spacer(modifier = Modifier.height(25.dp))
-                CalendarSection(
-                    displayedMonth = displayedMonth,
-                    selectedDate = state.selectedDate,
-                    onMonthChange = { displayedMonth = it },
-                    onDateSelected = { date ->
-                        viewModel.onEvent(PrayerTrackerEvent.SelectDate(date))
-                    },
-                    historyRecords = historyState.records
+                EmptyQadaState()
+            }
+        }
+
+        // Grouped by Month
+        qadaState.groupedByMonth.forEach { (monthYear, prayers) ->
+            item {
+                Text(
+                    text = monthYear,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
 
-            // Selected Day Detail
-            item {
-                Spacer(modifier = Modifier.height(12.dp))
-                SelectedDayDetail(
-                    selectedDate = state.selectedDate,
-                    prayerRecords = state.prayerRecords,
-                    prayerTimes = state.prayerTimes,
-                    onTogglePrayer = { prayerName, currentStatus ->
-                        if (currentStatus == PrayerStatus.PRAYED || currentStatus == PrayerStatus.LATE) {
-                            // Already prayed - could toggle off, but for now mark missed
-                            viewModel.onEvent(PrayerTrackerEvent.MarkPrayerMissed(prayerName))
-                        } else {
-                            viewModel.onEvent(
-                                PrayerTrackerEvent.MarkPrayerPrayed(
-                                    prayerName,
-                                    false
-                                )
-                            )
-                        }
+            items(prayers, key = { it.id }) { prayer ->
+                QadaPrayerItem(
+                    prayer = prayer,
+                    onMarkCompleted = {
+                        viewModel.onEvent(PrayerTrackerEvent.MarkQadaCompleted(prayer))
                     }
                 )
             }
+        }
 
-            item {
-                Spacer(modifier = Modifier.height(30.dp))
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+// --- Qada Tab Components ---
+
+@Composable
+private fun QadaSummaryCard(totalMissed: Int) {
+    val warningOrange = Color(0xFFF97316)
+    val warningOrangeDark = Color(0xFFEA580C)
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(warningOrange, warningOrangeDark)
+                )
+            )
+            .padding(20.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.Black.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Warning,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(28.dp)
+                )
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = "Prayers to Make Up",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White
+                )
+                Text(
+                    text = if (totalMissed == 0) {
+                        "All caught up!"
+                    } else {
+                        "$totalMissed missed prayer${if (totalMissed != 1) "s" else ""} pending"
+                    },
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Color.White.copy(alpha = 0.9f)
+                )
+            }
+
+            Text(
+                text = "$totalMissed",
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyQadaState() {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(32.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = NimazColors.StatusColors.Prayed,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "All Caught Up!",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(
+                text = "You have no missed prayers to make up. Keep up the good work!",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
+private fun QadaPrayerItem(
+    prayer: PrayerRecord,
+    onMarkCompleted: () -> Unit
+) {
+    val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")
+    val formattedDate = try {
+        Instant.ofEpochMilli(prayer.date)
+            .atZone(ZoneId.systemDefault())
+            .toLocalDate()
+            .format(dateFormatter)
+    } catch (e: Exception) {
+        "Unknown date"
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+        )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(10.dp))
+                    .background(getPrayerColor(prayer.prayerName).copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .clip(CircleShape)
+                        .background(getPrayerColor(prayer.prayerName))
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = prayer.prayerName.displayName(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = formattedDate,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Surface(
+                onClick = onMarkCompleted,
+                shape = RoundedCornerShape(8.dp),
+                color = NimazColors.StatusColors.Prayed.copy(alpha = 0.15f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        tint = NimazColors.StatusColors.Prayed,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = "Done",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Medium,
+                        color = NimazColors.StatusColors.Prayed
+                    )
+                }
             }
         }
     }

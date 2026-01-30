@@ -139,6 +139,11 @@
                 android:resource="@xml/prayer_tracker_widget_info" />
         </receiver>
 
+        <!-- Widget per-minute countdown tick receiver -->
+        <receiver
+            android:name=".widget.WidgetTickReceiver"
+            android:exported="false" />
+
         <!-- Adhan Download Service -->
         <service
             android:name=".data.audio.AdhanDownloadService"

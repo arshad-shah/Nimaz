@@ -32,6 +32,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 
 class NextPrayerWidget : GlanceAppWidget() {
 
@@ -158,6 +159,13 @@ private fun NextPrayerSuccessContent(
 
             Spacer(modifier = GlanceModifier.height(8.dp))
 
+            // Compute countdown live from stored epoch for freshness
+            val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
+                WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
+            } else {
+                data.countdown.ifEmpty { "—" }
+            }
+
             Box(
                 modifier = GlanceModifier
                     .background(ColorProvider(R.color.widget_primary_dim))
@@ -166,11 +174,11 @@ private fun NextPrayerSuccessContent(
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        text = if (data.isValid && data.countdown.isNotEmpty()) "in " else "",
+                        text = if (data.isValid && liveCountdown != "—") "in " else "",
                         style = TextStyle(color = primaryColor, fontSize = 12.sp)
                     )
                     Text(
-                        text = data.countdown.ifEmpty { "—" },
+                        text = liveCountdown,
                         style = TextStyle(
                             color = primaryColor,
                             fontSize = 12.sp,
@@ -189,10 +197,14 @@ class NextPrayerWidgetReceiver : GlanceAppWidgetReceiver() {
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
         NextPrayerWorker.enqueuePeriodicWork(context, force = true)
+        WidgetUpdateScheduler.schedule(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
         NextPrayerWorker.cancel(context)
+        // Only cancel alarm if no other countdown widgets are active
+        // For simplicity, always re-schedule — PrayerTimesWidget will also schedule
+        WidgetUpdateScheduler.cancel(context)
     }
 }

@@ -160,6 +160,28 @@ fun QuranReaderScreen(
         }
     }
 
+    // Save reading position when leaving the screen
+    DisposableEffect(Unit) {
+        onDispose {
+            val ayahs = when (state.readingMode) {
+                ReadingMode.SURAH -> state.surahWithAyahs?.ayahs ?: emptyList()
+                ReadingMode.JUZ, ReadingMode.PAGE -> state.ayahs
+            }
+            if (ayahs.isNotEmpty()) {
+                val idx = (listState.firstVisibleItemIndex - 1).coerceIn(0, ayahs.size - 1)
+                val ayah = ayahs[idx]
+                viewModel.onEvent(
+                    QuranEvent.UpdateReadingPosition(
+                        surah = ayah.surahNumber,
+                        ayah = ayah.numberInSurah,
+                        page = ayah.page,
+                        juz = ayah.juz
+                    )
+                )
+            }
+        }
+    }
+
     // Load based on which param is provided
     LaunchedEffect(surahNumber, juzNumber, pageNumber) {
         when {

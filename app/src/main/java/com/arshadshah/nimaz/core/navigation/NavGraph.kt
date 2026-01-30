@@ -49,9 +49,9 @@ import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
-import com.arshadshah.nimaz.presentation.screens.prayer.QadaPrayersScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
@@ -177,7 +177,7 @@ fun NavGraph() {
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
+                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
@@ -236,8 +236,8 @@ fun NavGraph() {
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToDuas = { navController.navigate(Route.DuaHome) },
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
-                    onNavigateToQadaPrayers = { navController.navigate(Route.QadaPrayers) },
+                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
+                    onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
                     onShareApp = {
                         val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -471,16 +471,18 @@ fun NavGraph() {
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker) },
+                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
 
-            composable<Route.PrayerTracker> {
+            composable<Route.PrayerTracker> { backStackEntry ->
+                val route = backStackEntry.toRoute<Route.PrayerTracker>()
                 PrayerTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToStats = { navController.navigate(Route.PrayerStats) }
+                    onNavigateToStats = { navController.navigate(Route.PrayerStats) },
+                    initialTab = route.initialTab
                 )
             }
 
@@ -490,8 +492,17 @@ fun NavGraph() {
                 )
             }
 
+            // Redirect QadaPrayers to PrayerTracker with Qada tab selected
             composable<Route.QadaPrayers> {
-                QadaPrayersScreen(
+                PrayerTrackerScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToStats = { navController.navigate(Route.PrayerStats) },
+                    initialTab = 1
+                )
+            }
+
+            composable<Route.MonthlyPrayerTimes> {
+                MonthlyPrayerTimesScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

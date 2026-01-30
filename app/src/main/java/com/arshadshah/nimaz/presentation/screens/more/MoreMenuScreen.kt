@@ -80,7 +80,7 @@ fun MoreMenuScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
-    onNavigateToQadaPrayers: () -> Unit,
+    onNavigateToMonthlyPrayerTimes: () -> Unit,
     onDeleteAllData: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -103,38 +103,17 @@ fun MoreMenuScreen(
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }
 
-            // Features Section
+            // Daily Practice Section
             item {
-                SectionHeader(title = "Features")
+                SectionHeader(title = "Daily Practice")
             }
             item {
                 GroupedCard {
                     MenuItem(
                         title = "Prayer Tracker",
-                        subtitle = "Track your daily prayers",
+                        subtitle = "Track your daily prayers & qada",
                         icon = Icons.Default.Schedule,
                         onClick = onNavigateToPrayerTracker
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Qada Prayers",
-                        subtitle = "Missed prayers to make up",
-                        icon = Icons.Default.Restore,
-                        onClick = onNavigateToQadaPrayers
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Calendar",
-                        subtitle = "Islamic calendar and events",
-                        icon = Icons.Default.CalendarMonth,
-                        onClick = onNavigateToCalendar
-                    )
-                    MenuDivider()
-                    MenuItem(
-                        title = "Hadith",
-                        subtitle = "Authentic hadith collections",
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
-                        onClick = onNavigateToHadith
                     )
                     MenuDivider()
                     MenuItem(
@@ -143,12 +122,20 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
                     )
-                    MenuDivider()
+                }
+            }
+
+            // Learning Section
+            item {
+                SectionHeader(title = "Learning")
+            }
+            item {
+                GroupedCard {
                     MenuItem(
-                        title = "Zakat",
-                        subtitle = "Zakat calculator",
-                        icon = Icons.Default.Calculate,
-                        onClick = onNavigateToZakat
+                        title = "Hadith",
+                        subtitle = "Authentic hadith collections",
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        onClick = onNavigateToHadith
                     )
                     MenuDivider()
                     MenuItem(
@@ -156,6 +143,35 @@ fun MoreMenuScreen(
                         subtitle = "Daily duas and supplications",
                         icon = Icons.Default.Mosque,
                         onClick = onNavigateToDuas
+                    )
+                }
+            }
+
+            // Tools Section
+            item {
+                SectionHeader(title = "Tools")
+            }
+            item {
+                GroupedCard {
+                    MenuItem(
+                        title = "Calendar",
+                        subtitle = "Islamic calendar and events",
+                        icon = Icons.Default.CalendarMonth,
+                        onClick = onNavigateToCalendar
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Monthly Prayer Times",
+                        subtitle = "Prayer times for the month",
+                        icon = Icons.Default.CalendarMonth,
+                        onClick = onNavigateToMonthlyPrayerTimes
+                    )
+                    MenuDivider()
+                    MenuItem(
+                        title = "Zakat",
+                        subtitle = "Zakat calculator",
+                        icon = Icons.Default.Calculate,
+                        onClick = onNavigateToZakat
                     )
                 }
             }

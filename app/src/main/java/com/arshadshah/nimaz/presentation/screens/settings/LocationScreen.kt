@@ -234,8 +234,8 @@ private fun isLocationSelected(
 ): Boolean {
     return when (currentLocation) {
         is CurrentLocationState.Set -> {
-            kotlin.math.abs(currentLocation.latitude - location.latitude) < 0.01 &&
-            kotlin.math.abs(currentLocation.longitude - location.longitude) < 0.01
+            kotlin.math.abs(currentLocation.latitude - location.latitude) < 0.001 &&
+            kotlin.math.abs(currentLocation.longitude - location.longitude) < 0.001
         }
         else -> false
     }

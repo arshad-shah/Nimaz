@@ -9,6 +9,9 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.AsrCalculation
+import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
 import java.time.LocalDate
@@ -108,7 +111,11 @@ class PrayerNotificationScheduler @Inject constructor(
         notificationsEnabled: Boolean,
         enabledPrayers: Set<PrayerType>? = null,
         preReminderEnabled: Boolean = false,
-        preReminderMinutes: Int = 15
+        preReminderMinutes: Int = 15,
+        calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
+        asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
+        highLatitudeRule: HighLatitudeRule? = null,
+        adjustments: Map<PrayerType, Int> = emptyMap()
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
@@ -125,7 +132,15 @@ class PrayerNotificationScheduler @Inject constructor(
             cancelPreReminderNotification(it)
         }
 
-        val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude, LocalDate.now())
+        val prayerTimes = prayerTimeCalculator.getPrayerTimes(
+            latitude = latitude,
+            longitude = longitude,
+            date = LocalDate.now(),
+            calculationMethod = calculationMethod,
+            asrCalculation = asrCalculation,
+            highLatitudeRule = highLatitudeRule,
+            adjustments = adjustments
+        )
         val now = LocalDateTime.now()
 
         prayerTimes.forEach { prayerTime ->

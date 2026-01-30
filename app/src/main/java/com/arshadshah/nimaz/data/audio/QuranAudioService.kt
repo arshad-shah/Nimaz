@@ -11,6 +11,9 @@ import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.session.MediaSession
+import androidx.media3.session.MediaStyleNotificationHelper
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -23,7 +26,7 @@ import javax.inject.Inject
 
 /**
  * Foreground service for Quran audio playback.
- * Provides media notification with play/pause, prev/next controls.
+ * Provides media-style notification with lock screen controls via Media3 MediaSession.
  */
 @AndroidEntryPoint
 class QuranAudioService : Service() {
@@ -33,6 +36,7 @@ class QuranAudioService : Service() {
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var stateCollectorJob: Job? = null
+    private var mediaSession: MediaSession? = null
 
     companion object {
         const val CHANNEL_ID = "quran_audio_channel"
@@ -74,7 +78,13 @@ class QuranAudioService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        when (intent?.action) {
+        if (intent == null) {
+            // Service restarted by system with null intent — nothing to do
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
+        when (intent.action) {
             ACTION_PLAY -> audioManager.togglePlayPause()
             ACTION_PAUSE -> audioManager.togglePlayPause()
             ACTION_NEXT -> audioManager.skipToNext()
@@ -84,7 +94,27 @@ class QuranAudioService : Service() {
                 stopSelf()
             }
         }
-        return START_STICKY
+        return START_NOT_STICKY
+    }
+
+    private fun getOrCreateMediaSession(): MediaSession? {
+        val player = audioManager.getPlayer() ?: return null
+
+        // If the player changed (e.g. after stop + recreate), rebuild the session
+        val existing = mediaSession
+        if (existing != null && existing.player === player) {
+            return existing
+        }
+
+        existing?.release()
+        return MediaSession.Builder(this, player)
+            .build()
+            .also { mediaSession = it }
+    }
+
+    private fun releaseMediaSession() {
+        mediaSession?.release()
+        mediaSession = null
     }
 
     private fun startStateObserver() {
@@ -94,6 +124,7 @@ class QuranAudioService : Service() {
                     updateNotification(state)
                 } else {
                     // Audio stopped, stop the service
+                    releaseMediaSession()
                     stopSelf()
                 }
             }
@@ -113,6 +144,7 @@ class QuranAudioService : Service() {
         }
     }
 
+    @androidx.annotation.OptIn(UnstableApi::class)
     private fun buildNotification(state: AudioState): Notification {
         // Create pending intents for actions
         val playPauseIntent = createActionIntent(
@@ -137,12 +169,12 @@ class QuranAudioService : Service() {
         val subtitle = if (state.isPreparing && state.totalToDownload > 0) {
             "Downloading ${state.downloadedCount} of ${state.totalToDownload} ayahs"
         } else if (state.totalAyahs > 0) {
-            "Ayah ${state.currentAyahIndex + 1} of ${state.totalAyahs} • ${state.reciterName}"
+            "Ayah ${state.currentAyahIndex + 1} of ${state.totalAyahs} \u2022 ${state.reciterName}"
         } else {
             state.currentSubtitle ?: state.reciterName
         }
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(state.currentTitle)
             .setContentText(subtitle)
@@ -168,7 +200,17 @@ class QuranAudioService : Service() {
                 "Next",
                 nextIntent
             )
-            .build()
+
+        // Apply MediaStyle if a MediaSession is available (gives lock screen controls)
+        val session = getOrCreateMediaSession()
+        if (session != null) {
+            builder.setStyle(
+                MediaStyleNotificationHelper.MediaStyle(session)
+                    .setShowActionsInCompactView(0, 1, 2) // prev, play/pause, next
+            )
+        }
+
+        return builder.build()
     }
 
     private fun createActionIntent(action: String): PendingIntent {
@@ -205,5 +247,6 @@ class QuranAudioService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         stateCollectorJob?.cancel()
+        releaseMediaSession()
     }
 }

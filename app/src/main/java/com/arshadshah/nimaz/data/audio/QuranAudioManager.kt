@@ -12,6 +12,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -176,6 +177,17 @@ class QuranAudioManager @Inject constructor(
                         Player.STATE_BUFFERING -> {
                             // Could show buffering indicator if needed
                         }
+                        Player.STATE_IDLE -> {
+                            // Player went idle, possibly due to an error - reset for recovery
+                            if (newPlayer.playerError != null) {
+                                _audioState.update {
+                                    it.copy(
+                                        isPlaying = false,
+                                        error = "Playback error: ${newPlayer.playerError?.message}"
+                                    )
+                                }
+                            }
+                        }
                         else -> {}
                     }
                 }
@@ -253,6 +265,7 @@ class QuranAudioManager @Inject constructor(
         withContext(Dispatchers.IO) {
             // Use chunked parallel downloads - 5 concurrent downloads at a time
             toDownload.chunked(5).forEach { chunk ->
+                ensureActive() // Bail out if user cancelled
                 val jobs = chunk.map { (ayah, file) ->
                     scope.launch(Dispatchers.IO) {
                         val url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
@@ -289,11 +302,16 @@ class QuranAudioManager @Inject constructor(
         // Cancel any ongoing download job
         downloadJob?.cancel()
 
+        // Release any existing player to ensure a fresh start (avoids stale ENDED state)
+        positionTrackingJob?.cancel()
+        player?.release()
+        player = null
+
         ayahPlaylist = ayahs
         currentPlaylistIndex = startIndex
 
         _audioState.update {
-            it.copy(
+            AudioState(
                 isActive = true,
                 isPreparing = true,
                 currentTitle = title,
@@ -465,16 +483,31 @@ class QuranAudioManager @Inject constructor(
         if (p.isPlaying) {
             p.pause()
         } else {
-            p.play()
+            when (p.playbackState) {
+                Player.STATE_ENDED -> {
+                    // Player finished — seek back to start and replay
+                    if (p.mediaItemCount > 0) {
+                        p.seekTo(0, 0L)
+                        p.play()
+                    }
+                }
+                Player.STATE_IDLE -> {
+                    // Player is idle with no media — nothing to do
+                }
+                else -> {
+                    p.play()
+                }
+            }
         }
     }
 
     fun stop() {
         downloadJob?.cancel()
         downloadJob = null
-        player?.stop()
-        player?.clearMediaItems()
         positionTrackingJob?.cancel()
+        // Release the player entirely so next playback gets a fresh instance
+        player?.release()
+        player = null
         ayahPlaylist = emptyList()
         currentPlaylistIndex = -1
         downloadingFiles.clear()
@@ -482,6 +515,12 @@ class QuranAudioManager @Inject constructor(
         // Stop the foreground service
         QuranAudioService.stop(context)
     }
+
+    /**
+     * Returns the current ExoPlayer instance, if one exists.
+     * Used by QuranAudioService to bind a MediaSession.
+     */
+    fun getPlayer(): ExoPlayer? = player
 
     fun seekTo(position: Long) {
         player?.seekTo(position)
@@ -495,37 +534,52 @@ class QuranAudioManager @Inject constructor(
 
     /**
      * Download file without updating state (for batch downloads).
+     * Includes retry logic and timeout for the wait loop.
      */
     private suspend fun downloadFileSilent(url: String, destination: File) {
         // Check if already downloading this file
         val key = destination.absolutePath
         if (downloadingFiles.putIfAbsent(key, true) != null) {
-            // Already downloading, wait for it
-            while (downloadingFiles.containsKey(key)) {
+            // Already downloading, wait for it with timeout (max 60s)
+            var waited = 0L
+            while (downloadingFiles.containsKey(key) && waited < 60_000L) {
                 delay(100)
+                waited += 100
             }
             return
         }
 
         try {
             withContext(Dispatchers.IO) {
-                try {
-                    val connection = URL(url).openConnection()
-                    connection.connectTimeout = 15000
-                    connection.readTimeout = 30000
+                var lastException: Exception? = null
+                val maxRetries = 2
+                for (attempt in 0..maxRetries) {
+                    ensureActive() // Bail out if cancelled
+                    try {
+                        val connection = URL(url).openConnection()
+                        connection.connectTimeout = 15000
+                        connection.readTimeout = 30000
 
-                    connection.getInputStream().use { input ->
-                        destination.outputStream().use { output ->
-                            val buffer = ByteArray(8192)
-                            var bytesRead: Int
-                            while (input.read(buffer).also { bytesRead = it } != -1) {
-                                output.write(buffer, 0, bytesRead)
+                        connection.getInputStream().use { input ->
+                            destination.outputStream().use { output ->
+                                val buffer = ByteArray(8192)
+                                var bytesRead: Int
+                                while (input.read(buffer).also { bytesRead = it } != -1) {
+                                    output.write(buffer, 0, bytesRead)
+                                }
                             }
                         }
+                        return@withContext // Success
+                    } catch (e: Exception) {
+                        destination.delete()
+                        lastException = e
+                        if (attempt < maxRetries) {
+                            delay(1000L) // Wait 1s before retry
+                        }
                     }
-                } catch (e: Exception) {
-                    destination.delete()
                 }
+                // All retries failed
+                lastException?.let { destination.delete() }
             }
         } finally {
             downloadingFiles.remove(key)

@@ -75,13 +75,16 @@ sealed interface Route {
     data object PrayerTimes : Route
 
     @Serializable
-    data object PrayerTracker : Route
+    data class PrayerTracker(val initialTab: Int = 0) : Route
 
     @Serializable
     data object PrayerStats : Route
 
     @Serializable
     data object QadaPrayers : Route
+
+    @Serializable
+    data object MonthlyPrayerTimes : Route
 
     // Fasting screens
     @Serializable

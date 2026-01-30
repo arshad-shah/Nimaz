@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
@@ -112,6 +113,18 @@ fun HomeScreen(
                         timeUntilNextPrayer = state.timeUntilNextPrayer,
                         onSettingsClick = onNavigateToSettings
                     )
+                }
+
+                // Jumu'ah Card (Friday only)
+                if (state.isFriday) {
+                    item {
+                        JumuahCard(
+                            jumuahTime = state.jumuahTime,
+                            timeUntilJumuah = state.timeUntilJumuah,
+                            isJumuahPassed = state.isJumuahPassed,
+                            modifier = Modifier.padding(horizontal = 20.dp)
+                        )
+                    }
                 }
 
                 // Today's Progress
@@ -779,6 +792,154 @@ private fun PrayerTimeCard(
             } else {
                 // Empty spacer to maintain layout consistency for Sunrise
                 Spacer(modifier = Modifier.size(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun JumuahCard(
+    jumuahTime: String,
+    timeUntilJumuah: String,
+    isJumuahPassed: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val jumuahGreen = Color(0xFF2E7D32)
+    val jumuahGreenLight = Color(0xFF43A047)
+
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(jumuahGreen, jumuahGreenLight)
+                    ),
+                    shape = RoundedCornerShape(20.dp)
+                )
+                .padding(20.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(44.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(Color.White.copy(alpha = 0.2f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Mosque,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "Jumu'ah Mubarak",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "\u0627\u0644\u062C\u0645\u0639\u0629",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+
+                    if (jumuahTime.isNotEmpty()) {
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = jumuahTime,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Khutbah time",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Countdown or passed status
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.15f))
+                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                ) {
+                    if (isJumuahPassed) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Jumu'ah prayer time has passed",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
+                            )
+                        }
+                    } else if (timeUntilJumuah.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Time until Jumu'ah",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+                            Text(
+                                text = timeUntilJumuah,
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Friday reminder text
+                Text(
+                    text = "\"The best day on which the sun rises is Friday.\" \u2014 Sahih Muslim",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Medium
+                )
             }
         }
     }

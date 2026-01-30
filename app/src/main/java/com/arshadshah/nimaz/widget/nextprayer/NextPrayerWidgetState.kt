@@ -20,5 +20,6 @@ data class NextPrayerData(
     val prayerName: String = "",
     val prayerTime: String = "",
     val countdown: String = "",
-    val isValid: Boolean = true
+    val isValid: Boolean = true,
+    val nextPrayerEpochMillis: Long = 0L
 )

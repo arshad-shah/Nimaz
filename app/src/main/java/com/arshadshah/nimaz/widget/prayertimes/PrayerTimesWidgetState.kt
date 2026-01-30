@@ -30,5 +30,6 @@ data class PrayerTimesData(
     val dhuhrPassed: Boolean = false,
     val asrPassed: Boolean = false,
     val maghribPassed: Boolean = false,
-    val ishaPassed: Boolean = false
+    val ishaPassed: Boolean = false,
+    val nextPrayerEpochMillis: Long = 0L
 )

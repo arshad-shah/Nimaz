@@ -32,21 +32,63 @@ class PrayerTimeCalculator @Inject constructor() {
     fun getPrayerTimes(
         latitude: Double,
         longitude: Double,
-        date: LocalDate = LocalDate.now()
+        date: LocalDate = LocalDate.now(),
+        calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
+        asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
+        highLatitudeRule: HighLatitudeRule? = null,
+        adjustments: Map<PrayerType, Int> = emptyMap()
     ): List<PrayerTime> {
         val coordinates = Coordinates(latitude, longitude)
         val dateComponents = DateComponents(date.year, date.monthValue, date.dayOfMonth)
-        val parameters = AdhanMethod.MUSLIM_WORLD_LEAGUE.parameters
+
+        val method = when (calculationMethod) {
+            CalculationMethod.MUSLIM_WORLD_LEAGUE -> AdhanMethod.MUSLIM_WORLD_LEAGUE
+            CalculationMethod.EGYPTIAN -> AdhanMethod.EGYPTIAN
+            CalculationMethod.KARACHI -> AdhanMethod.KARACHI
+            CalculationMethod.UMM_AL_QURA -> AdhanMethod.UMM_AL_QURA
+            CalculationMethod.DUBAI -> AdhanMethod.DUBAI
+            CalculationMethod.MOON_SIGHTING_COMMITTEE -> AdhanMethod.MOON_SIGHTING_COMMITTEE
+            CalculationMethod.NORTH_AMERICA -> AdhanMethod.NORTH_AMERICA
+            CalculationMethod.KUWAIT -> AdhanMethod.KUWAIT
+            CalculationMethod.QATAR -> AdhanMethod.QATAR
+            CalculationMethod.SINGAPORE -> AdhanMethod.SINGAPORE
+            CalculationMethod.TURKEY -> AdhanMethod.TURKEY
+        }
+
+        var parameters = method.parameters.copy(
+            madhab = when (asrCalculation) {
+                AsrCalculation.STANDARD -> Madhab.SHAFI
+                AsrCalculation.HANAFI -> Madhab.HANAFI
+            }
+        )
+
+        highLatitudeRule?.let { rule ->
+            val adhanRule = when (rule) {
+                HighLatitudeRule.MIDDLE_OF_THE_NIGHT -> AdhanHighLatitudeRule.MIDDLE_OF_THE_NIGHT
+                HighLatitudeRule.SEVENTH_OF_THE_NIGHT -> AdhanHighLatitudeRule.SEVENTH_OF_THE_NIGHT
+                HighLatitudeRule.TWILIGHT_ANGLE -> AdhanHighLatitudeRule.TWILIGHT_ANGLE
+            }
+            parameters = parameters.copy(highLatitudeRule = adhanRule)
+        }
 
         val adhanTimes = AdhanPrayerTimes(coordinates, dateComponents, parameters)
 
+        fun adjustTime(instant: Instant, prayerType: PrayerType): Instant {
+            val adj = adjustments[prayerType] ?: 0
+            return if (adj != 0) {
+                Instant.fromEpochMilliseconds(instant.toEpochMilliseconds() + adj * 60_000L)
+            } else {
+                instant
+            }
+        }
+
         return listOf(
-            PrayerTime(PrayerType.FAJR, adhanTimes.fajr),
-            PrayerTime(PrayerType.SUNRISE, adhanTimes.sunrise),
-            PrayerTime(PrayerType.DHUHR, adhanTimes.dhuhr),
-            PrayerTime(PrayerType.ASR, adhanTimes.asr),
-            PrayerTime(PrayerType.MAGHRIB, adhanTimes.maghrib),
-            PrayerTime(PrayerType.ISHA, adhanTimes.isha)
+            PrayerTime(PrayerType.FAJR, adjustTime(adhanTimes.fajr, PrayerType.FAJR)),
+            PrayerTime(PrayerType.SUNRISE, adjustTime(adhanTimes.sunrise, PrayerType.SUNRISE)),
+            PrayerTime(PrayerType.DHUHR, adjustTime(adhanTimes.dhuhr, PrayerType.DHUHR)),
+            PrayerTime(PrayerType.ASR, adjustTime(adhanTimes.asr, PrayerType.ASR)),
+            PrayerTime(PrayerType.MAGHRIB, adjustTime(adhanTimes.maghrib, PrayerType.MAGHRIB)),
+            PrayerTime(PrayerType.ISHA, adjustTime(adhanTimes.isha, PrayerType.ISHA))
         )
     }
 

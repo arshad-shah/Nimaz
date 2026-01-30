@@ -148,14 +148,22 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 prayerRepository.getAllLocations().collect { locations ->
-                    val recentLocations = locations.take(5).map { location ->
-                        SearchLocation(
-                            name = location.name,
-                            country = location.country ?: "",
-                            latitude = location.latitude,
-                            longitude = location.longitude
-                        )
-                    }
+                    val recentLocations = locations
+                        .map { location ->
+                            SearchLocation(
+                                name = location.name,
+                                country = location.country ?: "",
+                                latitude = location.latitude,
+                                longitude = location.longitude
+                            )
+                        }
+                        // Deduplicate by coordinates rounded to 3 decimal places (~110m)
+                        .distinctBy { loc ->
+                            val roundedLat = "%.3f".format(loc.latitude)
+                            val roundedLng = "%.3f".format(loc.longitude)
+                            "$roundedLat,$roundedLng"
+                        }
+                        .take(5)
                     _state.update { it.copy(recentLocations = recentLocations) }
                 }
             } catch (e: Exception) {

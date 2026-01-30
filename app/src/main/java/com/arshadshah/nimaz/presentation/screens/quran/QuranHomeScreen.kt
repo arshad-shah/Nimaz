@@ -88,7 +88,7 @@ fun QuranHomeScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToSurahInfo: (Int) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
-    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
+    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, ayah -> onNavigateToSurah(surah) },
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -165,7 +165,8 @@ fun QuranHomeScreen(
                         state = state,
                         bookmarks = bookmarksState.bookmarks,
                         onNavigateToSurah = onNavigateToSurah,
-                        onNavigateToBookmarks = onNavigateToBookmarks
+                        onNavigateToBookmarks = onNavigateToBookmarks,
+                        onNavigateToQuranAyah = onNavigateToQuranAyah
                     )
                     1 -> BrowseTabContent(
                         state = state,
@@ -191,7 +192,8 @@ private fun HomeTabContent(
     state: com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState,
     bookmarks: List<QuranBookmark>,
     onNavigateToSurah: (Int) -> Unit,
-    onNavigateToBookmarks: () -> Unit
+    onNavigateToBookmarks: () -> Unit,
+    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) }
 ) {
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -208,7 +210,7 @@ private fun HomeTabContent(
                     pageNumber = progress.lastReadPage,
                     totalAyahsRead = progress.totalAyahsRead,
                     surahName = state.surahs.find { it.number == progress.lastSurah },
-                    onClick = { onNavigateToSurah(progress.lastSurah) }
+                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) }
                 )
             }
 

@@ -120,6 +120,7 @@ class PrayerTimesWorker @AssistedInject constructor(
                 prayerTime.time.toLocalDateTime(timeZone).time > localTime.time
             }
 
+            val nextPrayerEpochMillis = nextPrayer?.time?.toEpochMilliseconds() ?: 0L
             val timeUntilNext = if (nextPrayer != null) {
                 val diff: kotlin.time.Duration = nextPrayer.time - currentTime
                 val totalMinutes = diff.inWholeMinutes
@@ -147,7 +148,8 @@ class PrayerTimesWorker @AssistedInject constructor(
                 dhuhrPassed = isPassed(dhuhr),
                 asrPassed = isPassed(asr),
                 maghribPassed = isPassed(maghrib),
-                ishaPassed = isPassed(isha)
+                ishaPassed = isPassed(isha),
+                nextPrayerEpochMillis = nextPrayerEpochMillis
             )
 
             setWidgetState(glanceIds, PrayerTimesWidgetState.Success(data))

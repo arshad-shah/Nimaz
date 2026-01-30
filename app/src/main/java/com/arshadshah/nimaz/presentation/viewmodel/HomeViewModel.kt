@@ -8,6 +8,9 @@ import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
+import com.arshadshah.nimaz.domain.model.AsrCalculation
+import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -26,6 +29,7 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import java.time.DayOfWeek
 import java.time.LocalDate
 import javax.inject.Inject
 import kotlin.time.Clock
@@ -43,6 +47,10 @@ data class HomeUiState(
     val longitude: Double = 0.0,
     val fastingToday: Boolean = false,
     val dailyHadith: String? = null,
+    val isFriday: Boolean = false,
+    val jumuahTime: String = "",
+    val timeUntilJumuah: String = "",
+    val isJumuahPassed: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -179,29 +187,74 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    // Cached prayer calculation settings
+    private var cachedCalcMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE
+    private var cachedAsrCalc = AsrCalculation.STANDARD
+    private var cachedHighLatRule: HighLatitudeRule? = null
+    private var cachedAdjustments = mapOf<PrayerType, Int>()
+
     private fun observeLocation() {
         viewModelScope.launch {
-            combine(
+            // Combine location with all prayer calculation settings
+            val locationFlow = combine(
                 preferencesDataStore.latitude,
                 preferencesDataStore.longitude,
                 preferencesDataStore.locationName
             ) { lat: Double, lng: Double, name: String ->
                 Triple(lat, lng, name)
+            }
+
+            val calcSettingsFlow = combine(
+                preferencesDataStore.calculationMethod,
+                preferencesDataStore.asrCalculation,
+                preferencesDataStore.highLatitudeRule
+            ) { calc: String, asr: String, high: String ->
+                Triple(calc, asr, high)
+            }
+
+            val adjustmentsFlow = combine(
+                preferencesDataStore.fajrAdjustment,
+                preferencesDataStore.sunriseAdjustment,
+                preferencesDataStore.dhuhrAdjustment,
+                preferencesDataStore.asrAdjustment,
+            ) { fajr, sunrise, dhuhr, asr ->
+                mapOf(
+                    PrayerType.FAJR to fajr,
+                    PrayerType.SUNRISE to sunrise,
+                    PrayerType.DHUHR to dhuhr,
+                    PrayerType.ASR to asr
+                )
             }.combine(
                 combine(
-                    preferencesDataStore.calculationMethod,
-                    preferencesDataStore.asrCalculation,
-                    preferencesDataStore.highLatitudeRule
-                ) { calc: String, asr: String, high: String ->
-                    Triple(calc, asr, high)
+                    preferencesDataStore.maghribAdjustment,
+                    preferencesDataStore.ishaAdjustment
+                ) { maghrib, isha ->
+                    mapOf(
+                        PrayerType.MAGHRIB to maghrib,
+                        PrayerType.ISHA to isha
+                    )
                 }
-            ) { location, _ ->
-                location
-            }.collect { (lat, lng, name) ->
+            ) { first, second -> first + second }
+
+            combine(locationFlow, calcSettingsFlow, adjustmentsFlow) { location, calcSettings, adjustments ->
+                Triple(location, calcSettings, adjustments)
+            }.collect { (location, calcSettings, adjustments) ->
+                val (lat, lng, name) = location
+                val (calcStr, asrStr, highStr) = calcSettings
+
                 val hasLocation = lat != 0.0 && lng != 0.0
                 val latitude = if (hasLocation) lat else DEFAULT_LATITUDE
                 val longitude = if (hasLocation) lng else DEFAULT_LONGITUDE
                 val locationName = if (hasLocation && name.isNotBlank()) name else DEFAULT_LOCATION_NAME
+
+                // Cache calculation settings
+                cachedCalcMethod = try { CalculationMethod.valueOf(calcStr) } catch (_: Exception) { CalculationMethod.MUSLIM_WORLD_LEAGUE }
+                cachedAsrCalc = when (asrStr.lowercase()) {
+                    "hanafi" -> AsrCalculation.HANAFI
+                    else -> AsrCalculation.STANDARD
+                }
+                cachedHighLatRule = try { HighLatitudeRule.valueOf(highStr) } catch (_: Exception) { null }
+                cachedAdjustments = adjustments
 
                 _state.update {
                     it.copy(
@@ -244,7 +297,14 @@ class HomeViewModel @Inject constructor(
             try {
                 _state.update { it.copy(isLoading = true) }
 
-                val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
+                val prayerTimes = prayerTimeCalculator.getPrayerTimes(
+                    latitude = latitude,
+                    longitude = longitude,
+                    calculationMethod = cachedCalcMethod,
+                    asrCalculation = cachedAsrCalc,
+                    highLatitudeRule = cachedHighLatRule,
+                    adjustments = cachedAdjustments
+                )
                 val currentTime = Clock.System.now()
                 val timeZone = TimeZone.currentSystemDefault()
                 val localTime = currentTime.toLocalDateTime(timeZone)
@@ -301,7 +361,15 @@ class HomeViewModel @Inject constructor(
                     // All prayers passed — wrap to tomorrow's Fajr
                     nextPrayer = PrayerType.FAJR
                     val tomorrowDate = LocalDate.now().plusDays(1)
-                    val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(latitude, longitude, tomorrowDate)
+                    val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(
+                        latitude = latitude,
+                        longitude = longitude,
+                        date = tomorrowDate,
+                        calculationMethod = cachedCalcMethod,
+                        asrCalculation = cachedAsrCalc,
+                        highLatitudeRule = cachedHighLatRule,
+                        adjustments = cachedAdjustments
+                    )
                     val tomorrowFajr = tomorrowPrayers.find { it.type == PrayerType.FAJR }?.time
                     timeUntilNext = if (tomorrowFajr != null) {
                         val diff: Duration = tomorrowFajr - currentTime
@@ -325,6 +393,27 @@ class HomeViewModel @Inject constructor(
                     display.copy(prayerStatus = status)
                 }
 
+                // Friday / Jumu'ah detection
+                val today = LocalDate.now()
+                val isFriday = today.dayOfWeek == DayOfWeek.FRIDAY
+                val dhuhrDisplay = displaysWithStatus.find { it.type == PrayerType.DHUHR }
+                val dhuhrInstant = prayerTimes.find { it.type == PrayerType.DHUHR }?.time
+
+                val jumuahTime = if (isFriday) dhuhrDisplay?.time ?: "" else ""
+                val isJumuahPassed = if (isFriday) dhuhrDisplay?.isPassed == true else false
+                val timeUntilJumuah = if (isFriday && !isJumuahPassed && dhuhrInstant != null) {
+                    val diff: Duration = dhuhrInstant - currentTime
+                    val totalSeconds = diff.inWholeSeconds
+                    val hours = totalSeconds / 3600
+                    val minutes = (totalSeconds % 3600) / 60
+                    val seconds = totalSeconds % 60
+                    when {
+                        hours > 0 -> "${hours}h ${minutes}m ${seconds}s"
+                        minutes > 0 -> "${minutes}m ${seconds}s"
+                        else -> "${seconds}s"
+                    }
+                } else ""
+
                 _state.update {
                     it.copy(
                         prayerTimes = displaysWithStatus,
@@ -332,6 +421,10 @@ class HomeViewModel @Inject constructor(
                         nextPrayer = nextPrayer,
                         timeUntilNextPrayer = timeUntilNext,
                         hijriDate = calculateHijriDate(),
+                        isFriday = isFriday,
+                        jumuahTime = jumuahTime,
+                        timeUntilJumuah = timeUntilJumuah,
+                        isJumuahPassed = isJumuahPassed,
                         isLoading = false,
                         error = null
                     )

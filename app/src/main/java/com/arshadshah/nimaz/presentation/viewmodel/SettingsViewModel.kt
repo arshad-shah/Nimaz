@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -100,6 +101,7 @@ data class NotificationSettingsUiState(
     val ishaAdhanEnabled: Boolean = true,
     // Sunrise always uses beep only (no toggle needed)
     val vibrationEnabled: Boolean = true,
+    val respectDnd: Boolean = true,
     val reminderMinutes: Int = 15,
     val showReminderBefore: Boolean = true,
     val persistentNotification: Boolean = false,
@@ -162,6 +164,7 @@ sealed interface SettingsEvent {
     data class SetAdhanEnabled(val enabled: Boolean) : SettingsEvent
     data class SetPrayerAdhanEnabled(val prayer: String, val enabled: Boolean) : SettingsEvent
     data class SetVibrationEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetRespectDnd(val enabled: Boolean) : SettingsEvent
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetShowReminderBefore(val enabled: Boolean) : SettingsEvent
     data class SetPersistentNotification(val enabled: Boolean) : SettingsEvent
@@ -314,8 +317,14 @@ class SettingsViewModel @Inject constructor(
                     rescheduleNotifications()
                 }
             }
-            is SettingsEvent.SetFajrAngle -> _prayerState.update { it.copy(fajrAngle = event.angle) }
-            is SettingsEvent.SetIshaAngle -> _prayerState.update { it.copy(ishaAngle = event.angle) }
+            is SettingsEvent.SetFajrAngle -> {
+                _prayerState.update { it.copy(fajrAngle = event.angle) }
+                viewModelScope.launch { rescheduleNotifications() }
+            }
+            is SettingsEvent.SetIshaAngle -> {
+                _prayerState.update { it.copy(ishaAngle = event.angle) }
+                viewModelScope.launch { rescheduleNotifications() }
+            }
             is SettingsEvent.SetPrayerAdjustment -> {
                 updatePrayerAdjustment(event.prayer, event.minutes)
                 viewModelScope.launch {
@@ -355,6 +364,10 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetVibrationEnabled -> {
                 _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
                 viewModelScope.launch { preferencesDataStore.setNotificationVibration(event.enabled) }
+            }
+            is SettingsEvent.SetRespectDnd -> {
+                _notificationState.update { it.copy(respectDnd = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setAdhanRespectDnd(event.enabled) }
             }
             is SettingsEvent.SetReminderMinutes -> {
                 _notificationState.update { it.copy(reminderMinutes = event.minutes) }
@@ -550,6 +563,7 @@ class SettingsViewModel @Inject constructor(
             val reminderMin = preferencesDataStore.notificationReminderMinutes.first()
             val showReminder = preferencesDataStore.showReminderBefore.first()
             val persistent = preferencesDataStore.persistentNotification.first()
+            val respectDnd = preferencesDataStore.adhanRespectDnd.first()
             val adhanSoundName = preferencesDataStore.selectedAdhanSound.first()
             val fajrNotif = preferencesDataStore.fajrNotificationEnabled.first()
             val sunriseNotif = preferencesDataStore.sunriseNotificationEnabled.first()
@@ -578,6 +592,7 @@ class SettingsViewModel @Inject constructor(
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
                     persistentNotification = persistent,
+                    respectDnd = respectDnd,
                     selectedAdhanSound = adhanSoundName,
                     fajrNotification = fajrNotif,
                     sunriseNotification = sunriseNotif,
@@ -640,6 +655,7 @@ class SettingsViewModel @Inject constructor(
         val lat = prefs.latitude
         val lng = prefs.longitude
         val notifState = _notificationState.value
+        val prayerSettings = _prayerState.value
 
         val enabledPrayers = buildSet {
             if (notifState.fajrNotification) add(PrayerType.FAJR)
@@ -650,13 +666,44 @@ class SettingsViewModel @Inject constructor(
             if (notifState.sunriseNotification) add(PrayerType.SUNRISE)
         }
 
+        val calcMethod = prayerSettings.calculationMethod
+        val asrCalc = when (prayerSettings.asrMethod) {
+            AsrJuristicMethod.STANDARD -> AsrCalculation.STANDARD
+            AsrJuristicMethod.HANAFI -> AsrCalculation.HANAFI
+        }
+        val highLatRule = try {
+            com.arshadshah.nimaz.domain.model.HighLatitudeRule.valueOf(
+                prayerSettings.highLatitudeRule.name.let {
+                    // Map SettingsViewModel enum names to domain model enum names
+                    when (it) {
+                        "MIDDLE_OF_NIGHT" -> "MIDDLE_OF_THE_NIGHT"
+                        "SEVENTH_OF_NIGHT" -> "SEVENTH_OF_THE_NIGHT"
+                        else -> it
+                    }
+                }
+            )
+        } catch (_: Exception) { null }
+
+        val adjustments = mapOf(
+            PrayerType.FAJR to prayerSettings.fajrAdjustment,
+            PrayerType.SUNRISE to prayerSettings.sunriseAdjustment,
+            PrayerType.DHUHR to prayerSettings.dhuhrAdjustment,
+            PrayerType.ASR to prayerSettings.asrAdjustment,
+            PrayerType.MAGHRIB to prayerSettings.maghribAdjustment,
+            PrayerType.ISHA to prayerSettings.ishaAdjustment
+        )
+
         prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
             latitude = lat,
             longitude = lng,
             notificationsEnabled = notifState.notificationsEnabled,
             enabledPrayers = enabledPrayers,
             preReminderEnabled = notifState.showReminderBefore,
-            preReminderMinutes = notifState.reminderMinutes
+            preReminderMinutes = notifState.reminderMinutes,
+            calculationMethod = calcMethod,
+            asrCalculation = asrCalc,
+            highLatitudeRule = highLatRule,
+            adjustments = adjustments
         )
     }
 
