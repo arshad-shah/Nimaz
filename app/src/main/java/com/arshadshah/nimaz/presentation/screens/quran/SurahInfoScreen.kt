@@ -80,6 +80,10 @@ fun SurahInfoScreen(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
                 isDownloading = audioState.isDownloading,
+                isPreparing = audioState.isPreparing,
+                downloadProgress = audioState.downloadProgress,
+                downloadedCount = audioState.downloadedCount,
+                totalToDownload = audioState.totalToDownload,
                 currentAyah = audioState.currentAyahIndex + 1,
                 totalAyahs = audioState.totalAyahs,
                 surahProgress = audioState.surahProgress,
@@ -440,6 +444,10 @@ private fun BottomActions(
     isAudioActive: Boolean,
     isPlaying: Boolean,
     isDownloading: Boolean,
+    isPreparing: Boolean,
+    downloadProgress: Float,
+    downloadedCount: Int,
+    totalToDownload: Int,
     currentAyah: Int,
     totalAyahs: Int,
     surahProgress: Float,
@@ -460,6 +468,10 @@ private fun BottomActions(
             SurahAudioControlBar(
                 isPlaying = isPlaying,
                 isDownloading = isDownloading,
+                isPreparing = isPreparing,
+                downloadProgress = downloadProgress,
+                downloadedCount = downloadedCount,
+                totalToDownload = totalToDownload,
                 currentAyah = currentAyah,
                 totalAyahs = totalAyahs,
                 surahProgress = surahProgress,
@@ -553,6 +565,10 @@ private fun BottomActions(
 private fun SurahAudioControlBar(
     isPlaying: Boolean,
     isDownloading: Boolean,
+    isPreparing: Boolean,
+    downloadProgress: Float,
+    downloadedCount: Int,
+    totalToDownload: Int,
     currentAyah: Int,
     totalAyahs: Int,
     surahProgress: Float,
@@ -565,15 +581,27 @@ private fun SurahAudioControlBar(
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.primaryContainer)
     ) {
-        // Surah progress bar
-        LinearProgressIndicator(
-            progress = { surahProgress },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp),
-            color = MaterialTheme.colorScheme.primary,
-            trackColor = MaterialTheme.colorScheme.primaryContainer,
-        )
+        // Show download progress bar when preparing/downloading
+        if (isPreparing && totalToDownload > 0) {
+            LinearProgressIndicator(
+                progress = { downloadProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp),
+                color = MaterialTheme.colorScheme.tertiary,
+                trackColor = MaterialTheme.colorScheme.primaryContainer,
+            )
+        } else {
+            // Surah progress bar
+            LinearProgressIndicator(
+                progress = { surahProgress },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(4.dp),
+                color = MaterialTheme.colorScheme.primary,
+                trackColor = MaterialTheme.colorScheme.primaryContainer,
+            )
+        }
 
         Row(
             modifier = Modifier
@@ -581,24 +609,45 @@ private fun SurahAudioControlBar(
                 .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Audio info with surah progress
+            // Audio info with surah progress or download status
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = if (isPlaying) "Now Playing" else "Paused",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-                Text(
-                    text = "Ayah $currentAyah of $totalAyahs",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Text(
-                    text = "${(surahProgress * 100).toInt()}% complete",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
+                if (isPreparing && totalToDownload > 0) {
+                    // Show download status
+                    Text(
+                        text = "Preparing Audio",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "Downloading $downloadedCount of $totalToDownload ayahs",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "${(downloadProgress * 100).toInt()}% complete",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                } else {
+                    // Show playback status
+                    Text(
+                        text = if (isPlaying) "Now Playing" else "Paused",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                    Text(
+                        text = "Ayah $currentAyah of $totalAyahs",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = "${(surahProgress * 100).toInt()}% complete",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                    )
+                }
             }
 
             // Play/Pause button
@@ -610,7 +659,7 @@ private fun SurahAudioControlBar(
                     .clickable(onClick = onPlayPauseClick),
                 contentAlignment = Alignment.Center
             ) {
-                if (isDownloading) {
+                if (isDownloading || isPreparing) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
                         strokeWidth = 2.dp,

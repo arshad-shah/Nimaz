@@ -5,85 +5,64 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import com.arshadshah.nimaz.presentation.theme.NimazColors.TajweedColors
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 /**
- * Parser for tajweed-annotated Quran text.
+ * Parser for pre-parsed tajweed JSON data.
  *
- * Tajweed text from Quran.com API uses HTML-like tags:
- * `<tajweed class="ghunnah">نّ</tajweed>`
+ * Tajweed data is now pre-parsed during database generation into a simple JSON format:
+ * [{"t":"بِ","r":"g"},{"t":"سْمِ","r":null}]
  *
- * This parser converts those tags into Compose AnnotatedString with appropriate colors.
+ * Where:
+ * - "t" = text content
+ * - "r" = rule code (single letter) or null for plain text
+ *
+ * Rule codes:
+ * - "g" = Ghunnah (nasalization) - Green
+ * - "i" = Ikhfa (hiding) - Purple
+ * - "d" = Idgham (merging) - Amber/Orange
+ * - "q" = Qalqalah (echoing) - Blue
+ * - "m" = Madd (elongation) - Red
+ * - "l" = Iqlab (conversion) - Purple
+ * - "s" = Silent letters - Gray/Slate
  */
 object TajweedParser {
 
-    private val tagPattern = Regex("""<tajweed\s+class="([^"]+)">(.*?)</tajweed>""")
+    private val json = Json { ignoreUnknownKeys = true }
 
     /**
-     * Map of tajweed rule class names to their light/dark color pairs.
-     * The Quran.com API uses various class names for different tajweed rules.
+     * Map of single-letter rule codes to their light/dark color pairs.
      */
     private val ruleColors: Map<String, Pair<Color, Color>> = mapOf(
         // Ghunnah (nasalization) - Green
-        "ghunnah" to Pair(TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
-        "ghn" to Pair(TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
+        "g" to Pair(TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
 
         // Ikhfa (hiding) - Purple
-        "ikhfa" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
-        "ikhfa_shafawi" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
-        "ikhf" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
-        "ikhf_shfw" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
+        "i" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
 
         // Idgham (merging) - Amber/Orange
-        "idgham" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgham_ghunnah" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgham_no_ghunnah" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgham_shafawi" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgham_mutajanisayn" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgham_mutaqaribayn" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgh_ghn" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgh_w_ghn" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgh_wo_ghn" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgh_shfw" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "idgh_mus" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
+        "d" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
 
         // Qalqalah (echoing) - Blue
-        "qalqalah" to Pair(TajweedColors.QalqalahLight, TajweedColors.QalqalahDark),
-        "qlq" to Pair(TajweedColors.QalqalahLight, TajweedColors.QalqalahDark),
+        "q" to Pair(TajweedColors.QalqalahLight, TajweedColors.QalqalahDark),
 
         // Madd (elongation) - Red
-        "madd" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_normal" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_permissible" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_necessary" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_obligatory" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_6" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_2" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "madd_246" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "mad" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "mad_2" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "mad_246" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "mad_6" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
-        "mad_obligatory" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
+        "m" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
 
-        // Iqlab (conversion) - Purple (same family as Ikhfa)
-        "iqlab" to Pair(TajweedColors.IqlabLight, TajweedColors.IqlabDark),
-        "iqlb" to Pair(TajweedColors.IqlabLight, TajweedColors.IqlabDark),
+        // Iqlab (conversion) - Purple
+        "l" to Pair(TajweedColors.IqlabLight, TajweedColors.IqlabDark),
 
         // Silent letters - Gray/Slate
-        "silent" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
-        "slnt" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
-
-        // Lam Shamsiyyah - use Idgham color (merging)
-        "lam_shamsiyah" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
-        "lam_shamsiyyah" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark)
+        "s" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark)
     )
 
     /**
-     * Parse tajweed-annotated text and return an AnnotatedString with colored spans.
+     * Parse pre-parsed tajweed JSON and return an AnnotatedString with colored spans.
      *
-     * @param tajweedText The raw tajweed text with HTML-like tags
+     * @param tajweedText The pre-parsed JSON string: [{"t":"text","r":"code"},...]
      * @param isDarkTheme Whether the app is in dark theme mode
-     * @param defaultColor The default text color for non-tajweed text
+     * @param defaultColor The default text color for plain text (r=null)
      * @return AnnotatedString with colored spans for tajweed rules
      */
     fun parse(
@@ -91,70 +70,92 @@ object TajweedParser {
         isDarkTheme: Boolean,
         defaultColor: Color = Color.Unspecified
     ): AnnotatedString {
-        return buildAnnotatedString {
-            var lastIndex = 0
-            val matches = tagPattern.findAll(tajweedText)
+        return try {
+            val segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
+            buildAnnotatedString {
+                for (segment in segments) {
+                    val startIdx = length
+                    append(segment.t)
 
-            for (match in matches) {
-                // Append text before this match
-                if (match.range.first > lastIndex) {
-                    append(tajweedText.substring(lastIndex, match.range.first))
+                    // Apply color if this segment has a rule
+                    val ruleCode = segment.r
+                    if (ruleCode != null) {
+                        val colorPair = ruleColors[ruleCode]
+                        val color = if (colorPair != null) {
+                            if (isDarkTheme) colorPair.second else colorPair.first
+                        } else {
+                            // Unknown rule code, use default
+                            defaultColor
+                        }
+
+                        if (color != Color.Unspecified) {
+                            addStyle(
+                                style = SpanStyle(color = color),
+                                start = startIdx,
+                                end = length
+                            )
+                        }
+                    }
                 }
-
-                // Get the tajweed class and text content
-                val ruleClass = match.groupValues[1].lowercase()
-                val textContent = match.groupValues[2]
-
-                // Get the appropriate color for this rule
-                val colorPair = ruleColors[ruleClass]
-                val color = if (colorPair != null) {
-                    if (isDarkTheme) colorPair.second else colorPair.first
-                } else {
-                    // Unknown rule, use default color
-                    defaultColor
-                }
-
-                // Append the text with color styling
-                val startIdx = length
-                append(textContent)
-                if (color != Color.Unspecified) {
-                    addStyle(
-                        style = SpanStyle(color = color),
-                        start = startIdx,
-                        end = length
-                    )
-                }
-
-                lastIndex = match.range.last + 1
             }
-
-            // Append any remaining text after the last match
-            if (lastIndex < tajweedText.length) {
-                append(tajweedText.substring(lastIndex))
+        } catch (e: Exception) {
+            // If parsing fails, return the raw text without colors
+            buildAnnotatedString {
+                append(stripJson(tajweedText))
             }
         }
     }
 
     /**
-     * Strip tajweed tags from text, returning plain Arabic text.
+     * Strip JSON and return plain text.
      * Useful for fallback or when tajweed display is disabled.
      *
-     * @param tajweedText The raw tajweed text with HTML-like tags
+     * @param tajweedText The pre-parsed JSON string
      * @return Plain text without tajweed markup
      */
     fun stripTags(tajweedText: String): String {
-        return tagPattern.replace(tajweedText) { match ->
-            match.groupValues[2] // Return just the text content
+        return try {
+            val segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
+            segments.joinToString("") { it.t }
+        } catch (e: Exception) {
+            stripJson(tajweedText)
         }
     }
 
     /**
-     * Check if text contains tajweed markup.
+     * Check if text is in the pre-parsed JSON format.
      *
      * @param text The text to check
-     * @return true if the text contains tajweed tags
+     * @return true if the text appears to be pre-parsed JSON
      */
     fun hasTajweedMarkup(text: String): Boolean {
-        return tagPattern.containsMatchIn(text)
+        return text.startsWith("[") && text.contains("\"t\":")
+    }
+
+    /**
+     * Fallback to extract text from malformed JSON.
+     */
+    private fun stripJson(text: String): String {
+        // Simple regex to extract "t" values from JSON
+        val pattern = Regex(""""t"\s*:\s*"([^"]+)"""")
+        val matches = pattern.findAll(text)
+        return if (matches.any()) {
+            matches.joinToString("") { it.groupValues[1] }
+        } else {
+            // Not JSON, return as-is
+            text
+        }
     }
 }
+
+/**
+ * Data class for a tajweed text segment.
+ *
+ * @property t The text content
+ * @property r The rule code (single letter) or null for plain text
+ */
+@Serializable
+data class TajweedSegment(
+    val t: String,
+    val r: String? = null
+)

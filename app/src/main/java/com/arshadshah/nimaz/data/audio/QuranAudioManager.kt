@@ -304,6 +304,9 @@ class QuranAudioManager @Inject constructor(
             )
         }
 
+        // Start the foreground service for media notification
+        QuranAudioService.start(context)
+
         downloadJob = scope.launch {
             try {
                 // Download all ayahs first
@@ -384,6 +387,9 @@ class QuranAudioManager @Inject constructor(
             )
         }
 
+        // Start the foreground service for media notification
+        QuranAudioService.start(context)
+
         scope.launch {
             val audioFile = getCachedFile("ayah_${ayahGlobalNumber}.mp3")
             if (!audioFile.exists()) {
@@ -404,6 +410,8 @@ class QuranAudioManager @Inject constructor(
                         error = "Failed to download audio"
                     )
                 }
+                // Stop service if playback failed
+                QuranAudioService.stop(context)
             }
         }
     }
@@ -471,6 +479,8 @@ class QuranAudioManager @Inject constructor(
         currentPlaylistIndex = -1
         downloadingFiles.clear()
         _audioState.update { AudioState() }
+        // Stop the foreground service
+        QuranAudioService.stop(context)
     }
 
     fun seekTo(position: Long) {

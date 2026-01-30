@@ -7,6 +7,7 @@ Converts JSON files to pre-populated Room database
 import sqlite3
 import json
 from pathlib import Path
+from preparse_tajweed import preparse_single
 
 JSON_DIR = Path(__file__).parent.parent / "json"
 OUTPUT_DB = Path(__file__).parent.parent / "output" / "nimaz_prepopulated.db"
@@ -404,10 +405,11 @@ def populate_database(conn):
     else:
         print("Warning: No transliteration data found")
 
-    # Load tajweed data
+    # Load tajweed data and pre-parse it
     tajweed_data = load_json('tajweed.json')
     if tajweed_data:
         print(f"Loaded tajweed data for {len(tajweed_data)} ayahs")
+        print("Pre-parsing tajweed data to JSON format...")
     else:
         print("Warning: No tajweed data found")
 
@@ -418,9 +420,11 @@ def populate_database(conn):
         # The JSON uses string keys, so convert to string
         transliteration = transliterations.get(str(a['number_global'])) if transliterations else None
 
-        # Get tajweed text using "surah:ayah" key format
+        # Get tajweed text using "surah:ayah" key format and pre-parse it
         tajweed_key = f"{a['surah_id']}:{a['number_in_surah']}"
-        text_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
+        raw_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
+        # Pre-parse HTML tajweed to JSON format for efficient rendering
+        text_tajweed = preparse_single(raw_tajweed) if raw_tajweed else None
 
         cursor.execute('''
             INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
