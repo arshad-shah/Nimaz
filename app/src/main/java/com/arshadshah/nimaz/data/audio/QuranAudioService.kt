@@ -38,9 +38,6 @@ class QuranAudioService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var stateCollectorJob: Job? = null
     private var mediaSession: MediaSession? = null
-    // Track the last title shown in the notification/lock screen so we can
-    // force a MediaSession rebuild when the ayah changes.
-    private var lastMediaSessionTitle: String = ""
 
     companion object {
         const val CHANNEL_ID = "quran_audio_channel"
@@ -125,12 +122,6 @@ class QuranAudioService : Service() {
         stateCollectorJob = serviceScope.launch {
             audioManager.audioState.collectLatest { state ->
                 if (state.isActive || state.isPreparing) {
-                    // If the title changed (ayah transition), force MediaSession rebuild
-                    // so the lock screen picks up the new metadata.
-                    if (state.currentTitle.isNotEmpty() && state.currentTitle != lastMediaSessionTitle) {
-                        lastMediaSessionTitle = state.currentTitle
-                        releaseMediaSession()
-                    }
                     updateNotification(state)
                 } else {
                     // Audio stopped — delay briefly before stopping the service to avoid
@@ -138,7 +129,6 @@ class QuranAudioService : Service() {
                     delay(500)
                     val current = audioManager.audioState.value
                     if (!current.isActive && !current.isPreparing) {
-                        lastMediaSessionTitle = ""
                         releaseMediaSession()
                         stopSelf()
                     }

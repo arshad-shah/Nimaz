@@ -278,7 +278,6 @@ class QuranAudioManager @Inject constructor(
                                 currentAyahIndex = newIndex,
                                 currentTitle = dynamicTitle,
                                 currentSubtitle = "Ayah ${item.ayahNumber} of ${ayahPlaylist.size}"
-                                // Don't reset position — total position tracking handles it
                             )
                         }
                     }
@@ -396,6 +395,7 @@ class QuranAudioManager @Inject constructor(
                 isActive = true,
                 isPreparing = true,
                 currentTitle = title,
+                reciterName = it.reciterName, // Preserve reciter set by setReciter()
                 error = null,
                 totalAyahs = ayahs.size,
                 currentAyahIndex = startIndex,
@@ -520,7 +520,8 @@ class QuranAudioManager @Inject constructor(
                 currentTitle = "Ayah $ayahNumber",
                 currentSubtitle = "Surah $surahNumber",
                 totalAyahs = 1,
-                currentAyahIndex = 0
+                currentAyahIndex = 0,
+                currentAyahId = ayahGlobalNumber
             )
         }
 
