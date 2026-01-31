@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
@@ -45,14 +46,13 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerChartType
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerStatsChart
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.StatsPeriod
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

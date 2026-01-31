@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
-import android.content.Intent
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -56,20 +55,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 import kotlinx.coroutines.launch
-import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 data class OnboardingPage(
     val title: String,

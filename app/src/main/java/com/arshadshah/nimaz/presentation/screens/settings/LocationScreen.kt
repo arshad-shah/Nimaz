@@ -42,7 +42,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -64,6 +63,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.LocationViewModel

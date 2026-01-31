@@ -16,14 +16,14 @@ import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import com.arshadshah.nimaz.domain.repository.ZakatRepository
 import com.arshadshah.nimaz.domain.usecase.DeleteQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
-import com.arshadshah.nimaz.domain.usecase.GetQuranFavoriteAyahIdsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetQuranFavoritesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetQuranFavoriteAyahIdsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetQuranFavoritesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetReadingProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSajdaAyahsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.IncrementAyahsReadUseCase

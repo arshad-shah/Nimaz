@@ -1,9 +1,6 @@
 package com.arshadshah.nimaz.core.util
 
-import com.arshadshah.nimaz.domain.model.PrayerName
-import com.arshadshah.nimaz.domain.model.PrayerStatus
 import java.time.LocalTime
-import kotlin.random.Random
 
 /**
  * Helper class for generating beautiful, engaging notification content

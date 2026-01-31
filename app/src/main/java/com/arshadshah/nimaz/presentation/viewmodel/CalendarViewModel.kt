@@ -2,15 +2,14 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
+import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
 import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
 import com.arshadshah.nimaz.domain.model.HijriDate
-import com.arshadshah.nimaz.domain.model.HijriMonth
-import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
-import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

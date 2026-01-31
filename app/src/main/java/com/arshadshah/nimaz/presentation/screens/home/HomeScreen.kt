@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.home
 
+// Prayer-specific accent colors matching the design prototype
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -59,26 +60,25 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.LocalInAppUpdateManager
-import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-// Prayer-specific accent colors matching the design prototype
-import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
-import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
 import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
-import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
+import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import java.time.format.DateTimeFormatter
 
 @Composable

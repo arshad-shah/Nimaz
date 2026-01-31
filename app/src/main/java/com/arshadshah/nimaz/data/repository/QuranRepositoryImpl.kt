@@ -3,9 +3,9 @@ package com.arshadshah.nimaz.data.repository
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
-import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite

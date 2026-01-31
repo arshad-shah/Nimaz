@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -28,18 +29,18 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -52,13 +53,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
-import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.model.FastRecord
+import com.arshadshah.nimaz.domain.model.FastStatus
+import com.arshadshah.nimaz.domain.model.FastType
+import com.arshadshah.nimaz.domain.model.MakeupFast
+import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
@@ -67,13 +74,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.domain.model.FastRecord
-import com.arshadshah.nimaz.domain.model.FastStatus
-import com.arshadshah.nimaz.domain.model.FastType
-import com.arshadshah.nimaz.domain.model.MakeupFast
-import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
 import java.time.DayOfWeek
@@ -85,8 +87,6 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
-import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Color constants for makeup fasts
 private val OrangeAccent = Color(0xFFF97316)

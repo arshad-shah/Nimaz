@@ -1,9 +1,6 @@
 package com.arshadshah.nimaz.data.audio
 
 import android.content.Context
-import android.media.AudioAttributes
-import android.media.AudioFormat
-import android.media.AudioTrack
 import android.media.MediaPlayer
 import android.net.Uri
 import dagger.hilt.android.qualifiers.ApplicationContext

@@ -7,20 +7,20 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.batoulapps.adhan2.CalculationMethod as AdhanMethod
 import com.batoulapps.adhan2.CalculationParameters
 import com.batoulapps.adhan2.Coordinates
-import com.batoulapps.adhan2.HighLatitudeRule as AdhanHighLatitudeRule
 import com.batoulapps.adhan2.Madhab
-import com.batoulapps.adhan2.PrayerTimes as AdhanPrayerTimes
 import com.batoulapps.adhan2.data.DateComponents
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime as toKotlinLocalDateTime
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.batoulapps.adhan2.CalculationMethod as AdhanMethod
+import com.batoulapps.adhan2.HighLatitudeRule as AdhanHighLatitudeRule
+import com.batoulapps.adhan2.PrayerTimes as AdhanPrayerTimes
+import kotlinx.datetime.toLocalDateTime as toKotlinLocalDateTime
 
 @Singleton
 class PrayerTimeCalculator @Inject constructor() {

@@ -1,13 +1,12 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import android.content.Context
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
-import dagger.hilt.android.qualifiers.ApplicationContext
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -15,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

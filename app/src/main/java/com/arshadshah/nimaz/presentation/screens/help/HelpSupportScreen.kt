@@ -41,11 +41,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private data class FaqItem(val question: String, val answer: String)
