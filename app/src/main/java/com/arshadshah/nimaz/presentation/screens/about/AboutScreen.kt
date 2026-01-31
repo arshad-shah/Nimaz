@@ -137,9 +137,10 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
             .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // App Logo
+        // App Logo — use foreground layer directly since ic_launcher is an
+        // adaptive icon XML that painterResource cannot handle
         Image(
-            painter = painterResource(R.mipmap.ic_launcher),
+            painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = "Nimaz",
             modifier = Modifier
                 .size(100.dp)

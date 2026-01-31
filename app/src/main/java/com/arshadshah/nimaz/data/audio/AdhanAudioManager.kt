@@ -54,7 +54,13 @@ class AdhanAudioManager @Inject constructor(
      */
     fun isDownloaded(sound: AdhanSound, isFajr: Boolean = false): Boolean {
         val fileName = sound.getFileName(isFajr)
-        return File(adhanDir, fileName).exists()
+        val file = File(adhanDir, fileName)
+        if (file.exists() && file.length() < 1000) {
+            // Corrupted/empty file — delete so it gets re-downloaded
+            file.delete()
+            return false
+        }
+        return file.exists()
     }
 
     /**

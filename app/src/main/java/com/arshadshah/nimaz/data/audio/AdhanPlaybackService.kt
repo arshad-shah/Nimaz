@@ -146,29 +146,40 @@ class AdhanPlaybackService : Service() {
         return START_NOT_STICKY
     }
 
+    private var fallbackFile: File? = null
+    private var fallbackPrayerName: String? = null
+
+    private fun isValidAudioFile(file: File): Boolean {
+        return file.exists() && file.length() > 1000 // Must be > 1KB to be a real audio file
+    }
+
     private fun startPlayback(adhanSound: AdhanSound, isFajr: Boolean, prayerName: String) {
         // Stop any existing playback
         stopPlayback()
 
         val adhanDir = File(filesDir, "adhan")
         val primaryFile = File(adhanDir, adhanSound.getFileName(isFajr))
+        val altFile = File(adhanDir, adhanSound.getFileName(!isFajr))
 
-        if (primaryFile.exists()) {
+        // Store fallback for use in error handler
+        fallbackFile = if (isValidAudioFile(altFile)) altFile else null
+        fallbackPrayerName = prayerName
+
+        if (isValidAudioFile(primaryFile)) {
             android.util.Log.d("AdhanPlayback", "Playing primary file: ${primaryFile.name} (isFajr=$isFajr)")
             playFile(primaryFile, prayerName)
             return
         }
 
-        // Bidirectional fallback: try the other variant
-        val fallbackIsFajr = !isFajr
-        val fallbackFile = File(adhanDir, adhanSound.getFileName(fallbackIsFajr))
-        if (fallbackFile.exists()) {
-            android.util.Log.d("AdhanPlayback", "Falling back to: ${fallbackFile.name} (isFajr=$fallbackIsFajr)")
-            playFile(fallbackFile, prayerName)
+        // Primary file missing or corrupt — try the other variant
+        if (isValidAudioFile(altFile)) {
+            android.util.Log.d("AdhanPlayback", "Primary invalid, falling back to: ${altFile.name}")
+            fallbackFile = null // Already using fallback, no second chance
+            playFile(altFile, prayerName)
             return
         }
 
-        android.util.Log.w("AdhanPlayback", "No adhan file found for ${adhanSound.name}")
+        android.util.Log.w("AdhanPlayback", "No valid adhan file found for ${adhanSound.name}")
         stopSelf()
     }
 
@@ -202,8 +213,18 @@ class AdhanPlaybackService : Service() {
 
                 override fun onPlayerError(error: androidx.media3.common.PlaybackException) {
                     android.util.Log.e("AdhanPlayback", "Playback error: ${error.message}")
-                    stopPlayback()
-                    stopSelf()
+                    // Try fallback file if primary failed (e.g. corrupted Fajr variant)
+                    val fb = fallbackFile
+                    val fbName = fallbackPrayerName
+                    if (fb != null && fbName != null) {
+                        android.util.Log.d("AdhanPlayback", "Trying fallback: ${fb.name}")
+                        fallbackFile = null // Prevent infinite retry
+                        stopPlayback()
+                        playFile(fb, fbName)
+                    } else {
+                        stopPlayback()
+                        stopSelf()
+                    }
                 }
             })
 
@@ -226,7 +247,7 @@ class AdhanPlaybackService : Service() {
                 startForeground(
                     notifId,
                     createPlaybackNotification(prayerName),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
                 )
             } else {
                 startForeground(notifId, createPlaybackNotification(prayerName))
