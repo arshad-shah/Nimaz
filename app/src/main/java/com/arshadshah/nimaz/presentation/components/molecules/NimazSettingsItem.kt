@@ -37,7 +37,7 @@ fun NimazSettingsItem(
     icon: ImageVector? = null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
     iconBackground: Color = Color.Unspecified,
-    iconTinted: Boolean = false,
+    tintIcon: Boolean = false,
     value: String? = null,
     checked: Boolean? = null,
     onCheckedChange: ((Boolean) -> Unit)? = null,
@@ -61,10 +61,10 @@ fun NimazSettingsItem(
         if (icon != null) {
             val resolvedBackground = when {
                 iconBackground != Color.Unspecified -> iconBackground
-                iconTinted -> iconTint.copy(alpha = 0.15f)
+                tintIcon -> iconTint.copy(alpha = 0.15f)
                 else -> MaterialTheme.colorScheme.surfaceContainerHighest
             }
-            val resolvedTint = if (iconTinted) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
+            val resolvedTint = if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
 
             Box(
                 modifier = Modifier

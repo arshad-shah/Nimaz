@@ -41,7 +41,8 @@ import java.time.format.DateTimeFormatter
 fun NimazQadaPrayerItem(
     prayer: PrayerRecord,
     onMarkCompleted: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    actionText: String = "Done"
 ) {
     val dateFormatter = DateTimeFormatter.ofPattern("EEEE, MMM d, yyyy")
     val formattedDate = try {
@@ -115,7 +116,7 @@ fun NimazQadaPrayerItem(
                         modifier = Modifier.size(16.dp)
                     )
                     Text(
-                        text = "Done",
+                        text = actionText,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
                         color = NimazColors.StatusColors.Prayed

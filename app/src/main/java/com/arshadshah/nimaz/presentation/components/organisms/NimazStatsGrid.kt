@@ -22,8 +22,7 @@ data class NimazStatData(
 @Composable
 fun NimazStatsGrid(
     stats: List<NimazStatData>,
-    modifier: Modifier = Modifier,
-    columns: Int = stats.size.coerceIn(2, 4)
+    modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),

@@ -48,6 +48,6 @@ private fun NimazSectionTitlePreview() {
 @Composable
 private fun NimazSectionTitleLowercasePreview() {
     NimazTheme {
-        NimazSectionTitle(text = "Links", uppercase = true)
+        NimazSectionTitle(text = "Links", uppercase = false)
     }
 }

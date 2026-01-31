@@ -173,10 +173,6 @@ fun HadithCollectionScreen(
                 item {
                     NimazSectionHeader(
                         title = "Kutub al-Sittah",
-                        showSeeAll = true,
-                        onSeeAllClick = {
-                            Toast.makeText(context, "All books are shown below", Toast.LENGTH_SHORT).show()
-                        },
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
                 }

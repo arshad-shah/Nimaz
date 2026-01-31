@@ -94,7 +94,7 @@ fun PrayerSettingsScreen(
                 NimazSettingsSection(title = "CALCULATION METHOD") {
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
-                        iconTinted = true,
+                        tintIcon = true,
                         title = "Calculation Method",
                         value = prayerState.calculationMethod.displayName(),
                         onClick = { showCalculationMethodDialog = true }

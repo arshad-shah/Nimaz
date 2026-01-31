@@ -282,7 +282,10 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        NimazSectionHeader(title = "Prayer Times")
+                        NimazSectionHeader(
+                            title = "Prayer Times",
+                            seeAllText = "Settings"
+                        )
                         Text(
                             text = "Settings",
                             style = MaterialTheme.typography.bodySmall,

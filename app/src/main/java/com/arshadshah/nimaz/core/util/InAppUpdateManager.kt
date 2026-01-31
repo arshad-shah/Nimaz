@@ -35,14 +35,17 @@ class InAppUpdateManager(private val activity: Activity) {
             InstallStatus.DOWNLOADING -> {
                 _updateState.value = UpdateState.Downloading
             }
+
             InstallStatus.DOWNLOADED -> {
                 _updateState.value = UpdateState.Downloaded {
                     appUpdateManager.completeUpdate()
                 }
             }
+
             InstallStatus.FAILED -> {
                 _updateState.value = UpdateState.Error("Update download failed")
             }
+
             else -> {}
         }
     }

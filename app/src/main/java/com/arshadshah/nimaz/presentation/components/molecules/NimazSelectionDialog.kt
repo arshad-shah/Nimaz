@@ -47,7 +47,8 @@ fun NimazSelectionDialog(
     options: List<NimazSelectionOption>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    confirmText: String = "Done"
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -134,7 +135,7 @@ fun NimazSelectionDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Done")
+                Text(confirmText)
             }
         }
     )

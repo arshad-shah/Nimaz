@@ -19,6 +19,7 @@ fun NimazSectionHeader(
     modifier: Modifier = Modifier,
     trailingText: String? = null,
     showSeeAll: Boolean = false,
+    seeAllText: String = "See All",
     onSeeAllClick: () -> Unit = {},
     trailingContent: (@Composable () -> Unit)? = null
 ) {
@@ -36,7 +37,7 @@ fun NimazSectionHeader(
         when {
             trailingContent != null -> trailingContent()
             showSeeAll -> Text(
-                text = "See All",
+                text = seeAllText,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable(onClick = onSeeAllClick)
