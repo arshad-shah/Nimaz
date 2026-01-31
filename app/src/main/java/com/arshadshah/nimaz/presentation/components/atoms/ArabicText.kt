@@ -81,16 +81,16 @@ fun ArabicText(
  */
 @Composable
 fun QuranVerseText(
+    modifier: Modifier = Modifier,
     arabicText: String,
     verseNumber: Int? = null,
-    modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.QURAN,
     customFontSize: Float? = null,
     color: Color = MaterialTheme.colorScheme.onSurface,
     showVerseNumber: Boolean = true
 ) {
     val displayText = if (showVerseNumber && verseNumber != null) {
-        "$arabicText ${toArabicNumber(verseNumber)}"
+        formatAyahWithEndMarker(arabicText, toArabicNumber(verseNumber).toInt())
     } else {
         arabicText
     }
@@ -111,6 +111,24 @@ fun QuranVerseText(
         )
     )
 }
+
+/**
+ * Process ayah text to append Arabic numeral with ornamental brackets at the end
+ */
+private fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
+    return "$arabicText ${formatAyahEndMarker(ayahNumber)}"
+}
+
+/**
+ * Format just the ayah end marker with ornamental brackets
+ */
+private fun formatAyahEndMarker(ayahNumber: Int): String {
+    val unicodeAyaEndStart = "\uFD3F" // ﴿
+    val unicodeAyaEndEnd = "\uFD3E"   // ﴾
+    val arabicNumber = toArabicNumber(ayahNumber)
+    return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
+}
+
 
 /**
  * Hadith Arabic text with proper styling.

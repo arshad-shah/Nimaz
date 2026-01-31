@@ -96,6 +96,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
@@ -1056,7 +1057,6 @@ private fun AyahItem(
 
         // Arabic text with ayah end marker (with optional tajweed colors)
         val displayText = ayah.getDisplayArabicText()
-        val formattedText = formatAyahWithEndMarker(displayText, ayah.numberInSurah)
         val textColor = MaterialTheme.colorScheme.onBackground
 
         if (showTajweed && ayah.textTajweed != null) {
@@ -1086,16 +1086,10 @@ private fun AyahItem(
                 )
             )
         } else {
-            ArabicText(
-                text = formattedText,
-                modifier = Modifier.fillMaxWidth(),
-                color = textColor,
-                style = TextStyle(
-                    fontFamily = AmiriFontFamily,
-                    fontSize = arabicFontSize.sp,
-                    lineHeight = (arabicFontSize * 2).sp,
-                    textDirection = TextDirection.Rtl
-                )
+            QuranVerseText(
+                arabicText = displayText,
+                verseNumber = ayah.numberInSurah,
+                customFontSize = arabicFontSize.sp.value
             )
         }
 
