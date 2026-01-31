@@ -41,6 +41,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Mosque
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 
 /**
@@ -400,7 +401,7 @@ private fun StatBadge(
 @Preview(showBackground = true, name = "Stat Card")
 @Composable
 private fun StatCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             StatCard(
                 title = "Prayers This Week",
@@ -413,10 +414,26 @@ private fun StatCardPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Stat Card Trending Down")
+@Composable
+private fun StatCardTrendDownPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            StatCard(
+                title = "Fasts This Month",
+                value = "12",
+                icon = Icons.Default.Mosque,
+                subtitle = "-2 from last month",
+                trend = StatTrend.DOWN
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, name = "Progress Stat Card")
 @Composable
 private fun ProgressStatCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             ProgressStatCard(
                 title = "Weekly Goal",
@@ -431,7 +448,7 @@ private fun ProgressStatCardPreview() {
 @Preview(showBackground = true, name = "Compact Stat")
 @Composable
 private fun CompactStatPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp)
@@ -445,7 +462,7 @@ private fun CompactStatPreview() {
 @Preview(showBackground = true, name = "Stats Row")
 @Composable
 private fun StatsRowPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             StatsRow(
                 stats = listOf(
@@ -461,7 +478,7 @@ private fun StatsRowPreview() {
 @Preview(showBackground = true, name = "Prayer Stats Card")
 @Composable
 private fun PrayerStatsCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PrayerStatsCard(
                 prayedCount = 4,

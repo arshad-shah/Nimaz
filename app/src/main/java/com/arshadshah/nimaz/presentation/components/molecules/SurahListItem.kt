@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 // ==================== PREVIEWS ====================
 
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 
 /**
@@ -317,7 +318,7 @@ fun FeaturedSurahCard(
 @Preview(showBackground = true, name = "Surah List Item")
 @Composable
 private fun SurahListItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SurahListItem(
                 surahNumber = 1,
@@ -335,7 +336,7 @@ private fun SurahListItemPreview() {
 @Preview(showBackground = true, name = "Surah List Item with Actions")
 @Composable
 private fun SurahListItemWithActionsPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SurahListItem(
                 surahNumber = 36,
@@ -354,10 +355,31 @@ private fun SurahListItemWithActionsPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Surah List Item Medinan")
+@Composable
+private fun SurahListItemMedinanPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            SurahListItem(
+                surahNumber = 2,
+                arabicName = "البقرة",
+                englishName = "Al-Baqarah",
+                englishMeaning = "The Cow",
+                versesCount = 286,
+                isMeccan = false,
+                isBookmarked = false,
+                onSurahClick = {},
+                onBookmarkClick = {},
+                onPlayClick = {}
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, name = "Compact Surah List Item")
 @Composable
 private fun CompactSurahListItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactSurahListItem(
                 surahNumber = 112,
@@ -373,7 +395,7 @@ private fun CompactSurahListItemPreview() {
 @Preview(showBackground = true, name = "Featured Surah Card")
 @Composable
 private fun FeaturedSurahCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             FeaturedSurahCard(
                 surahNumber = 2,

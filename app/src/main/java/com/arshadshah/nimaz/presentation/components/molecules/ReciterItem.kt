@@ -327,9 +327,9 @@ fun TranslatorItem(
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, name = "Reciter Item")
 @Composable
-fun ReciterItemPreview() {
+private fun ReciterItemPreview() {
     NimazTheme {
         Surface {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -362,6 +362,54 @@ fun ReciterItemPreview() {
                     onDownloadClick = {}
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Compact Reciter Item")
+@Composable
+private fun CompactReciterItemPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CompactReciterItem(
+                reciterName = "Mishary Rashid Alafasy",
+                isSelected = false,
+                isDownloaded = true,
+                onClick = {}
+            )
+            CompactReciterItem(
+                reciterName = "AbdulBaset AbdulSamad",
+                isSelected = true,
+                isDownloaded = true,
+                onClick = {}
+            )
+            CompactReciterItem(
+                reciterName = "Abdur-Rahman as-Sudais",
+                isSelected = false,
+                isDownloaded = false,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Translator Item")
+@Composable
+private fun TranslatorItemPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TranslatorItem(
+                translatorName = "Sahih International",
+                language = "English",
+                isSelected = true,
+                onClick = {}
+            )
+            TranslatorItem(
+                translatorName = "Muhammad Taqi-ud-Din al-Hilali",
+                language = "English",
+                isSelected = false,
+                onClick = {}
+            )
         }
     }
 }

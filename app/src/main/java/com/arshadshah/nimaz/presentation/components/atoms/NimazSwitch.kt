@@ -36,6 +36,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Switch size presets
@@ -203,7 +204,7 @@ fun IconToggleSwitch(
 @Preview(showBackground = true, name = "NimazSwitch")
 @Composable
 private fun NimazSwitchPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -221,7 +222,7 @@ private fun NimazSwitchPreview() {
 @Preview(showBackground = true, name = "Animated Switch Sizes")
 @Composable
 private fun AnimatedSwitchSizesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -252,7 +253,7 @@ private fun AnimatedSwitchSizesPreview() {
 @Preview(showBackground = true, name = "Animated Switch States")
 @Composable
 private fun AnimatedSwitchStatesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -268,7 +269,7 @@ private fun AnimatedSwitchStatesPreview() {
 @Preview(showBackground = true, name = "Prayer Notification Switch")
 @Composable
 private fun PrayerNotificationSwitchPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -293,7 +294,7 @@ private fun PrayerNotificationSwitchPreview() {
 @Preview(showBackground = true, name = "Icon Toggle Switch")
 @Composable
 private fun IconToggleSwitchPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)

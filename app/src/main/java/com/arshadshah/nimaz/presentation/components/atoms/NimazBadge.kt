@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Badge size presets
@@ -305,7 +306,7 @@ fun VerseNumberBadge(
 @Preview(showBackground = true, name = "NimazBadge")
 @Composable
 private fun NimazBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -321,7 +322,7 @@ private fun NimazBadgePreview() {
 @Preview(showBackground = true, name = "Status Badges")
 @Composable
 private fun StatusBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -338,7 +339,7 @@ private fun StatusBadgePreview() {
 @Preview(showBackground = true, name = "Prayer Status Badges")
 @Composable
 private fun PrayerStatusBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -355,7 +356,7 @@ private fun PrayerStatusBadgePreview() {
 @Preview(showBackground = true, name = "Hadith Grade Badge")
 @Composable
 private fun HadithGradeBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -371,7 +372,7 @@ private fun HadithGradeBadgePreview() {
 @Preview(showBackground = true, name = "Count Badge")
 @Composable
 private fun CountBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -386,7 +387,7 @@ private fun CountBadgePreview() {
 @Preview(showBackground = true, name = "Dot Badge")
 @Composable
 private fun DotBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -401,7 +402,7 @@ private fun DotBadgePreview() {
 @Preview(showBackground = true, name = "Icon With Badge")
 @Composable
 private fun IconWithBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(24.dp)
@@ -428,7 +429,7 @@ private fun IconWithBadgePreview() {
 @Preview(showBackground = true, name = "Surah Number Badge")
 @Composable
 private fun SurahNumberBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -443,7 +444,7 @@ private fun SurahNumberBadgePreview() {
 @Preview(showBackground = true, name = "Verse Number Badge")
 @Composable
 private fun VerseNumberBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -66,6 +66,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Complete Zakat calculator form with assets and liabilities.
@@ -723,5 +725,38 @@ fun ZakatResultCard(
                 modifier = Modifier.fillMaxWidth()
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "ZakatResultCard - Above Nisab")
+@Composable
+private fun ZakatResultCardAboveNisabPreview() {
+    NimazTheme {
+        ZakatResultCard(
+            totalAssets = 50000.0,
+            totalLiabilities = 5000.0,
+            nisabValue = 5000.0,
+            zakatDue = 1125.0,
+            currency = "USD",
+            onSaveClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "ZakatResultCard - Below Nisab")
+@Composable
+private fun ZakatResultCardBelowNisabPreview() {
+    NimazTheme {
+        ZakatResultCard(
+            totalAssets = 3000.0,
+            totalLiabilities = 1000.0,
+            nisabValue = 5000.0,
+            isAboveNisab = false,
+            zakatDue = 0.0,
+            currency = "USD",
+            onSaveClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

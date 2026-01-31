@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Divider thickness presets
@@ -224,7 +225,7 @@ fun DottedDivider(
 @Preview(showBackground = true, name = "Horizontal Dividers")
 @Composable
 private fun NimazHorizontalDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -242,7 +243,7 @@ private fun NimazHorizontalDividerPreview() {
 @Preview(showBackground = true, name = "Vertical Divider")
 @Composable
 private fun NimazVerticalDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier
                 .height(50.dp)
@@ -259,7 +260,7 @@ private fun NimazVerticalDividerPreview() {
 @Preview(showBackground = true, name = "Labeled Divider")
 @Composable
 private fun LabeledDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             LabeledDivider(label = "OR")
         }
@@ -269,7 +270,7 @@ private fun LabeledDividerPreview() {
 @Preview(showBackground = true, name = "Spacer Divider")
 @Composable
 private fun SpacerDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Above")
             SpacerDivider()
@@ -281,7 +282,7 @@ private fun SpacerDividerPreview() {
 @Preview(showBackground = true, name = "Section Divider")
 @Composable
 private fun SectionDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -297,7 +298,7 @@ private fun SectionDividerPreview() {
 @Preview(showBackground = true, name = "Inset Divider")
 @Composable
 private fun InsetDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("List Item 1", modifier = Modifier.padding(vertical = 8.dp))
             InsetDivider(startInset = 56.dp)
@@ -311,7 +312,7 @@ private fun InsetDividerPreview() {
 @Preview(showBackground = true, name = "Gradient Divider")
 @Composable
 private fun GradientDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Above")
             Spacer(modifier = Modifier.height(8.dp))
@@ -325,7 +326,7 @@ private fun GradientDividerPreview() {
 @Preview(showBackground = true, name = "Dotted Divider")
 @Composable
 private fun DottedDividerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Above")
             Spacer(modifier = Modifier.height(8.dp))

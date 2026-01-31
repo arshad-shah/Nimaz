@@ -35,6 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Indeterminate circular loading indicator.
@@ -359,7 +360,7 @@ fun StreakProgress(
 @Preview(showBackground = true, name = "Loading Spinner")
 @Composable
 private fun NimazLoadingSpinnerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             NimazLoadingSpinner()
         }
@@ -369,7 +370,7 @@ private fun NimazLoadingSpinnerPreview() {
 @Preview(showBackground = true, name = "Linear Loading")
 @Composable
 private fun NimazLinearLoadingPreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             NimazLinearLoading()
         }
@@ -379,7 +380,7 @@ private fun NimazLinearLoadingPreview() {
 @Preview(showBackground = true, name = "Linear Progress")
 @Composable
 private fun NimazLinearProgressPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -395,7 +396,7 @@ private fun NimazLinearProgressPreview() {
 @Preview(showBackground = true, name = "Circular Progress")
 @Composable
 private fun NimazCircularProgressPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -409,7 +410,7 @@ private fun NimazCircularProgressPreview() {
 @Preview(showBackground = true, name = "Labeled Progress")
 @Composable
 private fun LabeledProgressPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -423,7 +424,7 @@ private fun LabeledProgressPreview() {
 @Preview(showBackground = true, name = "Step Progress")
 @Composable
 private fun StepProgressIndicatorPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
@@ -438,7 +439,7 @@ private fun StepProgressIndicatorPreview() {
 @Preview(showBackground = true, name = "Prayer Progress Ring")
 @Composable
 private fun PrayerProgressRingPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -452,7 +453,7 @@ private fun PrayerProgressRingPreview() {
 @Preview(showBackground = true, name = "Streak Progress")
 @Composable
 private fun StreakProgressPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             StreakProgress(currentStreak = 7, targetStreak = 30)
         }

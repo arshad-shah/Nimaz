@@ -34,6 +34,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.HadithGradeBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Full hadith display card with Arabic, translation, and narrator chain.
@@ -329,7 +330,7 @@ fun HadithOfTheDayCard(
 @Preview(showBackground = true, name = "Hadith Card")
 @Composable
 private fun HadithCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithCard(
                 hadithNumber = 1,
@@ -351,7 +352,7 @@ private fun HadithCardPreview() {
 @Preview(showBackground = true, name = "Compact Hadith Card")
 @Composable
 private fun CompactHadithCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactHadithCard(
                 arabicText = "خَيْرُكُمْ مَنْ تَعَلَّمَ الْقُرْآنَ وَعَلَّمَهُ",
@@ -365,7 +366,7 @@ private fun CompactHadithCardPreview() {
 @Preview(showBackground = true, name = "Hadith of the Day Card")
 @Composable
 private fun HadithOfTheDayCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithOfTheDayCard(
                 arabicText = "الْمُسْلِمُ مَنْ سَلِمَ الْمُسْلِمُونَ مِنْ لِسَانِهِ وَيَدِهِ",

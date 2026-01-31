@@ -59,7 +59,9 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 
@@ -524,5 +526,45 @@ private fun getSearchResultTypeLabel(type: SearchResultType): String {
         SearchResultType.SURAH -> "S"
         SearchResultType.CHAPTER -> "C"
         SearchResultType.CATEGORY -> "C"
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NimazSearchBarEmptyPreview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "",
+            onQueryChange = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NimazSearchBarWithQueryPreview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "Al-Fatiha",
+            onQueryChange = {},
+            onClear = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun ExpandableSearchBarPreview() {
+    NimazTheme {
+        ExpandableSearchBar(
+            query = "",
+            onQueryChange = {},
+            onSearch = {},
+            recentSearches = listOf("Al-Baqarah", "Ayat al-Kursi"),
+            suggestions = listOf("Surah Yasin", "Juz Amma"),
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

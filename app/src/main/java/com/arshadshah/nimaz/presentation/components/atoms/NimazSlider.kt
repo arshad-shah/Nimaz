@@ -25,6 +25,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Primary slider component.
@@ -312,7 +313,7 @@ fun StepSlider(
 @Preview(showBackground = true, name = "Basic Slider")
 @Composable
 private fun NimazSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var value by remember { mutableFloatStateOf(0.5f) }
         Box(modifier = Modifier.padding(16.dp)) {
             NimazSlider(value = value, onValueChange = { value = it })
@@ -323,7 +324,7 @@ private fun NimazSliderPreview() {
 @Preview(showBackground = true, name = "Labeled Slider")
 @Composable
 private fun LabeledSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var value by remember { mutableFloatStateOf(50f) }
         Box(modifier = Modifier.padding(16.dp)) {
             LabeledSlider(
@@ -339,7 +340,7 @@ private fun LabeledSliderPreview() {
 @Preview(showBackground = true, name = "Font Size Slider")
 @Composable
 private fun FontSizeSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var fontSize by remember { mutableFloatStateOf(24f) }
         Box(modifier = Modifier.padding(16.dp)) {
             FontSizeSlider(value = fontSize, onValueChange = { fontSize = it })
@@ -350,7 +351,7 @@ private fun FontSizeSliderPreview() {
 @Preview(showBackground = true, name = "Volume Slider")
 @Composable
 private fun VolumeSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var volume by remember { mutableFloatStateOf(75f) }
         Box(modifier = Modifier.padding(16.dp)) {
             VolumeSlider(value = volume, onValueChange = { volume = it })
@@ -361,7 +362,7 @@ private fun VolumeSliderPreview() {
 @Preview(showBackground = true, name = "Time Offset Slider")
 @Composable
 private fun TimeOffsetSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var offset by remember { mutableFloatStateOf(0f) }
         Box(modifier = Modifier.padding(16.dp)) {
             TimeOffsetSlider(value = offset, onValueChange = { offset = it })
@@ -372,7 +373,7 @@ private fun TimeOffsetSliderPreview() {
 @Preview(showBackground = true, name = "Range Slider")
 @Composable
 private fun LabeledRangeSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var range by remember { mutableStateOf(20f..80f) }
         Box(modifier = Modifier.padding(16.dp)) {
             LabeledRangeSlider(
@@ -387,7 +388,7 @@ private fun LabeledRangeSliderPreview() {
 @Preview(showBackground = true, name = "Step Slider")
 @Composable
 private fun StepSliderPreview() {
-    MaterialTheme {
+    NimazTheme {
         var step by remember { mutableIntStateOf(1) }
         Box(modifier = Modifier.padding(16.dp)) {
             StepSlider(

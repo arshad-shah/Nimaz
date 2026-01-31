@@ -30,9 +30,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.ArrowForward
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Button variant types for NimazButton
@@ -196,7 +198,7 @@ fun PrayerButton(
 @Preview(showBackground = true, name = "Filled Button")
 @Composable
 private fun NimazButtonFilledPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Filled Button",
             onClick = {}
@@ -207,7 +209,7 @@ private fun NimazButtonFilledPreview() {
 @Preview(showBackground = true, name = "Tonal Button")
 @Composable
 private fun NimazButtonTonalPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Tonal Button",
             onClick = {},
@@ -219,7 +221,7 @@ private fun NimazButtonTonalPreview() {
 @Preview(showBackground = true, name = "Outlined Button")
 @Composable
 private fun NimazButtonOutlinedPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Outlined Button",
             onClick = {},
@@ -231,7 +233,7 @@ private fun NimazButtonOutlinedPreview() {
 @Preview(showBackground = true, name = "Elevated Button")
 @Composable
 private fun NimazButtonElevatedPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Elevated Button",
             onClick = {},
@@ -243,7 +245,7 @@ private fun NimazButtonElevatedPreview() {
 @Preview(showBackground = true, name = "Text Button")
 @Composable
 private fun NimazButtonTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Text Button",
             onClick = {},
@@ -255,7 +257,7 @@ private fun NimazButtonTextPreview() {
 @Preview(showBackground = true, name = "Button with Icons")
 @Composable
 private fun NimazButtonWithIconsPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Continue",
             onClick = {},
@@ -268,7 +270,7 @@ private fun NimazButtonWithIconsPreview() {
 @Preview(showBackground = true, name = "Loading Button")
 @Composable
 private fun NimazButtonLoadingPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazButton(
             text = "Loading",
             onClick = {},
@@ -277,11 +279,28 @@ private fun NimazButtonLoadingPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Disabled Button")
+@Composable
+private fun NimazButtonDisabledPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            NimazButton(text = "Disabled Filled", onClick = {}, enabled = false)
+            NimazButton(text = "Disabled Outlined", onClick = {}, enabled = false, variant = NimazButtonVariant.OUTLINED)
+        }
+    }
+}
+
 @Preview(showBackground = true, name = "Button Sizes")
 @Composable
 private fun NimazButtonSizesPreview() {
-    MaterialTheme {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
             NimazButton(text = "Small", onClick = {}, size = NimazButtonSize.SMALL)
             NimazButton(text = "Medium", onClick = {}, size = NimazButtonSize.MEDIUM)
             NimazButton(text = "Large", onClick = {}, size = NimazButtonSize.LARGE)
@@ -292,11 +311,21 @@ private fun NimazButtonSizesPreview() {
 @Preview(showBackground = true, name = "Prayer Button")
 @Composable
 private fun PrayerButtonPreview() {
-    MaterialTheme {
-        PrayerButton(
-            text = "Pray Fajr",
-            onClick = {},
-            prayerColor = Color(0xFF5C6BC0)
-        )
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            PrayerButton(
+                text = "Pray Fajr",
+                onClick = {},
+                prayerColor = Color(0xFF5C6BC0)
+            )
+            PrayerButton(
+                text = "Loading Prayer",
+                onClick = {},
+                loading = true
+            )
+        }
     }
 }

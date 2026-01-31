@@ -40,10 +40,12 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -804,5 +806,88 @@ fun PrayerStatsDonutChart(
                 )
             }
         }
+    }
+}
+
+private val samplePrayerStats = PrayerStats(
+    totalPrayed = 120,
+    totalMissed = 30,
+    totalJamaah = 45,
+    prayedByPrayer = mapOf(
+        PrayerName.FAJR to 20,
+        PrayerName.SUNRISE to 0,
+        PrayerName.DHUHR to 28,
+        PrayerName.ASR to 25,
+        PrayerName.MAGHRIB to 27,
+        PrayerName.ISHA to 20
+    ),
+    missedByPrayer = mapOf(
+        PrayerName.FAJR to 10,
+        PrayerName.SUNRISE to 0,
+        PrayerName.DHUHR to 2,
+        PrayerName.ASR to 5,
+        PrayerName.MAGHRIB to 3,
+        PrayerName.ISHA to 10
+    ),
+    currentStreak = 7,
+    longestStreak = 21,
+    perfectDays = 15,
+    startDate = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000,
+    endDate = System.currentTimeMillis()
+)
+
+@Preview(showBackground = true)
+@Composable
+private fun PrayerStatsChartDonutPreview() {
+    NimazTheme {
+        PrayerStatsChart(
+            stats = samplePrayerStats,
+            chartType = PrayerChartType.DONUT,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PrayerStatsChartBarPreview() {
+    NimazTheme {
+        PrayerStatsChart(
+            stats = samplePrayerStats,
+            chartType = PrayerChartType.BAR,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun WeeklyPrayerChartPreview() {
+    NimazTheme {
+        WeeklyPrayerChart(
+            weekData = listOf(
+                DailyPrayerData(dayLabel = "Mon", prayedCount = 5),
+                DailyPrayerData(dayLabel = "Tue", prayedCount = 4),
+                DailyPrayerData(dayLabel = "Wed", prayedCount = 3),
+                DailyPrayerData(dayLabel = "Thu", prayedCount = 5),
+                DailyPrayerData(dayLabel = "Fri", prayedCount = 5),
+                DailyPrayerData(dayLabel = "Sat", prayedCount = 2),
+                DailyPrayerData(dayLabel = "Sun", prayedCount = 4)
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PrayerStatsDonutChartPreview() {
+    NimazTheme {
+        PrayerStatsDonutChart(
+            prayed = 85,
+            late = 20,
+            missed = 15,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Settings item with toggle switch.
@@ -318,7 +319,7 @@ fun SettingsCustomItem(
 @Preview(showBackground = true, name = "Settings Switch Item")
 @Composable
 private fun SettingsSwitchItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SettingsSwitchItem(
                 title = "Notifications",
@@ -340,7 +341,7 @@ private fun SettingsSwitchItemPreview() {
 @Preview(showBackground = true, name = "Settings Navigation Item")
 @Composable
 private fun SettingsNavigationItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SettingsNavigationItem(
                 title = "Language",
@@ -360,7 +361,7 @@ private fun SettingsNavigationItemPreview() {
 @Preview(showBackground = true, name = "Settings Info Item")
 @Composable
 private fun SettingsInfoItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsInfoItem(
                 title = "Version",
@@ -374,7 +375,7 @@ private fun SettingsInfoItemPreview() {
 @Preview(showBackground = true, name = "Settings Action Item")
 @Composable
 private fun SettingsActionItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             SettingsActionItem(
                 title = "Clear Cache",

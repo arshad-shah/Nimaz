@@ -44,6 +44,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShap
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Location list item for saved locations.
@@ -343,7 +344,7 @@ fun CurrentLocationCard(
 @Preview(showBackground = true, name = "Location Item")
 @Composable
 private fun LocationItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             LocationItem(
                 locationName = "Dublin",
@@ -362,7 +363,7 @@ private fun LocationItemPreview() {
 @Preview(showBackground = true, name = "Location Item Selected")
 @Composable
 private fun LocationItemSelectedPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             LocationItem(
                 locationName = "Mecca",
@@ -379,7 +380,7 @@ private fun LocationItemSelectedPreview() {
 @Preview(showBackground = true, name = "Location Item Current")
 @Composable
 private fun LocationItemCurrentPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             LocationItem(
                 locationName = "Current Location",
@@ -395,7 +396,7 @@ private fun LocationItemCurrentPreview() {
 @Preview(showBackground = true, name = "Compact Location Item")
 @Composable
 private fun CompactLocationItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactLocationItem(
                 locationName = "London",
@@ -416,11 +417,26 @@ private fun CompactLocationItemPreview() {
 @Preview(showBackground = true, name = "Current Location Card")
 @Composable
 private fun CurrentLocationCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CurrentLocationCard(
                 locationName = "Dublin",
                 country = "Ireland",
+                onRefreshClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Current Location Card Loading")
+@Composable
+private fun CurrentLocationCardLoadingPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CurrentLocationCard(
+                locationName = "",
+                country = "",
+                isLoading = true,
                 onRefreshClick = {}
             )
         }

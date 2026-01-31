@@ -37,8 +37,8 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerGradientEnd
 import kotlinx.coroutines.delay
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 
 /**
@@ -354,7 +354,7 @@ fun CountdownBanner(
 @Preview(showBackground = true, name = "Countdown Timer")
 @Composable
 private fun CountdownTimerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CountdownTimer(
                 targetTimeMillis = System.currentTimeMillis() + (2 * 60 * 60 * 1000),
@@ -367,7 +367,7 @@ private fun CountdownTimerPreview() {
 @Preview(showBackground = true, name = "Prayer Countdown Timer")
 @Composable
 private fun PrayerCountdownTimerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PrayerCountdownTimer(
                 prayerType = PrayerType.ASR,
@@ -381,7 +381,7 @@ private fun PrayerCountdownTimerPreview() {
 @Preview(showBackground = true, name = "Inline Countdown")
 @Composable
 private fun InlineCountdownPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             InlineCountdown(
                 targetTimeMillis = System.currentTimeMillis() + (30 * 60 * 1000),
@@ -394,7 +394,7 @@ private fun InlineCountdownPreview() {
 @Preview(showBackground = true, name = "Countdown Banner")
 @Composable
 private fun CountdownBannerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CountdownBanner(
                 prayerType = PrayerType.MAGHRIB,

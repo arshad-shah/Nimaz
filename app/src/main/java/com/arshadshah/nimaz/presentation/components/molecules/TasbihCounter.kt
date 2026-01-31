@@ -53,6 +53,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.CounterTextStyles
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Main tasbih counter with circular progress and tap interaction.
@@ -392,7 +393,7 @@ private fun StatItem(
 @Preview(showBackground = true, name = "Tasbih Counter")
 @Composable
 private fun TasbihCounterPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TasbihCounter(
                 currentCount = 33,
@@ -409,7 +410,7 @@ private fun TasbihCounterPreview() {
 @Preview(showBackground = true, name = "Tasbih Counter with Laps")
 @Composable
 private fun TasbihCounterWithLapsPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TasbihCounter(
                 currentCount = 100,
@@ -426,7 +427,7 @@ private fun TasbihCounterWithLapsPreview() {
 @Preview(showBackground = true, name = "Compact Tasbih Counter")
 @Composable
 private fun CompactTasbihCounterPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -448,12 +449,32 @@ private fun CompactTasbihCounterPreview() {
 @Preview(showBackground = true, name = "Tasbih Session Stats")
 @Composable
 private fun TasbihSessionStatsPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TasbihSessionStats(
                 totalCount = 300,
                 lapsCompleted = 3,
                 duration = "5m 32s"
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Tasbih Counter with Dhikr")
+@Composable
+private fun TasbihCounterWithDhikrPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            TasbihCounterWithDhikr(
+                arabicText = "سُبْحَانَ اللَّهِ",
+                transliteration = "SubhanAllah",
+                translation = "Glory be to Allah",
+                currentCount = 21,
+                targetCount = 33,
+                lapsCompleted = 1,
+                onTap = {},
+                onUndo = {},
+                onReset = {}
             )
         }
     }

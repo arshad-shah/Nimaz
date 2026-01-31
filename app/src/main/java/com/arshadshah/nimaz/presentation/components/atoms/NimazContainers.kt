@@ -31,6 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Bottom sheet drag handle indicator.
@@ -338,7 +339,7 @@ fun FabContainer(
 @Preview(showBackground = true, name = "Bottom Sheet Handle")
 @Composable
 private fun BottomSheetHandlePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -351,7 +352,7 @@ private fun BottomSheetHandlePreview() {
 @Preview(showBackground = true, name = "Bottom Sheet Content")
 @Composable
 private fun BottomSheetContentPreview() {
-    MaterialTheme {
+    NimazTheme {
         Surface {
             BottomSheetContent(title = "Settings") {
                 Text("Sheet content goes here")
@@ -364,7 +365,7 @@ private fun BottomSheetContentPreview() {
 @Preview(showBackground = true, name = "Dialog Preview")
 @Composable
 private fun NimazDialogPreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             // Just showing the content, not actual dialog
             Surface(
@@ -387,7 +388,7 @@ private fun NimazDialogPreview() {
 @Preview(showBackground = true, name = "Info Dialog Preview")
 @Composable
 private fun InfoDialogPreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             Surface(
                 shape = RoundedCornerShape(28.dp),
@@ -408,7 +409,7 @@ private fun InfoDialogPreview() {
 @Preview(showBackground = true, name = "Full Screen Dialog Content")
 @Composable
 private fun FullScreenDialogContentPreview() {
-    MaterialTheme {
+    NimazTheme {
         FullScreenDialogContent(
             title = "Add Prayer Record",
             onClose = {},
@@ -422,7 +423,7 @@ private fun FullScreenDialogContentPreview() {
 @Preview(showBackground = true, name = "Nimaz Surface")
 @Composable
 private fun NimazSurfacePreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             NimazSurface {
                 Text("Surface content", modifier = Modifier.padding(16.dp))

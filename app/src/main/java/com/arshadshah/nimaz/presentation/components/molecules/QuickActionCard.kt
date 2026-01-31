@@ -42,6 +42,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ContainedIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Quick action item for home screen grid.
@@ -343,5 +345,148 @@ fun MiniQuickAction(
             tint = iconColor,
             modifier = Modifier.size(24.dp)
         )
+    }
+}
+
+@Preview(showBackground = true, name = "Quick Action Card")
+@Composable
+private fun QuickActionCardPreview() {
+    NimazTheme {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            QuickActionCard(
+                title = "Quran",
+                icon = Icons.Default.MenuBook,
+                iconColor = NimazColors.QuranColors.Meccan,
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionCard(
+                title = "Hadith",
+                icon = Icons.Default.Book,
+                iconColor = NimazColors.QuranColors.Medinan,
+                subtitle = "Daily",
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Quick Action Card with Badge")
+@Composable
+private fun QuickActionCardWithBadgePreview() {
+    NimazTheme {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            QuickActionCard(
+                title = "Tasbih",
+                icon = Icons.Default.RadioButtonChecked,
+                iconColor = NimazColors.TasbihColors.Counter,
+                badge = "3",
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionCard(
+                title = "Qibla",
+                icon = Icons.Default.Explore,
+                onClick = {},
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Horizontal Quick Action")
+@Composable
+private fun HorizontalQuickActionPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            HorizontalQuickAction(
+                title = "Quran",
+                icon = Icons.Default.MenuBook,
+                iconColor = NimazColors.QuranColors.Meccan,
+                subtitle = "Continue reading",
+                onClick = {}
+            )
+            HorizontalQuickAction(
+                title = "Calendar",
+                icon = Icons.Default.CalendarMonth,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Gradient Quick Action")
+@Composable
+private fun GradientQuickActionPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            GradientQuickAction(
+                title = "Start Fasting",
+                icon = Icons.Default.Restaurant,
+                subtitle = "Track your Ramadan fasts",
+                gradientColors = listOf(
+                    NimazColors.FastingColors.Fasted,
+                    NimazColors.FastingColors.Fasted.copy(alpha = 0.7f)
+                ),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Quick Actions Grid")
+@Composable
+private fun QuickActionsGridPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            QuickActionsGrid(
+                onQuranClick = {},
+                onHadithClick = {},
+                onDuaClick = {},
+                onTasbihClick = {},
+                onQiblaClick = {},
+                onCalendarClick = {},
+                onFastingClick = {},
+                onZakatClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Mini Quick Actions")
+@Composable
+private fun MiniQuickActionPreview() {
+    NimazTheme {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            MiniQuickAction(
+                icon = Icons.Default.MenuBook,
+                iconColor = NimazColors.QuranColors.Meccan,
+                onClick = {}
+            )
+            MiniQuickAction(
+                icon = Icons.Default.Explore,
+                onClick = {}
+            )
+            MiniQuickAction(
+                icon = Icons.Default.CalendarMonth,
+                onClick = {}
+            )
+        }
     }
 }

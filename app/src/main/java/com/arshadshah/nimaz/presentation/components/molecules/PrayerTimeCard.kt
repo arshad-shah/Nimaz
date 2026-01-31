@@ -42,6 +42,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.StatusIndicator
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerGradientEnd
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Single prayer time display card.
@@ -333,7 +334,7 @@ fun FeaturedPrayerCard(
 @Preview(showBackground = true, name = "Prayer Time Card")
 @Composable
 private fun PrayerTimeCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PrayerTimeCard(
                 prayerType = PrayerType.FAJR,
@@ -347,7 +348,7 @@ private fun PrayerTimeCardPreview() {
 @Preview(showBackground = true, name = "Prayer Time Cards States")
 @Composable
 private fun PrayerTimeCardsStatesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -363,7 +364,7 @@ private fun PrayerTimeCardsStatesPreview() {
 @Preview(showBackground = true, name = "Compact Prayer Row")
 @Composable
 private fun CompactPrayerTimeRowPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactPrayerTimeRow(prayerType = PrayerType.FAJR, prayerTime = "5:30 AM", prayed = true)
             CompactPrayerTimeRow(prayerType = PrayerType.DHUHR, prayerTime = "12:30 PM")
@@ -375,7 +376,7 @@ private fun CompactPrayerTimeRowPreview() {
 @Preview(showBackground = true, name = "Featured Prayer Card")
 @Composable
 private fun FeaturedPrayerCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             FeaturedPrayerCard(
                 prayerType = PrayerType.DHUHR,

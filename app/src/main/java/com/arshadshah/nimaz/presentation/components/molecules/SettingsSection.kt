@@ -20,6 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Settings section with header and grouped items.
@@ -196,7 +197,7 @@ private val Int.sp: androidx.compose.ui.unit.TextUnit
 @Preview(showBackground = true, name = "Settings Section")
 @Composable
 private fun SettingsSectionPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsSection(
                 title = "General",
@@ -219,7 +220,7 @@ private fun SettingsSectionPreview() {
 @Preview(showBackground = true, name = "Settings Section Flat")
 @Composable
 private fun SettingsSectionFlatPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsSectionFlat(title = "Notifications") {
                 Text(
@@ -234,7 +235,7 @@ private fun SettingsSectionFlatPreview() {
 @Preview(showBackground = true, name = "Settings Screen Header")
 @Composable
 private fun SettingsScreenHeaderPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsScreenHeader(
                 title = "Settings",
@@ -247,7 +248,7 @@ private fun SettingsScreenHeaderPreview() {
 @Preview(showBackground = true, name = "Settings Footer")
 @Composable
 private fun SettingsFooterPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SettingsFooter(text = "Nimaz v1.0.0 • Made with ❤️ for the Ummah")
         }

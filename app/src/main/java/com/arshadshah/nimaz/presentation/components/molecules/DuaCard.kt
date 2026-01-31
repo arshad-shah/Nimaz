@@ -39,6 +39,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Full dua display card with Arabic, translation, transliteration, and actions.
@@ -376,7 +377,7 @@ fun SimpleDuaCard(
 @Preview(showBackground = true, name = "Dua Card")
 @Composable
 private fun DuaCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaCard(
                 duaTitle = "Dua for entering the mosque",
@@ -399,7 +400,7 @@ private fun DuaCardPreview() {
 @Preview(showBackground = true, name = "Dua Card with Counter")
 @Composable
 private fun DuaCardWithCounterPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaCard(
                 duaTitle = "Istighfar",
@@ -421,7 +422,7 @@ private fun DuaCardWithCounterPreview() {
 @Preview(showBackground = true, name = "Simple Dua Card")
 @Composable
 private fun SimpleDuaCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SimpleDuaCard(
                 title = "Before eating",

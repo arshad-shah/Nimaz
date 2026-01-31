@@ -27,6 +27,7 @@ import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Arabic text size presets
@@ -270,7 +271,7 @@ fun VerseEndMarker(
 @Preview(showBackground = true, name = "Arabic Text Sizes")
 @Composable
 private fun ArabicTextSizesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -286,7 +287,7 @@ private fun ArabicTextSizesPreview() {
 @Preview(showBackground = true, name = "Bismillah Text")
 @Composable
 private fun BismillahTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             BismillahText()
         }
@@ -296,7 +297,7 @@ private fun BismillahTextPreview() {
 @Preview(showBackground = true, name = "Quran Verse Text")
 @Composable
 private fun QuranVerseTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             QuranVerseText(
                 arabicText = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
@@ -309,7 +310,7 @@ private fun QuranVerseTextPreview() {
 @Preview(showBackground = true, name = "Hadith Arabic Text")
 @Composable
 private fun HadithArabicTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithArabicText(
                 text = "إنما الأعمال بالنيات"
@@ -321,7 +322,7 @@ private fun HadithArabicTextPreview() {
 @Preview(showBackground = true, name = "Dua Arabic Text")
 @Composable
 private fun DuaArabicTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaArabicText(
                 text = "اللَّهُمَّ إِنِّي أَسْأَلُكَ الْهُدَى وَالتُّقَى"
@@ -333,7 +334,7 @@ private fun DuaArabicTextPreview() {
 @Preview(showBackground = true, name = "Ayah Display")
 @Composable
 private fun AyahDisplayPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             AyahDisplay(
                 arabicText = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
@@ -349,7 +350,7 @@ private fun AyahDisplayPreview() {
 @Preview(showBackground = true, name = "Verse End Marker")
 @Composable
 private fun VerseEndMarkerPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)

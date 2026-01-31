@@ -58,8 +58,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Audio playback state.
@@ -668,5 +670,92 @@ private fun formatDuration(millis: Long): String {
         String.format("%d:%02d:%02d", hours, minutes, seconds)
     } else {
         String.format("%d:%02d", minutes, seconds)
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MiniAudioPlayerPlayingPreview() {
+    NimazTheme {
+        MiniAudioPlayer(
+            state = AudioPlayerState(
+                isPlaying = true,
+                currentPosition = 45000L,
+                duration = 180000L,
+                currentTitle = "Al-Fatiha",
+                currentSubtitle = "Surah 1",
+                reciterName = "Mishary Rashid Alafasy"
+            ),
+            onPlayPauseClick = {},
+            onCloseClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MiniAudioPlayerPausedPreview() {
+    NimazTheme {
+        MiniAudioPlayer(
+            state = AudioPlayerState(
+                isPlaying = false,
+                currentPosition = 90000L,
+                duration = 180000L,
+                currentTitle = "Al-Baqarah",
+                currentSubtitle = "Surah 2",
+                reciterName = "Abdul Rahman Al-Sudais"
+            ),
+            onPlayPauseClick = {},
+            onCloseClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FullAudioPlayerPreview() {
+    NimazTheme {
+        FullAudioPlayer(
+            state = AudioPlayerState(
+                isPlaying = true,
+                currentPosition = 65000L,
+                duration = 300000L,
+                currentTitle = "Al-Imran",
+                currentSubtitle = "Surah 3",
+                reciterName = "Mishary Rashid Alafasy",
+                playbackSpeed = 1.0f,
+                repeatMode = RepeatMode.NONE,
+                isShuffleEnabled = false
+            ),
+            onPlayPauseClick = {},
+            onPreviousClick = {},
+            onNextClick = {},
+            onSeek = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QuranAudioPlayerPreview() {
+    NimazTheme {
+        QuranAudioPlayer(
+            state = AudioPlayerState(
+                isPlaying = true,
+                currentPosition = 12000L,
+                duration = 45000L,
+                currentTitle = "Al-Fatiha",
+                reciterName = "Mishary Rashid Alafasy"
+            ),
+            currentAyah = 3,
+            totalAyahs = 7,
+            onPlayPauseClick = {},
+            onPreviousAyah = {},
+            onNextAyah = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

@@ -53,6 +53,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 
 /**
@@ -546,5 +548,65 @@ fun WelcomeSlide(
                 color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f)
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "OnboardingSlide")
+@Composable
+private fun OnboardingSlidePreview() {
+    NimazTheme {
+        OnboardingSlide(
+            data = defaultOnboardingSlides.first()
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "PermissionSlide - Not Granted")
+@Composable
+private fun PermissionSlideNotGrantedPreview() {
+    NimazTheme {
+        PermissionSlide(
+            title = "Location Access",
+            description = "Allow location access for accurate prayer times and Qibla direction",
+            icon = Icons.Default.LocationOn,
+            isGranted = false,
+            onRequestPermission = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "PermissionSlide - Granted")
+@Composable
+private fun PermissionSlideGrantedPreview() {
+    NimazTheme {
+        PermissionSlide(
+            title = "Location Access",
+            description = "Allow location access for accurate prayer times and Qibla direction",
+            icon = Icons.Default.LocationOn,
+            isGranted = true,
+            onRequestPermission = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "FeatureHighlightCard")
+@Composable
+private fun FeatureHighlightCardPreview() {
+    NimazTheme {
+        FeatureHighlightCard(
+            title = "Prayer Times",
+            description = "Get accurate prayer times based on your location",
+            icon = Icons.Default.Mosque,
+            color = NimazColors.PrayerColors.Fajr,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "WelcomeSlide")
+@Composable
+private fun WelcomeSlidePreview() {
+    NimazTheme {
+        WelcomeSlide()
     }
 }

@@ -50,7 +50,9 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
@@ -464,5 +466,60 @@ fun PrayerNavBar(
                 )
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NimazBottomNavBarPreview() {
+    NimazTheme {
+        NimazBottomNavBar(
+            currentRoute = "home",
+            onNavigate = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NimazPillNavBarPreview() {
+    NimazTheme {
+        NimazPillNavBar(
+            currentRoute = "quran",
+            onNavigate = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun NimazFloatingNavBarPreview() {
+    NimazTheme {
+        NimazFloatingNavBar(
+            currentRoute = "prayer",
+            onNavigate = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun MiniNavBarPreview() {
+    NimazTheme {
+        MiniNavBar(
+            currentRoute = "home",
+            onNavigate = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PrayerNavBarPreview() {
+    NimazTheme {
+        PrayerNavBar(
+            currentPrayer = "dhuhr",
+            onPrayerSelect = {}
+        )
     }
 }

@@ -43,6 +43,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Tasbih preset card for selecting dhikr.
@@ -352,7 +353,7 @@ fun PresetCategoryHeader(
 @Preview(showBackground = true, name = "Tasbih Preset Card")
 @Composable
 private fun TasbihPresetCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TasbihPresetCard(
                 name = "SubhanAllah",
@@ -372,7 +373,7 @@ private fun TasbihPresetCardPreview() {
 @Preview(showBackground = true, name = "Tasbih Preset Card Default")
 @Composable
 private fun TasbihPresetCardDefaultPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             TasbihPresetCard(
                 name = "Alhamdulillah",
@@ -389,7 +390,7 @@ private fun TasbihPresetCardDefaultPreview() {
 @Preview(showBackground = true, name = "Compact Preset Item")
 @Composable
 private fun CompactPresetItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactPresetItem(
                 name = "Allahu Akbar",
@@ -412,7 +413,7 @@ private fun CompactPresetItemPreview() {
 @Preview(showBackground = true, name = "Featured Preset Card")
 @Composable
 private fun FeaturedPresetCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             FeaturedPresetCard(
                 name = "SubhanAllah",
@@ -428,7 +429,7 @@ private fun FeaturedPresetCardPreview() {
 @Preview(showBackground = true, name = "Preset Category Header")
 @Composable
 private fun PresetCategoryHeaderPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PresetCategoryHeader(
                 categoryName = "After Prayer",

@@ -53,11 +53,13 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -537,4 +539,42 @@ fun CompactQiblaIndicator(
 private fun isQiblaAligned(angle: Float): Boolean {
     val normalizedAngle = ((angle % 360) + 360) % 360
     return normalizedAngle < 5 || normalizedAngle > 355
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun QiblaCompassPreview() {
+    NimazTheme {
+        QiblaCompass(
+            qiblaInfo = QiblaInfo(
+                direction = QiblaDirection(
+                    bearing = 136.5,
+                    distance = 5200.0,
+                    userLatitude = 53.35,
+                    userLongitude = -6.26
+                ),
+                locationName = "Dublin",
+                latitude = 53.35,
+                longitude = -6.26,
+                distanceToMecca = 5200.0,
+                compass = null,
+                qiblaAngle = 136.5f,
+                isCalibrationNeeded = false
+            ),
+            locationName = "Dublin, Ireland",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CompactQiblaIndicatorPreview() {
+    NimazTheme {
+        CompactQiblaIndicator(
+            qiblaAngle = 136.5f,
+            bearing = 136.5,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
 }

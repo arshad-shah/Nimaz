@@ -41,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Search result type enumeration.
@@ -323,7 +324,7 @@ fun NoSearchResults(
 @Preview(showBackground = true, name = "Search Result Item")
 @Composable
 private fun SearchResultItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             SearchResultItem(
                 type = SearchResultType.QURAN_AYAH,
@@ -341,7 +342,7 @@ private fun SearchResultItemPreview() {
 @Preview(showBackground = true, name = "Quran Search Result")
 @Composable
 private fun QuranSearchResultPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             QuranSearchResult(
                 surahName = "Al-Fatiha",
@@ -359,7 +360,7 @@ private fun QuranSearchResultPreview() {
 @Preview(showBackground = true, name = "Hadith Search Result")
 @Composable
 private fun HadithSearchResultPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithSearchResult(
                 collectionName = "Sahih Bukhari",
@@ -373,10 +374,26 @@ private fun HadithSearchResultPreview() {
     }
 }
 
+@Preview(showBackground = true, name = "Dua Search Result")
+@Composable
+private fun DuaSearchResultPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            DuaSearchResult(
+                duaTitle = "Dua for Guidance",
+                categoryName = "Daily Duas",
+                duaText = "O Allah, guide me among those whom You have guided.",
+                query = "guide",
+                onClick = {}
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true, name = "Highlighted Text")
 @Composable
 private fun HighlightedTextPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             HighlightedText(
                 text = "The best among you are those who learn the Quran and teach it.",
@@ -393,7 +410,7 @@ private fun HighlightedTextPreview() {
 @Preview(showBackground = true, name = "No Search Results")
 @Composable
 private fun NoSearchResultsPreview() {
-    MaterialTheme {
+    NimazTheme {
         NoSearchResults(query = "xyz123")
     }
 }

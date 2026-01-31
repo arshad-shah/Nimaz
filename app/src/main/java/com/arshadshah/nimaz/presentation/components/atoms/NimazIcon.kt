@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Check
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Icon size presets
@@ -268,7 +269,7 @@ fun GradientIcon(
 @Preview(showBackground = true, name = "NimazIcon Sizes")
 @Composable
 private fun NimazIconSizesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -283,7 +284,7 @@ private fun NimazIconSizesPreview() {
 @Preview(showBackground = true, name = "Contained Icons")
 @Composable
 private fun ContainedIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -298,7 +299,7 @@ private fun ContainedIconPreview() {
 @Preview(showBackground = true, name = "Container Shapes")
 @Composable
 private fun ContainerShapesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -313,7 +314,7 @@ private fun ContainerShapesPreview() {
 @Preview(showBackground = true, name = "Feature Icons")
 @Composable
 private fun FeatureIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -328,7 +329,7 @@ private fun FeatureIconPreview() {
 @Preview(showBackground = true, name = "Prayer Icons")
 @Composable
 private fun PrayerIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -343,7 +344,7 @@ private fun PrayerIconPreview() {
 @Preview(showBackground = true, name = "Status Icons")
 @Composable
 private fun StatusIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -357,7 +358,7 @@ private fun StatusIconPreview() {
 @Preview(showBackground = true, name = "Action Icon")
 @Composable
 private fun ActionIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -371,7 +372,7 @@ private fun ActionIconPreview() {
 @Preview(showBackground = true, name = "Gradient Icon")
 @Composable
 private fun GradientIconPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

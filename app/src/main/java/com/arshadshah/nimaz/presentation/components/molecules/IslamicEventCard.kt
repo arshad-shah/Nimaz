@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Get icon and color for event type.
@@ -429,6 +431,126 @@ fun RamadanCountdownCard(
                     color = color
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Islamic Event Card - Eid")
+@Composable
+private fun IslamicEventCardEidPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            IslamicEventCard(
+                eventName = "Eid al-Fitr",
+                eventNameArabic = "عيد الفطر",
+                eventType = HijriDateCalculator.EventType.EID,
+                hijriDate = "1 Shawwal 1447",
+                gregorianDate = "30 March 2026",
+                daysUntil = 58,
+                description = "Festival of Breaking the Fast, marking the end of Ramadan.",
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Islamic Event Card - Ramadan")
+@Composable
+private fun IslamicEventCardRamadanPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            IslamicEventCard(
+                eventName = "Ramadan Begins",
+                eventNameArabic = "بداية رمضان",
+                eventType = HijriDateCalculator.EventType.RAMADAN,
+                hijriDate = "1 Ramadan 1447",
+                gregorianDate = "1 March 2026",
+                daysUntil = 29
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Islamic Event Card - Today")
+@Composable
+private fun IslamicEventCardTodayPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            IslamicEventCard(
+                eventName = "Laylat al-Qadr",
+                eventNameArabic = "ليلة القدر",
+                eventType = HijriDateCalculator.EventType.SPECIAL_NIGHT,
+                hijriDate = "27 Ramadan 1447",
+                gregorianDate = "27 March 2026",
+                daysUntil = 0,
+                description = "The Night of Decree, better than a thousand months."
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Compact Event Item")
+@Composable
+private fun CompactEventItemPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CompactEventItem(
+                eventName = "Eid al-Adha",
+                eventType = HijriDateCalculator.EventType.EID,
+                date = "10 Dhul Hijjah 1447",
+                daysUntil = 140,
+                onClick = {}
+            )
+            CompactEventItem(
+                eventName = "Day of Arafah",
+                eventType = HijriDateCalculator.EventType.RECOMMENDED_FAST,
+                date = "9 Dhul Hijjah 1447",
+                daysUntil = 1
+            )
+            CompactEventItem(
+                eventName = "Isra and Mi'raj",
+                eventType = HijriDateCalculator.EventType.COMMEMORATION,
+                date = "27 Rajab 1447",
+                daysUntil = 0
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Featured Event Card")
+@Composable
+private fun FeaturedEventCardPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            FeaturedEventCard(
+                eventName = "Eid al-Fitr",
+                eventNameArabic = "عيد الفطر",
+                eventType = HijriDateCalculator.EventType.EID,
+                daysUntil = 58,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Ramadan Countdown Card")
+@Composable
+private fun RamadanCountdownCardPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            RamadanCountdownCard(
+                daysUntil = 29,
+                onClick = {}
+            )
+            RamadanCountdownCard(
+                daysUntil = 0,
+                isRamadan = true,
+                daysRemaining = 18,
+                onClick = {}
+            )
         }
     }
 }

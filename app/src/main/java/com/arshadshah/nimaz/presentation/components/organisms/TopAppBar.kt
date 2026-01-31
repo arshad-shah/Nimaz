@@ -55,7 +55,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 
@@ -130,4 +132,40 @@ fun NimazBackTopAppBar(
         actions = actions,
         scrollBehavior = scrollBehavior
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+private fun NimazTopAppBarWithSubtitlePreview() {
+    NimazTheme {
+        NimazTopAppBar(
+            title = "Nimaz",
+            subtitle = "Next: Dhuhr at 12:30 PM"
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+private fun NimazTopAppBarTitleOnlyPreview() {
+    NimazTheme {
+        NimazTopAppBar(
+            title = "Nimaz"
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Preview(showBackground = true)
+@Composable
+private fun NimazBackTopAppBarPreview() {
+    NimazTheme {
+        NimazBackTopAppBar(
+            title = "Settings",
+            onBackClick = {},
+            subtitle = "Customize your experience"
+        )
+    }
 }

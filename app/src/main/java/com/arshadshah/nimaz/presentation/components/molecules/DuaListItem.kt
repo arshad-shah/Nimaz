@@ -34,6 +34,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ContainedIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Dua list item for category displays.
@@ -317,7 +318,7 @@ fun FeaturedDuaCard(
 @Preview(showBackground = true, name = "Dua List Item")
 @Composable
 private fun DuaListItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaListItem(
                 duaTitle = "Dua for entering the mosque",
@@ -334,7 +335,7 @@ private fun DuaListItemPreview() {
 @Preview(showBackground = true, name = "Dua List Item Favorite")
 @Composable
 private fun DuaListItemFavoritePreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaListItem(
                 duaTitle = "Dua before sleeping",
@@ -352,7 +353,7 @@ private fun DuaListItemFavoritePreview() {
 @Preview(showBackground = true, name = "Dua Category Item")
 @Composable
 private fun DuaCategoryItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaCategoryItem(
                 categoryName = "Morning & Evening",
@@ -367,7 +368,7 @@ private fun DuaCategoryItemPreview() {
 @Preview(showBackground = true, name = "Compact Dua List Item")
 @Composable
 private fun CompactDuaListItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactDuaListItem(
                 duaTitle = "Dua for guidance",
@@ -382,7 +383,7 @@ private fun CompactDuaListItemPreview() {
 @Preview(showBackground = true, name = "Featured Dua Card")
 @Composable
 private fun FeaturedDuaCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             FeaturedDuaCard(
                 duaTitle = "Dua for forgiveness",

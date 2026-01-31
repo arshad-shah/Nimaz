@@ -60,6 +60,9 @@ import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayCell
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.domain.model.HijriDate
+import androidx.compose.ui.tooling.preview.Preview
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -590,5 +593,105 @@ private fun MiniMonthCard(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true, name = "EventsStrip")
+@Composable
+private fun EventsStripPreview() {
+    val today = LocalDate.now()
+    val sampleEvents = listOf(
+        IslamicEvent(
+            id = "1",
+            nameArabic = "\u0639\u064a\u062f \u0627\u0644\u0641\u0637\u0631",
+            nameEnglish = "Eid al-Fitr",
+            description = "Festival of Breaking the Fast",
+            hijriMonth = 10,
+            hijriDay = 1,
+            eventType = IslamicEventType.HOLIDAY,
+            isHoliday = true,
+            isFastingDay = false,
+            isNightOfPower = false,
+            gregorianDate = today,
+            year = 1446,
+            notes = null,
+            priority = 1
+        ),
+        IslamicEvent(
+            id = "2",
+            nameArabic = "\u0644\u064a\u0644\u0629 \u0627\u0644\u0642\u062f\u0631",
+            nameEnglish = "Laylat al-Qadr",
+            description = "Night of Power",
+            hijriMonth = 9,
+            hijriDay = 27,
+            eventType = IslamicEventType.NIGHT,
+            isHoliday = false,
+            isFastingDay = false,
+            isNightOfPower = true,
+            gregorianDate = today.plusDays(5),
+            year = 1446,
+            notes = null,
+            priority = 1
+        ),
+        IslamicEvent(
+            id = "3",
+            nameArabic = "\u064a\u0648\u0645 \u0639\u0631\u0641\u0629",
+            nameEnglish = "Day of Arafah",
+            description = "Recommended fasting day",
+            hijriMonth = 12,
+            hijriDay = 9,
+            eventType = IslamicEventType.FAST,
+            isHoliday = false,
+            isFastingDay = true,
+            isNightOfPower = false,
+            gregorianDate = today.plusDays(10),
+            year = 1446,
+            notes = null,
+            priority = 2
+        )
+    )
+    NimazTheme {
+        EventsStrip(events = sampleEvents)
+    }
+}
+
+@Preview(showBackground = true, name = "CalendarGrid")
+@Composable
+private fun CalendarGridPreview() {
+    val today = LocalDate.now()
+    val sampleDays = (0 until 30).map { offset ->
+        val date = today.withDayOfMonth(1).plusDays(offset.toLong())
+        CalendarDay(
+            gregorianDate = date,
+            hijriDate = HijriDate(day = offset + 1, month = 7, year = 1446),
+            events = if (offset == 14) listOf(
+                IslamicEvent(
+                    id = "1",
+                    nameArabic = "\u0639\u064a\u062f",
+                    nameEnglish = "Sample Event",
+                    description = null,
+                    hijriMonth = 7,
+                    hijriDay = offset + 1,
+                    eventType = IslamicEventType.HOLIDAY,
+                    isHoliday = true,
+                    isFastingDay = false,
+                    isNightOfPower = false,
+                    gregorianDate = date,
+                    year = 1446,
+                    notes = null,
+                    priority = 1
+                )
+            ) else emptyList(),
+            isToday = date == today,
+            isCurrentMonth = true
+        )
+    }
+    NimazTheme {
+        CalendarGrid(
+            days = sampleDays,
+            currentMonth = 7,
+            currentYear = 1446,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Icon button style variants
@@ -209,7 +210,7 @@ fun ToggleIconButton(
 @Preview(showBackground = true, name = "Icon Button Styles")
 @Composable
 private fun IconButtonStylesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -225,7 +226,7 @@ private fun IconButtonStylesPreview() {
 @Preview(showBackground = true, name = "Icon Button Sizes")
 @Composable
 private fun IconButtonSizesPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -242,7 +243,7 @@ private fun IconButtonSizesPreview() {
 @Preview(showBackground = true, name = "Colored Icon Buttons")
 @Composable
 private fun ColoredIconButtonPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -261,7 +262,7 @@ private fun ColoredIconButtonPreview() {
 @Preview(showBackground = true, name = "Toggle Icon Button")
 @Composable
 private fun ToggleIconButtonPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

@@ -42,6 +42,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Full Quran verse card with Arabic text, translation, and actions.
@@ -246,7 +247,7 @@ private fun SajdaIndicator() {
 @Preview(showBackground = true, name = "Ayah Card")
 @Composable
 private fun AyahCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             AyahCard(
                 arabicText = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
@@ -266,7 +267,7 @@ private fun AyahCardPreview() {
 @Preview(showBackground = true, name = "Ayah Card with Sajda")
 @Composable
 private fun AyahCardSajdaPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             AyahCard(
                 arabicText = "إِنَّ الَّذِينَ عِندَ رَبِّكَ لَا يَسْتَكْبِرُونَ عَنْ عِبَادَتِهِ وَيُسَبِّحُونَهُ وَلَهُ يَسْجُدُونَ ۩",
@@ -285,7 +286,7 @@ private fun AyahCardSajdaPreview() {
 @Preview(showBackground = true, name = "Ayah Number Badge")
 @Composable
 private fun AyahNumberBadgePreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(modifier = Modifier.padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AyahNumberBadge(ayahNumber = 1)
             AyahNumberBadge(ayahNumber = 42)
@@ -297,7 +298,7 @@ private fun AyahNumberBadgePreview() {
 @Preview(showBackground = true, name = "Bismillah Card")
 @Composable
 private fun BismillahCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             BismillahCard(showTranslation = true)
         }
@@ -374,6 +375,45 @@ fun BismillahCard(
                     textAlign = TextAlign.Center
                 )
             }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Compact Ayah Display")
+@Composable
+private fun CompactAyahDisplayPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            CompactAyahDisplay(
+                arabicText = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
+                ayahNumber = 1
+            )
+            CompactAyahDisplay(
+                arabicText = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+                ayahNumber = 2,
+                isHighlighted = true,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Ayah Card with Transliteration")
+@Composable
+private fun AyahCardWithTransliterationPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            AyahCard(
+                arabicText = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
+                translation = "All praise is due to Allah, Lord of the worlds.",
+                surahNumber = 1,
+                ayahNumber = 2,
+                surahName = "Al-Fatiha",
+                transliteration = "Alhamdu lillahi rabbil aalameen",
+                showTransliteration = true,
+                onBookmarkClick = {},
+                onPlayClick = {}
+            )
         }
     }
 }

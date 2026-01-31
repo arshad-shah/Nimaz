@@ -32,6 +32,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 
 /**
@@ -367,7 +368,7 @@ fun DayOfWeekSelection(
 @Preview(showBackground = true, name = "Checkbox")
 @Composable
 private fun NimazCheckboxPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -383,7 +384,7 @@ private fun NimazCheckboxPreview() {
 @Preview(showBackground = true, name = "Labeled Checkbox")
 @Composable
 private fun LabeledCheckboxPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             var checked1 by remember { mutableStateOf(false) }
             var checked2 by remember { mutableStateOf(true) }
@@ -406,7 +407,7 @@ private fun LabeledCheckboxPreview() {
 @Preview(showBackground = true, name = "Tri-State Checkbox")
 @Composable
 private fun TriStateCheckboxPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -421,7 +422,7 @@ private fun TriStateCheckboxPreview() {
 @Preview(showBackground = true, name = "Radio Button")
 @Composable
 private fun RadioButtonPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -436,7 +437,7 @@ private fun RadioButtonPreview() {
 @Preview(showBackground = true, name = "Labeled Radio Button")
 @Composable
 private fun LabeledRadioButtonPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             var selected by remember { mutableStateOf("option1") }
 
@@ -457,7 +458,7 @@ private fun LabeledRadioButtonPreview() {
 @Preview(showBackground = true, name = "Radio Group")
 @Composable
 private fun RadioGroupPreview() {
-    MaterialTheme {
+    NimazTheme {
         var selected by remember { mutableStateOf("Medium") }
         Box(modifier = Modifier.padding(16.dp)) {
             RadioGroup(
@@ -472,7 +473,7 @@ private fun RadioGroupPreview() {
 @Preview(showBackground = true, name = "Checkbox Group")
 @Composable
 private fun CheckboxGroupPreview() {
-    MaterialTheme {
+    NimazTheme {
         var selected by remember { mutableStateOf(setOf("Fajr", "Isha")) }
         Box(modifier = Modifier.padding(16.dp)) {
             CheckboxGroup(
@@ -489,7 +490,7 @@ private fun CheckboxGroupPreview() {
 @Preview(showBackground = true, name = "Prayer Selection")
 @Composable
 private fun PrayerSelectionCheckboxesPreview() {
-    MaterialTheme {
+    NimazTheme {
         var selected by remember { mutableStateOf(setOf("Fajr", "Maghrib")) }
         Box(modifier = Modifier.padding(16.dp)) {
             PrayerSelectionCheckboxes(
@@ -505,7 +506,7 @@ private fun PrayerSelectionCheckboxesPreview() {
 @Preview(showBackground = true, name = "Day of Week Selection")
 @Composable
 private fun DayOfWeekSelectionPreview() {
-    MaterialTheme {
+    NimazTheme {
         var selected by remember { mutableStateOf(setOf(1, 3, 5)) }
         Box(modifier = Modifier.padding(16.dp)) {
             DayOfWeekSelection(

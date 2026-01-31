@@ -25,7 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Single day cell for calendar displays.
@@ -410,6 +412,162 @@ fun CalendarDayCell(
                     }
                 }
             }
+        }
+    }
+}
+
+// ==================== PREVIEWS ====================
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayDefaultPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDay(
+                dayNumber = 15,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDaySelectedPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDay(
+                dayNumber = 10,
+                hijriDay = 17,
+                isSelected = true,
+                modifier = Modifier.size(48.dp),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayTodayPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDay(
+                dayNumber = 22,
+                hijriDay = 1,
+                isToday = true,
+                hasEvent = true,
+                modifier = Modifier.size(48.dp),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayFastingPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDay(
+                dayNumber = 5,
+                hijriDay = 12,
+                hasEvent = true,
+                fastingStatus = FastingDayStatus.FASTED,
+                modifier = Modifier.size(48.dp),
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayNotCurrentMonthPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDay(
+                dayNumber = 29,
+                isCurrentMonth = false,
+                modifier = Modifier.size(48.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarWeekHeaderPreview() {
+    NimazTheme {
+        CalendarWeekHeader(
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarMonthHeaderPreview() {
+    NimazTheme {
+        CalendarMonthHeader(
+            monthName = "January",
+            year = 2026,
+            hijriMonth = "Rajab",
+            hijriYear = 1447,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarLegendPreview() {
+    NimazTheme {
+        CalendarLegend(
+            showFasting = true,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayCellPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDayCell(
+                gregorianDay = 15,
+                hijriDay = 22,
+                isToday = true,
+                isSelected = false,
+                isCurrentMonth = true,
+                hasEvent = true,
+                isHoliday = false,
+                isFastingDay = true,
+                onClick = {},
+                modifier = Modifier.size(48.dp)
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CalendarDayCellSelectedPreview() {
+    NimazTheme {
+        Row(modifier = Modifier.padding(16.dp)) {
+            CalendarDayCell(
+                gregorianDay = 25,
+                hijriDay = 3,
+                isToday = false,
+                isSelected = true,
+                isCurrentMonth = true,
+                hasEvent = false,
+                isHoliday = true,
+                isFastingDay = false,
+                onClick = {},
+                modifier = Modifier.size(48.dp)
+            )
         }
     }
 }

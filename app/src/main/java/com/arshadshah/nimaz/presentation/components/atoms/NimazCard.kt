@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material3.Text
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Card style variants
@@ -229,7 +230,7 @@ fun ListItemCard(
 @Preview(showBackground = true, name = "Filled Card")
 @Composable
 private fun NimazCardFilledPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazCard(
             modifier = Modifier.padding(16.dp),
             style = NimazCardStyle.FILLED
@@ -245,7 +246,7 @@ private fun NimazCardFilledPreview() {
 @Preview(showBackground = true, name = "Elevated Card")
 @Composable
 private fun NimazCardElevatedPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazCard(
             modifier = Modifier.padding(16.dp),
             style = NimazCardStyle.ELEVATED
@@ -261,7 +262,7 @@ private fun NimazCardElevatedPreview() {
 @Preview(showBackground = true, name = "Outlined Card")
 @Composable
 private fun NimazCardOutlinedPreview() {
-    MaterialTheme {
+    NimazTheme {
         NimazCard(
             modifier = Modifier.padding(16.dp),
             style = NimazCardStyle.OUTLINED
@@ -277,7 +278,7 @@ private fun NimazCardOutlinedPreview() {
 @Preview(showBackground = true, name = "Gradient Card")
 @Composable
 private fun GradientCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         GradientCard(
             modifier = Modifier.padding(16.dp),
             gradientColors = listOf(Color(0xFF5C6BC0), Color(0xFF9FA8DA))
@@ -294,7 +295,7 @@ private fun GradientCardPreview() {
 @Preview(showBackground = true, name = "Prayer Card")
 @Composable
 private fun PrayerCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         PrayerCard(
             modifier = Modifier.padding(16.dp),
             primaryColor = Color(0xFFFFB74D),
@@ -312,7 +313,7 @@ private fun PrayerCardPreview() {
 @Preview(showBackground = true, name = "Section Card")
 @Composable
 private fun SectionCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         SectionCard(
             modifier = Modifier.padding(16.dp)
         ) {
@@ -325,7 +326,7 @@ private fun SectionCardPreview() {
 @Preview(showBackground = true, name = "List Item Card")
 @Composable
 private fun ListItemCardPreview() {
-    MaterialTheme {
+    NimazTheme {
         ListItemCard(
             onClick = {},
             modifier = Modifier.padding(16.dp)

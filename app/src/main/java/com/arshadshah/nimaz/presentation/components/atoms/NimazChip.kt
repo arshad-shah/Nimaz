@@ -39,6 +39,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Chip style variants
@@ -388,7 +389,7 @@ fun RevelationTypeChip(
 @Preview(showBackground = true, name = "NimazChip Variants")
 @Composable
 private fun NimazChipVariantsPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -404,7 +405,7 @@ private fun NimazChipVariantsPreview() {
 @Preview(showBackground = true, name = "Filter Chips")
 @Composable
 private fun FilterChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -420,7 +421,7 @@ private fun FilterChipPreview() {
 @Preview(showBackground = true, name = "Assist Chips")
 @Composable
 private fun AssistChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -435,7 +436,7 @@ private fun AssistChipPreview() {
 @Preview(showBackground = true, name = "Input Chips")
 @Composable
 private fun InputChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -450,7 +451,7 @@ private fun InputChipPreview() {
 @Preview(showBackground = true, name = "Suggestion Chips")
 @Composable
 private fun SuggestionChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -465,7 +466,7 @@ private fun SuggestionChipPreview() {
 @Preview(showBackground = true, name = "Colored Chips")
 @Composable
 private fun ColoredChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -479,7 +480,7 @@ private fun ColoredChipPreview() {
 @Preview(showBackground = true, name = "Chip Group")
 @Composable
 private fun ChipGroupPreview() {
-    MaterialTheme {
+    NimazTheme {
         var selected by remember { mutableStateOf(setOf("Fajr")) }
         ChipGroup(
             chips = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"),
@@ -495,7 +496,7 @@ private fun ChipGroupPreview() {
 @Preview(showBackground = true, name = "Revelation Type Chips")
 @Composable
 private fun RevelationTypeChipPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

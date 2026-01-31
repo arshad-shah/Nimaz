@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShap
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Bookmark type enumeration.
@@ -335,7 +336,7 @@ fun CompactBookmarkItem(
 @Preview(showBackground = true, name = "Quran Bookmark Item")
 @Composable
 private fun QuranBookmarkItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             QuranBookmarkItem(
                 surahName = "Al-Baqarah",
@@ -354,7 +355,7 @@ private fun QuranBookmarkItemPreview() {
 @Preview(showBackground = true, name = "Hadith Bookmark Item")
 @Composable
 private fun HadithBookmarkItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithBookmarkItem(
                 collectionName = "Sahih Bukhari",
@@ -372,7 +373,7 @@ private fun HadithBookmarkItemPreview() {
 @Preview(showBackground = true, name = "Dua Bookmark Item")
 @Composable
 private fun DuaBookmarkItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             DuaBookmarkItem(
                 duaTitle = "Dua before sleeping",
@@ -389,7 +390,7 @@ private fun DuaBookmarkItemPreview() {
 @Preview(showBackground = true, name = "Compact Bookmark Items")
 @Composable
 private fun CompactBookmarkItemsPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             CompactBookmarkItem(
                 type = BookmarkType.QURAN,

@@ -35,6 +35,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.HadithGradeBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Hadith list item for collection displays.
@@ -288,7 +289,7 @@ fun HadithChapterItem(
 @Preview(showBackground = true, name = "Hadith List Item")
 @Composable
 private fun HadithListItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithListItem(
                 hadithNumber = 1,
@@ -307,7 +308,7 @@ private fun HadithListItemPreview() {
 @Preview(showBackground = true, name = "Hadith List Item Bookmarked")
 @Composable
 private fun HadithListItemBookmarkedPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithListItem(
                 hadithNumber = 2,
@@ -326,7 +327,7 @@ private fun HadithListItemBookmarkedPreview() {
 @Preview(showBackground = true, name = "Hadith Collection Item")
 @Composable
 private fun HadithCollectionItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithCollectionItem(
                 collectionName = "Sahih Bukhari",
@@ -342,7 +343,7 @@ private fun HadithCollectionItemPreview() {
 @Preview(showBackground = true, name = "Hadith Chapter Item")
 @Composable
 private fun HadithChapterItemPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             HadithChapterItem(
                 chapterNumber = 1,

@@ -57,6 +57,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -64,6 +65,7 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.RamadanProgress
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -690,5 +692,45 @@ private fun VoluntaryDayCell(
                 fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal
             )
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FastingStatsCardWithMakeupPreview() {
+    NimazTheme {
+        FastingStatsCard(
+            stats = FastingStats(
+                totalFasted = 45,
+                ramadanFasted = 28,
+                voluntaryFasted = 17,
+                pendingMakeupCount = 2,
+                totalFidyaPaid = 0.0,
+                currentStreak = 3,
+                startDate = System.currentTimeMillis() - 30L * 24 * 60 * 60 * 1000,
+                endDate = System.currentTimeMillis()
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FastingStatsCardNoMakeupPreview() {
+    NimazTheme {
+        FastingStatsCard(
+            stats = FastingStats(
+                totalFasted = 60,
+                ramadanFasted = 30,
+                voluntaryFasted = 30,
+                pendingMakeupCount = 0,
+                totalFidyaPaid = 0.0,
+                currentStreak = 10,
+                startDate = System.currentTimeMillis() - 60L * 24 * 60 * 60 * 1000,
+                endDate = System.currentTimeMillis()
+            ),
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

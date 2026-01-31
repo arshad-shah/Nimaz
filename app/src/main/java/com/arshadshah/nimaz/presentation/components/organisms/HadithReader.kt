@@ -58,6 +58,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.getHadithGradeBadgeColors
 import com.arshadshah.nimaz.presentation.components.molecules.HadithCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithListItem
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.compose.ui.tooling.preview.Preview
 
 /**
  * Data class representing a Hadith for the reader.
@@ -532,5 +534,52 @@ fun HadithChapterReader(
                 onBookmarkClick = { onBookmarkClick(hadith) }
             )
         }
+    }
+}
+
+private val sampleHadith = HadithReaderData(
+    id = "1",
+    hadithNumber = 1,
+    arabicText = "\u0625\u0650\u0646\u0651\u064e\u0645\u064e\u0627 \u0627\u0644\u0623\u064e\u0639\u0652\u0645\u064e\u0627\u0644\u064f \u0628\u0650\u0627\u0644\u0646\u0651\u0650\u064a\u0651\u064e\u0627\u062a\u0650",
+    englishText = "Actions are judged by intentions, so each man will have what he intended.",
+    narratorChain = "Narrated by Umar ibn al-Khattab",
+    grade = "Sahih",
+    bookName = "Sahih al-Bukhari",
+    chapterName = "Revelation",
+    collectionName = "Sahih al-Bukhari",
+    reference = "Bukhari 1",
+    isBookmarked = false
+)
+
+@Preview(showBackground = true, name = "HadithReader")
+@Composable
+private fun HadithReaderPreview() {
+    NimazTheme {
+        HadithReader(
+            hadith = sampleHadith,
+            hasPrevious = true,
+            hasNext = true
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "HadithChapterReader")
+@Composable
+private fun HadithChapterReaderPreview() {
+    NimazTheme {
+        HadithChapterReader(
+            chapterName = "Revelation",
+            chapterNumber = 1,
+            hadiths = listOf(
+                sampleHadith,
+                sampleHadith.copy(
+                    id = "2",
+                    hadithNumber = 2,
+                    englishText = "While we were one day sitting with the Messenger of Allah, there appeared before us a man dressed in extremely white clothes.",
+                    grade = "Sahih"
+                )
+            ),
+            bookName = "Sahih al-Bukhari"
+        )
     }
 }

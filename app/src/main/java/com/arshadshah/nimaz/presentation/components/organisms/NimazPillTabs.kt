@@ -19,7 +19,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Pill-style tabs (segmented control).
@@ -80,5 +82,31 @@ fun NimazPillTabs(
                 }
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PillTabsFirstSelectedPreview() {
+    NimazTheme {
+        NimazPillTabs(
+            tabs = listOf("Daily", "Weekly", "Monthly"),
+            selectedIndex = 0,
+            onTabSelect = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PillTabsMiddleSelectedPreview() {
+    NimazTheme {
+        NimazPillTabs(
+            tabs = listOf("Daily", "Weekly", "Monthly"),
+            selectedIndex = 1,
+            onTabSelect = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

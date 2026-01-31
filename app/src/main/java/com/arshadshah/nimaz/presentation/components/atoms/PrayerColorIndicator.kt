@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Get the color associated with a prayer type.
@@ -297,7 +298,7 @@ fun FastingStatusIndicator(
 @Preview(showBackground = true, name = "Prayer Color Dots")
 @Composable
 private fun PrayerColorDotPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -312,7 +313,7 @@ private fun PrayerColorDotPreview() {
 @Preview(showBackground = true, name = "Prayer Color Bars")
 @Composable
 private fun PrayerColorBarPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -327,7 +328,7 @@ private fun PrayerColorBarPreview() {
 @Preview(showBackground = true, name = "Prayer Color Strip")
 @Composable
 private fun PrayerColorStripPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -342,7 +343,7 @@ private fun PrayerColorStripPreview() {
 @Preview(showBackground = true, name = "Prayer Indicators")
 @Composable
 private fun PrayerIndicatorPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -357,7 +358,7 @@ private fun PrayerIndicatorPreview() {
 @Preview(showBackground = true, name = "Status Indicators")
 @Composable
 private fun StatusIndicatorPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -372,7 +373,7 @@ private fun StatusIndicatorPreview() {
 @Preview(showBackground = true, name = "Prayer Card Accent")
 @Composable
 private fun PrayerCardAccentPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier
                 .padding(16.dp)
@@ -389,7 +390,7 @@ private fun PrayerCardAccentPreview() {
 @Preview(showBackground = true, name = "Prayer Color Legend")
 @Composable
 private fun PrayerColorLegendPreview() {
-    MaterialTheme {
+    NimazTheme {
         Column(modifier = Modifier.padding(16.dp)) {
             PrayerColorLegend()
         }
@@ -399,7 +400,7 @@ private fun PrayerColorLegendPreview() {
 @Preview(showBackground = true, name = "Fasting Status Indicator")
 @Composable
 private fun FastingStatusIndicatorPreview() {
-    MaterialTheme {
+    NimazTheme {
         Row(
             modifier = Modifier.padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

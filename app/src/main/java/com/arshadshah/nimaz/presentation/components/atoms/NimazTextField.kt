@@ -37,6 +37,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Text field style variants
@@ -292,7 +293,7 @@ fun NumberTextField(
 @Preview(showBackground = true, name = "Outlined TextField")
 @Composable
 private fun NimazTextFieldOutlinedPreview() {
-    MaterialTheme {
+    NimazTheme {
         var text by remember { mutableStateOf("") }
         Box(modifier = Modifier.padding(16.dp)) {
             NimazTextField(
@@ -308,7 +309,7 @@ private fun NimazTextFieldOutlinedPreview() {
 @Preview(showBackground = true, name = "Filled TextField")
 @Composable
 private fun NimazTextFieldFilledPreview() {
-    MaterialTheme {
+    NimazTheme {
         var text by remember { mutableStateOf("") }
         Box(modifier = Modifier.padding(16.dp)) {
             NimazTextField(
@@ -325,7 +326,7 @@ private fun NimazTextFieldFilledPreview() {
 @Preview(showBackground = true, name = "TextField with Error")
 @Composable
 private fun NimazTextFieldErrorPreview() {
-    MaterialTheme {
+    NimazTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             NimazTextField(
                 value = "invalid",
@@ -341,7 +342,7 @@ private fun NimazTextFieldErrorPreview() {
 @Preview(showBackground = true, name = "Search TextField")
 @Composable
 private fun SearchTextFieldPreview() {
-    MaterialTheme {
+    NimazTheme {
         var text by remember { mutableStateOf("") }
         Box(modifier = Modifier.padding(16.dp)) {
             SearchTextField(
@@ -356,7 +357,7 @@ private fun SearchTextFieldPreview() {
 @Preview(showBackground = true, name = "Password TextField")
 @Composable
 private fun PasswordTextFieldPreview() {
-    MaterialTheme {
+    NimazTheme {
         var password by remember { mutableStateOf("") }
         Box(modifier = Modifier.padding(16.dp)) {
             PasswordTextField(
@@ -370,7 +371,7 @@ private fun PasswordTextFieldPreview() {
 @Preview(showBackground = true, name = "Number TextField")
 @Composable
 private fun NumberTextFieldPreview() {
-    MaterialTheme {
+    NimazTheme {
         var number by remember { mutableStateOf("") }
         Box(modifier = Modifier.padding(16.dp)) {
             NumberTextField(
