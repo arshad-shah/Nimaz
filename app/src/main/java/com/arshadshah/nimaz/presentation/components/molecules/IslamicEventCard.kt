@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Celebration
@@ -22,14 +20,12 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -227,214 +223,6 @@ private fun DaysUntilBadge(
     }
 }
 
-/**
- * Compact event list item.
- */
-@Composable
-fun CompactEventItem(
-    eventName: String,
-    eventType: HijriDateCalculator.EventType,
-    date: String,
-    modifier: Modifier = Modifier,
-    daysUntil: Int? = null,
-    onClick: (() -> Unit)? = null
-) {
-    val (icon, color) = getEventTypeDetails(eventType)
-
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = eventName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = date,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        if (daysUntil != null) {
-            Text(
-                text = when (daysUntil) {
-                    0 -> "Today"
-                    1 -> "Tomorrow"
-                    else -> "$daysUntil days"
-                },
-                style = MaterialTheme.typography.labelMedium,
-                color = color,
-                fontWeight = FontWeight.Bold
-            )
-        }
-    }
-}
-
-/**
- * Featured event card for home screen (Eid, Ramadan).
- */
-@Composable
-fun FeaturedEventCard(
-    eventName: String,
-    eventNameArabic: String,
-    eventType: HijriDateCalculator.EventType,
-    daysUntil: Int,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    val (icon, color) = getEventTypeDetails(eventType)
-    val gradientColors = listOf(color, color.copy(alpha = 0.7f))
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.linearGradient(gradientColors))
-                .padding(20.dp)
-        ) {
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
-                ) {
-                    Column {
-                        Text(
-                            text = "Upcoming",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = eventName,
-                            style = MaterialTheme.typography.headlineSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White
-                        )
-                        ArabicText(
-                            text = eventNameArabic,
-                            size = ArabicTextSize.MEDIUM,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.3f),
-                        modifier = Modifier.size(64.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = daysUntil.toString(),
-                        style = MaterialTheme.typography.displaySmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (daysUntil == 1) "day away" else "days away",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White.copy(alpha = 0.8f)
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Ramadan countdown card.
- */
-@Composable
-fun RamadanCountdownCard(
-    daysUntil: Int,
-    modifier: Modifier = Modifier,
-    isRamadan: Boolean = false,
-    daysRemaining: Int = 0,
-    onClick: (() -> Unit)? = null
-) {
-    val color = NimazColors.PrayerColors.Isha
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        colors = CardDefaults.cardColors(
-            containerColor = color.copy(alpha = 0.15f)
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = Icons.Default.Nightlight,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(32.dp)
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            if (isRamadan) {
-                Text(
-                    text = "Ramadan Mubarak",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = color
-                )
-                Text(
-                    text = "$daysRemaining days remaining",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else {
-                Text(
-                    text = "Ramadan in",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = "$daysUntil days",
-                    style = MaterialTheme.typography.headlineMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = color
-                )
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true, name = "Islamic Event Card - Eid")
 @Composable
 private fun IslamicEventCardEidPreview() {
@@ -484,72 +272,6 @@ private fun IslamicEventCardTodayPreview() {
                 gregorianDate = "27 March 2026",
                 daysUntil = 0,
                 description = "The Night of Decree, better than a thousand months."
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Compact Event Item")
-@Composable
-private fun CompactEventItemPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CompactEventItem(
-                eventName = "Eid al-Adha",
-                eventType = HijriDateCalculator.EventType.EID,
-                date = "10 Dhul Hijjah 1447",
-                daysUntil = 140,
-                onClick = {}
-            )
-            CompactEventItem(
-                eventName = "Day of Arafah",
-                eventType = HijriDateCalculator.EventType.RECOMMENDED_FAST,
-                date = "9 Dhul Hijjah 1447",
-                daysUntil = 1
-            )
-            CompactEventItem(
-                eventName = "Isra and Mi'raj",
-                eventType = HijriDateCalculator.EventType.COMMEMORATION,
-                date = "27 Rajab 1447",
-                daysUntil = 0
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Featured Event Card")
-@Composable
-private fun FeaturedEventCardPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            FeaturedEventCard(
-                eventName = "Eid al-Fitr",
-                eventNameArabic = "عيد الفطر",
-                eventType = HijriDateCalculator.EventType.EID,
-                daysUntil = 58,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Ramadan Countdown Card")
-@Composable
-private fun RamadanCountdownCardPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            RamadanCountdownCard(
-                daysUntil = 29,
-                onClick = {}
-            )
-            RamadanCountdownCard(
-                daysUntil = 0,
-                isRamadan = true,
-                daysRemaining = 18,
-                onClick = {}
             )
         }
     }

@@ -1,11 +1,11 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -42,7 +41,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -214,133 +212,6 @@ fun LocationItem(
     }
 }
 
-/**
- * Compact location selection item.
- */
-@Composable
-fun CompactLocationItem(
-    locationName: String,
-    country: String,
-    modifier: Modifier = Modifier,
-    isSelected: Boolean = false,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = null,
-            tint = if (isSelected) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            },
-            modifier = Modifier.size(24.dp)
-        )
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = locationName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                color = if (isSelected) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurface
-                }
-            )
-            Text(
-                text = country,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        if (isSelected) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = "Selected",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-    }
-}
-
-/**
- * Current location indicator card.
- */
-@Composable
-fun CurrentLocationCard(
-    locationName: String,
-    country: String,
-    modifier: Modifier = Modifier,
-    isLoading: Boolean = false,
-    onRefreshClick: (() -> Unit)? = null
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.MyLocation,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Current Location",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    text = if (isLoading) "Detecting..." else locationName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                if (!isLoading) {
-                    Text(
-                        text = country,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            if (onRefreshClick != null) {
-                IconButton(onClick = onRefreshClick) {
-                    Icon(
-                        imageVector = Icons.Default.MyLocation,
-                        contentDescription = "Refresh location",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-    }
-}
-
-
 @Preview(showBackground = true, name = "Location Item")
 @Composable
 private fun LocationItemPreview() {
@@ -393,52 +264,3 @@ private fun LocationItemCurrentPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Compact Location Item")
-@Composable
-private fun CompactLocationItemPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CompactLocationItem(
-                locationName = "London",
-                country = "United Kingdom",
-                isSelected = false,
-                onClick = {}
-            )
-            CompactLocationItem(
-                locationName = "Paris",
-                country = "France",
-                isSelected = true,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Current Location Card")
-@Composable
-private fun CurrentLocationCardPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CurrentLocationCard(
-                locationName = "Dublin",
-                country = "Ireland",
-                onRefreshClick = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Current Location Card Loading")
-@Composable
-private fun CurrentLocationCardLoadingPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CurrentLocationCard(
-                locationName = "",
-                country = "",
-                isLoading = true,
-                onRefreshClick = {}
-            )
-        }
-    }
-}

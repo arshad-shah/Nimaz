@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -28,9 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -186,135 +182,6 @@ fun SurahListItem(
     }
 }
 
-/**
- * Compact surah list item for smaller displays.
- */
-@Composable
-fun CompactSurahListItem(
-    surahNumber: Int,
-    arabicName: String,
-    englishName: String,
-    versesCount: Int,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Number
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = surahNumber.toString(),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(modifier = Modifier.width(12.dp))
-
-        // Name and verses
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = englishName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = "$versesCount verses",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        // Arabic name
-        ArabicText(
-            text = arabicName,
-            size = ArabicTextSize.SMALL,
-            color = MaterialTheme.colorScheme.primary
-        )
-    }
-}
-
-/**
- * Featured surah card for home screen.
- */
-@Composable
-fun FeaturedSurahCard(
-    surahNumber: Int,
-    arabicName: String,
-    englishName: String,
-    englishMeaning: String,
-    modifier: Modifier = Modifier,
-    lastReadAyah: Int? = null,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column {
-                    Text(
-                        text = "Continue Reading",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = englishName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                    Text(
-                        text = englishMeaning,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-                    )
-                }
-
-                ArabicText(
-                    text = arabicName,
-                    size = ArabicTextSize.LARGE,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-
-            if (lastReadAyah != null) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Text(
-                    text = "Last read: Ayah $lastReadAyah",
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
-}
 @Preview(showBackground = true, name = "Surah List Item")
 @Composable
 private fun SurahListItemPreview() {
@@ -376,35 +243,3 @@ private fun SurahListItemMedinanPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Compact Surah List Item")
-@Composable
-private fun CompactSurahListItemPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CompactSurahListItem(
-                surahNumber = 112,
-                arabicName = "الإخلاص",
-                englishName = "Al-Ikhlas",
-                versesCount = 4,
-                onClick = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Featured Surah Card")
-@Composable
-private fun FeaturedSurahCardPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            FeaturedSurahCard(
-                surahNumber = 2,
-                arabicName = "البقرة",
-                englishName = "Al-Baqarah",
-                englishMeaning = "The Cow",
-                lastReadAyah = 142,
-                onClick = {}
-            )
-        }
-    }
-}

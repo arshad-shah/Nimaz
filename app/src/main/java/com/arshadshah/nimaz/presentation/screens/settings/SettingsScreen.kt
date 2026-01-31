@@ -49,6 +49,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -301,5 +303,45 @@ private fun VersionInfo(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Settings Section")
+@Composable
+private fun SettingsSectionPreview() {
+    NimazTheme {
+        SettingsSection(title = "PRAYER SETTINGS") {
+            SettingsMenuItem(
+                icon = Icons.Default.Notifications,
+                iconTint = Color(0xFF6750A4),
+                iconBackground = Color(0xFF6750A4).copy(alpha = 0.12f),
+                title = "Notifications",
+                subtitle = "Adhan & reminders",
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Settings Menu Item")
+@Composable
+private fun SettingsMenuItemPreview() {
+    NimazTheme {
+        SettingsMenuItem(
+            icon = Icons.Default.Calculate,
+            iconTint = Color(0xFF6750A4),
+            iconBackground = Color(0xFF6750A4).copy(alpha = 0.12f),
+            title = "Calculation Method",
+            subtitle = "Prayer time calculation settings",
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Version Info")
+@Composable
+private fun VersionInfoPreview() {
+    NimazTheme {
+        VersionInfo()
     }
 }

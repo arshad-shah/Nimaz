@@ -244,28 +244,6 @@ fun toArabicNumber(number: Int): String {
     }.joinToString("")
 }
 
-/**
- * Verse end marker (۝) with number.
- */
-@Composable
-fun VerseEndMarker(
-    verseNumber: Int,
-    modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colorScheme.primary
-) {
-    Text(
-        text = " ۝${toArabicNumber(verseNumber)}",
-        modifier = modifier,
-        style = TextStyle(
-            fontFamily = AmiriFontFamily,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            textDirection = TextDirection.Rtl
-        ),
-        color = color
-    )
-}
-
 // ==================== PREVIEWS ====================
 
 @Preview(showBackground = true, name = "Arabic Text Sizes")
@@ -347,17 +325,3 @@ private fun AyahDisplayPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Verse End Marker")
-@Composable
-private fun VerseEndMarkerPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VerseEndMarker(verseNumber = 1)
-            VerseEndMarker(verseNumber = 7)
-            VerseEndMarker(verseNumber = 255)
-        }
-    }
-}

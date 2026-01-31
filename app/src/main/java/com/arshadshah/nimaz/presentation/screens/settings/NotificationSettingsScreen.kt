@@ -57,6 +57,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import android.content.Intent
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
@@ -547,33 +551,13 @@ fun NotificationSettingsScreen(
 
                 // Info Banner
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(15.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Text(
-                                text = "Make sure to enable notifications in your device settings and disable battery optimization for accurate prayer alerts.",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                lineHeight = 20.sp
-                            )
-                        }
-                    }
+                    NimazBanner(
+                        message = "Make sure to enable notifications in your device settings and disable battery optimization for accurate prayer alerts.",
+                        variant = NimazBannerVariant.INFO,
+                        icon = Icons.Default.Info,
+                        showBorder = true,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
@@ -816,4 +800,101 @@ private fun SettingDivider() {
             .height(1.dp)
             .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
     )
+}
+
+// Previews
+
+@Preview(showBackground = true, widthDp = 400, name = "Prayer Notification Row - Enabled")
+@Composable
+private fun PrayerNotificationRowEnabledPreview() {
+    NimazTheme {
+        PrayerNotificationRow(
+            prayer = PrayerNotificationData(
+                name = "Fajr",
+                key = "fajr",
+                accentColor = Color(0xFF5B8DEF),
+                isEnabled = true,
+                isSoundOn = true
+            ),
+            onToggle = {},
+            onSoundToggle = {},
+            globalAdhanEnabled = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Prayer Notification Row - Disabled")
+@Composable
+private fun PrayerNotificationRowDisabledPreview() {
+    NimazTheme {
+        PrayerNotificationRow(
+            prayer = PrayerNotificationData(
+                name = "Dhuhr",
+                key = "dhuhr",
+                accentColor = Color(0xFFFACC15),
+                isEnabled = false,
+                isSoundOn = false
+            ),
+            onToggle = {},
+            onSoundToggle = {},
+            globalAdhanEnabled = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Adhan Option Row - Selected")
+@Composable
+private fun AdhanOptionRowSelectedPreview() {
+    NimazTheme {
+        AdhanOptionRow(
+            name = "Makkah Adhan",
+            location = "Masjid al-Haram",
+            isSelected = true,
+            isDownloaded = true,
+            isDownloading = false,
+            downloadProgress = null,
+            isPlaying = false,
+            onSelect = {},
+            onPlay = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Adhan Option Row - Downloading")
+@Composable
+private fun AdhanOptionRowDownloadingPreview() {
+    NimazTheme {
+        AdhanOptionRow(
+            name = "Madinah Adhan",
+            location = "Masjid an-Nabawi",
+            isSelected = false,
+            isDownloaded = false,
+            isDownloading = true,
+            downloadProgress = 45,
+            isPlaying = false,
+            onSelect = {},
+            onPlay = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Setting Toggle Row")
+@Composable
+private fun SettingToggleRowPreview() {
+    NimazTheme {
+        SettingToggleRow(
+            label = "Adhan Sound",
+            value = "Play adhan audio at prayer time",
+            isEnabled = true,
+            onToggle = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Section Title")
+@Composable
+private fun SectionTitlePreview() {
+    NimazTheme {
+        SectionTitle(title = "PRAYER NOTIFICATIONS")
+    }
 }

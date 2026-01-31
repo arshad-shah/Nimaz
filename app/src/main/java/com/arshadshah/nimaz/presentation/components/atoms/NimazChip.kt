@@ -1,17 +1,17 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ElevatedSuggestionChip
@@ -19,25 +19,15 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
-import androidx.compose.material3.InputChipDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -301,63 +291,6 @@ fun NimazSuggestionChip(
 }
 
 /**
- * Colored chip with custom colors.
- */
-@Composable
-fun ColoredChip(
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    selected: Boolean = false,
-    containerColor: Color = MaterialTheme.colorScheme.primaryContainer,
-    labelColor: Color = MaterialTheme.colorScheme.onPrimaryContainer,
-    selectedContainerColor: Color = MaterialTheme.colorScheme.primary,
-    selectedLabelColor: Color = MaterialTheme.colorScheme.onPrimary,
-    enabled: Boolean = true,
-    shape: Shape = RoundedCornerShape(8.dp)
-) {
-    FilterChip(
-        selected = selected,
-        onClick = onClick,
-        label = { Text(label) },
-        modifier = modifier,
-        enabled = enabled,
-        shape = shape,
-        colors = FilterChipDefaults.filterChipColors(
-            containerColor = containerColor,
-            labelColor = labelColor,
-            selectedContainerColor = selectedContainerColor,
-            selectedLabelColor = selectedLabelColor
-        )
-    )
-}
-
-/**
- * Row of filter chips for multi-selection.
- */
-@Composable
-fun ChipGroup(
-    chips: List<String>,
-    selectedChips: Set<String>,
-    onChipSelected: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    singleSelection: Boolean = false
-) {
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        chips.forEach { chip ->
-            NimazFilterChip(
-                selected = chip in selectedChips,
-                onClick = { onChipSelected(chip) },
-                label = chip
-            )
-        }
-    }
-}
-
-/**
  * Revelation type chip for Quran (Meccan/Medinan).
  */
 @Composable
@@ -460,36 +393,6 @@ private fun SuggestionChipPreview() {
             NimazSuggestionChip(onClick = {}, label = "With Icon", icon = Icons.Default.Star)
             NimazSuggestionChip(onClick = {}, label = "Elevated", elevated = true)
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Colored Chips")
-@Composable
-private fun ColoredChipPreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ColoredChip(label = "Default", onClick = {})
-            ColoredChip(label = "Selected", onClick = {}, selected = true)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Chip Group")
-@Composable
-private fun ChipGroupPreview() {
-    NimazTheme {
-        var selected by remember { mutableStateOf(setOf("Fajr")) }
-        ChipGroup(
-            chips = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha"),
-            selectedChips = selected,
-            onChipSelected = { chip ->
-                selected = if (chip in selected) selected - chip else selected + chip
-            },
-            modifier = Modifier.padding(16.dp)
-        )
     }
 }
 

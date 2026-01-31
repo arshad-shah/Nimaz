@@ -27,8 +27,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -45,11 +43,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.CounterTextStyles
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
@@ -228,168 +223,6 @@ private fun LapsBadge(
     }
 }
 
-/**
- * Tasbih counter with dhikr text display.
- */
-@Composable
-fun TasbihCounterWithDhikr(
-    arabicText: String,
-    transliteration: String,
-    translation: String,
-    currentCount: Int,
-    targetCount: Int,
-    modifier: Modifier = Modifier,
-    lapsCompleted: Int = 0,
-    onTap: () -> Unit,
-    onUndo: (() -> Unit)? = null,
-    onReset: (() -> Unit)? = null
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Dhikr text
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            ),
-            shape = RoundedCornerShape(16.dp)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ArabicText(
-                    text = arabicText,
-                    size = ArabicTextSize.LARGE,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = transliteration,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    textAlign = TextAlign.Center
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = translation,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Counter
-        TasbihCounter(
-            currentCount = currentCount,
-            targetCount = targetCount,
-            lapsCompleted = lapsCompleted,
-            onTap = onTap,
-            onUndo = onUndo,
-            onReset = onReset
-        )
-    }
-}
-
-/**
- * Compact tasbih counter for smaller displays.
- */
-@Composable
-fun CompactTasbihCounter(
-    currentCount: Int,
-    targetCount: Int,
-    modifier: Modifier = Modifier,
-    size: Dp = 120.dp,
-    onTap: () -> Unit
-) {
-    val progress = (currentCount.toFloat() / targetCount).coerceIn(0f, 1f)
-
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .clickable(onClick = onTap),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.size(size)) {
-            val strokeWidth = 6.dp.toPx()
-            val radius = (size.toPx() - strokeWidth) / 2
-
-            drawCircle(
-                color = Color.Gray.copy(alpha = 0.2f),
-                radius = radius,
-                style = Stroke(width = strokeWidth)
-            )
-
-            drawArc(
-                color = NimazColors.TasbihColors.Counter,
-                startAngle = -90f,
-                sweepAngle = 360 * progress,
-                useCenter = false,
-                style = Stroke(width = strokeWidth, cap = StrokeCap.Round),
-                size = Size(radius * 2, radius * 2),
-                topLeft = Offset(strokeWidth / 2, strokeWidth / 2)
-            )
-        }
-
-        Text(
-            text = "$currentCount",
-            style = CounterTextStyles.counterMedium,
-            color = NimazColors.TasbihColors.Counter
-        )
-    }
-}
-
-/**
- * Tasbih session stats display.
- */
-@Composable
-fun TasbihSessionStats(
-    totalCount: Int,
-    lapsCompleted: Int,
-    duration: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
-    ) {
-        StatItem(label = "Total", value = totalCount.toString())
-        StatItem(label = "Laps", value = lapsCompleted.toString())
-        StatItem(label = "Duration", value = duration)
-    }
-}
-
-@Composable
-private fun StatItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
 @Preview(showBackground = true, name = "Tasbih Counter")
 @Composable
 private fun TasbihCounterPreview() {
@@ -424,58 +257,3 @@ private fun TasbihCounterWithLapsPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Compact Tasbih Counter")
-@Composable
-private fun CompactTasbihCounterPreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            CompactTasbihCounter(
-                currentCount = 25,
-                targetCount = 33,
-                onTap = {}
-            )
-            CompactTasbihCounter(
-                currentCount = 33,
-                targetCount = 33,
-                onTap = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Tasbih Session Stats")
-@Composable
-private fun TasbihSessionStatsPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            TasbihSessionStats(
-                totalCount = 300,
-                lapsCompleted = 3,
-                duration = "5m 32s"
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Tasbih Counter with Dhikr")
-@Composable
-private fun TasbihCounterWithDhikrPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            TasbihCounterWithDhikr(
-                arabicText = "سُبْحَانَ اللَّهِ",
-                transliteration = "SubhanAllah",
-                translation = "Glory be to Allah",
-                currentCount = 21,
-                targetCount = 33,
-                lapsCompleted = 1,
-                onTap = {},
-                onUndo = {},
-                onReset = {}
-            )
-        }
-    }
-}

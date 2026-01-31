@@ -4,14 +4,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Badge
-import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,17 +18,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -171,84 +163,6 @@ fun getHadithGradeBadgeColors(grade: String): Pair<Color, Color> {
 }
 
 /**
- * Numeric badge (like notification count).
- */
-@Composable
-fun CountBadge(
-    count: Int,
-    modifier: Modifier = Modifier,
-    maxCount: Int = 99,
-    backgroundColor: Color = MaterialTheme.colorScheme.error,
-    textColor: Color = MaterialTheme.colorScheme.onError
-) {
-    val displayText = if (count > maxCount) "$maxCount+" else count.toString()
-
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(10.dp))
-            .background(backgroundColor)
-            .padding(horizontal = 6.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = displayText,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = textColor
-        )
-    }
-}
-
-/**
- * Dot badge indicator.
- */
-@Composable
-fun DotBadge(
-    modifier: Modifier = Modifier,
-    size: Dp = 8.dp,
-    color: Color = MaterialTheme.colorScheme.error
-) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(color)
-    )
-}
-
-/**
- * Badge with icon content using Material3 BadgedBox.
- */
-@Composable
-fun IconWithBadge(
-    icon: ImageVector,
-    badgeCount: Int?,
-    modifier: Modifier = Modifier,
-    contentDescription: String? = null,
-    showBadge: Boolean = true,
-    iconSize: Dp = 24.dp
-) {
-    BadgedBox(
-        badge = {
-            if (showBadge) {
-                if (badgeCount != null && badgeCount > 0) {
-                    Badge { Text(if (badgeCount > 99) "99+" else badgeCount.toString()) }
-                } else if (badgeCount == null) {
-                    Badge()
-                }
-            }
-        },
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(iconSize)
-        )
-    }
-}
-
-/**
  * Surah number badge for Quran.
  */
 @Composable
@@ -270,32 +184,6 @@ fun SurahNumberBadge(
             text = number.toString(),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Bold,
-            color = textColor
-        )
-    }
-}
-
-/**
- * Verse number indicator.
- */
-@Composable
-fun VerseNumberBadge(
-    number: Int,
-    modifier: Modifier = Modifier,
-    size: Dp = 24.dp,
-    backgroundColor: Color = MaterialTheme.colorScheme.surfaceVariant,
-    textColor: Color = MaterialTheme.colorScheme.onSurfaceVariant
-) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(backgroundColor),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = number.toString(),
-            style = MaterialTheme.typography.labelSmall,
             color = textColor
         )
     }
@@ -369,63 +257,6 @@ private fun HadithGradeBadgePreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Count Badge")
-@Composable
-private fun CountBadgePreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            CountBadge(count = 5)
-            CountBadge(count = 42)
-            CountBadge(count = 100)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Dot Badge")
-@Composable
-private fun DotBadgePreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            DotBadge()
-            DotBadge(size = 12.dp, color = Color.Green)
-            DotBadge(size = 16.dp, color = Color.Blue)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Icon With Badge")
-@Composable
-private fun IconWithBadgePreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            IconWithBadge(
-                icon = Icons.Default.Notifications,
-                badgeCount = 5,
-                contentDescription = "Notifications"
-            )
-            IconWithBadge(
-                icon = Icons.Default.Notifications,
-                badgeCount = null,
-                contentDescription = "Has notifications"
-            )
-            IconWithBadge(
-                icon = Icons.Default.Notifications,
-                badgeCount = 0,
-                contentDescription = "No notifications"
-            )
-        }
-    }
-}
-
 @Preview(showBackground = true, name = "Surah Number Badge")
 @Composable
 private fun SurahNumberBadgePreview() {
@@ -441,17 +272,3 @@ private fun SurahNumberBadgePreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Verse Number Badge")
-@Composable
-private fun VerseNumberBadgePreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            VerseNumberBadge(number = 1)
-            VerseNumberBadge(number = 7)
-            VerseNumberBadge(number = 255)
-        }
-    }
-}

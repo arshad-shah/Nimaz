@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -16,6 +15,7 @@ import androidx.compose.material3.CardElevation
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -23,10 +23,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.material3.Text
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -182,48 +179,6 @@ fun PrayerCard(
     )
 }
 
-/**
- * Section card with title and content area.
- */
-@Composable
-fun SectionCard(
-    modifier: Modifier = Modifier,
-    style: NimazCardStyle = NimazCardStyle.ELEVATED,
-    contentPadding: Dp = 16.dp,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = style
-    ) {
-        Column(
-            modifier = Modifier.padding(contentPadding),
-            content = content
-        )
-    }
-}
-
-/**
- * Clickable list item card.
- */
-@Composable
-fun ListItemCard(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    shape: Shape = RoundedCornerShape(12.dp),
-    content: @Composable ColumnScope.() -> Unit
-) {
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
-        onClick = onClick,
-        shape = shape,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        content = content
-    )
-}
 
 // ==================== PREVIEWS ====================
 
@@ -310,31 +265,3 @@ private fun PrayerCardPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Section Card")
-@Composable
-private fun SectionCardPreview() {
-    NimazTheme {
-        SectionCard(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(text = "Section Title")
-            Text(text = "Section content goes here")
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "List Item Card")
-@Composable
-private fun ListItemCardPreview() {
-    NimazTheme {
-        ListItemCard(
-            onClick = {},
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Text(
-                text = "Clickable List Item",
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-    }
-}

@@ -20,7 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,22 +49,35 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 /**
- * Data class for daily prayer completion.
+ * Data class for a summary stat item displayed below charts.
  */
-data class DailyPrayerData(
-    val dayLabel: String,
-    val prayedCount: Int,
-    val totalPrayers: Int = 5
+data class ChartStatItem(
+    val value: String,
+    val label: String,
+    val color: Color
 )
 
 /**
  * Prayer statistics chart with multiple visualization options.
+ *
+ * @param stats The prayer statistics data to display.
+ * @param modifier Modifier for the card.
+ * @param chartType The type of chart to render.
+ * @param title The card title.
+ * @param subtitle Optional subtitle displayed below the title.
+ * @param summaryItems Controls the summary row below the chart:
+ *   - null → show default summary (current streak, longest streak, jamaah)
+ *   - empty list → show no summary row
+ *   - non-empty list → render the provided items
  */
 @Composable
 fun PrayerStatsChart(
     stats: PrayerStats,
     modifier: Modifier = Modifier,
-    chartType: PrayerChartType = PrayerChartType.DONUT
+    chartType: PrayerChartType = PrayerChartType.DONUT,
+    title: String = "Prayer Statistics",
+    subtitle: String? = null,
+    summaryItems: List<ChartStatItem>? = null
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -81,10 +93,18 @@ fun PrayerStatsChart(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Prayer Statistics",
+                text = title,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
+
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -97,7 +117,11 @@ fun PrayerStatsChart(
             Spacer(modifier = Modifier.height(20.dp))
 
             // Stats summary
-            StatsSummary(stats = stats)
+            when {
+                summaryItems == null -> StatsSummary(stats = stats)
+                summaryItems.isNotEmpty() -> StatsSummaryRow(items = summaryItems)
+                // empty list → show nothing
+            }
         }
     }
 }
@@ -225,13 +249,14 @@ private fun BarChart(
     stats: PrayerStats,
     modifier: Modifier = Modifier
 ) {
+    val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
     val maxValue = (stats.prayedByPrayer.values.maxOrNull() ?: 1).coerceAtLeast(1)
 
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        PrayerName.entries.forEach { prayer ->
+        prayers.forEach { prayer ->
             val prayed = stats.prayedByPrayer[prayer] ?: 0
             val missed = stats.missedByPrayer[prayer] ?: 0
             val total = prayed + missed
@@ -329,6 +354,8 @@ private fun RadialChart(
     stats: PrayerStats,
     modifier: Modifier = Modifier
 ) {
+    val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
+
     var animationPlayed by remember { mutableStateOf(false) }
 
     val animatedProgress by animateFloatAsState(
@@ -349,7 +376,6 @@ private fun RadialChart(
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(size.width / 2, size.height / 2)
             val maxRadius = size.minDimension / 2 - 20.dp.toPx()
-            val prayers = PrayerName.entries
             val angleStep = 360f / prayers.size
 
             // Draw grid circles
@@ -453,7 +479,7 @@ private fun RadialChart(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-        PrayerName.entries.forEach { prayer ->
+        prayers.forEach { prayer ->
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Box(
                     modifier = Modifier
@@ -472,7 +498,7 @@ private fun RadialChart(
 }
 
 /**
- * Statistics summary row.
+ * Default statistics summary row (shown when summaryItems is null).
  */
 @Composable
 private fun StatsSummary(
@@ -498,6 +524,28 @@ private fun StatsSummary(
             label = "In\nJamaah",
             color = NimazColors.StatusColors.Jamaah
         )
+    }
+}
+
+/**
+ * Custom summary row driven by ChartStatItem list.
+ */
+@Composable
+private fun StatsSummaryRow(
+    items: List<ChartStatItem>,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceEvenly
+    ) {
+        items.forEach { item ->
+            StatItem(
+                value = item.value,
+                label = item.label,
+                color = item.color
+            )
+        }
     }
 }
 
@@ -553,115 +601,6 @@ private fun LegendItem(
     }
 }
 
-/**
- * Weekly prayer completion chart.
- */
-@Composable
-fun WeeklyPrayerChart(
-    weekData: List<DailyPrayerData>,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "This Week",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                weekData.forEach { dayData ->
-                    DayColumn(
-                        dayLabel = dayData.dayLabel,
-                        prayedCount = dayData.prayedCount,
-                        totalPrayers = dayData.totalPrayers
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DayColumn(
-    dayLabel: String,
-    prayedCount: Int,
-    totalPrayers: Int,
-    modifier: Modifier = Modifier
-) {
-    var animationPlayed by remember { mutableStateOf(false) }
-    val percentage = prayedCount.toFloat() / totalPrayers
-
-    val animatedHeight by animateFloatAsState(
-        targetValue = if (animationPlayed) percentage else 0f,
-        animationSpec = tween(durationMillis = 800),
-        label = "day_animation"
-    )
-
-    LaunchedEffect(Unit) {
-        animationPlayed = true
-    }
-
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "$prayedCount",
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Box(
-            modifier = Modifier
-                .width(24.dp)
-                .height(80.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.BottomCenter
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxSize(animatedHeight)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        when {
-                            percentage >= 1f -> NimazColors.StatusColors.Prayed
-                            percentage >= 0.6f -> NimazColors.StatusColors.Pending
-                            else -> NimazColors.StatusColors.Missed.copy(alpha = 0.5f)
-                        }
-                    )
-            )
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = dayLabel,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
 private fun getPrayerColor(prayerName: PrayerName) = when (prayerName) {
     PrayerName.FAJR -> NimazColors.PrayerColors.Fajr
     PrayerName.SUNRISE -> NimazColors.PrayerColors.Sunrise
@@ -669,144 +608,6 @@ private fun getPrayerColor(prayerName: PrayerName) = when (prayerName) {
     PrayerName.ASR -> NimazColors.PrayerColors.Asr
     PrayerName.MAGHRIB -> NimazColors.PrayerColors.Maghrib
     PrayerName.ISHA -> NimazColors.PrayerColors.Isha
-}
-
-/**
- * Standalone donut chart for prayer stats screen.
- */
-@Composable
-fun PrayerStatsDonutChart(
-    prayed: Int,
-    late: Int,
-    missed: Int,
-    modifier: Modifier = Modifier
-) {
-    var animationPlayed by remember { mutableStateOf(false) }
-    val total = prayed + late + missed
-    val prayedPercentage = if (total > 0) prayed.toFloat() / total else 0f
-    val latePercentage = if (total > 0) late.toFloat() / total else 0f
-
-    val animatedPrayed by animateFloatAsState(
-        targetValue = if (animationPlayed) prayedPercentage else 0f,
-        animationSpec = tween(durationMillis = 1000),
-        label = "prayed_animation"
-    )
-
-    val animatedLate by animateFloatAsState(
-        targetValue = if (animationPlayed) latePercentage else 0f,
-        animationSpec = tween(durationMillis = 1000, delayMillis = 200),
-        label = "late_animation"
-    )
-
-    LaunchedEffect(Unit) {
-        animationPlayed = true
-    }
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        shape = RoundedCornerShape(20.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier.size(200.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    val strokeWidth = 24.dp.toPx()
-                    val radius = (size.minDimension - strokeWidth) / 2
-                    val topLeft = Offset(
-                        (size.width - radius * 2) / 2,
-                        (size.height - radius * 2) / 2
-                    )
-
-                    // Background arc (missed)
-                    drawArc(
-                        color = NimazColors.StatusColors.Missed.copy(alpha = 0.3f),
-                        startAngle = 0f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        topLeft = topLeft,
-                        size = Size(radius * 2, radius * 2),
-                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                    )
-
-                    // Late arc
-                    drawArc(
-                        color = NimazColors.StatusColors.Late,
-                        startAngle = -90f,
-                        sweepAngle = (animatedPrayed + animatedLate) * 360f,
-                        useCenter = false,
-                        topLeft = topLeft,
-                        size = Size(radius * 2, radius * 2),
-                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                    )
-
-                    // Prayed arc
-                    drawArc(
-                        color = NimazColors.StatusColors.Prayed,
-                        startAngle = -90f,
-                        sweepAngle = animatedPrayed * 360f,
-                        useCenter = false,
-                        topLeft = topLeft,
-                        size = Size(radius * 2, radius * 2),
-                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                    )
-                }
-
-                // Center content
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    val completionRate = if (total > 0) {
-                        ((prayed + late).toFloat() / total * 100).toInt()
-                    } else 0
-                    Text(
-                        text = "$completionRate%",
-                        style = MaterialTheme.typography.headlineLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = NimazColors.StatusColors.Prayed
-                    )
-                    Text(
-                        text = "Completed",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Legend
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                LegendItem(
-                    color = NimazColors.StatusColors.Prayed,
-                    label = "On Time",
-                    value = prayed
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                LegendItem(
-                    color = NimazColors.StatusColors.Late,
-                    label = "Late",
-                    value = late
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-                LegendItem(
-                    color = NimazColors.StatusColors.Missed,
-                    label = "Missed",
-                    value = missed
-                )
-            }
-        }
-    }
 }
 
 private val samplePrayerStats = PrayerStats(
@@ -843,6 +644,15 @@ private fun PrayerStatsChartDonutPreview() {
         PrayerStatsChart(
             stats = samplePrayerStats,
             chartType = PrayerChartType.DONUT,
+            title = "Prayer Completion",
+            subtitle = "January 2026",
+            summaryItems = listOf(
+                ChartStatItem("120", "Prayed", NimazColors.StatusColors.Prayed),
+                ChartStatItem("30", "Missed", NimazColors.StatusColors.Missed),
+                ChartStatItem("15", "Perfect\nDays", NimazColors.PrayerColors.Maghrib),
+                ChartStatItem("7", "Current\nStreak", NimazColors.StatusColors.Prayed),
+                ChartStatItem("21", "Longest\nStreak", Color(0xFF6366F1))
+            ),
             modifier = Modifier.padding(16.dp)
         )
     }
@@ -855,38 +665,8 @@ private fun PrayerStatsChartBarPreview() {
         PrayerStatsChart(
             stats = samplePrayerStats,
             chartType = PrayerChartType.BAR,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun WeeklyPrayerChartPreview() {
-    NimazTheme {
-        WeeklyPrayerChart(
-            weekData = listOf(
-                DailyPrayerData(dayLabel = "Mon", prayedCount = 5),
-                DailyPrayerData(dayLabel = "Tue", prayedCount = 4),
-                DailyPrayerData(dayLabel = "Wed", prayedCount = 3),
-                DailyPrayerData(dayLabel = "Thu", prayedCount = 5),
-                DailyPrayerData(dayLabel = "Fri", prayedCount = 5),
-                DailyPrayerData(dayLabel = "Sat", prayedCount = 2),
-                DailyPrayerData(dayLabel = "Sun", prayedCount = 4)
-            ),
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PrayerStatsDonutChartPreview() {
-    NimazTheme {
-        PrayerStatsDonutChart(
-            prayed = 85,
-            late = 20,
-            missed = 15,
+            title = "Prayer Breakdown",
+            summaryItems = emptyList(),
             modifier = Modifier.padding(16.dp)
         )
     }

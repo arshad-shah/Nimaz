@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private const val APP_VERSION = "1.0.0"
 private const val BUILD_NUMBER = 1
@@ -421,5 +423,51 @@ private fun FooterSection(modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "LinkItem")
+@Composable
+private fun LinkItemPreview() {
+    NimazTheme {
+        LinkItem(
+            emoji = "\u2B50",
+            title = "Rate on Play Store",
+            subtitle = "Help us reach more Muslims",
+            onClick = {},
+            showDivider = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "CreditsCard")
+@Composable
+private fun CreditsCardPreview() {
+    NimazTheme {
+        CreditsCard()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "SocialLinksRow")
+@Composable
+private fun SocialLinksRowPreview() {
+    NimazTheme {
+        SocialLinksRow()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "FooterSection")
+@Composable
+private fun FooterSectionPreview() {
+    NimazTheme {
+        FooterSection()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "AboutSectionTitle")
+@Composable
+private fun AboutSectionTitlePreview() {
+    NimazTheme {
+        SectionTitle(text = "Links")
     }
 }

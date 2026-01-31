@@ -12,6 +12,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,7 +67,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaViewModel
@@ -347,14 +350,6 @@ fun QiblaScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // Calibration Warning
-                if (state.needsCalibration) {
-                    CalibrationWarning(
-                        onClick = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) }
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                }
-
                 // Accuracy Bar
                 AccuracyBar(
                     accuracy = state.compassData.accuracy,
@@ -590,114 +585,117 @@ private fun CompassDial(
 }
 
 @Composable
-private fun CalibrationWarning(
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
-        onClick = onClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Column {
-                Text(
-                    text = "Calibration Needed",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.error
-                )
-                Text(
-                    text = "Tap here for calibration instructions",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
-@Composable
 private fun AccuracyBar(
     accuracy: CompassAccuracy,
     greenColor: Color,
     onCalibrate: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val (text, color) = when (accuracy) {
-        CompassAccuracy.HIGH -> "High Accuracy" to greenColor
-        CompassAccuracy.MEDIUM -> "Medium Accuracy" to Color(0xFFFACC15)
-        CompassAccuracy.LOW -> "Low Accuracy" to MaterialTheme.colorScheme.error
-        CompassAccuracy.UNRELIABLE -> "Unreliable" to MaterialTheme.colorScheme.onSurfaceVariant
+    val levels = listOf(
+        CompassAccuracy.UNRELIABLE,
+        CompassAccuracy.LOW,
+        CompassAccuracy.MEDIUM,
+        CompassAccuracy.HIGH
+    )
+    val activeIndex = levels.indexOf(accuracy)
+
+    val (label, color, hint) = when (accuracy) {
+        CompassAccuracy.HIGH -> Triple("High", greenColor, "Compass is accurate")
+        CompassAccuracy.MEDIUM -> Triple("Medium", Color(0xFFFACC15), "Accuracy is acceptable")
+        CompassAccuracy.LOW -> Triple("Low", MaterialTheme.colorScheme.error, "Calibration recommended")
+        CompassAccuracy.UNRELIABLE -> Triple(
+            "Unreliable",
+            MaterialTheme.colorScheme.error,
+            "Calibration needed"
+        )
     }
+
+    val needsCalibration = accuracy == CompassAccuracy.LOW || accuracy == CompassAccuracy.UNRELIABLE
 
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = if (needsCalibration) color.copy(alpha = 0.08f)
+        else MaterialTheme.colorScheme.surfaceVariant
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(color.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
-
-            Spacer(modifier = Modifier.width(10.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Compass Accuracy",
-                    style = MaterialTheme.typography.labelSmall,
+                    style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
                     color = color
                 )
             }
 
-            Button(
-                onClick = onCalibrate,
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    contentColor = MaterialTheme.colorScheme.onSurface
-                )
+            // Segmented accuracy indicator
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = "Calibrate",
-                    style = MaterialTheme.typography.labelSmall
+                levels.forEachIndexed { index, _ ->
+                    val segmentColor = if (index <= activeIndex) color else
+                        MaterialTheme.colorScheme.outlineVariant
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(6.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(segmentColor)
+                    )
+                }
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = if (needsCalibration) Icons.Default.Warning
+                    else Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = color,
+                    modifier = Modifier.size(14.dp)
                 )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = hint,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f)
+                )
+                if (needsCalibration) {
+                    Button(
+                        onClick = onCalibrate,
+                        shape = RoundedCornerShape(8.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = color,
+                            contentColor = Color.White
+                        ),
+                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
+                        modifier = Modifier.height(32.dp)
+                    ) {
+                        Text(
+                            text = "Calibrate",
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
             }
         }
     }
@@ -713,5 +711,105 @@ private fun getCompassDirection(bearing: Double): String {
         bearing < 247.5 -> "Southwest"
         bearing < 292.5 -> "West"
         else -> "Northwest"
+    }
+}
+
+// Previews
+
+@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - High")
+@Composable
+private fun AccuracyBarHighPreview() {
+    NimazTheme {
+        AccuracyBar(
+            accuracy = CompassAccuracy.HIGH,
+            greenColor = Color(0xFF22C55E),
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Medium")
+@Composable
+private fun AccuracyBarMediumPreview() {
+    NimazTheme {
+        AccuracyBar(
+            accuracy = CompassAccuracy.MEDIUM,
+            greenColor = Color(0xFF22C55E),
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Low")
+@Composable
+private fun AccuracyBarLowPreview() {
+    NimazTheme {
+        AccuracyBar(
+            accuracy = CompassAccuracy.LOW,
+            greenColor = Color(0xFF22C55E),
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Unreliable")
+@Composable
+private fun AccuracyBarUnreliablePreview() {
+    NimazTheme {
+        AccuracyBar(
+            accuracy = CompassAccuracy.UNRELIABLE,
+            greenColor = Color(0xFF22C55E),
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Calibration Dialog")
+@Composable
+private fun CalibrationDialogPreview() {
+    NimazTheme {
+        CalibrationDialog(
+            accuracy = CompassAccuracy.LOW,
+            onDismiss = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Rings")
+@Composable
+private fun CompassRingsPreview() {
+    NimazTheme {
+        CompassRings(modifier = Modifier.size(280.dp))
+    }
+}
+
+@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Dial")
+@Composable
+private fun CompassDialPreview() {
+    NimazTheme {
+        CompassDial(
+            qiblaBearing = 45f,
+            isFacingQibla = false,
+            goldColor = Color(0xFFD4A853),
+            modifier = Modifier.size(280.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Calibration Step")
+@Composable
+private fun CalibrationStepPreview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            CalibrationStep("1", "Hold your phone away from metal objects and magnets")
+            CalibrationStep("2", "Slowly move your phone in a figure-8 pattern")
+        }
     }
 }

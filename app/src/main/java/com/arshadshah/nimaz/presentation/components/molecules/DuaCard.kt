@@ -323,57 +323,6 @@ private fun DuaCounter(
     }
 }
 
-/**
- * Simple dua display without actions.
- */
-@Composable
-fun SimpleDuaCard(
-    arabicText: String,
-    translation: String,
-    modifier: Modifier = Modifier,
-    title: String? = null
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-            }
-
-            ArabicText(
-                text = arabicText,
-                size = ArabicTextSize.MEDIUM,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = translation,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-
 @Preview(showBackground = true, name = "Dua Card")
 @Composable
 private fun DuaCardPreview() {
@@ -414,20 +363,6 @@ private fun DuaCardWithCounterPreview() {
                 onCountIncrement = {},
                 onCountDecrement = {},
                 onCountReset = {}
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Simple Dua Card")
-@Composable
-private fun SimpleDuaCardPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            SimpleDuaCard(
-                title = "Before eating",
-                arabicText = "بِسْمِ اللَّهِ",
-                translation = "In the name of Allah."
             )
         }
     }

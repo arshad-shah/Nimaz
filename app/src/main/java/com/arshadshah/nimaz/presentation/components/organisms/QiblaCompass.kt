@@ -57,6 +57,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.QiblaDirection
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -430,43 +432,16 @@ private fun CalibrationWarning(
     accuracy: CompassAccuracy,
     modifier: Modifier = Modifier
 ) {
-    val warningColor = when (accuracy) {
-        CompassAccuracy.UNRELIABLE -> MaterialTheme.colorScheme.error
-        CompassAccuracy.LOW -> NimazColors.FastingColors.Makeup
-        else -> NimazColors.StatusColors.Pending
-    }
+    val variant = if (accuracy == CompassAccuracy.UNRELIABLE)
+        NimazBannerVariant.ERROR else NimazBannerVariant.WARNING
 
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        color = warningColor.copy(alpha = 0.1f)
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = null,
-                tint = warningColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column {
-                Text(
-                    text = "Calibration Needed",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = warningColor
-                )
-                Text(
-                    text = "Move your phone in a figure-8 pattern to calibrate the compass",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
+    NimazBanner(
+        message = "Move your phone in a figure-8 pattern to calibrate the compass",
+        variant = variant,
+        icon = Icons.Default.Warning,
+        title = "Calibration Needed",
+        modifier = modifier
+    )
 }
 
 /**

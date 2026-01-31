@@ -1,13 +1,18 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -21,19 +26,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.ArrowForward
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -167,31 +165,6 @@ fun NimazButton(
     }
 }
 
-/**
- * Convenience composable for prayer-themed button.
- */
-@Composable
-fun PrayerButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    prayerColor: Color = MaterialTheme.colorScheme.primary,
-    enabled: Boolean = true,
-    loading: Boolean = false
-) {
-    NimazButton(
-        text = text,
-        onClick = onClick,
-        modifier = modifier,
-        variant = NimazButtonVariant.FILLED,
-        enabled = enabled,
-        loading = loading,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = prayerColor,
-            contentColor = Color.White
-        )
-    )
-}
 
 // ==================== PREVIEWS ====================
 
@@ -308,24 +281,3 @@ private fun NimazButtonSizesPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Prayer Button")
-@Composable
-private fun PrayerButtonPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrayerButton(
-                text = "Pray Fajr",
-                onClick = {},
-                prayerColor = Color(0xFF5C6BC0)
-            )
-            PrayerButton(
-                text = "Loading Prayer",
-                onClick = {},
-                loading = true
-            )
-        }
-    }
-}

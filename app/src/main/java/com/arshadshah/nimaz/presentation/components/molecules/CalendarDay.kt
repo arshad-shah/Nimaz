@@ -23,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -232,84 +231,6 @@ fun CalendarMonthHeader(
 }
 
 /**
- * Calendar legend showing indicator meanings.
- */
-@Composable
-fun CalendarLegend(
-    modifier: Modifier = Modifier,
-    showFasting: Boolean = false
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Today indicator
-        LegendItem(
-            label = "Today",
-            color = MaterialTheme.colorScheme.primary
-        )
-
-        Spacer(modifier = Modifier.size(16.dp))
-
-        // Event indicator
-        LegendItem(
-            label = "Event",
-            color = MaterialTheme.colorScheme.secondary
-        )
-
-        if (showFasting) {
-            Spacer(modifier = Modifier.size(16.dp))
-            LegendItem(
-                label = "Fasted",
-                color = NimazColors.FastingColors.Fasted
-            )
-        }
-    }
-}
-
-@Composable
-private fun LegendItem(
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-/**
- * Empty day placeholder for calendar grid alignment.
- */
-@Composable
-fun EmptyCalendarDay(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .aspectRatio(1f)
-            .padding(2.dp)
-    )
-}
-
-/**
  * Calendar day cell for use in calendar grids.
  * Displays both Gregorian and Hijri day numbers with event indicators.
  */
@@ -514,17 +435,6 @@ private fun CalendarMonthHeaderPreview() {
             year = 2026,
             hijriMonth = "Rajab",
             hijriYear = 1447,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun CalendarLegendPreview() {
-    NimazTheme {
-        CalendarLegend(
-            showFasting = true,
             modifier = Modifier.padding(16.dp)
         )
     }

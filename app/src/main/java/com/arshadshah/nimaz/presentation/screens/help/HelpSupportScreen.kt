@@ -44,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private data class FaqItem(val question: String, val answer: String)
 
@@ -278,5 +280,39 @@ private fun FeatureGuideCard(guide: FeatureGuide) {
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "HelpSectionHeader")
+@Composable
+private fun HelpSectionHeaderPreview() {
+    NimazTheme {
+        SectionHeader(title = "Frequently Asked Questions")
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "FaqCard")
+@Composable
+private fun FaqCardPreview() {
+    NimazTheme {
+        FaqCard(
+            faq = FaqItem(
+                "How are prayer times calculated?",
+                "Prayer times are calculated using your location and the calculation method you select in Prayer Settings."
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "FeatureGuideCard")
+@Composable
+private fun FeatureGuideCardPreview() {
+    NimazTheme {
+        FeatureGuideCard(
+            guide = FeatureGuide(
+                "Prayer Times",
+                "View daily prayer times, mark prayers as completed, and track your consistency."
+            )
+        )
     }
 }

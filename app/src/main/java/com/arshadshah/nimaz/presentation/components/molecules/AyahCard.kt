@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -34,12 +33,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.AyahDisplay
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
-import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -291,109 +287,6 @@ private fun AyahNumberBadgePreview() {
             AyahNumberBadge(ayahNumber = 1)
             AyahNumberBadge(ayahNumber = 42)
             AyahNumberBadge(ayahNumber = 286, isSajdaAyah = true)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Bismillah Card")
-@Composable
-private fun BismillahCardPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            BismillahCard(showTranslation = true)
-        }
-    }
-}
-
-/**
- * Compact ayah display for reading mode.
- */
-@Composable
-fun CompactAyahDisplay(
-    arabicText: String,
-    ayahNumber: Int,
-    modifier: Modifier = Modifier,
-    isHighlighted: Boolean = false,
-    onClick: (() -> Unit)? = null
-) {
-    Box(
-        modifier = modifier
-            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .then(
-                if (isHighlighted) {
-                    Modifier.background(
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-                        RoundedCornerShape(4.dp)
-                    )
-                } else {
-                    Modifier
-                }
-            )
-            .padding(vertical = 4.dp)
-    ) {
-        Text(
-            text = "$arabicText ${toArabicNumber(ayahNumber)}",
-            style = MaterialTheme.typography.headlineSmall,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-/**
- * Bismillah header card.
- */
-@Composable
-fun BismillahCard(
-    modifier: Modifier = Modifier,
-    showTranslation: Boolean = true
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ),
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            ArabicText(
-                text = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                size = ArabicTextSize.LARGE,
-                color = MaterialTheme.colorScheme.primary
-            )
-            if (showTranslation) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "In the name of Allah, the Most Gracious, the Most Merciful",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Compact Ayah Display")
-@Composable
-private fun CompactAyahDisplayPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            CompactAyahDisplay(
-                arabicText = "بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ",
-                ayahNumber = 1
-            )
-            CompactAyahDisplay(
-                arabicText = "الْحَمْدُ لِلَّهِ رَبِّ الْعَالَمِينَ",
-                ayahNumber = 2,
-                isHighlighted = true,
-                onClick = {}
-            )
         }
     }
 }

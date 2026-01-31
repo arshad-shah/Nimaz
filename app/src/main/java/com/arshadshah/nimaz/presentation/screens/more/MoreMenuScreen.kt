@@ -60,6 +60,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -447,6 +450,49 @@ private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
                     Text("Cancel")
                 }
             }
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "MoreSectionHeader")
+@Composable
+private fun MoreSectionHeaderPreview() {
+    NimazTheme {
+        SectionHeader(
+            title = "Daily Practice",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "MenuItemGroup")
+@Composable
+private fun MenuItemGroupPreview() {
+    NimazTheme {
+        GroupedCard(modifier = Modifier.padding(16.dp)) {
+            MenuItem(
+                title = "Prayer Tracker",
+                subtitle = "Track your daily prayers & qada",
+                icon = Icons.Default.Schedule,
+                onClick = {}
+            )
+            MenuDivider()
+            MenuItem(
+                title = "Fasting",
+                subtitle = "Fasting tracker and schedule",
+                icon = Icons.Default.Fastfood,
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "DeleteAllDataCard")
+@Composable
+private fun DeleteAllDataCardPreview() {
+    NimazTheme {
+        DeleteAllDataCard(
+            onDeleteAllData = {}
         )
     }
 }

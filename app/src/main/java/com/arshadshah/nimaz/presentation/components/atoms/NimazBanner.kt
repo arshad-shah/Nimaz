@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -40,7 +41,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 enum class NimazBannerVariant {
     INFO,
     WARNING,
-    UPDATE
+    UPDATE,
+    ERROR
 }
 
 @Composable
@@ -53,7 +55,8 @@ fun NimazBanner(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null,
     isLoading: Boolean = false,
-    showBorder: Boolean = false
+    showBorder: Boolean = false,
+    onClick: (() -> Unit)? = null
 ) {
     when (variant) {
         NimazBannerVariant.INFO -> InfoVariant(
@@ -78,6 +81,16 @@ fun NimazBanner(
             actionLabel = actionLabel,
             onAction = onAction,
             isLoading = isLoading
+        )
+
+        NimazBannerVariant.ERROR -> ErrorVariant(
+            message = message,
+            modifier = modifier,
+            icon = icon,
+            title = title,
+            actionLabel = actionLabel,
+            onAction = onAction,
+            onClick = onClick
         )
     }
 }
@@ -278,6 +291,87 @@ private fun UpdateVariant(
     }
 }
 
+@Composable
+private fun ErrorVariant(
+    message: String,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    title: String? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
+    onClick: (() -> Unit)? = null
+) {
+    val errorColor = MaterialTheme.colorScheme.error
+    val content: @Composable () -> Unit = {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = errorColor,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Column(modifier = Modifier.weight(1f)) {
+                if (title != null) {
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = errorColor
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                }
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                if (actionLabel != null && onAction != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Button(
+                        onClick = onAction,
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = errorColor,
+                            contentColor = Color.White
+                        ),
+                        modifier = Modifier.height(36.dp)
+                    ) {
+                        Text(
+                            text = actionLabel,
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    if (onClick != null) {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            onClick = onClick,
+            content = content
+        )
+    } else {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(12.dp),
+            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            content = content
+        )
+    }
+}
+
 // Previews
 
 @Preview(showBackground = true, widthDp = 400, name = "Info Banner")
@@ -374,6 +468,37 @@ private fun UpdateBannerReadyPreview() {
             message = "Update ready to install",
             variant = NimazBannerVariant.UPDATE,
             actionLabel = "Restart",
+            onAction = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Error Banner")
+@Composable
+private fun ErrorBannerPreview() {
+    NimazTheme {
+        NimazBanner(
+            message = "Tap here for calibration instructions",
+            variant = NimazBannerVariant.ERROR,
+            icon = Icons.Default.Warning,
+            title = "Calibration Needed",
+            onClick = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Error Banner with Action")
+@Composable
+private fun ErrorBannerWithActionPreview() {
+    NimazTheme {
+        NimazBanner(
+            message = "Move your phone in a figure-8 pattern to calibrate the compass",
+            variant = NimazBannerVariant.ERROR,
+            icon = Icons.Default.Warning,
+            title = "Calibration Needed",
+            actionLabel = "Calibrate",
             onAction = {},
             modifier = Modifier.padding(16.dp)
         )

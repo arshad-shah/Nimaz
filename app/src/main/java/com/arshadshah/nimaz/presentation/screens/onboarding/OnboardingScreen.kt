@@ -68,6 +68,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 data class OnboardingPage(
     val title: String,
@@ -556,5 +558,86 @@ private fun FeatureRow(
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Onboarding Welcome")
+@Composable
+private fun OnboardingWelcomePreview() {
+    NimazTheme {
+        OnboardingPageContent(
+            page = OnboardingPage(
+                title = "Welcome to Nimaz",
+                description = "Your complete Islamic companion app",
+                icon = Icons.Default.Mosque,
+                color = Color(0xFF6750A4),
+                features = listOf(
+                    "Accurate prayer times",
+                    "Complete Quran with audio",
+                    "Authentic Hadith collections",
+                    "Daily duas and supplications"
+                )
+            ),
+            isPermissionGranted = false,
+            locationName = null,
+            onRequestPermission = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Onboarding Permission Granted")
+@Composable
+private fun OnboardingPermissionGrantedPreview() {
+    NimazTheme {
+        OnboardingPageContent(
+            page = OnboardingPage(
+                title = "Location Access",
+                description = "Allow location access for accurate prayer times",
+                icon = Icons.Default.LocationOn,
+                color = Color(0xFF625B71),
+                features = listOf(
+                    "Automatic location detection",
+                    "Precise prayer times"
+                ),
+                permissionType = PermissionType.LOCATION
+            ),
+            isPermissionGranted = true,
+            locationName = "Dublin, Ireland",
+            onRequestPermission = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Onboarding Permission Needed")
+@Composable
+private fun OnboardingPermissionNeededPreview() {
+    NimazTheme {
+        OnboardingPageContent(
+            page = OnboardingPage(
+                title = "Notifications",
+                description = "Get reminded for prayers",
+                icon = Icons.Default.Notifications,
+                color = Color(0xFFF97316),
+                features = listOf(
+                    "Prayer time alerts",
+                    "Custom Adhan sounds"
+                ),
+                permissionType = PermissionType.NOTIFICATION
+            ),
+            isPermissionGranted = false,
+            locationName = null,
+            onRequestPermission = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Feature Row")
+@Composable
+private fun FeatureRowPreview() {
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            FeatureRow(text = "Accurate prayer times", color = Color(0xFF6750A4))
+            FeatureRow(text = "Complete Quran with audio", color = Color(0xFF6750A4))
+        }
     }
 }

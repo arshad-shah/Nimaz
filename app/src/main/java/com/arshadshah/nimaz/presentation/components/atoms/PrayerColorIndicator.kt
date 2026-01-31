@@ -1,11 +1,13 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -19,14 +21,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -70,23 +69,6 @@ fun getPrayerGradient(prayerType: PrayerType): Brush {
 }
 
 /**
- * Simple dot indicator with prayer color.
- */
-@Composable
-fun PrayerColorDot(
-    prayerType: PrayerType,
-    modifier: Modifier = Modifier,
-    size: Dp = 12.dp
-) {
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(getPrayerColor(prayerType))
-    )
-}
-
-/**
  * Vertical bar indicator with prayer color.
  */
 @Composable
@@ -111,69 +93,6 @@ fun PrayerColorBar(
                 }
             )
     )
-}
-
-/**
- * Horizontal indicator strip with prayer color.
- */
-@Composable
-fun PrayerColorStrip(
-    prayerType: PrayerType,
-    modifier: Modifier = Modifier,
-    height: Dp = 4.dp,
-    useGradient: Boolean = true,
-    shape: Shape = RoundedCornerShape(2.dp)
-) {
-    Box(
-        modifier = modifier
-            .height(height)
-            .clip(shape)
-            .background(
-                if (useGradient) {
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            getPrayerColor(prayerType),
-                            getPrayerGradientEnd(prayerType)
-                        )
-                    )
-                } else {
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            getPrayerColor(prayerType),
-                            getPrayerColor(prayerType)
-                        )
-                    )
-                }
-            )
-    )
-}
-
-/**
- * Prayer indicator with color and optional label.
- */
-@Composable
-fun PrayerIndicator(
-    prayerType: PrayerType,
-    modifier: Modifier = Modifier,
-    showLabel: Boolean = true,
-    size: Dp = 12.dp
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        PrayerColorDot(
-            prayerType = prayerType,
-            size = size
-        )
-        if (showLabel) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = prayerType.displayName,
-                style = MaterialTheme.typography.bodyMedium
-            )
-        }
-    }
 }
 
 /**
@@ -226,90 +145,6 @@ enum class PrayerStatus(val displayName: String) {
     JAMAAH("Jama'ah")
 }
 
-/**
- * Prayer time card accent - left border with gradient.
- */
-@Composable
-fun PrayerCardAccent(
-    prayerType: PrayerType,
-    modifier: Modifier = Modifier,
-    width: Dp = 6.dp
-) {
-    Box(
-        modifier = modifier
-            .width(width)
-            .clip(RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp))
-            .background(getPrayerGradient(prayerType))
-    )
-}
-
-/**
- * Legend row showing all prayer colors.
- */
-@Composable
-fun PrayerColorLegend(
-    modifier: Modifier = Modifier,
-    showLabels: Boolean = true
-) {
-    Column(modifier = modifier) {
-        PrayerType.entries.forEach { prayerType ->
-            if (prayerType != PrayerType.SUNRISE) { // Optionally exclude Sunrise
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.height(32.dp)
-                ) {
-                    PrayerColorDot(prayerType = prayerType, size = 16.dp)
-                    if (showLabels) {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = prayerType.displayName,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-/**
- * Fasting status indicator colors.
- */
-@Composable
-fun FastingStatusIndicator(
-    fasted: Boolean,
-    modifier: Modifier = Modifier,
-    size: Dp = 12.dp
-) {
-    val color = if (fasted) {
-        NimazColors.FastingColors.Fasted
-    } else {
-        NimazColors.FastingColors.NotFasted
-    }
-
-    Box(
-        modifier = modifier
-            .size(size)
-            .clip(CircleShape)
-            .background(color)
-    )
-}
-
-@Preview(showBackground = true, name = "Prayer Color Dots")
-@Composable
-private fun PrayerColorDotPreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrayerType.entries.forEach { prayerType ->
-                PrayerColorDot(prayerType = prayerType)
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true, name = "Prayer Color Bars")
 @Composable
 private fun PrayerColorBarPreview() {
@@ -320,36 +155,6 @@ private fun PrayerColorBarPreview() {
         ) {
             PrayerType.entries.take(5).forEach { prayerType ->
                 PrayerColorBar(prayerType = prayerType, height = 48.dp)
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Prayer Color Strip")
-@Composable
-private fun PrayerColorStripPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrayerColorStrip(prayerType = PrayerType.FAJR, modifier = Modifier.fillMaxWidth())
-            PrayerColorStrip(prayerType = PrayerType.DHUHR, modifier = Modifier.fillMaxWidth())
-            PrayerColorStrip(prayerType = PrayerType.MAGHRIB, modifier = Modifier.fillMaxWidth())
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Prayer Indicators")
-@Composable
-private fun PrayerIndicatorPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrayerType.entries.take(5).forEach { prayerType ->
-                PrayerIndicator(prayerType = prayerType)
             }
         }
     }
@@ -370,49 +175,3 @@ private fun StatusIndicatorPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Prayer Card Accent")
-@Composable
-private fun PrayerCardAccentPreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .height(60.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            PrayerCardAccent(prayerType = PrayerType.FAJR, modifier = Modifier.height(60.dp))
-            PrayerCardAccent(prayerType = PrayerType.DHUHR, modifier = Modifier.height(60.dp))
-            PrayerCardAccent(prayerType = PrayerType.MAGHRIB, modifier = Modifier.height(60.dp))
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Prayer Color Legend")
-@Composable
-private fun PrayerColorLegendPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            PrayerColorLegend()
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Fasting Status Indicator")
-@Composable
-private fun FastingStatusIndicatorPreview() {
-    NimazTheme {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                FastingStatusIndicator(fasted = true)
-                Text("Fasted", style = MaterialTheme.typography.labelSmall)
-            }
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                FastingStatusIndicator(fasted = false)
-                Text("Not Fasted", style = MaterialTheme.typography.labelSmall)
-            }
-        }
-    }
-}

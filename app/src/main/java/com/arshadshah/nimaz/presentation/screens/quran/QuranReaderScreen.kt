@@ -95,6 +95,8 @@ import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
 private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
@@ -1197,6 +1199,89 @@ private fun AyahItem(
         HorizontalDivider(
             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f),
             thickness = 0.5.dp
+        )
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Previews
+// ---------------------------------------------------------------------------
+
+@Preview(showBackground = true, widthDp = 400, name = "Juz Page Banner")
+@Composable
+private fun JuzPageBannerPreview() {
+    NimazTheme {
+        JuzPageBanner(
+            title = "Juz 1",
+            subtitle = "Al-Fatihah - Al-Baqarah"
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Surah Banner")
+@Composable
+private fun SurahBannerPreview() {
+    NimazTheme {
+        SurahBanner(
+            surahNameArabic = "الفاتحة",
+            surahNameEnglish = "Al-Fatihah",
+            surahMeaning = "The Opening",
+            revelationType = RevelationType.MECCAN,
+            ayahCount = 7,
+            showBismillah = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Page Surah Separator")
+@Composable
+private fun PageSurahSeparatorPreview() {
+    NimazTheme {
+        PageSurahSeparator(
+            surahNumber = 2,
+            surahNameArabic = "البقرة",
+            surahNameEnglish = "Al-Baqarah",
+            showBismillah = true
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Audio Bottom Bar - Playing")
+@Composable
+private fun AudioBottomBarPlayingPreview() {
+    NimazTheme {
+        AudioBottomBar(
+            isAudioActive = true,
+            isPlaying = true,
+            isDownloading = false,
+            isPreparing = false,
+            downloadProgress = 0f,
+            downloadedCount = 0,
+            totalToDownload = 0,
+            audioTitle = "Al-Fatihah - Ayah 1",
+            progress = 0.4f,
+            onPlayClick = {},
+            onStopClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Audio Bottom Bar - Downloading")
+@Composable
+private fun AudioBottomBarDownloadingPreview() {
+    NimazTheme {
+        AudioBottomBar(
+            isAudioActive = true,
+            isPlaying = false,
+            isDownloading = true,
+            isPreparing = false,
+            downloadProgress = 0.65f,
+            downloadedCount = 5,
+            totalToDownload = 7,
+            audioTitle = "Downloading...",
+            progress = 0f,
+            onPlayClick = {},
+            onStopClick = {}
         )
     }
 }

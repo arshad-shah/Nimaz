@@ -80,6 +80,8 @@ import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
 import java.util.Locale
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Color constants for makeup fasts
 private val OrangeAccent = Color(0xFFF97316)
@@ -1552,3 +1554,101 @@ private fun MakeupEmptyState(
         }
     }
 }
+
+// region Previews
+
+@Preview(showBackground = true, widthDp = 400, name = "Stats Grid")
+@Composable
+private fun StatsGridPreview() {
+    NimazTheme {
+        StatsGrid(fasted = 15, missed = 3, remaining = 12)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Stat Card")
+@Composable
+private fun StatCardPreview() {
+    NimazTheme {
+        StatCard(value = "15", label = "Fasted", color = Color(0xFF22C55E))
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Legend Item")
+@Composable
+private fun LegendItemPreview() {
+    NimazTheme {
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            LegendItem(color = Color(0xFF22C55E), label = "Fasted")
+            LegendItem(color = Color(0xFFEF4444), label = "Missed")
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Recommended Fasts Section")
+@Composable
+private fun RecommendedFastsSectionPreview() {
+    NimazTheme {
+        RecommendedFastsSection()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Log Fast Button")
+@Composable
+private fun LogFastButtonPreview() {
+    NimazTheme {
+        LogFastButton(onClick = {})
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Makeup Empty State")
+@Composable
+private fun MakeupEmptyStatePreview() {
+    NimazTheme {
+        MakeupEmptyState()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Makeup Summary Card")
+@Composable
+private fun MakeupSummaryCardPreview() {
+    NimazTheme {
+        MakeupSummaryCard(pendingCount = 5)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Makeup Stats Grid")
+@Composable
+private fun MakeupStatsGridPreview() {
+    NimazTheme {
+        MakeupStatsGrid(completedCount = 8, pendingCount = 5, totalCount = 13)
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Makeup Section Header")
+@Composable
+private fun MakeupSectionHeaderPreview() {
+    NimazTheme {
+        MakeupSectionHeader(title = "Pending", count = "5")
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Ramadan Countdown Card")
+@Composable
+private fun RamadanCountdownCardPreview() {
+    NimazTheme {
+        RamadanCountdownCard()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Ramadan Banner")
+@Composable
+private fun RamadanBannerPreview() {
+    NimazTheme {
+        RamadanBanner(fastedDays = 15, totalDays = 30, currentDay = 16)
+    }
+}
+
+// endregion

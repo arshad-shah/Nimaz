@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
@@ -715,4 +717,73 @@ private fun getShortPrayerName(name: String): String {
 private fun formatWidgetTime(hour: Int, minute: Int): String {
     val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
     return String.format("%d:%02d", h, minute)
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Next Prayer Widget Preview")
+@Composable
+private fun NextPrayerWidgetPreviewDemo() {
+    NimazTheme {
+        NextPrayerWidgetPreview(
+            data = WidgetPreviewData(
+                nextPrayerName = "Maghrib",
+                nextPrayerTime = "6:15 PM",
+                countdown = "2h 30m"
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Prayer Times Widget Preview")
+@Composable
+private fun PrayerTimesWidgetPreviewDemo() {
+    NimazTheme {
+        PrayerTimesWidgetPreview(
+            data = WidgetPreviewData(
+                locationName = "Dublin",
+                hijriDay = 15,
+                hijriMonth = "Rajab",
+                nextPrayerName = "Maghrib",
+                countdown = "2h 30m",
+                prayers = listOf(
+                    PrayerPreview("Fajr", "5:30", isPassed = true),
+                    PrayerPreview("Dhuhr", "12:45", isPassed = true),
+                    PrayerPreview("Asr", "3:30", isPassed = true),
+                    PrayerPreview("Mgrb", "6:15", isNext = true),
+                    PrayerPreview("Isha", "7:45")
+                )
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Hijri Date Widget Preview")
+@Composable
+private fun HijriDateWidgetPreviewDemo() {
+    NimazTheme {
+        HijriDateWidgetPreview(
+            data = WidgetPreviewData(
+                dayOfWeek = "Tuesday",
+                hijriDay = 15,
+                hijriMonth = "Rajab",
+                hijriYear = 1446,
+                gregorianDate = "28 Jan"
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Prayer Tracker Widget Preview")
+@Composable
+private fun PrayerTrackerWidgetPreviewDemo() {
+    NimazTheme {
+        PrayerTrackerWidgetPreview()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "How To Add Card")
+@Composable
+private fun HowToAddCardPreview() {
+    NimazTheme {
+        HowToAddCard()
+    }
 }

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -19,9 +20,11 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
@@ -56,6 +59,13 @@ import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
 import com.arshadshah.nimaz.presentation.viewmodel.HighLatitudeRule
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -460,47 +470,39 @@ private fun AdjustmentRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Minus button
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .clickable { onValueChange(value - 1) },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "\u2212",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
 
-            // Value display
-            Text(
-                text = if (value > 0) "+$value" else "$value",
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.width(50.dp),
-                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            NimazIconButton(
+                icon = Icons.Default.Remove,
+                contentDescription = "Adjustment Info",
+                style = NimazIconButtonStyle.FILLED,
+                size = NimazIconButtonSize.SMALL,
+                onClick = {
+                    onValueChange(value - 1)
+                     }
             )
-
-            // Plus button
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                    .clickable { onValueChange(value + 1) },
-                contentAlignment = Alignment.Center
+            NimazCard(
+                style = NimazCardStyle.OUTLINED,
+                shape = RoundedCornerShape(8.dp),
+                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
             ) {
                 Text(
-                    text = "+",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    text = if (value > 0) "+$value" else "$value",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(8.dp),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
                 )
             }
+            NimazIconButton(
+                icon = Icons.Default.Add,
+                contentDescription = "Adjustment Info",
+                style = NimazIconButtonStyle.FILLED,
+                size = NimazIconButtonSize.SMALL,
+                onClick = {
+                    onValueChange(value + 1)
+                }
+            )
         }
     }
 }
@@ -617,4 +619,61 @@ private fun SelectionDialog(
             }
         }
     )
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Setting Item")
+@Composable
+private fun SettingItemPreview() {
+    NimazTheme {
+        SettingItem(
+            icon = Icons.Default.Schedule,
+            label = "Calculation Method",
+            value = "Muslim World League",
+            iconTinted = true,
+            onClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Setting Toggle Item")
+@Composable
+private fun SettingToggleItemPreview() {
+    NimazTheme {
+        SettingToggleItem(
+            icon = Icons.Default.Notifications,
+            label = "Pre-Adhan Reminder",
+            value = "15 minutes before",
+            checked = true,
+            onCheckedChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Adjustment Row")
+@Composable
+private fun AdjustmentRowPreview() {
+    NimazTheme {
+        AdjustmentRow(
+            label = "Fajr",
+            value = 2,
+            onValueChange = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Prayer Selection Dialog")
+@Composable
+private fun PrayerSelectionDialogPreview() {
+    NimazTheme {
+        SelectionDialog(
+            title = "Asr Calculation",
+            options = listOf(
+                SelectionOption("Standard (Shafi'i, Maliki, Hanbali)", "Shadow equals object length"),
+                SelectionOption("Hanafi", "Shadow equals twice object length")
+            ),
+            selectedIndex = 0,
+            onSelect = {},
+            onDismiss = {}
+        )
+    }
 }
