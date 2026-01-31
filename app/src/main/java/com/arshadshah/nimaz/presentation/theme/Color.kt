@@ -141,25 +141,78 @@ object NimazColors {
         val Milestone = Color(0xFFFFC107)
     }
 
-    // Tajweed Colors for Quran pronunciation rules
+    // Tajweed Colors — V2: distinct colour per sub-rule, matching printed mushaf coding
     object TajweedColors {
-        // Light theme colors
-        val GhunnahLight = Color(0xFF059669)    // Green - nasalization
-        val IkhfaLight = Color(0xFF7C3AED)      // Purple - hiding
-        val IdghamLight = Color(0xFFD97706)     // Amber - merging
-        val QalqalahLight = Color(0xFF2563EB)   // Blue - echoing
-        val MaddLight = Color(0xFFDC2626)       // Red - elongation
-        val IqlabLight = Color(0xFF7C3AED)      // Purple - conversion (same as Ikhfa)
-        val SilentLight = Color(0xFF64748B)     // Slate/Gray - silent letters
+        // ── Light theme ──
 
-        // Dark theme colors (brighter variants for better visibility)
+        // Ghunnah (nasalisation)
+        val GhunnahLight = Color(0xFF059669)          // Green
+
+        // Ikhfa (concealment of noon sakinah)
+        val IkhfaLight = Color(0xFF0D9488)            // Teal
+        // Ikhfa Shafawi (labial concealment of meem sakinah)
+        val IkhfaShafawiLight = Color(0xFF0E7490)     // Cyan-700
+
+        // Idgham with Ghunnah
+        val IdghamGhunnahLight = Color(0xFFD97706)    // Amber
+        // Idgham without Ghunnah
+        val IdghamNoGhunnahLight = Color(0xFF92400E)  // Brown / Amber-800
+        // Idgham Shafawi (labial merging)
+        val IdghamShafawiLight = Color(0xFFB45309)    // Amber-700
+        // Idgham Mutajanisayn (homorganic)
+        val IdghamMutajanisaynLight = Color(0xFFC2410C) // Orange-700
+        // Idgham Mutaqaribayn (close articulation)
+        val IdghamMutaqaribayLight = Color(0xFFEA580C)  // Orange-600
+
+        // Qalqalah (echoing)
+        val QalqalahLight = Color(0xFF2563EB)         // Blue
+
+        // Madd Normal / Tabee'i (2 beats)
+        val MaddNormalLight = Color(0xFFE11D48)       // Rose-600
+        // Madd Jaiz / Permissible (2-4-5 beats)
+        val MaddPermissibleLight = Color(0xFFDB2777)  // Pink-600
+        // Madd Wajib / Obligatory (4-5 beats)
+        val MaddObligatoryLight = Color(0xFFDC2626)   // Red-600
+        // Madd Lazim / Necessary (6 beats)
+        val MaddNecessaryLight = Color(0xFF9F1239)    // Rose-800
+
+        // Iqlab (conversion noon → meem)
+        val IqlabLight = Color(0xFF7C3AED)            // Violet
+
+        // Lam Shamsiyyah (sun-letter assimilation)
+        val LamShamsiyyahLight = Color(0xFF4F46E5)    // Indigo
+
+        // Silent letters
+        val SilentLight = Color(0xFF64748B)           // Slate
+        // Hamza Al-Wasl
+        val HamzaWaslLight = Color(0xFF94A3B8)        // Slate-400
+
+        // ── Dark theme (brighter for OLED readability) ──
+
         val GhunnahDark = Color(0xFF34D399)
-        val IkhfaDark = Color(0xFFA78BFA)
-        val IdghamDark = Color(0xFFFBBF24)
+
+        val IkhfaDark = Color(0xFF2DD4BF)
+        val IkhfaShafawiDark = Color(0xFF22D3EE)
+
+        val IdghamGhunnahDark = Color(0xFFFBBF24)
+        val IdghamNoGhunnahDark = Color(0xFFF59E0B)
+        val IdghamShafawiDark = Color(0xFFFCD34D)
+        val IdghamMutajanisaynDark = Color(0xFFFB923C)
+        val IdghamMutaqaribayDark = Color(0xFFFDBA74)
+
         val QalqalahDark = Color(0xFF60A5FA)
-        val MaddDark = Color(0xFFF87171)
+
+        val MaddNormalDark = Color(0xFFFB7185)
+        val MaddPermissibleDark = Color(0xFFF472B6)
+        val MaddObligatoryDark = Color(0xFFF87171)
+        val MaddNecessaryDark = Color(0xFFFDA4AF)
+
         val IqlabDark = Color(0xFFA78BFA)
+
+        val LamShamsiyyahDark = Color(0xFF818CF8)
+
         val SilentDark = Color(0xFF94A3B8)
+        val HamzaWaslDark = Color(0xFFCBD5E1)
     }
 }
 

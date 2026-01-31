@@ -6,68 +6,92 @@ Converts: <tajweed class="ghunnah">text</tajweed>
 To: [{"t": "text", "r": "g"}]
 
 This eliminates runtime regex parsing in the Android app.
+
+V2 rule codes — each tajweed sub-type gets its own code so the app can
+assign distinct colors matching a standard colour-coded mushaf.
 """
 
 import json
 import re
 from pathlib import Path
 
-# Map tajweed class names to single-letter codes
-# Based on actual classes found in tajweed.json:
-# end, ghunnah, ham_wasl, idgham_ghunnah, idgham_mutajanisayn, idgham_mutaqaribayn,
-# idgham_shafawi, idgham_wo_ghunnah, ikhafa, ikhafa_shafawi, iqlab, laam_shamsiyah,
-# madda_necessary, madda_normal, madda_obligatory, madda_permissible, qalaqah, slnt
+# ── V2 Rule Code Map ──────────────────────────────────────────────────
+# Every class from the Quran.com uthmani_tajweed API is mapped to a
+# unique short code.  This lets the Android renderer show a different
+# colour for each tajweed sub-rule, matching printed tajweed mushafs.
+#
+# Classes present in tajweed.json (18):
+#   end, ghunnah, ham_wasl, idgham_ghunnah, idgham_mutajanisayn,
+#   idgham_mutaqaribayn, idgham_shafawi, idgham_wo_ghunnah, ikhafa,
+#   ikhafa_shafawi, iqlab, laam_shamsiyah, madda_necessary, madda_normal,
+#   madda_obligatory, madda_permissible, qalaqah, slnt
 RULE_CODES = {
-    # Ghunnah (nasalization) - Green
+    # ── Ghunnah (nasalisation, 2 beats) ──
     'ghunnah': 'g',
     'ghn': 'g',
 
-    # Ikhfa (hiding) - Purple
-    'ikhfa': 'i',
-    'ikhafa': 'i',
-    'ikhfa_shafawi': 'i',
-    'ikhafa_shafawi': 'i',
+    # ── Ikhfa (concealment / hiding of noon sakinah) ──
+    'ikhfa': 'if',
+    'ikhafa': 'if',
 
-    # Idgham (merging) - Amber/Orange
-    'idgham': 'd',
-    'idgham_ghunnah': 'd',
-    'idgham_no_ghunnah': 'd',
-    'idgham_wo_ghunnah': 'd',
-    'idgham_shafawi': 'd',
-    'idgham_mutajanisayn': 'd',
-    'idgham_mutaqaribayn': 'd',
+    # ── Ikhfa Shafawi (labial hiding of meem sakinah) ──
+    'ikhfa_shafawi': 'is',
+    'ikhafa_shafawi': 'is',
 
-    # Qalqalah (echoing) - Blue
+    # ── Idgham with Ghunnah (merging with nasalisation) ──
+    'idgham': 'dg',
+    'idgham_ghunnah': 'dg',
+
+    # ── Idgham without Ghunnah (merging without nasalisation) ──
+    'idgham_no_ghunnah': 'dn',
+    'idgham_wo_ghunnah': 'dn',
+
+    # ── Idgham Shafawi (labial merging of meem sakinah) ──
+    'idgham_shafawi': 'ds',
+
+    # ── Idgham Mutajanisayn (merging of homorganic letters) ──
+    'idgham_mutajanisayn': 'dj',
+
+    # ── Idgham Mutaqaribayn (merging of close-articulation letters) ──
+    'idgham_mutaqaribayn': 'dk',
+
+    # ── Qalqalah (echoing / bouncing) ──
     'qalqalah': 'q',
     'qalaqah': 'q',
 
-    # Madd (elongation) - Red
-    'madd': 'm',
-    'madd_normal': 'm',
-    'madd_permissible': 'm',
-    'madd_necessary': 'm',
-    'madd_obligatory': 'm',
-    'madda_normal': 'm',
-    'madda_permissible': 'm',
-    'madda_necessary': 'm',
-    'madda_obligatory': 'm',
+    # ── Madd Normal / Tabee'i (natural elongation, 2 beats) ──
+    'madd': 'mn',
+    'madd_normal': 'mn',
+    'madda_normal': 'mn',
 
-    # Iqlab (conversion) - Purple
+    # ── Madd Jaiz Munfasil (permissible elongation, 2-4-5 beats) ──
+    'madd_permissible': 'mp',
+    'madda_permissible': 'mp',
+
+    # ── Madd Wajib Muttasil (obligatory elongation, 4-5 beats) ──
+    'madd_obligatory': 'mo',
+    'madda_obligatory': 'mo',
+
+    # ── Madd Lazim (necessary elongation, 6 beats) ──
+    'madd_necessary': 'my',
+    'madda_necessary': 'my',
+
+    # ── Iqlab (conversion of noon sakinah to meem) ──
     'iqlab': 'l',
 
-    # Silent letters - Gray/Slate
-    'silent': 's',
-    'slnt': 's',
+    # ── Lam Shamsiyyah (assimilation of lam into sun letters) ──
+    'lam_shamsiyah': 'ls',
+    'laam_shamsiyah': 'ls',
 
-    # Lam Shamsiyyah (sun letters - use idgham color)
-    'lam_shamsiyah': 'd',
-    'laam_shamsiyah': 'd',
+    # ── Silent letters ──
+    'silent': 'sl',
+    'slnt': 'sl',
 
-    # Hamza Wasl (connecting hamza - silent)
-    'ham_wasl': 's',
-    'hamza_wasl': 's',
+    # ── Hamza Al-Wasl (connecting hamza, not pronounced mid-sentence) ──
+    'ham_wasl': 'hw',
+    'hamza_wasl': 'hw',
 
-    # End marker (verse number indicator - ignore)
+    # ── End marker (verse number indicator — stripped) ──
     'end': None,
 }
 

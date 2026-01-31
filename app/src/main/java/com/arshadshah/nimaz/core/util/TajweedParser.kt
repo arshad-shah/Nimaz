@@ -11,50 +11,86 @@ import kotlinx.serialization.json.Json
 /**
  * Parser for pre-parsed tajweed JSON data.
  *
- * Tajweed data is now pre-parsed during database generation into a simple JSON format:
+ * Tajweed data is pre-parsed during database generation into a simple JSON format:
  * [{"t":"بِ","r":"g"},{"t":"سْمِ","r":null}]
  *
  * Where:
  * - "t" = text content
- * - "r" = rule code (single letter) or null for plain text
+ * - "r" = rule code or null for plain text
  *
- * Rule codes:
- * - "g" = Ghunnah (nasalization) - Green
- * - "i" = Ikhfa (hiding) - Purple
- * - "d" = Idgham (merging) - Amber/Orange
- * - "q" = Qalqalah (echoing) - Blue
- * - "m" = Madd (elongation) - Red
- * - "l" = Iqlab (conversion) - Purple
- * - "s" = Silent letters - Gray/Slate
+ * V2 rule codes (each sub-type is distinct):
+ *
+ *  Code  | Rule                           | Colour family
+ * -------|--------------------------------|---------------
+ *  "g"   | Ghunnah (nasalisation)         | Green
+ *  "if"  | Ikhfa (concealment)            | Teal
+ *  "is"  | Ikhfa Shafawi (labial hiding)  | Cyan
+ *  "dg"  | Idgham with Ghunnah            | Amber
+ *  "dn"  | Idgham without Ghunnah         | Brown
+ *  "ds"  | Idgham Shafawi                 | Amber variant
+ *  "dj"  | Idgham Mutajanisayn            | Orange
+ *  "dk"  | Idgham Mutaqaribayn            | Orange variant
+ *  "q"   | Qalqalah (echoing)             | Blue
+ *  "mn"  | Madd Normal (2 beats)          | Rose
+ *  "mp"  | Madd Permissible (2-4-5 beats) | Pink
+ *  "mo"  | Madd Obligatory (4-5 beats)    | Red
+ *  "my"  | Madd Necessary (6 beats)       | Dark Rose
+ *  "l"   | Iqlab (conversion)             | Violet
+ *  "ls"  | Lam Shamsiyyah                 | Indigo
+ *  "sl"  | Silent letters                 | Slate
+ *  "hw"  | Hamza Al-Wasl                  | Light Slate
+ *
+ * Legacy single-letter codes (v1) are still accepted for backwards compatibility.
  */
 object TajweedParser {
 
     private val json = Json { ignoreUnknownKeys = true }
 
     /**
-     * Map of single-letter rule codes to their light/dark color pairs.
+     * Map of rule codes to their light/dark colour pairs.
+     * Includes both v2 granular codes and v1 legacy codes.
      */
     private val ruleColors: Map<String, Pair<Color, Color>> = mapOf(
-        // Ghunnah (nasalization) - Green
+        // ── V2 granular codes ──
+
+        // Ghunnah
         "g" to Pair(TajweedColors.GhunnahLight, TajweedColors.GhunnahDark),
 
-        // Ikhfa (hiding) - Purple
-        "i" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
+        // Ikhfa
+        "if" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
+        "is" to Pair(TajweedColors.IkhfaShafawiLight, TajweedColors.IkhfaShafawiDark),
 
-        // Idgham (merging) - Amber/Orange
-        "d" to Pair(TajweedColors.IdghamLight, TajweedColors.IdghamDark),
+        // Idgham
+        "dg" to Pair(TajweedColors.IdghamGhunnahLight, TajweedColors.IdghamGhunnahDark),
+        "dn" to Pair(TajweedColors.IdghamNoGhunnahLight, TajweedColors.IdghamNoGhunnahDark),
+        "ds" to Pair(TajweedColors.IdghamShafawiLight, TajweedColors.IdghamShafawiDark),
+        "dj" to Pair(TajweedColors.IdghamMutajanisaynLight, TajweedColors.IdghamMutajanisaynDark),
+        "dk" to Pair(TajweedColors.IdghamMutaqaribayLight, TajweedColors.IdghamMutaqaribayDark),
 
-        // Qalqalah (echoing) - Blue
+        // Qalqalah
         "q" to Pair(TajweedColors.QalqalahLight, TajweedColors.QalqalahDark),
 
-        // Madd (elongation) - Red
-        "m" to Pair(TajweedColors.MaddLight, TajweedColors.MaddDark),
+        // Madd (each sub-type distinct)
+        "mn" to Pair(TajweedColors.MaddNormalLight, TajweedColors.MaddNormalDark),
+        "mp" to Pair(TajweedColors.MaddPermissibleLight, TajweedColors.MaddPermissibleDark),
+        "mo" to Pair(TajweedColors.MaddObligatoryLight, TajweedColors.MaddObligatoryDark),
+        "my" to Pair(TajweedColors.MaddNecessaryLight, TajweedColors.MaddNecessaryDark),
 
-        // Iqlab (conversion) - Purple
+        // Iqlab
         "l" to Pair(TajweedColors.IqlabLight, TajweedColors.IqlabDark),
 
-        // Silent letters - Gray/Slate
-        "s" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark)
+        // Lam Shamsiyyah
+        "ls" to Pair(TajweedColors.LamShamsiyyahLight, TajweedColors.LamShamsiyyahDark),
+
+        // Silent / Hamza Wasl
+        "sl" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
+        "hw" to Pair(TajweedColors.HamzaWaslLight, TajweedColors.HamzaWaslDark),
+
+        // ── V1 legacy codes (backwards compatibility with old databases) ──
+        "i" to Pair(TajweedColors.IkhfaLight, TajweedColors.IkhfaDark),
+        "d" to Pair(TajweedColors.IdghamGhunnahLight, TajweedColors.IdghamGhunnahDark),
+        "m" to Pair(TajweedColors.MaddNormalLight, TajweedColors.MaddNormalDark),
+        "s" to Pair(TajweedColors.SilentLight, TajweedColors.SilentDark),
     )
 
     /**
@@ -152,7 +188,7 @@ object TajweedParser {
  * Data class for a tajweed text segment.
  *
  * @property t The text content
- * @property r The rule code (single letter) or null for plain text
+ * @property r The rule code or null for plain text
  */
 @Serializable
 data class TajweedSegment(

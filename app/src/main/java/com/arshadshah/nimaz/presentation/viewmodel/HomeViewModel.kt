@@ -2,9 +2,12 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -165,6 +168,12 @@ class HomeViewModel @Inject constructor(
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
             HomeEvent.RefreshPermissions -> checkPermissions()
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+        }
+    }
+
+    fun getBatteryOptimizationIntent(): Intent {
+        return Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${context.packageName}")
         }
     }
 

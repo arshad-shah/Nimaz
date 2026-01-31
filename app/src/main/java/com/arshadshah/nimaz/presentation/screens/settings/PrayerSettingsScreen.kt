@@ -48,6 +48,8 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
@@ -126,11 +128,13 @@ fun PrayerSettingsScreen(
 
             // Info Banner
             item {
-                InfoBanner(
-                    text = buildString {
+                NimazBanner(
+                    message = buildString {
                         val city = locationState.currentLocation?.city ?: "Your location"
                         append("$city may be at a high latitude. Prayer times may vary significantly during summer months. Consider using Angle Based or One Seventh methods.")
-                    }
+                    },
+                    variant = NimazBannerVariant.INFO,
+                    icon = Icons.Default.Info
                 )
             }
 
@@ -501,30 +505,6 @@ private fun AdjustmentRow(
     }
 }
 
-@Composable
-private fun InfoBanner(text: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-            .padding(15.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.2
-        )
-    }
-}
 
 @Composable
 private fun SettingsDivider() {

@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.home
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -56,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -64,13 +69,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.core.util.UpdateState
-import com.arshadshah.nimaz.presentation.components.molecules.PermissionAlertCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 // Prayer-specific accent colors matching the design prototype
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
 import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.format.DateTimeFormatter
 
 @Composable
@@ -92,6 +99,19 @@ fun HomeScreen(
     val updateManager = LocalInAppUpdateManager.current
     val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
 
+    // Permission launchers
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
+
+    val batteryOptimizationLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { viewModel.onEvent(HomeEvent.RefreshPermissions) }
+
     Scaffold { innerPadding ->
         Box(
             modifier = Modifier
@@ -109,78 +129,6 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
-                // Permission Alert Cards
-                if (!state.hasNotificationPermission) {
-                    item {
-                        PermissionAlertCard(
-                            icon = Icons.Default.Notifications,
-                            title = "Notifications Disabled",
-                            description = "Prayer notifications need permission to alert you at prayer times.",
-                            actionLabel = "Enable",
-                            onAction = onNavigateToSettings,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-                if (!state.hasLocationPermission) {
-                    item {
-                        PermissionAlertCard(
-                            icon = Icons.Default.LocationOn,
-                            title = "Location Permission Needed",
-                            description = "Location is needed to calculate accurate prayer times for your area.",
-                            actionLabel = "Grant",
-                            onAction = onNavigateToSettings,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-                if (state.isBatteryOptimized) {
-                    item {
-                        PermissionAlertCard(
-                            icon = Icons.Default.BatteryAlert,
-                            title = "Battery Optimization Active",
-                            description = "Battery optimization may prevent timely prayer notifications.",
-                            actionLabel = "Fix",
-                            onAction = onNavigateToSettings,
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                        )
-                    }
-                }
-
-                // In-App Update Banner
-                when (val currentUpdateState = updateState) {
-                    is UpdateState.UpdateAvailable -> {
-                        item {
-                            UpdateBanner(
-                                message = "A new version of Nimaz is available",
-                                actionLabel = "Update",
-                                onAction = { updateManager?.startUpdate() },
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                    is UpdateState.Downloading -> {
-                        item {
-                            UpdateBanner(
-                                message = "Downloading update...",
-                                actionLabel = null,
-                                onAction = {},
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                    is UpdateState.Downloaded -> {
-                        item {
-                            UpdateBanner(
-                                message = "Update ready to install",
-                                actionLabel = "Restart",
-                                onAction = { currentUpdateState.completeUpdate() },
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
-                            )
-                        }
-                    }
-                    else -> {}
-                }
 
                 // Header with Prayer Info
                 item {
@@ -195,6 +143,97 @@ fun HomeScreen(
                         timeUntilNextPrayer = state.timeUntilNextPrayer,
                         onSettingsClick = onNavigateToSettings
                     )
+                }
+
+                    // In-App Update Banner
+                    when (updateState) {
+                        is UpdateState.UpdateAvailable -> {
+                            item {
+                                NimazBanner(
+                                    message = "A new version of Nimaz is available",
+                                    variant = NimazBannerVariant.UPDATE,
+                                    actionLabel = "Update",
+                                    onAction = { updateManager?.startUpdate() },
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                        is UpdateState.Downloading -> {
+                            item {
+                                NimazBanner(
+                                    message = "Downloading update...",
+                                    variant = NimazBannerVariant.UPDATE,
+                                    isLoading = true,
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                        is UpdateState.Downloaded -> {
+                            item {
+                                NimazBanner(
+                                    message = "Update ready to install",
+                                    variant = NimazBannerVariant.UPDATE,
+                                    actionLabel = "Restart",
+                                    onAction = { updateState.completeUpdate() },
+                                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                        else -> {}
+                    }
+
+                // Permission Alert Cards (after header so timer is always visible)
+                if (!state.hasNotificationPermission) {
+                    item {
+                        NimazBanner(
+                            message = "Prayer notifications need permission to alert you at prayer times.",
+                            variant = NimazBannerVariant.WARNING,
+                            icon = Icons.Default.Notifications,
+                            title = "Notifications Disabled",
+                            actionLabel = "Enable",
+                            onAction = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                            },
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                if (!state.hasLocationPermission) {
+                    item {
+                        NimazBanner(
+                            message = "Location is needed to calculate accurate prayer times for your area.",
+                            variant = NimazBannerVariant.WARNING,
+                            icon = Icons.Default.LocationOn,
+                            title = "Location Permission Needed",
+                            actionLabel = "Grant",
+                            onAction = {
+                                locationPermissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            },
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                if (state.isBatteryOptimized) {
+                    item {
+                        NimazBanner(
+                            message = "Battery optimization may prevent timely prayer notifications.",
+                            variant = NimazBannerVariant.WARNING,
+                            icon = Icons.Default.BatteryAlert,
+                            title = "Battery Optimization Active",
+                            actionLabel = "Fix",
+                            onAction = {
+                                batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
+                            },
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
                 }
 
                 // Jumu'ah Card (Friday only)
@@ -952,9 +991,9 @@ private fun JumuahCard(
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
-                            Text(
+                            ArabicText(
                                 text = "\u0627\u0644\u062C\u0645\u0639\u0629",
-                                style = MaterialTheme.typography.bodySmall,
+                                size = ArabicTextSize.SMALL,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
                         }
@@ -1078,58 +1117,189 @@ private fun getArabicPrayerName(prayerType: PrayerType?): String {
     }
 }
 
+// ─── Sample data for previews ─────────────────────────────────────────────────
+
+private val samplePrayerTimes = listOf(
+    PrayerTimeDisplay(PrayerType.FAJR, "Fajr", "5:23 AM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
+    PrayerTimeDisplay(PrayerType.SUNRISE, "Sunrise", "6:45 AM", isPassed = true, isCurrent = false, isNext = false),
+    PrayerTimeDisplay(PrayerType.DHUHR, "Dhuhr", "1:15 PM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
+    PrayerTimeDisplay(PrayerType.ASR, "Asr", "4:30 PM", isPassed = false, isCurrent = true, isNext = true),
+    PrayerTimeDisplay(PrayerType.MAGHRIB, "Maghrib", "6:12 PM", isPassed = false, isCurrent = false, isNext = false),
+    PrayerTimeDisplay(PrayerType.ISHA, "Isha", "7:45 PM", isPassed = false, isCurrent = false, isNext = false),
+)
+
+// ─── Previews ─────────────────────────────────────────────────────────────────
+
+@Preview(showBackground = true, widthDp = 400)
 @Composable
-private fun UpdateBanner(
-    message: String,
-    actionLabel: String?,
-    onAction: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer
-        ),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Row(
+private fun HomeHeaderPreview() {
+    NimazTheme {
+        HomeHeader(
+            locationName = "Dublin, Ireland",
+            hijriDate = "7 Rajab 1446",
+            gregorianDate = "Friday, January 31, 2026",
+            nextPrayer = PrayerType.ASR,
+            nextPrayerTime = "4:30 PM",
+            timeUntilNextPrayer = "2h 15m 30s",
+            onSettingsClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+private fun CountdownTimerPreview() {
+    NimazTheme {
+        CountdownTimer(
+            timeUntilNextPrayer = "2h 15m 30s",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+private fun TodaysProgressCardPreview() {
+    NimazTheme {
+        TodaysProgressCard(
+            prayerTimes = samplePrayerTimes,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Active Prayer Card")
+@Composable
+private fun PrayerTimeCardActivePreview() {
+    NimazTheme {
+        PrayerTimeCard(
+            prayer = samplePrayerTimes[3], // Asr - current
+            isActive = true,
+            onClick = {},
+            onToggle = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Completed Prayer Card")
+@Composable
+private fun PrayerTimeCardCompletedPreview() {
+    NimazTheme {
+        PrayerTimeCard(
+            prayer = samplePrayerTimes[0], // Fajr - prayed
+            isActive = false,
+            onClick = {},
+            onToggle = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Upcoming Prayer Card")
+@Composable
+private fun PrayerTimeCardUpcomingPreview() {
+    NimazTheme {
+        PrayerTimeCard(
+            prayer = samplePrayerTimes[4], // Maghrib - upcoming
+            isActive = false,
+            onClick = {},
+            onToggle = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+private fun JumuahCardPreview() {
+    NimazTheme {
+        JumuahCard(
+            jumuahTime = "1:30 PM",
+            timeUntilJumuah = "3h 15m",
+            isJumuahPassed = false,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Jumu'ah Passed")
+@Composable
+private fun JumuahCardPassedPreview() {
+    NimazTheme {
+        JumuahCard(
+            jumuahTime = "1:30 PM",
+            timeUntilJumuah = "",
+            isJumuahPassed = true,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400)
+@Composable
+private fun TodayInfoCardsPreview() {
+    NimazTheme {
+        TodayInfoCards(
+            fastingToday = true,
+            dailyHadith = "The Prophet (peace be upon him) said: \"The best of you are those who learn the Quran and teach it.\" — Sahih al-Bukhari",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "Full Home Content")
+@Composable
+private fun HomeContentPreview() {
+    NimazTheme {
+        LazyColumn(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(bottom = 16.dp)
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+            item {
+                HomeHeader(
+                    locationName = "Dublin, Ireland",
+                    hijriDate = "7 Rajab 1446",
+                    gregorianDate = "Friday, January 31, 2026",
+                    nextPrayer = PrayerType.ASR,
+                    nextPrayerTime = "4:30 PM",
+                    timeUntilNextPrayer = "2h 15m 30s",
+                    onSettingsClick = {}
                 )
             }
-            if (actionLabel != null) {
-                Spacer(modifier = Modifier.width(12.dp))
-                Card(
-                    modifier = Modifier.clickable { onAction() },
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    ),
-                    shape = RoundedCornerShape(8.dp)
-                ) {
-                    Text(
-                        text = actionLabel,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            } else {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    strokeWidth = 2.dp
+            item {
+                TodaysProgressCard(
+                    prayerTimes = samplePrayerTimes,
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                SectionHeader(title = "Today", modifier = Modifier.padding(horizontal = 20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                TodayInfoCards(
+                    fastingToday = false,
+                    dailyHadith = "The Prophet (peace be upon him) said: \"The best of you are those who learn the Quran and teach it.\"",
+                    modifier = Modifier.padding(horizontal = 20.dp)
+                )
+            }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+                SectionHeader(title = "Prayer Times", modifier = Modifier.padding(horizontal = 20.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+            }
+            items(samplePrayerTimes) { prayer ->
+                PrayerTimeCard(
+                    prayer = prayer,
+                    isActive = prayer.type == PrayerType.ASR,
+                    onClick = {},
+                    onToggle = {},
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                 )
             }
         }
     }
 }
+
