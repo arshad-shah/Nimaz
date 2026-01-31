@@ -71,6 +71,7 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 // Prayer-specific accent colors matching the design prototype
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
@@ -259,7 +260,7 @@ fun HomeScreen(
                 // Today Info Cards
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
-                    SectionHeader(
+                    NimazSectionHeader(
                         title = "Today",
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -281,7 +282,7 @@ fun HomeScreen(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        SectionHeader(title = "Prayer Times")
+                        NimazSectionHeader(title = "Prayer Times")
                         Text(
                             text = "Settings",
                             style = MaterialTheme.typography.bodySmall,
@@ -700,20 +701,6 @@ private fun ProgressPrayerDot(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-}
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onBackground,
-        modifier = modifier
-    )
 }
 
 @Composable
@@ -1277,7 +1264,7 @@ private fun HomeContentPreview() {
             }
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionHeader(title = "Today", modifier = Modifier.padding(horizontal = 20.dp))
+                NimazSectionHeader(title = "Today", modifier = Modifier.padding(horizontal = 20.dp))
                 Spacer(modifier = Modifier.height(12.dp))
                 TodayInfoCards(
                     fastingToday = false,
@@ -1287,7 +1274,7 @@ private fun HomeContentPreview() {
             }
             item {
                 Spacer(modifier = Modifier.height(24.dp))
-                SectionHeader(title = "Prayer Times", modifier = Modifier.padding(horizontal = 20.dp))
+                NimazSectionHeader(title = "Prayer Times", modifier = Modifier.padding(horizontal = 20.dp))
                 Spacer(modifier = Modifier.height(12.dp))
             }
             items(samplePrayerTimes) { prayer ->

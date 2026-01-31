@@ -53,6 +53,7 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 
@@ -119,18 +120,18 @@ fun SurahInfoScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // About This Surah
-                    SectionTitle("About This Surah")
+                    NimazSectionTitle(text = "About This Surah", uppercase = false)
                     InfoCard(
                         text = surahInfo?.description
                             ?: "This surah contains divine guidance and wisdom for believers."
                     )
 
                     // Details Grid
-                    SectionTitle("Details")
+                    NimazSectionTitle(text = "Details", uppercase = false)
                     DetailGrid(surah = surah)
 
                     // Main Themes
-                    SectionTitle("Main Themes")
+                    NimazSectionTitle(text = "Main Themes", uppercase = false)
                     ThemesList(
                         themes = surahInfo?.themes
                             ?: listOf("Divine Guidance", "Worship", "Morality", "Remembrance")
@@ -293,20 +294,6 @@ private fun StatItem(
             color = Color(0xFF737373)
         )
     }
-}
-
-@Composable
-private fun SectionTitle(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.onBackground,
-        modifier = modifier
-    )
 }
 
 @Composable

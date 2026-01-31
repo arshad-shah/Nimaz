@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VolumeOff
 import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +60,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
@@ -132,10 +132,12 @@ fun TasbihScreen(
             val currentSessionCount = counterState.count + (counterState.laps * counterState.targetCount)
             val liveTotalToday = statsState.baseTotalToday + currentSessionCount
 
-            StatsRow(
-                totalToday = liveTotalToday,
-                laps = counterState.laps,
-                completedSessions = statsState.completedSessions,
+            NimazStatsGrid(
+                stats = listOf(
+                    NimazStatData(value = liveTotalToday.toString(), label = "TODAY"),
+                    NimazStatData(value = counterState.laps.toString(), label = "ROUNDS"),
+                    NimazStatData(value = statsState.completedSessions.toString(), label = "SESSIONS")
+                ),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
 
@@ -358,69 +360,6 @@ private fun CounterCircle(
     }
 }
 
-@Composable
-private fun StatsRow(
-    totalToday: Int,
-    laps: Int,
-    completedSessions: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        StatCard(
-            value = totalToday.toString(),
-            label = "TODAY",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = laps.toString(),
-            label = "ROUNDS",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = completedSessions.toString(),
-            label = "SESSIONS",
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 0.5.sp
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

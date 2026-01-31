@@ -55,6 +55,7 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
@@ -378,34 +379,13 @@ private fun CalendarGridCard(
                 horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                LegendItem(color = eidColor, label = "Eid")
+                NimazLegendItem(color = eidColor, label = "Eid")
                 Spacer(modifier = Modifier.width(20.dp))
-                LegendItem(color = holyColor, label = "Holy Night")
+                NimazLegendItem(color = holyColor, label = "Holy Night")
                 Spacer(modifier = Modifier.width(20.dp))
-                LegendItem(color = fastColor, label = "Fasting")
+                NimazLegendItem(color = fastColor, label = "Fasting")
             }
         }
-    }
-}
-
-@Composable
-private fun LegendItem(color: Color, label: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-            fontSize = 11.sp
-        )
     }
 }
 

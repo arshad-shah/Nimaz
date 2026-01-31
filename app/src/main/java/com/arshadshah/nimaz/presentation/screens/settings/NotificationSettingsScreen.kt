@@ -45,7 +45,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import com.arshadshah.nimaz.data.audio.DownloadState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -55,16 +54,17 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.sp
 import android.content.Intent
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
-import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -188,7 +188,7 @@ fun NotificationSettingsScreen(
             // Prayer Notifications Section
             if (notificationState.notificationsEnabled) {
                 item {
-                    SectionTitle(title = "PRAYER NOTIFICATIONS")
+                    NimazSectionTitle(text = "PRAYER NOTIFICATIONS", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
                 }
 
                 item {
@@ -240,7 +240,7 @@ fun NotificationSettingsScreen(
 
                 // Adhan Sound Section
                 item {
-                    SectionTitle(title = "ADHAN SOUND")
+                    NimazSectionTitle(text = "ADHAN SOUND", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
                 }
 
                 // Global Adhan Toggle
@@ -332,7 +332,7 @@ fun NotificationSettingsScreen(
 
                 // Additional Alerts Section
                 item {
-                    SectionTitle(title = "ADDITIONAL ALERTS")
+                    NimazSectionTitle(text = "ADDITIONAL ALERTS", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
                 }
 
                 item {
@@ -343,22 +343,22 @@ fun NotificationSettingsScreen(
                     ) {
                         Column {
                             // Pre-Adhan Reminder
-                            SettingToggleRow(
-                                label = "Pre-Adhan Reminder",
-                                value = "${notificationState.reminderMinutes} minutes before",
-                                isEnabled = notificationState.showReminderBefore,
-                                onToggle = {
+                            NimazSettingsItem(
+                                title = "Pre-Adhan Reminder",
+                                subtitle = "${notificationState.reminderMinutes} minutes before",
+                                checked = notificationState.showReminderBefore,
+                                onCheckedChange = {
                                     viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
                                 }
                             )
-                            SettingDivider()
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                             // Sunrise Alert
-                            SettingToggleRow(
-                                label = "Sunrise Alert",
-                                value = "End of Fajr prayer time",
-                                isEnabled = notificationState.sunriseNotification,
-                                onToggle = {
+                            NimazSettingsItem(
+                                title = "Sunrise Alert",
+                                subtitle = "End of Fajr prayer time",
+                                checked = notificationState.sunriseNotification,
+                                onCheckedChange = {
                                     viewModel.onEvent(
                                         SettingsEvent.SetPrayerNotification(
                                             "sunrise",
@@ -367,36 +367,36 @@ fun NotificationSettingsScreen(
                                     )
                                 }
                             )
-                            SettingDivider()
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                             // Friday Prayer Reminder (maps to persistent notification)
-                            SettingToggleRow(
-                                label = "Friday Prayer Reminder",
-                                value = "1 hour before Jummah",
-                                isEnabled = notificationState.persistentNotification,
-                                onToggle = {
+                            NimazSettingsItem(
+                                title = "Friday Prayer Reminder",
+                                subtitle = "1 hour before Jummah",
+                                checked = notificationState.persistentNotification,
+                                onCheckedChange = {
                                     viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification))
                                 }
                             )
-                            SettingDivider()
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                             // Vibration
-                            SettingToggleRow(
-                                label = "Vibration",
-                                value = "Vibrate with notification",
-                                isEnabled = notificationState.vibrationEnabled,
-                                onToggle = {
+                            NimazSettingsItem(
+                                title = "Vibration",
+                                subtitle = "Vibrate with notification",
+                                checked = notificationState.vibrationEnabled,
+                                onCheckedChange = {
                                     viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
                                 }
                             )
-                            SettingDivider()
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                             // Honor Do Not Disturb
-                            SettingToggleRow(
-                                label = "Honor Do Not Disturb",
-                                value = "Skip adhan when DND is active",
-                                isEnabled = notificationState.respectDnd,
-                                onToggle = {
+                            NimazSettingsItem(
+                                title = "Honor Do Not Disturb",
+                                subtitle = "Skip adhan when DND is active",
+                                checked = notificationState.respectDnd,
+                                onCheckedChange = {
                                     viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
                                 }
                             )
@@ -407,7 +407,7 @@ fun NotificationSettingsScreen(
 
                 // Troubleshooting Section
                 item {
-                    SectionTitle(title = "TROUBLESHOOTING")
+                    NimazSectionTitle(text = "TROUBLESHOOTING", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
                 }
 
                 item {
@@ -480,7 +480,7 @@ fun NotificationSettingsScreen(
 
                 // Battery Optimization Section
                 item {
-                    SectionTitle(title = "BATTERY OPTIMIZATION")
+                    NimazSectionTitle(text = "BATTERY OPTIMIZATION", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
                 }
 
                 item {
@@ -563,18 +563,6 @@ fun NotificationSettingsScreen(
             }
         }
     }
-}
-
-@Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        letterSpacing = 1.sp,
-        modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
-    )
 }
 
 @Composable
@@ -758,49 +746,6 @@ private fun AdhanOptionRow(
     }
 }
 
-@Composable
-private fun SettingToggleRow(
-    label: String,
-    value: String,
-    isEnabled: Boolean,
-    onToggle: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = isEnabled,
-            onCheckedChange = { onToggle() }
-        )
-    }
-}
-
-@Composable
-private fun SettingDivider() {
-    Box(
-        Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(1.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-    )
-}
 
 // Previews
 
@@ -878,23 +823,3 @@ private fun AdhanOptionRowDownloadingPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Setting Toggle Row")
-@Composable
-private fun SettingToggleRowPreview() {
-    NimazTheme {
-        SettingToggleRow(
-            label = "Adhan Sound",
-            value = "Play adhan audio at prayer time",
-            isEnabled = true,
-            onToggle = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Section Title")
-@Composable
-private fun SectionTitlePreview() {
-    NimazTheme {
-        SectionTitle(title = "PRAYER NOTIFICATIONS")
-    }
-}

@@ -41,9 +41,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
@@ -86,11 +86,16 @@ fun ZakatHistoryScreen(
         }
     ) { paddingValues ->
         if (historyState.history.isEmpty() && !historyState.isLoading) {
-            EmptyHistoryContent(
+            NimazEmptyState(
+                title = "No Zakat History",
+                message = "Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.",
+                icon = Icons.Default.History,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+                actionLabel = "Calculate Zakat",
+                onAction = onNavigateToCalculator,
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
-                onNavigateToCalculator = onNavigateToCalculator
+                    .padding(paddingValues)
             )
         } else {
             LazyColumn(
@@ -343,77 +348,6 @@ private fun HistoryEntryCard(
                         tint = MaterialTheme.colorScheme.error
                     )
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun EmptyHistoryContent(
-    modifier: Modifier = Modifier,
-    onNavigateToCalculator: () -> Unit
-) {
-    Column(
-        modifier = modifier.padding(32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Surface(
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerHigh,
-            modifier = Modifier.size(80.dp)
-        ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = Icons.Default.History,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Text(
-            text = "No Zakat History",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = "Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Card(
-            onClick = onNavigateToCalculator,
-            shape = RoundedCornerShape(12.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-                Text(
-                    text = "Calculate Zakat",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
             }
         }
     }

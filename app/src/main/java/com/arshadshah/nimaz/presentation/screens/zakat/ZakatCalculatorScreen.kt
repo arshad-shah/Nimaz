@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
@@ -130,12 +131,20 @@ fun ZakatCalculatorScreen(
             // Assets Section
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
+                NimazSectionHeader(
                     title = "Assets",
-                    total = state.assets.total +
-                            (state.assets.goldGrams * state.goldPricePerGram) +
-                            (state.assets.silverGrams * state.silverPricePerGram),
-                    currency = state.currency
+                    trailingContent = {
+                        Text(
+                            text = formatCurrency(
+                                state.assets.total +
+                                        (state.assets.goldGrams * state.goldPricePerGram) +
+                                        (state.assets.silverGrams * state.silverPricePerGram),
+                                state.currency
+                            ),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 )
             }
 
@@ -252,11 +261,15 @@ fun ZakatCalculatorScreen(
             // Liabilities Section
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader(
+                NimazSectionHeader(
                     title = "Liabilities",
-                    total = state.liabilities.total,
-                    currency = state.currency,
-                    totalColor = MaterialTheme.colorScheme.error
+                    trailingContent = {
+                        Text(
+                            text = formatCurrency(state.liabilities.total, state.currency),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
                 )
             }
 
@@ -489,37 +502,6 @@ private fun NisabOptionCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-    }
-}
-
-// --- Section Header ---
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    total: Double,
-    currency: String,
-    totalColor: Color = MaterialTheme.colorScheme.primary,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = formatCurrency(total, currency),
-            style = MaterialTheme.typography.bodyMedium,
-            color = totalColor
-        )
     }
 }
 

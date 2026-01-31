@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -81,7 +82,10 @@ fun AboutScreen(
 
             // Links Section
             item {
-                SectionTitle(text = "Links")
+                NimazSectionTitle(
+                    text = "Links",
+                    modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
+                )
             }
 
             item {
@@ -95,7 +99,10 @@ fun AboutScreen(
 
             // Credits Section
             item {
-                SectionTitle(text = "Data Sources & Credits")
+                NimazSectionTitle(
+                    text = "Data Sources & Credits",
+                    modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
+                )
             }
 
             item {
@@ -115,20 +122,6 @@ fun AboutScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
-}
-
-@Composable
-private fun SectionTitle(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = modifier.padding(start = 5.dp, top = 4.dp)
-    )
 }
 
 @Composable
@@ -464,10 +457,3 @@ private fun FooterSectionPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "AboutSectionTitle")
-@Composable
-private fun AboutSectionTitlePreview() {
-    NimazTheme {
-        SectionTitle(text = "Links")
-    }
-}

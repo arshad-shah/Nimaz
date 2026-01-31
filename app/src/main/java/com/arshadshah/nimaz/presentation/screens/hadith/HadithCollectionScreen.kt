@@ -43,7 +43,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -54,7 +53,10 @@ import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 
@@ -114,10 +116,13 @@ fun HadithCollectionScreen(
             ) {
                 // Stats Row
                 item {
-                    StatsRow(
-                        readToday = 0,
-                        bookmarked = bookmarksState.bookmarks.size,
-                        dayStreak = 0
+                    NimazStatsGrid(
+                        stats = listOf(
+                            NimazStatData(value = "0", label = "Read Today"),
+                            NimazStatData(value = "${bookmarksState.bookmarks.size}", label = "Bookmarked"),
+                            NimazStatData(value = "0", label = "Day Streak")
+                        ),
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                     )
                 }
 
@@ -166,7 +171,7 @@ fun HadithCollectionScreen(
 
                 // Books Section Header
                 item {
-                    SectionHeader(
+                    NimazSectionHeader(
                         title = "Kutub al-Sittah",
                         showSeeAll = true,
                         onSeeAllClick = {
@@ -189,71 +194,6 @@ fun HadithCollectionScreen(
     }
 }
 
-@Composable
-private fun StatsRow(
-    readToday: Int,
-    bookmarked: Int,
-    dayStreak: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        StatCard(
-            value = "$readToday",
-            label = "Read Today",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = "$bookmarked",
-            label = "Bookmarked",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = "$dayStreak",
-            label = "Day Streak",
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                fontSize = 10.sp
-            )
-        }
-    }
-}
 
 @Composable
 private fun HadithOfTheDayCard(
@@ -390,34 +330,6 @@ private fun HadithActionButton(
     }
 }
 
-@Composable
-private fun SectionHeader(
-    title: String,
-    showSeeAll: Boolean,
-    onSeeAllClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onBackground
-        )
-        if (showSeeAll) {
-            Text(
-                text = "See All",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.clickable(onClick = onSeeAllClick)
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

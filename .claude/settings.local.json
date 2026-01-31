@@ -46,7 +46,9 @@
       "WebFetch(domain:aladhan.com)",
       "WebFetch(domain:www.islamcan.com)",
       "WebFetch(domain:www.assabile.com)",
-      "WebFetch(domain:archive.org)"
+      "WebFetch(domain:archive.org)",
+      "Bash(for screen in SettingsScreen PrayerSettingsScreen AppearanceSettingsScreen NotificationSettingsScreen QuranSettingsScreen LocationScreen MoreMenuScreen AboutScreen HomeScreen HelpSupportScreen FastTrackerScreen PrayerTrackerScreen QadaPrayersScreen BookmarksScreen SearchScreen HadithCollectionScreen IslamicCalendarScreen TasbihScreen ZakatCalculatorScreen ZakatHistoryScreen SurahInfoScreen)",
+      "Bash(do)"
     ]
   }
 }

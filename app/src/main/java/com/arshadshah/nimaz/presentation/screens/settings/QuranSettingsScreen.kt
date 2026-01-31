@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -32,8 +31,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -49,6 +46,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -122,7 +122,11 @@ fun QuranSettingsScreen(
 
             // Arabic Text Section
             item {
-                SectionTitle(title = "ARABIC TEXT")
+                NimazSectionTitle(
+                    text = "ARABIC TEXT",
+                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
+                    uppercase = false
+                )
             }
             item {
                 Card(
@@ -191,7 +195,11 @@ fun QuranSettingsScreen(
 
             // Display Options Section
             item {
-                SectionTitle(title = "DISPLAY OPTIONS")
+                NimazSectionTitle(
+                    text = "DISPLAY OPTIONS",
+                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
+                    uppercase = false
+                )
             }
             item {
                 Card(
@@ -201,39 +209,39 @@ fun QuranSettingsScreen(
                         containerColor = MaterialTheme.colorScheme.surfaceContainer
                     )
                 ) {
-                    DisplayToggleItem(
-                        label = "Show Transliteration",
+                    NimazSettingsItem(
+                        title = "Show Transliteration",
                         subtitle = "Roman letters pronunciation",
-                        isEnabled = quranState.showTransliteration,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
+                        checked = quranState.showTransliteration,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
                     )
-                    SettingDivider()
-                    DisplayToggleItem(
-                        label = "Show Translation",
+                    NimazDivider()
+                    NimazSettingsItem(
+                        title = "Show Translation",
                         subtitle = "Meaning in your language",
-                        isEnabled = quranState.showTranslation,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
+                        checked = quranState.showTranslation,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
                     )
-                    SettingDivider()
-                    DisplayToggleItem(
-                        label = "Continuous Reading",
+                    NimazDivider()
+                    NimazSettingsItem(
+                        title = "Continuous Reading",
                         subtitle = "Continue reading between surahs and auto-play next verse",
-                        isEnabled = quranState.continuousReading,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
+                        checked = quranState.continuousReading,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
                     )
-                    SettingDivider()
-                    DisplayToggleItem(
-                        label = "Keep Screen On",
+                    NimazDivider()
+                    NimazSettingsItem(
+                        title = "Keep Screen On",
                         subtitle = "Prevent screen from turning off",
-                        isEnabled = quranState.keepScreenOn,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
+                        checked = quranState.keepScreenOn,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
-                    SettingDivider()
-                    DisplayToggleItem(
-                        label = "Show Tajweed Colors",
+                    NimazDivider()
+                    NimazSettingsItem(
+                        title = "Show Tajweed Colors",
                         subtitle = "Color-coded pronunciation rules",
-                        isEnabled = quranState.showTajweed,
-                        onToggle = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
+                        checked = quranState.showTajweed,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
                 }
                 Spacer(modifier = Modifier.height(30.dp))
@@ -241,7 +249,11 @@ fun QuranSettingsScreen(
 
             // Translation Section
             item {
-                SectionTitle(title = "TRANSLATION")
+                NimazSectionTitle(
+                    text = "TRANSLATION",
+                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
+                    uppercase = false
+                )
             }
             item {
                 Card(
@@ -260,7 +272,7 @@ fun QuranSettingsScreen(
                             onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
                         )
                         if (index < translationOptions.lastIndex) {
-                            SettingDivider()
+                            NimazDivider()
                         }
                     }
                 }
@@ -269,7 +281,11 @@ fun QuranSettingsScreen(
 
             // Audio Section
             item {
-                SectionTitle(title = "AUDIO")
+                NimazSectionTitle(
+                    text = "AUDIO",
+                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
+                    uppercase = false
+                )
             }
             item {
                 Card(
@@ -429,58 +445,6 @@ private fun PreviewCard(
 }
 
 @Composable
-private fun SectionTitle(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        letterSpacing = 1.sp,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier.padding(start = 5.dp, bottom = 12.dp)
-    )
-}
-
-@Composable
-private fun DisplayToggleItem(
-    label: String,
-    subtitle: String,
-    isEnabled: Boolean,
-    onToggle: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onToggle() }
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = isEnabled,
-            onCheckedChange = { onToggle() },
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = MaterialTheme.colorScheme.primary,
-                uncheckedThumbColor = MaterialTheme.colorScheme.onSurface,
-                uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        )
-    }
-}
-
-@Composable
 private fun TranslationItem(
     name: String,
     language: String,
@@ -549,12 +513,4 @@ private fun TranslationItem(
             )
         }
     }
-}
-
-@Composable
-private fun SettingDivider() {
-    HorizontalDivider(
-        color = MaterialTheme.colorScheme.outlineVariant,
-        thickness = 0.5.dp
-    )
 }

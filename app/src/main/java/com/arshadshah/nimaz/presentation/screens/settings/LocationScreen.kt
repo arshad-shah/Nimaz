@@ -63,6 +63,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.viewmodel.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.LocationViewModel
@@ -144,7 +145,7 @@ fun LocationScreen(
             // Search Results
             if (state.searchResults.isNotEmpty()) {
                 item {
-                    SectionTitle(text = "Search Results")
+                    NimazSectionTitle(text = "Search Results")
                 }
                 items(state.searchResults) { location ->
                     LocationListItem(
@@ -184,7 +185,7 @@ fun LocationScreen(
             // Recent Locations
             if (state.recentLocations.isNotEmpty()) {
                 item {
-                    SectionTitle(text = "Recent")
+                    NimazSectionTitle(text = "Recent")
                 }
                 items(state.recentLocations) { location ->
                     LocationListItem(
@@ -198,7 +199,7 @@ fun LocationScreen(
 
             // Popular Cities
             item {
-                SectionTitle(text = "Popular Cities")
+                NimazSectionTitle(text = "Popular Cities")
             }
             items(state.popularCities) { location ->
                 LocationListItem(
@@ -211,21 +212,6 @@ fun LocationScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
-}
-
-@Composable
-private fun SectionTitle(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = text.uppercase(),
-        style = MaterialTheme.typography.labelSmall,
-        fontWeight = FontWeight.Medium,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
-        modifier = modifier.padding(start = 5.dp, top = 8.dp, bottom = 4.dp)
-    )
 }
 
 private fun isLocationSelected(

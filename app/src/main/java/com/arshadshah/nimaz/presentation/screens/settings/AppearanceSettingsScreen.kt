@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -28,7 +27,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -41,8 +39,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AppTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -76,7 +76,7 @@ fun AppearanceSettingsScreen(
         ) {
             // Theme Section
             item {
-                SectionTitle(text = "Theme")
+                NimazSectionTitle(text = "Theme")
             }
             item {
                 ThemeSelectionCard(
@@ -87,7 +87,7 @@ fun AppearanceSettingsScreen(
 
             // Display Section
             item {
-                SectionTitle(text = "Display")
+                NimazSectionTitle(text = "Display")
             }
             item {
                 DisplaySettingsCard(
@@ -112,7 +112,7 @@ fun AppearanceSettingsScreen(
 
             // Home Screen Section
             item {
-                SectionTitle(text = "Home Screen")
+                NimazSectionTitle(text = "Home Screen")
             }
             item {
                 HomeScreenSettingsCard(
@@ -126,43 +126,6 @@ fun AppearanceSettingsScreen(
             item {
                 Spacer(modifier = Modifier.height(24.dp))
             }
-        }
-    }
-}
-
-// --- Section Title ---
-
-@Composable
-private fun SectionTitle(
-    text: String,
-    showProBadge: Boolean = false
-) {
-    Row(
-        modifier = Modifier.padding(start = 5.dp, top = 24.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = text.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            letterSpacing = 1.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        if (showProBadge) {
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = "PRO",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 9.sp
-                ),
-                color = MaterialTheme.colorScheme.inverseSurface,
-                modifier = Modifier
-                    .background(
-                        color = Color(0xFFEAB308),
-                        shape = RoundedCornerShape(4.dp)
-                    )
-                    .padding(horizontal = 6.dp, vertical = 2.dp)
-            )
         }
     }
 }
@@ -361,32 +324,32 @@ private fun DisplaySettingsCard(
         )
     ) {
         Column {
-            SettingToggleItem(
-                label = "Islamic Patterns",
-                description = "Show decorative patterns",
-                isEnabled = showIslamicPatterns,
-                onToggle = onIslamicPatternsToggle
+            NimazSettingsItem(
+                title = "Islamic Patterns",
+                subtitle = "Show decorative patterns",
+                checked = showIslamicPatterns,
+                onCheckedChange = { onIslamicPatternsToggle() }
             )
-            SettingDivider()
-            SettingToggleItem(
-                label = "Animations",
-                description = "Enable smooth transitions",
-                isEnabled = animationsEnabled,
-                onToggle = onAnimationsToggle
+            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazSettingsItem(
+                title = "Animations",
+                subtitle = "Enable smooth transitions",
+                checked = animationsEnabled,
+                onCheckedChange = { onAnimationsToggle() }
             )
-            SettingDivider()
-            SettingToggleItem(
-                label = "Haptic Feedback",
-                description = "Vibration on interactions",
-                isEnabled = hapticFeedback,
-                onToggle = onHapticFeedbackToggle
+            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazSettingsItem(
+                title = "Haptic Feedback",
+                subtitle = "Vibration on interactions",
+                checked = hapticFeedback,
+                onCheckedChange = { onHapticFeedbackToggle() }
             )
-            SettingDivider()
-            SettingToggleItem(
-                label = "24-Hour Time",
-                description = "Use 24-hour format",
-                isEnabled = use24HourFormat,
-                onToggle = on24HourToggle
+            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazSettingsItem(
+                title = "24-Hour Time",
+                subtitle = "Use 24-hour format",
+                checked = use24HourFormat,
+                onCheckedChange = { on24HourToggle() }
             )
         }
     }
@@ -406,59 +369,12 @@ private fun HomeScreenSettingsCard(
         )
     ) {
         Column {
-            SettingToggleItem(
-                label = "Show Islamic Date",
-                description = "Display Hijri calendar",
-                isEnabled = useHijriPrimary,
-                onToggle = onHijriPrimaryToggle
+            NimazSettingsItem(
+                title = "Show Islamic Date",
+                subtitle = "Display Hijri calendar",
+                checked = useHijriPrimary,
+                onCheckedChange = { onHijriPrimaryToggle() }
             )
         }
     }
-}
-
-// --- Shared Components ---
-
-@Composable
-private fun SettingToggleItem(
-    label: String,
-    description: String,
-    isEnabled: Boolean,
-    onToggle: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onToggle)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        Switch(
-            checked = isEnabled,
-            onCheckedChange = { onToggle() }
-        )
-    }
-}
-
-@Composable
-private fun SettingDivider() {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .height(1.dp)
-            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-    )
 }

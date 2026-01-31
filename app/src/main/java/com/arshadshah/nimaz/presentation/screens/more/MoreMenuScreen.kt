@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Calculate
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
@@ -35,10 +32,7 @@ import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -51,17 +45,17 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
-import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
+import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -108,18 +102,18 @@ fun MoreMenuScreen(
 
             // Daily Practice Section
             item {
-                SectionHeader(title = "Daily Practice")
+                NimazSectionHeader(title = "Daily Practice")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Prayer Tracker",
                         subtitle = "Track your daily prayers & qada",
                         icon = Icons.Default.Schedule,
                         onClick = onNavigateToPrayerTracker
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Fasting",
                         subtitle = "Fasting tracker and schedule",
                         icon = Icons.Default.Fastfood,
@@ -130,18 +124,18 @@ fun MoreMenuScreen(
 
             // Learning Section
             item {
-                SectionHeader(title = "Learning")
+                NimazSectionHeader(title = "Learning")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Hadith",
                         subtitle = "Authentic hadith collections",
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToHadith
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Duas",
                         subtitle = "Daily duas and supplications",
                         icon = Icons.Default.Mosque,
@@ -152,25 +146,25 @@ fun MoreMenuScreen(
 
             // Tools Section
             item {
-                SectionHeader(title = "Tools")
+                NimazSectionHeader(title = "Tools")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Calendar",
                         subtitle = "Islamic calendar and events",
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToCalendar
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Monthly Prayer Times",
                         subtitle = "Prayer times for the month",
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Zakat",
                         subtitle = "Zakat calculator",
                         icon = Icons.Default.Calculate,
@@ -181,25 +175,25 @@ fun MoreMenuScreen(
 
             // Prayer Settings Section
             item {
-                SectionHeader(title = "Prayer Settings")
+                NimazSectionHeader(title = "Prayer Settings")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Calculation Method",
                         subtitle = "Prayer time calculation parameters",
                         icon = Icons.Default.Settings,
                         onClick = onNavigateToCalculationMethod
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Notifications",
                         subtitle = "Prayer alerts and reminders",
                         icon = Icons.Default.Notifications,
                         onClick = onNavigateToNotifications
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Location",
                         subtitle = "Manage locations for prayer times",
                         icon = Icons.Default.LocationOn,
@@ -210,25 +204,25 @@ fun MoreMenuScreen(
 
             // App Settings Section
             item {
-                SectionHeader(title = "App Settings")
+                NimazSectionHeader(title = "App Settings")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Appearance",
                         subtitle = "Theme, colors, and display",
                         icon = Icons.Default.DarkMode,
                         onClick = onNavigateToAppearance
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Language",
                         subtitle = "App language preferences",
                         icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Widgets",
                         subtitle = "Home screen widget settings",
                         icon = Icons.Default.Widgets,
@@ -239,32 +233,32 @@ fun MoreMenuScreen(
 
             // Support Section
             item {
-                SectionHeader(title = "Support")
+                NimazSectionHeader(title = "Support")
             }
             item {
-                GroupedCard {
-                    MenuItem(
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "About Nimaz",
                         subtitle = "Version, credits, and info",
                         icon = Icons.Default.Info,
                         onClick = onNavigateToAbout
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Help & Support",
                         subtitle = "FAQs and contact us",
                         icon = Icons.AutoMirrored.Filled.Help,
                         onClick = onNavigateToHelp
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Share App",
                         subtitle = "Share Nimaz with friends",
                         icon = Icons.Default.Share,
                         onClick = onShareApp
                     )
-                    MenuDivider()
-                    MenuItem(
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Rate Us",
                         subtitle = "Rate Nimaz on the store",
                         icon = Icons.Default.Star,
@@ -283,104 +277,6 @@ fun MoreMenuScreen(
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
-        }
-    }
-}
-
-@Composable
-private fun SectionHeader(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier.padding(vertical = 4.dp)
-    )
-}
-
-@Composable
-private fun GroupedCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column {
-            content()
-        }
-    }
-}
-
-@Composable
-private fun MenuDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 56.dp),
-        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun MenuItem(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(0.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
-            )
         }
     }
 }
@@ -451,39 +347,6 @@ private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
                 }
             }
         )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "MoreSectionHeader")
-@Composable
-private fun MoreSectionHeaderPreview() {
-    NimazTheme {
-        SectionHeader(
-            title = "Daily Practice",
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "MenuItemGroup")
-@Composable
-private fun MenuItemGroupPreview() {
-    NimazTheme {
-        GroupedCard(modifier = Modifier.padding(16.dp)) {
-            MenuItem(
-                title = "Prayer Tracker",
-                subtitle = "Track your daily prayers & qada",
-                icon = Icons.Default.Schedule,
-                onClick = {}
-            )
-            MenuDivider()
-            MenuItem(
-                title = "Fasting",
-                subtitle = "Fasting tracker and schedule",
-                icon = Icons.Default.Fastfood,
-                onClick = {}
-            )
-        }
     }
 }
 

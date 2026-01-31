@@ -61,7 +61,12 @@ import android.widget.Toast
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -166,10 +171,12 @@ fun FastTrackerScreen(
 
                         // Stats Grid
                         item {
-                            StatsGrid(
-                                fasted = ramadanState.fastedDays,
-                                missed = ramadanState.missedDays,
-                                remaining = ramadanState.remainingDays
+                            NimazStatsGrid(
+                                stats = listOf(
+                                    NimazStatData(ramadanState.fastedDays.toString(), "Fasted"),
+                                    NimazStatData(ramadanState.missedDays.toString(), "Missed"),
+                                    NimazStatData(ramadanState.remainingDays.toString(), "Remaining")
+                                )
                             )
                         }
 
@@ -486,69 +493,6 @@ private fun RamadanMissedFastsTracker(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun StatsGrid(
-    fasted: Int,
-    missed: Int,
-    remaining: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        StatCard(
-            value = fasted.toString(),
-            label = "Fasted",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = missed.toString(),
-            label = "Missed",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = remaining.toString(),
-            label = "Remaining",
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
-    value: String,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(15.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = color
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -906,41 +850,16 @@ private fun FastingCalendarSection(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    LegendItem(color = NimazColors.FastingColors.Fasted, label = "Fasted")
+                    NimazLegendItem(color = NimazColors.FastingColors.Fasted, label = "Fasted")
                     Spacer(modifier = Modifier.width(16.dp))
-                    LegendItem(color = Color(0xFFEF4444), label = "Missed")
+                    NimazLegendItem(color = Color(0xFFEF4444), label = "Missed")
                     if (ramadanDaysInMonth.isNotEmpty()) {
                         Spacer(modifier = Modifier.width(16.dp))
-                        LegendItem(color = NimazColors.FastingColors.Ramadan, label = "Ramadan")
+                        NimazLegendItem(color = NimazColors.FastingColors.Ramadan, label = "Ramadan")
                     }
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun LegendItem(
-    color: Color,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(8.dp)
-                .clip(CircleShape)
-                .background(color)
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -1116,7 +1035,11 @@ private fun MakeupFastsContent(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (makeupState.allMakeupFasts.isEmpty()) {
-            MakeupEmptyState()
+            NimazEmptyState(
+                title = "No Makeup Fasts",
+                message = "All your fasts are up to date!",
+                iconTint = GreenAccent
+            )
         } else {
             val completedFasts = makeupState.allMakeupFasts.filter {
                 it.status == MakeupFastStatus.COMPLETED || it.status == MakeupFastStatus.FIDYA_PAID
@@ -1128,10 +1051,12 @@ private fun MakeupFastsContent(
             MakeupSummaryCard(pendingCount = makeupState.pendingCount)
 
             // Stats Grid
-            MakeupStatsGrid(
-                completedCount = completedCount,
-                pendingCount = makeupState.pendingCount,
-                totalCount = totalCount
+            NimazStatsGrid(
+                stats = listOf(
+                    NimazStatData("$completedCount", "Completed", GreenAccent),
+                    NimazStatData("${makeupState.pendingCount}", "Pending", OrangeAccent),
+                    NimazStatData("$totalCount", "Total")
+                )
             )
 
             // Info Banner
@@ -1144,9 +1069,10 @@ private fun MakeupFastsContent(
 
             // Pending Section
             if (makeupState.pendingMakeupFasts.isNotEmpty()) {
-                MakeupSectionHeader(
+                NimazSectionHeader(
                     title = "Pending",
-                    count = "${makeupState.pendingCount} pending"
+                    trailingText = "${makeupState.pendingCount} pending",
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 makeupState.pendingMakeupFasts.forEach { makeupFast ->
@@ -1163,9 +1089,10 @@ private fun MakeupFastsContent(
             // Completed Section
             if (completedFasts.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
-                MakeupSectionHeader(
+                NimazSectionHeader(
                     title = "Completed",
-                    count = "${completedFasts.size} fasts"
+                    trailingText = "${completedFasts.size} fasts",
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 completedFasts.forEach { makeupFast ->
@@ -1214,103 +1141,6 @@ private fun MakeupSummaryCard(
                 color = Color.White.copy(alpha = 0.9f)
             )
         }
-    }
-}
-
-@Composable
-private fun MakeupStatsGrid(
-    completedCount: Int,
-    pendingCount: Int,
-    totalCount: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        MakeupStatCard(
-            value = "$completedCount",
-            label = "Completed",
-            valueColor = GreenAccent,
-            modifier = Modifier.weight(1f)
-        )
-        MakeupStatCard(
-            value = "$pendingCount",
-            label = "Pending",
-            valueColor = OrangeAccent,
-            modifier = Modifier.weight(1f)
-        )
-        MakeupStatCard(
-            value = "$totalCount",
-            label = "Total",
-            valueColor = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun MakeupStatCard(
-    value: String,
-    label: String,
-    valueColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Bold
-                ),
-                color = valueColor
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-
-@Composable
-private fun MakeupSectionHeader(
-    title: String,
-    count: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = count,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
     }
 }
 
@@ -1512,64 +1342,19 @@ private fun MakeupCompletedFastItem(
     }
 }
 
-@Composable
-private fun MakeupEmptyState(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(GreenAccent.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = GreenAccent,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "No Makeup Fasts",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "All your fasts are up to date!",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
 // region Previews
 
 @Preview(showBackground = true, widthDp = 400, name = "Stats Grid")
 @Composable
 private fun StatsGridPreview() {
     NimazTheme {
-        StatsGrid(fasted = 15, missed = 3, remaining = 12)
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Stat Card")
-@Composable
-private fun StatCardPreview() {
-    NimazTheme {
-        StatCard(value = "15", label = "Fasted", color = Color(0xFF22C55E))
+        NimazStatsGrid(
+            stats = listOf(
+                NimazStatData("15", "Fasted"),
+                NimazStatData("3", "Missed"),
+                NimazStatData("12", "Remaining")
+            )
+        )
     }
 }
 
@@ -1581,8 +1366,8 @@ private fun LegendItemPreview() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            LegendItem(color = Color(0xFF22C55E), label = "Fasted")
-            LegendItem(color = Color(0xFFEF4444), label = "Missed")
+            NimazLegendItem(color = Color(0xFF22C55E), label = "Fasted")
+            NimazLegendItem(color = Color(0xFFEF4444), label = "Missed")
         }
     }
 }
@@ -1607,7 +1392,11 @@ private fun LogFastButtonPreview() {
 @Composable
 private fun MakeupEmptyStatePreview() {
     NimazTheme {
-        MakeupEmptyState()
+        NimazEmptyState(
+            title = "No Makeup Fasts",
+            message = "All your fasts are up to date!",
+            iconTint = GreenAccent
+        )
     }
 }
 
@@ -1623,7 +1412,13 @@ private fun MakeupSummaryCardPreview() {
 @Composable
 private fun MakeupStatsGridPreview() {
     NimazTheme {
-        MakeupStatsGrid(completedCount = 8, pendingCount = 5, totalCount = 13)
+        NimazStatsGrid(
+            stats = listOf(
+                NimazStatData("8", "Completed", GreenAccent),
+                NimazStatData("5", "Pending", OrangeAccent),
+                NimazStatData("13", "Total")
+            )
+        )
     }
 }
 
@@ -1631,7 +1426,7 @@ private fun MakeupStatsGridPreview() {
 @Composable
 private fun MakeupSectionHeaderPreview() {
     NimazTheme {
-        MakeupSectionHeader(title = "Pending", count = "5")
+        NimazSectionHeader(title = "Pending", trailingText = "5")
     }
 }
 

@@ -49,7 +49,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
+import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarkType
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksViewModel
@@ -79,7 +82,11 @@ fun BookmarksScreen(
         }
     ) { paddingValues ->
         if (state.allBookmarks.isEmpty() && !state.isLoading) {
-            EmptyBookmarksState(
+            NimazEmptyState(
+                title = "No Bookmarks Yet",
+                message = "Save ayahs, hadiths, and duas for quick access",
+                icon = Icons.Default.Bookmark,
+                iconTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
@@ -102,10 +109,21 @@ fun BookmarksScreen(
 
                 // Stats Row
                 item {
-                    StatsRow(
-                        quranCount = statsState.quranCount,
-                        hadithCount = statsState.hadithCount,
-                        duaCount = statsState.duaCount
+                    NimazStatsGrid(
+                        stats = listOf(
+                            NimazStatData(
+                                value = statsState.quranCount.toString(),
+                                label = "Quran Verses"
+                            ),
+                            NimazStatData(
+                                value = statsState.hadithCount.toString(),
+                                label = "Hadith"
+                            ),
+                            NimazStatData(
+                                value = statsState.duaCount.toString(),
+                                label = "Duas"
+                            )
+                        )
                     )
                 }
 
@@ -211,70 +229,6 @@ private fun TabChip(
             color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
             else MaterialTheme.colorScheme.onSurfaceVariant
         )
-    }
-}
-
-@Composable
-private fun StatsRow(
-    quranCount: Int,
-    hadithCount: Int,
-    duaCount: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        StatCard(
-            value = quranCount.toString(),
-            label = "Quran Verses",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = hadithCount.toString(),
-            label = "Hadith",
-            modifier = Modifier.weight(1f)
-        )
-        StatCard(
-            value = duaCount.toString(),
-            label = "Duas",
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun StatCard(
-    value: String,
-    label: String,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = value,
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.tertiary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
     }
 }
 
@@ -469,37 +423,3 @@ private fun BookmarkCard(
     }
 }
 
-@Composable
-private fun EmptyBookmarksState(
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier,
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(20.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Bookmark,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(64.dp)
-            )
-            Spacer(modifier = Modifier.height(20.dp))
-            Text(
-                text = "No Bookmarks Yet",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Save ayahs, hadiths, and duas for quick access",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}

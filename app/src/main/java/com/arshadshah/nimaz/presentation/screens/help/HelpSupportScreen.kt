@@ -43,6 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -125,7 +126,7 @@ fun HelpSupportScreen(
         ) {
             // FAQ Section
             item {
-                SectionHeader("Frequently Asked Questions")
+                NimazSectionHeader(title = "Frequently Asked Questions")
             }
 
             items(faqItems) { faq ->
@@ -135,7 +136,7 @@ fun HelpSupportScreen(
             // Feature Guides Section
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader("Feature Guides")
+                NimazSectionHeader(title = "Feature Guides")
             }
 
             items(featureGuides) { guide ->
@@ -145,7 +146,7 @@ fun HelpSupportScreen(
             // Contact Section
             item {
                 Spacer(modifier = Modifier.height(8.dp))
-                SectionHeader("Contact Us")
+                NimazSectionHeader(title = "Contact Us")
             }
 
             item {
@@ -203,17 +204,6 @@ fun HelpSupportScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
-}
-
-@Composable
-private fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleSmall,
-        fontWeight = FontWeight.Bold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 4.dp)
-    )
 }
 
 @Composable
@@ -280,14 +270,6 @@ private fun FeatureGuideCard(guide: FeatureGuide) {
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "HelpSectionHeader")
-@Composable
-private fun HelpSectionHeaderPreview() {
-    NimazTheme {
-        SectionHeader(title = "Frequently Asked Questions")
     }
 }
 
