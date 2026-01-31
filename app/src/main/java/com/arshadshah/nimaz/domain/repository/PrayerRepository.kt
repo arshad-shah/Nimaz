@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 interface PrayerRepository {
+    // Today's prayer records — shared flow for cross-screen sync
+    fun getTodayPrayerRecords(): Flow<Map<PrayerName, PrayerStatus>>
+
     // Prayer times calculation
     fun getPrayerTimesForDate(date: LocalDate, location: Location): PrayerTimes
     fun getPrayerTimesForRange(startDate: LocalDate, endDate: LocalDate, location: Location): List<PrayerTimes>

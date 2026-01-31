@@ -15,6 +15,7 @@
     <!-- Foreground Service for Audio and Downloads -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SHORT_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
 
     <!-- Schedule exact alarms for prayer notifications -->
@@ -156,7 +157,7 @@
             android:name=".data.audio.AdhanPlaybackService"
             android:enabled="true"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback" />
+            android:foregroundServiceType="shortService" />
 
         <!-- Quran Audio Service -->
         <service

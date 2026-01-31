@@ -493,7 +493,7 @@ fun FeatureHighlightCard(
  */
 @Composable
 fun WelcomeSlide(
-    appName: String = "Nimaz Pro",
+    appName: String = "Nimaz",
     tagline: String = "Your Complete Islamic Companion",
     modifier: Modifier = Modifier
 ) {

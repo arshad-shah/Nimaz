@@ -171,13 +171,11 @@ class QuranAudioService : Service() {
             )
         }
 
-        // Build subtitle with progress info
+        // Build subtitle with reciter info
         val subtitle = if (state.isPreparing && state.totalToDownload > 0) {
             "Downloading ${state.downloadedCount} of ${state.totalToDownload} ayahs"
-        } else if (state.totalAyahs > 0) {
-            "Ayah ${state.currentAyahIndex + 1} of ${state.totalAyahs} \u2022 ${state.reciterName}"
         } else {
-            state.currentSubtitle ?: state.reciterName
+            state.reciterName
         }
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)

@@ -26,6 +26,7 @@ coroutines = "1.10.2"
 serialization = "1.10.0"
 datetime = "0.7.1"
 playServicesLocation = "21.3.0"
+playAppUpdate = "2.1.0"
 uiTestJunit4 = "1.10.1"
 
 [libraries]
@@ -91,6 +92,10 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 
 # Location
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+
+# In-App Updates
+play-app-update = { group = "com.google.android.play", name = "app-update", version.ref = "playAppUpdate" }
+play-app-update-ktx = { group = "com.google.android.play", name = "app-update-ktx", version.ref = "playAppUpdate" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

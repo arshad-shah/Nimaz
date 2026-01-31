@@ -145,7 +145,9 @@ class PrayerTrackerViewModel @Inject constructor(
         // Cancel previous date's Flow collection before starting new one
         dateRecordsJob?.cancel()
         dateRecordsJob = viewModelScope.launch {
-            // Load prayer records for the date
+            // Room's reactive Flow ensures cross-screen sync: when HomeScreen or
+            // PrayerTracker updates a prayer status via the repository, Room emits
+            // the change to all active Flow collectors automatically.
             prayerRepository.getPrayerRecordsForDate(dateEpoch).collect { records ->
                 _trackerState.update {
                     it.copy(prayerRecords = records, isLoading = false)

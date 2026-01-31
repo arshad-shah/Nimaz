@@ -249,7 +249,7 @@ private fun SettingsScreenHeaderPreview() {
 private fun SettingsFooterPreview() {
     MaterialTheme {
         Column(modifier = Modifier.padding(16.dp)) {
-            SettingsFooter(text = "Nimaz Pro v1.0.0 • Made with ❤️ for the Ummah")
+            SettingsFooter(text = "Nimaz v1.0.0 • Made with ❤️ for the Ummah")
         }
     }
 }

@@ -125,7 +125,7 @@ fun OnboardingScreen(
 
     val pages = listOf(
         OnboardingPage(
-            title = "Welcome to Nimaz Pro",
+            title = "Welcome to Nimaz",
             description = "Your complete Islamic companion app for prayer times, Quran, Hadith, and more",
             icon = Icons.Default.Mosque,
             color = MaterialTheme.colorScheme.primary,

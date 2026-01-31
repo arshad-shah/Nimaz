@@ -62,8 +62,6 @@ data class GeneralSettingsUiState(
     val use24HourFormat: Boolean = false,
     val showSeconds: Boolean = false,
     val hapticFeedback: Boolean = true,
-    val accentColor: String = "Teal",
-    val appIcon: String = "Default",
     val showIslamicPatterns: Boolean = true,
     val animationsEnabled: Boolean = true,
     val showCountdown: Boolean = true,
@@ -143,8 +141,6 @@ sealed interface SettingsEvent {
     data class Set24HourFormat(val enabled: Boolean) : SettingsEvent
     data class SetShowSeconds(val enabled: Boolean) : SettingsEvent
     data class SetHapticFeedback(val enabled: Boolean) : SettingsEvent
-    data class SetAccentColor(val color: String) : SettingsEvent
-    data class SetAppIcon(val icon: String) : SettingsEvent
     data class SetShowIslamicPatterns(val enabled: Boolean) : SettingsEvent
     data class SetAnimationsEnabled(val enabled: Boolean) : SettingsEvent
     data class SetShowCountdown(val enabled: Boolean) : SettingsEvent
@@ -269,14 +265,6 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetHapticFeedback -> {
                 _generalState.update { it.copy(hapticFeedback = event.enabled) }
                 viewModelScope.launch { preferencesDataStore.setHapticFeedback(event.enabled) }
-            }
-            is SettingsEvent.SetAccentColor -> {
-                _generalState.update { it.copy(accentColor = event.color) }
-                viewModelScope.launch { preferencesDataStore.setAccentColor(event.color) }
-            }
-            is SettingsEvent.SetAppIcon -> {
-                _generalState.update { it.copy(appIcon = event.icon) }
-                viewModelScope.launch { preferencesDataStore.setAppIcon(event.icon) }
             }
             is SettingsEvent.SetShowIslamicPatterns -> {
                 _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
@@ -498,8 +486,6 @@ class SettingsViewModel @Inject constructor(
             }
             val langCode = preferencesDataStore.appLanguage.first()
             val language = AppLanguage.entries.find { it.code == langCode } ?: AppLanguage.ENGLISH
-            val accentColor = preferencesDataStore.accentColor.first()
-            val appIcon = preferencesDataStore.appIcon.first()
             val showIslamicPatterns = preferencesDataStore.showIslamicPatterns.first()
             val animationsEnabled = preferencesDataStore.animationsEnabled.first()
             val showCountdown = preferencesDataStore.showCountdown.first()
@@ -512,8 +498,6 @@ class SettingsViewModel @Inject constructor(
                 it.copy(
                     theme = theme,
                     language = language,
-                    accentColor = accentColor,
-                    appIcon = appIcon,
                     showIslamicPatterns = showIslamicPatterns,
                     animationsEnabled = animationsEnabled,
                     showCountdown = showCountdown,

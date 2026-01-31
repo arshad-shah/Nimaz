@@ -112,7 +112,7 @@ fun WidgetsScreen(
             // Intro text
             item {
                 Text(
-                    text = "Add Nimaz Pro widgets to your home screen for quick access to prayer times without opening the app.",
+                    text = "Add Nimaz widgets to your home screen for quick access to prayer times without opening the app.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 22.sp
@@ -553,7 +553,7 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
         val steps = listOf(
             "Long press on an empty area of your home screen",
             "Tap \"Widgets\" from the menu that appears",
-            "Search for \"Nimaz Pro\" and select your preferred widget",
+            "Search for \"Nimaz\" and select your preferred widget",
             "Drag the widget to your desired location"
         )
 

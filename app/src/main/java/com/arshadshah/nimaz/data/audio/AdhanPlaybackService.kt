@@ -16,15 +16,10 @@ import android.os.IBinder
 import android.os.PowerManager
 import android.text.SpannableString
 import android.text.style.ForegroundColorSpan
-import androidx.annotation.OptIn
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.MediaItem
-import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
-import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.MediaSession
-import androidx.media3.session.MediaStyleNotificationHelper
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
@@ -41,7 +36,6 @@ class AdhanPlaybackService : Service() {
     lateinit var adhanAudioManager: AdhanAudioManager
 
     private var exoPlayer: ExoPlayer? = null
-    private var mediaSession: MediaSession? = null
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: AudioFocusRequest? = null
     private var wakeLock: PowerManager.WakeLock? = null
@@ -178,7 +172,6 @@ class AdhanPlaybackService : Service() {
         stopSelf()
     }
 
-    @OptIn(UnstableApi::class)
     private fun playFile(audioFile: File, prayerName: String) {
         try {
             // Acquire wake lock
@@ -216,20 +209,9 @@ class AdhanPlaybackService : Service() {
 
             exoPlayer = player
 
-            // Create Media3 MediaSession
-            mediaSession = MediaSession.Builder(this, player).build()
-
-            // Set media item with metadata
-            val title = notificationTitle.ifEmpty { "$prayerName Adhan" }
-            val subtitle = notificationMessage.ifEmpty { "Nimaz" }
+            // Set media item
             val mediaItem = MediaItem.Builder()
                 .setUri(audioFile.toURI().toString())
-                .setMediaMetadata(
-                    MediaMetadata.Builder()
-                        .setTitle(title)
-                        .setArtist(subtitle)
-                        .build()
-                )
                 .build()
 
             player.setMediaItem(mediaItem)
@@ -244,7 +226,7 @@ class AdhanPlaybackService : Service() {
                 startForeground(
                     notifId,
                     createPlaybackNotification(prayerName),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
                 )
             } else {
                 startForeground(notifId, createPlaybackNotification(prayerName))
@@ -264,10 +246,6 @@ class AdhanPlaybackService : Service() {
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
-        // Release MediaSession
-        mediaSession?.release()
-        mediaSession = null
 
         // Release audio focus
         abandonAudioFocus()
@@ -329,7 +307,6 @@ class AdhanPlaybackService : Service() {
         }
     }
 
-    @OptIn(UnstableApi::class)
     private fun createPlaybackNotification(prayerName: String): Notification {
         // Create stop action intent
         val stopIntent = Intent(this, AdhanPlaybackService::class.java).apply {
@@ -396,16 +373,7 @@ class AdhanPlaybackService : Service() {
                 stopPendingIntent
             )
 
-        // Apply Media3 MediaStyle for lock screen integration
-        val session = mediaSession
-        if (session != null) {
-            builder.setStyle(
-                MediaStyleNotificationHelper.MediaStyle(session)
-                    .setShowActionsInCompactView(0) // Stop button
-            )
-        } else {
-            builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
-        }
+        builder.setStyle(NotificationCompat.BigTextStyle().bigText(message))
 
         return builder.build()
     }

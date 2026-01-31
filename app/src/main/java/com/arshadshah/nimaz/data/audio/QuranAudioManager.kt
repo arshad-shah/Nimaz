@@ -266,18 +266,13 @@ class QuranAudioManager @Inject constructor(
                     if (newIndex >= 0 && newIndex < ayahPlaylist.size) {
                         currentPlaylistIndex = newIndex
                         val item = ayahPlaylist[newIndex]
-                        // Build dynamic title: "Surah Name - Ayah X"
-                        val dynamicTitle = if (playlistTitle.isNotEmpty()) {
-                            "$playlistTitle - Ayah ${item.ayahNumber}"
-                        } else {
-                            "Ayah ${item.ayahNumber}"
-                        }
+                        val dynamicTitle = playlistTitle.ifEmpty { "Quran" }
                         _audioState.update {
                             it.copy(
                                 currentAyahId = item.ayahGlobalId,
                                 currentAyahIndex = newIndex,
                                 currentTitle = dynamicTitle,
-                                currentSubtitle = "Ayah ${item.ayahNumber} of ${ayahPlaylist.size}"
+                                currentSubtitle = it.reciterName
                             )
                         }
                     }
@@ -452,20 +447,15 @@ class QuranAudioManager @Inject constructor(
                 precomputedDurations = durations
 
                 // Build media items with metadata for each ayah
-                val mediaItems = validFiles.map { (originalIndex, file) ->
-                    val ayah = ayahs[originalIndex]
-                    val ayahTitle = if (title.isNotEmpty()) {
-                        "$title - Ayah ${ayah.ayahNumber}"
-                    } else {
-                        "Ayah ${ayah.ayahNumber}"
-                    }
+                val surahTitle = title.ifEmpty { "Quran" }
+                val mediaItems = validFiles.map { (_, file) ->
                     MediaItem.Builder()
                         .setUri(file.toURI().toString())
                         .setMediaMetadata(
                             MediaMetadata.Builder()
-                                .setTitle(ayahTitle)
+                                .setTitle(surahTitle)
                                 .setArtist(_audioState.value.reciterName)
-                                .setAlbumTitle(title.ifEmpty { "Quran" })
+                                .setAlbumTitle(surahTitle)
                                 .build()
                         )
                         .build()

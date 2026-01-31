@@ -56,7 +56,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.sp
+import android.content.Intent
+import android.os.PowerManager
+import android.provider.Settings
 import android.widget.Toast
+import androidx.compose.runtime.mutableStateOf
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -464,6 +468,77 @@ fun NotificationSettingsScreen(
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Reset Notifications")
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(24.dp))
+                }
+
+                // Battery Optimization Section
+                item {
+                    SectionTitle(title = "BATTERY OPTIMIZATION")
+                }
+
+                item {
+                    val powerManager = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
+                    val isExempted = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainer
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Battery Optimization",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                    Text(
+                                        text = if (isExempted) "Disabled (recommended)" else "Enabled — may delay notifications",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isExempted) MaterialTheme.colorScheme.primary
+                                        else Color(0xFFF59E0B)
+                                    )
+                                }
+                                if (isExempted) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = "Exempted",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            }
+                            if (!isExempted) {
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Text(
+                                    text = "When battery optimization is enabled, Android may delay or skip prayer notifications to save battery. Disabling it ensures notifications arrive on time.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Spacer(modifier = Modifier.height(12.dp))
+                                Button(
+                                    onClick = {
+                                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                        context.startActivity(intent)
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(12.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = Color(0xFFF59E0B),
+                                        contentColor = Color.White
+                                    )
+                                ) {
+                                    Text("Disable Battery Optimization")
+                                }
                             }
                         }
                     }

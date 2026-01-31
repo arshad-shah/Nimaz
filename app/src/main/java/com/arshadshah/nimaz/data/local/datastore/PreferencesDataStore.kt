@@ -34,8 +34,6 @@ class PreferencesDataStore @Inject constructor(
         val DYNAMIC_COLOR = booleanPreferencesKey("dynamic_color")
 
         // Appearance
-        val ACCENT_COLOR = stringPreferencesKey("accent_color")
-        val APP_ICON = stringPreferencesKey("app_icon")
         val SHOW_ISLAMIC_PATTERNS = booleanPreferencesKey("show_islamic_patterns")
         val ANIMATIONS_ENABLED = booleanPreferencesKey("animations_enabled")
 
@@ -143,22 +141,6 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Appearance
-    val accentColor: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ACCENT_COLOR] ?: "Teal"
-    }
-
-    suspend fun setAccentColor(color: String) {
-        dataStore.edit { it[PreferencesKeys.ACCENT_COLOR] = color }
-    }
-
-    val appIcon: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.APP_ICON] ?: "Default"
-    }
-
-    suspend fun setAppIcon(icon: String) {
-        dataStore.edit { it[PreferencesKeys.APP_ICON] = icon }
-    }
-
     val showIslamicPatterns: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.SHOW_ISLAMIC_PATTERNS] ?: true
     }

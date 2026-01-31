@@ -27,12 +27,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
@@ -60,9 +62,14 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.components.molecules.PermissionAlertCard
 // Prayer-specific accent colors matching the design prototype
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
+import com.arshadshah.nimaz.presentation.theme.LocalAnimationsEnabled
+import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import java.time.format.DateTimeFormatter
 
@@ -82,6 +89,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val updateManager = LocalInAppUpdateManager.current
+    val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
 
     Scaffold { innerPadding ->
         Box(
@@ -100,6 +109,79 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
+                // Permission Alert Cards
+                if (!state.hasNotificationPermission) {
+                    item {
+                        PermissionAlertCard(
+                            icon = Icons.Default.Notifications,
+                            title = "Notifications Disabled",
+                            description = "Prayer notifications need permission to alert you at prayer times.",
+                            actionLabel = "Enable",
+                            onAction = onNavigateToSettings,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                if (!state.hasLocationPermission) {
+                    item {
+                        PermissionAlertCard(
+                            icon = Icons.Default.LocationOn,
+                            title = "Location Permission Needed",
+                            description = "Location is needed to calculate accurate prayer times for your area.",
+                            actionLabel = "Grant",
+                            onAction = onNavigateToSettings,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+                if (state.isBatteryOptimized) {
+                    item {
+                        PermissionAlertCard(
+                            icon = Icons.Default.BatteryAlert,
+                            title = "Battery Optimization Active",
+                            description = "Battery optimization may prevent timely prayer notifications.",
+                            actionLabel = "Fix",
+                            onAction = onNavigateToSettings,
+                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                // In-App Update Banner
+                when (val currentUpdateState = updateState) {
+                    is UpdateState.UpdateAvailable -> {
+                        item {
+                            UpdateBanner(
+                                message = "A new version of Nimaz is available",
+                                actionLabel = "Update",
+                                onAction = { updateManager?.startUpdate() },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    is UpdateState.Downloading -> {
+                        item {
+                            UpdateBanner(
+                                message = "Downloading update...",
+                                actionLabel = null,
+                                onAction = {},
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    is UpdateState.Downloaded -> {
+                        item {
+                            UpdateBanner(
+                                message = "Update ready to install",
+                                actionLabel = "Restart",
+                                onAction = { currentUpdateState.completeUpdate() },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
+                    else -> {}
+                }
+
                 // Header with Prayer Info
                 item {
                     HomeHeader(
@@ -255,13 +337,14 @@ private fun HomeHeader(
             Spacer(modifier = Modifier.height(30.dp))
 
             // Current Prayer Section
+            val useHijriPrimary = LocalUseHijriPrimary.current
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Islamic Date
+                // Primary Date
                 Text(
-                    text = hijriDate.ifEmpty { "" },
+                    text = if (useHijriPrimary) hijriDate.ifEmpty { "" } else gregorianDate,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Medium
@@ -269,9 +352,9 @@ private fun HomeHeader(
 
                 Spacer(modifier = Modifier.height(4.dp))
 
-                // Gregorian Date
+                // Secondary Date
                 Text(
-                    text = gregorianDate,
+                    text = if (useHijriPrimary) gregorianDate else hijriDate.ifEmpty { "" },
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -366,17 +449,30 @@ private fun CountdownTimer(
         }
     }
 
-    // Animation for pulsing effect
+    // Animation for pulsing effect — disabled when animations are off
+    val animationsEnabled = LocalAnimationsEnabled.current
     val infiniteTransition = rememberInfiniteTransition(label = "countdown_pulse")
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.7f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
+    val alpha by if (animationsEnabled) {
+        infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 0.7f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "alpha"
+        )
+    } else {
+        infiniteTransition.animateFloat(
+            initialValue = 1f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(1, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart
+            ),
+            label = "alpha_static"
+        )
+    }
 
     Row(
         modifier = modifier,
@@ -979,5 +1075,61 @@ private fun getArabicPrayerName(prayerType: PrayerType?): String {
         PrayerType.MAGHRIB -> "\u0627\u0644\u0645\u063A\u0631\u0628"
         PrayerType.ISHA -> "\u0627\u0644\u0639\u0634\u0627\u0621"
         else -> ""
+    }
+}
+
+@Composable
+private fun UpdateBanner(
+    message: String,
+    actionLabel: String?,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            if (actionLabel != null) {
+                Spacer(modifier = Modifier.width(12.dp))
+                Card(
+                    modifier = Modifier.clickable { onAction() },
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primary
+                    ),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text(
+                        text = actionLabel,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+            } else {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(24.dp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    strokeWidth = 2.dp
+                )
+            }
+        }
     }
 }

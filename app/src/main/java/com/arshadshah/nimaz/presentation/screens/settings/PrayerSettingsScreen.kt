@@ -15,9 +15,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
@@ -216,9 +218,27 @@ fun PrayerSettingsScreen(
 
     // Selection dialogs
     if (showCalculationMethodDialog) {
+        val calcOptions = CalculationMethod.entries.map { method ->
+            SelectionOption(
+                title = method.displayName(),
+                description = when (method) {
+                    CalculationMethod.MUSLIM_WORLD_LEAGUE -> "Used in Europe, Far East, parts of the US"
+                    CalculationMethod.EGYPTIAN -> "Used in Africa, Syria, Lebanon, Malaysia"
+                    CalculationMethod.KARACHI -> "Used in Pakistan, Bangladesh, India, Afghanistan"
+                    CalculationMethod.UMM_AL_QURA -> "Used in the Arabian Peninsula"
+                    CalculationMethod.DUBAI -> "Used in the UAE"
+                    CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Used in the UK, parts of Europe"
+                    CalculationMethod.NORTH_AMERICA -> "Used in the US and Canada"
+                    CalculationMethod.KUWAIT -> "Used in Kuwait"
+                    CalculationMethod.QATAR -> "Used in Qatar"
+                    CalculationMethod.SINGAPORE -> "Used in Singapore, Malaysia, Indonesia"
+                    CalculationMethod.TURKEY -> "Used in Turkey and Central Asia"
+                }
+            )
+        }
         SelectionDialog(
             title = "Calculation Method",
-            options = CalculationMethod.entries.map { it.displayName() },
+            options = calcOptions,
             selectedIndex = CalculationMethod.entries.indexOf(prayerState.calculationMethod),
             onSelect = { index ->
                 viewModel.onEvent(SettingsEvent.SetCalculationMethod(CalculationMethod.entries[index]))
@@ -231,7 +251,10 @@ fun PrayerSettingsScreen(
     if (showAsrMethodDialog) {
         SelectionDialog(
             title = "Asr Calculation",
-            options = listOf("Standard (Shafi'i, Maliki, Hanbali)", "Hanafi"),
+            options = listOf(
+                SelectionOption("Standard (Shafi'i, Maliki, Hanbali)", "Shadow equals object length"),
+                SelectionOption("Hanafi", "Shadow equals twice object length")
+            ),
             selectedIndex = AsrJuristicMethod.entries.indexOf(prayerState.asrMethod),
             onSelect = { index ->
                 viewModel.onEvent(SettingsEvent.SetAsrMethod(AsrJuristicMethod.entries[index]))
@@ -244,7 +267,11 @@ fun PrayerSettingsScreen(
     if (showHighLatitudeDialog) {
         SelectionDialog(
             title = "High Latitude Method",
-            options = listOf("Middle of the Night", "Seventh of the Night", "Twilight Angle"),
+            options = listOf(
+                SelectionOption("Middle of the Night", "Split the night in half from sunset to sunrise"),
+                SelectionOption("Seventh of the Night", "Use 1/7th of the night for Fajr and Isha"),
+                SelectionOption("Twilight Angle", "Use the angle-based method for Fajr and Isha")
+            ),
             selectedIndex = HighLatitudeRule.entries.indexOf(prayerState.highLatitudeRule),
             onSelect = { index ->
                 viewModel.onEvent(SettingsEvent.SetHighLatitudeRule(HighLatitudeRule.entries[index]))
@@ -507,11 +534,16 @@ private fun SettingsDivider() {
     )
 }
 
+data class SelectionOption(
+    val title: String,
+    val description: String = ""
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SelectionDialog(
     title: String,
-    options: List<String>,
+    options: List<SelectionOption>,
     selectedIndex: Int,
     onSelect: (Int) -> Unit,
     onDismiss: () -> Unit
@@ -526,32 +558,75 @@ private fun SelectionDialog(
             )
         },
         text = {
-            Column {
-                options.forEachIndexed { index, option ->
-                    Row(
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                itemsIndexed(options) { index, option ->
+                    val isSelected = index == selectedIndex
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onSelect(index) }
-                            .background(
-                                if (index == selectedIndex)
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                else
-                                    MaterialTheme.colorScheme.surface
+                            .clickable { onSelect(index) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceContainerHighest
+                        ),
+                        border = if (isSelected) {
+                            androidx.compose.foundation.BorderStroke(
+                                1.5.dp,
+                                MaterialTheme.colorScheme.primary
                             )
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        } else null
                     ) {
-                        androidx.compose.material3.RadioButton(
-                            selected = index == selectedIndex,
-                            onClick = { onSelect(index) }
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = option,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = if (index == selectedIndex) FontWeight.Medium else FontWeight.Normal
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = option.title,
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                    color = if (isSelected)
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.onSurface
+                                )
+                                if (option.description.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(2.dp))
+                                    Text(
+                                        text = option.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
+                                        else
+                                            MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                            if (isSelected) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .clip(androidx.compose.foundation.shape.CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Check,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onPrimary,
+                                        modifier = Modifier.size(14.dp)
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }

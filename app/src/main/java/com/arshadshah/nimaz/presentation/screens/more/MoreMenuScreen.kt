@@ -241,7 +241,7 @@ fun MoreMenuScreen(
             item {
                 GroupedCard {
                     MenuItem(
-                        title = "About Nimaz Pro",
+                        title = "About Nimaz",
                         subtitle = "Version, credits, and info",
                         icon = Icons.Default.Info,
                         onClick = onNavigateToAbout
@@ -256,14 +256,14 @@ fun MoreMenuScreen(
                     MenuDivider()
                     MenuItem(
                         title = "Share App",
-                        subtitle = "Share Nimaz Pro with friends",
+                        subtitle = "Share Nimaz with friends",
                         icon = Icons.Default.Share,
                         onClick = onShareApp
                     )
                     MenuDivider()
                     MenuItem(
                         title = "Rate Us",
-                        subtitle = "Rate Nimaz Pro on the store",
+                        subtitle = "Rate Nimaz on the store",
                         icon = Icons.Default.Star,
                         onClick = onRateApp
                     )
@@ -392,7 +392,7 @@ private fun AppVersionCard() {
     }
 
     Text(
-        text = "Nimaz Pro v$versionName",
+        text = "Nimaz v$versionName",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,

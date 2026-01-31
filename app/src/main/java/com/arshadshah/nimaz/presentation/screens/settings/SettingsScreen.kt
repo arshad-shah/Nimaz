@@ -290,7 +290,7 @@ private fun VersionInfo(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Nimaz Pro",
+            text = "Nimaz",
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.Medium,
             color = MaterialTheme.colorScheme.onSurfaceVariant

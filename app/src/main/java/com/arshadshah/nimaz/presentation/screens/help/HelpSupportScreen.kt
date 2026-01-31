@@ -74,7 +74,7 @@ private val faqItems = listOf(
     ),
     FaqItem(
         "Why am I not receiving notifications?",
-        "Make sure notifications are enabled in the app (More > Notifications) and in your device's system settings. Also check that battery optimization is disabled for Nimaz Pro."
+        "Make sure notifications are enabled in the app (More > Notifications) and in your device's system settings. Also check that battery optimization is disabled for Nimaz."
     ),
     FaqItem(
         "How do I use the Tasbih counter?",
@@ -152,8 +152,8 @@ fun HelpSupportScreen(
                         .fillMaxWidth()
                         .clickable {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:support@nimazpro.app")
-                                putExtra(Intent.EXTRA_SUBJECT, "Nimaz Pro Support Request")
+                                data = Uri.parse("mailto:support@nimaz.app")
+                                putExtra(Intent.EXTRA_SUBJECT, "Nimaz Support Request")
                             }
                             context.startActivity(Intent.createChooser(intent, "Send Email"))
                         },
@@ -183,7 +183,7 @@ fun HelpSupportScreen(
                                 fontWeight = FontWeight.Medium
                             )
                             Text(
-                                text = "support@nimazpro.app",
+                                text = "support@nimaz.app",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )

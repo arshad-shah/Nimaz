@@ -106,6 +106,10 @@ dependencies {
     // Location
     implementation(libs.play.services.location)
 
+    // In-App Updates
+    implementation(libs.play.app.update)
+    implementation(libs.play.app.update.ktx)
+
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

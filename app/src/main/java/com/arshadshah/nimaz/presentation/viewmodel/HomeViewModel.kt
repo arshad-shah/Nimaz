@@ -1,6 +1,11 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.PowerManager
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -52,7 +57,11 @@ data class HomeUiState(
     val timeUntilJumuah: String = "",
     val isJumuahPassed: Boolean = false,
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    // Permission states
+    val hasNotificationPermission: Boolean = true,
+    val hasLocationPermission: Boolean = true,
+    val isBatteryOptimized: Boolean = false
 )
 
 data class PrayerTimeDisplay(
@@ -68,6 +77,7 @@ data class PrayerTimeDisplay(
 sealed interface HomeEvent {
     data class UpdateLocation(val latitude: Double, val longitude: Double, val name: String) : HomeEvent
     data object RefreshPrayerTimes : HomeEvent
+    data object RefreshPermissions : HomeEvent
     data class TogglePrayerStatus(val prayerType: PrayerType) : HomeEvent
 }
 
@@ -85,7 +95,9 @@ class HomeViewModel @Inject constructor(
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
     init {
+        checkPermissions()
         observeLocation()
+        observeTimeFormat()
         loadPrayerRecords()
         observeFastingStatus()
         loadDailyHadith()
@@ -94,10 +106,8 @@ class HomeViewModel @Inject constructor(
 
     private fun loadPrayerRecords() {
         viewModelScope.launch {
-            val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
-            prayerRepository.getPrayerRecordsForDate(todayEpoch).collect { records ->
-                val recordMap = records.associate { it.prayerName to it.status }
-                _prayerRecords.update { recordMap }
+            prayerRepository.getTodayPrayerRecords().collect { records ->
+                _prayerRecords.update { records }
             }
         }
     }
@@ -153,7 +163,34 @@ class HomeViewModel @Inject constructor(
         when (event) {
             is HomeEvent.UpdateLocation -> updateLocation(event.latitude, event.longitude, event.name)
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
+            HomeEvent.RefreshPermissions -> checkPermissions()
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+        }
+    }
+
+    private fun checkPermissions() {
+        val hasNotification = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else true
+
+        val hasLocation = ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+        ContextCompat.checkSelfPermission(
+            context, Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        val isBatteryOptimized = !powerManager.isIgnoringBatteryOptimizations(context.packageName)
+
+        _state.update {
+            it.copy(
+                hasNotificationPermission = hasNotification,
+                hasLocationPermission = hasLocation,
+                isBatteryOptimized = isBatteryOptimized
+            )
         }
     }
 
@@ -444,10 +481,25 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private var use24HourFormat: Boolean = false
+
+    private fun observeTimeFormat() {
+        viewModelScope.launch {
+            preferencesDataStore.use24HourFormat.collect { enabled ->
+                use24HourFormat = enabled
+                calculatePrayerTimes() // Recalculate to reformat times
+            }
+        }
+    }
+
     private fun formatTime(hour: Int, minute: Int): String {
-        val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-        val amPm = if (hour >= 12) "PM" else "AM"
-        return String.format("%d:%02d %s", h, minute, amPm)
+        return if (use24HourFormat) {
+            String.format("%02d:%02d", hour, minute)
+        } else {
+            val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
+            val amPm = if (hour >= 12) "PM" else "AM"
+            String.format("%d:%02d %s", h, minute, amPm)
+        }
     }
 
     private fun calculateHijriDate(): String {

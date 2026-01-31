@@ -28,6 +28,13 @@ class PrayerRepositoryImpl @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator
 ) : PrayerRepository {
 
+    override fun getTodayPrayerRecords(): Flow<Map<PrayerName, PrayerStatus>> {
+        val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+        return prayerDao.getPrayerRecordsForDate(todayEpoch).map { entities ->
+            entities.associate { PrayerName.fromString(it.prayerName) to PrayerStatus.fromString(it.status) }
+        }
+    }
+
     override fun getPrayerTimesForDate(date: LocalDate, location: Location): PrayerTimes {
         return prayerTimeCalculator.calculatePrayerTimes(date, location)
     }

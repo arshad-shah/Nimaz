@@ -1,7 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.about
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.core.util.UpdateState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,9 +35,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 
 private const val APP_VERSION = "1.0.0"
@@ -132,30 +138,18 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // App Logo
-        Box(
+        Image(
+            painter = painterResource(R.mipmap.ic_launcher),
+            contentDescription = "Nimaz",
             modifier = Modifier
                 .size(100.dp)
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primaryContainer
-                        )
-                    ),
-                    shape = RoundedCornerShape(24.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "\uD83D\uDD4C",
-                fontSize = 48.sp
-            )
-        }
+                .clip(RoundedCornerShape(24.dp))
+        )
 
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Nimaz Pro",
+            text = "Nimaz",
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -209,7 +203,7 @@ private fun LinksCard(
         LinkItem(
             emoji = "\uD83D\uDCE7",
             title = "Contact Support",
-            subtitle = "support@nimazpro.app",
+            subtitle = "support@nimaz.app",
             onClick = onContactUs,
             showDivider = true
         )
@@ -217,8 +211,8 @@ private fun LinksCard(
         LinkItem(
             emoji = "\uD83C\uDF10",
             title = "Website",
-            subtitle = "nimazpro.app",
-            onClick = { uriHandler.openUri("https://nimazpro.app") },
+            subtitle = "nimaz.app",
+            onClick = { uriHandler.openUri("https://nimaz.app") },
             showDivider = true
         )
         LinkItem(
@@ -233,6 +227,29 @@ private fun LinksCard(
             title = "Terms of Service",
             subtitle = "Usage terms",
             onClick = onNavigateToTerms,
+            showDivider = true
+        )
+        val updateManager = LocalInAppUpdateManager.current
+        val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
+        val updateSubtitle = when (updateState) {
+            is UpdateState.UpdateAvailable -> "New version available"
+            is UpdateState.Downloading -> "Downloading..."
+            is UpdateState.Downloaded -> "Ready to install"
+            is UpdateState.NoUpdateAvailable -> "You're up to date"
+            is UpdateState.Error -> "Check failed"
+            else -> "Tap to check"
+        }
+        LinkItem(
+            emoji = "\uD83D\uDD04",
+            title = "Check for Updates",
+            subtitle = updateSubtitle,
+            onClick = {
+                when (updateState) {
+                    is UpdateState.UpdateAvailable -> updateManager?.startUpdate()
+                    is UpdateState.Downloaded -> updateState.completeUpdate()
+                    else -> updateManager?.checkForUpdate()
+                }
+            },
             showDivider = false
         )
     }
@@ -348,9 +365,9 @@ private fun CreditsCard(modifier: Modifier = Modifier) {
 private fun SocialLinksRow(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     val socials = listOf(
-        "X" to "https://x.com/nimazpro",
-        "IG" to "https://instagram.com/nimazpro",
-        "YT" to "https://youtube.com/@nimazpro"
+        "X" to "https://x.com/nimaz",
+        "IG" to "https://instagram.com/nimaz",
+        "YT" to "https://youtube.com/@nimaz"
     )
 
     Row(
@@ -399,7 +416,7 @@ private fun FooterSection(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "\u00A9 2026 Nimaz Pro. All rights reserved.",
+            text = "\u00A9 2026 Nimaz. All rights reserved.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )

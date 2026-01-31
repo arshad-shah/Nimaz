@@ -9,11 +9,22 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+
+/**
+ * CompositionLocals for appearance settings that UI components can read.
+ */
+val LocalHapticEnabled = compositionLocalOf { true }
+val LocalAnimationsEnabled = compositionLocalOf { true }
+val LocalUse24HourFormat = compositionLocalOf { false }
+val LocalUseHijriPrimary = compositionLocalOf { false }
+val LocalShowIslamicPatterns = compositionLocalOf { true }
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -75,6 +86,11 @@ enum class ThemeMode {
 fun NimazTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
     dynamicColor: Boolean = false,
+    hapticEnabled: Boolean = true,
+    animationsEnabled: Boolean = true,
+    use24HourFormat: Boolean = false,
+    useHijriPrimary: Boolean = false,
+    showIslamicPatterns: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {
@@ -103,10 +119,18 @@ fun NimazTheme(
         }
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = NimazTypography,
-        shapes = NimazShapes,
-        content = content
-    )
+    CompositionLocalProvider(
+        LocalHapticEnabled provides hapticEnabled,
+        LocalAnimationsEnabled provides animationsEnabled,
+        LocalUse24HourFormat provides use24HourFormat,
+        LocalUseHijriPrimary provides useHijriPrimary,
+        LocalShowIslamicPatterns provides showIslamicPatterns
+    ) {
+        MaterialTheme(
+            colorScheme = colorScheme,
+            typography = NimazTypography,
+            shapes = NimazShapes,
+            content = content
+        )
+    }
 }
