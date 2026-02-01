@@ -349,12 +349,17 @@ class CalendarViewModel @Inject constructor(
         }.sortedBy { getApproximateGregorianDate(it, currentHijriYear) }
     }
 
-    private fun getApproximateGregorianDate(event: IslamicEvent, hijriYear: Int): LocalDate {
-        return HijriDateCalculator.toGregorian(
-            event.hijriDay,
-            event.hijriMonth,
-            hijriYear
-        )
+    private fun getApproximateGregorianDate(event: IslamicEvent, hijriYear: Int): LocalDate? {
+        if (event.hijriMonth !in 1..12 || event.hijriDay < 1) return null
+        return try {
+            HijriDateCalculator.toGregorian(
+                event.hijriDay,
+                event.hijriMonth,
+                hijriYear
+            )
+        } catch (_: Exception) {
+            null
+        }
     }
 }
 

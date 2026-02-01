@@ -36,6 +36,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
+import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthNameArabic
 import com.arshadshah.nimaz.domain.model.HijriMonth
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
@@ -113,7 +115,7 @@ fun IslamicCalendarScreen(
                         headerTitle = "${getHijriMonthName(month.hijriMonth)} ${month.hijriYear}",
                         headerSubtitle = {
                             ArabicText(
-                                text = getHijriMonthArabicName(month.hijriMonth),
+                                text = getHijriMonthNameArabic(month.hijriMonth),
                                 size = ArabicTextSize.SMALL,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 textAlign = TextAlign.Start
@@ -183,7 +185,7 @@ private fun TodayHeroCard(
 ) {
     val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
     val monthName = hijriMonth?.let { getHijriMonthName(it) } ?: ""
-    val monthArabic = hijriMonth?.let { getHijriMonthArabicName(it) } ?: ""
+    val monthArabic = hijriMonth?.let { getHijriMonthNameArabic(it) } ?: ""
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -246,13 +248,4 @@ private fun getEventDotColor(events: List<IslamicEvent>): Color? {
         IslamicEventType.FAST -> Color(0xFFA855F7)
         IslamicEventType.HISTORICAL -> Color(0xFF22C55E)
     }
-}
-
-private fun getHijriMonthName(month: Int): String {
-    return HijriMonth.fromNumber(month)?.displayName() ?: "Unknown"
-}
-
-@Composable
-private fun getHijriMonthArabicName(month: Int): String {
-    return HijriMonth.fromNumber(month)?.arabicName() ?: ""
 }

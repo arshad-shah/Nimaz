@@ -376,7 +376,7 @@ private fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
     val offset = if (firstOfMonth.dayOfWeek == DayOfWeek.SUNDAY) 0
     else firstOfMonth.dayOfWeek.value
     val startDate = firstOfMonth.minusDays(offset.toLong())
-    return List(42) { startDate.plusDays(it.toLong()) }
+    return List(35) { startDate.plusDays(it.toLong()) }
 }
 
 private fun YearMonth.formatDefault(): String {
