@@ -738,6 +738,6 @@ private fun TafseerHighlightControls(
                     }
                 }
             }
-        }
+    }
     }
 }

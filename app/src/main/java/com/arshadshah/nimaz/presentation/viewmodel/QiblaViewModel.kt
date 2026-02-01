@@ -44,7 +44,8 @@ data class QiblaUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val showLocationPicker: Boolean = false,
-    val showCalibrationDialog: Boolean = false
+    val showCalibrationDialog: Boolean = false,
+    val isArMode: Boolean = false
 )
 
 data class QiblaSettingsUiState(
@@ -68,6 +69,7 @@ sealed interface QiblaEvent {
     data object DismissCalibrationDialog : QiblaEvent
     data object StartCompass : QiblaEvent
     data object StopCompass : QiblaEvent
+    data class SetArMode(val enabled: Boolean) : QiblaEvent
 }
 
 @HiltViewModel
@@ -201,6 +203,7 @@ class QiblaViewModel @Inject constructor(
                 registerSensors()
             }
             QiblaEvent.StopCompass -> unregisterSensors()
+            is QiblaEvent.SetArMode -> _qiblaState.update { it.copy(isArMode = event.enabled) }
         }
     }
 

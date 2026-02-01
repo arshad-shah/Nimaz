@@ -1,6 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.qibla
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -28,6 +33,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.RotateLeft
 import androidx.compose.material.icons.automirrored.filled.RotateRight
+import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
@@ -46,6 +52,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +65,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -64,8 +74,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaViewModel
@@ -80,6 +92,7 @@ fun QiblaScreen(
     viewModel: QiblaViewModel = hiltViewModel()
 ) {
     val state by viewModel.qiblaState.collectAsState()
+    val context = LocalContext.current
 
     val animatedAzimuth by animateFloatAsState(
         targetValue = state.animatedAzimuth,
@@ -92,6 +105,26 @@ fun QiblaScreen(
 
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
+    // Camera permission state
+    var cameraPermissionGranted by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+    var showCameraRationale by remember { mutableStateOf(false) }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        cameraPermissionGranted = granted
+        if (granted) {
+            viewModel.onEvent(QiblaEvent.SetArMode(true))
+        } else {
+            showCameraRationale = true
+        }
+    }
 
     if (state.showCalibrationDialog) {
         CalibrationDialog(
@@ -100,261 +133,367 @@ fun QiblaScreen(
         )
     }
 
+    // Camera rationale dialog
+    if (showCameraRationale) {
+        AlertDialog(
+            onDismissRequest = { showCameraRationale = false },
+            icon = {
+                Icon(
+                    imageVector = Icons.Default.CameraAlt,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = "Camera Permission Required",
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+            },
+            text = {
+                Text(
+                    text = "Camera access is needed to show the AR Qibla view. The camera feed is used to overlay the Qibla direction on the real world. No images are captured or stored.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showCameraRationale = false
+                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                }) {
+                    Text("Grant Permission")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showCameraRationale = false }) {
+                    Text("Not Now")
+                }
+            }
+        )
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { paddingValues ->
-    Box(
-        modifier = Modifier
-            .padding(paddingValues)
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-    ) {
-        // Error state
-        if (state.error != null && state.qiblaInfo == null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Warning,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(48.dp)
+        Box(
+            modifier = Modifier
+                .padding(paddingValues)
+                .fillMaxSize()
+                .background(
+                    if (state.isArMode) Color.Black
+                    else MaterialTheme.colorScheme.background
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = state.error ?: "Unknown error",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.error,
-                    textAlign = TextAlign.Center
+        ) {
+            // Error state
+            if (state.error != null && state.qiblaInfo == null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Warning,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(48.dp)
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        text = state.error ?: "Unknown error",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.error,
+                        textAlign = TextAlign.Center
+                    )
+                }
+                return@Box
+            }
+
+            // Main content with Crossfade
+            Crossfade(
+                targetState = state.isArMode,
+                animationSpec = tween(400),
+                label = "qibla_mode_crossfade"
+            ) { isArMode ->
+                if (isArMode && cameraPermissionGranted) {
+                    // AR View
+                    ArQiblaView(
+                        azimuth = state.compassData.azimuth,
+                        qiblaInfo = state.qiblaInfo,
+                        isFacingQibla = state.isFacingQibla,
+                        rotationToQibla = state.rotationToQibla,
+                        isCompassReady = state.isCompassReady,
+                        compassAccuracy = state.compassData.accuracy,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    // Compass View
+                    CompassQiblaView(
+                        state = state,
+                        animatedAzimuth = animatedAzimuth,
+                        goldColor = goldColor,
+                        greenColor = greenColor,
+                        onCalibrate = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) }
+                    )
+                }
+            }
+
+            // Mode toggle - floating at top
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .padding(top = if (state.isArMode) 64.dp else 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                NimazPillTabs(
+                    tabs = listOf("Compass", "AR"),
+                    selectedIndex = if (state.isArMode) 1 else 0,
+                    onTabSelect = { index ->
+                        if (index == 1) {
+                            // Switching to AR mode
+                            if (cameraPermissionGranted) {
+                                viewModel.onEvent(QiblaEvent.SetArMode(true))
+                            } else {
+                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                            }
+                        } else {
+                            viewModel.onEvent(QiblaEvent.SetArMode(false))
+                        }
+                    }
                 )
             }
-            return@Box
+        }
+    }
+}
+
+@Composable
+private fun CompassQiblaView(
+    state: com.arshadshah.nimaz.presentation.viewmodel.QiblaUiState,
+    animatedAzimuth: Float,
+    goldColor: Color,
+    greenColor: Color,
+    onCalibrate: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp)
+            .padding(top = 56.dp, bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Location Info
+        state.qiblaInfo?.let { info ->
+            Text(
+                text = info.locationName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${String.format("%.4f", info.latitude)}\u00B0 ${if (info.latitude >= 0) "N" else "S"}, ${
+                    String.format("%.4f", abs(info.longitude))
+                }\u00B0 ${if (info.longitude >= 0) "E" else "W"}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp)
-                .padding(top = 8.dp, bottom = 20.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
+        Spacer(modifier = Modifier.height(20.dp))
 
-            // Location Info
-            state.qiblaInfo?.let { info ->
-                Text(
-                    text = info.locationName,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onBackground
+        // Compass
+        Box(
+            modifier = Modifier.size(300.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            CompassRings(modifier = Modifier.fillMaxSize())
+
+            Box(
+                modifier = Modifier
+                    .size(280.dp)
+                    .rotate(-animatedAzimuth),
+                contentAlignment = Alignment.Center
+            ) {
+                CompassDial(
+                    qiblaBearing = state.qiblaDirection?.bearing?.toFloat() ?: 0f,
+                    isFacingQibla = state.isFacingQibla,
+                    goldColor = goldColor,
+                    modifier = Modifier.size(250.dp)
                 )
-                Spacer(modifier = Modifier.height(4.dp))
+                DirectionMarkers(modifier = Modifier.fillMaxSize())
+            }
+
+            // Center dot
+            Box(
+                modifier = Modifier
+                    .size(if (state.isFacingQibla) 28.dp else 20.dp)
+                    .clip(CircleShape)
+                    .background(
+                        if (state.isFacingQibla) greenColor
+                        else MaterialTheme.colorScheme.outline
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                if (state.isFacingQibla) {
+                    Icon(
+                        imageVector = Icons.Default.Mosque,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            // Facing Qibla glow overlay
+            androidx.compose.animation.AnimatedVisibility(
+                visible = state.isFacingQibla,
+                enter = fadeIn() + scaleIn(),
+                exit = fadeOut() + scaleOut()
+            ) {
+                Canvas(modifier = Modifier.size(280.dp)) {
+                    drawCircle(
+                        color = greenColor.copy(alpha = 0.15f),
+                        radius = size.minDimension / 2
+                    )
+                }
+            }
+
+            // Static north indicator
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val center = Offset(size.width / 2, 0f)
+                val triSize = 8.dp.toPx()
+                val path = Path().apply {
+                    moveTo(center.x, triSize + 2.dp.toPx())
+                    lineTo(center.x - triSize / 2, 2.dp.toPx())
+                    lineTo(center.x + triSize / 2, 2.dp.toPx())
+                    close()
+                }
+                drawPath(path = path, color = Color(0xFFEF4444))
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Facing Qibla banner
+        AnimatedVisibility(
+            visible = state.isFacingQibla,
+            enter = fadeIn() + scaleIn(),
+            exit = fadeOut() + scaleOut()
+        ) {
+            Surface(
+                shape = RoundedCornerShape(16.dp),
+                color = greenColor.copy(alpha = 0.15f)
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Mosque,
+                        contentDescription = null,
+                        tint = greenColor,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = "Facing Qibla",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = greenColor
+                    )
+                }
+            }
+        }
+
+        // Turn direction hint
+        AnimatedVisibility(
+            visible = !state.isFacingQibla && state.isCompassReady,
+            enter = fadeIn(),
+            exit = fadeOut()
+        ) {
+            val turnRight = state.rotationToQibla > 0
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = if (turnRight)
+                        Icons.AutoMirrored.Filled.RotateRight
+                    else
+                        Icons.AutoMirrored.Filled.RotateLeft,
+                    contentDescription = null,
+                    tint = goldColor,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "${String.format("%.4f", info.latitude)}\u00B0 ${if (info.latitude >= 0) "N" else "S"}, ${
-                        String.format("%.4f", abs(info.longitude))
-                    }\u00B0 ${if (info.longitude >= 0) "E" else "W"}",
-                    style = MaterialTheme.typography.bodySmall,
+                    text = "Turn ${if (turnRight) "right" else "left"} ${abs(state.rotationToQibla).toInt()}\u00B0",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
 
-            Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-                // Compass — N/E/S/W and dial both rotate together
-                Box(
-                    modifier = Modifier.size(300.dp),
-                    contentAlignment = Alignment.Center
+        // Qibla Direction Info
+        state.qiblaInfo?.let { info ->
+            Text(
+                text = "${info.direction.bearing.toInt()}\u00B0",
+                style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
+                fontWeight = FontWeight.Bold,
+                color = if (state.isFacingQibla) greenColor else goldColor
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${getCompassDirection(info.direction.bearing)} \u2022 Qibla Direction",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Distance pill
+            Surface(
+                shape = RoundedCornerShape(25.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant
+            ) {
+                Row(
+                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Outer rings (static)
-                    CompassRings(modifier = Modifier.fillMaxSize())
-
-                    // Rotating group: dial + ticks + qibla arrow + direction markers
-                    Box(
-                        modifier = Modifier
-                            .size(280.dp)
-                            .rotate(-animatedAzimuth),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CompassDial(
-                            qiblaBearing = state.qiblaDirection?.bearing?.toFloat() ?: 0f,
-                            isFacingQibla = state.isFacingQibla,
-                            goldColor = goldColor,
-                            modifier = Modifier.size(250.dp)
-                        )
-                        DirectionMarkers(modifier = Modifier.fillMaxSize())
-                    }
-
-                    // Center dot (static — stays in center)
-                    Box(
-                        modifier = Modifier
-                            .size(if (state.isFacingQibla) 28.dp else 20.dp)
-                            .clip(CircleShape)
-                            .background(
-                                if (state.isFacingQibla) greenColor
-                                else MaterialTheme.colorScheme.outline
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (state.isFacingQibla) {
-                            Icon(
-                                imageVector = Icons.Default.Mosque,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
-
-                    // Facing Qibla glow overlay
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = state.isFacingQibla,
-                        enter = fadeIn() + scaleIn(),
-                        exit = fadeOut() + scaleOut()
-                    ) {
-                        Canvas(modifier = Modifier.size(280.dp)) {
-                            drawCircle(
-                                color = greenColor.copy(alpha = 0.15f),
-                                radius = size.minDimension / 2
-                            )
-                        }
-                    }
-
-                    // Static north indicator at top (fixed red triangle pointing down)
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val center = Offset(size.width / 2, 0f)
-                        val triSize = 8.dp.toPx()
-                        val path = Path().apply {
-                            moveTo(center.x, triSize + 2.dp.toPx())
-                            lineTo(center.x - triSize / 2, 2.dp.toPx())
-                            lineTo(center.x + triSize / 2, 2.dp.toPx())
-                            close()
-                        }
-                        drawPath(path = path, color = Color(0xFFEF4444))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Facing Qibla banner
-                AnimatedVisibility(
-                    visible = state.isFacingQibla,
-                    enter = fadeIn() + scaleIn(),
-                    exit = fadeOut() + scaleOut()
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = greenColor.copy(alpha = 0.15f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mosque,
-                                contentDescription = null,
-                                tint = greenColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = "Facing Qibla",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = greenColor
-                            )
-                        }
-                    }
-                }
-
-                // Turn direction hint
-                AnimatedVisibility(
-                    visible = !state.isFacingQibla && state.isCompassReady,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    val turnRight = state.rotationToQibla > 0
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (turnRight)
-                                Icons.AutoMirrored.Filled.RotateRight
-                            else
-                                Icons.AutoMirrored.Filled.RotateLeft,
-                            contentDescription = null,
-                            tint = goldColor,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = "Turn ${if (turnRight) "right" else "left"} ${abs(state.rotationToQibla).toInt()}\u00B0",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Qibla Direction Info
-                state.qiblaInfo?.let { info ->
-                    Text(
-                        text = "${info.direction.bearing.toInt()}\u00B0",
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
-                        fontWeight = FontWeight.Bold,
-                        color = if (state.isFacingQibla) greenColor else goldColor
+                    Icon(
+                        imageVector = Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "${getCompassDirection(info.direction.bearing)} \u2022 Qibla Direction",
-                        style = MaterialTheme.typography.bodyMedium,
+                        text = "${String.format("%,d", (info.distanceToMecca / 1000).toInt())} km to Mecca",
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Distance pill
-                    Surface(
-                        shape = RoundedCornerShape(25.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "${String.format("%,d", (info.distanceToMecca / 1000).toInt())} km to Mecca",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
                 }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Accuracy Bar
-                AccuracyBar(
-                    accuracy = state.compassData.accuracy,
-                    greenColor = greenColor,
-                    onCalibrate = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) },
-                    modifier = Modifier.fillMaxWidth()
-                )
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Accuracy Bar
+        AccuracyBar(
+            accuracy = state.compassData.accuracy,
+            greenColor = greenColor,
+            onCalibrate = onCalibrate,
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
