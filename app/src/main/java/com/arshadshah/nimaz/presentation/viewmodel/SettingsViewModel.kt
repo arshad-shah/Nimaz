@@ -34,14 +34,14 @@ enum class AppLanguage(
     val nativeName: String,
     val flag: String
 ) {
-    ENGLISH("en", "English", "English", "\uD83C\uDDEC\uD83C\uDDE7"),
-    ARABIC("ar", "Arabic", "العربية", "\uD83C\uDDF8\uD83C\uDDE6"),
-    TURKISH("tr", "Turkish", "Türkçe", "\uD83C\uDDF9\uD83C\uDDF7"),
-    INDONESIAN("id", "Indonesian", "Bahasa Indonesia", "\uD83C\uDDEE\uD83C\uDDE9"),
-    MALAY("ms", "Malay", "Bahasa Melayu", "\uD83C\uDDF2\uD83C\uDDFE"),
-    FRENCH("fr", "French", "Français", "\uD83C\uDDEB\uD83C\uDDF7"),
-    GERMAN("de", "German", "Deutsch", "\uD83C\uDDE9\uD83C\uDDEA"),
-    URDU("ur", "Urdu", "اردو", "\uD83C\uDDF5\uD83C\uDDF0")
+    ENGLISH("en", "English", "English", "GB"),
+    ARABIC("ar", "Arabic", "العربية", "SA"),
+    TURKISH("tr", "Turkish", "Türkçe", "TR"),
+    INDONESIAN("id", "Indonesian", "Bahasa Indonesia", "ID"),
+    MALAY("ms", "Malay", "Bahasa Melayu", "MY"),
+    FRENCH("fr", "French", "Français", "FR"),
+    GERMAN("de", "German", "Deutsch", "DE"),
+    URDU("ur", "Urdu", "اردو", "PK")
 }
 
 enum class AsrJuristicMethod {

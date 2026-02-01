@@ -19,6 +19,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
@@ -188,14 +196,14 @@ private fun LinksCard(
             .clip(RoundedCornerShape(16.dp))
     ) {
         LinkItem(
-            emoji = "\u2B50",
+            icon = Icons.Default.Star,
             title = "Rate on Play Store",
             subtitle = "Help us reach more Muslims",
             onClick = onRateApp,
             showDivider = true
         )
         LinkItem(
-            emoji = "\uD83D\uDCE7",
+            icon = Icons.Default.Email,
             title = "Contact Support",
             subtitle = "support@nimaz.app",
             onClick = onContactUs,
@@ -203,21 +211,21 @@ private fun LinksCard(
         )
         val uriHandler = LocalUriHandler.current
         LinkItem(
-            emoji = "\uD83C\uDF10",
+            icon = Icons.Default.Public,
             title = "Website",
             subtitle = "nimaz.app",
             onClick = { uriHandler.openUri("https://nimaz.app") },
             showDivider = true
         )
         LinkItem(
-            emoji = "\uD83D\uDCDC",
+            icon = Icons.Default.Description,
             title = "Privacy Policy",
             subtitle = "How we handle your data",
             onClick = onNavigateToPrivacyPolicy,
             showDivider = true
         )
         LinkItem(
-            emoji = "\uD83D\uDCCB",
+            icon = Icons.Default.ListAlt,
             title = "Terms of Service",
             subtitle = "Usage terms",
             onClick = onNavigateToTerms,
@@ -234,7 +242,7 @@ private fun LinksCard(
             else -> "Tap to check"
         }
         LinkItem(
-            emoji = "\uD83D\uDD04",
+            icon = Icons.Default.Refresh,
             title = "Check for Updates",
             subtitle = updateSubtitle,
             onClick = {
@@ -251,7 +259,7 @@ private fun LinksCard(
 
 @Composable
 private fun LinkItem(
-    emoji: String,
+    icon: ImageVector,
     title: String,
     subtitle: String,
     onClick: () -> Unit,
@@ -275,7 +283,12 @@ private fun LinkItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = emoji, fontSize = 18.sp)
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
+                )
             }
 
             Spacer(modifier = Modifier.width(15.dp))
@@ -404,7 +417,7 @@ private fun FooterSection(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Made with \u2764\uFE0F for the Ummah",
+            text = "Made with love for the Ummah",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
@@ -422,7 +435,7 @@ private fun FooterSection(modifier: Modifier = Modifier) {
 private fun LinkItemPreview() {
     NimazTheme {
         LinkItem(
-            emoji = "\u2B50",
+            icon = Icons.Default.Star,
             title = "Rate on Play Store",
             subtitle = "Help us reach more Muslims",
             onClick = {},

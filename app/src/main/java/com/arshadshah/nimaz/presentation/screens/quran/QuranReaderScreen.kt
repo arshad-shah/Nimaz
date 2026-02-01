@@ -38,6 +38,8 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.automirrored.filled.ViewList
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -58,8 +60,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -145,6 +150,10 @@ fun QuranReaderScreen(
     val audioState by viewModel.audioState.collectAsState()
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
+    var usePageView by rememberSaveable { mutableStateOf(false) }
+    var savedListIndex by rememberSaveable { mutableStateOf(0) }
+    var savedListOffset by rememberSaveable { mutableStateOf(0) }
+    var pendingScrollRestore by rememberSaveable { mutableStateOf(false) }
 
     // Keep screen on based on settings
     DisposableEffect(state.keepScreenOn) {
@@ -185,6 +194,28 @@ fun QuranReaderScreen(
             juzNumber != null -> viewModel.onEvent(QuranEvent.LoadJuz(juzNumber))
             pageNumber != null -> viewModel.onEvent(QuranEvent.LoadPage(pageNumber))
             surahNumber != null -> viewModel.onEvent(QuranEvent.LoadSurah(surahNumber))
+        }
+    }
+
+    // Save position when entering page view, restore data when leaving
+    LaunchedEffect(usePageView) {
+        if (usePageView) {
+            savedListIndex = listState.firstVisibleItemIndex
+            savedListOffset = listState.firstVisibleItemScrollOffset
+        } else {
+            pendingScrollRestore = true
+            when {
+                surahNumber != null -> viewModel.onEvent(QuranEvent.LoadSurah(surahNumber))
+                juzNumber != null -> viewModel.onEvent(QuranEvent.LoadJuz(juzNumber))
+            }
+        }
+    }
+
+    // Restore scroll position after data reloads
+    LaunchedEffect(pendingScrollRestore, state.isLoading) {
+        if (pendingScrollRestore && !state.isLoading && !usePageView) {
+            listState.scrollToItem(savedListIndex, savedListOffset)
+            pendingScrollRestore = false
         }
     }
 
@@ -258,12 +289,22 @@ fun QuranReaderScreen(
 
     // Page mode pager state
     val totalPages = 604
-    val pagerState = if (state.readingMode == ReadingMode.PAGE && pageNumber != null) {
-        rememberPagerState(
-            initialPage = (pageNumber - 1).coerceIn(0, totalPages - 1),
-            pageCount = { totalPages }
-        )
-    } else null
+    val pagerState = when {
+        state.readingMode == ReadingMode.PAGE && pageNumber != null -> {
+            rememberPagerState(
+                initialPage = (pageNumber - 1).coerceIn(0, totalPages - 1),
+                pageCount = { totalPages }
+            )
+        }
+        usePageView && displayAyahs.isNotEmpty() -> {
+            val initialPage = displayAyahs.first().page
+            rememberPagerState(
+                initialPage = (initialPage - 1).coerceIn(0, totalPages - 1),
+                pageCount = { totalPages }
+            )
+        }
+        else -> null
+    }
 
     // Load page when pager settles
     pagerState?.let { ps ->
@@ -313,6 +354,14 @@ fun QuranReaderScreen(
                     }
                 },
                 actions = {
+                    if (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ) {
+                        IconButton(onClick = { usePageView = !usePageView }) {
+                            Icon(
+                                imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
+                                contentDescription = if (usePageView) "Switch to list view" else "Switch to page view"
+                            )
+                        }
+                    }
                     IconButton(onClick = onNavigateToQuranSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
@@ -369,14 +418,14 @@ fun QuranReaderScreen(
                 .fillMaxSize()
                 .padding(paddingValues)
         ) {
-            if (state.isLoading && state.readingMode != ReadingMode.PAGE) {
+            if (state.isLoading && state.readingMode != ReadingMode.PAGE && !usePageView) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
-            } else if (state.readingMode == ReadingMode.PAGE && pagerState != null) {
+            } else if (pagerState != null && (state.readingMode == ReadingMode.PAGE || usePageView)) {
                 // Page mode with HorizontalPager using MushafPage
                 val homeState by viewModel.homeState.collectAsState()
 

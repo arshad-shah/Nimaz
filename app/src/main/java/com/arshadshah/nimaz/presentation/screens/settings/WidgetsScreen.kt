@@ -16,7 +16,13 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -124,7 +131,7 @@ fun WidgetsScreen(
                     title = "Next Prayer Widget (2\u00D72)",
                     infoName = "Next Prayer",
                     infoSize = "2\u00D72 \u2022 Shows countdown to next prayer",
-                    infoEmoji = "\u23F0",
+                    infoIcon = Icons.Default.Schedule,
                     preview = { NextPrayerWidgetPreview(previewData) }
                 )
             }
@@ -135,7 +142,7 @@ fun WidgetsScreen(
                     title = "Prayer Times Widget (4\u00D72)",
                     infoName = "Prayer Times",
                     infoSize = "4\u00D72 \u2022 All prayers + countdown",
-                    infoEmoji = "\uD83D\uDCCB",
+                    infoIcon = Icons.Default.ListAlt,
                     preview = { PrayerTimesWidgetPreview(previewData) }
                 )
             }
@@ -146,7 +153,7 @@ fun WidgetsScreen(
                     title = "Hijri Date Widget (2\u00D72)",
                     infoName = "Hijri Date",
                     infoSize = "2\u00D72 \u2022 Islamic calendar date",
-                    infoEmoji = "\uD83D\uDCC5",
+                    infoIcon = Icons.Default.CalendarMonth,
                     preview = { HijriDateWidgetPreview(previewData) }
                 )
             }
@@ -157,7 +164,7 @@ fun WidgetsScreen(
                     title = "Prayer Tracker Widget (4\u00D71)",
                     infoName = "Prayer Tracker",
                     infoSize = "4\u00D71 \u2022 Tap to mark prayers completed",
-                    infoEmoji = "\u2705",
+                    infoIcon = Icons.Default.CheckCircle,
                     preview = { PrayerTrackerWidgetPreview() }
                 )
             }
@@ -187,7 +194,7 @@ private fun WidgetSection(
     title: String,
     infoName: String,
     infoSize: String,
-    infoEmoji: String,
+    infoIcon: ImageVector,
     preview: @Composable () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -241,7 +248,12 @@ private fun WidgetSection(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(text = infoEmoji, fontSize = 20.sp)
+                Icon(
+                    imageVector = infoIcon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp)
+                )
             }
 
             Spacer(modifier = Modifier.width(15.dp))

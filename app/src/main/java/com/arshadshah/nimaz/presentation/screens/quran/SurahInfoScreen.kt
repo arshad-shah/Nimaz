@@ -25,7 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FormatListNumbered
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -331,13 +336,13 @@ private fun DetailGrid(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             DetailCard(
-                icon = "\uD83D\uDCCD",
+                icon = Icons.Default.LocationOn,
                 label = "Revelation",
                 value = if (surah.revelationType == RevelationType.MECCAN) "Makkah" else "Madinah",
                 modifier = Modifier.weight(1f)
             )
             DetailCard(
-                icon = "\uD83D\uDCD1",
+                icon = Icons.Default.MenuBook,
                 label = "Juz",
                 value = surah.juzStart.toString(),
                 modifier = Modifier.weight(1f)
@@ -348,13 +353,13 @@ private fun DetailGrid(
             horizontalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             DetailCard(
-                icon = "\uD83D\uDD22",
+                icon = Icons.Default.FormatListNumbered,
                 label = "Order",
                 value = "${surah.orderInMushaf} in Mushaf",
                 modifier = Modifier.weight(1f)
             )
             DetailCard(
-                icon = "\uD83D\uDCD6",
+                icon = Icons.Default.Book,
                 label = "Verses",
                 value = "${surah.numberOfAyahs} ayahs",
                 modifier = Modifier.weight(1f)
@@ -365,7 +370,7 @@ private fun DetailGrid(
 
 @Composable
 private fun DetailCard(
-    icon: String,
+    icon: ImageVector,
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -377,9 +382,11 @@ private fun DetailCard(
             .padding(15.dp)
     ) {
         Column {
-            Text(
-                text = icon,
-                fontSize = 20.sp
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

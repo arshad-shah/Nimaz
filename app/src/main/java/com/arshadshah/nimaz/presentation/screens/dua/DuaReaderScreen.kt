@@ -23,7 +23,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -42,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -369,7 +372,7 @@ private fun DuaCard(
                         // Source
                         if (!dua.reference.isNullOrEmpty()) {
                             MetaItem(
-                                icon = "\uD83D\uDCD6",
+                                icon = Icons.Default.Book,
                                 label = "Source",
                                 value = dua.reference
                             )
@@ -379,7 +382,7 @@ private fun DuaCard(
                         dua.repeatCount?.let { count ->
                             if (count > 0) {
                                 MetaItem(
-                                    icon = "\uD83D\uDD04",
+                                    icon = Icons.Default.Refresh,
                                     label = "Recommended",
                                     value = "Recite $count time${if (count > 1) "s" else ""}"
                                 )
@@ -394,7 +397,7 @@ private fun DuaCard(
 
 @Composable
 private fun MetaItem(
-    icon: String,
+    icon: ImageVector,
     label: String,
     value: String,
     modifier: Modifier = Modifier
@@ -410,7 +413,12 @@ private fun MetaItem(
             modifier = Modifier.size(32.dp)
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                Text(text = icon, fontSize = 14.sp)
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(16.dp)
+                )
             }
         }
 

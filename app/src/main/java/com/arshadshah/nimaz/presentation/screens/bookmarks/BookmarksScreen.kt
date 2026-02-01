@@ -22,9 +22,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -247,10 +250,10 @@ private fun BookmarkCard(
         BookmarkType.DUA -> "Dua"
     }
 
-    val typeEmoji = when (bookmark.type) {
-        BookmarkType.QURAN -> "\uD83D\uDCD6"
-        BookmarkType.HADITH -> "\uD83D\uDCDC"
-        BookmarkType.DUA -> "\uD83E\uDD32"
+    val typeIcon = when (bookmark.type) {
+        BookmarkType.QURAN -> Icons.Default.Book
+        BookmarkType.HADITH -> Icons.Default.Description
+        BookmarkType.DUA -> Icons.Default.VolunteerActivism
     }
 
     val typeColor = when (bookmark.type) {
@@ -291,9 +294,11 @@ private fun BookmarkCard(
                         .background(typeBgColor),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = typeEmoji,
-                        fontSize = 20.sp
+                    Icon(
+                        imageVector = typeIcon,
+                        contentDescription = null,
+                        tint = typeColor,
+                        modifier = Modifier.size(22.dp)
                     )
                 }
 

@@ -22,7 +22,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Hotel
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.VolunteerActivism
+import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -42,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -332,9 +344,11 @@ private fun CategoryGridCard(
                     .background(iconColor.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = getCategoryEmoji(category.iconName),
-                    fontSize = 24.sp
+                Icon(
+                    imageVector = getCategoryIcon(category.iconName),
+                    contentDescription = null,
+                    tint = iconColor,
+                    modifier = Modifier.size(24.dp)
                 )
             }
 
@@ -387,9 +401,11 @@ private fun AdhkarListItem(
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = getCategoryEmoji(category.iconName),
-                    fontSize = 20.sp
+                Icon(
+                    imageVector = getCategoryIcon(category.iconName),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(22.dp)
                 )
             }
 
@@ -485,20 +501,20 @@ private fun getCategoryColor(categoryId: String): Color {
     }
 }
 
-private fun getCategoryEmoji(iconName: String?): String {
-    if (iconName == null) return "\uD83D\uDD4C"
+private fun getCategoryIcon(iconName: String?): ImageVector {
+    if (iconName == null) return Icons.Default.Mosque
     return when (iconName.lowercase()) {
-        "morning", "sunrise", "fajr" -> "\uD83C\uDF05"
-        "evening", "sunset", "moon" -> "\uD83C\uDF19"
-        "sleep", "night", "bed" -> "\uD83D\uDE34"
-        "prayer", "mosque", "salah" -> "\uD83D\uDD4C"
-        "travel", "journey", "plane" -> "\u2708\uFE0F"
-        "food", "eat", "drink" -> "\uD83C\uDF7D\uFE0F"
-        "home", "house" -> "\uD83C\uDFE0"
-        "bathroom", "wudu" -> "\uD83D\uDEBF"
-        "sick", "health", "healing" -> "\uD83D\uDE37"
-        "protection", "shield" -> "\uD83D\uDEE1\uFE0F"
-        "forgiveness", "repentance" -> "\uD83E\uDD32"
-        else -> "\uD83D\uDD4C"
+        "morning", "sunrise", "fajr" -> Icons.Default.LightMode
+        "evening", "sunset", "moon" -> Icons.Default.DarkMode
+        "sleep", "night", "bed" -> Icons.Default.Hotel
+        "prayer", "mosque", "salah" -> Icons.Default.Mosque
+        "travel", "journey", "plane" -> Icons.Default.Flight
+        "food", "eat", "drink" -> Icons.Default.Restaurant
+        "home", "house" -> Icons.Default.Home
+        "bathroom", "wudu" -> Icons.Default.WaterDrop
+        "sick", "health", "healing" -> Icons.Default.LocalHospital
+        "protection", "shield" -> Icons.Default.Shield
+        "forgiveness", "repentance" -> Icons.Default.VolunteerActivism
+        else -> Icons.Default.Mosque
     }
 }

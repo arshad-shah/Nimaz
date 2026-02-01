@@ -19,9 +19,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.NightsStay
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -46,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -760,21 +763,21 @@ private fun RecommendedFastsSection(
 
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             RecommendedFastCard(
-                icon = "\uD83D\uDCC5",
+                icon = Icons.Default.CalendarMonth,
                 iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 name = "Monday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
                 nextDate = mondayText
             )
             RecommendedFastCard(
-                icon = "\uD83D\uDCC5",
+                icon = Icons.Default.CalendarMonth,
                 iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
                 name = "Thursday Fasting",
                 description = "Sunnah of the Prophet \uFDFA",
                 nextDate = thursdayText
             )
             RecommendedFastCard(
-                icon = "\uD83C\uDF15",
+                icon = Icons.Default.NightsStay,
                 iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                 name = "Ayyam al-Beed",
                 description = "13th, 14th, 15th of lunar month",
@@ -805,7 +808,7 @@ private fun calculateAyyamAlBeedStatus(today: LocalDate): String {
 
 @Composable
 private fun RecommendedFastCard(
-    icon: String,
+    icon: ImageVector,
     iconBgColor: Color,
     name: String,
     description: String,
@@ -828,7 +831,12 @@ private fun RecommendedFastCard(
                 .background(iconBgColor),
             contentAlignment = Alignment.Center
         ) {
-            Text(text = icon, fontSize = 20.sp)
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
+            )
         }
 
         Column(modifier = Modifier.weight(1f)) {
