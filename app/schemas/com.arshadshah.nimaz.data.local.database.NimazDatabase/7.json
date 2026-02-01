@@ -1,0 +1,1933 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 7,
+    "identityHash": "139cdab0869e9e220792e57326af9c3e",
+    "entities": [
+      {
+        "tableName": "surahs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `number` INTEGER NOT NULL, `name_arabic` TEXT NOT NULL, `name_english` TEXT NOT NULL, `name_transliteration` TEXT NOT NULL, `revelation_type` TEXT NOT NULL, `verses_count` INTEGER NOT NULL, `order_revealed` INTEGER NOT NULL, `start_page` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "number",
+            "columnName": "number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameArabic",
+            "columnName": "name_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameEnglish",
+            "columnName": "name_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameTransliteration",
+            "columnName": "name_transliteration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "revelationType",
+            "columnName": "revelation_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "versesCount",
+            "columnName": "verses_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "orderRevealed",
+            "columnName": "order_revealed",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startPage",
+            "columnName": "start_page",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "ayahs",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `surah_id` INTEGER NOT NULL, `number_in_surah` INTEGER NOT NULL, `number_global` INTEGER NOT NULL, `text_arabic` TEXT NOT NULL, `text_uthmani` TEXT NOT NULL, `juz` INTEGER NOT NULL, `hizb` INTEGER NOT NULL, `page` INTEGER NOT NULL, `sajda` INTEGER NOT NULL, `sajda_type` TEXT, `transliteration` TEXT, `text_tajweed` TEXT, PRIMARY KEY(`id`), FOREIGN KEY(`surah_id`) REFERENCES `surahs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surahId",
+            "columnName": "surah_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberInSurah",
+            "columnName": "number_in_surah",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberGlobal",
+            "columnName": "number_global",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "textArabic",
+            "columnName": "text_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "textUthmani",
+            "columnName": "text_uthmani",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "juz",
+            "columnName": "juz",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hizb",
+            "columnName": "hizb",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "page",
+            "columnName": "page",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sajda",
+            "columnName": "sajda",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sajdaType",
+            "columnName": "sajda_type",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "transliteration",
+            "columnName": "transliteration",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "textTajweed",
+            "columnName": "text_tajweed",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_ayahs_surah_id",
+            "unique": false,
+            "columnNames": [
+              "surah_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ayahs_surah_id` ON `${TABLE_NAME}` (`surah_id`)"
+          },
+          {
+            "name": "index_ayahs_juz",
+            "unique": false,
+            "columnNames": [
+              "juz"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ayahs_juz` ON `${TABLE_NAME}` (`juz`)"
+          },
+          {
+            "name": "index_ayahs_page",
+            "unique": false,
+            "columnNames": [
+              "page"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ayahs_page` ON `${TABLE_NAME}` (`page`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "surahs",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "surah_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "translations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ayah_id` INTEGER NOT NULL, `text` TEXT NOT NULL, `translator_id` TEXT NOT NULL, FOREIGN KEY(`ayah_id`) REFERENCES `ayahs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayah_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translatorId",
+            "columnName": "translator_id",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_translations_ayah_id",
+            "unique": false,
+            "columnNames": [
+              "ayah_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_translations_ayah_id` ON `${TABLE_NAME}` (`ayah_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ayahs",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ayah_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "quran_bookmarks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ayahId` INTEGER NOT NULL, `surahNumber` INTEGER NOT NULL, `ayahNumber` INTEGER NOT NULL, `note` TEXT, `color` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayahId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surahNumber",
+            "columnName": "surahNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahNumber",
+            "columnName": "ayahNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_quran_bookmarks_ayahId",
+            "unique": false,
+            "columnNames": [
+              "ayahId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_quran_bookmarks_ayahId` ON `${TABLE_NAME}` (`ayahId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "quran_favorites",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`ayahId` INTEGER NOT NULL, `surahNumber` INTEGER NOT NULL, `ayahNumber` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, PRIMARY KEY(`ayahId`))",
+        "fields": [
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayahId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surahNumber",
+            "columnName": "surahNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahNumber",
+            "columnName": "ayahNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "ayahId"
+          ]
+        }
+      },
+      {
+        "tableName": "reading_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `lastReadSurah` INTEGER NOT NULL, `lastReadAyah` INTEGER NOT NULL, `lastReadPage` INTEGER NOT NULL, `lastReadJuz` INTEGER NOT NULL, `totalAyahsRead` INTEGER NOT NULL, `currentKhatmaCount` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReadSurah",
+            "columnName": "lastReadSurah",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReadAyah",
+            "columnName": "lastReadAyah",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReadPage",
+            "columnName": "lastReadPage",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastReadJuz",
+            "columnName": "lastReadJuz",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalAyahsRead",
+            "columnName": "totalAyahsRead",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentKhatmaCount",
+            "columnName": "currentKhatmaCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "surah_info",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`surahNumber` INTEGER NOT NULL, `description` TEXT NOT NULL, `themes` TEXT NOT NULL, PRIMARY KEY(`surahNumber`))",
+        "fields": [
+          {
+            "fieldPath": "surahNumber",
+            "columnName": "surahNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "themes",
+            "columnName": "themes",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "surahNumber"
+          ]
+        }
+      },
+      {
+        "tableName": "hadith_books",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name_english` TEXT NOT NULL, `name_arabic` TEXT NOT NULL, `author` TEXT NOT NULL, `hadith_count` INTEGER NOT NULL, `description` TEXT NOT NULL, `icon` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameEnglish",
+            "columnName": "name_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameArabic",
+            "columnName": "name_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "author",
+            "columnName": "author",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hadithCount",
+            "columnName": "hadith_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "icon",
+            "columnName": "icon",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "hadiths",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `book_id` INTEGER NOT NULL, `chapter_id` INTEGER NOT NULL, `number_in_book` INTEGER NOT NULL, `number_in_chapter` INTEGER NOT NULL, `text_arabic` TEXT NOT NULL, `text_english` TEXT NOT NULL, `narrator` TEXT NOT NULL, `grade` TEXT NOT NULL, `reference` TEXT NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`book_id`) REFERENCES `hadith_books`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "book_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chapterId",
+            "columnName": "chapter_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberInBook",
+            "columnName": "number_in_book",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "numberInChapter",
+            "columnName": "number_in_chapter",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "textArabic",
+            "columnName": "text_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "textEnglish",
+            "columnName": "text_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "narrator",
+            "columnName": "narrator",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "grade",
+            "columnName": "grade",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reference",
+            "columnName": "reference",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_hadiths_book_id",
+            "unique": false,
+            "columnNames": [
+              "book_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_hadiths_book_id` ON `${TABLE_NAME}` (`book_id`)"
+          },
+          {
+            "name": "index_hadiths_chapter_id",
+            "unique": false,
+            "columnNames": [
+              "chapter_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_hadiths_chapter_id` ON `${TABLE_NAME}` (`chapter_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "hadith_books",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "book_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "hadith_bookmarks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `hadithId` INTEGER NOT NULL, `bookId` INTEGER NOT NULL, `hadithNumber` INTEGER NOT NULL, `note` TEXT, `color` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hadithId",
+            "columnName": "hadithId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bookId",
+            "columnName": "bookId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hadithNumber",
+            "columnName": "hadithNumber",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_hadith_bookmarks_hadithId",
+            "unique": false,
+            "columnNames": [
+              "hadithId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_hadith_bookmarks_hadithId` ON `${TABLE_NAME}` (`hadithId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "dua_categories",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name_english` TEXT NOT NULL, `name_arabic` TEXT NOT NULL, `icon` TEXT NOT NULL, `display_order` INTEGER NOT NULL, `dua_count` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameEnglish",
+            "columnName": "name_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameArabic",
+            "columnName": "name_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "icon",
+            "columnName": "icon",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayOrder",
+            "columnName": "display_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duaCount",
+            "columnName": "dua_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "duas",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `category_id` INTEGER NOT NULL, `title_english` TEXT NOT NULL, `title_arabic` TEXT NOT NULL, `text_arabic` TEXT NOT NULL, `transliteration` TEXT NOT NULL, `translation` TEXT NOT NULL, `source` TEXT NOT NULL, `virtue` TEXT, `repeat_count` INTEGER NOT NULL, `audio_file` TEXT, `display_order` INTEGER NOT NULL, PRIMARY KEY(`id`), FOREIGN KEY(`category_id`) REFERENCES `dua_categories`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "category_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titleEnglish",
+            "columnName": "title_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "titleArabic",
+            "columnName": "title_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "textArabic",
+            "columnName": "text_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transliteration",
+            "columnName": "transliteration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translation",
+            "columnName": "translation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "source",
+            "columnName": "source",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "virtue",
+            "columnName": "virtue",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "repeatCount",
+            "columnName": "repeat_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "audioFile",
+            "columnName": "audio_file",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "displayOrder",
+            "columnName": "display_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_duas_category_id",
+            "unique": false,
+            "columnNames": [
+              "category_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_duas_category_id` ON `${TABLE_NAME}` (`category_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "dua_categories",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "category_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "dua_bookmarks",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `duaId` INTEGER NOT NULL, `categoryId` INTEGER NOT NULL, `note` TEXT, `isFavorite` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duaId",
+            "columnName": "duaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "categoryId",
+            "columnName": "categoryId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dua_bookmarks_duaId",
+            "unique": false,
+            "columnNames": [
+              "duaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dua_bookmarks_duaId` ON `${TABLE_NAME}` (`duaId`)"
+          }
+        ]
+      },
+      {
+        "tableName": "dua_progress",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `duaId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `completedCount` INTEGER NOT NULL, `targetCount` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, `createdAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duaId",
+            "columnName": "duaId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedCount",
+            "columnName": "completedCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetCount",
+            "columnName": "targetCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "isCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_dua_progress_duaId",
+            "unique": false,
+            "columnNames": [
+              "duaId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dua_progress_duaId` ON `${TABLE_NAME}` (`duaId`)"
+          },
+          {
+            "name": "index_dua_progress_date",
+            "unique": false,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_dua_progress_date` ON `${TABLE_NAME}` (`date`)"
+          }
+        ]
+      },
+      {
+        "tableName": "prayer_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` INTEGER NOT NULL, `prayerName` TEXT NOT NULL, `status` TEXT NOT NULL, `prayedAt` INTEGER, `scheduledTime` INTEGER NOT NULL, `isJamaah` INTEGER NOT NULL, `isQadaFor` INTEGER, `note` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prayerName",
+            "columnName": "prayerName",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "prayedAt",
+            "columnName": "prayedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "scheduledTime",
+            "columnName": "scheduledTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isJamaah",
+            "columnName": "isJamaah",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isQadaFor",
+            "columnName": "isQadaFor",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_prayer_records_date",
+            "unique": false,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prayer_records_date` ON `${TABLE_NAME}` (`date`)"
+          },
+          {
+            "name": "index_prayer_records_prayerName",
+            "unique": false,
+            "columnNames": [
+              "prayerName"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_prayer_records_prayerName` ON `${TABLE_NAME}` (`prayerName`)"
+          },
+          {
+            "name": "index_prayer_records_date_prayerName",
+            "unique": true,
+            "columnNames": [
+              "date",
+              "prayerName"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_prayer_records_date_prayerName` ON `${TABLE_NAME}` (`date`, `prayerName`)"
+          }
+        ]
+      },
+      {
+        "tableName": "fast_records",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `date` INTEGER NOT NULL, `hijriDate` TEXT, `hijriMonth` INTEGER, `hijriYear` INTEGER, `fastType` TEXT NOT NULL, `status` TEXT NOT NULL, `exemptionReason` TEXT, `suhoorTime` INTEGER, `iftarTime` INTEGER, `note` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hijriDate",
+            "columnName": "hijriDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "hijriMonth",
+            "columnName": "hijriMonth",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "hijriYear",
+            "columnName": "hijriYear",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fastType",
+            "columnName": "fastType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "exemptionReason",
+            "columnName": "exemptionReason",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "suhoorTime",
+            "columnName": "suhoorTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "iftarTime",
+            "columnName": "iftarTime",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_fast_records_date",
+            "unique": true,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_fast_records_date` ON `${TABLE_NAME}` (`date`)"
+          },
+          {
+            "name": "index_fast_records_hijriMonth",
+            "unique": false,
+            "columnNames": [
+              "hijriMonth"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fast_records_hijriMonth` ON `${TABLE_NAME}` (`hijriMonth`)"
+          },
+          {
+            "name": "index_fast_records_fastType",
+            "unique": false,
+            "columnNames": [
+              "fastType"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_fast_records_fastType` ON `${TABLE_NAME}` (`fastType`)"
+          }
+        ]
+      },
+      {
+        "tableName": "makeup_fasts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `originalDate` INTEGER NOT NULL, `originalHijriDate` TEXT, `reason` TEXT NOT NULL, `status` TEXT NOT NULL, `completedDate` INTEGER, `fidyaAmount` REAL, `note` TEXT, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalDate",
+            "columnName": "originalDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalHijriDate",
+            "columnName": "originalHijriDate",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "reason",
+            "columnName": "reason",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "status",
+            "columnName": "status",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedDate",
+            "columnName": "completedDate",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "fidyaAmount",
+            "columnName": "fidyaAmount",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_makeup_fasts_originalDate",
+            "unique": false,
+            "columnNames": [
+              "originalDate"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_makeup_fasts_originalDate` ON `${TABLE_NAME}` (`originalDate`)"
+          },
+          {
+            "name": "index_makeup_fasts_status",
+            "unique": false,
+            "columnNames": [
+              "status"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_makeup_fasts_status` ON `${TABLE_NAME}` (`status`)"
+          }
+        ]
+      },
+      {
+        "tableName": "tasbih_presets",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `arabic` TEXT NOT NULL, `transliteration` TEXT NOT NULL, `translation` TEXT NOT NULL, `target_count` INTEGER NOT NULL, `is_custom` INTEGER NOT NULL, `display_order` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "arabic",
+            "columnName": "arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "transliteration",
+            "columnName": "transliteration",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "translation",
+            "columnName": "translation",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetCount",
+            "columnName": "target_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCustom",
+            "columnName": "is_custom",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "displayOrder",
+            "columnName": "display_order",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tasbih_sessions",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `presetId` INTEGER, `presetName` TEXT, `date` INTEGER NOT NULL, `currentCount` INTEGER NOT NULL, `targetCount` INTEGER NOT NULL, `totalLaps` INTEGER NOT NULL, `isCompleted` INTEGER NOT NULL, `duration` INTEGER, `startedAt` INTEGER NOT NULL, `completedAt` INTEGER, `note` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "presetId",
+            "columnName": "presetId",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "presetName",
+            "columnName": "presetName",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "currentCount",
+            "columnName": "currentCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "targetCount",
+            "columnName": "targetCount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalLaps",
+            "columnName": "totalLaps",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isCompleted",
+            "columnName": "isCompleted",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "duration",
+            "columnName": "duration",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "startedAt",
+            "columnName": "startedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "completedAt",
+            "columnName": "completedAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tasbih_sessions_presetId",
+            "unique": false,
+            "columnNames": [
+              "presetId"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tasbih_sessions_presetId` ON `${TABLE_NAME}` (`presetId`)"
+          },
+          {
+            "name": "index_tasbih_sessions_date",
+            "unique": false,
+            "columnNames": [
+              "date"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tasbih_sessions_date` ON `${TABLE_NAME}` (`date`)"
+          },
+          {
+            "name": "index_tasbih_sessions_isCompleted",
+            "unique": false,
+            "columnNames": [
+              "isCompleted"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tasbih_sessions_isCompleted` ON `${TABLE_NAME}` (`isCompleted`)"
+          }
+        ]
+      },
+      {
+        "tableName": "zakat_history",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `calculatedAt` INTEGER NOT NULL, `totalAssets` REAL NOT NULL, `totalLiabilities` REAL NOT NULL, `netWorth` REAL NOT NULL, `zakatDue` REAL NOT NULL, `nisabType` TEXT NOT NULL, `nisabValue` REAL NOT NULL, `isPaid` INTEGER NOT NULL, `paidAt` INTEGER, `notes` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calculatedAt",
+            "columnName": "calculatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalAssets",
+            "columnName": "totalAssets",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "totalLiabilities",
+            "columnName": "totalLiabilities",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "netWorth",
+            "columnName": "netWorth",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zakatDue",
+            "columnName": "zakatDue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nisabType",
+            "columnName": "nisabType",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nisabValue",
+            "columnName": "nisabValue",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isPaid",
+            "columnName": "isPaid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "paidAt",
+            "columnName": "paidAt",
+            "affinity": "INTEGER"
+          },
+          {
+            "fieldPath": "notes",
+            "columnName": "notes",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "tafseer_texts",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ayah_id` INTEGER NOT NULL, `surah_number` INTEGER NOT NULL, `ayah_number` INTEGER NOT NULL, `tafseer_id` TEXT NOT NULL, `text` TEXT NOT NULL, FOREIGN KEY(`ayah_id`) REFERENCES `ayahs`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayah_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "surahNumber",
+            "columnName": "surah_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahNumber",
+            "columnName": "ayah_number",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tafseerId",
+            "columnName": "tafseer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tafseer_texts_ayah_id",
+            "unique": false,
+            "columnNames": [
+              "ayah_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id` ON `${TABLE_NAME}` (`ayah_id`)"
+          },
+          {
+            "name": "index_tafseer_texts_tafseer_id",
+            "unique": false,
+            "columnNames": [
+              "tafseer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tafseer_texts_tafseer_id` ON `${TABLE_NAME}` (`tafseer_id`)"
+          },
+          {
+            "name": "index_tafseer_texts_ayah_id_tafseer_id",
+            "unique": true,
+            "columnNames": [
+              "ayah_id",
+              "tafseer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `${TABLE_NAME}` (`ayah_id`, `tafseer_id`)"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "table": "ayahs",
+            "onDelete": "CASCADE",
+            "onUpdate": "NO ACTION",
+            "columns": [
+              "ayah_id"
+            ],
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ]
+      },
+      {
+        "tableName": "tafseer_highlights",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ayah_id` INTEGER NOT NULL, `tafseer_id` TEXT NOT NULL, `start_offset` INTEGER NOT NULL, `end_offset` INTEGER NOT NULL, `color` TEXT NOT NULL, `note` TEXT, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayah_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tafseerId",
+            "columnName": "tafseer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startOffset",
+            "columnName": "start_offset",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "endOffset",
+            "columnName": "end_offset",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "color",
+            "columnName": "color",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "note",
+            "columnName": "note",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tafseer_highlights_ayah_id_tafseer_id",
+            "unique": false,
+            "columnNames": [
+              "ayah_id",
+              "tafseer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `${TABLE_NAME}` (`ayah_id`, `tafseer_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "tafseer_notes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `ayah_id` INTEGER NOT NULL, `tafseer_id` TEXT NOT NULL, `text` TEXT NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ayahId",
+            "columnName": "ayah_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tafseerId",
+            "columnName": "tafseer_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "text",
+            "columnName": "text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "created_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updated_at",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_tafseer_notes_ayah_id_tafseer_id",
+            "unique": false,
+            "columnNames": [
+              "ayah_id",
+              "tafseer_id"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `${TABLE_NAME}` (`ayah_id`, `tafseer_id`)"
+          }
+        ]
+      },
+      {
+        "tableName": "locations",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT NOT NULL, `latitude` REAL NOT NULL, `longitude` REAL NOT NULL, `timezone` TEXT NOT NULL, `country` TEXT, `city` TEXT, `isCurrentLocation` INTEGER NOT NULL, `isFavorite` INTEGER NOT NULL, `calculationMethod` TEXT, `asrCalculation` TEXT, `highLatitudeRule` TEXT, `fajrAngle` REAL, `ishaAngle` REAL, `createdAt` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "name",
+            "columnName": "name",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "latitude",
+            "columnName": "latitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "longitude",
+            "columnName": "longitude",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "timezone",
+            "columnName": "timezone",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "country",
+            "columnName": "country",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "city",
+            "columnName": "city",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "isCurrentLocation",
+            "columnName": "isCurrentLocation",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isFavorite",
+            "columnName": "isFavorite",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "calculationMethod",
+            "columnName": "calculationMethod",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "asrCalculation",
+            "columnName": "asrCalculation",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "highLatitudeRule",
+            "columnName": "highLatitudeRule",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "fajrAngle",
+            "columnName": "fajrAngle",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "ishaAngle",
+            "columnName": "ishaAngle",
+            "affinity": "REAL"
+          },
+          {
+            "fieldPath": "createdAt",
+            "columnName": "createdAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "updatedAt",
+            "columnName": "updatedAt",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "islamic_events",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `name_english` TEXT NOT NULL, `name_arabic` TEXT NOT NULL, `hijri_month` INTEGER NOT NULL, `hijri_day` INTEGER NOT NULL, `event_type` TEXT NOT NULL, `description` TEXT NOT NULL, `is_holiday` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameEnglish",
+            "columnName": "name_english",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nameArabic",
+            "columnName": "name_arabic",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hijriMonth",
+            "columnName": "hijri_month",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "hijriDay",
+            "columnName": "hijri_day",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "eventType",
+            "columnName": "event_type",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "description",
+            "columnName": "description",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isHoliday",
+            "columnName": "is_holiday",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [
+          {
+            "name": "index_islamic_events_hijri_month_hijri_day",
+            "unique": false,
+            "columnNames": [
+              "hijri_month",
+              "hijri_day"
+            ],
+            "orders": [],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_islamic_events_hijri_month_hijri_day` ON `${TABLE_NAME}` (`hijri_month`, `hijri_day`)"
+          }
+        ]
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '139cdab0869e9e220792e57326af9c3e')"
+    ]
+  }
+}

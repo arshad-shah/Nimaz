@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
+import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
@@ -29,6 +30,9 @@ import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahEntity
 import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
+import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
+import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
+import com.arshadshah.nimaz.data.local.database.entity.TafseerTextEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
@@ -62,11 +66,15 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         TasbihSessionEntity::class,
         // Zakat
         ZakatHistoryEntity::class,
+        // Tafseer
+        TafseerTextEntity::class,
+        TafseerHighlightEntity::class,
+        TafseerNoteEntity::class,
         // Other
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -79,6 +87,7 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
     abstract fun islamicEventDao(): IslamicEventDao
     abstract fun zakatDao(): ZakatDao
+    abstract fun tafseerDao(): TafseerDao
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"

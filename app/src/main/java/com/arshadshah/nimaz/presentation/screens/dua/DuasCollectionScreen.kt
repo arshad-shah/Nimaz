@@ -21,8 +21,10 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.DoorFront
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Flight
 import androidx.compose.material.icons.filled.Home
@@ -34,6 +36,7 @@ import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -119,15 +122,6 @@ fun DuasCollectionScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(bottom = 16.dp)
             ) {
-                // Featured Dua of the Day Card
-                item {
-                    val featuredFavorite = favoritesState.favorites.firstOrNull()
-                    FeaturedDuaCard(
-                        featuredTitle = featuredFavorite?.duaTitle,
-                        featuredCategoryName = featuredFavorite?.categoryName,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
-                    )
-                }
 
                 // Favorites Section
                 if (favoritesState.favorites.isNotEmpty()) {
@@ -143,20 +137,6 @@ fun DuasCollectionScreen(
                                 bottom = 12.dp
                             )
                         )
-                    }
-
-                    item {
-                        LazyRow(
-                            contentPadding = PaddingValues(horizontal = 20.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(favoritesState.favorites.take(5)) { favorite ->
-                                FavoriteDuaChip(
-                                    title = favorite.duaTitle ?: favorite.duaId,
-                                    onClick = { onNavigateToCategory(favorite.categoryId) }
-                                )
-                            }
-                        }
                     }
                 }
 
@@ -229,87 +209,6 @@ fun DuasCollectionScreen(
                         )
                     }
                 }
-
-                // If 4 or fewer categories, show them all as grid only
-                if (state.filteredCategories.size <= 4 && state.filteredCategories.size > 0) {
-                    // Already shown in grid above
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FeaturedDuaCard(
-    featuredTitle: String? = null,
-    featuredCategoryName: String? = null,
-    modifier: Modifier = Modifier
-) {
-    val goldColor = Color(0xFFEAB308)
-    val goldDark = Color(0xFFCA8A04)
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(goldColor, goldDark)
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .padding(20.dp)
-        ) {
-            Column {
-                // Badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.Black.copy(alpha = 0.15f))
-                        .padding(horizontal = 10.dp, vertical = 5.dp)
-                ) {
-                    Text(
-                        text = if (featuredTitle != null) "Your Favorite" else "Dua of the Day",
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1C1917)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Arabic text
-                ArabicText(
-                    text = "\u0631\u064E\u0628\u064E\u0651\u0646\u064E\u0627 \u0622\u062A\u0650\u0646\u064E\u0627 \u0641\u0650\u064A \u0627\u0644\u062F\u064F\u0651\u0646\u0652\u064A\u064E\u0627 \u062D\u064E\u0633\u064E\u0646\u064E\u0629\u064B \u0648\u064E\u0641\u0650\u064A \u0627\u0644\u0652\u0622\u062E\u0650\u0631\u064E\u0629\u0650 \u062D\u064E\u0633\u064E\u0646\u064E\u0629\u064B \u0648\u064E\u0642\u0650\u0646\u064E\u0627 \u0639\u064E\u0630\u064E\u0627\u0628\u064E \u0627\u0644\u0646\u064E\u0651\u0627\u0631\u0650",
-                    size = ArabicTextSize.LARGE,
-                    textAlign = TextAlign.End,
-                    color = Color(0xFF1C1917),
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Translation / Title
-                Text(
-                    text = featuredTitle
-                        ?: "\"Our Lord, give us good in this world and good in the Hereafter, and protect us from the punishment of the Fire.\"",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF1C1917).copy(alpha = 0.9f),
-                    lineHeight = 22.sp
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Source
-                Text(
-                    text = featuredCategoryName ?: "Quran 2:201",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.7f)
-                )
             }
         }
     }
@@ -450,42 +349,6 @@ private fun AdhkarListItem(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FavoriteDuaChip(
-    title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Card(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
-        )
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                style = MaterialTheme.typography.labelMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-    }
-}
-
 @Composable
 private fun getCategoryColor(categoryId: String): Color {
     return when (categoryId.hashCode() % 8) {
@@ -503,18 +366,22 @@ private fun getCategoryColor(categoryId: String): Color {
 
 private fun getCategoryIcon(iconName: String?): ImageVector {
     if (iconName == null) return Icons.Default.Mosque
-    return when (iconName.lowercase()) {
-        "morning", "sunrise", "fajr" -> Icons.Default.LightMode
-        "evening", "sunset", "moon" -> Icons.Default.DarkMode
-        "sleep", "night", "bed" -> Icons.Default.Hotel
-        "prayer", "mosque", "salah" -> Icons.Default.Mosque
-        "travel", "journey", "plane" -> Icons.Default.Flight
-        "food", "eat", "drink" -> Icons.Default.Restaurant
-        "home", "house" -> Icons.Default.Home
-        "bathroom", "wudu" -> Icons.Default.WaterDrop
-        "sick", "health", "healing" -> Icons.Default.LocalHospital
-        "protection", "shield" -> Icons.Default.Shield
-        "forgiveness", "repentance" -> Icons.Default.VolunteerActivism
+    return when (iconName) {
+        "🌅" -> Icons.Default.LightMode
+        "🌙" -> Icons.Default.DarkMode
+        "🤲" -> Icons.Default.Mosque
+        "☀️" -> Icons.Default.WbSunny
+        "😴" -> Icons.Default.Hotel
+        "🏠" -> Icons.Default.Home
+        "🚪" -> Icons.Default.DoorFront
+        "🕌" -> Icons.Default.Mosque
+        "🕋" -> Icons.Default.Mosque
+        "🍽️" -> Icons.Default.Restaurant
+        "✨" -> Icons.Default.AutoAwesome
+        "✈️" -> Icons.Default.Flight
+        "🌧️" -> Icons.Default.WaterDrop
+        "💚" -> Icons.Default.Favorite
+        "🙏" -> Icons.Default.VolunteerActivism
         else -> Icons.Default.Mosque
     }
 }

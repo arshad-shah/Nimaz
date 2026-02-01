@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.data.repository.FastingRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
+import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.DuaRepository
@@ -12,6 +13,7 @@ import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import com.arshadshah.nimaz.domain.repository.ZakatRepository
 import com.arshadshah.nimaz.domain.usecase.DeleteQuranBookmarkUseCase
@@ -86,6 +88,12 @@ abstract class RepositoryModule {
     abstract fun bindZakatRepository(
         zakatRepositoryImpl: ZakatRepositoryImpl
     ): ZakatRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindTafseerRepository(
+        tafseerRepositoryImpl: TafseerRepositoryImpl
+    ): TafseerRepository
 }
 
 @Module

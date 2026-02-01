@@ -179,6 +179,10 @@ sealed interface Route {
     @Serializable
     data object GlobalSearch : Route
 
+    // Tafseer
+    @Serializable
+    data class Tafseer(val surahNumber: Int, val ayahNumber: Int = 1) : Route
+
     // Surah Info
     @Serializable
     data class SurahInfo(val surahNumber: Int) : Route

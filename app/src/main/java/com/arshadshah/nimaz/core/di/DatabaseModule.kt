@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
+import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import dagger.Module
@@ -73,4 +74,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideZakatDao(database: NimazDatabase): ZakatDao = database.zakatDao()
+
+    @Provides
+    @Singleton
+    fun provideTafseerDao(database: NimazDatabase): TafseerDao = database.tafseerDao()
 }

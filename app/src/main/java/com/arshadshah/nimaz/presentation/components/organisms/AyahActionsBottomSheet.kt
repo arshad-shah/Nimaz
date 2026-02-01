@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -86,7 +87,8 @@ fun AyahActionsBottomSheet(
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
-    onCopyClick: (Ayah) -> Unit = {}
+    onCopyClick: (Ayah) -> Unit = {},
+    onTafseerClick: (Ayah) -> Unit = {}
 ) {
     NimazBottomSheet(
         onDismissRequest = onDismissRequest,
@@ -102,7 +104,8 @@ fun AyahActionsBottomSheet(
             onBookmarkClick = onBookmarkClick,
             onFavoriteClick = onFavoriteClick,
             onShareClick = onShareClick,
-            onCopyClick = onCopyClick
+            onCopyClick = onCopyClick,
+            onTafseerClick = onTafseerClick
         )
     }
 }
@@ -122,7 +125,8 @@ fun AyahActionsContent(
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
-    onCopyClick: (Ayah) -> Unit = {}
+    onCopyClick: (Ayah) -> Unit = {},
+    onTafseerClick: (Ayah) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -273,6 +277,14 @@ fun AyahActionsContent(
                     onShareClick(ayah)
                 },
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+
+            // Tafseer button
+            ActionButton(
+                icon = Icons.Default.MenuBook,
+                label = "Tafseer",
+                onClick = { onTafseerClick(ayah) },
+                tint = MaterialTheme.colorScheme.primary
             )
         }
 

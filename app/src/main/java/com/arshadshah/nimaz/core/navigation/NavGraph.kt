@@ -56,6 +56,7 @@ import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
+import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
@@ -262,7 +263,19 @@ fun NavGraph() {
                     surahNumber = args.surahNumber,
                     initialAyahNumber = args.ayahNumber,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
+                    onNavigateToTafseer = { surah, ayah ->
+                        navController.navigate(Route.Tafseer(surah, ayah))
+                    }
+                )
+            }
+
+            composable<Route.Tafseer> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.Tafseer>()
+                TafseerScreen(
+                    surahNumber = args.surahNumber,
+                    ayahNumber = args.ayahNumber,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -282,7 +295,10 @@ fun NavGraph() {
                 QuranReaderScreen(
                     pageNumber = args.pageNumber,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
+                    onNavigateToTafseer = { surah, ayah ->
+                        navController.navigate(Route.Tafseer(surah, ayah))
+                    }
                 )
             }
 
@@ -291,7 +307,10 @@ fun NavGraph() {
                 QuranReaderScreen(
                     juzNumber = args.juzNumber,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) }
+                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
+                    onNavigateToTafseer = { surah, ayah ->
+                        navController.navigate(Route.Tafseer(surah, ayah))
+                    }
                 )
             }
 

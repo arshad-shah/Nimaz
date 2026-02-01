@@ -99,7 +99,8 @@ fun MushafPage(
     onFavoriteClick: (Ayah) -> Unit = {},
     onPlayClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
-    onCopyClick: (Ayah) -> Unit = {}
+    onCopyClick: (Ayah) -> Unit = {},
+    onTafseerClick: (Ayah) -> Unit = {}
 ) {
     // State for selected ayah and bottom sheet
     var selectedAyah by remember { mutableStateOf<Ayah?>(null) }
@@ -209,6 +210,10 @@ fun MushafPage(
             },
             onCopyClick = { clickedAyah ->
                 onCopyClick(clickedAyah)
+            },
+            onTafseerClick = { clickedAyah ->
+                onTafseerClick(clickedAyah)
+                selectedAyah = null
             }
         )
     }

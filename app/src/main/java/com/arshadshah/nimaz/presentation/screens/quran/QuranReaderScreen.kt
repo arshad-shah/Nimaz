@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
@@ -143,6 +144,7 @@ fun QuranReaderScreen(
     initialAyahNumber: Int = 1,
     onNavigateBack: () -> Unit,
     onNavigateToQuranSettings: () -> Unit = {},
+    onNavigateToTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -505,6 +507,9 @@ fun QuranReaderScreen(
                                 },
                                 onShareClick = { /* Share is handled in bottom sheet */ },
                                 onCopyClick = { /* Copy is handled in bottom sheet */ },
+                                onTafseerClick = { ayah ->
+                                    onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                                },
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
@@ -608,6 +613,9 @@ fun QuranReaderScreen(
                                         ayahNumber = ayah.numberInSurah
                                     )
                                 )
+                            },
+                            onTafseerClick = {
+                                onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
                             }
                         )
                     }
@@ -996,6 +1004,7 @@ private fun AyahItem(
     onBookmarkClick: () -> Unit,
     onFavoriteClick: () -> Unit = {},
     onPlayAyahClick: () -> Unit = {},
+    onTafseerClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -1090,6 +1099,17 @@ private fun AyahItem(
                         contentDescription = if (isHighlighted) "Playing" else "Play",
                         tint = if (isHighlighted) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+                IconButton(
+                    onClick = onTafseerClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MenuBook,
+                        contentDescription = "Tafseer",
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )
                 }

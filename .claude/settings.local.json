@@ -48,7 +48,8 @@
       "WebFetch(domain:www.assabile.com)",
       "WebFetch(domain:archive.org)",
       "Bash(for screen in SettingsScreen PrayerSettingsScreen AppearanceSettingsScreen NotificationSettingsScreen QuranSettingsScreen LocationScreen MoreMenuScreen AboutScreen HomeScreen HelpSupportScreen FastTrackerScreen PrayerTrackerScreen QadaPrayersScreen BookmarksScreen SearchScreen HadithCollectionScreen IslamicCalendarScreen TasbihScreen ZakatCalculatorScreen ZakatHistoryScreen SurahInfoScreen)",
-      "Bash(do)"
+      "Bash(do)",
+      "WebFetch(domain:api.quran.com)"
     ]
   }
 }

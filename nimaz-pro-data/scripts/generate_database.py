@@ -342,6 +342,51 @@ def create_tables(conn):
         )
     ''')
 
+    # Tafseer Texts (pre-populated content)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tafseer_texts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            ayah_id INTEGER NOT NULL,
+            surah_number INTEGER NOT NULL,
+            ayah_number INTEGER NOT NULL,
+            tafseer_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            FOREIGN KEY (ayah_id) REFERENCES ayahs(id) ON DELETE CASCADE
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_texts_ayah_id ON tafseer_texts(ayah_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_texts_tafseer_id ON tafseer_texts(tafseer_id)')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_tafseer_texts_ayah_tafseer ON tafseer_texts(ayah_id, tafseer_id)')
+
+    # Tafseer Highlights (user data)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tafseer_highlights (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            ayah_id INTEGER NOT NULL,
+            tafseer_id TEXT NOT NULL,
+            start_offset INTEGER NOT NULL,
+            end_offset INTEGER NOT NULL,
+            color TEXT NOT NULL,
+            note TEXT,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_highlights_ayah_tafseer ON tafseer_highlights(ayah_id, tafseer_id)')
+
+    # Tafseer Notes (user data)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS tafseer_notes (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            ayah_id INTEGER NOT NULL,
+            tafseer_id TEXT NOT NULL,
+            text TEXT NOT NULL,
+            created_at INTEGER NOT NULL,
+            updated_at INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_notes_ayah_tafseer ON tafseer_notes(ayah_id, tafseer_id)')
+
     # Locations
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS locations (
@@ -514,6 +559,30 @@ def populate_database(conn):
               p['translation'], p['target_count'], 1 if p.get('is_custom') else 0,
               p['display_order']))
     print(f"Inserted {len(presets)} tasbih presets")
+
+    # Tafseer - Ibn Kathir
+    tafseer_ibn_kathir = load_json('tafseer_ibn_kathir.json')
+    if tafseer_ibn_kathir:
+        for t in tafseer_ibn_kathir:
+            cursor.execute('''
+                INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text)
+                VALUES (?,?,?,?,?)
+            ''', (t['ayah_id'], t['surah_number'], t['ayah_number'], 'ibn_kathir_en', t['text']))
+        print(f"Inserted {len(tafseer_ibn_kathir)} Ibn Kathir tafseer entries")
+    else:
+        print("Warning: No Ibn Kathir tafseer data found")
+
+    # Tafseer - Ma'arif al-Qur'an
+    tafseer_maariful = load_json('tafseer_maariful_quran.json')
+    if tafseer_maariful:
+        for t in tafseer_maariful:
+            cursor.execute('''
+                INSERT INTO tafseer_texts (ayah_id, surah_number, ayah_number, tafseer_id, text)
+                VALUES (?,?,?,?,?)
+            ''', (t['ayah_id'], t['surah_number'], t['ayah_number'], 'maariful_quran_en', t['text']))
+        print(f"Inserted {len(tafseer_maariful)} Ma'arif al-Qur'an tafseer entries")
+    else:
+        print("Warning: No Ma'arif al-Qur'an tafseer data found")
 
     conn.commit()
 
