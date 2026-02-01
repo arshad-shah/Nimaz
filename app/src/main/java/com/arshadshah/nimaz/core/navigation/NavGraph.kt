@@ -236,6 +236,7 @@ fun NavGraph() {
                     onNavigateToFasting = { navController.navigate(Route.FastingHome) },
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToDuas = { navController.navigate(Route.DuaHome) },
+                    onNavigateToTafseer = { navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1)) },
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },

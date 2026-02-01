@@ -1,24 +1,13 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -27,16 +16,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
@@ -59,14 +45,12 @@ fun TafseerHighlightableText(
     isHighlightMode: Boolean,
     selectedColor: String,
     onHighlightCreated: (startOffset: Int, endOffset: Int, color: String) -> Unit,
-    onHighlightDeleted: (highlightId: Long) -> Unit,
+    onHighlightTapped: (TafseerHighlight) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     var selectionStart by remember { mutableIntStateOf(-1) }
     var selectionEnd by remember { mutableIntStateOf(-1) }
-    var deletePopupHighlight by remember { mutableStateOf<TafseerHighlight?>(null) }
-    var deletePopupOffset by remember { mutableStateOf(Offset.Zero) }
 
     // Build annotated string with highlights, Arabic font detection, and selection preview
     val annotatedString = remember(text, highlights, selectionStart, selectionEnd, selectedColor, isHighlightMode) {
@@ -105,60 +89,12 @@ fun TafseerHighlightableText(
                             // Check if tapped on existing highlight
                             val tappedHighlight = findTappedHighlight(charOffset, highlights, text)
                             if (tappedHighlight != null) {
-                                deletePopupHighlight = tappedHighlight
-                                deletePopupOffset = tapOffset
-                            } else {
-                                deletePopupHighlight = null
+                                onHighlightTapped(tappedHighlight)
                             }
                         }
                     }
                 }
         )
-
-        // Delete popup for tapped highlight
-        AnimatedVisibility(
-            visible = deletePopupHighlight != null,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            deletePopupHighlight?.let { highlight ->
-                val density = LocalDensity.current
-                val xPx = deletePopupOffset.x.toInt()
-                val yPx = deletePopupOffset.y.toInt()
-
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    shadowElevation = 4.dp,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    modifier = Modifier.offset {
-                        IntOffset(
-                            x = (xPx - with(density) { 60.dp.toPx() }.toInt()).coerceAtLeast(0),
-                            y = yPx - with(density) { 44.dp.toPx() }.toInt()
-                        )
-                    }
-                ) {
-                    TextButton(
-                        onClick = {
-                            onHighlightDeleted(highlight.id)
-                            deletePopupHighlight = null
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = "Remove",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    }
-                }
-            }
-        }
 
         // Selection indicator when first tap placed
         if (isHighlightMode && selectionStart >= 0) {

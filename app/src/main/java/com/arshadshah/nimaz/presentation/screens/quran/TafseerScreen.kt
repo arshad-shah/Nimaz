@@ -139,7 +139,6 @@ fun TafseerScreen(
                         ayah = ayah,
                         tafseer = if (isCurrentPage) state.currentTafseer else null,
                         highlights = if (isCurrentPage) state.highlights else emptyList(),
-                        notes = if (isCurrentPage) state.notes else emptyList(),
                         totalAyahs = state.ayahs.size,
                         selectedSource = state.selectedSource,
                         onSourceSwitch = { source ->
@@ -151,14 +150,8 @@ fun TafseerScreen(
                         onHighlightDeleted = { id ->
                             viewModel.onEvent(TafseerEvent.DeleteHighlight(id))
                         },
-                        onNoteAdded = { text ->
-                            viewModel.onEvent(TafseerEvent.AddNote(text))
-                        },
-                        onNoteUpdated = { note ->
-                            viewModel.onEvent(TafseerEvent.UpdateNote(note))
-                        },
-                        onNoteDeleted = { id ->
-                            viewModel.onEvent(TafseerEvent.DeleteNote(id))
+                        onHighlightNoteUpdated = { id, note ->
+                            viewModel.onEvent(TafseerEvent.UpdateHighlightNote(id, note))
                         }
                     )
                 }

@@ -72,6 +72,7 @@ fun MoreMenuScreen(
     onNavigateToFasting: () -> Unit,
     onNavigateToZakat: () -> Unit,
     onNavigateToDuas: () -> Unit,
+    onNavigateToTafseer: () -> Unit,
     onNavigateToLocation: () -> Unit,
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
@@ -138,6 +139,13 @@ fun MoreMenuScreen(
                         subtitle = "Daily duas and supplications",
                         icon = Icons.Default.Mosque,
                         onClick = onNavigateToDuas
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = "Tafseer",
+                        subtitle = "Quran interpretation and commentary",
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        onClick = onNavigateToTafseer
                     )
                 }
             }
