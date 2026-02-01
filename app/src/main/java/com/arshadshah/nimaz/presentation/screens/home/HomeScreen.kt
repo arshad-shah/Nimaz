@@ -284,13 +284,11 @@ fun HomeScreen(
                     ) {
                         NimazSectionHeader(
                             title = "Prayer Times",
-                            seeAllText = "Settings"
-                        )
-                        Text(
-                            text = "Settings",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.clickable { onNavigateToPrayerSettings() }
+                            showSeeAll = true,
+                            seeAllText = "Settings",
+                            onSeeAllClick = {
+                                onNavigateToPrayerSettings()
+                            }
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))

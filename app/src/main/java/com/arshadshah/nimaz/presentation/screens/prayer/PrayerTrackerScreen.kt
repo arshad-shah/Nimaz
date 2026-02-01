@@ -2,14 +2,12 @@ package com.arshadshah.nimaz.presentation.screens.prayer
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -25,8 +23,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
@@ -58,21 +54,23 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.IndicatorPosition
+import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
+import com.arshadshah.nimaz.presentation.components.molecules.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -417,202 +415,44 @@ private fun CalendarSection(
     onDateSelected: (LocalDate) -> Unit,
     historyRecords: List<PrayerRecord>
 ) {
-    // Section header with month navigation
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "Calendar",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Surface(
-                onClick = { onMonthChange(displayedMonth.minusMonths(1)) },
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = "Previous month",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
+    val today = remember { LocalDate.now() }
+
+    val prayerStatusMap = remember(historyRecords) {
+        historyRecords
+            .filter { it.prayerName != PrayerName.SUNRISE }
+            .groupBy { it.date }
+            .mapValues { (_, records) ->
+                val completedCount = records.count { r ->
+                    r.status == PrayerStatus.PRAYED ||
+                            r.status == PrayerStatus.LATE ||
+                            r.status == PrayerStatus.QADA
+                }
+                val missedCount = records.count { r -> r.status == PrayerStatus.MISSED }
+                when {
+                    completedCount == 5 -> NimazColors.StatusColors.Prayed
+                    completedCount > 0 -> NimazColors.StatusColors.Partial
+                    missedCount > 0 -> NimazColors.StatusColors.Missed
+                    else -> null
                 }
             }
-            Text(
-                text = displayedMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.width(120.dp)
+    }
+
+    NimazCalendar(
+        displayedMonth = displayedMonth,
+        selectedDate = selectedDate,
+        onDateSelected = onDateSelected,
+        onPreviousMonth = { onMonthChange(displayedMonth.minusMonths(1)) },
+        onNextMonth = { onMonthChange(displayedMonth.plusMonths(1)) },
+        selectionStyle = SelectionStyle.BORDER,
+        dayStateProvider = { date ->
+            val epoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+            val badgeColor = prayerStatusMap[epoch]
+            CalendarDayState(
+                indicatorColor = if (date.isBefore(today) && badgeColor != null) badgeColor else null,
+                indicatorPosition = IndicatorPosition.TOP_END
             )
-            Surface(
-                onClick = { onMonthChange(displayedMonth.plusMonths(1)) },
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "Next month",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
         }
-    }
-
-    Spacer(modifier = Modifier.height(15.dp))
-
-    // Calendar grid
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
-    ) {
-        Column(modifier = Modifier.padding(15.dp)) {
-            // Day name headers
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                val dayNames = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
-                dayNames.forEach { name ->
-                    Text(
-                        text = name,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Calendar days
-            val calendarDays = remember(displayedMonth) {
-                buildCalendarDays(displayedMonth)
-            }
-
-            val today = LocalDate.now()
-
-            // Render rows of 7
-            calendarDays.chunked(7).forEach { week ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    week.forEach { day ->
-                        val isCurrentMonth = day.month == displayedMonth.month
-                        val isToday = day == today
-                        val isSelected = day == selectedDate
-
-                        // Calculate completion status for the day using historyRecords
-                        val dayEpoch = day.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-                        val dayRecords = historyRecords.filter { it.date == dayEpoch && it.prayerName != PrayerName.SUNRISE }
-                        val completedCount = dayRecords.count { record ->
-                            record.status == PrayerStatus.PRAYED ||
-                            record.status == PrayerStatus.LATE ||
-                            record.status == PrayerStatus.QADA
-                        }
-                        val missedCount = dayRecords.count { record ->
-                            record.status == PrayerStatus.MISSED
-                        }
-                        val totalExpected = 5 // 5 daily prayers (excluding sunrise)
-                        val hasRecords = dayRecords.isNotEmpty()
-
-                        val badgeColor = when {
-                            !hasRecords -> null // No records for this day
-                            completedCount == totalExpected -> NimazColors.StatusColors.Prayed // Green - all completed
-                            completedCount > 0 -> NimazColors.StatusColors.Partial // Orange - partial completion
-                            missedCount > 0 -> NimazColors.StatusColors.Missed // Red - all missed
-                            else -> null
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .padding(2.dp)
-                                .then(
-                                    if (isSelected) {
-                                        Modifier.border(
-                                            2.dp,
-                                            MaterialTheme.colorScheme.primary,
-                                            RoundedCornerShape(10.dp)
-                                        )
-                                    } else Modifier
-                                )
-                                .then(
-                                    if (isToday) {
-                                        Modifier
-                                            .clip(RoundedCornerShape(10.dp))
-                                            .background(MaterialTheme.colorScheme.primaryContainer)
-                                    } else Modifier
-                                )
-                                .clip(RoundedCornerShape(10.dp))
-                                .clickable {
-                                    onDateSelected(day)
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "${day.dayOfMonth}",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = when {
-                                    isToday -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    !isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(
-                                        alpha = 0.25f
-                                    )
-
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }
-                            )
-                            // Day badge for past days based on actual completion status
-                            if (day.isBefore(today) && badgeColor != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(2.dp)
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(badgeColor)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
-    val firstOfMonth = yearMonth.atDay(1)
-    val firstDayOfWeek = firstOfMonth.dayOfWeek
-    // Sunday = 0 offset
-    val offset = if (firstDayOfWeek == DayOfWeek.SUNDAY) 0 else firstDayOfWeek.value
-    val startDate = firstOfMonth.minusDays(offset.toLong())
-
-    val days = mutableListOf<LocalDate>()
-    val totalDays = 42 // 6 rows x 7
-    for (i in 0 until totalDays) {
-        days.add(startDate.plusDays(i.toLong()))
-    }
-    return days
+    )
 }
 
 // --- Selected Day Detail ---

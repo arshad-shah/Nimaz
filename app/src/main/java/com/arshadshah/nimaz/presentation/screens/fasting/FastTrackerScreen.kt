@@ -3,14 +3,12 @@ package com.arshadshah.nimaz.presentation.screens.fasting
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,13 +16,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Button
@@ -33,8 +28,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -55,7 +48,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,6 +62,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
@@ -81,12 +76,10 @@ import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
-import java.time.Month
+import java.time.YearMonth
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
 import java.time.temporal.TemporalAdjusters
-import java.util.Locale
 
 // Color constants for makeup fasts
 private val OrangeAccent = Color(0xFFF97316)
@@ -673,194 +666,69 @@ private fun FastingCalendarSection(
     showRamadanIndicators: Boolean = true,
     modifier: Modifier = Modifier
 ) {
-    val today = LocalDate.now()
-    val monthStart = LocalDate.of(selectedYear, selectedMonth, 1)
-    val daysInMonth = monthStart.lengthOfMonth()
-    val firstDayOfWeek = monthStart.dayOfWeek.value % 7 // Sunday = 0
+    val today = remember { LocalDate.now() }
+    val displayedMonth = remember(selectedMonth, selectedYear) {
+        YearMonth.of(selectedYear, selectedMonth)
+    }
+    val daysInMonth = displayedMonth.lengthOfMonth()
 
-    // Build a map of date -> status from records
     val recordMap = remember(records) {
         records.associateBy { record ->
             LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
         }
     }
 
-    // Check which days are in Ramadan for indicators
     val ramadanDaysInMonth = remember(selectedMonth, selectedYear) {
         if (showRamadanIndicators) {
             (1..daysInMonth).filter { day ->
-                val date = LocalDate.of(selectedYear, selectedMonth, day)
-                HijriDateCalculator.isRamadan(date)
+                HijriDateCalculator.isRamadan(LocalDate.of(selectedYear, selectedMonth, day))
             }.toSet()
-        } else {
-            emptySet()
-        }
+        } else emptySet()
     }
 
-    Column(modifier = modifier) {
-        // Calendar header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "${Month.of(selectedMonth).getDisplayName(TextStyle.FULL, Locale.getDefault())} $selectedYear",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                IconButton(
-                    onClick = onPreviousMonth,
-                    modifier = Modifier.size(32.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = "Previous",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-                IconButton(
-                    onClick = onNextMonth,
-                    modifier = Modifier.size(32.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "Next",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-            }
-        }
+    val futureTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
 
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Calendar grid
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(15.dp)
-        ) {
-            Column {
-                // Weekday headers
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
-                        Text(
-                            text = day,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 5.dp)
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Days grid
-                val totalCells = firstDayOfWeek + daysInMonth
-                val rows = (totalCells + 6) / 7
-
-                for (row in 0 until rows) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        for (col in 0..6) {
-                            val cellIndex = row * 7 + col
-                            val dayNumber = cellIndex - firstDayOfWeek + 1
-
-                            if (dayNumber in 1..daysInMonth) {
-                                val date = LocalDate.of(selectedYear, selectedMonth, dayNumber)
-                                val record = recordMap[date]
-                                val isToday = date == today
-                                val isFuture = date.isAfter(today)
-                                val isFasted = record?.status == FastStatus.FASTED
-                                val isMissed = record?.status == FastStatus.MAKEUP_DUE
-                                val isRamadanDay = dayNumber in ramadanDaysInMonth
-
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .aspectRatio(1f)
-                                        .padding(2.dp)
-                                        .clip(RoundedCornerShape(10.dp))
-                                        .background(
-                                            when {
-                                                isToday -> MaterialTheme.colorScheme.primaryContainer
-                                                isRamadanDay -> NimazColors.FastingColors.Ramadan.copy(alpha = 0.15f)
-                                                else -> Color.Transparent
-                                            }
-                                        )
-                                        .clickable { onSelectDate(date) },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(
-                                        horizontalAlignment = Alignment.CenterHorizontally,
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            text = dayNumber.toString(),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            fontWeight = if (isToday || isRamadanDay) FontWeight.SemiBold else FontWeight.Normal,
-                                            color = when {
-                                                isToday -> MaterialTheme.colorScheme.onPrimaryContainer
-                                                isRamadanDay && !isFuture -> NimazColors.FastingColors.Ramadan
-                                                isFuture -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
-                                                else -> MaterialTheme.colorScheme.onSurface
-                                            }
-                                        )
-                                        // Status dot
-                                        if (isFasted || isMissed) {
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(6.dp)
-                                                    .clip(CircleShape)
-                                                    .background(
-                                                        if (isFasted) NimazColors.FastingColors.Fasted
-                                                        else Color(0xFFEF4444)
-                                                    )
-                                            )
-                                        }
-                                    }
-                                }
-                            } else {
-                                Spacer(modifier = Modifier.weight(1f))
-                            }
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                // Legend
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    NimazLegendItem(color = NimazColors.FastingColors.Fasted, label = "Fasted")
-                    Spacer(modifier = Modifier.width(16.dp))
-                    NimazLegendItem(color = Color(0xFFEF4444), label = "Missed")
-                    if (ramadanDaysInMonth.isNotEmpty()) {
-                        Spacer(modifier = Modifier.width(16.dp))
-                        NimazLegendItem(color = NimazColors.FastingColors.Ramadan, label = "Ramadan")
-                    }
-                }
+    val legendItems = remember(ramadanDaysInMonth) {
+        buildList {
+            add(CalendarLegendItem(NimazColors.FastingColors.Fasted, "Fasted"))
+            add(CalendarLegendItem(Color(0xFFEF4444), "Missed"))
+            if (ramadanDaysInMonth.isNotEmpty()) {
+                add(CalendarLegendItem(NimazColors.FastingColors.Ramadan, "Ramadan"))
             }
         }
     }
+
+    NimazCalendar(
+        displayedMonth = displayedMonth,
+        selectedDate = null,
+        onDateSelected = onSelectDate,
+        onPreviousMonth = onPreviousMonth,
+        onNextMonth = onNextMonth,
+        modifier = modifier,
+        dayStateProvider = { date ->
+            if (date.monthValue == selectedMonth && date.year == selectedYear) {
+                val record = recordMap[date]
+                val isFuture = date.isAfter(today)
+                val isRamadanDay = date.dayOfMonth in ramadanDaysInMonth
+                CalendarDayState(
+                    indicatorColor = when {
+                        record?.status == FastStatus.FASTED -> NimazColors.FastingColors.Fasted
+                        record?.status == FastStatus.MAKEUP_DUE -> Color(0xFFEF4444)
+                        else -> null
+                    },
+                    backgroundColor = if (isRamadanDay)
+                        NimazColors.FastingColors.Ramadan.copy(alpha = 0.15f) else null,
+                    textColor = when {
+                        isRamadanDay && !isFuture -> NimazColors.FastingColors.Ramadan
+                        isFuture -> futureTextColor
+                        else -> null
+                    },
+                    fontWeight = if (isRamadanDay) FontWeight.SemiBold else null
+                )
+            } else CalendarDayState()
+        },
+        legendItems = legendItems
+    )
 }
 
 @Composable
