@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import androidx.core.net.toUri
 
 private data class FaqItem(val question: String, val answer: String)
 
@@ -155,7 +156,7 @@ fun HelpSupportScreen(
                         .fillMaxWidth()
                         .clickable {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = Uri.parse("mailto:support@nimaz.app")
+                                data = "mailto:support@nimaz.app".toUri()
                                 putExtra(Intent.EXTRA_SUBJECT, "Nimaz Support Request")
                             }
                             context.startActivity(Intent.createChooser(intent, "Send Email"))

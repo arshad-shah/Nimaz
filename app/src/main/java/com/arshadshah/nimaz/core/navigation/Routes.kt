@@ -190,6 +190,44 @@ sealed interface Route {
     // Select Reciter
     @Serializable
     data object SelectReciter : Route
+
+    // Licenses
+    @Serializable
+    data object Licenses : Route
+
+    @Serializable
+    data class LicenseDetail(val libraryHashCode: Int) : Route
+
+    // Asma ul Husna (99 Names of Allah)
+    @Serializable
+    data object AsmaUlHusnaList : Route
+
+    @Serializable
+    data class AsmaUlHusnaDetail(val nameId: Int) : Route
+
+    // Asma un Nabi (99 Names of Prophet Muhammad)
+    @Serializable
+    data object AsmaUnNabiList : Route
+
+    @Serializable
+    data class AsmaUnNabiDetail(val nameId: Int) : Route
+
+    // Prophets of Islam
+    @Serializable
+    data object ProphetsList : Route
+
+    @Serializable
+    data class ProphetDetail(val prophetId: Int) : Route
+
+    // Khatam
+    @Serializable
+    data object KhatamList : Route
+
+    @Serializable
+    data class KhatamDetail(val khatamId: Long) : Route
+
+    @Serializable
+    data object KhatamCreate : Route
 }
 
 // Navigation destinations for bottom navigation

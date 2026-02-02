@@ -1,21 +1,15 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,22 +23,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionOption
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -138,7 +125,7 @@ fun PrayerSettingsScreen(
             // Manual Adjustments Section
             item {
                 NimazSettingsSection(title = "MANUAL ADJUSTMENTS (MINUTES)") {
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Fajr",
                         value = prayerState.fajrAdjustment,
                         onValueChange = {
@@ -146,7 +133,7 @@ fun PrayerSettingsScreen(
                         }
                     )
                     NimazDivider()
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Sunrise",
                         value = prayerState.sunriseAdjustment,
                         onValueChange = {
@@ -154,7 +141,7 @@ fun PrayerSettingsScreen(
                         }
                     )
                     NimazDivider()
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Dhuhr",
                         value = prayerState.dhuhrAdjustment,
                         onValueChange = {
@@ -162,7 +149,7 @@ fun PrayerSettingsScreen(
                         }
                     )
                     NimazDivider()
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Asr",
                         value = prayerState.asrAdjustment,
                         onValueChange = {
@@ -170,7 +157,7 @@ fun PrayerSettingsScreen(
                         }
                     )
                     NimazDivider()
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Maghrib",
                         value = prayerState.maghribAdjustment,
                         onValueChange = {
@@ -178,7 +165,7 @@ fun PrayerSettingsScreen(
                         }
                     )
                     NimazDivider()
-                    AdjustmentRow(
+                    NimazNumberStepper(
                         label = "Isha",
                         value = prayerState.ishaAdjustment,
                         onValueChange = {
@@ -279,74 +266,3 @@ fun PrayerSettingsScreen(
     }
 }
 
-@Composable
-private fun AdjustmentRow(
-    label: String,
-    value: Int,
-    onValueChange: (Int) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 15.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-
-            NimazIconButton(
-                icon = Icons.Default.Remove,
-                contentDescription = "Adjustment Info",
-                style = NimazIconButtonStyle.FILLED,
-                size = NimazIconButtonSize.SMALL,
-                onClick = {
-                    onValueChange(value - 1)
-                     }
-            )
-            NimazCard(
-                style = NimazCardStyle.OUTLINED,
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.outlineVariant)
-            ) {
-                Text(
-                    text = if (value > 0) "+$value" else "$value",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(8.dp),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-            }
-            NimazIconButton(
-                icon = Icons.Default.Add,
-                contentDescription = "Adjustment Info",
-                style = NimazIconButtonStyle.FILLED,
-                size = NimazIconButtonSize.SMALL,
-                onClick = {
-                    onValueChange(value + 1)
-                }
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Adjustment Row")
-@Composable
-private fun AdjustmentRowPreview() {
-    NimazTheme {
-        AdjustmentRow(
-            label = "Fajr",
-            value = 2,
-            onValueChange = {}
-        )
-    }
-}

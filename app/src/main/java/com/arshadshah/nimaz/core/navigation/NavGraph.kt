@@ -36,7 +36,16 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import com.google.android.play.core.review.ReviewManagerFactory
+import kotlin.system.exitProcess
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
+import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
+import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
+import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
+import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
@@ -47,7 +56,16 @@ import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
+import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
+import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaListScreen
+import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
+import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiListScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamListScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
+import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
+import com.arshadshah.nimaz.presentation.screens.prophets.ProphetsListScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
@@ -203,6 +221,10 @@ fun NavGraph() {
                     },
                     onNavigateToQuranAyah = { surahNumber, ayahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                    },
+                    onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
+                    onNavigateToKhatamDetail = { khatamId ->
+                        navController.navigate(Route.KhatamDetail(khatamId))
                     }
                 )
             }
@@ -223,6 +245,13 @@ fun NavGraph() {
 
             composable<Route.More> {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val settingsViewModel: SettingsViewModel = hiltViewModel()
+                val shouldRestart by settingsViewModel.shouldRestart.collectAsState()
+
+                LaunchedEffect(shouldRestart) {
+                    if (shouldRestart) restartApp(context)
+                }
+
                 MoreMenuScreen(
                     onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
                     onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
@@ -240,6 +269,10 @@ fun NavGraph() {
                     onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
+                    onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
+                    onNavigateToAsmaUlHusna = { navController.navigate(Route.AsmaUlHusnaList) },
+                    onNavigateToAsmaUnNabi = { navController.navigate(Route.AsmaUnNabiList) },
+                    onNavigateToProphets = { navController.navigate(Route.ProphetsList) },
                     onShareApp = {
                         val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                             type = "text/plain"
@@ -248,11 +281,21 @@ fun NavGraph() {
                         context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
                     },
                     onRateApp = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
-                        context.startActivity(intent)
+                        val activity = context as? Activity
+                        if (activity != null) {
+                            val manager = ReviewManagerFactory.create(context)
+                            manager.requestReviewFlow().addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    manager.launchReviewFlow(activity, task.result)
+                                } else {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                                    context.startActivity(intent)
+                                }
+                            }
+                        }
                     },
                     onDeleteAllData = {
-                        // TODO: Implement delete all data via SettingsViewModel
+                        settingsViewModel.onEvent(SettingsEvent.DeleteAllData)
                     }
                 )
             }
@@ -267,6 +310,11 @@ fun NavGraph() {
                     onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToTafseer = { surah, ayah ->
                         navController.navigate(Route.Tafseer(surah, ayah))
+                    },
+                    onNavigateToNextSurah = { nextSurah ->
+                        navController.navigate(Route.QuranReader(nextSurah)) {
+                            popUpTo<Route.QuranReader> { inclusive = true }
+                        }
                     }
                 )
             }
@@ -630,6 +678,7 @@ fun NavGraph() {
 
             // Settings
             composable<Route.Settings> {
+                val context = androidx.compose.ui.platform.LocalContext.current
                 SettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
@@ -638,7 +687,8 @@ fun NavGraph() {
                     onNavigateToAppearance = { navController.navigate(Route.SettingsAppearance) },
                     onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
                     onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
-                    onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) }
+                    onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
+                    onRestartApp = { restartApp(context) }
                 )
             }
 
@@ -697,20 +747,29 @@ fun NavGraph() {
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/privacy-policy"))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/privacy-policy"))
                         context.startActivity(intent)
                     },
                     onNavigateToTerms = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/terms-of-service"))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/terms-of-service"))
                         context.startActivity(intent)
                     },
                     onNavigateToLicenses = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimazapp.com/licenses"))
-                        context.startActivity(intent)
+                        navController.navigate(Route.Licenses)
                     },
                     onRateApp = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
-                        context.startActivity(intent)
+                        val activity = context as? Activity
+                        if (activity != null) {
+                            val manager = ReviewManagerFactory.create(context)
+                            manager.requestReviewFlow().addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    manager.launchReviewFlow(activity, task.result)
+                                } else {
+                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                                    context.startActivity(intent)
+                                }
+                            }
+                        }
                     },
                     onShareApp = {
                         val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
@@ -721,11 +780,112 @@ fun NavGraph() {
                     },
                     onContactUs = {
                         val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:support@nimazapp.com")
+                            data = android.net.Uri.parse("mailto:arshad@arshadshah.com")
                             putExtra(android.content.Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
                         }
                         context.startActivity(intent)
                     }
+                )
+            }
+
+            composable<Route.Licenses> {
+                LicensesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { hashCode ->
+                        navController.navigate(Route.LicenseDetail(hashCode))
+                    }
+                )
+            }
+
+            composable<Route.LicenseDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.LicenseDetail>()
+                LicenseDetailScreen(
+                    libraryHashCode = args.libraryHashCode,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Asma ul Husna screens
+            composable<Route.AsmaUlHusnaList> {
+                AsmaUlHusnaListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { nameId ->
+                        navController.navigate(Route.AsmaUlHusnaDetail(nameId))
+                    }
+                )
+            }
+
+            composable<Route.AsmaUlHusnaDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.AsmaUlHusnaDetail>()
+                AsmaUlHusnaDetailScreen(
+                    nameId = args.nameId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Asma un Nabi screens
+            composable<Route.AsmaUnNabiList> {
+                AsmaUnNabiListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { nameId ->
+                        navController.navigate(Route.AsmaUnNabiDetail(nameId))
+                    }
+                )
+            }
+
+            composable<Route.AsmaUnNabiDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.AsmaUnNabiDetail>()
+                AsmaUnNabiDetailScreen(
+                    nameId = args.nameId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Prophets screens
+            composable<Route.ProphetsList> {
+                ProphetsListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { prophetId ->
+                        navController.navigate(Route.ProphetDetail(prophetId))
+                    }
+                )
+            }
+
+            composable<Route.ProphetDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.ProphetDetail>()
+                ProphetDetailScreen(
+                    prophetId = args.prophetId,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Khatam screens
+            composable<Route.KhatamList> {
+                KhatamListScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToDetail = { khatamId ->
+                        navController.navigate(Route.KhatamDetail(khatamId))
+                    },
+                    onNavigateToCreate = {
+                        navController.navigate(Route.KhatamCreate)
+                    }
+                )
+            }
+
+            composable<Route.KhatamDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.KhatamDetail>()
+                KhatamDetailScreen(
+                    khatamId = args.khatamId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToRead = { surahNumber, ayahNumber ->
+                        navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                    }
+                )
+            }
+
+            composable<Route.KhatamCreate> {
+                KhatamCreateScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -786,3 +946,13 @@ private val bottomNavItems = listOf(
     BottomNavItem(Route.QiblaNav, "Qibla", Icons.Default.Explore),
     BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz)
 )
+
+private fun restartApp(context: Context) {
+    val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+    intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+    context.startActivity(intent)
+    if (context is Activity) {
+        context.finish()
+    }
+    exitProcess(0)
+}

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
@@ -85,4 +86,16 @@ interface FastingDao {
         ORDER BY date DESC
     """)
     suspend fun getRecentFastedRecords(todayTimestamp: Long): List<FastRecordEntity>
+
+    @Query("DELETE FROM fast_records")
+    suspend fun deleteAllFastRecords()
+
+    @Query("DELETE FROM makeup_fasts")
+    suspend fun deleteAllMakeupFasts()
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllFastRecords()
+        deleteAllMakeupFasts()
+    }
 }

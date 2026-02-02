@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
@@ -77,6 +79,10 @@ fun MoreMenuScreen(
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToMonthlyPrayerTimes: () -> Unit,
+    onNavigateToKhatam: () -> Unit,
+    onNavigateToAsmaUlHusna: () -> Unit,
+    onNavigateToAsmaUnNabi: () -> Unit,
+    onNavigateToProphets: () -> Unit,
     onDeleteAllData: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -118,6 +124,13 @@ fun MoreMenuScreen(
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
                     )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = "Khatam Quran",
+                        subtitle = "Track your Quran completion",
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        onClick = onNavigateToKhatam
+                    )
                 }
             }
 
@@ -127,6 +140,27 @@ fun MoreMenuScreen(
             }
             item {
                 NimazMenuGroup {
+                    NimazMenuItem(
+                        title = "Allah's 99 Names",
+                        subtitle = "Learn the beautiful names of Allah",
+                        icon = Icons.Default.Star,
+                        onClick = onNavigateToAsmaUlHusna
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = "Prophet's 99 Names",
+                        subtitle = "Names and attributes of Prophet Muhammad (PBUH)",
+                        icon = Icons.Default.Person,
+                        onClick = onNavigateToAsmaUnNabi
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = "Prophets of Islam",
+                        subtitle = "Stories and lessons from 25 prophets",
+                        icon = Icons.Default.Groups,
+                        onClick = onNavigateToProphets
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = "Hadith",
                         subtitle = "Authentic hadith collections",

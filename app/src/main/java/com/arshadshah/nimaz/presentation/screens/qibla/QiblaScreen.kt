@@ -50,6 +50,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -93,6 +94,13 @@ fun QiblaScreen(
 ) {
     val state by viewModel.qiblaState.collectAsState()
     val context = LocalContext.current
+
+    DisposableEffect(Unit) {
+        viewModel.onEvent(QiblaEvent.StartCompass)
+        onDispose {
+            viewModel.onEvent(QiblaEvent.StopCompass)
+        }
+    }
 
     val animatedAzimuth by animateFloatAsState(
         targetValue = state.animatedAzimuth,

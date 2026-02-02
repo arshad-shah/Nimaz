@@ -29,8 +29,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MenuBook
@@ -41,6 +43,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -52,6 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -145,6 +149,7 @@ fun QuranReaderScreen(
     onNavigateBack: () -> Unit,
     onNavigateToQuranSettings: () -> Unit = {},
     onNavigateToTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
+    onNavigateToNextSurah: (Int) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -271,6 +276,11 @@ fun QuranReaderScreen(
         }
     }
 
+    // Force list view when khatam is active (page view has no khatam checkboxes)
+    LaunchedEffect(state.activeKhatamId) {
+        if (state.activeKhatamId != null) usePageView = false
+    }
+
     val favoriteAyahIds = state.favoriteAyahIds
 
     val displayAyahs = when (state.readingMode) {
@@ -356,7 +366,7 @@ fun QuranReaderScreen(
                     }
                 },
                 actions = {
-                    if (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ) {
+                    if (state.activeKhatamId == null && (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ)) {
                         IconButton(onClick = { usePageView = !usePageView }) {
                             Icon(
                                 imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
@@ -551,6 +561,54 @@ fun QuranReaderScreen(
                                     showBismillah = (surahNumber ?: 0) != 9 && (surahNumber ?: 0) != 1
                                 )
                             }
+
+                            // Khatam mode: "Mark all as read" or "Continue to next surah"
+                            if (state.activeKhatamId != null) {
+                                item(key = "khatam_mark_surah") {
+                                    val surahAyahIds = surahWithAyahs.ayahs.map { it.id }.toSet()
+                                    val allRead = surahAyahIds.isNotEmpty() && surahAyahIds.all { it in state.khatamReadAyahIds }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 15.dp),
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        if (allRead) {
+                                            if (surahWithAyahs.surah.number < 114) {
+                                                TextButton(
+                                                    onClick = {
+                                                        onNavigateToNextSurah(surahWithAyahs.surah.number + 1)
+                                                    }
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                                        contentDescription = null,
+                                                        modifier = Modifier.size(18.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(6.dp))
+                                                    Text("Continue to next surah")
+                                                }
+                                            }
+                                        } else {
+                                            TextButton(
+                                                onClick = {
+                                                    viewModel.onEvent(
+                                                        QuranEvent.MarkSurahAsReadForKhatam(surahWithAyahs.surah.number)
+                                                    )
+                                                }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Filled.CheckCircle,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                                Spacer(modifier = Modifier.width(6.dp))
+                                                Text("Mark all ayahs in this surah as read")
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     } else {
                         item(key = "banner") {
@@ -586,6 +644,8 @@ fun QuranReaderScreen(
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
                             isFavorite = ayah.id in favoriteAyahIds,
+                            isKhatamRead = ayah.id in state.khatamReadAyahIds,
+                            isKhatamMode = state.activeKhatamId != null,
                             showTajweed = state.showTajweed,
                             onBookmarkClick = {
                                 viewModel.onEvent(
@@ -616,6 +676,9 @@ fun QuranReaderScreen(
                             },
                             onTafseerClick = {
                                 onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                            },
+                            onKhatamToggle = {
+                                viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
                             }
                         )
                     }
@@ -1000,11 +1063,14 @@ private fun AyahItem(
     fontSize: Float,
     isHighlighted: Boolean = false,
     isFavorite: Boolean = false,
+    isKhatamRead: Boolean = false,
+    isKhatamMode: Boolean = false,
     showTajweed: Boolean = false,
     onBookmarkClick: () -> Unit,
     onFavoriteClick: () -> Unit = {},
     onPlayAyahClick: () -> Unit = {},
     onTafseerClick: () -> Unit = {},
+    onKhatamToggle: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -1031,19 +1097,37 @@ private fun AyahItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primaryContainer),
-                contentAlignment = Alignment.Center
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                Text(
-                    text = ayah.numberInSurah.toString(),
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = ayah.numberInSurah.toString(),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+                if (isKhatamMode) {
+                    IconButton(
+                        onClick = onKhatamToggle,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                            contentDescription = if (isKhatamRead) "Mark as unread" else "Mark as read",
+                            tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                }
             }
 
             Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {

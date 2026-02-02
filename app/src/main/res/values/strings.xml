@@ -6,10 +6,58 @@
     <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
     <string name="widget_prayer_times_description">Shows all prayer times for today</string>
     <string name="widget_prayer_tracker_description">Track your daily prayers with tap-to-check boxes</string>
+    <string name="widget_hijri_calendar_description">Shows the full Hijri month calendar with today\'s events</string>
+
+    <!-- Asma ul Husna -->
+    <string name="asma_ul_husna_title">Allah\'s 99 Names</string>
+    <string name="asma_ul_husna_search_hint">Search names...</string>
+    <string name="asma_ul_husna_all">All</string>
+    <string name="asma_ul_husna_favorites">Favorites</string>
+    <string name="asma_ul_husna_meaning">Meaning</string>
+    <string name="asma_ul_husna_explanation">Explanation</string>
+    <string name="asma_ul_husna_benefits">Benefits</string>
+    <string name="asma_ul_husna_quran_references">Quran References</string>
+    <string name="asma_ul_husna_usage_in_dua">Usage in Dua</string>
+
+    <!-- Asma un Nabi -->
+    <string name="asma_un_nabi_title">Prophet\'s 99 Names</string>
+    <string name="asma_un_nabi_search_hint">Search names...</string>
+    <string name="asma_un_nabi_source">Source</string>
+
+    <!-- Prophets -->
+    <string name="prophets_title">Prophets of Islam</string>
+    <string name="prophets_search_hint">Search prophets...</string>
+    <string name="prophets_story">Story</string>
+    <string name="prophets_key_lessons">Key Lessons</string>
+    <string name="prophets_quran_mentions">Quran Mentions</string>
+    <string name="prophets_timeline">Timeline</string>
+    <string name="prophets_miracles">Miracles</string>
+    <string name="prophets_era">Era</string>
+    <string name="prophets_lineage">Lineage</string>
+    <string name="prophets_years_lived">Years Lived</string>
+    <string name="prophets_place">Place of Preaching</string>
+
+    <!-- Khatam -->
+    <string name="khatam_title">Khatam Quran</string>
+    <string name="khatam_active">Active Khatam</string>
+    <string name="khatam_in_progress">In Progress</string>
+    <string name="khatam_completed">Completed</string>
+    <string name="khatam_abandoned">Abandoned</string>
+    <string name="khatam_stats_title">Overview</string>
+    <string name="khatam_ayahs_read">Ayahs Read</string>
+    <string name="khatam_daily_target">Daily Target</string>
+
+    <!-- Qibla AR -->
+    <string name="qibla_ar_heading">Heading</string>
+    <string name="qibla_ar_bearing">Qibla Bearing</string>
+    <string name="qibla_ar_facing">Facing Qibla</string>
+    <string name="qibla_ar_distance">Distance</string>
+    <string name="qibla_ar_accuracy">Accuracy</string>
 
     <!-- Widget Names -->
     <string name="widget_prayer_times_name">Prayer Times</string>
     <string name="widget_next_prayer_name">Next Prayer</string>
     <string name="widget_hijri_date_name">Hijri Date</string>
     <string name="widget_prayer_tracker_name">Prayer Tracker</string>
+    <string name="widget_hijri_calendar_name">Hijri Calendar</string>
 </resources>

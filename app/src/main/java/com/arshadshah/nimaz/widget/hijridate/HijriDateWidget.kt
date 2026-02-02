@@ -111,55 +111,51 @@ private fun HijriDateSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
-    Box(
+    Column(
         modifier = GlanceModifier
             .fillMaxSize()
             .background(backgroundColor)
             .cornerRadius(16.dp)
             .clickable(actionStartActivity<MainActivity>())
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+            .padding(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = data.gregorianDayOfWeek.ifEmpty { "—" },
-                style = TextStyle(
-                    color = textSecondary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
-                )
+        Text(
+            text = data.gregorianDayOfWeek.ifEmpty { "—" },
+            style = TextStyle(
+                color = textSecondary,
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium
             )
+        )
 
-            Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.defaultWeight())
 
-            Text(
-                text = data.hijriDay.toString(),
-                style = TextStyle(
-                    color = primaryColor,
-                    fontSize = 42.sp,
-                    fontWeight = FontWeight.Bold
-                )
+        Text(
+            text = data.hijriDay.toString(),
+            style = TextStyle(
+                color = primaryColor,
+                fontSize = 42.sp,
+                fontWeight = FontWeight.Bold
             )
+        )
 
-            Text(
-                text = "${data.hijriMonth.ifEmpty { "—" }} ${data.hijriYear}",
-                style = TextStyle(
-                    color = textColor,
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium
-                )
+        Text(
+            text = "${data.hijriMonth.ifEmpty { "—" }} ${data.hijriYear}",
+            style = TextStyle(
+                color = textColor,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
             )
+        )
 
-            Spacer(modifier = GlanceModifier.height(4.dp))
+        Spacer(modifier = GlanceModifier.defaultWeight())
 
-            Text(
-                text = data.gregorianDate.ifEmpty { "—" },
-                style = TextStyle(color = textSecondary, fontSize = 11.sp)
-            )
-        }
+        Text(
+            text = data.gregorianDate.ifEmpty { "—" },
+            style = TextStyle(color = textSecondary, fontSize = 11.sp)
+        )
     }
 }
 

@@ -132,4 +132,16 @@ interface DuaDao {
             )
         }
     }
+
+    @Query("DELETE FROM dua_bookmarks")
+    suspend fun deleteAllBookmarks()
+
+    @Query("DELETE FROM dua_progress")
+    suspend fun deleteAllProgress()
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllBookmarks()
+        deleteAllProgress()
+    }
 }

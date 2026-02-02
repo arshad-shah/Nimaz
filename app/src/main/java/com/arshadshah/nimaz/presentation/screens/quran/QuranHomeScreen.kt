@@ -37,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -67,6 +68,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.material.icons.filled.CheckCircle
+import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.RevelationType
@@ -89,6 +93,8 @@ fun QuranHomeScreen(
     onNavigateToSurahInfo: (Int) -> Unit = {},
     onNavigateToSearch: () -> Unit = {},
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, ayah -> onNavigateToSurah(surah) },
+    onNavigateToKhatam: () -> Unit = {},
+    onNavigateToKhatamDetail: (Long) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -166,7 +172,9 @@ fun QuranHomeScreen(
                         bookmarks = bookmarksState.bookmarks,
                         onNavigateToSurah = onNavigateToSurah,
                         onNavigateToBookmarks = onNavigateToBookmarks,
-                        onNavigateToQuranAyah = onNavigateToQuranAyah
+                        onNavigateToQuranAyah = onNavigateToQuranAyah,
+                        onNavigateToKhatam = onNavigateToKhatam,
+                        onNavigateToKhatamDetail = onNavigateToKhatamDetail
                     )
                     1 -> BrowseTabContent(
                         state = state,
@@ -193,7 +201,9 @@ private fun HomeTabContent(
     bookmarks: List<QuranBookmark>,
     onNavigateToSurah: (Int) -> Unit,
     onNavigateToBookmarks: () -> Unit,
-    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) }
+    onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
+    onNavigateToKhatam: () -> Unit = {},
+    onNavigateToKhatamDetail: (Long) -> Unit = {}
 ) {
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -214,15 +224,26 @@ private fun HomeTabContent(
                 )
             }
 
-            // Khatam Progress Card
+            // Khatam Progress Card - uses real Khatam data
             item(key = "khatam_progress") {
                 KhatamProgressCard(
-                    currentKhatmaCount = progress.currentKhatmaCount,
-                    totalAyahsRead = progress.totalAyahsRead,
-                    lastReadJuz = progress.lastReadJuz
+                    activeKhatam = state.activeKhatam,
+                    completedCount = state.completedKhatamCount,
+                    onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
+                    onClickStart = onNavigateToKhatam
                 )
             }
         } else {
+            // Khatam Progress Card (even without reading progress)
+            item(key = "khatam_progress") {
+                KhatamProgressCard(
+                    activeKhatam = state.activeKhatam,
+                    completedCount = state.completedKhatamCount,
+                    onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
+                    onClickStart = onNavigateToKhatam
+                )
+            }
+
             // No reading progress yet - show start reading prompt
             item(key = "start_reading") {
                 Card(
@@ -329,6 +350,21 @@ private fun BrowseTabContent(
     onTabSelect: (Int) -> Unit,
     onNavigateToSurahInfo: (Int) -> Unit = {}
 ) {
+    val isKhatamActive = state.activeKhatam != null
+    val khatamReadAyahIds = state.khatamReadAyahIds
+
+    // Build surah ayah ranges: Map<surahNumber, IntRange> (cumulative sum of ayahCount)
+    val surahAyahRanges = remember(state.surahs) {
+        val ranges = mutableMapOf<Int, IntRange>()
+        var start = 1
+        for (surah in state.surahs) {
+            val end = start + surah.ayahCount - 1
+            ranges[surah.number] = start..end
+            start = end + 1
+        }
+        ranges
+    }
+
     Column {
         // Sticky TabRow outside LazyColumn - only Surah/Juz/Page
         TabRow(
@@ -354,16 +390,26 @@ private fun BrowseTabContent(
                         items = state.filteredSurahs,
                         key = { it.number }
                     ) { surah ->
+                        val surahRange = surahAyahRanges[surah.number]
+                        val readCount = if (isKhatamActive && surahRange != null)
+                            khatamReadAyahIds.count { it in surahRange } else 0
                         SurahListItem(
                             surah = surah,
                             onClick = { onNavigateToSurah(surah.number) },
-                            onInfoClick = { onNavigateToSurahInfo(surah.number) }
+                            onInfoClick = { onNavigateToSurahInfo(surah.number) },
+                            khatamReadCount = readCount,
+                            khatamTotalAyahs = surah.ayahCount,
+                            isKhatamActive = isKhatamActive
                         )
                     }
                 }
                 1 -> {
                     item(key = "juz_grid") {
-                        JuzGrid(onNavigateToJuz = onNavigateToJuz)
+                        JuzGrid(
+                            onNavigateToJuz = onNavigateToJuz,
+                            khatamReadAyahIds = khatamReadAyahIds,
+                            isKhatamActive = isKhatamActive
+                        )
                     }
                 }
                 2 -> {
@@ -590,108 +636,167 @@ private fun FavoriteAyahItem(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun KhatamProgressCard(
-    currentKhatmaCount: Int,
-    totalAyahsRead: Int,
-    lastReadJuz: Int,
+    activeKhatam: Khatam?,
+    completedCount: Int,
+    onClickActive: (Long) -> Unit,
+    onClickStart: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val totalAyahs = 6236
-    val progressFraction = (totalAyahsRead.toFloat() / totalAyahs).coerceIn(0f, 1f)
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(18.dp)
+    if (activeKhatam != null) {
+        val progressFraction = activeKhatam.progressPercent
+        Card(
+            onClick = { onClickActive(activeKhatam.id) },
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Khatam Progress",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                ) {
-                    Text(
-                        text = "$currentKhatmaCount completed",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "$lastReadJuz",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Juz Completed",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "${30 - lastReadJuz}",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    Text(
-                        text = "Juz Remaining",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            Box(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(18.dp)
             ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = activeKhatam.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Surface(
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                    ) {
+                        Text(
+                            text = "$completedCount completed",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(20.dp)
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "${activeKhatam.totalAyahsRead}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Ayahs Read",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "${Khatam.TOTAL_QURAN_AYAHS - activeKhatam.totalAyahsRead}",
+                            style = MaterialTheme.typography.headlineMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            text = "Remaining",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(progressFraction)
+                        .fillMaxWidth()
                         .height(8.dp)
                         .clip(RoundedCornerShape(4.dp))
-                        .background(
-                            brush = Brush.horizontalGradient(
-                                colors = listOf(
-                                    Color(0xFF14B8A6),
-                                    Color(0xFFEAB308)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progressFraction)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(
+                                brush = Brush.horizontalGradient(
+                                    colors = listOf(
+                                        Color(0xFF14B8A6),
+                                        Color(0xFFEAB308)
+                                    )
                                 )
                             )
-                        )
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                Text(
+                    text = "${(progressFraction * 100).toInt()}% complete",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.align(Alignment.End)
+                )
+            }
+        }
+    } else {
+        Card(
+            onClick = onClickStart,
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.PlayArrow,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
+                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = "Start a Khatam",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Track your Quran reading progress",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -747,10 +852,23 @@ private fun BookmarkCard(
 @Composable
 private fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
+    khatamReadAyahIds: Set<Int> = emptySet(),
+    isKhatamActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val columns = 5
     val juzNumbers = (1..30).toList()
+
+    // Pre-compute juz progress
+    val juzProgress = remember(khatamReadAyahIds, isKhatamActive) {
+        if (!isKhatamActive) emptyMap()
+        else KhatamConstants.JUZ_AYAH_RANGES.mapIndexed { index, (start, end) ->
+            val total = end - start + 1
+            val read = khatamReadAyahIds.count { it in start..end }
+            (index + 1) to (read to total)
+        }.toMap()
+    }
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -761,6 +879,10 @@ private fun JuzGrid(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 row.forEach { juzNumber ->
+                    val (readCount, totalCount) = juzProgress[juzNumber] ?: (0 to 0)
+                    val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
+                    val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+
                     Card(
                         onClick = { onNavigateToJuz(juzNumber) },
                         modifier = Modifier
@@ -768,24 +890,43 @@ private fun JuzGrid(
                             .aspectRatio(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = if (isComplete)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
+                            // Show progress ring behind number when khatam is active
+                            if (isKhatamActive && progress > 0f && !isComplete) {
+                                CircularProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier.size(48.dp),
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    strokeWidth = 3.dp
+                                )
+                            }
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = juzNumber.toString(),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.primary
+                                    color = if (isComplete)
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.primary
                                 )
                                 Text(
                                     text = "Juz",
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = if (isComplete)
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                         }
@@ -1076,8 +1217,12 @@ private fun SurahListItem(
     surah: Surah,
     onClick: () -> Unit,
     onInfoClick: () -> Unit = {},
+    khatamReadCount: Int = 0,
+    khatamTotalAyahs: Int = 0,
+    isKhatamActive: Boolean = false,
     modifier: Modifier = Modifier
 ) {
+    val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
@@ -1087,85 +1232,111 @@ private fun SurahListItem(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier.size(40.dp),
-                contentAlignment = Alignment.Center
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .rotate(45f)
-                        .border(
-                            width = 2.dp,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                            shape = RoundedCornerShape(2.dp)
-                        )
-                )
-                Text(
-                    text = surah.number.toString(),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-
-            Spacer(modifier = Modifier.width(14.dp))
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = surah.nameEnglish,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    val isMeccan = surah.revelationType == RevelationType.MECCAN
+                    if (isComplete) {
+                        Icon(
+                            imageVector = Icons.Filled.CheckCircle,
+                            contentDescription = "Completed",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(36.dp)
+                        )
+                    } else {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .rotate(45f)
+                                .border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(2.dp)
+                                )
+                        )
+                        Text(
+                            text = surah.number.toString(),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.width(14.dp))
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (isMeccan) "Makkah" else "Madinah",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = surah.nameEnglish,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = "\u2022",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "${surah.ayahCount} Verses",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        val isMeccan = surah.revelationType == RevelationType.MECCAN
+                        Text(
+                            text = if (isMeccan) "Makkah" else "Madinah",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "\u2022",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = "${surah.ayahCount} Verses",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                ArabicText(
+                    text = surah.nameArabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                IconButton(
+                    onClick = onInfoClick,
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Surah Info",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            ArabicText(
-                text = surah.nameArabic,
-                size = ArabicTextSize.MEDIUM,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            IconButton(
-                onClick = onInfoClick,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Info,
-                    contentDescription = "Surah Info",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+            // Khatam progress bar
+            if (isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount > 0) {
+                LinearProgressIndicator(
+                    progress = { khatamReadCount.toFloat() / khatamTotalAyahs },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .padding(horizontal = 14.dp),
+                    color = if (isComplete) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.tertiary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
+                Spacer(modifier = Modifier.height(4.dp))
             }
         }
     }

@@ -1,0 +1,276 @@
+package com.arshadshah.nimaz.presentation.screens.asmaunnabi
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.domain.model.AsmaUnNabi
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiEvent
+import com.arshadshah.nimaz.presentation.viewmodel.AsmaUnNabiViewModel
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AsmaUnNabiListScreen(
+    onNavigateBack: () -> Unit,
+    onNavigateToDetail: (Int) -> Unit,
+    viewModel: AsmaUnNabiViewModel = hiltViewModel()
+) {
+    val state by viewModel.listState.collectAsState()
+
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background,
+        topBar = {
+            NimazBackTopAppBar(
+                title = "Prophet's 99 Names",
+                onBackClick = onNavigateBack
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            NimazSearchBar(
+                query = state.searchQuery,
+                onQueryChange = { viewModel.onEvent(AsmaUnNabiEvent.Search(it)) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
+                placeholder = "Search by name or meaning...",
+                showClearButton = state.searchQuery.isNotEmpty(),
+                onClear = { viewModel.onEvent(AsmaUnNabiEvent.ClearSearch) },
+                onSearch = { viewModel.onEvent(AsmaUnNabiEvent.Search(it)) }
+            )
+
+            // Filter Chips
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.ExtraSmall),
+                horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+            ) {
+                FilterChip(
+                    selected = !state.showFavoritesOnly,
+                    onClick = {
+                        if (state.showFavoritesOnly) {
+                            viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter)
+                        }
+                    },
+                    label = { Text("All") },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                )
+                FilterChip(
+                    selected = state.showFavoritesOnly,
+                    onClick = {
+                        if (!state.showFavoritesOnly) {
+                            viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter)
+                        }
+                    },
+                    label = { Text("Favorites") },
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                )
+            }
+
+            // Content
+            if (state.isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                val displayList = state.filteredNames
+
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(
+                        horizontal = NimazSpacing.Large,
+                        vertical = NimazSpacing.Small
+                    ),
+                    verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                ) {
+                    items(
+                        items = displayList,
+                        key = { it.id }
+                    ) { name ->
+                        AsmaUnNabiNameCard(
+                            name = name,
+                            onCardClick = { onNavigateToDetail(name.id) },
+                            onFavoriteClick = {
+                                viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id))
+                            }
+                        )
+                    }
+
+                    if (displayList.isEmpty()) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 48.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (state.showFavoritesOnly) {
+                                        "No favorites yet"
+                                    } else {
+                                        "No names found"
+                                    },
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AsmaUnNabiNameCard(
+    name: AsmaUnNabi,
+    onCardClick: () -> Unit,
+    onFavoriteClick: () -> Unit
+) {
+    NimazCard(
+        modifier = Modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
+        onClick = onCardClick
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(NimazSpacing.Medium),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Number Badge
+            Box(
+                modifier = Modifier
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.tertiary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "${name.id}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            Spacer(modifier = Modifier.width(NimazSpacing.Medium))
+
+            // Name Details
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                ArabicText(
+                    text = name.nameArabic,
+                    size = ArabicTextSize.SMALL,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = TextAlign.End
+                )
+                Text(
+                    text = name.nameTransliteration,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = name.nameEnglish,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Favorite Button
+            IconButton(onClick = onFavoriteClick) {
+                Icon(
+                    imageVector = if (name.isFavorite) {
+                        Icons.Filled.Favorite
+                    } else {
+                        Icons.Outlined.FavoriteBorder
+                    },
+                    contentDescription = if (name.isFavorite) {
+                        "Remove from favorites"
+                    } else {
+                        "Add to favorites"
+                    },
+                    tint = if (name.isFavorite) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    }
+                )
+            }
+        }
+    }
+}

@@ -1,0 +1,690 @@
+[
+  {
+    "id": 1,
+    "number": 1,
+    "name_arabic": "آدم",
+    "name_english": "Adam",
+    "name_transliteration": "Adam",
+    "title_arabic": "أبو البشر",
+    "title_english": "Father of Humanity",
+    "story_summary": "Adam (AS) was the first human being and the first prophet created by Allah. He was fashioned from clay and given life by the breath of Allah. The angels were commanded to prostrate before him, and all obeyed except Iblis (Satan), who refused out of arrogance.\n\nAdam and his wife Hawwa (Eve) were placed in Jannah (Paradise) and told they could enjoy everything except one tree. Iblis deceived them into eating from the forbidden tree, and they were sent down to earth. Adam immediately repented and Allah forgave him.\n\nAdam's story establishes the fundamental themes of Islam: the honor of humanity, the danger of arrogance, the reality of temptation, and the mercy of Allah in accepting repentance. He taught his children monotheism and the worship of Allah alone.",
+    "key_lessons": [
+      "Repentance is always accepted by Allah when sincere",
+      "Arrogance is the root of disobedience to Allah",
+      "Humans are honored creations of Allah with free will",
+      "Satan is a sworn enemy of mankind",
+      "Knowledge is a gift from Allah that distinguishes humans"
+    ],
+    "quran_mentions": ["2:30-39", "7:11-25", "15:26-44", "17:61-65", "18:50", "20:115-123", "38:71-85"],
+    "era": "Early Prophets",
+    "lineage": "No human lineage; created directly by Allah from clay",
+    "years_lived": "960 years",
+    "place_of_preaching": "Earth (after descending from Paradise)",
+    "miracles": [
+      "Created directly by Allah from clay without parents",
+      "Taught the names of all things by Allah",
+      "Angels prostrated before him by Allah's command"
+    ],
+    "display_order": 1
+  },
+  {
+    "id": 2,
+    "number": 2,
+    "name_arabic": "إدريس",
+    "name_english": "Enoch",
+    "name_transliteration": "Idris",
+    "title_arabic": "النبي الصديق",
+    "title_english": "The Truthful Prophet",
+    "story_summary": "Idris (AS) is one of the earliest prophets mentioned in the Quran. He is praised by Allah as being truthful and patient. He was among the first to use the pen for writing and is credited with many early advancements in knowledge.\n\nIdris called his people to the worship of Allah alone and to righteous conduct. He emphasized justice, honesty, and the pursuit of knowledge. He was raised to a high station by Allah, as mentioned in the Quran.\n\nHis life exemplifies the importance of seeking knowledge, patience in calling people to truth, and the honor that Allah bestows upon those who are sincere in their faith and devotion.",
+    "key_lessons": [
+      "Pursuit of knowledge is a noble act of worship",
+      "Patience and truthfulness lead to a high station with Allah",
+      "Teaching and writing are powerful tools for spreading guidance",
+      "Consistency in worship and devotion pleases Allah"
+    ],
+    "quran_mentions": ["19:56-57", "21:85-86"],
+    "era": "Early Prophets",
+    "lineage": "Descendant of Adam (AS), from the lineage of Shith (Seth)",
+    "years_lived": "365 years (approximate)",
+    "place_of_preaching": "Babylon (ancient Iraq)",
+    "miracles": [
+      "Raised to a high station by Allah",
+      "Given knowledge of astronomy and mathematics",
+      "First to use the pen and write"
+    ],
+    "display_order": 2
+  },
+  {
+    "id": 3,
+    "number": 3,
+    "name_arabic": "نوح",
+    "name_english": "Noah",
+    "name_transliteration": "Nuh",
+    "title_arabic": "شيخ الأنبياء",
+    "title_english": "Sheikh of the Prophets",
+    "story_summary": "Nuh (AS) was sent to his people who had fallen into idol worship. He preached tirelessly for 950 years, calling them back to the worship of Allah alone. Despite his long effort, only a small number believed, while the majority mocked and rejected him.\n\nAllah commanded Nuh to build a great ark, and when the flood came, he boarded it with the believers and pairs of every animal. The floodwaters destroyed the disbelievers, including Nuh's own son who refused to board. This was a profound test of Nuh's faith.\n\nAfter the waters receded, the ark settled on Mount Judi, and Nuh and the believers began a new chapter of human civilization. His story is one of the most detailed in the Quran, emphasizing patience, perseverance, and trust in Allah's plan.",
+    "key_lessons": [
+      "Patience in dawah even when results seem minimal",
+      "Obedience to Allah takes priority over family ties",
+      "Allah's punishment is real for those who persist in disbelief",
+      "Trust in Allah's plan even when it seems impossible",
+      "Perseverance in the face of mockery and rejection"
+    ],
+    "quran_mentions": ["7:59-64", "10:71-73", "11:25-49", "23:23-30", "26:105-122", "29:14-15", "54:9-17", "71:1-28"],
+    "era": "Early Prophets",
+    "lineage": "Descendant of Adam (AS) through Idris (AS)",
+    "years_lived": "950 years (of preaching alone)",
+    "place_of_preaching": "Southern Iraq (Mesopotamia)",
+    "miracles": [
+      "Built the Ark by Allah's instruction despite being far from water",
+      "The Great Flood that covered the earth",
+      "Preservation of all species on the Ark"
+    ],
+    "display_order": 3
+  },
+  {
+    "id": 4,
+    "number": 4,
+    "name_arabic": "هود",
+    "name_english": "Hud",
+    "name_transliteration": "Hud",
+    "title_arabic": "نبي عاد",
+    "title_english": "Prophet to the People of Aad",
+    "story_summary": "Hud (AS) was sent to the people of Aad, a powerful and prosperous civilization in the Arabian Peninsula known for their impressive buildings and physical strength. They had become arrogant and worshipped idols, believing their power made them invincible.\n\nHud called them to abandon idol worship and return to Allah alone. He reminded them that their strength and prosperity were gifts from Allah. The people of Aad rejected his message, challenging him to bring the punishment he warned them about.\n\nAllah destroyed them with a furious, devastating wind that lasted seven nights and eight days, leaving their civilization in ruins. Only Hud and the believers were saved. Their story serves as a powerful reminder that no civilization is too powerful for Allah's punishment.",
+    "key_lessons": [
+      "Material strength and prosperity do not make one immune to Allah's punishment",
+      "Arrogance leads to destruction",
+      "Gratitude for blessings is essential",
+      "True strength lies in faith, not physical power"
+    ],
+    "quran_mentions": ["7:65-72", "11:50-60", "26:123-140", "41:15-16", "46:21-26", "54:18-22", "69:6-8", "89:6-14"],
+    "era": "Early Prophets",
+    "lineage": "Descendant of Nuh (AS), from the tribe of Aad",
+    "years_lived": "150 years (approximate)",
+    "place_of_preaching": "Al-Ahqaf (Southern Arabia, modern Yemen/Oman)",
+    "miracles": [
+      "Survived the devastating windstorm that destroyed his people",
+      "Protected by Allah from the plots of his people"
+    ],
+    "display_order": 4
+  },
+  {
+    "id": 5,
+    "number": 5,
+    "name_arabic": "صالح",
+    "name_english": "Salih",
+    "name_transliteration": "Salih",
+    "title_arabic": "نبي ثمود",
+    "title_english": "Prophet to the People of Thamud",
+    "story_summary": "Salih (AS) was sent to the people of Thamud, who succeeded the people of Aad and lived in the rocky mountains of Al-Hijr in northern Arabia. They were skilled in carving homes from mountains and had been blessed with abundant resources, yet they turned to idol worship.\n\nSalih called them to worship Allah alone. As a sign, Allah brought forth a miraculous she-camel from a rock. The people were told to let the camel graze freely and not to harm her. Despite this clear miracle, the disbelievers hamstrung and killed the she-camel.\n\nAllah gave them three days before destroying them with a mighty blast (earthquake and thunder). The story of Thamud is mentioned repeatedly in the Quran as a warning against rejecting divine signs and harming what Allah has made sacred.",
+    "key_lessons": [
+      "Rejecting clear signs leads to destruction",
+      "Miracles alone do not guarantee faith",
+      "Respecting what Allah has made sacred is obligatory",
+      "Three days of respite show Allah's mercy even before punishment"
+    ],
+    "quran_mentions": ["7:73-79", "11:61-68", "15:80-84", "26:141-159", "27:45-53", "54:23-32", "91:11-15"],
+    "era": "Early Prophets",
+    "lineage": "Descendant of Nuh (AS), from the tribe of Thamud",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Al-Hijr (Mada'in Salih, modern Saudi Arabia)",
+    "miracles": [
+      "A she-camel miraculously emerged from a rock as a sign from Allah",
+      "Predicted the exact timing of his people's destruction"
+    ],
+    "display_order": 5
+  },
+  {
+    "id": 6,
+    "number": 6,
+    "name_arabic": "إبراهيم",
+    "name_english": "Abraham",
+    "name_transliteration": "Ibrahim",
+    "title_arabic": "خليل الله",
+    "title_english": "Friend of Allah",
+    "story_summary": "Ibrahim (AS) is one of the greatest prophets and is revered across Islam, Christianity, and Judaism. Born in a society of idol worshippers, he used rational thinking to prove the falsehood of their worship. When he smashed the idols, his people threw him into a great fire, but Allah commanded the fire to be cool and peaceful for him.\n\nIbrahim faced numerous trials throughout his life. He was commanded to leave his wife Hajar and infant son Ismail in the barren valley of Makkah, trusting fully in Allah's plan. This act led to the discovery of the well of Zamzam and the establishment of Makkah as a holy city. His greatest test was the command to sacrifice his son Ismail, which he prepared to fulfill with complete submission before Allah replaced Ismail with a ram.\n\nIbrahim built the Kaaba with his son Ismail and established the rituals of Hajj. He is called the father of the prophets, as many later prophets came from his lineage through both Ismail and Ishaq. His life is the ultimate example of complete submission to Allah.",
+    "key_lessons": [
+      "Complete submission to Allah is the essence of Islam",
+      "Rational thinking supports true faith",
+      "Trust in Allah even when His commands seem difficult",
+      "Family and wealth should never come before obedience to Allah",
+      "Building institutions of worship benefits generations"
+    ],
+    "quran_mentions": ["2:124-141", "2:258-260", "6:74-83", "11:69-76", "14:35-41", "15:51-56", "19:41-50", "21:51-73", "22:26-27", "26:69-104", "37:83-113", "43:26-28", "60:4-6"],
+    "era": "Early Prophets",
+    "lineage": "Son of Azar (Tarakh), descendant of Nuh (AS)",
+    "years_lived": "175 years",
+    "place_of_preaching": "Ur (Iraq), Harran (Turkey), Palestine, Makkah, Egypt",
+    "miracles": [
+      "Survived being thrown into a great fire which became cool and safe",
+      "Birds came back to life after being cut into pieces at Allah's command",
+      "Given the vision of the heavens and the unseen"
+    ],
+    "display_order": 6
+  },
+  {
+    "id": 7,
+    "number": 7,
+    "name_arabic": "لوط",
+    "name_english": "Lot",
+    "name_transliteration": "Lut",
+    "title_arabic": "نبي سدوم",
+    "title_english": "Prophet to the People of Sodom",
+    "story_summary": "Lut (AS) was the nephew of Ibrahim (AS) and believed in his message. He was sent as a prophet to the people of Sodom and Gomorrah, who were engaged in grave immorality and highway robbery, in addition to their rejection of Allah.\n\nLut tirelessly warned his people against their sinful behavior, but they refused to listen and even threatened to expel him. When angels came to Lut in the form of handsome young men, the townspeople rushed to his home with evil intentions, and Lut was deeply distressed.\n\nAllah commanded Lut to leave with his family at night, except his wife who was among the disbelievers. The towns were destroyed by a rain of stones and the land was turned upside down. The Dead Sea region is believed to mark the location of this destruction.",
+    "key_lessons": [
+      "Standing firm against societal immorality is a prophetic duty",
+      "Family ties do not guarantee salvation without faith",
+      "Allah's punishment comes to those who persist in grave sins",
+      "A prophet must continue calling to truth regardless of opposition"
+    ],
+    "quran_mentions": ["7:80-84", "11:77-83", "15:57-77", "21:71-75", "26:160-175", "27:54-58", "29:28-35", "37:133-138", "54:33-40"],
+    "era": "Early Prophets",
+    "lineage": "Nephew of Ibrahim (AS)",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Sodom and Gomorrah (near the Dead Sea)",
+    "miracles": [
+      "Angels came to protect him from his people",
+      "Guided to escape before the destruction"
+    ],
+    "display_order": 7
+  },
+  {
+    "id": 8,
+    "number": 8,
+    "name_arabic": "إسماعيل",
+    "name_english": "Ishmael",
+    "name_transliteration": "Ismail",
+    "title_arabic": "ذبيح الله",
+    "title_english": "Sacrifice of Allah",
+    "story_summary": "Ismail (AS) was the firstborn son of Ibrahim (AS) and Hajar. As an infant, he was taken with his mother to the barren valley of Makkah by Allah's command. When Hajar ran between the hills of Safa and Marwa searching for water, Allah caused the well of Zamzam to spring forth near baby Ismail.\n\nThe greatest trial of Ismail's life came when his father Ibrahim saw in a dream that he must sacrifice his son. When told about this, young Ismail responded with remarkable submission, telling his father to do as he was commanded. As Ibrahim was about to fulfill the sacrifice, Allah ransomed Ismail with a great ram, and this event is commemorated every year during Eid al-Adha.\n\nIsmail helped his father Ibrahim build the Kaaba in Makkah. He became the ancestor of the Arab people and, through his lineage, the Prophet Muhammad (PBUH) was born. Ismail is described in the Quran as being true to his promise and a messenger-prophet.",
+    "key_lessons": [
+      "Submission to Allah's will brings ultimate reward",
+      "Youth is no barrier to exemplary faith and obedience",
+      "Keeping promises is a quality of the righteous",
+      "Sacrifice for Allah's sake is never truly lost"
+    ],
+    "quran_mentions": ["2:125-129", "2:133-136", "6:86", "14:39", "19:54-55", "21:85", "37:100-111", "38:48"],
+    "era": "Early Prophets",
+    "lineage": "Son of Ibrahim (AS) and Hajar",
+    "years_lived": "137 years",
+    "place_of_preaching": "Makkah and surrounding areas of Arabia",
+    "miracles": [
+      "The well of Zamzam sprang forth at his feet as an infant",
+      "Ransomed by Allah with a ram during the sacrifice"
+    ],
+    "display_order": 8
+  },
+  {
+    "id": 9,
+    "number": 9,
+    "name_arabic": "إسحاق",
+    "name_english": "Isaac",
+    "name_transliteration": "Ishaq",
+    "title_arabic": "نبي الله",
+    "title_english": "Prophet of Allah",
+    "story_summary": "Ishaq (AS) was the second son of Ibrahim (AS), born to his wife Sarah in their old age. His birth was announced by angels who visited Ibrahim, and Sarah laughed in amazement at the news, as she was elderly and had been barren.\n\nIshaq grew up in the land of Canaan (Palestine) and continued the message of monotheism that his father had established. He was blessed with prophethood and righteous offspring. Through his son Yaqub (Jacob), the lineage of the Children of Israel was established.\n\nIshaq is mentioned in the Quran alongside Ibrahim and Ismail as one of the righteous prophets. His life demonstrates that Allah's blessings come at His appointed time and that faith runs through families dedicated to His worship.",
+    "key_lessons": [
+      "Allah's blessings come at the appointed time",
+      "Nothing is impossible for Allah",
+      "Righteous parents produce righteous offspring through Allah's mercy",
+      "Continuing the legacy of faith is a great honor"
+    ],
+    "quran_mentions": ["2:133-136", "6:84", "11:69-73", "12:6", "14:39", "19:49", "21:72", "29:27", "37:112-113", "38:45-47"],
+    "era": "Early Prophets",
+    "lineage": "Son of Ibrahim (AS) and Sarah",
+    "years_lived": "180 years",
+    "place_of_preaching": "Canaan (Palestine)",
+    "miracles": [
+      "Born to elderly parents as a miraculous gift from Allah",
+      "Blessed with prophethood and righteous offspring"
+    ],
+    "display_order": 9
+  },
+  {
+    "id": 10,
+    "number": 10,
+    "name_arabic": "يعقوب",
+    "name_english": "Jacob",
+    "name_transliteration": "Yaqub",
+    "title_arabic": "إسرائيل",
+    "title_english": "Israel (Servant of Allah)",
+    "story_summary": "Yaqub (AS), also known as Israel, was the son of Ishaq (AS) and the grandson of Ibrahim (AS). He was blessed with twelve sons, and through them, the twelve tribes of Israel were established. He is considered the patriarch of the Children of Israel.\n\nYaqub's greatest trial was the loss of his beloved son Yusuf. His other sons, driven by jealousy, threw Yusuf into a well and told their father that a wolf had eaten him. Yaqub's grief was immense, and he wept until he lost his eyesight, yet he never lost hope in Allah's mercy and continued to trust in His plan.\n\nAfter many years, Yaqub was reunited with Yusuf in Egypt, and his sight was restored when Yusuf's shirt was placed over his eyes. His story teaches profound lessons about patience, trust in Allah during hardship, and the ultimate reward for those who remain steadfast.",
+    "key_lessons": [
+      "Beautiful patience (sabr jameel) means trusting Allah without complaint",
+      "Never lose hope in Allah's mercy regardless of circumstances",
+      "A parent's love and dua are powerful",
+      "Allah reunites those who trust in Him"
+    ],
+    "quran_mentions": ["2:132-140", "3:93", "6:84", "11:71", "12:4-100", "19:49", "21:72", "29:27", "38:45-47"],
+    "era": "Early Prophets",
+    "lineage": "Son of Ishaq (AS), grandson of Ibrahim (AS)",
+    "years_lived": "147 years",
+    "place_of_preaching": "Canaan (Palestine) and Egypt",
+    "miracles": [
+      "His eyesight was restored by Yusuf's shirt",
+      "Sensed the scent of Yusuf from a great distance"
+    ],
+    "display_order": 10
+  },
+  {
+    "id": 11,
+    "number": 11,
+    "name_arabic": "يوسف",
+    "name_english": "Joseph",
+    "name_transliteration": "Yusuf",
+    "title_arabic": "الصديق",
+    "title_english": "The Truthful One",
+    "story_summary": "Yusuf (AS) is the subject of an entire surah in the Quran, described as the best of stories. As a young boy, he dreamed that eleven stars, the sun, and the moon prostrated to him. His jealous brothers threw him into a well, and he was found by a caravan and sold as a slave in Egypt.\n\nIn Egypt, the wife of his master tried to seduce him, but Yusuf chose prison over sin. In prison, he interpreted dreams for fellow inmates, and eventually interpreted a dream for the King of Egypt, which led to his release and appointment as the treasurer of Egypt. His wise management saved Egypt from a severe famine.\n\nYusuf's brothers eventually came to Egypt seeking food and did not recognize him. After testing them, Yusuf revealed his identity and forgave them. He was reunited with his father Yaqub, fulfilling his childhood dream. Surah Yusuf is a masterpiece of storytelling that covers themes of jealousy, temptation, patience, forgiveness, and divine planning.",
+    "key_lessons": [
+      "Maintaining chastity and integrity in the face of temptation",
+      "Forgiving those who wronged you brings peace and blessings",
+      "Allah's plan may take years but is always perfect",
+      "Skills and talents should be used for the benefit of society",
+      "Dreams can be true visions from Allah"
+    ],
+    "quran_mentions": ["6:84", "12:1-111", "40:34"],
+    "era": "Early Prophets",
+    "lineage": "Son of Yaqub (AS), grandson of Ishaq (AS), great-grandson of Ibrahim (AS)",
+    "years_lived": "110 years",
+    "place_of_preaching": "Egypt",
+    "miracles": [
+      "Gift of interpreting dreams accurately",
+      "Exceptional beauty granted by Allah",
+      "His shirt restored his father's eyesight"
+    ],
+    "display_order": 11
+  },
+  {
+    "id": 12,
+    "number": 12,
+    "name_arabic": "أيوب",
+    "name_english": "Job",
+    "name_transliteration": "Ayyub",
+    "title_arabic": "الصابر",
+    "title_english": "The Patient One",
+    "story_summary": "Ayyub (AS) was a wealthy and righteous prophet who was tested by Allah with severe trials. He lost his wealth, his children, and was afflicted with a terrible illness that lasted for many years. Despite his suffering, he never complained to anyone but Allah and remained grateful.\n\nHis patience became legendary. Even when people abandoned him and only his wife remained by his side, Ayyub continued to worship Allah and express gratitude. He would say that Allah had given him blessings for many years, so he should be patient during hardship.\n\nWhen Ayyub finally called upon Allah, saying that harm had touched him and that Allah is the Most Merciful, Allah responded immediately. He was told to strike the ground with his foot, and a cool spring appeared for washing and drinking. Allah restored his health, his family, and doubled his former wealth. His story is the ultimate example of patience in adversity.",
+    "key_lessons": [
+      "True patience means being grateful even during severe trials",
+      "Allah tests those He loves to elevate their status",
+      "Complaining should be directed only to Allah",
+      "After hardship comes ease and reward",
+      "A supportive spouse is a great blessing"
+    ],
+    "quran_mentions": ["4:163", "6:84", "21:83-84", "38:41-44"],
+    "era": "Middle Prophets",
+    "lineage": "Descendant of Ibrahim (AS) through Ishaq (AS)",
+    "years_lived": "93 years (approximate)",
+    "place_of_preaching": "Land of Uz (modern Syria/Jordan region)",
+    "miracles": [
+      "A healing spring emerged when he struck the ground with his foot",
+      "Allah restored his health, family, and wealth in full"
+    ],
+    "display_order": 12
+  },
+  {
+    "id": 13,
+    "number": 13,
+    "name_arabic": "شعيب",
+    "name_english": "Shuaib",
+    "name_transliteration": "Shuaib",
+    "title_arabic": "خطيب الأنبياء",
+    "title_english": "Orator of the Prophets",
+    "story_summary": "Shuaib (AS) was sent to the people of Madyan and the Companions of the Thicket (Ashab al-Aykah). His people were known for dishonesty in trade, cheating in weights and measures, highway robbery, and corruption. Shuaib was eloquent in speech, earning him the title of the Orator of the Prophets.\n\nShuaib called his people to worship Allah alone and to practice fair dealings in business. He warned them that cheating people of their rights was a grave sin. His people rejected him and threatened to stone him, saying they would have done so if not for his family connections.\n\nThe people of Madyan were destroyed by a mighty earthquake and a blast from the sky, while the Companions of the Thicket were destroyed by the punishment of a day of shadow (a cloud that rained fire upon them). Shuaib's story is particularly relevant to issues of economic justice and honest business practices.",
+    "key_lessons": [
+      "Honesty in business and trade is a religious obligation",
+      "Eloquent speech is a gift that should be used for truth",
+      "Cheating others of their rights invites Allah's wrath",
+      "Economic corruption destroys societies"
+    ],
+    "quran_mentions": ["7:85-93", "11:84-95", "26:176-191", "29:36-37"],
+    "era": "Middle Prophets",
+    "lineage": "Descendant of Ibrahim (AS)",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Madyan (northwestern Arabia, near the Gulf of Aqaba)",
+    "miracles": [
+      "Exceptional eloquence and persuasive speech",
+      "Protected by Allah from his people's plots"
+    ],
+    "display_order": 13
+  },
+  {
+    "id": 14,
+    "number": 14,
+    "name_arabic": "موسى",
+    "name_english": "Moses",
+    "name_transliteration": "Musa",
+    "title_arabic": "كليم الله",
+    "title_english": "The One Who Spoke with Allah",
+    "story_summary": "Musa (AS) is the most frequently mentioned prophet in the Quran. Born during Pharaoh's massacre of Israelite male infants, his mother placed him in a basket on the Nile. He was found by Pharaoh's household and raised in the palace. After accidentally killing an Egyptian, he fled to Madyan where he married and lived for years.\n\nAt Mount Tur (Sinai), Allah spoke directly to Musa through a burning bush and gave him two miracles: his staff that could turn into a serpent and his hand that would glow white. Musa was sent with his brother Harun to confront Pharaoh and demand the release of the Children of Israel. After the ten plagues and Pharaoh's persistent refusal, Musa led his people out of Egypt, and Allah parted the Red Sea for their escape while drowning Pharaoh and his army.\n\nMusa received the Torah on Mount Sinai and spent forty years guiding the Children of Israel through the wilderness. Despite their constant complaints and disobedience, Musa remained patient. His encounters with the mysterious Khidr taught him humility. Musa's story encompasses themes of courage, leadership, patience, and direct communication with Allah.",
+    "key_lessons": [
+      "Courage to stand against tyranny and oppression",
+      "Even prophets need to learn humility and patience",
+      "Allah prepares His chosen ones through life experiences",
+      "True liberation is spiritual as well as physical",
+      "Leadership requires immense patience with people"
+    ],
+    "quran_mentions": ["2:49-74", "7:103-162", "10:75-92", "18:60-82", "20:9-98", "26:10-68", "27:7-14", "28:3-46", "40:23-46", "44:17-33", "79:15-26"],
+    "era": "Middle Prophets",
+    "lineage": "Son of Imran, from the Children of Israel, descendant of Yaqub (AS)",
+    "years_lived": "120 years",
+    "place_of_preaching": "Egypt, Sinai Peninsula, and the surrounding wilderness",
+    "miracles": [
+      "His staff turned into a living serpent",
+      "His hand glowed radiant white when placed under his arm",
+      "Parting of the Red Sea",
+      "Striking a rock to bring forth twelve springs of water",
+      "The ten plagues sent upon Egypt",
+      "Spoke directly with Allah without intermediary",
+      "Received the Torah"
+    ],
+    "display_order": 14
+  },
+  {
+    "id": 15,
+    "number": 15,
+    "name_arabic": "هارون",
+    "name_english": "Aaron",
+    "name_transliteration": "Harun",
+    "title_arabic": "وزير موسى",
+    "title_english": "Minister of Musa",
+    "story_summary": "Harun (AS) was the elder brother of Musa (AS) and was appointed by Allah as a prophet to assist Musa in his mission to Pharaoh. When Musa asked Allah for support, he requested that Harun be made his helper, as Harun was more eloquent in speech.\n\nHarun served as Musa's minister and spokesperson. He shared in the burden of leading the Children of Israel and supported Musa throughout the confrontation with Pharaoh. He was known for his gentle nature, eloquence, and ability to bring people together.\n\nDuring Musa's absence on Mount Sinai for forty days, some of the Children of Israel were led astray by the Samiri into worshipping a golden calf. Harun tried to stop them but was overpowered. When Musa returned angry, Harun explained that the people nearly killed him and asked Musa not to let the enemies rejoice over their discord.",
+    "key_lessons": [
+      "Teamwork and support are essential in calling to truth",
+      "Eloquence is a valuable gift for spreading the message",
+      "A gentle approach in leadership has its place",
+      "Unity among leaders of faith strengthens the community"
+    ],
+    "quran_mentions": ["2:248", "4:163", "6:84", "7:142-150", "10:75", "19:53", "20:29-36", "20:90-94", "21:48", "23:45", "25:35", "26:13", "28:34-35", "37:114-120"],
+    "era": "Middle Prophets",
+    "lineage": "Son of Imran, elder brother of Musa (AS)",
+    "years_lived": "122 years",
+    "place_of_preaching": "Egypt and Sinai Peninsula",
+    "miracles": [
+      "Granted prophethood alongside his brother",
+      "Spoke with authority and eloquence that moved hearts"
+    ],
+    "display_order": 15
+  },
+  {
+    "id": 16,
+    "number": 16,
+    "name_arabic": "ذو الكفل",
+    "name_english": "Dhul-Kifl",
+    "name_transliteration": "Dhul-Kifl",
+    "title_arabic": "الصابر الشاكر",
+    "title_english": "The Patient and Grateful",
+    "story_summary": "Dhul-Kifl (AS) is mentioned twice in the Quran among the righteous and patient prophets. His exact identity has been discussed by scholars, with some identifying him with the biblical Ezekiel and others suggesting he was a righteous man from the Children of Israel who took on great responsibilities.\n\nThe name Dhul-Kifl means 'the one of the portion' or 'the one who guaranteed,' suggesting he took upon himself a great responsibility or pledge. Some scholars narrate that he guaranteed to fast every day, pray all night, and never become angry while judging between people.\n\nDhul-Kifl is praised in the Quran for his patience and is listed alongside other great prophets such as Ismail and Idris. His inclusion among the prophets emphasizes that fulfilling responsibilities and maintaining patience are among the highest virtues in Islam.",
+    "key_lessons": [
+      "Fulfilling one's commitments and responsibilities is a mark of righteousness",
+      "Patience and gratitude are qualities of the truly devoted",
+      "Just judgment among people is a prophetic quality",
+      "Consistency in worship is more valuable than occasional grand gestures"
+    ],
+    "quran_mentions": ["21:85-86", "38:48"],
+    "era": "Middle Prophets",
+    "lineage": "From the Children of Israel, possibly descendant of Ayyub (AS)",
+    "years_lived": "75 years (approximate)",
+    "place_of_preaching": "Among the Children of Israel (Syria/Iraq region)",
+    "miracles": [
+      "Maintained his pledge of constant worship and just judgment without fail",
+      "Counted among the patient and righteous by Allah"
+    ],
+    "display_order": 16
+  },
+  {
+    "id": 17,
+    "number": 17,
+    "name_arabic": "داود",
+    "name_english": "David",
+    "name_transliteration": "Dawud",
+    "title_arabic": "خليفة الله في الأرض",
+    "title_english": "Allah's Vicegerent on Earth",
+    "story_summary": "Dawud (AS) was a prophet and king of Israel. As a young man, he defeated the giant warrior Jalut (Goliath) with a sling and a stone during a battle between the army of Talut (Saul) and the forces of the disbelievers. This act of bravery, relying on Allah, led to his rise to kingship.\n\nAllah blessed Dawud with many gifts: a beautiful voice with which he recited the Zabur (Psalms), the mountains and birds would join him in glorifying Allah, and he was given the ability to soften iron with his bare hands to make armor. He was also given great wisdom in judgment.\n\nDawud was known for his worship. He would fast every other day, which the Prophet Muhammad (PBUH) described as the most beloved fasting to Allah. He divided his night into portions for sleep, prayer, and rest. His story teaches the balance between worship, leadership, and the use of one's talents for Allah's cause.",
+    "key_lessons": [
+      "True strength comes from reliance on Allah, not physical power alone",
+      "Gifts and talents should be used in worship and service",
+      "Justice in leadership is a divine trust",
+      "Balanced worship is sustainable and beloved to Allah",
+      "Combining worldly skills with spiritual devotion"
+    ],
+    "quran_mentions": ["2:249-252", "4:163", "5:78", "6:84", "17:55", "21:78-80", "27:15-16", "34:10-13", "38:17-26"],
+    "era": "Late Prophets",
+    "lineage": "From the Children of Israel, tribe of Judah",
+    "years_lived": "70 years (approximate)",
+    "place_of_preaching": "Palestine (Kingdom of Israel)",
+    "miracles": [
+      "Given the Zabur (Psalms) as a holy book",
+      "Mountains and birds glorified Allah alongside him",
+      "Iron became soft in his hands to make armor",
+      "Defeated Jalut (Goliath) as a young man"
+    ],
+    "display_order": 17
+  },
+  {
+    "id": 18,
+    "number": 18,
+    "name_arabic": "سليمان",
+    "name_english": "Solomon",
+    "name_transliteration": "Sulaiman",
+    "title_arabic": "النبي الملك",
+    "title_english": "The Prophet-King",
+    "story_summary": "Sulaiman (AS) was the son of Dawud (AS) and inherited his kingdom and prophethood. Allah granted him a dominion unlike any before or after him. He could understand the language of birds and animals, command the jinn, and control the wind which would carry his forces.\n\nSulaiman's kingdom was magnificent. The jinn built for him palaces, statues, basins like reservoirs, and heavy cooking pots. His encounter with the Queen of Sheba (Bilqis) is a famous story in the Quran. Through wisdom rather than force, he invited her to Islam, and she submitted to Allah after witnessing the wonders of his kingdom.\n\nDespite his immense worldly power, Sulaiman remained humble and devoted to Allah. He would inspect his horses and his army for the sake of Allah. When he died, the jinn did not know until a termite ate through the staff supporting his body, proving they had no knowledge of the unseen.",
+    "key_lessons": [
+      "Power and wealth are tests from Allah that require gratitude",
+      "Wisdom is superior to brute force in leadership",
+      "Even the greatest kingdom is temporary",
+      "Humility before Allah regardless of worldly status",
+      "The unseen is known only to Allah"
+    ],
+    "quran_mentions": ["2:102", "4:163", "6:84", "21:78-82", "27:15-44", "34:12-14", "38:30-40"],
+    "era": "Late Prophets",
+    "lineage": "Son of Dawud (AS), from the Children of Israel",
+    "years_lived": "52 years (approximate)",
+    "place_of_preaching": "Palestine and the greater Kingdom of Israel",
+    "miracles": [
+      "Could understand and speak the language of birds and animals",
+      "Jinn were subjugated to his command",
+      "The wind carried him and his forces",
+      "Had power over jinn who built structures and dived for pearls"
+    ],
+    "display_order": 18
+  },
+  {
+    "id": 19,
+    "number": 19,
+    "name_arabic": "إلياس",
+    "name_english": "Elijah",
+    "name_transliteration": "Ilyas",
+    "title_arabic": "نبي الله",
+    "title_english": "Prophet of Allah",
+    "story_summary": "Ilyas (AS) was a prophet sent to the people of Baalbek in modern-day Lebanon. His people had fallen into the worship of an idol called Baal, despite being from the Children of Israel who had previously received divine guidance.\n\nIlyas courageously confronted his people, asking them whether they would call upon Baal and abandon the Best of Creators, Allah, their Lord and the Lord of their forefathers. He reminded them of Allah's blessings and the foolishness of idol worship.\n\nDespite his efforts, the majority of his people rejected his message. The Quran praises Ilyas as being among the messengers and among those who were sent. Peace was sent upon him and he is counted among the righteous servants of Allah.",
+    "key_lessons": [
+      "Standing against popular but false beliefs takes courage",
+      "Relapse into idol worship can happen even to guided communities",
+      "Prophets fulfill their duty regardless of people's response",
+      "Allah honors those who stand firm for truth"
+    ],
+    "quran_mentions": ["6:85", "37:123-132"],
+    "era": "Late Prophets",
+    "lineage": "From the Children of Israel, descendant of Harun (AS)",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Baalbek (modern Lebanon)",
+    "miracles": [
+      "Protected by Allah from the plots of his people",
+      "Granted peace and honor from Allah"
+    ],
+    "display_order": 19
+  },
+  {
+    "id": 20,
+    "number": 20,
+    "name_arabic": "اليسع",
+    "name_english": "Elisha",
+    "name_transliteration": "Al-Yasa",
+    "title_arabic": "المفضل",
+    "title_english": "The Favored One",
+    "story_summary": "Al-Yasa (AS) succeeded Ilyas (AS) as a prophet among the Children of Israel. He continued the mission of calling people to the worship of Allah alone and guiding them back to the straight path after they had strayed.\n\nAl-Yasa is mentioned in the Quran among the righteous and the favored. He is listed alongside other great prophets such as Ibrahim, Ishaq, Yaqub, and Ismail, indicating his high status with Allah.\n\nWhile the Quran does not provide extensive details about his life, his inclusion among the elite prophets and the description of him being among the best of people testifies to his righteousness and dedication to Allah's cause.",
+    "key_lessons": [
+      "Continuing the mission of one's predecessor is honorable",
+      "Being counted among the righteous is the greatest achievement",
+      "Not all prophets receive extensive mentions but all are equally honored",
+      "Steadfastness in faith earns Allah's favor"
+    ],
+    "quran_mentions": ["6:86", "38:48"],
+    "era": "Late Prophets",
+    "lineage": "From the Children of Israel, successor to Ilyas (AS)",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Among the Children of Israel (Levant region)",
+    "miracles": [
+      "Granted prophethood and counted among the best of creation",
+      "Favored and chosen by Allah above many others"
+    ],
+    "display_order": 20
+  },
+  {
+    "id": 21,
+    "number": 21,
+    "name_arabic": "يونس",
+    "name_english": "Jonah",
+    "name_transliteration": "Yunus",
+    "title_arabic": "ذو النون",
+    "title_english": "The Companion of the Whale",
+    "story_summary": "Yunus (AS) was sent to the people of Nineveh (in modern-day Iraq). When his people rejected his message, he left them in anger and frustration before receiving Allah's permission, expecting that Allah would punish them. He boarded a ship which encountered a severe storm, and when lots were drawn, Yunus was thrown overboard.\n\nA great whale swallowed Yunus, and he found himself in layers of darkness: the darkness of the whale's belly, the darkness of the sea, and the darkness of the night. In this desperate state, he called out to Allah with the famous supplication: 'There is no god but You, Glory be to You, indeed I was among the wrongdoers.'\n\nAllah accepted his repentance and commanded the whale to cast him out on a barren shore. Allah caused a gourd plant to grow over him for shade and nourishment. Meanwhile, his people of Nineveh, fearing the punishment, repented and believed. They are the only community mentioned in the Quran whose collective repentance saved them from destruction.",
+    "key_lessons": [
+      "Never abandon one's mission without Allah's permission",
+      "Sincere repentance is accepted no matter the circumstances",
+      "The dua of Yunus is powerful for relief from distress",
+      "An entire community can be saved through collective repentance",
+      "Patience in dawah is essential even when discouraged"
+    ],
+    "quran_mentions": ["4:163", "6:86", "10:98", "21:87-88", "37:139-148", "68:48-50"],
+    "era": "Late Prophets",
+    "lineage": "From the Children of Israel",
+    "years_lived": "Unknown",
+    "place_of_preaching": "Nineveh (modern-day Mosul, Iraq)",
+    "miracles": [
+      "Survived in the belly of a whale by Allah's mercy",
+      "His entire community repented and was saved from destruction",
+      "A gourd plant grew miraculously to provide him shade"
+    ],
+    "display_order": 21
+  },
+  {
+    "id": 22,
+    "number": 22,
+    "name_arabic": "زكريا",
+    "name_english": "Zechariah",
+    "name_transliteration": "Zakariya",
+    "title_arabic": "كافل مريم",
+    "title_english": "Guardian of Maryam",
+    "story_summary": "Zakariya (AS) was a righteous prophet and priest from the Children of Israel who served in the temple. He was appointed as the guardian of Maryam (Mary), the mother of Isa (Jesus). Whenever he entered her chamber, he would find her supplied with provisions, and when he asked where they came from, she would say they were from Allah.\n\nInspired by Allah's provision for Maryam, the elderly and childless Zakariya turned to Allah in heartfelt supplication, asking for an heir despite his old age and his wife's barrenness. Allah answered his prayer and gave him glad tidings of a son named Yahya, a name that had never been given before.\n\nAs a sign, Zakariya was unable to speak to people for three days, though he could glorify Allah. He communicated through gestures during this period. His story beautifully illustrates that Allah answers prayers at any stage of life and that sincere supplication is never wasted.",
+    "key_lessons": [
+      "No prayer is too late or too impossible for Allah to answer",
+      "Witnessing Allah's blessings on others should inspire our own dua",
+      "Serving in places of worship is a noble calling",
+      "Patience and sincerity in dua eventually bear fruit"
+    ],
+    "quran_mentions": ["3:37-41", "6:85", "19:2-11", "21:89-90"],
+    "era": "Late Prophets",
+    "lineage": "From the Children of Israel, descendant of Sulaiman (AS)",
+    "years_lived": "120 years (approximate)",
+    "place_of_preaching": "Palestine (Jerusalem)",
+    "miracles": [
+      "Blessed with a son (Yahya) in extreme old age",
+      "Given a sign of being unable to speak for three days while still able to glorify Allah"
+    ],
+    "display_order": 22
+  },
+  {
+    "id": 23,
+    "number": 23,
+    "name_arabic": "يحيى",
+    "name_english": "John",
+    "name_transliteration": "Yahya",
+    "title_arabic": "سيداً وحصوراً ونبياً",
+    "title_english": "Noble, Chaste, and a Prophet",
+    "story_summary": "Yahya (AS) was the son of Zakariya (AS), born miraculously to elderly parents. His name was chosen by Allah Himself, and it was a name never given to anyone before him. From childhood, Yahya was given wisdom, compassion, and purity by Allah.\n\nThe Quran describes Yahya with remarkable qualities: he was given judgment and wisdom as a child, he was dutiful to his parents, and he was neither arrogant nor disobedient. He held firmly to the Scripture and was given compassion from Allah and purity of heart.\n\nYahya confirmed the coming of Isa (AS) and called his people to repentance and righteousness. He lived a life of asceticism and devotion, shunning worldly pleasures in favor of worship. He is one of the few prophets whom the Quran describes as having peace upon him on the day he was born, the day he dies, and the day he will be raised alive.",
+    "key_lessons": [
+      "Purity of heart is a gift from Allah that should be cherished",
+      "Wisdom can be granted at any age by Allah's will",
+      "Kindness to parents is linked to closeness to Allah",
+      "Living simply for Allah's sake is a noble path"
+    ],
+    "quran_mentions": ["3:38-41", "6:85", "19:7-15", "21:89-90"],
+    "era": "Late Prophets",
+    "lineage": "Son of Zakariya (AS), from the Children of Israel",
+    "years_lived": "30 years (approximate)",
+    "place_of_preaching": "Palestine",
+    "miracles": [
+      "Given wisdom and judgment as a young child",
+      "Born to elderly parents as an answer to prayer",
+      "His name was chosen directly by Allah"
+    ],
+    "display_order": 23
+  },
+  {
+    "id": 24,
+    "number": 24,
+    "name_arabic": "عيسى",
+    "name_english": "Jesus",
+    "name_transliteration": "Isa",
+    "title_arabic": "روح الله وكلمته",
+    "title_english": "Spirit of Allah and His Word",
+    "story_summary": "Isa (AS) was born miraculously to Maryam (Mary) without a father, by the command of Allah who said 'Be' and it was. He is described as a word from Allah and a spirit from Him. As an infant in the cradle, he spoke to defend his mother's honor, declaring himself a servant of Allah and a prophet.\n\nIsa was given remarkable miracles: he healed the blind and the leper, raised the dead by Allah's permission, fashioned birds from clay and breathed life into them, and informed people of what they ate and stored in their homes. He was given the Injeel (Gospel) and confirmed the Torah before him while making lawful some things previously forbidden.\n\nWhen his enemies plotted to crucify him, Allah raised Isa to the heavens. The Quran clearly states that he was not killed nor crucified, but it was made to appear so. Muslims believe Isa will return before the Day of Judgment to establish justice. He is one of the five greatest messengers (Ulul Azm) and is highly honored in Islam.",
+    "key_lessons": [
+      "Miracles happen by Allah's permission, not by the prophet's own power",
+      "Isa was a prophet and servant of Allah, not divine",
+      "Defending truth may require extraordinary sacrifice",
+      "Allah protects His messengers in ways beyond human comprehension",
+      "The message of all prophets was the same: worship Allah alone"
+    ],
+    "quran_mentions": ["2:87", "2:136", "2:253", "3:42-63", "4:156-159", "4:171-172", "5:46-47", "5:72-78", "5:110-120", "19:16-40", "43:57-65", "61:6", "61:14"],
+    "era": "Late Prophets",
+    "lineage": "Son of Maryam (Mary), no father; descendant of Dawud (AS) and the Children of Israel",
+    "years_lived": "33 years (on earth before being raised; will return)",
+    "place_of_preaching": "Palestine (among the Children of Israel)",
+    "miracles": [
+      "Born without a father by Allah's command",
+      "Spoke from the cradle as an infant",
+      "Healed the blind and the leper by Allah's permission",
+      "Raised the dead by Allah's permission",
+      "Fashioned birds from clay and breathed life into them by Allah's permission",
+      "Informed people of what they stored in their homes",
+      "A table spread with food was sent down from heaven",
+      "Raised alive to the heavens"
+    ],
+    "display_order": 24
+  },
+  {
+    "id": 25,
+    "number": 25,
+    "name_arabic": "محمد",
+    "name_english": "Muhammad",
+    "name_transliteration": "Muhammad",
+    "title_arabic": "خاتم الأنبياء والمرسلين",
+    "title_english": "Seal of the Prophets and Messengers",
+    "story_summary": "Muhammad (PBUH) is the final prophet and messenger of Allah, sent as a mercy to all of creation. Born in Makkah in 570 CE, he was known as Al-Amin (The Trustworthy) and As-Sadiq (The Truthful) even before his prophethood. At the age of 40, he received the first revelation from Allah through the Angel Jibreel in the Cave of Hira.\n\nFor thirteen years in Makkah, he called people to monotheism, enduring persecution, boycotts, and the loss of loved ones. He then migrated to Madinah (the Hijrah), where he established the first Islamic state based on justice, brotherhood, and the worship of Allah. Over the next ten years, he unified the Arabian Peninsula under Islam through a combination of wisdom, diplomacy, and, when necessary, defensive warfare.\n\nThe Prophet Muhammad (PBUH) received the Quran, the final and preserved revelation of Allah. He established the five pillars of Islam, defined the principles of worship, social justice, family life, governance, and personal conduct. His life (Sunnah) serves as the practical guide for implementing the Quran. He passed away in 632 CE in Madinah, having completed the message and established a civilization that would shape world history.",
+    "key_lessons": [
+      "Mercy and compassion are the foundation of true leadership",
+      "The Quran is the final, preserved guidance for all humanity",
+      "Character and trustworthiness are essential qualities of faith",
+      "Justice applies equally to all people regardless of status",
+      "The purpose of life is to worship Allah and serve humanity"
+    ],
+    "quran_mentions": ["3:144", "33:40", "47:2", "48:29", "61:6"],
+    "era": "Late Prophets",
+    "lineage": "Son of Abdullah ibn Abdul Muttalib, descendant of Ismail (AS) and Ibrahim (AS), from the tribe of Quraysh",
+    "years_lived": "63 years",
+    "place_of_preaching": "Makkah and Madinah, Arabia; message for all of humanity",
+    "miracles": [
+      "The Quran - the greatest and living miracle",
+      "Isra and Mi'raj (Night Journey and Ascension to the Heavens)",
+      "Splitting of the moon",
+      "Water flowing from between his fingers",
+      "The tree trunk that wept when he moved to a pulpit",
+      "Food being multiplied by his blessing",
+      "Prophecies of future events that came true"
+    ],
+    "display_order": 25
+  }
+]

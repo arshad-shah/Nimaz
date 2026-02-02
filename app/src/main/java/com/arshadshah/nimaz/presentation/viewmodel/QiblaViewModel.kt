@@ -162,7 +162,6 @@ class QiblaViewModel @Inject constructor(
 
     init {
         observeLocation()
-        registerSensors()
     }
 
     override fun onCleared() {

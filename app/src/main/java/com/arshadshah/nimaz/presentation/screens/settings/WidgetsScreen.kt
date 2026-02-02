@@ -70,7 +70,10 @@ private data class WidgetPreviewData(
     val hijriYear: Int = 1446,
     val gregorianDate: String = "—",
     val dayOfWeek: String = "—",
-    val locationName: String = "—"
+    val locationName: String = "—",
+    val daysInMonth: Int = 30,
+    val firstDayOfWeekOffset: Int = 0,
+    val todayEvents: List<Pair<String, String>> = emptyList()
 )
 
 private data class PrayerPreview(
@@ -136,12 +139,12 @@ fun WidgetsScreen(
                 )
             }
 
-            // Prayer Times Widget (4x2)
+            // Prayer Times Widget (4x1)
             item {
                 WidgetSection(
-                    title = "Prayer Times Widget (4\u00D72)",
+                    title = "Prayer Times Widget (4\u00D71)",
                     infoName = "Prayer Times",
-                    infoSize = "4\u00D72 \u2022 All prayers + countdown",
+                    infoSize = "4\u00D71 \u2022 All prayers + countdown",
                     infoIcon = Icons.Default.ListAlt,
                     preview = { PrayerTimesWidgetPreview(previewData) }
                 )
@@ -166,6 +169,17 @@ fun WidgetsScreen(
                     infoSize = "4\u00D71 \u2022 Tap to mark prayers completed",
                     infoIcon = Icons.Default.CheckCircle,
                     preview = { PrayerTrackerWidgetPreview() }
+                )
+            }
+
+            // Hijri Calendar Widget (4x2)
+            item {
+                WidgetSection(
+                    title = "Hijri Calendar Widget (4\u00D72)",
+                    infoName = "Hijri Calendar",
+                    infoSize = "4\u00D72 \u2022 Full month calendar + today\u2019s events",
+                    infoIcon = Icons.Default.CalendarMonth,
+                    preview = { HijriCalendarWidgetPreview(previewData) }
                 )
             }
 
@@ -550,6 +564,175 @@ private fun PrayerTrackerWidgetPreview(
 }
 
 @Composable
+private fun HijriCalendarWidgetPreview(
+    data: WidgetPreviewData,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Left side: Calendar grid
+            Column(
+                modifier = Modifier
+                    .weight(0.7f)
+                    .padding(end = 8.dp)
+            ) {
+                // Header row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "${data.hijriMonth} ${data.hijriYear}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = data.gregorianDate,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                // Day-of-week labels
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    listOf("S", "M", "T", "W", "T", "F", "S").forEach { label ->
+                        Box(
+                            modifier = Modifier.weight(1f),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = label,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                // Calendar grid — each row uses weight(1f) to fill vertical space
+                val totalCells = data.firstDayOfWeekOffset + data.daysInMonth
+                val totalRows = (totalCells + 6) / 7
+                for (row in 0 until totalRows) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f)
+                    ) {
+                        for (col in 0 until 7) {
+                            val cellIndex = row * 7 + col
+                            val dayNumber = cellIndex - data.firstDayOfWeekOffset + 1
+
+                            Box(
+                                modifier = Modifier.weight(1f),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (dayNumber in 1..data.daysInMonth) {
+                                    val isToday = dayNumber == data.hijriDay
+                                    if (isToday) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(22.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = dayNumber.toString(),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onPrimary
+                                            )
+                                        }
+                                    } else {
+                                        Text(
+                                            text = dayNumber.toString(),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurface
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Divider
+            Box(
+                modifier = Modifier
+                    .width(1.dp)
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+
+            // Right side: Events panel
+            Column(
+                modifier = Modifier
+                    .weight(0.3f)
+                    .padding(start = 8.dp)
+            ) {
+                Text(
+                    text = "Today",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Text(
+                    text = data.hijriDay.toString(),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+
+                Spacer(modifier = Modifier.height(6.dp))
+
+                if (data.todayEvents.isEmpty()) {
+                    Text(
+                        text = "No events",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                    )
+                } else {
+                    data.todayEvents.forEach { (name, type) ->
+                        Column(modifier = Modifier.padding(bottom = 4.dp)) {
+                            Text(
+                                text = name,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 2
+                            )
+                            Text(
+                                text = type,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontSize = 10.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun HowToAddCard(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
@@ -674,6 +857,18 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
         val gregorianDate = "${today.dayOfMonth} ${today.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }}"
         val dayOfWeek = today.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
+        // Calendar grid data
+        val daysInMonth = HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
+        val firstOfMonth = HijriDateCalculator.toGregorian(1, hijriDate.month, hijriDate.year)
+        val javaDow = firstOfMonth.dayOfWeek.value // 1=Mon..7=Sun
+        val firstDayOfWeekOffset = if (javaDow == 7) 0 else javaDow // Sun=0, Mon=1..Sat=6
+
+        // Today's events
+        val allEvents = HijriDateCalculator.getIslamicEvents(hijriDate.year)
+        val todayEvents = allEvents
+            .filter { it.day == hijriDate.day && it.month == hijriDate.month }
+            .map { it.name to it.type.name.replace("_", " ").lowercase().replaceFirstChar { c -> c.uppercase() } }
+
         WidgetPreviewData(
             nextPrayerName = nextPrayerName,
             nextPrayerTime = nextPrayerTimeStr,
@@ -685,7 +880,10 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
             hijriYear = hijriDate.year,
             gregorianDate = gregorianDate,
             dayOfWeek = dayOfWeek,
-            locationName = locationName
+            locationName = locationName,
+            daysInMonth = daysInMonth,
+            firstDayOfWeekOffset = firstDayOfWeekOffset,
+            todayEvents = todayEvents
         )
     } catch (e: Exception) {
         // Return fallback data

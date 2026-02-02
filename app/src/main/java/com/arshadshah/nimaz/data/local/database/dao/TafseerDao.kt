@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
@@ -61,4 +62,16 @@ interface TafseerDao {
 
     @Query("DELETE FROM tafseer_notes WHERE id = :noteId")
     suspend fun deleteNoteById(noteId: Long)
+
+    @Query("DELETE FROM tafseer_highlights")
+    suspend fun deleteAllHighlights()
+
+    @Query("DELETE FROM tafseer_notes")
+    suspend fun deleteAllNotes()
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllHighlights()
+        deleteAllNotes()
+    }
 }

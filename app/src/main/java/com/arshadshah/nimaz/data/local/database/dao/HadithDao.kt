@@ -102,4 +102,7 @@ interface HadithDao {
             )
         }
     }
+
+    @Query("DELETE FROM hadith_bookmarks")
+    suspend fun deleteAllUserData()
 }

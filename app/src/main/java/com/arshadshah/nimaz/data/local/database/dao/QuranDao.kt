@@ -165,4 +165,20 @@ interface QuranDao {
             )
         }
     }
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllBookmarks()
+        deleteAllFavorites()
+        deleteAllReadingProgress()
+    }
+
+    @Query("DELETE FROM quran_bookmarks")
+    suspend fun deleteAllBookmarks()
+
+    @Query("DELETE FROM quran_favorites")
+    suspend fun deleteAllFavorites()
+
+    @Query("DELETE FROM reading_progress")
+    suspend fun deleteAllReadingProgress()
 }

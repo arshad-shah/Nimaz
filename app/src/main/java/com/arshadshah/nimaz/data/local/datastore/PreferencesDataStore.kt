@@ -108,6 +108,10 @@ class PreferencesDataStore @Inject constructor(
         val LOCATION_NAME = stringPreferencesKey("location_name")
     }
 
+    suspend fun clearAllData() {
+        dataStore.edit { it.clear() }
+    }
+
     // Onboarding
     val onboardingCompleted: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false

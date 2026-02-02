@@ -19,13 +19,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.ListAlt
-import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -36,23 +39,20 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-private const val APP_VERSION = "1.0.0"
-private const val BUILD_NUMBER = 1
+import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,8 +99,21 @@ fun AboutScreen(
                     onRateApp = onRateApp,
                     onContactUs = onContactUs,
                     onNavigateToPrivacyPolicy = onNavigateToPrivacyPolicy,
-                    onNavigateToTerms = onNavigateToTerms
+                    onNavigateToTerms = onNavigateToTerms,
+                    onNavigateToLicenses = onNavigateToLicenses
                 )
+            }
+
+            // Developer Section
+            item {
+                NimazSectionTitle(
+                    text = "Developer",
+                    modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
+                )
+            }
+
+            item {
+                DeveloperCard()
             }
 
             // Credits Section
@@ -138,8 +151,6 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
             .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // App Logo — use foreground layer directly since ic_launcher is an
-        // adaptive icon XML that painterResource cannot handle
         Image(
             painter = painterResource(R.mipmap.ic_launcher_foreground),
             contentDescription = "Nimaz",
@@ -160,7 +171,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = "Version $APP_VERSION (Build $BUILD_NUMBER)",
+            text = "Version ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -168,7 +179,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = "Your complete Islamic companion for prayer times, Quran, and daily worship",
+            text = "A comprehensive Islamic companion app with accurate prayer times, qibla direction, Quran reading, and more.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -184,8 +195,11 @@ private fun LinksCard(
     onContactUs: () -> Unit,
     onNavigateToPrivacyPolicy: () -> Unit,
     onNavigateToTerms: () -> Unit,
+    onNavigateToLicenses: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val uriHandler = LocalUriHandler.current
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -205,30 +219,36 @@ private fun LinksCard(
         LinkItem(
             icon = Icons.Default.Email,
             title = "Contact Support",
-            subtitle = "support@nimaz.app",
+            subtitle = "arshad@arshadshah.com",
             onClick = onContactUs,
             showDivider = true
         )
-        val uriHandler = LocalUriHandler.current
         LinkItem(
-            icon = Icons.Default.Public,
+            icon = Icons.Default.Language,
             title = "Website",
-            subtitle = "nimaz.app",
-            onClick = { uriHandler.openUri("https://nimaz.app") },
+            subtitle = "nimaz.arshadshah.com",
+            onClick = { uriHandler.openUri("https://nimaz.arshadshah.com") },
             showDivider = true
         )
         LinkItem(
-            icon = Icons.Default.Description,
+            icon = Icons.Default.Shield,
             title = "Privacy Policy",
             subtitle = "How we handle your data",
             onClick = onNavigateToPrivacyPolicy,
             showDivider = true
         )
         LinkItem(
-            icon = Icons.Default.ListAlt,
+            icon = Icons.Default.Description,
             title = "Terms of Service",
             subtitle = "Usage terms",
             onClick = onNavigateToTerms,
+            showDivider = true
+        )
+        LinkItem(
+            icon = Icons.Default.Gavel,
+            title = "Open Source Licenses",
+            subtitle = "Third-party libraries",
+            onClick = onNavigateToLicenses,
             showDivider = true
         )
         val updateManager = LocalInAppUpdateManager.current
@@ -253,6 +273,42 @@ private fun LinksCard(
                 }
             },
             showDivider = false
+        )
+    }
+}
+
+@Composable
+private fun DeveloperCard(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(
+                color = MaterialTheme.colorScheme.surfaceVariant,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(20.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Arshad Shah",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "Software Engineer at HMH, Dublin",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "BSc Computer Science, TU Dublin",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "Dublin, Ireland",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -371,10 +427,14 @@ private fun CreditsCard(modifier: Modifier = Modifier) {
 @Composable
 private fun SocialLinksRow(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
+
+    data class SocialLink(val icon: ImageVector, val url: String, val label: String)
+
     val socials = listOf(
-        "X" to "https://x.com/nimaz",
-        "IG" to "https://instagram.com/nimaz",
-        "YT" to "https://youtube.com/@nimaz"
+        SocialLink(Icons.Default.Code, "https://github.com/arshad-shah", "GitHub"),
+        SocialLink(Icons.Default.WorkOutline, "https://linkedin.com/in/arshadshah", "LinkedIn"),
+        SocialLink(Icons.Default.Email, "mailto:arshad@arshadshah.com", "Email"),
+        SocialLink(Icons.Default.Language, "https://arshadshah.com", "Website")
     )
 
     Row(
@@ -382,7 +442,7 @@ private fun SocialLinksRow(modifier: Modifier = Modifier) {
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        socials.forEachIndexed { index, (label, url) ->
+        socials.forEachIndexed { index, social ->
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -391,14 +451,14 @@ private fun SocialLinksRow(modifier: Modifier = Modifier) {
                         shape = RoundedCornerShape(14.dp)
                     )
                     .clip(RoundedCornerShape(14.dp))
-                    .clickable { uriHandler.openUri(url) },
+                    .clickable { uriHandler.openUri(social.url) },
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                Icon(
+                    imageVector = social.icon,
+                    contentDescription = social.label,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(20.dp)
                 )
             }
             if (index < socials.lastIndex) {
@@ -416,55 +476,32 @@ private fun FooterSection(modifier: Modifier = Modifier) {
             .padding(vertical = 20.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(
-            text = "Made with love for the Ummah",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Made with ",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+            Icon(
+                imageVector = Icons.Default.Favorite,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                modifier = Modifier.size(14.dp)
+            )
+            Text(
+                text = " for the Ummah",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+            )
+        }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "\u00A9 2026 Nimaz. All rights reserved.",
+            text = "\u00A9 ${LocalDate.now().year} Nimaz. All rights reserved.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )
     }
 }
-
-@Preview(showBackground = true, widthDp = 400, name = "LinkItem")
-@Composable
-private fun LinkItemPreview() {
-    NimazTheme {
-        LinkItem(
-            icon = Icons.Default.Star,
-            title = "Rate on Play Store",
-            subtitle = "Help us reach more Muslims",
-            onClick = {},
-            showDivider = true
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "CreditsCard")
-@Composable
-private fun CreditsCardPreview() {
-    NimazTheme {
-        CreditsCard()
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "SocialLinksRow")
-@Composable
-private fun SocialLinksRowPreview() {
-    NimazTheme {
-        SocialLinksRow()
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "FooterSection")
-@Composable
-private fun FooterSectionPreview() {
-    NimazTheme {
-        FooterSection()
-    }
-}
-

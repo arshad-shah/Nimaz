@@ -96,6 +96,9 @@ interface PrayerDao {
         AND prayerName != 'sunrise'
     """)
     suspend fun markPastPrayersAsMissed(todayDate: Long, timestamp: Long = System.currentTimeMillis()): Int
+
+    @Query("DELETE FROM prayer_records")
+    suspend fun deleteAllUserData()
 }
 
 data class PrayerStatCount(

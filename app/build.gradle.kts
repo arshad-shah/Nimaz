@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.about.libs.plugin)
 }
 
 android {
@@ -41,6 +42,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -115,6 +117,14 @@ dependencies {
     // In-App Updates
     implementation(libs.play.app.update)
     implementation(libs.play.app.update.ktx)
+
+    // AboutLibraries
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+
+    // In-App Review
+    implementation(libs.app.review)
+    implementation(libs.app.review.ktx)
 
     // Testing
     testImplementation(libs.junit)

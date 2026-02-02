@@ -49,7 +49,8 @@
       "WebFetch(domain:archive.org)",
       "Bash(for screen in SettingsScreen PrayerSettingsScreen AppearanceSettingsScreen NotificationSettingsScreen QuranSettingsScreen LocationScreen MoreMenuScreen AboutScreen HomeScreen HelpSupportScreen FastTrackerScreen PrayerTrackerScreen QadaPrayersScreen BookmarksScreen SearchScreen HadithCollectionScreen IslamicCalendarScreen TasbihScreen ZakatCalculatorScreen ZakatHistoryScreen SurahInfoScreen)",
       "Bash(do)",
-      "WebFetch(domain:api.quran.com)"
+      "WebFetch(domain:api.quran.com)",
+      "Bash(\"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\gradlew.bat\" compileDebugKotlin)"
     ]
   }
 }

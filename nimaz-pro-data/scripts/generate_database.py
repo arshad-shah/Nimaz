@@ -409,6 +409,93 @@ def create_tables(conn):
         )
     ''')
 
+    # Asma ul Husna (99 Names of Allah)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS asma_ul_husna (
+            id INTEGER NOT NULL PRIMARY KEY,
+            number INTEGER NOT NULL,
+            name_arabic TEXT NOT NULL,
+            name_transliteration TEXT NOT NULL,
+            name_english TEXT NOT NULL,
+            meaning TEXT NOT NULL,
+            explanation TEXT NOT NULL,
+            benefits TEXT NOT NULL,
+            quran_references TEXT NOT NULL,
+            usage_in_dua TEXT NOT NULL,
+            display_order INTEGER NOT NULL
+        )
+    ''')
+
+    # Asma ul Husna Bookmarks (user data)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS asma_ul_husna_bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            name_id INTEGER NOT NULL,
+            is_favorite INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_asma_ul_husna_bookmarks_name_id ON asma_ul_husna_bookmarks(name_id)')
+
+    # Asma un Nabi (99 Names of Prophet Muhammad)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS asma_un_nabi (
+            id INTEGER NOT NULL PRIMARY KEY,
+            number INTEGER NOT NULL,
+            name_arabic TEXT NOT NULL,
+            name_transliteration TEXT NOT NULL,
+            name_english TEXT NOT NULL,
+            meaning TEXT NOT NULL,
+            explanation TEXT NOT NULL,
+            source TEXT NOT NULL,
+            display_order INTEGER NOT NULL
+        )
+    ''')
+
+    # Asma un Nabi Bookmarks (user data)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS asma_un_nabi_bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            name_id INTEGER NOT NULL,
+            is_favorite INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_asma_un_nabi_bookmarks_name_id ON asma_un_nabi_bookmarks(name_id)')
+
+    # Prophets
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS prophets (
+            id INTEGER NOT NULL PRIMARY KEY,
+            number INTEGER NOT NULL,
+            name_arabic TEXT NOT NULL,
+            name_english TEXT NOT NULL,
+            name_transliteration TEXT NOT NULL,
+            title_arabic TEXT NOT NULL,
+            title_english TEXT NOT NULL,
+            story_summary TEXT NOT NULL,
+            key_lessons TEXT NOT NULL,
+            quran_mentions TEXT NOT NULL,
+            era TEXT NOT NULL,
+            lineage TEXT NOT NULL,
+            years_lived TEXT NOT NULL,
+            place_of_preaching TEXT NOT NULL,
+            miracles TEXT NOT NULL,
+            display_order INTEGER NOT NULL
+        )
+    ''')
+
+    # Prophet Bookmarks (user data)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS prophet_bookmarks (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            prophet_id INTEGER NOT NULL,
+            is_favorite INTEGER NOT NULL DEFAULT 1,
+            created_at INTEGER NOT NULL
+        )
+    ''')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_prophet_bookmarks_prophet_id ON prophet_bookmarks(prophet_id)')
+
     # Create indices
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_surah_id ON ayahs(surah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_juz ON ayahs(juz)')
@@ -583,6 +670,51 @@ def populate_database(conn):
         print(f"Inserted {len(tafseer_maariful)} Ma'arif al-Qur'an tafseer entries")
     else:
         print("Warning: No Ma'arif al-Qur'an tafseer data found")
+
+    # Asma ul Husna (99 Names of Allah)
+    asma_ul_husna = load_json('asma_ul_husna.json')
+    if asma_ul_husna:
+        for a in asma_ul_husna:
+            quran_refs = json.dumps(a.get('quran_references', []))
+            cursor.execute('''
+                INSERT OR REPLACE INTO asma_ul_husna VALUES (?,?,?,?,?,?,?,?,?,?,?)
+            ''', (a['id'], a['number'], a['name_arabic'], a['name_transliteration'],
+                  a['name_english'], a['meaning'], a['explanation'], a['benefits'],
+                  quran_refs, a['usage_in_dua'], a['display_order']))
+        print(f"Inserted {len(asma_ul_husna)} Asma ul Husna entries")
+    else:
+        print("Warning: No Asma ul Husna data found")
+
+    # Asma un Nabi (99 Names of Prophet Muhammad)
+    asma_un_nabi = load_json('asma_un_nabi.json')
+    if asma_un_nabi:
+        for a in asma_un_nabi:
+            cursor.execute('''
+                INSERT OR REPLACE INTO asma_un_nabi VALUES (?,?,?,?,?,?,?,?,?)
+            ''', (a['id'], a['number'], a['name_arabic'], a['name_transliteration'],
+                  a['name_english'], a['meaning'], a['explanation'], a['source'],
+                  a['display_order']))
+        print(f"Inserted {len(asma_un_nabi)} Asma un Nabi entries")
+    else:
+        print("Warning: No Asma un Nabi data found")
+
+    # Prophets
+    prophets = load_json('prophets.json')
+    if prophets:
+        for p in prophets:
+            key_lessons = json.dumps(p.get('key_lessons', []))
+            quran_mentions = json.dumps(p.get('quran_mentions', []))
+            miracles = json.dumps(p.get('miracles', []))
+            cursor.execute('''
+                INSERT OR REPLACE INTO prophets VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ''', (p['id'], p['number'], p['name_arabic'], p['name_english'],
+                  p['name_transliteration'], p['title_arabic'], p['title_english'],
+                  p['story_summary'], key_lessons, quran_mentions, p['era'],
+                  p['lineage'], p['years_lived'], p['place_of_preaching'],
+                  miracles, p['display_order']))
+        print(f"Inserted {len(prophets)} prophet entries")
+    else:
+        print("Warning: No prophets data found")
 
     conn.commit()
 

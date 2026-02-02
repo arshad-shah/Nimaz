@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -18,24 +16,33 @@ import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Widgets
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSection
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -50,9 +57,16 @@ fun SettingsScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToLanguage: () -> Unit,
     onNavigateToWidgets: () -> Unit,
+    onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showResetDialog by remember { mutableStateOf(false) }
+    val shouldRestart by viewModel.shouldRestart.collectAsState()
+
+    LaunchedEffect(shouldRestart) {
+        if (shouldRestart) onRestartApp()
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -67,140 +81,145 @@ fun SettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Prayer Settings Section
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
+            // Prayer Settings
+            item { NimazSectionHeader(title = "Prayer Settings") }
             item {
-                NimazSettingsSection(title = "PRAYER SETTINGS") {
-                    NimazSettingsItem(
-                        icon = Icons.Default.Calculate,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Calculation Method",
                         subtitle = "Prayer time calculation settings",
+                        icon = Icons.Default.Calculate,
                         onClick = onNavigateToPrayerSettings
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 73.dp))
-                    NimazSettingsItem(
-                        icon = Icons.Default.LocationOn,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Location",
                         subtitle = "Manage prayer time locations",
+                        icon = Icons.Default.LocationOn,
                         onClick = onNavigateToLocation
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 73.dp))
-                    NimazSettingsItem(
-                        icon = Icons.Default.Notifications,
-                        iconTint = MaterialTheme.colorScheme.primary,
-                        iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Notifications",
                         subtitle = "Adhan & reminders",
+                        icon = Icons.Default.Notifications,
                         onClick = onNavigateToNotifications
                     )
                 }
             }
 
-            // Quran Section
+            // Quran
+            item { NimazSectionHeader(title = "Quran") }
             item {
-                NimazSettingsSection(title = "QURAN") {
-                    NimazSettingsItem(
-                        icon = Icons.Default.MenuBook,
-                        iconTint = MaterialTheme.colorScheme.tertiary,
-                        iconBackground = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.12f),
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Quran Settings",
                         subtitle = "Reading and audio preferences",
+                        icon = Icons.Default.MenuBook,
                         onClick = onNavigateToQuranSettings
                     )
                 }
             }
 
-            // App Settings Section
+            // App Settings
+            item { NimazSectionHeader(title = "App Settings") }
             item {
-                NimazSettingsSection(title = "APP SETTINGS") {
-                    NimazSettingsItem(
-                        icon = Icons.Default.DarkMode,
-                        iconTint = MaterialTheme.colorScheme.secondary,
-                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Appearance",
                         subtitle = "Theme & display",
+                        icon = Icons.Default.DarkMode,
                         onClick = onNavigateToAppearance
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 73.dp))
-                    NimazSettingsItem(
-                        icon = Icons.Default.Language,
-                        iconTint = MaterialTheme.colorScheme.secondary,
-                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Language",
                         subtitle = "App language preferences",
+                        icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
                     )
-                    NimazDivider(modifier = Modifier.padding(start = 73.dp))
-                    NimazSettingsItem(
-                        icon = Icons.Default.Widgets,
-                        iconTint = MaterialTheme.colorScheme.secondary,
-                        iconBackground = MaterialTheme.colorScheme.secondary.copy(alpha = 0.12f),
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = "Widgets",
                         subtitle = "Home screen widgets",
+                        icon = Icons.Default.Widgets,
                         onClick = onNavigateToWidgets
                     )
                 }
             }
 
-            // Data Section
+            // Data
+            item { NimazSectionHeader(title = "Data") }
             item {
-                NimazSettingsSection(title = "DATA") {
-                    NimazSettingsItem(
-                        icon = Icons.Default.Restore,
-                        iconTint = MaterialTheme.colorScheme.error,
-                        iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.12f),
+                NimazMenuGroup {
+                    NimazMenuItem(
                         title = "Reset Settings",
                         subtitle = "Restore default settings",
-                        onClick = { viewModel.onEvent(SettingsEvent.ResetToDefaults) },
-                        showArrow = false
+                        icon = Icons.Default.Restore,
+                        iconTint = MaterialTheme.colorScheme.error,
+                        onClick = { showResetDialog = true }
                     )
                 }
             }
 
             // Version Info
-            item {
-                VersionInfo()
-            }
+            item { AppVersionInfo() }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
+
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = { showResetDialog = false },
+            title = { Text("Reset Settings") },
+            text = {
+                Text("This will restore all settings to their defaults. Your prayer tracking data, bookmarks, and other content will not be affected. The app will restart.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showResetDialog = false
+                        viewModel.onEvent(SettingsEvent.ResetToDefaults)
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error
+                    )
+                ) {
+                    Text("Reset")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showResetDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
 }
 
 @Composable
-private fun VersionInfo(
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
+private fun AppVersionInfo() {
+    val context = LocalContext.current
+    val versionName = try {
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "Unknown"
+    } catch (_: Exception) {
+        "Unknown"
+    }
+
+    Text(
+        text = "Nimaz v$versionName",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = "Nimaz",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(2.dp))
-        Text(
-            text = "Version 1.0.0",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Version Info")
-@Composable
-private fun VersionInfoPreview() {
-    NimazTheme {
-        VersionInfo()
-    }
+            .padding(vertical = 8.dp)
+    )
 }

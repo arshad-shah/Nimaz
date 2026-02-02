@@ -56,4 +56,7 @@ interface LocationDao {
         ishaAngle: Double?,
         timestamp: Long = System.currentTimeMillis()
     )
+
+    @Query("DELETE FROM locations")
+    suspend fun deleteAllUserData()
 }

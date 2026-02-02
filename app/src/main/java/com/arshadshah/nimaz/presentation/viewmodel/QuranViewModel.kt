@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -13,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
+import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
@@ -42,6 +44,9 @@ data class QuranHomeUiState(
     val selectedTab: Int = 0, // Browse sub-tab: 0=Surah, 1=Juz, 2=Page
     val readingProgress: ReadingProgress? = null,
     val favorites: List<QuranFavorite> = emptyList(),
+    val activeKhatam: Khatam? = null,
+    val khatamReadAyahIds: Set<Int> = emptySet(),
+    val completedKhatamCount: Int = 0,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -64,7 +69,9 @@ data class QuranReaderUiState(
     val continuousReading: Boolean = true,
     val favoriteAyahIds: Set<Int> = emptySet(),
     val pageCache: Map<Int, List<Ayah>> = emptyMap(),
-    val showTajweed: Boolean = false
+    val showTajweed: Boolean = false,
+    val activeKhatamId: Long? = null,
+    val khatamReadAyahIds: Set<Int> = emptySet()
 )
 
 data class QuranSearchUiState(
@@ -98,13 +105,18 @@ sealed interface QuranEvent {
     data object StopAudio : QuranEvent
     data class PlaySurahFromInfo(val surahNumber: Int) : QuranEvent
     data class LoadSurahInfo(val surahNumber: Int) : QuranEvent
+    data class MarkAyahsReadForKhatam(val ayahIds: List<Int>) : QuranEvent
+    data class UnmarkAyahReadForKhatam(val ayahId: Int) : QuranEvent
+    data class ToggleKhatamAyah(val ayahId: Int) : QuranEvent
+    data class MarkSurahAsReadForKhatam(val surahNumber: Int) : QuranEvent
 }
 
 @HiltViewModel
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     val audioManager: QuranAudioManager,
-    private val preferencesDataStore: PreferencesDataStore
+    private val preferencesDataStore: PreferencesDataStore,
+    private val khatamUseCases: KhatamUseCases
 ) : ViewModel() {
 
     private val _homeState = MutableStateFlow(QuranHomeUiState())
@@ -136,6 +148,8 @@ class QuranViewModel @Inject constructor(
         loadFavoriteAyahIds()
         observeQuranSettings()
         setupDebouncedSearch()
+        observeActiveKhatam()
+        observeActiveKhatamForHome()
     }
 
     @OptIn(FlowPreview::class)
@@ -174,6 +188,10 @@ class QuranViewModel @Inject constructor(
             QuranEvent.StopAudio -> audioManager.stop()
             is QuranEvent.PlaySurahFromInfo -> playSurahFromInfo(event.surahNumber)
             is QuranEvent.LoadSurahInfo -> loadSurahInfo(event.surahNumber)
+            is QuranEvent.MarkAyahsReadForKhatam -> markAyahsReadForKhatam(event.ayahIds)
+            is QuranEvent.UnmarkAyahReadForKhatam -> unmarkAyahReadForKhatam(event.ayahId)
+            is QuranEvent.ToggleKhatamAyah -> toggleKhatamAyah(event.ayahId)
+            is QuranEvent.MarkSurahAsReadForKhatam -> markSurahAsReadForKhatam(event.surahNumber)
         }
     }
 
@@ -534,6 +552,84 @@ class QuranViewModel @Inject constructor(
     private fun updateReadingPosition(surah: Int, ayah: Int, page: Int, juz: Int) {
         viewModelScope.launch {
             quranUseCases.updateReadingPosition(surah, ayah, page, juz)
+        }
+    }
+
+    private fun observeActiveKhatam() {
+        viewModelScope.launch {
+            khatamUseCases.observeActiveKhatam().collect { khatam ->
+                val khatamId = khatam?.id
+                _readerState.update { it.copy(activeKhatamId = khatamId) }
+                if (khatamId != null) {
+                    // Start observing read ayah IDs for this khatam
+                    khatamUseCases.observeReadAyahIds(khatamId).collect { ids ->
+                        _readerState.update { it.copy(khatamReadAyahIds = ids) }
+                        // Reactive completion check
+                        if (ids.size >= Khatam.TOTAL_QURAN_AYAHS) {
+                            khatamUseCases.completeKhatam(khatamId)
+                        }
+                    }
+                } else {
+                    _readerState.update { it.copy(khatamReadAyahIds = emptySet()) }
+                }
+            }
+        }
+    }
+
+    private fun observeActiveKhatamForHome() {
+        viewModelScope.launch {
+            khatamUseCases.observeActiveKhatam().collect { khatam ->
+                _homeState.update { it.copy(activeKhatam = khatam) }
+                if (khatam != null) {
+                    khatamUseCases.observeReadAyahIds(khatam.id).collect { ids ->
+                        _homeState.update { it.copy(khatamReadAyahIds = ids) }
+                    }
+                } else {
+                    _homeState.update { it.copy(khatamReadAyahIds = emptySet()) }
+                }
+            }
+        }
+        viewModelScope.launch {
+            khatamUseCases.observeCompletedKhatams().collect { completed ->
+                _homeState.update { it.copy(completedKhatamCount = completed.size) }
+            }
+        }
+    }
+
+    private fun toggleKhatamAyah(ayahId: Int) {
+        val khatamId = _readerState.value.activeKhatamId ?: return
+        val isRead = ayahId in _readerState.value.khatamReadAyahIds
+        viewModelScope.launch {
+            if (isRead) {
+                khatamUseCases.unmarkAyahRead(khatamId, ayahId)
+            } else {
+                khatamUseCases.markAyahsRead(khatamId, listOf(ayahId))
+            }
+        }
+    }
+
+    private fun markSurahAsReadForKhatam(surahNumber: Int) {
+        val khatamId = _readerState.value.activeKhatamId ?: return
+        viewModelScope.launch {
+            khatamUseCases.markSurahAsRead(khatamId, surahNumber)
+        }
+    }
+
+    private fun unmarkAyahReadForKhatam(ayahId: Int) {
+        val khatamId = _readerState.value.activeKhatamId ?: return
+        viewModelScope.launch {
+            khatamUseCases.unmarkAyahRead(khatamId, ayahId)
+        }
+    }
+
+    private fun markAyahsReadForKhatam(ayahIds: List<Int>) {
+        val khatamId = _readerState.value.activeKhatamId ?: return
+        val readIds = _readerState.value.khatamReadAyahIds
+        val newIds = ayahIds.filter { it !in readIds }
+        if (newIds.isEmpty()) return
+
+        viewModelScope.launch {
+            khatamUseCases.markAyahsRead(khatamId, newIds)
         }
     }
 

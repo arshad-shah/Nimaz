@@ -22,4 +22,7 @@ interface ZakatDao {
 
     @Query("DELETE FROM zakat_history WHERE id = :id")
     suspend fun deleteCalculation(id: Long)
+
+    @Query("DELETE FROM zakat_history")
+    suspend fun deleteAllUserData()
 }

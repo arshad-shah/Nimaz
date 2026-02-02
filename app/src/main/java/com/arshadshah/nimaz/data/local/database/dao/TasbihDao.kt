@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
 import com.arshadshah.nimaz.data.local.database.entity.TasbihPresetEntity
 import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
@@ -98,6 +99,18 @@ interface TasbihDao {
 
     @Query("SELECT SUM(duration) FROM tasbih_sessions WHERE date BETWEEN :startDate AND :endDate")
     suspend fun getTotalDurationInRange(startDate: Long, endDate: Long): Long?
+
+    @Query("DELETE FROM tasbih_sessions")
+    suspend fun deleteAllSessions()
+
+    @Query("DELETE FROM tasbih_presets WHERE is_custom = 1")
+    suspend fun deleteCustomPresets()
+
+    @Transaction
+    suspend fun deleteAllUserData() {
+        deleteAllSessions()
+        deleteCustomPresets()
+    }
 }
 
 data class PresetUsageStat(

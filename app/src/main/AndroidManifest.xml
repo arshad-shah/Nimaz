@@ -143,6 +143,19 @@
                 android:resource="@xml/prayer_tracker_widget_info" />
         </receiver>
 
+        <!-- Hijri Calendar Widget -->
+        <receiver
+            android:name=".widget.hijricalendar.HijriCalendarWidgetReceiver"
+            android:exported="true"
+            android:label="@string/widget_hijri_calendar_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/hijri_calendar_widget_info" />
+        </receiver>
+
         <!-- Widget per-minute countdown tick receiver -->
         <receiver
             android:name=".widget.WidgetTickReceiver"

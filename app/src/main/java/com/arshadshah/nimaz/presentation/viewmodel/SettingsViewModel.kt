@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
+import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -200,6 +201,7 @@ sealed interface SettingsEvent {
     data object TestNotification : SettingsEvent
     data object TestAllNotifications : SettingsEvent
     data object ResetNotifications : SettingsEvent
+    data object DeleteAllData : SettingsEvent
 }
 
 @HiltViewModel
@@ -208,7 +210,8 @@ class SettingsViewModel @Inject constructor(
     private val prayerRepository: PrayerRepository,
     private val preferencesDataStore: PreferencesDataStore,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
-    val adhanAudioManager: AdhanAudioManager
+    val adhanAudioManager: AdhanAudioManager,
+    private val database: NimazDatabase
 ) : ViewModel() {
 
     private val _generalState = MutableStateFlow(GeneralSettingsUiState())
@@ -228,6 +231,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _widgetState = MutableStateFlow(WidgetSettingsUiState())
     val widgetState: StateFlow<WidgetSettingsUiState> = _widgetState.asStateFlow()
+
+    private val _shouldRestart = MutableStateFlow(false)
+    val shouldRestart: StateFlow<Boolean> = _shouldRestart.asStateFlow()
 
     init {
         loadSettings()
@@ -473,6 +479,7 @@ class SettingsViewModel @Inject constructor(
                     rescheduleNotifications()
                 }
             }
+            SettingsEvent.DeleteAllData -> deleteAllData()
         }
     }
 
@@ -758,11 +765,15 @@ class SettingsViewModel @Inject constructor(
     }
 
     private fun resetToDefaults() {
-        _generalState.update { GeneralSettingsUiState() }
-        _prayerState.update { PrayerSettingsUiState() }
-        _notificationState.update { NotificationSettingsUiState() }
-        _quranState.update { QuranSettingsUiState() }
-        _widgetState.update { WidgetSettingsUiState() }
+        viewModelScope.launch {
+            preferencesDataStore.clearAllData()
+            _generalState.update { GeneralSettingsUiState() }
+            _prayerState.update { PrayerSettingsUiState() }
+            _notificationState.update { NotificationSettingsUiState() }
+            _quranState.update { QuranSettingsUiState() }
+            _widgetState.update { WidgetSettingsUiState() }
+            _shouldRestart.value = true
+        }
     }
 
     private fun exportSettings() {
@@ -774,6 +785,33 @@ class SettingsViewModel @Inject constructor(
     private fun importSettings() {
         viewModelScope.launch {
             // Implementation would import settings from a file
+        }
+    }
+
+    private fun deleteAllData() {
+        viewModelScope.launch {
+            // Clear all user data from DAOs
+            database.quranDao().deleteAllUserData()
+            database.hadithDao().deleteAllUserData()
+            database.duaDao().deleteAllUserData()
+            database.prayerDao().deleteAllUserData()
+            database.fastingDao().deleteAllUserData()
+            database.tasbihDao().deleteAllUserData()
+            database.zakatDao().deleteAllUserData()
+            database.locationDao().deleteAllUserData()
+            database.tafseerDao().deleteAllUserData()
+
+            // Clear DataStore preferences
+            preferencesDataStore.clearAllData()
+
+            // Reset UI state to defaults
+            _generalState.update { GeneralSettingsUiState() }
+            _prayerState.update { PrayerSettingsUiState() }
+            _notificationState.update { NotificationSettingsUiState() }
+            _quranState.update { QuranSettingsUiState() }
+            _locationState.update { LocationSettingsUiState() }
+            _widgetState.update { WidgetSettingsUiState() }
+            _shouldRestart.value = true
         }
     }
 }
