@@ -60,9 +60,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -90,7 +92,7 @@ fun KhatamListScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Khatam Quran",
+                title = stringResource(R.string.khatam_title),
                 onBackClick = onNavigateBack
             )
         },
@@ -99,7 +101,7 @@ fun KhatamListScreen(
                 onClick = onNavigateToCreate,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Start New Khatam")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.khatam_start_new))
             }
         }
     ) { paddingValues ->
@@ -169,9 +171,9 @@ fun KhatamListScreen(
                         ) {
                             Text(
                                 text = when (selectedTab) {
-                                    0 -> "No khatams in progress"
-                                    1 -> "No completed khatams"
-                                    else -> "No abandoned khatams"
+                                    0 -> stringResource(R.string.khatam_no_in_progress)
+                                    1 -> stringResource(R.string.khatam_no_completed)
+                                    else -> stringResource(R.string.khatam_no_abandoned)
                                 },
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -209,7 +211,7 @@ fun KhatamListScreen(
 
                 if (!khatam.isActive && khatam.status != KhatamStatus.COMPLETED) {
                     ListItem(
-                        headlineContent = { Text("Set as Active") },
+                        headlineContent = { Text(stringResource(R.string.khatam_set_active)) },
                         leadingContent = {
                             Icon(
                                 Icons.Default.Star,
@@ -226,7 +228,7 @@ fun KhatamListScreen(
 
                 if (khatam.status != KhatamStatus.COMPLETED && khatam.status != KhatamStatus.ABANDONED) {
                     ListItem(
-                        headlineContent = { Text("Abandon") },
+                        headlineContent = { Text(stringResource(R.string.khatam_abandon)) },
                         leadingContent = {
                             Icon(
                                 Icons.Default.DoNotDisturb,
@@ -243,7 +245,7 @@ fun KhatamListScreen(
 
                 if (khatam.status == KhatamStatus.ABANDONED) {
                     ListItem(
-                        headlineContent = { Text("Reactivate") },
+                        headlineContent = { Text(stringResource(R.string.khatam_reactivate)) },
                         leadingContent = {
                             Icon(
                                 Icons.Default.Refresh,
@@ -261,7 +263,7 @@ fun KhatamListScreen(
                 ListItem(
                     headlineContent = {
                         Text(
-                            "Delete",
+                            stringResource(R.string.delete),
                             color = MaterialTheme.colorScheme.error
                         )
                     },
@@ -288,9 +290,9 @@ fun KhatamListScreen(
                 showDeleteConfirm = false
                 selectedKhatamForAction = null
             },
-            title = { Text("Delete Khatam") },
+            title = { Text(stringResource(R.string.khatam_delete_title)) },
             text = {
-                Text("Are you sure you want to delete \"${khatamToDelete?.name}\"? This action cannot be undone.")
+                Text(stringResource(R.string.khatam_delete_message, khatamToDelete?.name ?: ""))
             },
             confirmButton = {
                 TextButton(
@@ -302,7 +304,7 @@ fun KhatamListScreen(
                         selectedKhatamForAction = null
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
@@ -312,7 +314,7 @@ fun KhatamListScreen(
                         selectedKhatamForAction = null
                     }
                 ) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -336,21 +338,21 @@ private fun KhatamStatusTabs(
     ) {
         StatusTabCard(
             count = inProgressCount,
-            label = "In Progress",
+            label = stringResource(R.string.khatam_in_progress),
             isSelected = selectedIndex == 0,
             onClick = { onTabSelect(0) },
             modifier = Modifier.weight(1f)
         )
         StatusTabCard(
             count = completedCount,
-            label = "Completed",
+            label = stringResource(R.string.khatam_completed),
             isSelected = selectedIndex == 1,
             onClick = { onTabSelect(1) },
             modifier = Modifier.weight(1f)
         )
         StatusTabCard(
             count = abandonedCount,
-            label = "Abandoned",
+            label = stringResource(R.string.khatam_abandoned),
             isSelected = selectedIndex == 2,
             onClick = { onTabSelect(2) },
             modifier = Modifier.weight(1f)
@@ -437,19 +439,19 @@ private fun KhatamStatsCard(
         StatItem(
             icon = Icons.Default.CheckCircle,
             value = completedCount.toString(),
-            label = "Completed",
+            label = stringResource(R.string.khatam_completed),
             tint = MaterialTheme.colorScheme.primary
         )
         StatItem(
             icon = Icons.Default.TrendingUp,
             value = inProgressCount.toString(),
-            label = "In Progress",
+            label = stringResource(R.string.khatam_in_progress),
             tint = MaterialTheme.colorScheme.tertiary
         )
         StatItem(
             icon = Icons.Default.AutoStories,
             value = formatAyahCount(totalAyahsRead),
-            label = "Ayahs Read",
+            label = stringResource(R.string.khatam_ayahs_read),
             tint = MaterialTheme.colorScheme.secondary
         )
     }
@@ -531,7 +533,7 @@ private fun ActiveKhatamCard(
                 modifier = Modifier.size(14.dp)
             )
             Text(
-                text = "Active Khatam",
+                text = stringResource(R.string.khatam_active),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
@@ -552,7 +554,7 @@ private fun ActiveKhatamCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = "${khatam.totalAyahsRead} / ${Khatam.TOTAL_QURAN_AYAHS} ayahs",
+                    text = stringResource(R.string.khatam_ayahs_format, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
@@ -583,12 +585,12 @@ private fun ActiveKhatamCard(
         ) {
             ActiveKhatamPill(
                 icon = Icons.Default.AutoStories,
-                text = "${khatam.totalAyahsRead} Ayahs Read",
+                text = stringResource(R.string.khatam_ayahs_read_count, khatam.totalAyahsRead),
                 modifier = Modifier.weight(1f)
             )
             ActiveKhatamPill(
                 icon = Icons.Default.Timeline,
-                text = "${khatam.dailyTarget} / day",
+                text = stringResource(R.string.khatam_per_day_format, khatam.dailyTarget),
                 modifier = Modifier.weight(1f)
             )
         }
@@ -702,12 +704,12 @@ private fun KhatamCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "${khatam.totalAyahsRead} / ${Khatam.TOTAL_QURAN_AYAHS} ayahs",
+                    text = stringResource(R.string.khatam_ayahs_format, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Created ${formatDate(khatam.createdAt)}",
+                    text = stringResource(R.string.khatam_created_format, formatDate(khatam.createdAt)),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )
@@ -764,13 +766,13 @@ private fun EmptyState(
             modifier = Modifier.size(64.dp)
         )
         Text(
-            text = "No Khatam Started",
+            text = stringResource(R.string.khatam_no_started),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = "Start your journey to complete the Quran",
+            text = stringResource(R.string.khatam_start_journey),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             textAlign = TextAlign.Center

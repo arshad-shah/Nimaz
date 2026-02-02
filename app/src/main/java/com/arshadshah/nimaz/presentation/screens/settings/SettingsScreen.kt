@@ -36,9 +36,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -73,7 +75,7 @@ fun SettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Settings",
+                title = stringResource(R.string.settings),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -89,26 +91,26 @@ fun SettingsScreen(
             item { Spacer(modifier = Modifier.height(4.dp)) }
 
             // Prayer Settings
-            item { NimazSectionHeader(title = "Prayer Settings") }
+            item { NimazSectionHeader(title = stringResource(R.string.prayer_settings)) }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Calculation Method",
-                        subtitle = "Prayer time calculation settings",
+                        title = stringResource(R.string.calculation_method),
+                        subtitle = stringResource(R.string.calculation_method_subtitle),
                         icon = Icons.Default.Calculate,
                         onClick = onNavigateToPrayerSettings
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Location",
-                        subtitle = "Manage prayer time locations",
+                        title = stringResource(R.string.location),
+                        subtitle = stringResource(R.string.location_subtitle),
                         icon = Icons.Default.LocationOn,
                         onClick = onNavigateToLocation
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Notifications",
-                        subtitle = "Adhan & reminders",
+                        title = stringResource(R.string.notifications),
+                        subtitle = stringResource(R.string.notifications_subtitle),
                         icon = Icons.Default.Notifications,
                         onClick = onNavigateToNotifications
                     )
@@ -116,12 +118,12 @@ fun SettingsScreen(
             }
 
             // Quran
-            item { NimazSectionHeader(title = "Quran") }
+            item { NimazSectionHeader(title = stringResource(R.string.quran)) }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Quran Settings",
-                        subtitle = "Reading and audio preferences",
+                        title = stringResource(R.string.quran_settings),
+                        subtitle = stringResource(R.string.quran_settings_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToQuranSettings
                     )
@@ -129,26 +131,26 @@ fun SettingsScreen(
             }
 
             // App Settings
-            item { NimazSectionHeader(title = "App Settings") }
+            item { NimazSectionHeader(title = stringResource(R.string.app_settings)) }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Appearance",
-                        subtitle = "Theme & display",
+                        title = stringResource(R.string.appearance),
+                        subtitle = stringResource(R.string.appearance_subtitle),
                         icon = Icons.Default.DarkMode,
                         onClick = onNavigateToAppearance
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Language",
-                        subtitle = "App language preferences",
+                        title = stringResource(R.string.language),
+                        subtitle = stringResource(R.string.language_subtitle),
                         icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Widgets",
-                        subtitle = "Home screen widgets",
+                        title = stringResource(R.string.widgets),
+                        subtitle = stringResource(R.string.widgets_subtitle),
                         icon = Icons.Default.Widgets,
                         onClick = onNavigateToWidgets
                     )
@@ -156,12 +158,12 @@ fun SettingsScreen(
             }
 
             // Data
-            item { NimazSectionHeader(title = "Data") }
+            item { NimazSectionHeader(title = stringResource(R.string.data)) }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Reset Settings",
-                        subtitle = "Restore default settings",
+                        title = stringResource(R.string.reset_settings),
+                        subtitle = stringResource(R.string.reset_settings_subtitle),
                         icon = Icons.Default.Restore,
                         iconTint = MaterialTheme.colorScheme.error,
                         onClick = { showResetDialog = true }
@@ -179,9 +181,9 @@ fun SettingsScreen(
     if (showResetDialog) {
         AlertDialog(
             onDismissRequest = { showResetDialog = false },
-            title = { Text("Reset Settings") },
+            title = { Text(stringResource(R.string.reset_settings_dialog_title)) },
             text = {
-                Text("This will restore all settings to their defaults. Your prayer tracking data, bookmarks, and other content will not be affected. The app will restart.")
+                Text(stringResource(R.string.reset_settings_dialog_message))
             },
             confirmButton = {
                 Button(
@@ -193,12 +195,12 @@ fun SettingsScreen(
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Reset")
+                    Text(stringResource(R.string.reset))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showResetDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -215,7 +217,7 @@ private fun AppVersionInfo() {
     }
 
     Text(
-        text = "Nimaz v$versionName",
+        text = stringResource(R.string.version_format, versionName),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,

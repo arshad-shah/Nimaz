@@ -49,9 +49,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
@@ -78,7 +80,7 @@ fun BookmarksScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Bookmarks",
+                title = stringResource(R.string.bookmarks_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -86,8 +88,8 @@ fun BookmarksScreen(
     ) { paddingValues ->
         if (state.allBookmarks.isEmpty() && !state.isLoading) {
             NimazEmptyState(
-                title = "No Bookmarks Yet",
-                message = "Save ayahs, hadiths, and duas for quick access",
+                title = stringResource(R.string.no_bookmarks_yet),
+                message = stringResource(R.string.no_bookmarks_hint),
                 icon = Icons.Default.Bookmark,
                 iconTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier
@@ -116,15 +118,15 @@ fun BookmarksScreen(
                         stats = listOf(
                             NimazStatData(
                                 value = statsState.quranCount.toString(),
-                                label = "Quran Verses"
+                                label = stringResource(R.string.quran_verses)
                             ),
                             NimazStatData(
                                 value = statsState.hadithCount.toString(),
-                                label = "Hadith"
+                                label = stringResource(R.string.hadith)
                             ),
                             NimazStatData(
                                 value = statsState.duaCount.toString(),
-                                label = "Duas"
+                                label = stringResource(R.string.duas)
                             )
                         )
                     )
@@ -195,13 +197,18 @@ private fun TabRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         TabChip(
-            label = "All",
+            label = stringResource(R.string.all),
             isSelected = selectedFilter == null,
             onClick = { onFilterSelected(null) }
         )
         BookmarkType.entries.forEach { type ->
+            val label = when (type) {
+                BookmarkType.QURAN -> stringResource(R.string.quran_type)
+                BookmarkType.HADITH -> stringResource(R.string.hadith_type)
+                BookmarkType.DUA -> stringResource(R.string.dua_type)
+            }
             TabChip(
-                label = type.name.lowercase().replaceFirstChar { it.uppercase() },
+                label = label,
                 isSelected = selectedFilter == type,
                 onClick = { onFilterSelected(type) }
             )
@@ -245,9 +252,9 @@ private fun BookmarkCard(
     val context = LocalContext.current
 
     val typeLabel = when (bookmark.type) {
-        BookmarkType.QURAN -> "Quran"
-        BookmarkType.HADITH -> "Hadith"
-        BookmarkType.DUA -> "Dua"
+        BookmarkType.QURAN -> stringResource(R.string.quran_type)
+        BookmarkType.HADITH -> stringResource(R.string.hadith_type)
+        BookmarkType.DUA -> stringResource(R.string.dua_type)
     }
 
     val typeIcon = when (bookmark.type) {
@@ -334,13 +341,13 @@ private fun BookmarkCard(
                             putExtra(Intent.EXTRA_TEXT, textToShare)
                             type = "text/plain"
                         }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                        context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.share)))
                     },
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.share),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
@@ -351,7 +358,7 @@ private fun BookmarkCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
@@ -400,14 +407,15 @@ private fun BookmarkCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Added ${
+                    text = stringResource(
+                        R.string.added_format,
                         DateUtils.getRelativeTimeSpanString(
                             bookmark.createdAt,
                             System.currentTimeMillis(),
                             DateUtils.DAY_IN_MILLIS,
                             DateUtils.FORMAT_ABBREV_RELATIVE
                         )
-                    }",
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

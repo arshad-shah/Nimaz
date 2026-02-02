@@ -50,7 +50,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -91,7 +93,7 @@ fun MoreMenuScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazTopAppBar(
-                title = "More",
+                title = stringResource(R.string.more),
                 scrollBehavior = scrollBehavior
             )
         }
@@ -107,27 +109,27 @@ fun MoreMenuScreen(
 
             // Daily Practice Section
             item {
-                NimazSectionHeader(title = "Daily Practice")
+                NimazSectionHeader(title = stringResource(R.string.daily_practice))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Prayer Tracker",
-                        subtitle = "Track your daily prayers & qada",
+                        title = stringResource(R.string.prayer_tracker),
+                        subtitle = stringResource(R.string.prayer_tracker_subtitle),
                         icon = Icons.Default.Schedule,
                         onClick = onNavigateToPrayerTracker
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Fasting",
-                        subtitle = "Fasting tracker and schedule",
+                        title = stringResource(R.string.fasting),
+                        subtitle = stringResource(R.string.fasting_subtitle),
                         icon = Icons.Default.Fastfood,
                         onClick = onNavigateToFasting
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Khatam Quran",
-                        subtitle = "Track your Quran completion",
+                        title = stringResource(R.string.khatam_quran),
+                        subtitle = stringResource(R.string.khatam_quran_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToKhatam
                     )
@@ -136,48 +138,48 @@ fun MoreMenuScreen(
 
             // Learning Section
             item {
-                NimazSectionHeader(title = "Learning")
+                NimazSectionHeader(title = stringResource(R.string.learning))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Allah's 99 Names",
-                        subtitle = "Learn the beautiful names of Allah",
+                        title = stringResource(R.string.allahs_99_names),
+                        subtitle = stringResource(R.string.allahs_99_names_subtitle),
                         icon = Icons.Default.Star,
                         onClick = onNavigateToAsmaUlHusna
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Prophet's 99 Names",
-                        subtitle = "Names and attributes of Prophet Muhammad (PBUH)",
+                        title = stringResource(R.string.prophets_99_names),
+                        subtitle = stringResource(R.string.prophets_99_names_subtitle),
                         icon = Icons.Default.Person,
                         onClick = onNavigateToAsmaUnNabi
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Prophets of Islam",
-                        subtitle = "Stories and lessons from 25 prophets",
+                        title = stringResource(R.string.prophets_of_islam),
+                        subtitle = stringResource(R.string.prophets_of_islam_subtitle),
                         icon = Icons.Default.Groups,
                         onClick = onNavigateToProphets
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Hadith",
-                        subtitle = "Authentic hadith collections",
+                        title = stringResource(R.string.hadith),
+                        subtitle = stringResource(R.string.hadith_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToHadith
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Duas",
-                        subtitle = "Daily duas and supplications",
+                        title = stringResource(R.string.duas),
+                        subtitle = stringResource(R.string.duas_subtitle),
                         icon = Icons.Default.Mosque,
                         onClick = onNavigateToDuas
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Tafseer",
-                        subtitle = "Quran interpretation and commentary",
+                        title = stringResource(R.string.tafseer),
+                        subtitle = stringResource(R.string.tafseer_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToTafseer
                     )
@@ -186,27 +188,27 @@ fun MoreMenuScreen(
 
             // Tools Section
             item {
-                NimazSectionHeader(title = "Tools")
+                NimazSectionHeader(title = stringResource(R.string.tools))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Calendar",
-                        subtitle = "Islamic calendar and events",
+                        title = stringResource(R.string.calendar),
+                        subtitle = stringResource(R.string.calendar_subtitle),
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToCalendar
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Monthly Prayer Times",
-                        subtitle = "Prayer times for the month",
+                        title = stringResource(R.string.monthly_prayer_times),
+                        subtitle = stringResource(R.string.monthly_prayer_times_subtitle),
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Zakat",
-                        subtitle = "Zakat calculator",
+                        title = stringResource(R.string.zakat),
+                        subtitle = stringResource(R.string.zakat_subtitle),
                         icon = Icons.Default.Calculate,
                         onClick = onNavigateToZakat
                     )
@@ -215,27 +217,27 @@ fun MoreMenuScreen(
 
             // Prayer Settings Section
             item {
-                NimazSectionHeader(title = "Prayer Settings")
+                NimazSectionHeader(title = stringResource(R.string.prayer_settings))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Calculation Method",
-                        subtitle = "Prayer time calculation parameters",
+                        title = stringResource(R.string.calculation_method),
+                        subtitle = stringResource(R.string.calculation_method_menu_subtitle),
                         icon = Icons.Default.Settings,
                         onClick = onNavigateToCalculationMethod
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Notifications",
-                        subtitle = "Prayer alerts and reminders",
+                        title = stringResource(R.string.notifications),
+                        subtitle = stringResource(R.string.notifications_menu_subtitle),
                         icon = Icons.Default.Notifications,
                         onClick = onNavigateToNotifications
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Location",
-                        subtitle = "Manage locations for prayer times",
+                        title = stringResource(R.string.location),
+                        subtitle = stringResource(R.string.location_menu_subtitle),
                         icon = Icons.Default.LocationOn,
                         onClick = onNavigateToLocation
                     )
@@ -244,27 +246,27 @@ fun MoreMenuScreen(
 
             // App Settings Section
             item {
-                NimazSectionHeader(title = "App Settings")
+                NimazSectionHeader(title = stringResource(R.string.app_settings))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Appearance",
-                        subtitle = "Theme, colors, and display",
+                        title = stringResource(R.string.appearance),
+                        subtitle = stringResource(R.string.appearance_menu_subtitle),
                         icon = Icons.Default.DarkMode,
                         onClick = onNavigateToAppearance
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Language",
-                        subtitle = "App language preferences",
+                        title = stringResource(R.string.language),
+                        subtitle = stringResource(R.string.language_menu_subtitle),
                         icon = Icons.Default.Language,
                         onClick = onNavigateToLanguage
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Widgets",
-                        subtitle = "Home screen widget settings",
+                        title = stringResource(R.string.widgets),
+                        subtitle = stringResource(R.string.widgets_menu_subtitle),
                         icon = Icons.Default.Widgets,
                         onClick = onNavigateToWidgets
                     )
@@ -273,34 +275,34 @@ fun MoreMenuScreen(
 
             // Support Section
             item {
-                NimazSectionHeader(title = "Support")
+                NimazSectionHeader(title = stringResource(R.string.support))
             }
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "About Nimaz",
-                        subtitle = "Version, credits, and info",
+                        title = stringResource(R.string.about_nimaz),
+                        subtitle = stringResource(R.string.about_nimaz_subtitle),
                         icon = Icons.Default.Info,
                         onClick = onNavigateToAbout
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Help & Support",
-                        subtitle = "FAQs and contact us",
+                        title = stringResource(R.string.help_support),
+                        subtitle = stringResource(R.string.help_support_subtitle),
                         icon = Icons.AutoMirrored.Filled.Help,
                         onClick = onNavigateToHelp
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Share App",
-                        subtitle = "Share Nimaz with friends",
+                        title = stringResource(R.string.share_app),
+                        subtitle = stringResource(R.string.share_app_subtitle),
                         icon = Icons.Default.Share,
                         onClick = onShareApp
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
-                        title = "Rate Us",
-                        subtitle = "Rate Nimaz on the store",
+                        title = stringResource(R.string.rate_us),
+                        subtitle = stringResource(R.string.rate_us_subtitle),
                         icon = Icons.Default.Star,
                         onClick = onRateApp
                     )
@@ -331,7 +333,7 @@ private fun AppVersionCard() {
     }
 
     Text(
-        text = "Nimaz v$versionName",
+        text = stringResource(R.string.version_format, versionName),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -358,15 +360,15 @@ private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
             modifier = Modifier.size(18.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text("Delete All Data")
+        Text(stringResource(R.string.delete_all_data))
     }
 
     if (showDialog) {
         AlertDialog(
             onDismissRequest = { showDialog = false },
-            title = { Text("Delete All Data") },
+            title = { Text(stringResource(R.string.delete_all_data_dialog_title)) },
             text = {
-                Text("This will permanently delete all your data including prayer tracking, bookmarks, tasbih history, and settings. This action cannot be undone.")
+                Text(stringResource(R.string.delete_all_data_dialog_message))
             },
             confirmButton = {
                 Button(
@@ -378,12 +380,12 @@ private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
                         containerColor = MaterialTheme.colorScheme.error
                     )
                 ) {
-                    Text("Delete")
+                    Text(stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

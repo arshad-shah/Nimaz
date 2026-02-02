@@ -40,8 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
@@ -68,7 +70,7 @@ fun KhatamDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = state.khatam?.name ?: "Khatam Detail",
+                title = state.khatam?.name ?: stringResource(R.string.khatam_detail),
                 onBackClick = onNavigateBack
             )
         }
@@ -119,7 +121,7 @@ fun KhatamDetailScreen(
                         )
                         Spacer(modifier = Modifier.size(8.dp))
                         Text(
-                            text = "Continue Reading",
+                            text = stringResource(R.string.khatam_continue_reading),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -139,7 +141,7 @@ fun KhatamDetailScreen(
             // Juz progress grid
             item {
                 NimazSectionTitle(
-                    text = "Juz Progress",
+                    text = stringResource(R.string.khatam_juz_progress),
                     modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
                 )
             }
@@ -152,7 +154,7 @@ fun KhatamDetailScreen(
             if (state.dailyLogs.isNotEmpty()) {
                 item {
                     NimazSectionTitle(
-                        text = "Daily Reading",
+                        text = stringResource(R.string.khatam_daily_reading),
                         modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
                     )
                 }
@@ -195,7 +197,7 @@ private fun ProgressOverview(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "${khatam.totalAyahsRead} ayahs",
+                    text = stringResource(R.string.khatam_ayahs_count_format, khatam.totalAyahsRead),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -203,7 +205,7 @@ private fun ProgressOverview(
         }
 
         Text(
-            text = "${khatam.totalAyahsRead} of ${Khatam.TOTAL_QURAN_AYAHS} ayahs read",
+            text = stringResource(R.string.khatam_of_ayahs_read, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -223,20 +225,20 @@ private fun StatsGrid(
     ) {
         StatCard(
             icon = Icons.Default.CalendarToday,
-            label = "Days Active",
+            label = stringResource(R.string.khatam_days_active),
             value = "$daysActive",
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Default.Speed,
-            label = "Avg Pace",
-            value = "${averagePace.toInt()}/day",
+            label = stringResource(R.string.khatam_avg_pace),
+            value = stringResource(R.string.khatam_pace_per_day, averagePace.toInt()),
             modifier = Modifier.weight(1f)
         )
         StatCard(
             icon = Icons.Default.Timer,
-            label = "Target",
-            value = "$dailyTarget/day",
+            label = stringResource(R.string.khatam_target),
+            value = stringResource(R.string.khatam_pace_per_day, dailyTarget),
             modifier = Modifier.weight(1f)
         )
     }
@@ -363,7 +365,7 @@ private fun DailyReadingSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "${log.ayahsRead} ayahs",
+                    text = stringResource(R.string.khatam_ayahs_count_format, log.ayahsRead),
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.primary

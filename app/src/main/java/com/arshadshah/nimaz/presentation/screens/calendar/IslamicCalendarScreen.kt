@@ -34,8 +34,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthNameArabic
 import com.arshadshah.nimaz.domain.model.HijriMonth
@@ -68,14 +70,14 @@ fun IslamicCalendarScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Islamic Calendar",
+                title = stringResource(R.string.islamic_calendar),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(CalendarEvent.LoadToday) }) {
                         Icon(
                             imageVector = Icons.Default.Today,
-                            contentDescription = "Today"
+                            contentDescription = stringResource(R.string.today)
                         )
                     }
                 }
@@ -128,9 +130,9 @@ fun IslamicCalendarScreen(
                             )
                         },
                         legendItems = listOf(
-                            CalendarLegendItem(Color(0xFFEAB308), "Eid"),
-                            CalendarLegendItem(Color(0xFF22C55E), "Holy Night"),
-                            CalendarLegendItem(Color(0xFFA855F7), "Fasting")
+                            CalendarLegendItem(Color(0xFFEAB308), stringResource(R.string.eid)),
+                            CalendarLegendItem(Color(0xFF22C55E), stringResource(R.string.holy_night)),
+                            CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))
                         )
                     )
                 }
@@ -140,7 +142,7 @@ fun IslamicCalendarScreen(
             if (eventsState.eventsForSelectedDate.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Events",
+                        text = stringResource(R.string.events),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -155,7 +157,7 @@ fun IslamicCalendarScreen(
             if (eventsState.upcomingEvents.isNotEmpty()) {
                 item {
                     Text(
-                        text = "Upcoming Events",
+                        text = stringResource(R.string.upcoming_events),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onBackground
@@ -208,7 +210,7 @@ private fun TodayHeroCard(
         ) {
             Column {
                 Text(
-                    text = "Today",
+                    text = stringResource(R.string.today),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimary
                 )

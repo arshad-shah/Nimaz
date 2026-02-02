@@ -35,6 +35,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -68,7 +70,7 @@ fun AsmaUlHusnaDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = state.name?.nameTransliteration ?: "Name Detail",
+                title = state.name?.nameTransliteration ?: stringResource(R.string.name_detail),
                 onBackClick = onNavigateBack
             )
         },
@@ -88,9 +90,9 @@ fun AsmaUlHusnaDetailScreen(
                             Icons.Outlined.FavoriteBorder
                         },
                         contentDescription = if (name.isFavorite) {
-                            "Remove from favorites"
+                            stringResource(R.string.remove_from_favorites)
                         } else {
-                            "Add to favorites"
+                            stringResource(R.string.add_to_favorites)
                         },
                         tint = if (name.isFavorite) {
                             MaterialTheme.colorScheme.error
@@ -194,7 +196,7 @@ fun AsmaUlHusnaDetailScreen(
                 // Meaning Section
                 item {
                     DetailSectionCard(
-                        title = "Meaning",
+                        title = stringResource(R.string.asma_ul_husna_meaning),
                         content = name.meaning
                     )
                 }
@@ -202,7 +204,7 @@ fun AsmaUlHusnaDetailScreen(
                 // Explanation Section
                 item {
                     DetailSectionCard(
-                        title = "Explanation",
+                        title = stringResource(R.string.asma_ul_husna_explanation),
                         content = name.explanation
                     )
                 }
@@ -210,7 +212,7 @@ fun AsmaUlHusnaDetailScreen(
                 // Benefits Section
                 item {
                     DetailSectionCard(
-                        title = "Benefits",
+                        title = stringResource(R.string.asma_ul_husna_benefits),
                         content = name.benefits
                     )
                 }
@@ -230,7 +232,7 @@ fun AsmaUlHusnaDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                             ) {
                                 Text(
-                                    text = "Quran References",
+                                    text = stringResource(R.string.asma_ul_husna_quran_references),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -263,7 +265,7 @@ fun AsmaUlHusnaDetailScreen(
                 // Usage in Dua Section
                 item {
                     DetailSectionCard(
-                        title = "Usage in Dua",
+                        title = stringResource(R.string.asma_ul_husna_usage_in_dua),
                         content = name.usageInDua
                     )
                 }

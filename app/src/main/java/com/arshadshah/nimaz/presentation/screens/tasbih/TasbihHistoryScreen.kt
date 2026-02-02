@@ -36,9 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
@@ -62,7 +64,7 @@ fun TasbihHistoryScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Tasbih History",
+                title = stringResource(R.string.tasbih_history),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -97,7 +99,7 @@ fun TasbihHistoryScreen(
                 // Today's Sessions
                 if (historyState.todaySessions.isNotEmpty()) {
                     item(key = "today_header") {
-                        SectionLabel("Today")
+                        SectionLabel(stringResource(R.string.today))
                     }
                     items(
                         items = historyState.todaySessions,
@@ -113,7 +115,7 @@ fun TasbihHistoryScreen(
                 }
                 if (weekOnly.isNotEmpty()) {
                     item(key = "week_header") {
-                        SectionLabel("This Week")
+                        SectionLabel(stringResource(R.string.this_week))
                     }
                     items(
                         items = weekOnly,
@@ -141,12 +143,12 @@ fun TasbihHistoryScreen(
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "No sessions yet",
+                                    text = stringResource(R.string.no_sessions_yet),
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    text = "Start counting to see your history here",
+                                    text = stringResource(R.string.start_counting_hint),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                                 )
@@ -179,9 +181,9 @@ private fun StatsSummaryCard(
                 .padding(18.dp),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            StatItem(value = totalToday.toString(), label = "Today")
-            StatItem(value = completedSessions.toString(), label = "Sessions")
-            StatItem(value = totalThisWeek.toString(), label = "This Week")
+            StatItem(value = totalToday.toString(), label = stringResource(R.string.today))
+            StatItem(value = completedSessions.toString(), label = stringResource(R.string.sessions))
+            StatItem(value = totalThisWeek.toString(), label = stringResource(R.string.this_week))
         }
     }
 }
@@ -252,7 +254,7 @@ private fun SessionCard(
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = session.presetName ?: "Custom",
+                    text = session.presetName ?: stringResource(R.string.custom),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
@@ -267,7 +269,7 @@ private fun SessionCard(
                     )
                     if (session.totalLaps > 0) {
                         Text(
-                            text = "${session.totalLaps} laps",
+                            text = stringResource(R.string.laps_format, session.totalLaps),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -290,7 +292,7 @@ private fun SessionCard(
                     color = Color(0xFF22C55E).copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = "Done",
+                        text = stringResource(R.string.done),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color(0xFF22C55E),
                         fontWeight = FontWeight.SemiBold,

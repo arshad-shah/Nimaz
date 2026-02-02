@@ -28,9 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -58,7 +60,7 @@ fun AddPresetScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Add Preset",
+                title = stringResource(R.string.add_preset_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -79,11 +81,11 @@ fun AddPresetScreen(
                     name = it
                     nameError = false
                 },
-                label = { Text("Name *") },
-                placeholder = { Text("e.g., SubhanAllah wa Bihamdihi") },
+                label = { Text(stringResource(R.string.name_required)) },
+                placeholder = { Text(stringResource(R.string.preset_name_placeholder)) },
                 isError = nameError,
                 supportingText = if (nameError) {
-                    { Text("Name is required") }
+                    { Text(stringResource(R.string.name_required_error)) }
                 } else null,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
@@ -94,8 +96,8 @@ fun AddPresetScreen(
             OutlinedTextField(
                 value = arabicText,
                 onValueChange = { arabicText = it },
-                label = { Text("Arabic Text") },
-                placeholder = { Text("e.g., \u0633\u064f\u0628\u0652\u062d\u064e\u0627\u0646\u064e \u0627\u0644\u0644\u0651\u064e\u0647\u0650") },
+                label = { Text(stringResource(R.string.arabic_text)) },
+                placeholder = { Text(stringResource(R.string.arabic_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -105,8 +107,8 @@ fun AddPresetScreen(
             OutlinedTextField(
                 value = transliteration,
                 onValueChange = { transliteration = it },
-                label = { Text("Transliteration") },
-                placeholder = { Text("e.g., SubhanAllah wa Bihamdihi") },
+                label = { Text(stringResource(R.string.transliteration)) },
+                placeholder = { Text(stringResource(R.string.transliteration_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -116,8 +118,8 @@ fun AddPresetScreen(
             OutlinedTextField(
                 value = translation,
                 onValueChange = { translation = it },
-                label = { Text("Translation") },
-                placeholder = { Text("e.g., Glory be to Allah and praise Him") },
+                label = { Text(stringResource(R.string.translation)) },
+                placeholder = { Text(stringResource(R.string.translation_placeholder)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -129,7 +131,7 @@ fun AddPresetScreen(
                 onValueChange = { newVal ->
                     if (newVal.all { it.isDigit() }) targetCount = newVal
                 },
-                label = { Text("Target Count") },
+                label = { Text(stringResource(R.string.target_count)) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(14.dp),
                 singleLine = true
@@ -144,7 +146,7 @@ fun AddPresetScreen(
                     value = selectedCategory.displayName(),
                     onValueChange = {},
                     readOnly = true,
-                    label = { Text("Category") },
+                    label = { Text(stringResource(R.string.category)) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -197,7 +199,7 @@ fun AddPresetScreen(
                 shape = RoundedCornerShape(14.dp)
             ) {
                 Text(
-                    text = "Save Preset",
+                    text = stringResource(R.string.save_preset),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold
                 )

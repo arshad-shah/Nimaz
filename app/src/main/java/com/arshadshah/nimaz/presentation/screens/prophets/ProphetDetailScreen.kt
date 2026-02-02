@@ -38,11 +38,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -69,7 +71,7 @@ fun ProphetDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = state.prophet?.nameEnglish ?: "Prophet Detail",
+                title = state.prophet?.nameEnglish ?: stringResource(R.string.prophet_detail),
                 onBackClick = onNavigateBack
             )
         },
@@ -89,9 +91,9 @@ fun ProphetDetailScreen(
                             Icons.Outlined.FavoriteBorder
                         },
                         contentDescription = if (prophet.isFavorite) {
-                            "Remove from favorites"
+                            stringResource(R.string.remove_from_favorites)
                         } else {
-                            "Add to favorites"
+                            stringResource(R.string.add_to_favorites)
                         },
                         tint = if (prophet.isFavorite) {
                             MaterialTheme.colorScheme.error
@@ -180,7 +182,7 @@ fun ProphetDetailScreen(
                 // Story Section
                 item {
                     DetailSectionCard(
-                        title = "Story",
+                        title = stringResource(R.string.prophets_story),
                         content = prophet.storySummary
                     )
                 }
@@ -200,7 +202,7 @@ fun ProphetDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                             ) {
                                 Text(
-                                    text = "Key Lessons",
+                                    text = stringResource(R.string.prophets_key_lessons),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -246,7 +248,7 @@ fun ProphetDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                             ) {
                                 Text(
-                                    text = "Quran Mentions",
+                                    text = stringResource(R.string.prophets_quran_mentions),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface
@@ -290,7 +292,7 @@ fun ProphetDetailScreen(
                             verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
                         ) {
                             Text(
-                                text = "Timeline",
+                                text = stringResource(R.string.prophets_timeline),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -301,12 +303,12 @@ fun ProphetDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 TimelineItem(
-                                    label = "Era",
+                                    label = stringResource(R.string.prophets_era),
                                     value = prophet.era,
                                     modifier = Modifier.weight(1f)
                                 )
                                 TimelineItem(
-                                    label = "Lineage",
+                                    label = stringResource(R.string.prophets_lineage),
                                     value = prophet.lineage,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -316,12 +318,12 @@ fun ProphetDetailScreen(
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 TimelineItem(
-                                    label = "Years Lived",
+                                    label = stringResource(R.string.prophets_years_lived),
                                     value = prophet.yearsLived,
                                     modifier = Modifier.weight(1f)
                                 )
                                 TimelineItem(
-                                    label = "Place of Preaching",
+                                    label = stringResource(R.string.prophets_place),
                                     value = prophet.placeOfPreaching,
                                     modifier = Modifier.weight(1f)
                                 )
@@ -345,7 +347,7 @@ fun ProphetDetailScreen(
                                 verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                             ) {
                                 Text(
-                                    text = "Miracles",
+                                    text = stringResource(R.string.prophets_miracles),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSurface

@@ -33,6 +33,20 @@ val AmiriFontFamily = FontFamily(
     Font(R.font.amiri_bold, weight = FontWeight.Bold)
 )
 
+val NotoNaskhArabicFontFamily = FontFamily(
+    Font(R.font.noto_naskh_arabic_variable, weight = FontWeight.Normal),
+    Font(R.font.noto_naskh_arabic_variable, weight = FontWeight.Medium),
+    Font(R.font.noto_naskh_arabic_variable, weight = FontWeight.SemiBold),
+    Font(R.font.noto_naskh_arabic_variable, weight = FontWeight.Bold)
+)
+
+val NotoNastaliqUrduFontFamily = FontFamily(
+    Font(R.font.noto_nastaliq_urdu_variable, weight = FontWeight.Normal),
+    Font(R.font.noto_nastaliq_urdu_variable, weight = FontWeight.Medium),
+    Font(R.font.noto_nastaliq_urdu_variable, weight = FontWeight.SemiBold),
+    Font(R.font.noto_nastaliq_urdu_variable, weight = FontWeight.Bold)
+)
+
 // Typography
 val NimazTypography = Typography(
     // Display styles - For large, prominent text
@@ -231,6 +245,238 @@ object PrayerTextStyles {
         fontSize = 20.sp,
         lineHeight = 28.sp
     )
+}
+
+// Arabic UI Typography (Noto Naskh Arabic for UI elements when locale is Arabic)
+private val ArabicUiTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 57.sp,
+        lineHeight = 64.sp,
+        letterSpacing = 0.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 45.sp,
+        lineHeight = 52.sp,
+        letterSpacing = 0.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 36.sp,
+        lineHeight = 44.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 40.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 36.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 28.sp,
+        letterSpacing = 0.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = NotoNaskhArabicFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 16.sp,
+        letterSpacing = 0.sp
+    )
+)
+
+// Urdu UI Typography (Noto Nastaliq Urdu - taller line heights for Nastaliq script)
+private val UrduUiTypography = Typography(
+    displayLarge = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 57.sp,
+        lineHeight = 80.sp,
+        letterSpacing = 0.sp
+    ),
+    displayMedium = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 45.sp,
+        lineHeight = 68.sp,
+        letterSpacing = 0.sp
+    ),
+    displaySmall = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 36.sp,
+        lineHeight = 56.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineLarge = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
+        lineHeight = 52.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineMedium = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 28.sp,
+        lineHeight = 46.sp,
+        letterSpacing = 0.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        lineHeight = 40.sp,
+        letterSpacing = 0.sp
+    ),
+    titleLarge = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 22.sp,
+        lineHeight = 36.sp,
+        letterSpacing = 0.sp
+    ),
+    titleMedium = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 16.sp,
+        lineHeight = 30.sp,
+        letterSpacing = 0.sp
+    ),
+    titleSmall = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyLarge = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 30.sp,
+        letterSpacing = 0.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 14.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    bodySmall = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 12.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.sp
+    ),
+    labelLarge = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 14.sp,
+        lineHeight = 26.sp,
+        letterSpacing = 0.sp
+    ),
+    labelMedium = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 12.sp,
+        lineHeight = 22.sp,
+        letterSpacing = 0.sp
+    ),
+    labelSmall = TextStyle(
+        fontFamily = NotoNastaliqUrduFontFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 11.sp,
+        lineHeight = 20.sp,
+        letterSpacing = 0.sp
+    )
+)
+
+/**
+ * Returns the appropriate Typography based on the given locale code.
+ * - "ar" -> Noto Naskh Arabic (readable Naskh style for UI)
+ * - "ur" -> Noto Nastaliq Urdu (Nastaliq script with taller line heights)
+ * - All others -> Default Outfit/PlusJakartaSans Latin typography
+ */
+fun typographyForLocale(localeCode: String): Typography {
+    return when (localeCode) {
+        "ar" -> ArabicUiTypography
+        "ur" -> UrduUiTypography
+        else -> NimazTypography
+    }
 }
 
 // Counter Text Styles (for Tasbih)

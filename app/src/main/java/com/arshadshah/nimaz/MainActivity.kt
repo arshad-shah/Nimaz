@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
             val use24HourFormat by preferencesDataStore.use24HourFormat.collectAsState(initial = false)
             val useHijriPrimary by preferencesDataStore.useHijriPrimary.collectAsState(initial = false)
             val showIslamicPatterns by preferencesDataStore.showIslamicPatterns.collectAsState(initial = true)
+            val localeCode by preferencesDataStore.appLanguage.collectAsState(initial = "en")
 
             val themeMode = when (themeModeString) {
                 "light" -> ThemeMode.LIGHT
@@ -69,7 +70,8 @@ class MainActivity : ComponentActivity() {
                     animationsEnabled = animationsEnabled,
                     use24HourFormat = use24HourFormat,
                     useHijriPrimary = useHijriPrimary,
-                    showIslamicPatterns = showIslamicPatterns
+                    showIslamicPatterns = showIslamicPatterns,
+                    localeCode = localeCode
                 ) {
                     Surface(
                         modifier = Modifier.fillMaxSize(),

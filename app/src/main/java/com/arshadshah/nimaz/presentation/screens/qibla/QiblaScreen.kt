@@ -72,11 +72,13 @@ import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -155,14 +157,14 @@ fun QiblaScreen(
             },
             title = {
                 Text(
-                    text = "Camera Permission Required",
+                    text = stringResource(R.string.camera_permission_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
             },
             text = {
                 Text(
-                    text = "Camera access is needed to show the AR Qibla view. The camera feed is used to overlay the Qibla direction on the real world. No images are captured or stored.",
+                    text = stringResource(R.string.camera_permission_message),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -172,12 +174,12 @@ fun QiblaScreen(
                     showCameraRationale = false
                     cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
                 }) {
-                    Text("Grant Permission")
+                    Text(stringResource(R.string.grant_permission))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showCameraRationale = false }) {
-                    Text("Not Now")
+                    Text(stringResource(R.string.not_now))
                 }
             }
         )
@@ -212,7 +214,7 @@ fun QiblaScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = state.error ?: "Unknown error",
+                        text = state.error ?: stringResource(R.string.unknown_error),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error,
                         textAlign = TextAlign.Center
@@ -259,7 +261,7 @@ fun QiblaScreen(
                 contentAlignment = Alignment.Center
             ) {
                 NimazPillTabs(
-                    tabs = listOf("Compass", "AR"),
+                    tabs = listOf(stringResource(R.string.compass), stringResource(R.string.ar)),
                     selectedIndex = if (state.isArMode) 1 else 0,
                     onTabSelect = { index ->
                         if (index == 1) {
@@ -411,7 +413,7 @@ private fun CompassQiblaView(
                     )
                     Spacer(modifier = Modifier.width(10.dp))
                     Text(
-                        text = "Facing Qibla",
+                        text = stringResource(R.string.facing_qibla),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = greenColor
@@ -442,7 +444,7 @@ private fun CompassQiblaView(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Turn ${if (turnRight) "right" else "left"} ${abs(state.rotationToQibla).toInt()}\u00B0",
+                    text = if (turnRight) stringResource(R.string.turn_right_format, abs(state.rotationToQibla).toInt()) else stringResource(R.string.turn_left_format, abs(state.rotationToQibla).toInt()),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -462,7 +464,7 @@ private fun CompassQiblaView(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "${getCompassDirection(info.direction.bearing)} \u2022 Qibla Direction",
+                text = stringResource(R.string.qibla_direction_format, getCompassDirection(info.direction.bearing)),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -485,7 +487,7 @@ private fun CompassQiblaView(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "${String.format("%,d", (info.distanceToMecca / 1000).toInt())} km to Mecca",
+                        text = stringResource(R.string.km_to_mecca_format, String.format("%,d", (info.distanceToMecca / 1000).toInt())),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -522,7 +524,7 @@ private fun CalibrationDialog(
         },
         title = {
             Text(
-                text = "Calibrate Compass",
+                text = stringResource(R.string.calibrate_compass),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
@@ -530,21 +532,21 @@ private fun CalibrationDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 Text(
-                    text = "Current accuracy: ${accuracy.name.lowercase().replaceFirstChar { it.uppercase() }}",
+                    text = stringResource(R.string.current_accuracy_format, accuracy.name.lowercase().replaceFirstChar { it.uppercase() }),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "To improve compass accuracy:",
+                    text = stringResource(R.string.improve_accuracy),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold
                 )
-                CalibrationStep("1", "Hold your phone away from metal objects and magnets")
-                CalibrationStep("2", "Slowly move your phone in a figure-8 pattern")
-                CalibrationStep("3", "Rotate the figure-8 in all three axes")
-                CalibrationStep("4", "Repeat until accuracy improves to Medium or High")
+                CalibrationStep("1", stringResource(R.string.calibration_step_1))
+                CalibrationStep("2", stringResource(R.string.calibration_step_2))
+                CalibrationStep("3", stringResource(R.string.calibration_step_3))
+                CalibrationStep("4", stringResource(R.string.calibration_step_4))
                 Text(
-                    text = "Tip: If accuracy remains low, try moving to a different location away from electronic devices.",
+                    text = stringResource(R.string.calibration_tip),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -552,7 +554,7 @@ private fun CalibrationDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Got it")
+                Text(stringResource(R.string.got_it))
             }
         }
     )
@@ -743,13 +745,13 @@ private fun AccuracyBar(
     val activeIndex = levels.indexOf(accuracy)
 
     val (label, color, hint) = when (accuracy) {
-        CompassAccuracy.HIGH -> Triple("High", greenColor, "Compass is accurate")
-        CompassAccuracy.MEDIUM -> Triple("Medium", Color(0xFFFACC15), "Accuracy is acceptable")
-        CompassAccuracy.LOW -> Triple("Low", MaterialTheme.colorScheme.error, "Calibration recommended")
+        CompassAccuracy.HIGH -> Triple(stringResource(R.string.accuracy_high), greenColor, stringResource(R.string.accuracy_high_hint))
+        CompassAccuracy.MEDIUM -> Triple(stringResource(R.string.accuracy_medium), Color(0xFFFACC15), stringResource(R.string.accuracy_medium_hint))
+        CompassAccuracy.LOW -> Triple(stringResource(R.string.accuracy_low), MaterialTheme.colorScheme.error, stringResource(R.string.accuracy_low_hint))
         CompassAccuracy.UNRELIABLE -> Triple(
-            "Unreliable",
+            stringResource(R.string.accuracy_unreliable),
             MaterialTheme.colorScheme.error,
-            "Calibration needed"
+            stringResource(R.string.accuracy_unreliable_hint)
         )
     }
 
@@ -772,7 +774,7 @@ private fun AccuracyBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Compass Accuracy",
+                    text = stringResource(R.string.compass_accuracy),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -833,7 +835,7 @@ private fun AccuracyBar(
                         modifier = Modifier.height(32.dp)
                     ) {
                         Text(
-                            text = "Calibrate",
+                            text = stringResource(R.string.calibrate),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -844,16 +846,17 @@ private fun AccuracyBar(
     }
 }
 
+@Composable
 private fun getCompassDirection(bearing: Double): String {
     return when {
-        bearing < 22.5 || bearing >= 337.5 -> "North"
-        bearing < 67.5 -> "Northeast"
-        bearing < 112.5 -> "East"
-        bearing < 157.5 -> "Southeast"
-        bearing < 202.5 -> "South"
-        bearing < 247.5 -> "Southwest"
-        bearing < 292.5 -> "West"
-        else -> "Northwest"
+        bearing < 22.5 || bearing >= 337.5 -> stringResource(R.string.direction_north)
+        bearing < 67.5 -> stringResource(R.string.direction_northeast)
+        bearing < 112.5 -> stringResource(R.string.direction_east)
+        bearing < 157.5 -> stringResource(R.string.direction_southeast)
+        bearing < 202.5 -> stringResource(R.string.direction_south)
+        bearing < 247.5 -> stringResource(R.string.direction_southwest)
+        bearing < 292.5 -> stringResource(R.string.direction_west)
+        else -> stringResource(R.string.direction_northwest)
     }
 }
 

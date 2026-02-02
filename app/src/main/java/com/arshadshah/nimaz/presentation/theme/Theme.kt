@@ -91,6 +91,7 @@ fun NimazTheme(
     use24HourFormat: Boolean = false,
     useHijriPrimary: Boolean = false,
     showIslamicPatterns: Boolean = true,
+    localeCode: String = "en",
     content: @Composable () -> Unit
 ) {
     val darkTheme = when (themeMode) {
@@ -128,7 +129,7 @@ fun NimazTheme(
     ) {
         MaterialTheme(
             colorScheme = colorScheme,
-            typography = NimazTypography,
+            typography = typographyForLocale(localeCode),
             shapes = NimazShapes,
             content = content
         )

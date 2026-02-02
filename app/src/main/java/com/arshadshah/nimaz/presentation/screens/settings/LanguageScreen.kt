@@ -33,9 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AppLanguage
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -53,7 +55,7 @@ fun LanguageScreen(
         containerColor = MaterialTheme.colorScheme.surface,
         topBar = {
             NimazBackTopAppBar(
-                title = "Language",
+                title = stringResource(R.string.language_title),
                 onBackClick = onNavigateBack
             )
         }
@@ -67,7 +69,7 @@ fun LanguageScreen(
             // Section Title
             item {
                 Text(
-                    text = "APP LANGUAGE",
+                    text = stringResource(R.string.app_language_section),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp,
@@ -108,7 +110,7 @@ fun LanguageScreen(
             item {
                 Spacer(modifier = Modifier.height(20.dp))
                 Text(
-                    text = "Changing the language will restart the app and apply the new language to all screens.",
+                    text = stringResource(R.string.language_change_info),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 20.sp,

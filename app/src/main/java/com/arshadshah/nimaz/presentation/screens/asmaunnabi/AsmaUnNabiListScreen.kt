@@ -36,9 +36,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AsmaUnNabi
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -63,7 +65,7 @@ fun AsmaUnNabiListScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Prophet's 99 Names",
+                title = stringResource(R.string.asma_un_nabi_title),
                 onBackClick = onNavigateBack
             )
         }
@@ -79,7 +81,7 @@ fun AsmaUnNabiListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
-                placeholder = "Search by name or meaning...",
+                placeholder = stringResource(R.string.asma_un_nabi_search_hint),
                 showClearButton = state.searchQuery.isNotEmpty(),
                 onClear = { viewModel.onEvent(AsmaUnNabiEvent.ClearSearch) },
                 onSearch = { viewModel.onEvent(AsmaUnNabiEvent.Search(it)) }
@@ -99,7 +101,7 @@ fun AsmaUnNabiListScreen(
                             viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter)
                         }
                     },
-                    label = { Text("All") },
+                    label = { Text(stringResource(R.string.all)) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.tertiaryContainer,
                         selectedLabelColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -112,7 +114,7 @@ fun AsmaUnNabiListScreen(
                             viewModel.onEvent(AsmaUnNabiEvent.ToggleFavoritesFilter)
                         }
                     },
-                    label = { Text("Favorites") },
+                    label = { Text(stringResource(R.string.favorites)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Favorite,
@@ -169,9 +171,9 @@ fun AsmaUnNabiListScreen(
                             ) {
                                 Text(
                                     text = if (state.showFavoritesOnly) {
-                                        "No favorites yet"
+                                        stringResource(R.string.no_favorites_yet)
                                     } else {
-                                        "No names found"
+                                        stringResource(R.string.asma_un_nabi_no_names_found)
                                     },
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -260,9 +262,9 @@ private fun AsmaUnNabiNameCard(
                         Icons.Outlined.FavoriteBorder
                     },
                     contentDescription = if (name.isFavorite) {
-                        "Remove from favorites"
+                        stringResource(R.string.remove_from_favorites)
                     } else {
-                        "Add to favorites"
+                        stringResource(R.string.add_to_favorites)
                     },
                     tint = if (name.isFavorite) {
                         MaterialTheme.colorScheme.error

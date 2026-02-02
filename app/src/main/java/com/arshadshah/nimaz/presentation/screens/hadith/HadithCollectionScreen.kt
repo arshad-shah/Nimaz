@@ -44,10 +44,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -78,20 +80,20 @@ fun HadithCollectionScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Hadith",
+                title = stringResource(R.string.hadith_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToSearch) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = stringResource(R.string.search)
                         )
                     }
                     IconButton(onClick = onNavigateToBookmarks) {
                         Icon(
                             imageVector = Icons.Default.BookmarkBorder,
-                            contentDescription = "Bookmarks"
+                            contentDescription = stringResource(R.string.bookmarks)
                         )
                     }
                 }
@@ -118,9 +120,9 @@ fun HadithCollectionScreen(
                 item {
                     NimazStatsGrid(
                         stats = listOf(
-                            NimazStatData(value = "0", label = "Read Today"),
-                            NimazStatData(value = "${bookmarksState.bookmarks.size}", label = "Bookmarked"),
-                            NimazStatData(value = "0", label = "Day Streak")
+                            NimazStatData(value = "0", label = stringResource(R.string.read_today)),
+                            NimazStatData(value = "${bookmarksState.bookmarks.size}", label = stringResource(R.string.bookmarked)),
+                            NimazStatData(value = "0", label = stringResource(R.string.day_streak))
                         ),
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
                     )
@@ -151,11 +153,11 @@ fun HadithCollectionScreen(
                                     appendLine()
                                     appendLine(hadithOfTheDay.reference ?: "")
                                 } else {
-                                    appendLine("مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ")
+                                    appendLine(context.getString(R.string.hadith_fallback_arabic))
                                     appendLine()
-                                    appendLine("\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\"")
+                                    appendLine(context.getString(R.string.hadith_fallback_english))
                                     appendLine()
-                                    appendLine("Sahih al-Bukhari 6018")
+                                    appendLine(context.getString(R.string.hadith_fallback_source))
                                 }
                             }
                             val sendIntent = Intent().apply {
@@ -163,7 +165,7 @@ fun HadithCollectionScreen(
                                 putExtra(Intent.EXTRA_TEXT, shareText)
                                 type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, "Share Hadith"))
+                            context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.share_hadith)))
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -172,7 +174,7 @@ fun HadithCollectionScreen(
                 // Books Section Header
                 item {
                     NimazSectionHeader(
-                        title = "Kutub al-Sittah",
+                        title = stringResource(R.string.kutub_al_sittah),
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
                     )
                 }
@@ -199,9 +201,9 @@ private fun HadithOfTheDayCard(
     modifier: Modifier = Modifier
 ) {
     // Fallback values when hadith is null
-    val arabicText = hadith?.textArabic ?: "مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ"
-    val translationText = hadith?.textEnglish ?: "\"Whoever believes in Allah and the Last Day, let him speak good or remain silent.\""
-    val source = hadith?.reference ?: "Sahih al-Bukhari 6018"
+    val arabicText = hadith?.textArabic ?: stringResource(R.string.hadith_fallback_arabic)
+    val translationText = hadith?.textEnglish ?: stringResource(R.string.hadith_fallback_english)
+    val source = hadith?.reference ?: stringResource(R.string.hadith_fallback_source)
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -242,7 +244,7 @@ private fun HadithOfTheDayCard(
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
-                            text = "Hadith of the Day",
+                            text = stringResource(R.string.hadith_of_the_day),
                             style = MaterialTheme.typography.labelSmall,
                             color = Color(0xFFFACC15),
                             fontWeight = FontWeight.Medium
@@ -288,12 +290,12 @@ private fun HadithOfTheDayCard(
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         HadithActionButton(
                             icon = Icons.Default.BookmarkBorder,
-                            contentDescription = "Bookmark",
+                            contentDescription = stringResource(R.string.bookmark),
                             onClick = onBookmarkClick
                         )
                         HadithActionButton(
                             icon = Icons.Default.Share,
-                            contentDescription = "Share",
+                            contentDescription = stringResource(R.string.share),
                             onClick = onShareClick
                         )
                     }
@@ -420,7 +422,7 @@ private fun BookCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "${formatNumber(book.totalHadiths)} hadith",
+                text = stringResource(R.string.hadith_count_format, formatNumber(book.totalHadiths)),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )

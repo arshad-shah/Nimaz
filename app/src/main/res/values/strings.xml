@@ -313,6 +313,40 @@
     <string name="khatam_stats_title">Overview</string>
     <string name="khatam_ayahs_read">Ayahs Read</string>
     <string name="khatam_daily_target">Daily Target</string>
+    <string name="khatam_start_new">Start New Khatam</string>
+    <string name="khatam_no_in_progress">No khatams in progress</string>
+    <string name="khatam_no_completed">No completed khatams</string>
+    <string name="khatam_no_abandoned">No abandoned khatams</string>
+    <string name="khatam_set_active">Set as Active</string>
+    <string name="khatam_abandon">Abandon</string>
+    <string name="khatam_reactivate">Reactivate</string>
+    <string name="khatam_delete_title">Delete Khatam</string>
+    <string name="khatam_delete_message">Are you sure you want to delete \"%s\"? This action cannot be undone.</string>
+    <string name="khatam_ayahs_format">%1$d / %2$d ayahs</string>
+    <string name="khatam_ayahs_read_count">%d Ayahs Read</string>
+    <string name="khatam_per_day_format">%d / day</string>
+    <string name="khatam_created_format">Created %s</string>
+    <string name="khatam_no_started">No Khatam Started</string>
+    <string name="khatam_start_journey">Start your journey to complete the Quran</string>
+    <string name="khatam_new">New Khatam</string>
+    <string name="khatam_name_label">Khatam Name</string>
+    <string name="khatam_name_placeholder">e.g., Ramadan Khatam 2026</string>
+    <string name="khatam_ayahs_unit">%d ayahs</string>
+    <string name="khatam_estimated_completion">Estimated completion: ~%d days</string>
+    <string name="khatam_notes_label">Notes (Optional)</string>
+    <string name="khatam_notes_placeholder">Any personal notes…</string>
+    <string name="khatam_creating">Creating…</string>
+    <string name="khatam_start">Start Khatam</string>
+    <string name="khatam_detail">Khatam Detail</string>
+    <string name="khatam_continue_reading">Continue Reading</string>
+    <string name="khatam_juz_progress">Juz Progress</string>
+    <string name="khatam_daily_reading">Daily Reading</string>
+    <string name="khatam_ayahs_count_format">%d ayahs</string>
+    <string name="khatam_of_ayahs_read">%1$d of %2$d ayahs read</string>
+    <string name="khatam_days_active">Days Active</string>
+    <string name="khatam_avg_pace">Avg Pace</string>
+    <string name="khatam_target">Target</string>
+    <string name="khatam_pace_per_day">%d/day</string>
 
     <!-- Qibla AR -->
     <string name="qibla_ar_heading">Heading</string>
@@ -334,6 +368,192 @@
     <string name="widget_hijri_date_name">Hijri Date</string>
     <string name="widget_prayer_tracker_name">Prayer Tracker</string>
     <string name="widget_hijri_calendar_name">Hijri Calendar</string>
+
+    <!-- Prayer Tracker Screen -->
+    <string name="tracker">Tracker</string>
+    <string name="qada">Qada</string>
+    <string name="prayer_tracker_title">Prayer Tracker</string>
+    <string name="view_statistics">View Statistics</string>
+    <string name="all_caught_up">All Caught Up!</string>
+    <string name="all_caught_up_message">You have no missed prayers to make up. Keep up the good work!</string>
+    <string name="prayers_to_make_up">Prayers to Make Up</string>
+    <string name="all_caught_up_short">All caught up!</string>
+    <string name="missed_prayers_pending">%1$d missed prayer%2$s pending</string>
+    <string name="plural_s">s</string>
+    <string name="current_streak">Current Streak</string>
+    <string name="consecutive_days_all_prayers">consecutive days with all prayers</string>
+    <string name="on_time">On time</string>
+    <string name="late">Late</string>
+    <string name="missed">Missed</string>
+    <string name="made_up">Made up</string>
+    <string name="upcoming">Upcoming</string>
+
+    <!-- Tasbih Screen -->
+    <string name="tasbih">Tasbih</string>
+    <string name="tasbih_title">Tasbih</string>
+    <string name="history">History</string>
+    <string name="add_preset">Add Preset</string>
+    <string name="today_upper">TODAY</string>
+    <string name="rounds">ROUNDS</string>
+    <string name="sessions_upper">SESSIONS</string>
+    <string name="quick_presets">QUICK PRESETS</string>
+    <string name="target_format">Target: %d</string>
+    <string name="tap_to_count">Tap to count</string>
+    <string name="reset_action">Reset</string>
+    <string name="toggle_sound">Toggle Sound</string>
+    <string name="toggle_vibration">Toggle Vibration</string>
+
+    <!-- Tasbih History Screen -->
+    <string name="tasbih_history">Tasbih History</string>
+    <string name="this_week">This Week</string>
+    <string name="no_sessions_yet">No sessions yet</string>
+    <string name="start_counting_hint">Start counting to see your history here</string>
+    <string name="sessions">Sessions</string>
+    <string name="custom">Custom</string>
+    <string name="laps_format">%d laps</string>
+    <string name="done">Done</string>
+
+    <!-- Add Preset Screen -->
+    <string name="add_preset_title">Add Preset</string>
+    <string name="name_required">Name *</string>
+    <string name="name_required_error">Name is required</string>
+    <string name="preset_name_placeholder">e.g., SubhanAllah wa Bihamdihi</string>
+    <string name="arabic_text">Arabic Text</string>
+    <string name="arabic_placeholder">e.g., سُبْحَانَ اللَّهِ</string>
+    <string name="transliteration">Transliteration</string>
+    <string name="transliteration_placeholder">e.g., SubhanAllah wa Bihamdihi</string>
+    <string name="translation">Translation</string>
+    <string name="translation_placeholder">e.g., Glory be to Allah and praise Him</string>
+    <string name="target_count">Target Count</string>
+    <string name="category">Category</string>
+    <string name="save_preset">Save Preset</string>
+
+    <!-- Duas Collection Screen -->
+    <string name="duas_adhkar">Duas &amp; Adhkar</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="daily_adhkar">Daily Adhkar</string>
+    <string name="situational_duas">Situational Duas</string>
+    <string name="duas_count_format">%d duas</string>
+
+    <!-- Bookmarks Screen -->
+    <string name="bookmarks_title">Bookmarks</string>
+    <string name="no_bookmarks_yet">No Bookmarks Yet</string>
+    <string name="no_bookmarks_hint">Save ayahs, hadiths, and duas for quick access</string>
+    <string name="quran_verses">Quran Verses</string>
+    <string name="share">Share</string>
+    <string name="added_format">Added %s</string>
+    <string name="quran_type">Quran</string>
+    <string name="hadith_type">Hadith</string>
+    <string name="dua_type">Dua</string>
+
+    <!-- Islamic Calendar Screen -->
+    <string name="islamic_calendar">Islamic Calendar</string>
+    <string name="eid">Eid</string>
+    <string name="holy_night">Holy Night</string>
+    <string name="events">Events</string>
+    <string name="upcoming_events">Upcoming Events</string>
+
+    <!-- Hadith Collection Screen -->
+    <string name="hadith_title">Hadith</string>
+    <string name="read_today">Read Today</string>
+    <string name="bookmarked">Bookmarked</string>
+    <string name="day_streak">Day Streak</string>
+    <string name="share_hadith">Share Hadith</string>
+    <string name="kutub_al_sittah">Kutub al-Sittah</string>
+    <string name="bookmark">Bookmark</string>
+    <string name="hadith_count_format">%s hadith</string>
+
+    <!-- Search Screen -->
+    <string name="search_title">Search</string>
+    <string name="search_placeholder">Search Quran, Hadith, Duas…</string>
+    <string name="recent_searches">Recent Searches</string>
+    <string name="clear_recent">Clear Recent</string>
+    <string name="results_found_format">%d results found</string>
+    <string name="no_results_format">No results for \"%s\"</string>
+    <string name="no_results_hint">Try different keywords or filters</string>
+    <string name="remove">Remove</string>
+    <string name="surah_ayahs_format">%1$s • %2$d ayahs</string>
+
+    <!-- Zakat Calculator Screen -->
+    <string name="zakat_calculator">Zakat Calculator</string>
+    <string name="zakat_due">Zakat Due</string>
+    <string name="zakat_rate_hint">2.5%% of eligible wealth</string>
+    <string name="assets">Assets</string>
+    <string name="cash_on_hand">Cash on Hand</string>
+    <string name="bank_balance">Bank Balance</string>
+    <string name="gold">Gold</string>
+    <string name="silver">Silver</string>
+    <string name="investments">Investments</string>
+    <string name="business_inventory">Business Inventory</string>
+    <string name="receivables">Receivables</string>
+    <string name="rental_income">Rental Income</string>
+    <string name="other_assets">Other Assets</string>
+    <string name="liabilities">Liabilities</string>
+    <string name="debts_owed">Debts Owed</string>
+    <string name="expenses_due">Expenses Due</string>
+    <string name="other_liabilities">Other Liabilities</string>
+    <string name="total_assets">Total Assets</string>
+    <string name="total_liabilities">Total Liabilities</string>
+    <string name="net_zakatable_wealth">Net Zakatable Wealth</string>
+    <string name="nisab_threshold">Nisab Threshold</string>
+    <string name="meets_nisab">Meets Nisab</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="zakat_due_rate">Zakat Due (2.5%%)</string>
+    <string name="save_calculation">Save Calculation</string>
+    <string name="zakat_history">History</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="gold_nisab">Gold</string>
+    <string name="silver_nisab">Silver</string>
+    <string name="nisab_gold_price_format">Gold (%s/g)</string>
+    <string name="nisab_silver_price_format">Silver (%s/g)</string>
+    <string name="nisab_above_format">Your wealth is above the Nisab threshold. Zakat is obligatory.</string>
+    <string name="nisab_below_format">Your wealth is below the Nisab threshold. Zakat is not obligatory.</string>
+    <string name="breakdown">Breakdown</string>
+    <string name="loans">Loans</string>
+    <string name="bills_due">Bills Due</string>
+    <string name="hint_physical_cash">Physical cash you possess</string>
+    <string name="hint_bank_accounts">All bank accounts combined</string>
+    <string name="hint_weight_in_grams">Weight in grams</string>
+    <string name="hint_stocks_bonds">Stocks, bonds, mutual funds</string>
+    <string name="hint_goods_for_trade">Goods held for trade</string>
+    <string name="hint_money_owed_to_you">Money owed to you</string>
+    <string name="hint_income_from_properties">Income from properties</string>
+    <string name="hint_other_zakatable_assets">Any other zakatable assets</string>
+    <string name="hint_personal_debts">Personal debts</string>
+    <string name="hint_bank_personal_loans">Bank or personal loans</string>
+    <string name="hint_outstanding_bills">Outstanding bills</string>
+    <string name="hint_other_liabilities">Any other liabilities</string>
+    <string name="calculation_breakdown">Calculation Breakdown</string>
+    <string name="nisab_above_detail_format">Your wealth exceeds the %1$s nisab threshold of %2$s</string>
+    <string name="nisab_below_detail_format">Nisab threshold (%1$s): %2$s</string>
+    <string name="nisab_gold_subtitle_format">87.48g @ $%d/g</string>
+    <string name="nisab_silver_subtitle_format">612.36g @ $%s/g</string>
+
+    <!-- Detail screen fallbacks -->
+    <string name="name_detail">Name Detail</string>
+    <string name="prophet_detail">Prophet Detail</string>
+
+    <!-- Language Screen -->
+    <string name="language_title">Language</string>
+    <string name="app_language_section">APP LANGUAGE</string>
+    <string name="language_change_info">Changing the language will restart the app and apply the new language to all screens.</string>
+
+    <!-- Hadith fallback -->
+    <string name="hadith_fallback_arabic">مَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ لِيَصْمُتْ</string>
+    <string name="hadith_fallback_english">"Whoever believes in Allah and the Last Day, let him speak good or remain silent."</string>
+    <string name="hadith_fallback_source">Sahih al-Bukhari 6018</string>
+
+    <!-- Home Screen - Jumu'ah extras -->
+    <string name="jumuah_arabic">\u0627\u0644\u062C\u0645\u0639\u0629</string>
+    <string name="jumuah_hadith_quote">"The best day on which the sun rises is Friday." — Sahih Muslim</string>
+
+    <!-- Prayer Tracker -->
+    <string name="prayers_completed_format">%1$d of %2$d</string>
+
+    <!-- Search Screen -->
+    <string name="surah_result_format">Surah %1$d:%2$d</string>
+    <string name="hadith_result_format">Hadith #%1$d</string>
 
     <!-- Share -->
     <string name="share_message">Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>

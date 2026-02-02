@@ -37,10 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Prophet
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -65,7 +67,7 @@ fun ProphetsListScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Prophets of Islam",
+                title = stringResource(R.string.prophets_title),
                 onBackClick = onNavigateBack
             )
         }
@@ -81,7 +83,7 @@ fun ProphetsListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.Small),
-                placeholder = "Search prophets...",
+                placeholder = stringResource(R.string.prophets_search_hint),
                 showClearButton = state.searchQuery.isNotEmpty(),
                 onClear = { viewModel.onEvent(ProphetEvent.ClearSearch) }
             )
@@ -100,7 +102,7 @@ fun ProphetsListScreen(
                             viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter)
                         }
                     },
-                    label = { Text("All") },
+                    label = { Text(stringResource(R.string.all)) },
                     colors = FilterChipDefaults.filterChipColors(
                         selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
                         selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -113,7 +115,7 @@ fun ProphetsListScreen(
                             viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter)
                         }
                     },
-                    label = { Text("Favorites") },
+                    label = { Text(stringResource(R.string.favorites)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Favorite,
@@ -169,9 +171,9 @@ fun ProphetsListScreen(
                             ) {
                                 Text(
                                     text = if (state.showFavoritesOnly) {
-                                        "No favorites yet"
+                                        stringResource(R.string.no_favorites_yet)
                                     } else {
-                                        "No prophets found"
+                                        stringResource(R.string.prophets_no_found)
                                     },
                                     style = MaterialTheme.typography.bodyLarge,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -285,9 +287,9 @@ private fun ProphetCard(
                         Icons.Outlined.FavoriteBorder
                     },
                     contentDescription = if (prophet.isFavorite) {
-                        "Remove from favorites"
+                        stringResource(R.string.remove_from_favorites)
                     } else {
-                        "Add to favorites"
+                        stringResource(R.string.add_to_favorites)
                     },
                     tint = if (prophet.isFavorite) {
                         MaterialTheme.colorScheme.error

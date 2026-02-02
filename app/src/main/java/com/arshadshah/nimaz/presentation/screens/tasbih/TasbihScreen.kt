@@ -55,8 +55,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -84,19 +86,19 @@ fun TasbihScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazTopAppBar(
-                title = "Tasbih",
+                title = stringResource(R.string.tasbih_title),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToHistory) {
                         Icon(
                             imageVector = Icons.Default.History,
-                            contentDescription = "History"
+                            contentDescription = stringResource(R.string.history)
                         )
                     }
                     IconButton(onClick = onNavigateToAddPreset) {
                         Icon(
                             imageVector = Icons.Default.Add,
-                            contentDescription = "Add Preset"
+                            contentDescription = stringResource(R.string.add_preset)
                         )
                     }
                 }
@@ -134,9 +136,9 @@ fun TasbihScreen(
 
             NimazStatsGrid(
                 stats = listOf(
-                    NimazStatData(value = liveTotalToday.toString(), label = "TODAY"),
-                    NimazStatData(value = counterState.laps.toString(), label = "ROUNDS"),
-                    NimazStatData(value = statsState.completedSessions.toString(), label = "SESSIONS")
+                    NimazStatData(value = liveTotalToday.toString(), label = stringResource(R.string.today_upper)),
+                    NimazStatData(value = counterState.laps.toString(), label = stringResource(R.string.rounds)),
+                    NimazStatData(value = statsState.completedSessions.toString(), label = stringResource(R.string.sessions_upper))
                 ),
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
@@ -145,7 +147,7 @@ fun TasbihScreen(
 
             // Presets Section
             Text(
-                text = "QUICK PRESETS",
+                text = stringResource(R.string.quick_presets),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 letterSpacing = 1.sp,
@@ -236,7 +238,7 @@ private fun DhikrDisplay(
 
         // Target count
         Text(
-            text = "Target: $targetCount",
+            text = stringResource(R.string.target_format, targetCount),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -350,7 +352,7 @@ private fun CounterCircle(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Tap to count",
+                        text = stringResource(R.string.tap_to_count),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -434,7 +436,7 @@ private fun ControlButtons(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = "Reset",
+                    contentDescription = stringResource(R.string.reset_action),
                     tint = MaterialTheme.colorScheme.error,
                     modifier = Modifier.size(24.dp)
                 )
@@ -451,7 +453,7 @@ private fun ControlButtons(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = if (soundEnabled) Icons.Default.VolumeUp else Icons.Default.VolumeOff,
-                    contentDescription = "Toggle Sound",
+                    contentDescription = stringResource(R.string.toggle_sound),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                         alpha = if (soundEnabled) 1f else 0.4f
                     ),
@@ -470,7 +472,7 @@ private fun ControlButtons(
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.PhoneAndroid,
-                    contentDescription = "Toggle Vibration",
+                    contentDescription = stringResource(R.string.toggle_vibration),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
                         alpha = if (vibrationEnabled) 1f else 0.4f
                     ),

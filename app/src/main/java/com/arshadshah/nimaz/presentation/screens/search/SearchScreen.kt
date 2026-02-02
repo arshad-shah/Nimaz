@@ -48,6 +48,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -81,7 +83,7 @@ fun SearchScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Search",
+                title = stringResource(R.string.search_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -99,7 +101,7 @@ fun SearchScreen(
                 NimazSearchBar(
                     query = state.query,
                     onQueryChange = { viewModel.onEvent(SearchEvent.UpdateQuery(it)) },
-                    placeholder = "Search Quran, Hadith, Duas...",
+                    placeholder = stringResource(R.string.search_placeholder),
                     modifier = Modifier.fillMaxWidth(),
                     showClearButton = state.query.isNotEmpty(),
                     onClear = { viewModel.onEvent(SearchEvent.ClearSearch) },
@@ -120,10 +122,10 @@ fun SearchScreen(
                             label = {
                                 Text(
                                     when (filter) {
-                                        SearchFilter.ALL -> "All"
-                                        SearchFilter.QURAN -> "Quran"
-                                        SearchFilter.HADITH -> "Hadith"
-                                        SearchFilter.DUA -> "Duas"
+                                        SearchFilter.ALL -> stringResource(R.string.all)
+                                        SearchFilter.QURAN -> stringResource(R.string.quran)
+                                        SearchFilter.HADITH -> stringResource(R.string.hadith)
+                                        SearchFilter.DUA -> stringResource(R.string.duas)
                                     }
                                 )
                             }
@@ -141,7 +143,7 @@ fun SearchScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Recent Searches",
+                            text = stringResource(R.string.recent_searches),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.Bold
                         )
@@ -150,7 +152,7 @@ fun SearchScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Close,
-                                contentDescription = "Clear Recent",
+                                contentDescription = stringResource(R.string.clear_recent),
                                 modifier = Modifier.size(20.dp)
                             )
                         }
@@ -184,7 +186,7 @@ fun SearchScreen(
             if (state.query.isNotEmpty() && !state.isSearching && state.filteredResults.isNotEmpty()) {
                 item {
                     Text(
-                        text = "${statsState.totalResults} results found",
+                        text = stringResource(R.string.results_found_format, statsState.totalResults),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -220,8 +222,8 @@ fun SearchScreen(
             if (state.query.isNotEmpty() && !state.isSearching && state.filteredResults.isEmpty()) {
                 item {
                     NimazEmptyState(
-                        title = "No results for \"${state.query}\"",
-                        message = "Try different keywords or filters",
+                        title = stringResource(R.string.no_results_format, state.query),
+                        message = stringResource(R.string.no_results_hint),
                         icon = Icons.Default.Search,
                         iconTint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -271,7 +273,7 @@ private fun RecentSearchItem(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Remove",
+                    contentDescription = stringResource(R.string.remove),
                     modifier = Modifier.size(16.dp)
                 )
             }
@@ -290,8 +292,8 @@ private fun QuranSearchResultCard(
     SearchResultCard(
         icon = Icons.Default.MenuBook,
         iconColor = NimazColors.QuranColors.Meccan,
-        type = "Quran",
-        title = "Surah ${result.ayah.surahNumber}:${result.ayah.ayahNumber}",
+        type = stringResource(R.string.quran_type),
+        title = stringResource(R.string.surah_result_format, result.ayah.surahNumber, result.ayah.ayahNumber),
         subtitle = result.surahName,
         highlightedText = result.matchedText,
         query = query,
@@ -346,7 +348,7 @@ private fun SurahSearchResultCard(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "${surah.nameTransliteration} • ${surah.numberOfAyahs} ayahs",
+                    text = stringResource(R.string.surah_ayahs_format, surah.nameTransliteration, surah.numberOfAyahs),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -371,8 +373,8 @@ private fun HadithSearchResultCard(
     SearchResultCard(
         icon = Icons.Default.Book,
         iconColor = MaterialTheme.colorScheme.primary,
-        type = "Hadith",
-        title = "Hadith #${result.hadith.hadithNumber}",
+        type = stringResource(R.string.hadith_type),
+        title = stringResource(R.string.hadith_result_format, result.hadith.hadithNumber),
         subtitle = result.bookName,
         highlightedText = result.matchedText,
         query = query,
@@ -391,7 +393,7 @@ private fun DuaSearchResultCard(
     SearchResultCard(
         icon = Icons.Default.Mosque,
         iconColor = MaterialTheme.colorScheme.secondary,
-        type = "Dua",
+        type = stringResource(R.string.dua_type),
         title = result.dua.titleEnglish,
         subtitle = result.categoryName,
         highlightedText = result.matchedText,

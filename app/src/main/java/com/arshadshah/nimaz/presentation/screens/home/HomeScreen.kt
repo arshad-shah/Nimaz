@@ -62,9 +62,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.LocalInAppUpdateManager
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -151,9 +153,9 @@ fun HomeScreen(
                         is UpdateState.UpdateAvailable -> {
                             item {
                                 NimazBanner(
-                                    message = "A new version of Nimaz is available",
+                                    message = stringResource(R.string.update_available),
                                     variant = NimazBannerVariant.UPDATE,
-                                    actionLabel = "Update",
+                                    actionLabel = stringResource(R.string.update_action),
                                     onAction = { updateManager?.startUpdate() },
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                                 )
@@ -162,7 +164,7 @@ fun HomeScreen(
                         is UpdateState.Downloading -> {
                             item {
                                 NimazBanner(
-                                    message = "Downloading update...",
+                                    message = stringResource(R.string.downloading_update),
                                     variant = NimazBannerVariant.UPDATE,
                                     isLoading = true,
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
@@ -172,9 +174,9 @@ fun HomeScreen(
                         is UpdateState.Downloaded -> {
                             item {
                                 NimazBanner(
-                                    message = "Update ready to install",
+                                    message = stringResource(R.string.update_ready),
                                     variant = NimazBannerVariant.UPDATE,
-                                    actionLabel = "Restart",
+                                    actionLabel = stringResource(R.string.restart),
                                     onAction = { updateState.completeUpdate() },
                                     modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)
                                 )
@@ -187,11 +189,11 @@ fun HomeScreen(
                 if (!state.hasNotificationPermission) {
                     item {
                         NimazBanner(
-                            message = "Prayer notifications need permission to alert you at prayer times.",
+                            message = stringResource(R.string.notifications_disabled_message),
                             variant = NimazBannerVariant.WARNING,
                             icon = Icons.Default.Notifications,
-                            title = "Notifications Disabled",
-                            actionLabel = "Enable",
+                            title = stringResource(R.string.notifications_disabled_title),
+                            actionLabel = stringResource(R.string.enable),
                             onAction = {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
@@ -204,11 +206,11 @@ fun HomeScreen(
                 if (!state.hasLocationPermission) {
                     item {
                         NimazBanner(
-                            message = "Location is needed to calculate accurate prayer times for your area.",
+                            message = stringResource(R.string.location_permission_message),
                             variant = NimazBannerVariant.WARNING,
                             icon = Icons.Default.LocationOn,
-                            title = "Location Permission Needed",
-                            actionLabel = "Grant",
+                            title = stringResource(R.string.location_permission_title),
+                            actionLabel = stringResource(R.string.grant),
                             onAction = {
                                 locationPermissionLauncher.launch(
                                     arrayOf(
@@ -224,11 +226,11 @@ fun HomeScreen(
                 if (state.isBatteryOptimized) {
                     item {
                         NimazBanner(
-                            message = "Battery optimization may prevent timely prayer notifications.",
+                            message = stringResource(R.string.battery_optimization_message),
                             variant = NimazBannerVariant.WARNING,
                             icon = Icons.Default.BatteryAlert,
-                            title = "Battery Optimization Active",
-                            actionLabel = "Fix",
+                            title = stringResource(R.string.battery_optimization_title),
+                            actionLabel = stringResource(R.string.fix),
                             onAction = {
                                 batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
                             },
@@ -261,7 +263,7 @@ fun HomeScreen(
                 item {
                     Spacer(modifier = Modifier.height(24.dp))
                     NimazSectionHeader(
-                        title = "Today",
+                        title = stringResource(R.string.today),
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -283,9 +285,9 @@ fun HomeScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         NimazSectionHeader(
-                            title = "Prayer Times",
+                            title = stringResource(R.string.prayer_times),
                             showSeeAll = true,
-                            seeAllText = "Settings",
+                            seeAllText = stringResource(R.string.settings),
                             onSeeAllClick = {
                                 onNavigateToPrayerSettings()
                             }
@@ -358,7 +360,7 @@ private fun HomeHeader(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = locationName.ifEmpty { "Location" },
+                        text = locationName.ifEmpty { stringResource(R.string.location) },
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -404,7 +406,7 @@ private fun HomeHeader(
 
                 // Next Prayer Label
                 Text(
-                    text = "NEXT PRAYER",
+                    text = stringResource(R.string.next_prayer),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 2.sp
@@ -437,7 +439,7 @@ private fun HomeHeader(
 
                 // Prayer Time
                 Text(
-                    text = "at $nextPrayerTime",
+                    text = stringResource(R.string.at_time, nextPrayerTime),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.secondary
                 )
@@ -520,11 +522,11 @@ private fun CountdownTimer(
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        CountdownUnit(value = hours, label = "Hours", alpha = alpha)
+        CountdownUnit(value = hours, label = stringResource(R.string.hours), alpha = alpha)
         CountdownSeparator()
-        CountdownUnit(value = minutes, label = "Minutes", alpha = alpha)
+        CountdownUnit(value = minutes, label = stringResource(R.string.minutes), alpha = alpha)
         CountdownSeparator()
-        CountdownUnit(value = seconds, label = "Seconds", alpha = alpha)
+        CountdownUnit(value = seconds, label = stringResource(R.string.seconds), alpha = alpha)
     }
 }
 
@@ -614,13 +616,13 @@ private fun TodaysProgressCard(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Today's Progress",
+                        text = stringResource(R.string.todays_progress),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "$completedCount of $totalCount prayers",
+                        text = stringResource(R.string.prayers_count_format, completedCount, totalCount),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -745,13 +747,13 @@ private fun TodayInfoCards(
                 Spacer(modifier = Modifier.width(14.dp))
                 Column {
                     Text(
-                        text = "Fasting",
+                        text = stringResource(R.string.fasting),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = if (fastingToday) "Today: Fasting" else "No fast today",
+                        text = if (fastingToday) stringResource(R.string.today_fasting) else stringResource(R.string.no_fast_today),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                     )
@@ -790,7 +792,7 @@ private fun TodayInfoCards(
                         }
                         Spacer(modifier = Modifier.width(14.dp))
                         Text(
-                            text = "Hadith of the Day",
+                            text = stringResource(R.string.hadith_of_the_day),
                             style = MaterialTheme.typography.titleSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -906,7 +908,7 @@ private fun PrayerTimeCard(
                     if (isPrayed) {
                         Icon(
                             imageVector = Icons.Default.Check,
-                            contentDescription = "Prayed",
+                            contentDescription = stringResource(R.string.prayed),
                             tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(14.dp)
                         )
@@ -974,13 +976,13 @@ private fun JumuahCard(
                         }
                         Column {
                             Text(
-                                text = "Jumu'ah Mubarak",
+                                text = stringResource(R.string.jumuah_mubarak),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                             ArabicText(
-                                text = "\u0627\u0644\u062C\u0645\u0639\u0629",
+                                text = stringResource(R.string.jumuah_arabic),
                                 size = ArabicTextSize.SMALL,
                                 color = Color.White.copy(alpha = 0.8f)
                             )
@@ -996,7 +998,7 @@ private fun JumuahCard(
                                 color = Color.White
                             )
                             Text(
-                                text = "Khutbah time",
+                                text = stringResource(R.string.khutbah_time),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White.copy(alpha = 0.7f)
                             )
@@ -1028,7 +1030,7 @@ private fun JumuahCard(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Jumu'ah prayer time has passed",
+                                text = stringResource(R.string.jumuah_passed),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White
                             )
@@ -1040,7 +1042,7 @@ private fun JumuahCard(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Time until Jumu'ah",
+                                text = stringResource(R.string.time_until_jumuah),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color.White.copy(alpha = 0.9f)
                             )
@@ -1058,7 +1060,7 @@ private fun JumuahCard(
 
                 // Friday reminder text
                 Text(
-                    text = "\"The best day on which the sun rises is Friday.\" \u2014 Sahih Muslim",
+                    text = stringResource(R.string.jumuah_hadith_quote),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Medium

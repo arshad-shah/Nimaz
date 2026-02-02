@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
@@ -256,8 +257,11 @@ class SettingsViewModel @Inject constructor(
             }
             is SettingsEvent.SetLanguage -> {
                 _generalState.update { it.copy(language = event.language) }
-                viewModelScope.launch { preferencesDataStore.setAppLanguage(event.language.code) }
-                // Locale change is applied by the language settings screen via LocaleHelper
+                viewModelScope.launch {
+                    preferencesDataStore.setAppLanguage(event.language.code)
+                    LocaleHelper.setLocale(context, event.language.code)
+                    _shouldRestart.value = true
+                }
             }
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }

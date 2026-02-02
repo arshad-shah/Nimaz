@@ -3,6 +3,7 @@ package com.arshadshah.nimaz
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
+import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
@@ -38,8 +39,22 @@ class NimazApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        applySavedLocale()
         scheduleInitialNotifications()
         downloadDefaultAdhanIfNeeded()
+    }
+
+    private fun applySavedLocale() {
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
+            try {
+                val langCode = preferencesDataStore.appLanguage.first()
+                if (langCode.isNotEmpty() && langCode != "en") {
+                    LocaleHelper.setLocale(this@NimazApp, langCode)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     private fun scheduleInitialNotifications() {

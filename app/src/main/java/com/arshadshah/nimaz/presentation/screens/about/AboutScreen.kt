@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -69,7 +70,7 @@ fun AboutScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "About",
+                title = stringResource(R.string.about),
                 onBackClick = onNavigateBack
             )
         }
@@ -89,7 +90,7 @@ fun AboutScreen(
             // Links Section
             item {
                 NimazSectionTitle(
-                    text = "Links",
+                    text = stringResource(R.string.links),
                     modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
                 )
             }
@@ -107,7 +108,7 @@ fun AboutScreen(
             // Developer Section
             item {
                 NimazSectionTitle(
-                    text = "Developer",
+                    text = stringResource(R.string.developer),
                     modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
                 )
             }
@@ -119,7 +120,7 @@ fun AboutScreen(
             // Credits Section
             item {
                 NimazSectionTitle(
-                    text = "Data Sources & Credits",
+                    text = stringResource(R.string.data_sources_credits),
                     modifier = Modifier.padding(start = 5.dp, top = 4.dp, bottom = 0.dp)
                 )
             }
@@ -153,7 +154,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
     ) {
         Image(
             painter = painterResource(R.mipmap.ic_launcher_foreground),
-            contentDescription = "Nimaz",
+            contentDescription = stringResource(R.string.app_name),
             modifier = Modifier
                 .size(100.dp)
                 .clip(RoundedCornerShape(24.dp))
@@ -162,7 +163,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = "Nimaz",
+            text = stringResource(R.string.app_name),
             style = MaterialTheme.typography.headlineMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
@@ -171,7 +172,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(5.dp))
 
         Text(
-            text = "Version ${BuildConfig.VERSION_NAME} (Build ${BuildConfig.VERSION_CODE})",
+            text = stringResource(R.string.version_detail_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -179,7 +180,7 @@ private fun AppInfoSection(modifier: Modifier = Modifier) {
         Spacer(modifier = Modifier.height(15.dp))
 
         Text(
-            text = "A comprehensive Islamic companion app with accurate prayer times, qibla direction, Quran reading, and more.",
+            text = stringResource(R.string.app_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -211,59 +212,59 @@ private fun LinksCard(
     ) {
         LinkItem(
             icon = Icons.Default.Star,
-            title = "Rate on Play Store",
-            subtitle = "Help us reach more Muslims",
+            title = stringResource(R.string.rate_play_store),
+            subtitle = stringResource(R.string.rate_play_store_subtitle),
             onClick = onRateApp,
             showDivider = true
         )
         LinkItem(
             icon = Icons.Default.Email,
-            title = "Contact Support",
-            subtitle = "arshad@arshadshah.com",
+            title = stringResource(R.string.contact_support),
+            subtitle = stringResource(R.string.contact_email),
             onClick = onContactUs,
             showDivider = true
         )
         LinkItem(
             icon = Icons.Default.Language,
-            title = "Website",
-            subtitle = "nimaz.arshadshah.com",
+            title = stringResource(R.string.website),
+            subtitle = stringResource(R.string.website_url_display),
             onClick = { uriHandler.openUri("https://nimaz.arshadshah.com") },
             showDivider = true
         )
         LinkItem(
             icon = Icons.Default.Shield,
-            title = "Privacy Policy",
-            subtitle = "How we handle your data",
+            title = stringResource(R.string.privacy_policy),
+            subtitle = stringResource(R.string.privacy_policy_subtitle),
             onClick = onNavigateToPrivacyPolicy,
             showDivider = true
         )
         LinkItem(
             icon = Icons.Default.Description,
-            title = "Terms of Service",
-            subtitle = "Usage terms",
+            title = stringResource(R.string.terms_of_service),
+            subtitle = stringResource(R.string.terms_of_service_subtitle),
             onClick = onNavigateToTerms,
             showDivider = true
         )
         LinkItem(
             icon = Icons.Default.Gavel,
-            title = "Open Source Licenses",
-            subtitle = "Third-party libraries",
+            title = stringResource(R.string.open_source_licenses),
+            subtitle = stringResource(R.string.open_source_licenses_subtitle),
             onClick = onNavigateToLicenses,
             showDivider = true
         )
         val updateManager = LocalInAppUpdateManager.current
         val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
         val updateSubtitle = when (updateState) {
-            is UpdateState.UpdateAvailable -> "New version available"
-            is UpdateState.Downloading -> "Downloading..."
-            is UpdateState.Downloaded -> "Ready to install"
-            is UpdateState.NoUpdateAvailable -> "You're up to date"
-            is UpdateState.Error -> "Check failed"
-            else -> "Tap to check"
+            is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
+            is UpdateState.Downloading -> stringResource(R.string.update_downloading)
+            is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
+            is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
+            is UpdateState.Error -> stringResource(R.string.update_check_failed)
+            else -> stringResource(R.string.update_tap_to_check)
         }
         LinkItem(
             icon = Icons.Default.Refresh,
-            title = "Check for Updates",
+            title = stringResource(R.string.check_for_updates),
             subtitle = updateSubtitle,
             onClick = {
                 when (updateState) {
@@ -290,23 +291,23 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Arshad Shah",
+            text = stringResource(R.string.developer_name),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
-            text = "Software Engineer at HMH, Dublin",
+            text = stringResource(R.string.developer_role),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = "BSc Computer Science, TU Dublin",
+            text = stringResource(R.string.developer_education),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Text(
-            text = "Dublin, Ireland",
+            text = stringResource(R.string.developer_location),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -396,12 +397,12 @@ private fun CreditsCard(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         val credits = listOf(
-            "Quran Text" to "Tanzil.net",
-            "Translations" to "Sahih International",
-            "Hadith Data" to "Sunnah.com",
-            "Prayer Times" to "Aladhan API",
-            "Recitations" to "Quran.com",
-            "Hijri Calendar" to "Islamic Finder"
+            stringResource(R.string.credit_quran_text) to stringResource(R.string.credit_tanzil),
+            stringResource(R.string.credit_translations) to stringResource(R.string.credit_sahih_international),
+            stringResource(R.string.credit_hadith_data) to stringResource(R.string.credit_sunnah),
+            stringResource(R.string.credit_prayer_times) to stringResource(R.string.credit_aladhan),
+            stringResource(R.string.credit_recitations) to stringResource(R.string.credit_quran_com),
+            stringResource(R.string.credit_hijri_calendar) to stringResource(R.string.credit_islamic_finder)
         )
 
         credits.forEach { (name, source) ->
@@ -431,10 +432,10 @@ private fun SocialLinksRow(modifier: Modifier = Modifier) {
     data class SocialLink(val icon: ImageVector, val url: String, val label: String)
 
     val socials = listOf(
-        SocialLink(Icons.Default.Code, "https://github.com/arshad-shah", "GitHub"),
-        SocialLink(Icons.Default.WorkOutline, "https://linkedin.com/in/arshadshah", "LinkedIn"),
-        SocialLink(Icons.Default.Email, "mailto:arshad@arshadshah.com", "Email"),
-        SocialLink(Icons.Default.Language, "https://arshadshah.com", "Website")
+        SocialLink(Icons.Default.Code, "https://github.com/arshad-shah", stringResource(R.string.github)),
+        SocialLink(Icons.Default.WorkOutline, "https://linkedin.com/in/arshadshah", stringResource(R.string.linkedin)),
+        SocialLink(Icons.Default.Email, "mailto:arshad@arshadshah.com", stringResource(R.string.email)),
+        SocialLink(Icons.Default.Language, "https://arshadshah.com", stringResource(R.string.website))
     )
 
     Row(
@@ -481,7 +482,7 @@ private fun FooterSection(modifier: Modifier = Modifier) {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Made with ",
+                text = stringResource(R.string.made_with),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
@@ -492,14 +493,14 @@ private fun FooterSection(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(14.dp)
             )
             Text(
-                text = " for the Ummah",
+                text = stringResource(R.string.for_the_ummah),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
         }
         Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = "\u00A9 ${LocalDate.now().year} Nimaz. All rights reserved.",
+            text = stringResource(R.string.copyright_format, LocalDate.now().year),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
         )

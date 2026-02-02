@@ -54,9 +54,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -90,22 +92,22 @@ fun PrayerTrackerScreen(
     val coroutineScope = rememberCoroutineScope()
 
     val tabs = listOf(
-        "Tracker" to Icons.Default.Schedule,
-        "Qada" to Icons.Default.Restore
+        stringResource(R.string.tracker) to Icons.Default.Schedule,
+        stringResource(R.string.qada) to Icons.Default.Restore
     )
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Prayer Tracker",
+                title = stringResource(R.string.prayer_tracker_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
                         Icon(
                             imageVector = Icons.Default.BarChart,
-                            contentDescription = "View Statistics"
+                            contentDescription = stringResource(R.string.view_statistics)
                         )
                     }
                 }
@@ -239,8 +241,8 @@ private fun QadaTabContent(viewModel: PrayerTrackerViewModel) {
         if (qadaState.missedPrayers.isEmpty() && !qadaState.isLoading) {
             item {
                 NimazEmptyState(
-                    title = "All Caught Up!",
-                    message = "You have no missed prayers to make up. Keep up the good work!"
+                    title = stringResource(R.string.all_caught_up),
+                    message = stringResource(R.string.all_caught_up_message)
                 )
             }
         }
@@ -312,16 +314,20 @@ private fun QadaSummaryCard(totalMissed: Int) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Prayers to Make Up",
+                    text = stringResource(R.string.prayers_to_make_up),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White
                 )
                 Text(
                     text = if (totalMissed == 0) {
-                        "All caught up!"
+                        stringResource(R.string.all_caught_up_short)
                     } else {
-                        "$totalMissed missed prayer${if (totalMissed != 1) "s" else ""} pending"
+                        stringResource(
+                            R.string.missed_prayers_pending,
+                            totalMissed,
+                            if (totalMissed != 1) stringResource(R.string.plural_s) else ""
+                        )
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.9f)
@@ -381,7 +387,7 @@ private fun StreakCard(currentStreak: Int) {
                         )
                     }
                     Text(
-                        text = "Current Streak",
+                        text = stringResource(R.string.current_streak),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = Color(0xFF1C1917)
@@ -396,7 +402,7 @@ private fun StreakCard(currentStreak: Int) {
                     lineHeight = 48.sp
                 )
                 Text(
-                    text = "consecutive days with all prayers",
+                    text = stringResource(R.string.consecutive_days_all_prayers),
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color(0xFF1C1917).copy(alpha = 0.8f)
                 )
@@ -495,7 +501,7 @@ private fun SelectedDayDetail(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = "$prayedCount of ${prayers.size}",
+                    text = stringResource(R.string.prayers_completed_format, prayedCount, prayers.size),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -532,18 +538,19 @@ private fun SelectedDayDetail(
                         else -> false
                     }
 
+                    // For visual styling, treat auto-detected missed as missed
+                    val isMissed = status == PrayerStatus.MISSED ||
+                            (isPrayerTimePassed && status == PrayerStatus.NOT_PRAYED)
+
                     // Determine the display status
                     val displayStatus = when {
-                        status == PrayerStatus.PRAYED -> "On time"
-                        status == PrayerStatus.LATE -> "Late"
-                        status == PrayerStatus.MISSED -> "Missed"
-                        status == PrayerStatus.QADA -> "Made up"
-                        isPrayerTimePassed && status == PrayerStatus.NOT_PRAYED -> "Missed"
-                        else -> "Upcoming"
+                        status == PrayerStatus.PRAYED -> stringResource(R.string.on_time)
+                        status == PrayerStatus.LATE -> stringResource(R.string.late)
+                        status == PrayerStatus.MISSED -> stringResource(R.string.missed)
+                        status == PrayerStatus.QADA -> stringResource(R.string.made_up)
+                        isPrayerTimePassed && status == PrayerStatus.NOT_PRAYED -> stringResource(R.string.missed)
+                        else -> stringResource(R.string.upcoming)
                     }
-
-                    // For visual styling, treat auto-detected missed as missed
-                    val isMissed = displayStatus == "Missed"
 
                     PrayerCheckItem(
                         name = prayerName.name.lowercase()

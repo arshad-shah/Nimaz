@@ -24,9 +24,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -52,7 +54,7 @@ fun KhatamCreateScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "New Khatam",
+                title = stringResource(R.string.khatam_new),
                 onBackClick = onNavigateBack
             )
         }
@@ -68,7 +70,7 @@ fun KhatamCreateScreen(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Khatam Name",
+                        text = stringResource(R.string.khatam_name_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -76,7 +78,7 @@ fun KhatamCreateScreen(
                     OutlinedTextField(
                         value = state.name,
                         onValueChange = { viewModel.onEvent(KhatamEvent.UpdateName(it)) },
-                        placeholder = { Text("e.g., Ramadan Khatam 2026") },
+                        placeholder = { Text(stringResource(R.string.khatam_name_placeholder)) },
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(12.dp),
                         singleLine = true,
@@ -106,7 +108,7 @@ fun KhatamCreateScreen(
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     NimazNumberStepper(
-                        label = "Daily Target",
+                        label = stringResource(R.string.khatam_daily_target),
                         value = state.dailyTarget,
                         onValueChange = { viewModel.onEvent(KhatamEvent.UpdateDailyTarget(it)) },
                         formatValue = { "$it ayahs" },
@@ -120,7 +122,7 @@ fun KhatamCreateScreen(
                         (Khatam.TOTAL_QURAN_AYAHS.toFloat() / state.dailyTarget).toInt()
                     } else 0
                     Text(
-                        text = "Estimated completion: ~$daysToComplete days",
+                        text = stringResource(R.string.khatam_estimated_completion, daysToComplete),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(horizontal = 15.dp, vertical = 4.dp)
@@ -132,7 +134,7 @@ fun KhatamCreateScreen(
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        text = "Notes (Optional)",
+                        text = stringResource(R.string.khatam_notes_label),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurface
@@ -140,7 +142,7 @@ fun KhatamCreateScreen(
                     OutlinedTextField(
                         value = state.notes,
                         onValueChange = { viewModel.onEvent(KhatamEvent.UpdateNotes(it)) },
-                        placeholder = { Text("Any personal notes...") },
+                        placeholder = { Text(stringResource(R.string.khatam_notes_placeholder)) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(100.dp),
@@ -164,7 +166,7 @@ fun KhatamCreateScreen(
                     enabled = state.name.isNotBlank() && !state.isCreating
                 ) {
                     Text(
-                        text = if (state.isCreating) "Creating..." else "Start Khatam",
+                        text = if (state.isCreating) stringResource(R.string.khatam_creating) else stringResource(R.string.khatam_start),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )

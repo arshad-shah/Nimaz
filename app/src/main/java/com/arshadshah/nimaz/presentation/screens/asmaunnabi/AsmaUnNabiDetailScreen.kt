@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,7 +67,7 @@ fun AsmaUnNabiDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = state.name?.nameTransliteration ?: "Name Detail",
+                title = state.name?.nameTransliteration ?: stringResource(R.string.name_detail),
                 onBackClick = onNavigateBack
             )
         },
@@ -85,9 +87,9 @@ fun AsmaUnNabiDetailScreen(
                             Icons.Outlined.FavoriteBorder
                         },
                         contentDescription = if (name.isFavorite) {
-                            "Remove from favorites"
+                            stringResource(R.string.remove_from_favorites)
                         } else {
-                            "Add to favorites"
+                            stringResource(R.string.add_to_favorites)
                         },
                         tint = if (name.isFavorite) {
                             MaterialTheme.colorScheme.error
@@ -192,7 +194,7 @@ fun AsmaUnNabiDetailScreen(
                 // Meaning Section
                 item {
                     DetailSectionCard(
-                        title = "Meaning",
+                        title = stringResource(R.string.asma_ul_husna_meaning),
                         content = name.meaning
                     )
                 }
@@ -200,7 +202,7 @@ fun AsmaUnNabiDetailScreen(
                 // Explanation Section
                 item {
                     DetailSectionCard(
-                        title = "Explanation",
+                        title = stringResource(R.string.asma_ul_husna_explanation),
                         content = name.explanation
                     )
                 }
@@ -208,7 +210,7 @@ fun AsmaUnNabiDetailScreen(
                 // Source Section
                 item {
                     DetailSectionCard(
-                        title = "Source",
+                        title = stringResource(R.string.asma_un_nabi_source),
                         content = name.source
                     )
                 }

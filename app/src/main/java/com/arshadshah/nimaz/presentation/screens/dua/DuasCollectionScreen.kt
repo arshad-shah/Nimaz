@@ -60,10 +60,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -92,14 +94,14 @@ fun DuasCollectionScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Duas & Adhkar",
+                title = stringResource(R.string.duas_adhkar),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToBookmarks) {
                         Icon(
                             imageVector = Icons.Default.Bookmark,
-                            contentDescription = "Bookmarks"
+                            contentDescription = stringResource(R.string.bookmarks)
                         )
                     }
                 }
@@ -127,7 +129,7 @@ fun DuasCollectionScreen(
                 if (favoritesState.favorites.isNotEmpty()) {
                     item {
                         Text(
-                            text = "Favorites",
+                            text = stringResource(R.string.favorites),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(
@@ -143,7 +145,7 @@ fun DuasCollectionScreen(
                 // Daily Adhkar - 2-column grid
                 item {
                     Text(
-                        text = "Daily Adhkar",
+                        text = stringResource(R.string.daily_adhkar),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
                         modifier = Modifier.padding(
@@ -186,7 +188,7 @@ fun DuasCollectionScreen(
                 if (state.filteredCategories.size > 4) {
                     item {
                         Text(
-                            text = "Situational Duas",
+                            text = stringResource(R.string.situational_duas),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(
@@ -264,7 +266,7 @@ private fun CategoryGridCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "${category.duaCount} duas",
+                text = stringResource(R.string.duas_count_format, category.duaCount),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -340,7 +342,7 @@ private fun AdhkarListItem(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = "${category.duaCount} duas",
+                    text = stringResource(R.string.duas_count_format, category.duaCount),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
