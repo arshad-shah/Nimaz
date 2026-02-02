@@ -1,18 +1,283 @@
 <resources>
     <string name="app_name">Nimaz</string>
 
-    <!-- Widget Descriptions -->
-    <string name="widget_hijri_date_description">Shows the current Hijri date</string>
-    <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
-    <string name="widget_prayer_times_description">Shows all prayer times for today</string>
-    <string name="widget_prayer_tracker_description">Track your daily prayers with tap-to-check boxes</string>
-    <string name="widget_hijri_calendar_description">Shows the full Hijri month calendar with today\'s events</string>
+    <!-- Common / Shared -->
+    <string name="all">All</string>
+    <string name="favorites">Favorites</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="search">Search</string>
+    <string name="location">Location</string>
+    <string name="settings">Settings</string>
+    <string name="notifications">Notifications</string>
+    <string name="appearance">Appearance</string>
+    <string name="language">Language</string>
+    <string name="widgets">Widgets</string>
+    <string name="today">Today</string>
+    <string name="prayed">Prayed</string>
+    <string name="unknown">Unknown</string>
+    <string name="no_favorites_yet">No favorites yet</string>
+    <string name="remove_from_favorites">Remove from favorites</string>
+    <string name="add_to_favorites">Add to favorites</string>
+    <string name="version_format">Nimaz v%s</string>
+    <string name="version_detail_format">Version %1$s (Build %2$d)</string>
+    <string name="loading">Loading…</string>
+
+    <!-- Home Screen -->
+    <string name="next_prayer">NEXT PRAYER</string>
+    <string name="at_time">at %s</string>
+    <string name="todays_progress">Today\'s Progress</string>
+    <string name="prayers_count_format">%1$d of %2$d prayers</string>
+    <string name="fasting">Fasting</string>
+    <string name="today_fasting">Today: Fasting</string>
+    <string name="no_fast_today">No fast today</string>
+    <string name="hadith_of_the_day">Hadith of the Day</string>
+    <string name="prayer_times">Prayer Times</string>
+    <string name="hours">Hours</string>
+    <string name="minutes">Minutes</string>
+    <string name="seconds">Seconds</string>
+
+    <!-- Home Screen - Banners -->
+    <string name="update_available">A new version of Nimaz is available</string>
+    <string name="update_action">Update</string>
+    <string name="downloading_update">Downloading update…</string>
+    <string name="update_ready">Update ready to install</string>
+    <string name="restart">Restart</string>
+    <string name="notifications_disabled_title">Notifications Disabled</string>
+    <string name="notifications_disabled_message">Prayer notifications need permission to alert you at prayer times.</string>
+    <string name="enable">Enable</string>
+    <string name="location_permission_title">Location Permission Needed</string>
+    <string name="location_permission_message">Location is needed to calculate accurate prayer times for your area.</string>
+    <string name="grant">Grant</string>
+    <string name="battery_optimization_title">Battery Optimization Active</string>
+    <string name="battery_optimization_message">Battery optimization may prevent timely prayer notifications.</string>
+    <string name="fix">Fix</string>
+
+    <!-- Home Screen - Jumu'ah -->
+    <string name="jumuah_mubarak">Jumu\'ah Mubarak</string>
+    <string name="khutbah_time">Khutbah time</string>
+    <string name="jumuah_passed">Jumu\'ah prayer time has passed</string>
+    <string name="time_until_jumuah">Time until Jumu\'ah</string>
+    <string name="jumuah_hadith">"The best day on which the sun rises is Friday." — Sahih Muslim</string>
+
+    <!-- Settings Screen -->
+    <string name="prayer_settings">Prayer Settings</string>
+    <string name="calculation_method">Calculation Method</string>
+    <string name="calculation_method_subtitle">Prayer time calculation settings</string>
+    <string name="location_subtitle">Manage prayer time locations</string>
+    <string name="notifications_subtitle">Adhan &amp; reminders</string>
+    <string name="quran">Quran</string>
+    <string name="quran_settings">Quran Settings</string>
+    <string name="quran_settings_subtitle">Reading and audio preferences</string>
+    <string name="app_settings">App Settings</string>
+    <string name="appearance_subtitle">Theme &amp; display</string>
+    <string name="language_subtitle">App language preferences</string>
+    <string name="widgets_subtitle">Home screen widgets</string>
+    <string name="data">Data</string>
+    <string name="reset_settings">Reset Settings</string>
+    <string name="reset_settings_subtitle">Restore default settings</string>
+    <string name="reset_settings_dialog_title">Reset Settings</string>
+    <string name="reset_settings_dialog_message">This will restore all settings to their defaults. Your prayer tracking data, bookmarks, and other content will not be affected. The app will restart.</string>
+    <string name="reset">Reset</string>
+
+    <!-- More Menu Screen -->
+    <string name="more">More</string>
+    <string name="daily_practice">Daily Practice</string>
+    <string name="prayer_tracker">Prayer Tracker</string>
+    <string name="prayer_tracker_subtitle">Track your daily prayers &amp; qada</string>
+    <string name="fasting_subtitle">Fasting tracker and schedule</string>
+    <string name="khatam_quran">Khatam Quran</string>
+    <string name="khatam_quran_subtitle">Track your Quran completion</string>
+    <string name="learning">Learning</string>
+    <string name="allahs_99_names">Allah\'s 99 Names</string>
+    <string name="allahs_99_names_subtitle">Learn the beautiful names of Allah</string>
+    <string name="prophets_99_names">Prophet\'s 99 Names</string>
+    <string name="prophets_99_names_subtitle">Names and attributes of Prophet Muhammad (PBUH)</string>
+    <string name="prophets_of_islam">Prophets of Islam</string>
+    <string name="prophets_of_islam_subtitle">Stories and lessons from 25 prophets</string>
+    <string name="hadith">Hadith</string>
+    <string name="hadith_subtitle">Authentic hadith collections</string>
+    <string name="duas">Duas</string>
+    <string name="duas_subtitle">Daily duas and supplications</string>
+    <string name="tafseer">Tafseer</string>
+    <string name="tafseer_subtitle">Quran interpretation and commentary</string>
+    <string name="tools">Tools</string>
+    <string name="calendar">Calendar</string>
+    <string name="calendar_subtitle">Islamic calendar and events</string>
+    <string name="monthly_prayer_times">Monthly Prayer Times</string>
+    <string name="monthly_prayer_times_subtitle">Prayer times for the month</string>
+    <string name="zakat">Zakat</string>
+    <string name="zakat_subtitle">Zakat calculator</string>
+    <string name="calculation_method_menu_subtitle">Prayer time calculation parameters</string>
+    <string name="notifications_menu_subtitle">Prayer alerts and reminders</string>
+    <string name="location_menu_subtitle">Manage locations for prayer times</string>
+    <string name="appearance_menu_subtitle">Theme, colors, and display</string>
+    <string name="language_menu_subtitle">App language preferences</string>
+    <string name="widgets_menu_subtitle">Home screen widget settings</string>
+    <string name="support">Support</string>
+    <string name="about_nimaz">About Nimaz</string>
+    <string name="about_nimaz_subtitle">Version, credits, and info</string>
+    <string name="help_support">Help &amp; Support</string>
+    <string name="help_support_subtitle">FAQs and contact us</string>
+    <string name="share_app">Share App</string>
+    <string name="share_app_subtitle">Share Nimaz with friends</string>
+    <string name="rate_us">Rate Us</string>
+    <string name="rate_us_subtitle">Rate Nimaz on the store</string>
+    <string name="delete_all_data">Delete All Data</string>
+    <string name="delete_all_data_dialog_title">Delete All Data</string>
+    <string name="delete_all_data_dialog_message">This will permanently delete all your data including prayer tracking, bookmarks, tasbih history, and settings. This action cannot be undone.</string>
+
+    <!-- About Screen -->
+    <string name="about">About</string>
+    <string name="app_description">A comprehensive Islamic companion app with accurate prayer times, qibla direction, Quran reading, and more.</string>
+    <string name="links">Links</string>
+    <string name="developer">Developer</string>
+    <string name="data_sources_credits">Data Sources &amp; Credits</string>
+    <string name="rate_play_store">Rate on Play Store</string>
+    <string name="rate_play_store_subtitle">Help us reach more Muslims</string>
+    <string name="contact_support">Contact Support</string>
+    <string name="contact_email">arshad@arshadshah.com</string>
+    <string name="website">Website</string>
+    <string name="website_url_display">nimaz.arshadshah.com</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="privacy_policy_subtitle">How we handle your data</string>
+    <string name="terms_of_service">Terms of Service</string>
+    <string name="terms_of_service_subtitle">Usage terms</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    <string name="open_source_licenses_subtitle">Third-party libraries</string>
+    <string name="check_for_updates">Check for Updates</string>
+    <string name="update_new_version">New version available</string>
+    <string name="update_downloading">Downloading…</string>
+    <string name="update_downloaded">Ready to install</string>
+    <string name="update_up_to_date">You\'re up to date</string>
+    <string name="update_check_failed">Check failed</string>
+    <string name="update_tap_to_check">Tap to check</string>
+    <string name="developer_name">Arshad Shah</string>
+    <string name="developer_role">Software Engineer at HMH, Dublin</string>
+    <string name="developer_education">BSc Computer Science, TU Dublin</string>
+    <string name="developer_location">Dublin, Ireland</string>
+    <string name="credit_quran_text">Quran Text</string>
+    <string name="credit_tanzil">Tanzil.net</string>
+    <string name="credit_translations">Translations</string>
+    <string name="credit_sahih_international">Sahih International</string>
+    <string name="credit_hadith_data">Hadith Data</string>
+    <string name="credit_sunnah">Sunnah.com</string>
+    <string name="credit_prayer_times">Prayer Times</string>
+    <string name="credit_aladhan">Aladhan API</string>
+    <string name="credit_recitations">Recitations</string>
+    <string name="credit_quran_com">Quran.com</string>
+    <string name="credit_hijri_calendar">Hijri Calendar</string>
+    <string name="credit_islamic_finder">Islamic Finder</string>
+    <string name="github">GitHub</string>
+    <string name="linkedin">LinkedIn</string>
+    <string name="email">Email</string>
+    <string name="made_with">Made with </string>
+    <string name="for_the_ummah"> for the Ummah</string>
+    <string name="copyright_format">© %d Nimaz. All rights reserved.</string>
+
+    <!-- Help & Support Screen -->
+    <string name="faq_title">Frequently Asked Questions</string>
+    <string name="feature_guides">Feature Guides</string>
+    <string name="contact_us">Contact Us</string>
+    <string name="email_support">Email Support</string>
+    <string name="support_email">support@nimaz.app</string>
+    <string name="nimaz_support_request">Nimaz Support Request</string>
+    <string name="send_email">Send Email</string>
+
+    <!-- FAQ Questions & Answers -->
+    <string name="faq_prayer_times_q">How are prayer times calculated?</string>
+    <string name="faq_prayer_times_a">Prayer times are calculated using your location and the calculation method you select in Prayer Settings. Different methods are used by different regions and Islamic organizations.</string>
+    <string name="faq_mosque_difference_q">Why are my prayer times different from my local mosque?</string>
+    <string name="faq_mosque_difference_a">Different mosques may use different calculation methods or manual adjustments. You can change your calculation method in Prayer Settings, or use per-prayer time adjustments.</string>
+    <string name="faq_set_location_q">How do I set my location?</string>
+    <string name="faq_set_location_a">Go to More > Prayer Settings > Location. You can search for your city or use GPS to detect your current location automatically.</string>
+    <string name="faq_qibla_q">How does the Qibla compass work?</string>
+    <string name="faq_qibla_a">The Qibla compass uses your phone\'s magnetometer and GPS location to calculate the direction of the Kaaba in Makkah. Make sure to calibrate your compass by moving your phone in a figure-8 pattern.</string>
+    <string name="faq_track_prayers_q">Can I track my prayers?</string>
+    <string name="faq_track_prayers_a">Yes! Tap on any prayer time on the home screen to mark it as prayed. You can view your prayer history and streaks in Prayer Stats.</string>
+    <string name="faq_quran_translation_q">How do I change the Quran translation?</string>
+    <string name="faq_quran_translation_a">Go to More > App Settings > Quran Settings (or the Quran tab) and select your preferred translator.</string>
+    <string name="faq_notifications_q">Why am I not receiving notifications?</string>
+    <string name="faq_notifications_a">Make sure notifications are enabled in the app (More > Notifications) and in your device\'s system settings. Also check that battery optimization is disabled for Nimaz.</string>
+    <string name="faq_tasbih_q">How do I use the Tasbih counter?</string>
+    <string name="faq_tasbih_a">Go to the Tasbih tab, select a preset or create your own, and tap the counter to increment. You can set a target count and the app will notify you when reached.</string>
+
+    <!-- Feature Guide Titles & Descriptions -->
+    <string name="guide_prayer_times_title">Prayer Times</string>
+    <string name="guide_prayer_times_desc">View daily prayer times, mark prayers as completed, and track your consistency.</string>
+    <string name="guide_quran_title">Quran Reader</string>
+    <string name="guide_quran_desc">Read the Quran with translations, transliteration, bookmarks, and audio recitation.</string>
+    <string name="guide_qibla_title">Qibla Compass</string>
+    <string name="guide_qibla_desc">Find the direction of the Kaaba using your phone\'s compass and GPS.</string>
+    <string name="guide_tasbih_title">Tasbih Counter</string>
+    <string name="guide_tasbih_desc">Digital counter for dhikr with customizable presets and history tracking.</string>
+    <string name="guide_notifications_title">Notifications</string>
+    <string name="guide_notifications_desc">Get notified before each prayer time with optional adhan sounds.</string>
+    <string name="guide_hadith_title">Hadith Collection</string>
+    <string name="guide_hadith_desc">Browse authentic hadith collections organized by book and chapter.</string>
+    <string name="guide_fasting_title">Fasting Tracker</string>
+    <string name="guide_fasting_desc">Track your fasts during Ramadan and throughout the year.</string>
+    <string name="guide_zakat_title">Zakat Calculator</string>
+    <string name="guide_zakat_desc">Calculate your Zakat obligation based on your assets and savings.</string>
+    <string name="guide_calendar_title">Islamic Calendar</string>
+    <string name="guide_calendar_desc">View the Hijri calendar alongside the Gregorian calendar with Islamic events.</string>
+
+    <!-- Qibla Screen -->
+    <string name="compass">Compass</string>
+    <string name="ar">AR</string>
+    <string name="facing_qibla">Facing Qibla</string>
+    <string name="turn_right_format">Turn right %d°</string>
+    <string name="turn_left_format">Turn left %d°</string>
+    <string name="qibla_direction_format">%s • Qibla Direction</string>
+    <string name="km_to_mecca_format">%s km to Mecca</string>
+    <string name="compass_accuracy">Compass Accuracy</string>
+    <string name="calibrate">Calibrate</string>
+    <string name="calibrate_compass">Calibrate Compass</string>
+    <string name="current_accuracy_format">Current accuracy: %s</string>
+    <string name="improve_accuracy">To improve compass accuracy:</string>
+    <string name="calibration_step_1">Hold your phone away from metal objects and magnets</string>
+    <string name="calibration_step_2">Slowly move your phone in a figure-8 pattern</string>
+    <string name="calibration_step_3">Rotate the figure-8 in all three axes</string>
+    <string name="calibration_step_4">Repeat until accuracy improves to Medium or High</string>
+    <string name="calibration_tip">Tip: If accuracy remains low, try moving to a different location away from electronic devices.</string>
+    <string name="got_it">Got it</string>
+    <string name="accuracy_high">High</string>
+    <string name="accuracy_high_hint">Compass is accurate</string>
+    <string name="accuracy_medium">Medium</string>
+    <string name="accuracy_medium_hint">Accuracy is acceptable</string>
+    <string name="accuracy_low">Low</string>
+    <string name="accuracy_low_hint">Calibration recommended</string>
+    <string name="accuracy_unreliable">Unreliable</string>
+    <string name="accuracy_unreliable_hint">Calibration needed</string>
+    <string name="camera_permission_title">Camera Permission Required</string>
+    <string name="camera_permission_message">Camera access is needed to show the AR Qibla view. The camera feed is used to overlay the Qibla direction on the real world. No images are captured or stored.</string>
+    <string name="grant_permission">Grant Permission</string>
+    <string name="not_now">Not Now</string>
+    <string name="unknown_error">Unknown error</string>
+    <string name="direction_north">North</string>
+    <string name="direction_northeast">Northeast</string>
+    <string name="direction_east">East</string>
+    <string name="direction_southeast">Southeast</string>
+    <string name="direction_south">South</string>
+    <string name="direction_southwest">Southwest</string>
+    <string name="direction_west">West</string>
+    <string name="direction_northwest">Northwest</string>
+    <string name="direction_n">N</string>
+    <string name="direction_e">E</string>
+    <string name="direction_s">S</string>
+    <string name="direction_w">W</string>
+
+    <!-- Prayer Settings Screen -->
+    <string name="prayer_settings_title">Prayer Settings</string>
+    <string name="calculation_method_section">CALCULATION METHOD</string>
+    <string name="asr_calculation">Asr Calculation</string>
+    <string name="asr_standard">Standard (Shafi\'i, Maliki, Hanbali)</string>
+    <string name="asr_hanafi">Hanafi</string>
 
     <!-- Asma ul Husna -->
     <string name="asma_ul_husna_title">Allah\'s 99 Names</string>
-    <string name="asma_ul_husna_search_hint">Search names...</string>
-    <string name="asma_ul_husna_all">All</string>
-    <string name="asma_ul_husna_favorites">Favorites</string>
+    <string name="asma_ul_husna_search_hint">Search by name or meaning…</string>
+    <string name="asma_ul_husna_no_names_found">No names found</string>
     <string name="asma_ul_husna_meaning">Meaning</string>
     <string name="asma_ul_husna_explanation">Explanation</string>
     <string name="asma_ul_husna_benefits">Benefits</string>
@@ -21,12 +286,14 @@
 
     <!-- Asma un Nabi -->
     <string name="asma_un_nabi_title">Prophet\'s 99 Names</string>
-    <string name="asma_un_nabi_search_hint">Search names...</string>
+    <string name="asma_un_nabi_search_hint">Search by name or meaning…</string>
+    <string name="asma_un_nabi_no_names_found">No names found</string>
     <string name="asma_un_nabi_source">Source</string>
 
     <!-- Prophets -->
     <string name="prophets_title">Prophets of Islam</string>
-    <string name="prophets_search_hint">Search prophets...</string>
+    <string name="prophets_search_hint">Search prophets…</string>
+    <string name="prophets_no_found">No prophets found</string>
     <string name="prophets_story">Story</string>
     <string name="prophets_key_lessons">Key Lessons</string>
     <string name="prophets_quran_mentions">Quran Mentions</string>
@@ -54,10 +321,21 @@
     <string name="qibla_ar_distance">Distance</string>
     <string name="qibla_ar_accuracy">Accuracy</string>
 
+    <!-- Widget Descriptions -->
+    <string name="widget_hijri_date_description">Shows the current Hijri date</string>
+    <string name="widget_next_prayer_description">Shows the next prayer time and countdown</string>
+    <string name="widget_prayer_times_description">Shows all prayer times for today</string>
+    <string name="widget_prayer_tracker_description">Track your daily prayers with tap-to-check boxes</string>
+    <string name="widget_hijri_calendar_description">Shows the full Hijri month calendar with today\'s events</string>
+
     <!-- Widget Names -->
     <string name="widget_prayer_times_name">Prayer Times</string>
     <string name="widget_next_prayer_name">Next Prayer</string>
     <string name="widget_hijri_date_name">Hijri Date</string>
     <string name="widget_prayer_tracker_name">Prayer Tracker</string>
     <string name="widget_hijri_calendar_name">Hijri Calendar</string>
+
+    <!-- Share -->
+    <string name="share_message">Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
+    <string name="share_chooser_title">Share Nimaz</string>
 </resources>
