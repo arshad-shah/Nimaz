@@ -381,6 +381,9 @@ fun NotificationSettingsScreen(
                 }
 
                 item {
+                    val testSentMsg = stringResource(R.string.notification_settings_test_sent)
+                    val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
+                    val resetSuccessMsg = stringResource(R.string.notification_settings_reset_success)
                     NimazMenuGroup {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -389,7 +392,7 @@ fun NotificationSettingsScreen(
                             Button(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestNotification)
-                                    Toast.makeText(context, context.getString(R.string.notification_settings_test_sent), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, testSentMsg, Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
@@ -406,7 +409,7 @@ fun NotificationSettingsScreen(
                             Button(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestAllNotifications)
-                                    Toast.makeText(context, context.getString(R.string.notification_settings_test_all_sent), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
@@ -426,7 +429,7 @@ fun NotificationSettingsScreen(
                             OutlinedButton(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.ResetNotifications)
-                                    Toast.makeText(context, context.getString(R.string.notification_settings_reset_success), Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)

@@ -128,15 +128,17 @@ fun HelpSupportScreen(
             }
 
             item {
+                val supportSubject = stringResource(R.string.nimaz_support_request)
+                val sendEmailLabel = stringResource(R.string.send_email)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
                             val intent = Intent(Intent.ACTION_SENDTO).apply {
                                 data = "mailto:support@nimaz.app".toUri()
-                                putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.nimaz_support_request))
+                                putExtra(Intent.EXTRA_SUBJECT, supportSubject)
                             }
-                            context.startActivity(Intent.createChooser(intent, context.getString(R.string.send_email)))
+                            context.startActivity(Intent.createChooser(intent, sendEmailLabel))
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(

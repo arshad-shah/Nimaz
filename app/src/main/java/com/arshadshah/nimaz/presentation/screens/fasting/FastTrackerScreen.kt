@@ -967,7 +967,7 @@ private fun MakeupFastsContent(
                         makeupFast = makeupFast,
                         onComplete = { onCompleteMakeupFast(makeupFast.id) },
                         onEdit = {
-                            Toast.makeText(context, context.getString(R.string.fasting_edit_coming_soon), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, stringResource(R.string.fasting_edit_coming_soon), Toast.LENGTH_SHORT).show()
                         }
                     )
                 }

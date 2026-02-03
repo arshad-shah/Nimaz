@@ -131,6 +131,10 @@ fun HadithCollectionScreen(
                 // Hadith of the Day
                 item {
                     val hadithOfTheDay = state.hadithOfTheDay
+                    val fallbackArabic = stringResource(R.string.hadith_fallback_arabic)
+                    val fallbackEnglish = stringResource(R.string.hadith_fallback_english)
+                    val fallbackSource = stringResource(R.string.hadith_fallback_source)
+                    val shareHadithLabel = stringResource(R.string.share_hadith)
                     HadithOfTheDayCard(
                         hadith = hadithOfTheDay,
                         onBookmarkClick = {
@@ -153,11 +157,11 @@ fun HadithCollectionScreen(
                                     appendLine()
                                     appendLine(hadithOfTheDay.reference ?: "")
                                 } else {
-                                    appendLine(context.getString(R.string.hadith_fallback_arabic))
+                                    appendLine(fallbackArabic)
                                     appendLine()
-                                    appendLine(context.getString(R.string.hadith_fallback_english))
+                                    appendLine(fallbackEnglish)
                                     appendLine()
-                                    appendLine(context.getString(R.string.hadith_fallback_source))
+                                    appendLine(fallbackSource)
                                 }
                             }
                             val sendIntent = Intent().apply {
@@ -165,7 +169,7 @@ fun HadithCollectionScreen(
                                 putExtra(Intent.EXTRA_TEXT, shareText)
                                 type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.share_hadith)))
+                            context.startActivity(Intent.createChooser(sendIntent, shareHadithLabel))
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
