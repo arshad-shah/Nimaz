@@ -65,6 +65,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -158,8 +159,8 @@ fun QuranReaderScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var usePageView by rememberSaveable { mutableStateOf(false) }
-    var savedListIndex by rememberSaveable { mutableStateOf(0) }
-    var savedListOffset by rememberSaveable { mutableStateOf(0) }
+    var savedListIndex by rememberSaveable { mutableIntStateOf(0) }
+    var savedListOffset by rememberSaveable { mutableIntStateOf(0) }
     var pendingScrollRestore by rememberSaveable { mutableStateOf(false) }
 
     // Keep screen on based on settings
@@ -276,10 +277,7 @@ fun QuranReaderScreen(
         }
     }
 
-    // Force list view when khatam is active (page view has no khatam checkboxes)
-    LaunchedEffect(state.activeKhatamId) {
-        if (state.activeKhatamId != null) usePageView = false
-    }
+    // No longer force list view when khatam is active - page view now supports khatam via bottom sheet
 
     val favoriteAyahIds = state.favoriteAyahIds
 
@@ -391,7 +389,7 @@ fun QuranReaderScreen(
                             )
                         }
                     }
-                    if (state.activeKhatamId == null && (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ)) {
+                    if (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ) {
                         IconButton(onClick = { usePageView = !usePageView }) {
                             Icon(
                                 imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
@@ -544,6 +542,11 @@ fun QuranReaderScreen(
                                 onCopyClick = { /* Copy is handled in bottom sheet */ },
                                 onTafseerClick = { ayah ->
                                     onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                                },
+                                isKhatamActive = state.activeKhatamId != null,
+                                khatamReadAyahIds = state.khatamReadAyahIds,
+                                onKhatamToggle = { ayah ->
+                                    viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
                                 },
                                 modifier = Modifier.fillMaxSize()
                             )

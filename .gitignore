@@ -14,3 +14,16 @@
 .cxx
 local.properties
 nul
+
+# Fastlane
+fastlane/report.xml
+fastlane/README.md
+fastlane/test_output/
+
+# Python cache
+nimaz-pro-data/scripts/__pycache__/
+
+# Secrets & signing
+*.keystore
+secrets.properties
+google-services.json

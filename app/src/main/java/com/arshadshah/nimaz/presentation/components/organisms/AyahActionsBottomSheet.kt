@@ -25,7 +25,9 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -82,12 +84,15 @@ fun AyahActionsBottomSheet(
     surahName: String? = null,
     isBookmarked: Boolean = ayah.isBookmarked,
     isFavorite: Boolean = false,
+    isKhatamActive: Boolean = false,
+    isKhatamRead: Boolean = false,
     sheetState: SheetState = rememberModalBottomSheetState(),
     onPlayClick: (Ayah) -> Unit = {},
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
     onCopyClick: (Ayah) -> Unit = {},
+    onKhatamToggle: (Ayah) -> Unit = {},
     onTafseerClick: (Ayah) -> Unit = {}
 ) {
     NimazBottomSheet(
@@ -100,11 +105,14 @@ fun AyahActionsBottomSheet(
             surahName = surahName,
             isBookmarked = isBookmarked,
             isFavorite = isFavorite,
+            isKhatamActive = isKhatamActive,
+            isKhatamRead = isKhatamRead,
             onPlayClick = onPlayClick,
             onBookmarkClick = onBookmarkClick,
             onFavoriteClick = onFavoriteClick,
             onShareClick = onShareClick,
             onCopyClick = onCopyClick,
+            onKhatamToggle = onKhatamToggle,
             onTafseerClick = onTafseerClick
         )
     }
@@ -121,11 +129,14 @@ fun AyahActionsContent(
     surahName: String? = null,
     isBookmarked: Boolean = ayah.isBookmarked,
     isFavorite: Boolean = false,
+    isKhatamActive: Boolean = false,
+    isKhatamRead: Boolean = false,
     onPlayClick: (Ayah) -> Unit = {},
     onBookmarkClick: (Ayah) -> Unit = {},
     onFavoriteClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
     onCopyClick: (Ayah) -> Unit = {},
+    onKhatamToggle: (Ayah) -> Unit = {},
     onTafseerClick: (Ayah) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -278,6 +289,16 @@ fun AyahActionsContent(
                 },
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
+
+            // Khatam read toggle (only when khatam is active)
+            if (isKhatamActive) {
+                ActionButton(
+                    icon = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                    label = if (isKhatamRead) "Unread" else "Read",
+                    onClick = { onKhatamToggle(ayah) },
+                    tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             // Tafseer button
             ActionButton(

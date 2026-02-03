@@ -1,0 +1,45 @@
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+    lane :test do
+      gradle(task: "test")
+      gradle(task: "lint")
+    end
+
+    desc "Run lint check"
+    lane :lint do
+      gradle(task: "lint")
+    end
+
+  desc "Deploy a new version to the Google Play internal track"
+  lane :deploy_internal do
+    build_and_sign_apk_or_aab
+    upload_to_play_store(
+      track: "internal",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"]
+    )
+  end
+
+  desc "Deploy a new version to the Google Play beta track"
+  lane :deploy_beta do
+    build_and_sign_apk_or_aab
+    upload_to_play_store(
+      track: "beta",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"]
+    )
+  end
+
+  private_lane :build_and_sign_apk_or_aab do
+    gradle(
+      task: "bundle",
+      build_type: "release",
+      properties: {
+          "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+          "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+          "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+          "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+      }
+    )
+  end
+end

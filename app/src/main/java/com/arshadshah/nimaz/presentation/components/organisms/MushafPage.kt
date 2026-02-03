@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -100,11 +101,20 @@ fun MushafPage(
     onPlayClick: (Ayah) -> Unit = {},
     onShareClick: (Ayah) -> Unit = {},
     onCopyClick: (Ayah) -> Unit = {},
+    isKhatamActive: Boolean = false,
+    khatamReadAyahIds: Set<Int> = emptySet(),
+    onKhatamToggle: (Ayah) -> Unit = {},
     onTafseerClick: (Ayah) -> Unit = {}
 ) {
     // State for selected ayah and bottom sheet
     var selectedAyah by remember { mutableStateOf<Ayah?>(null) }
+    var bookmarkOverride by remember { mutableStateOf<Boolean?>(null) }
     val sheetState = rememberModalBottomSheetState()
+
+    // Reset bookmark override when a new ayah is selected
+    LaunchedEffect(selectedAyah) {
+        bookmarkOverride = null
+    }
 
     // Group ayahs by surah for rendering with headers
     val ayahsBySurah = remember(ayahs) {
@@ -191,8 +201,10 @@ fun MushafPage(
         AyahActionsBottomSheet(
             ayah = ayah,
             surahName = surah?.nameEnglish,
-            isBookmarked = ayah.isBookmarked,
+            isBookmarked = bookmarkOverride ?: ayah.isBookmarked,
             isFavorite = ayah.id in favoriteAyahIds,
+            isKhatamActive = isKhatamActive,
+            isKhatamRead = ayah.id in khatamReadAyahIds,
             sheetState = sheetState,
             onDismissRequest = { selectedAyah = null },
             onPlayClick = { clickedAyah ->
@@ -200,6 +212,7 @@ fun MushafPage(
                 selectedAyah = null
             },
             onBookmarkClick = { clickedAyah ->
+                bookmarkOverride = !(bookmarkOverride ?: ayah.isBookmarked)
                 onBookmarkClick(clickedAyah)
             },
             onFavoriteClick = { clickedAyah ->
@@ -210,6 +223,9 @@ fun MushafPage(
             },
             onCopyClick = { clickedAyah ->
                 onCopyClick(clickedAyah)
+            },
+            onKhatamToggle = { clickedAyah ->
+                onKhatamToggle(clickedAyah)
             },
             onTafseerClick = { clickedAyah ->
                 onTafseerClick(clickedAyah)
