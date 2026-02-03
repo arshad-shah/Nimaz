@@ -106,7 +106,19 @@ jobs:
             RELEASE_NOTES="Bug fixes and improvements."
           else
             # --- Call OpenAI API to generate release notes ---
-            PROMPT="You are a mobile app release notes writer for an Islamic prayer app called Nimaz. Given these git commits, write concise, user-friendly Play Store release notes. Rules: max 500 characters, no technical jargon, no commit hashes, use bullet points, focus on what users gain, start with a brief summary line. Commits:\n\n${COMMITS}\n\nVersion: ${VERSION_NAME}"
+            PROMPT="Write Google Play Store release notes for an Islamic app called Nimaz (v${VERSION_NAME}).
+
+STRICT RULES:
+- Max 500 characters total
+- Write ONLY what end users care about (new features, fixes they notice, UX improvements)
+- NEVER mention: CI/CD, deployment, workflows, metadata, store listings, pipelines, database versions, migrations, code refactoring, internal tooling, release processes
+- If all commits are internal/technical with nothing user-facing, write ONLY: \"Bug fixes and performance improvements.\"
+- No greetings, no sign-offs, no \"thank you\", no \"enjoy\"
+- No bold, no headers, no markdown formatting
+- Plain text with simple bullet points using - prefix
+- Keep it short and natural, like how top apps write changelogs
+
+Commits to analyze (ignore any that are purely internal):\n\n${COMMITS}"
 
             # Escape for JSON
             PROMPT_ESCAPED=$(echo "$PROMPT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
