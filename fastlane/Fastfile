@@ -19,25 +19,13 @@ platform :android do
     build_and_sign_apk_or_aab
   end
 
-  desc "Deploy a new version to the Google Play internal track"
-  lane :deploy_internal do
+  desc "Deploy to a Google Play track (internal, beta, or production). Usage: fastlane deploy track:internal"
+  lane :deploy do |options|
+    track = options[:track] || "internal"
+    UI.message("Deploying to track: #{track}")
     build_and_sign_apk_or_aab
     upload_to_play_store(
-      track: "internal",
-      json_key: ENV["ANDROID_JSON_KEY_FILE"],
-      skip_upload_metadata: false,
-      skip_upload_changelogs: false,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      metadata_path: METADATA_PATH
-    )
-  end
-
-  desc "Deploy a new version to the Google Play beta track"
-  lane :deploy_beta do
-    build_and_sign_apk_or_aab
-    upload_to_play_store(
-      track: "beta",
+      track: track,
       json_key: ENV["ANDROID_JSON_KEY_FILE"],
       skip_upload_metadata: false,
       skip_upload_changelogs: false,
