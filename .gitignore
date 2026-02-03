@@ -19,6 +19,7 @@ nul
 fastlane/report.xml
 fastlane/README.md
 fastlane/test_output/
+fastlane/metadata/android/*/changelogs/[0-9]*.txt
 
 # Python cache
 nimaz-pro-data/scripts/__pycache__/

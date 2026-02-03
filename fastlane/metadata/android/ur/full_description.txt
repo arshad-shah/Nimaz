@@ -1,0 +1,53 @@
+Nimaz is your all-in-one Islamic companion app — completely offline and ad-free.
+
+Whether you need accurate prayer times, a beautiful Quran reader, or everyday Islamic tools, Nimaz has you covered.
+
+Key Features:
+
+🕌 Prayer Times & Adhan
+• Accurate prayer times based on your location
+• Multiple calculation methods supported
+• Prayer time notifications and reminders
+
+📖 Quran Reader
+• Full Quran with Mushaf page view
+• Khatam (Quran completion) tracking
+• Tafseer reader for deeper understanding
+• Bookmark your favourite ayahs
+
+📚 Hadith Collections
+• Browse Hadith collections
+• Bookmark and save your favourite Hadith
+
+🤲 Dua Library
+• Comprehensive Dua collection organised by category
+• Easy to browse and search
+
+🧭 Qibla Compass
+• Find the Qibla direction from anywhere in the world
+
+📿 Tasbih Counter
+• Digital Tasbeeh counter with presets
+• Track your daily dhikr
+
+🕋 Prayer & Fasting Tracker
+• Track your daily prayers
+• Monitor your fasting during Ramadan and beyond
+
+💰 Zakat Calculator
+• Calculate your Zakat easily
+
+🏠 Home Screen Widgets
+• Multiple widget styles for prayer times on your home screen
+
+🌍 Multi-Language Support
+• Available in English, Arabic, German, French, Turkish, Indonesian, Malay, and Urdu
+
+✨ Why Nimaz?
+• 100% offline — no internet required
+• Completely ad-free
+• Lightweight and fast
+• Privacy-focused — no data collection
+• Regular updates with new features
+
+Download Nimaz today and keep your Islamic practices on track!

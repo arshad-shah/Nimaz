@@ -1,5 +1,7 @@
 default_platform(:android)
 
+METADATA_PATH = "fastlane/metadata/android"
+
 platform :android do
   desc "Runs all the tests"
     lane :test do
@@ -22,7 +24,12 @@ platform :android do
     build_and_sign_apk_or_aab
     upload_to_play_store(
       track: "internal",
-      json_key: ENV["ANDROID_JSON_KEY_FILE"]
+      json_key: ENV["ANDROID_JSON_KEY_FILE"],
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      metadata_path: METADATA_PATH
     )
   end
 
@@ -31,7 +38,12 @@ platform :android do
     build_and_sign_apk_or_aab
     upload_to_play_store(
       track: "beta",
-      json_key: ENV["ANDROID_JSON_KEY_FILE"]
+      json_key: ENV["ANDROID_JSON_KEY_FILE"],
+      skip_upload_metadata: false,
+      skip_upload_changelogs: false,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+      metadata_path: METADATA_PATH
     )
   end
 

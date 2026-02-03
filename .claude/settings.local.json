@@ -53,7 +53,8 @@
       "Bash(\"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\gradlew.bat\" compileDebugKotlin)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(git -C \"C:\\\\Users\\\\shaha\\\\StudioProjects\\\\Nimaz\" remote -v)"
+      "Bash(git -C \"C:\\\\Users\\\\shaha\\\\StudioProjects\\\\Nimaz\" remote -v)",
+      "Bash(git push:*)"
     ]
   }
 }

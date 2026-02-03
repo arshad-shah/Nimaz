@@ -48,6 +48,21 @@ jobs:
           fileName: "android_keystore.keystore"
           encodedString: ${{ secrets.KEYSTORE_FILE }}
 
+      - name: Prepare changelogs from release notes
+        run: |
+          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts)
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+          LOCALES="en-US de-DE fr-FR id ms tr-TR ar ur"
+          for LOCALE in $LOCALES; do
+            CHANGELOG_DIR="fastlane/metadata/android/${LOCALE}/changelogs"
+            mkdir -p "$CHANGELOG_DIR"
+            if [ -f "RELEASE_NOTES.md" ]; then
+              cp RELEASE_NOTES.md "${CHANGELOG_DIR}/${VERSION_CODE}.txt"
+            else
+              echo "Bug fixes and improvements." > "${CHANGELOG_DIR}/${VERSION_CODE}.txt"
+            fi
+          done
+
       - name: Build & deploy Android release
         run: bundle exec fastlane android deploy_internal
         env:
