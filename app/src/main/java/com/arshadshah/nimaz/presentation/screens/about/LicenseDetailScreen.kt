@@ -48,6 +48,7 @@ fun LicenseDetailScreen(
     var library by remember { mutableStateOf<Library?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    val libraryNotFoundMsg = stringResource(R.string.license_detail_library_not_found)
 
     LaunchedEffect(libraryHashCode) {
         kotlinWithContext(Dispatchers.IO) {
@@ -55,7 +56,7 @@ fun LicenseDetailScreen(
             library = libs.libraries.find { it.hashCode() == libraryHashCode }
         }
         if (library == null) {
-            error = context.getString(R.string.license_detail_library_not_found)
+            error = libraryNotFoundMsg
         }
         isLoading = false
     }

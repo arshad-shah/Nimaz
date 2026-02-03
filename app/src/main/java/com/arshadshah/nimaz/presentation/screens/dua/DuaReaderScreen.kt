@@ -120,6 +120,9 @@ fun DuaReaderScreen(
         } else {
             state.dua?.let { dua ->
                 val repeatCount = dua.repeatCount ?: 0
+                val firstDuaMsg = stringResource(R.string.dua_reader_first_dua)
+                val sourceLabel = if (!dua.reference.isNullOrEmpty()) stringResource(R.string.dua_reader_source_label, dua.reference) else ""
+                val shareLabel = stringResource(R.string.dua_reader_share)
 
                 Column(
                     modifier = Modifier
@@ -134,7 +137,7 @@ fun DuaReaderScreen(
                             if (prevId != null && prevId.toInt() > 0) {
                                 viewModel.onEvent(DuaEvent.LoadDua(prevId))
                             } else {
-                                Toast.makeText(context, context.getString(R.string.dua_reader_first_dua), Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, firstDuaMsg, Toast.LENGTH_SHORT).show()
                             }
                         },
                         onNext = {
@@ -193,7 +196,7 @@ fun DuaReaderScreen(
                                 appendLine(dua.textEnglish)
                                 if (!dua.reference.isNullOrEmpty()) {
                                     appendLine()
-                                    appendLine(context.getString(R.string.dua_reader_source_label, dua.reference))
+                                    appendLine(sourceLabel)
                                 }
                             }
                             val sendIntent = Intent().apply {
@@ -201,7 +204,7 @@ fun DuaReaderScreen(
                                 putExtra(Intent.EXTRA_TEXT, textToShare)
                                 type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.dua_reader_share)))
+                            context.startActivity(Intent.createChooser(sendIntent, shareLabel))
                         },
                         onDoneClick = onNavigateBack
                     )

@@ -269,6 +269,8 @@ private fun BookmarkCard(
         BookmarkType.DUA -> MaterialTheme.colorScheme.secondary
     }
 
+    val shareLabel = stringResource(R.string.share)
+
     val typeBgColor = when (bookmark.type) {
         BookmarkType.QURAN -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
         BookmarkType.HADITH -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
@@ -341,7 +343,7 @@ private fun BookmarkCard(
                             putExtra(Intent.EXTRA_TEXT, textToShare)
                             type = "text/plain"
                         }
-                        context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.share)))
+                        context.startActivity(Intent.createChooser(sendIntent, shareLabel))
                     },
                     modifier = Modifier.size(36.dp)
                 ) {

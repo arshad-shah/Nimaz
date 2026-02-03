@@ -962,12 +962,13 @@ private fun MakeupFastsContent(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                val editComingSoonMsg = stringResource(R.string.fasting_edit_coming_soon)
                 makeupState.pendingMakeupFasts.forEach { makeupFast ->
                     MakeupPendingFastCard(
                         makeupFast = makeupFast,
                         onComplete = { onCompleteMakeupFast(makeupFast.id) },
                         onEdit = {
-                            Toast.makeText(context, stringResource(R.string.fasting_edit_coming_soon), Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, editComingSoonMsg, Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
