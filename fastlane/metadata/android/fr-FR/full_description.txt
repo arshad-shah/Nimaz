@@ -1,53 +1,67 @@
-Nimaz is your all-in-one Islamic companion app — completely offline and ad-free.
+Nimaz est une application islamique complète — entièrement hors ligne et 100% sans publicité. Obtenez des horaires de prière précis, lisez le Saint Coran, trouvez la direction de la Qibla, comptez le Tasbih, explorez les collections de Hadith et de Dua, et bien plus encore.
 
-Whether you need accurate prayer times, a beautiful Quran reader, or everyday Islamic tools, Nimaz has you covered.
+Nimaz rassemble tous les outils islamiques essentiels dans une seule application respectueuse de votre vie privée.
 
-Key Features:
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-🕌 Prayer Times & Adhan
-• Accurate prayer times based on your location
-• Multiple calculation methods supported
-• Prayer time notifications and reminders
+🕌 HORAIRES DE PRIÈRE & ADHAN PRÉCIS
+• Horaires de salah précis pour Fajr, Dhuhr, Asr, Maghrib et Isha selon votre position
+• Plusieurs méthodes de calcul (MWL, ISNA, Égypte, La Mecque, Karachi et plus)
+• Notifications de prière et rappels d'Adhan personnalisables
+• Horaires du lever du soleil et de minuit inclus
 
-📖 Quran Reader
-• Full Quran with Mushaf page view
-• Khatam (Quran completion) tracking
-• Tafseer reader for deeper understanding
-• Bookmark your favourite ayahs
+📖 LECTEUR DE CORAN AVEC VUE MUSHAF
+• Lisez le Saint Coran complet avec la mise en page authentique du Mushaf
+• Suivi de Khatam — suivez votre progression dans la lecture complète du Coran
+• Tafseer intégré pour une compréhension approfondie de chaque ayah
+• Marquez et reprenez où vous vous êtes arrêté
+• Navigation fluide entre les pages
 
-📚 Hadith Collections
-• Browse Hadith collections
-• Bookmark and save your favourite Hadith
+📚 COLLECTIONS DE HADITHS
+• Parcourez des Hadiths issus de grandes collections
+• Sauvegardez vos Hadiths favoris pour un accès rapide
+• Recherche et navigation faciles
 
-🤲 Dua Library
-• Comprehensive Dua collection organised by category
-• Easy to browse and search
+🤲 BIBLIOTHÈQUE DE DUAS & AZKAR
+• Collection complète de Duas et Azkar quotidiens
+• Organisée par catégorie : matin, soir, voyage, sommeil et plus
 
-🧭 Qibla Compass
-• Find the Qibla direction from anywhere in the world
+🧭 BOUSSOLE QIBLA & DIRECTION
+• Trouvez la direction de la Qibla depuis n'importe où dans le monde
+• Fonctionne hors ligne avec la boussole et le GPS de votre appareil
 
-📿 Tasbih Counter
-• Digital Tasbeeh counter with presets
-• Track your daily dhikr
+📿 COMPTEUR DE TASBIH & SUIVI DE DHIKR
+• Compteur de Tasbih numérique avec préréglages personnalisables
+• Suivez votre dhikr quotidien : SubhanAllah, Alhamdulillah, Allahu Akbar
+• Expérience de comptage simple et sans distraction
 
-🕋 Prayer & Fasting Tracker
-• Track your daily prayers
-• Monitor your fasting during Ramadan and beyond
+🕋 SUIVI DE PRIÈRE & JOURNAL DE JEÛNE
+• Suivez vos cinq prières quotidiennes
+• Enregistrez vos jours de jeûne pendant le Ramadan et les jeûnes volontaires
+• Progression visuelle pour rester motivé
 
-💰 Zakat Calculator
-• Calculate your Zakat easily
+💰 CALCULATEUR DE ZAKAT
+• Calculez votre Zakat rapidement et précisément
+• Supporte l'or, l'argent, les espèces et les investissements
 
-🏠 Home Screen Widgets
-• Multiple widget styles for prayer times on your home screen
+🏠 WIDGETS POUR L'ÉCRAN D'ACCUEIL
+• Widgets d'horaires de prière élégants pour votre écran d'accueil
+• Plusieurs styles et tailles de widgets au choix
+• Voyez la prochaine prière d'un coup d'œil
 
-🌍 Multi-Language Support
-• Available in English, Arabic, German, French, Turkish, Indonesian, Malay, and Urdu
+🌍 SUPPORT MULTILINGUE
+• Disponible en Français, English (Anglais), العربية (Arabe), Deutsch (Allemand), Türkçe (Turc), Bahasa Indonesia, Bahasa Melayu et اردو (Ourdou)
 
-✨ Why Nimaz?
-• 100% offline — no internet required
-• Completely ad-free
-• Lightweight and fast
-• Privacy-focused — no data collection
-• Regular updates with new features
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-Download Nimaz today and keep your Islamic practices on track!
+✨ POURQUOI NIMAZ ?
+
+✅ 100% Hors ligne — toutes les fonctionnalités sans internet
+✅ Entièrement sans publicité — aucune bannière, aucun pop-up
+✅ Vie privée d'abord — aucune collecte de données, aucun suivi
+✅ Léger — performances rapides, stockage minimal
+✅ Mises à jour régulières et améliorations
+
+Que vous cherchiez une application fiable pour les horaires de prière, un beau lecteur de Coran ou un outil pour développer de meilleures habitudes islamiques — Nimaz est conçu pour être votre compagnon quotidien.
+
+Téléchargez Nimaz maintenant — votre boîte à outils islamique complète, toujours dans votre poche.

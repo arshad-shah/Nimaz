@@ -101,6 +101,9 @@ jobs:
 
           if [ "$USE_MANUAL" = true ]; then
             RELEASE_NOTES="$MANUAL_NOTES"
+          elif [ -z "${OPENAI_API_KEY:-}" ]; then
+            echo "WARNING: OPENAI_API_KEY secret is not set. Falling back to default release notes."
+            RELEASE_NOTES="Bug fixes and improvements."
           else
             # --- Call OpenAI API to generate release notes ---
             PROMPT="You are a mobile app release notes writer for an Islamic prayer app called Nimaz. Given these git commits, write concise, user-friendly Play Store release notes. Rules: max 500 characters, no technical jargon, no commit hashes, use bullet points, focus on what users gain, start with a brief summary line. Commits:\n\n${COMMITS}\n\nVersion: ${VERSION_NAME}"
@@ -108,7 +111,8 @@ jobs:
             # Escape for JSON
             PROMPT_ESCAPED=$(echo "$PROMPT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
 
-            RESPONSE=$(curl -s --fail-with-body https://api.openai.com/v1/chat/completions \
+            HTTP_CODE=$(curl -s -o /tmp/openai_response.json -w "%{http_code}" \
+              https://api.openai.com/v1/chat/completions \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $OPENAI_API_KEY" \
               -d "{
@@ -118,17 +122,24 @@ jobs:
                 \"temperature\": 0.7
               }")
 
-            RELEASE_NOTES=$(echo "$RESPONSE" | python3 -c "
+            if [ "$HTTP_CODE" -ne 200 ]; then
+              echo "WARNING: OpenAI API returned HTTP $HTTP_CODE. Response:"
+              cat /tmp/openai_response.json
+              echo ""
+              echo "Falling back to default release notes."
+              RELEASE_NOTES="Bug fixes and improvements."
+            else
+              RELEASE_NOTES=$(python3 -c "
           import sys, json
-          data = json.load(sys.stdin)
+          data = json.load(open('/tmp/openai_response.json'))
           if 'choices' in data and len(data['choices']) > 0:
               print(data['choices'][0]['message']['content'].strip())
           else:
               print('Bug fixes and improvements.')
           ")
-
-            # Enforce 500-char Play Store limit
-            RELEASE_NOTES=$(echo "$RELEASE_NOTES" | head -c 500)
+              # Enforce 500-char Play Store limit
+              RELEASE_NOTES=$(echo "$RELEASE_NOTES" | head -c 500)
+            fi
           fi
 
           echo "--- Generated Release Notes ---"

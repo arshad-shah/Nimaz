@@ -1,53 +1,67 @@
-Nimaz is your all-in-one Islamic companion app — completely offline and ad-free.
+Nimaz, eksiksiz bir İslami uygulama — tamamen çevrimdışı ve %100 reklamsız. Doğru namaz vakitlerini öğrenin, Kur'an-ı Kerim'i okuyun, kıble yönünü bulun, tesbih çekin, hadis ve dua koleksiyonlarını keşfedin ve çok daha fazlası.
 
-Whether you need accurate prayer times, a beautiful Quran reader, or everyday Islamic tools, Nimaz has you covered.
+Nimaz, tüm temel İslami araçları gizliliğe önem veren tek bir güzel uygulamada bir araya getirir.
 
-Key Features:
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-🕌 Prayer Times & Adhan
-• Accurate prayer times based on your location
-• Multiple calculation methods supported
-• Prayer time notifications and reminders
+🕌 DOĞRU NAMAZ VAKİTLERİ & EZAN
+• Konumunuza göre Fajr, Öğle, İkindi, Akşam ve Yatsı için hassas namaz vakitleri
+• Birden fazla hesaplama yöntemi (Diyanet, MWL, ISNA, Mısır, Mekke, Karaçi ve daha fazlası)
+• Özelleştirilebilir namaz vakti bildirimleri ve ezan hatırlatıcıları
+• Güneşin doğuşu ve gece yarısı vakitleri dahil
 
-📖 Quran Reader
-• Full Quran with Mushaf page view
-• Khatam (Quran completion) tracking
-• Tafseer reader for deeper understanding
-• Bookmark your favourite ayahs
+📖 MUSHAF GÖRÜNÜMÜYLE KUR'AN OKUYUCU
+• Orijinal Mushaf sayfa düzeniyle Kur'an-ı Kerim'in tamamını okuyun
+• Hatim takibi — Kur'an tamamlama ilerlemenizi takip edin
+• Her ayetin daha derin anlaşılması için yerleşik tefsir
+• Yer işareti koyun ve kaldığınız yerden devam edin
+• Akıcı sayfa navigasyonu
 
-📚 Hadith Collections
-• Browse Hadith collections
-• Bookmark and save your favourite Hadith
+📚 HADİS KOLEKSİYONLARI
+• Büyük koleksiyonlardan hadisleri inceleyin
+• Favori hadislerinizi hızlı erişim için kaydedin
+• Kolay arama ve gezinme
 
-🤲 Dua Library
-• Comprehensive Dua collection organised by category
-• Easy to browse and search
+🤲 DUA & ZİKİR KÜTÜPHANESİ
+• Günlük dualar ve zikirlerin kapsamlı koleksiyonu
+• Kategorilere göre düzenlenmiş: sabah, akşam, yolculuk, uyku ve daha fazlası
 
-🧭 Qibla Compass
-• Find the Qibla direction from anywhere in the world
+🧭 KIBLE PUSULASI & YÖN BULUCU
+• Dünyanın her yerinden kıble yönünü bulun
+• Cihaz pusulası ve GPS ile çevrimdışı çalışır
 
-📿 Tasbih Counter
-• Digital Tasbeeh counter with presets
-• Track your daily dhikr
+📿 TESBİH SAYACI & ZİKİR TAKİPÇİSİ
+• Özelleştirilebilir ön ayarlara sahip dijital tesbih sayacı
+• Günlük zikrinizi takip edin: Sübhanallah, Elhamdülillah, Allahu Ekber
+• Basit, dikkat dağıtmayan sayma deneyimi
 
-🕋 Prayer & Fasting Tracker
-• Track your daily prayers
-• Monitor your fasting during Ramadan and beyond
+🕋 NAMAZ TAKİPÇİSİ & ORUÇ GÜNLÜĞÜ
+• Beş vakit namazınızı takip edin
+• Ramazan ve nafile oruç günlerinizi kaydedin
+• Motivasyon için görsel ilerleme
 
-💰 Zakat Calculator
-• Calculate your Zakat easily
+💰 ZEKAT HESAPLAYICI
+• Zekatınızı hızlı ve doğru bir şekilde hesaplayın
+• Altın, gümüş, nakit ve yatırım hesaplamalarını destekler
 
-🏠 Home Screen Widgets
-• Multiple widget styles for prayer times on your home screen
+🏠 ANA EKRAN WİDGET'LARI
+• Ana ekranınız için güzel namaz vakti widget'ları
+• Birden fazla widget stili ve boyutu
+• Uygulamayı açmadan bir bakışta sonraki namazı görün
 
-🌍 Multi-Language Support
-• Available in English, Arabic, German, French, Turkish, Indonesian, Malay, and Urdu
+🌍 ÇOK DİLLİ DESTEK
+• Türkçe, English (İngilizce), العربية (Arapça), Deutsch (Almanca), Français (Fransızca), Bahasa Indonesia, Bahasa Melayu ve اردو (Urduca) dillerinde mevcut
 
-✨ Why Nimaz?
-• 100% offline — no internet required
-• Completely ad-free
-• Lightweight and fast
-• Privacy-focused — no data collection
-• Regular updates with new features
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-Download Nimaz today and keep your Islamic practices on track!
+✨ NEDEN NIMAZ?
+
+✅ %100 Çevrimdışı — tüm özellikler internet olmadan çalışır
+✅ Tamamen reklamsız — banner yok, pop-up yok
+✅ Gizlilik öncelikli — veri toplama yok, izleme yok
+✅ Hafif — hızlı performans, minimum depolama
+✅ Düzenli güncellemeler ve iyileştirmeler
+
+İster güvenilir bir namaz vakitleri uygulaması, ister güzel bir Kur'an okuyucu, ister daha iyi İslami alışkanlıklar oluşturmak için bir araç arıyor olun — Nimaz günlük yoldaşınız olarak tasarlanmıştır.
+
+Nimaz'ı şimdi indirin — eksiksiz İslami araç setiniz, her zaman cebinizde.

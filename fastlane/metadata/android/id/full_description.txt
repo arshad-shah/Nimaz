@@ -1,53 +1,67 @@
-Nimaz is your all-in-one Islamic companion app — completely offline and ad-free.
+Nimaz adalah aplikasi Islam lengkap — sepenuhnya offline dan 100% bebas iklan. Dapatkan jadwal sholat yang akurat, baca Al-Quran, temukan arah kiblat, hitung tasbih, jelajahi koleksi hadis dan doa, serta banyak lagi.
 
-Whether you need accurate prayer times, a beautiful Quran reader, or everyday Islamic tools, Nimaz has you covered.
+Nimaz menggabungkan semua alat Islam penting dalam satu aplikasi yang indah dan menghargai privasi Anda.
 
-Key Features:
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-🕌 Prayer Times & Adhan
-• Accurate prayer times based on your location
-• Multiple calculation methods supported
-• Prayer time notifications and reminders
+🕌 JADWAL SHOLAT & ADZAN AKURAT
+• Waktu sholat yang presisi untuk Subuh, Dzuhur, Ashar, Maghrib, dan Isya berdasarkan lokasi Anda
+• Berbagai metode perhitungan (Kemenag, MWL, ISNA, Mesir, Mekkah, Karachi, dan lainnya)
+• Notifikasi waktu sholat dan pengingat adzan yang dapat disesuaikan
+• Waktu terbit matahari dan tengah malam termasuk
 
-📖 Quran Reader
-• Full Quran with Mushaf page view
-• Khatam (Quran completion) tracking
-• Tafseer reader for deeper understanding
-• Bookmark your favourite ayahs
+📖 PEMBACA AL-QURAN DENGAN TAMPILAN MUSHAF
+• Baca Al-Quran lengkap dengan tata letak halaman Mushaf asli
+• Pelacak khatam — pantau kemajuan Anda menyelesaikan Al-Quran
+• Tafsir bawaan untuk pemahaman lebih dalam setiap ayat
+• Tandai dan lanjutkan dari tempat terakhir Anda berhenti
+• Navigasi halaman yang mulus
 
-📚 Hadith Collections
-• Browse Hadith collections
-• Bookmark and save your favourite Hadith
+📚 KOLEKSI HADIS
+• Telusuri hadis dari koleksi-koleksi utama
+• Simpan hadis favorit Anda untuk akses cepat
+• Pencarian dan navigasi yang mudah
 
-🤲 Dua Library
-• Comprehensive Dua collection organised by category
-• Easy to browse and search
+🤲 PERPUSTAKAAN DOA & DZIKIR
+• Koleksi lengkap doa dan dzikir harian
+• Diorganisir berdasarkan kategori: pagi, sore, perjalanan, tidur, dan lainnya
 
-🧭 Qibla Compass
-• Find the Qibla direction from anywhere in the world
+🧭 KOMPAS KIBLAT & PENUNJUK ARAH
+• Temukan arah kiblat dari mana saja di dunia
+• Bekerja offline menggunakan kompas perangkat dan GPS
 
-📿 Tasbih Counter
-• Digital Tasbeeh counter with presets
-• Track your daily dhikr
+📿 PENGHITUNG TASBIH & PELACAK DZIKIR
+• Penghitung tasbih digital dengan preset yang dapat disesuaikan
+• Lacak dzikir harian Anda: SubhanAllah, Alhamdulillah, Allahu Akbar
+• Pengalaman menghitung yang sederhana dan tanpa gangguan
 
-🕋 Prayer & Fasting Tracker
-• Track your daily prayers
-• Monitor your fasting during Ramadan and beyond
+🕋 PELACAK SHOLAT & CATATAN PUASA
+• Lacak sholat lima waktu Anda
+• Catat hari puasa Anda selama Ramadan dan puasa sunnah
+• Kemajuan visual untuk menjaga motivasi
 
-💰 Zakat Calculator
-• Calculate your Zakat easily
+💰 KALKULATOR ZAKAT
+• Hitung zakat Anda dengan cepat dan akurat
+• Mendukung perhitungan emas, perak, uang tunai, dan investasi
 
-🏠 Home Screen Widgets
-• Multiple widget styles for prayer times on your home screen
+🏠 WIDGET LAYAR UTAMA
+• Widget jadwal sholat yang indah untuk layar utama Anda
+• Berbagai gaya dan ukuran widget
+• Lihat sholat berikutnya sekilas tanpa membuka aplikasi
 
-🌍 Multi-Language Support
-• Available in English, Arabic, German, French, Turkish, Indonesian, Malay, and Urdu
+🌍 DUKUNGAN MULTI-BAHASA
+• Tersedia dalam Bahasa Indonesia, English (Inggris), العربية (Arab), Deutsch (Jerman), Français (Prancis), Türkçe (Turki), Bahasa Melayu, dan اردو (Urdu)
 
-✨ Why Nimaz?
-• 100% offline — no internet required
-• Completely ad-free
-• Lightweight and fast
-• Privacy-focused — no data collection
-• Regular updates with new features
+━━━━━━━━━━━━━━━━━━━━━━━━
 
-Download Nimaz today and keep your Islamic practices on track!
+✨ MENGAPA NIMAZ?
+
+✅ 100% Offline — semua fitur berfungsi tanpa internet
+✅ Sepenuhnya bebas iklan — tanpa banner, tanpa pop-up
+✅ Privasi utama — tanpa pengumpulan data, tanpa pelacakan
+✅ Ringan — performa cepat, penyimpanan minimal
+✅ Update rutin dan perbaikan berkelanjutan
+
+Baik Anda mencari aplikasi jadwal sholat yang andal, pembaca Al-Quran yang indah, atau alat untuk membangun kebiasaan Islam yang lebih baik — Nimaz dirancang untuk menjadi pendamping harian Anda.
+
+Unduh Nimaz sekarang — perangkat Islam lengkap Anda, selalu di saku Anda.
