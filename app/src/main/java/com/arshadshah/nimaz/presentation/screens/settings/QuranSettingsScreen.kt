@@ -20,8 +20,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -45,7 +43,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -104,10 +103,12 @@ fun QuranSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
             // Preview Card
             item {
                 PreviewCard(
@@ -115,25 +116,14 @@ fun QuranSettingsScreen(
                     showTransliteration = quranState.showTransliteration,
                     showTranslation = quranState.showTranslation
                 )
-                Spacer(modifier = Modifier.height(25.dp))
             }
 
             // Arabic Text Section
             item {
-                NimazSectionTitle(
-                    text = "ARABIC TEXT",
-                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
-                    uppercase = false
-                )
+                NimazSectionHeader(title = "Arabic Text")
             }
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
+                NimazMenuGroup {
                     // Arabic Font Size Slider
                     Column(modifier = Modifier.padding(16.dp)) {
                         Row(
@@ -167,6 +157,8 @@ fun QuranSettingsScreen(
                         )
                     }
 
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
                     // Font: Amiri (see comments above for adding new fonts)
                     Row(
                         modifier = Modifier
@@ -188,53 +180,42 @@ fun QuranSettingsScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(30.dp))
             }
 
             // Display Options Section
             item {
-                NimazSectionTitle(
-                    text = "DISPLAY OPTIONS",
-                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
-                    uppercase = false
-                )
+                NimazSectionHeader(title = "Display Options")
             }
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
+                NimazMenuGroup {
                     NimazSettingsItem(
                         title = "Show Transliteration",
                         subtitle = "Roman letters pronunciation",
                         checked = quranState.showTransliteration,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         title = "Show Translation",
                         subtitle = "Meaning in your language",
                         checked = quranState.showTranslation,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         title = "Continuous Reading",
                         subtitle = "Continue reading between surahs and auto-play next verse",
                         checked = quranState.continuousReading,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         title = "Keep Screen On",
                         subtitle = "Prevent screen from turning off",
                         checked = quranState.keepScreenOn,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         title = "Show Tajweed Colors",
                         subtitle = "Color-coded pronunciation rules",
@@ -242,25 +223,14 @@ fun QuranSettingsScreen(
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
                 }
-                Spacer(modifier = Modifier.height(30.dp))
             }
 
             // Translation Section
             item {
-                NimazSectionTitle(
-                    text = "TRANSLATION",
-                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
-                    uppercase = false
-                )
+                NimazSectionHeader(title = "Translation")
             }
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
+                NimazMenuGroup {
                     translationOptions.forEachIndexed { index, (displayName, value) ->
                         val isSelected = quranState.selectedTranslatorId == value
                         TranslationItem(
@@ -270,29 +240,18 @@ fun QuranSettingsScreen(
                             onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
                         )
                         if (index < translationOptions.lastIndex) {
-                            NimazDivider()
+                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(30.dp))
             }
 
             // Audio Section
             item {
-                NimazSectionTitle(
-                    text = "AUDIO",
-                    modifier = Modifier.padding(start = 5.dp, bottom = 12.dp),
-                    uppercase = false
-                )
+                NimazSectionHeader(title = "Audio")
             }
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer
-                    )
-                ) {
+                NimazMenuGroup {
                     // Reciter
                     Row(
                         modifier = Modifier
@@ -332,7 +291,10 @@ fun QuranSettingsScreen(
                     }
                     // Continuous reading also controls auto-play of next verse in audio mode
                 }
-                Spacer(modifier = Modifier.height(30.dp))
+            }
+
+            item {
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -344,13 +306,7 @@ private fun PreviewCard(
     showTransliteration: Boolean,
     showTranslation: Boolean
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
+    NimazMenuGroup {
         Column(modifier = Modifier.padding(20.dp)) {
             // Header row with verse number badge
             Row(

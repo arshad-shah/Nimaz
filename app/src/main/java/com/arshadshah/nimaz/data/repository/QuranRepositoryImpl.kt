@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.entity.AyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
@@ -125,6 +126,10 @@ class QuranRepositoryImpl @Inject constructor(
         return quranDao.getSajdaAyahs().map { entities ->
             entities.map { it.toDomain() }
         }
+    }
+
+    override suspend fun getPageAyahRanges(): List<PageAyahRange> {
+        return quranDao.getPageAyahRanges()
     }
 
     override fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?> {

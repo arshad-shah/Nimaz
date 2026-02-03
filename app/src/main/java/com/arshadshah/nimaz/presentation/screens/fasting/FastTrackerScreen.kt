@@ -53,8 +53,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -102,13 +104,13 @@ fun FastTrackerScreen(
     val calendarState by viewModel.calendarState.collectAsState()
 
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Ramadan", "Voluntary", "Makeup")
+    val tabs = listOf(stringResource(R.string.fasting_tab_ramadan), stringResource(R.string.fasting_tab_voluntary), stringResource(R.string.fasting_tab_makeup))
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Fasting",
+                title = stringResource(R.string.fasting_title),
                 onBackClick = onNavigateBack
             )
         }
@@ -169,9 +171,9 @@ fun FastTrackerScreen(
                         item {
                             NimazStatsGrid(
                                 stats = listOf(
-                                    NimazStatData(ramadanState.fastedDays.toString(), "Fasted"),
-                                    NimazStatData(ramadanState.missedDays.toString(), "Missed"),
-                                    NimazStatData(ramadanState.remainingDays.toString(), "Remaining")
+                                    NimazStatData(ramadanState.fastedDays.toString(), stringResource(R.string.fasting_fasted)),
+                                    NimazStatData(ramadanState.missedDays.toString(), stringResource(R.string.fasting_missed)),
+                                    NimazStatData(ramadanState.remainingDays.toString(), stringResource(R.string.fasting_remaining))
                                 )
                             )
                         }
@@ -330,14 +332,14 @@ private fun RamadanBanner(
     ) {
         Column {
             Text(
-                text = "CURRENT",
+                text = stringResource(R.string.fasting_current),
                 style = MaterialTheme.typography.labelSmall,
                 color = Color.White.copy(alpha = 0.8f),
                 letterSpacing = 1.sp
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Ramadan - Day $currentDay",
+                text = stringResource(R.string.fasting_ramadan_day, currentDay),
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
@@ -399,7 +401,7 @@ private fun RamadanCountdownCard(
             modifier = Modifier.fillMaxWidth()
         ) {
             Text(
-                text = "RAMADAN STARTS IN",
+                text = stringResource(R.string.fasting_ramadan_starts_in),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.8f),
                 letterSpacing = 2.sp
@@ -413,7 +415,7 @@ private fun RamadanCountdownCard(
                 color = Color.White
             )
             Text(
-                text = if (daysUntilRamadan == 1) "day" else "days",
+                text = if (daysUntilRamadan == 1) stringResource(R.string.fasting_day) else stringResource(R.string.fasting_days),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
@@ -477,13 +479,13 @@ private fun RamadanMissedFastsTracker(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (unloggedDays == 1) "Unlogged Day" else "Unlogged Days",
+                        text = if (unloggedDays == 1) stringResource(R.string.fasting_unlogged_day) else stringResource(R.string.fasting_unlogged_days),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Tap on calendar dates to log your fasts",
+                        text = stringResource(R.string.fasting_log_calendar_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -512,7 +514,7 @@ private fun TodayFastSection(
 
     Column(modifier = modifier) {
         Text(
-            text = "Today",
+            text = stringResource(R.string.fasting_today),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
@@ -541,33 +543,38 @@ private fun TodayFastSection(
                         )
                         if (ramadanDay != null) {
                             Text(
-                                text = "Ramadan - Day $ramadanDay",
+                                text = stringResource(R.string.fasting_ramadan_day, ramadanDay),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
 
+                    val fastingStatusText = stringResource(R.string.fasting_status_fasting)
+                    val notFastingStatusText = stringResource(R.string.fasting_status_not_fasting)
+                    val exemptedStatusText = stringResource(R.string.fasting_status_exempted)
+                    val makeupDueStatusText = stringResource(R.string.fasting_status_makeup_due)
+
                     val (statusBg, statusColor, statusText) = when (fastStatus) {
                         FastStatus.FASTED -> Triple(
                             NimazColors.FastingColors.Fasted.copy(alpha = 0.2f),
                             NimazColors.FastingColors.Fasted,
-                            "Fasting"
+                            fastingStatusText
                         )
                         FastStatus.NOT_FASTED -> Triple(
                             MaterialTheme.colorScheme.surfaceVariant,
                             MaterialTheme.colorScheme.onSurfaceVariant,
-                            "Not Fasting"
+                            notFastingStatusText
                         )
                         FastStatus.EXEMPTED -> Triple(
                             NimazColors.FastingColors.Exempted.copy(alpha = 0.2f),
                             NimazColors.FastingColors.Exempted,
-                            "Exempted"
+                            exemptedStatusText
                         )
                         FastStatus.MAKEUP_DUE -> Triple(
                             NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                             NimazColors.FastingColors.Makeup,
-                            "Makeup Due"
+                            makeupDueStatusText
                         )
                     }
 
@@ -603,7 +610,7 @@ private fun TodayFastSection(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Suhoor ends",
+                                text = stringResource(R.string.fasting_suhoor_ends),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -616,7 +623,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else "Completed",
+                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else stringResource(R.string.fasting_completed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -633,7 +640,7 @@ private fun TodayFastSection(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
                             Text(
-                                text = "Iftar",
+                                text = stringResource(R.string.fasting_iftar),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -646,7 +653,7 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) "Waiting" else "Completed",
+                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) stringResource(R.string.fasting_waiting) else stringResource(R.string.fasting_completed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -691,12 +698,15 @@ private fun FastingCalendarSection(
 
     val futureTextColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f)
 
-    val legendItems = remember(ramadanDaysInMonth) {
+    val fastedLabel = stringResource(R.string.fasting_fasted)
+    val missedLabel = stringResource(R.string.fasting_missed)
+    val ramadanLabel = stringResource(R.string.fasting_tab_ramadan)
+    val legendItems = remember(ramadanDaysInMonth, fastedLabel, missedLabel, ramadanLabel) {
         buildList {
-            add(CalendarLegendItem(NimazColors.FastingColors.Fasted, "Fasted"))
-            add(CalendarLegendItem(Color(0xFFEF4444), "Missed"))
+            add(CalendarLegendItem(NimazColors.FastingColors.Fasted, fastedLabel))
+            add(CalendarLegendItem(Color(0xFFEF4444), missedLabel))
             if (ramadanDaysInMonth.isNotEmpty()) {
-                add(CalendarLegendItem(NimazColors.FastingColors.Ramadan, "Ramadan"))
+                add(CalendarLegendItem(NimazColors.FastingColors.Ramadan, ramadanLabel))
             }
         }
     }
@@ -741,20 +751,27 @@ private fun RecommendedFastsSection(
     val today = LocalDate.now()
     val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
 
+    val todayText = stringResource(R.string.fasting_today)
+
     // Calculate next Monday
     val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
-    val mondayText = if (nextMonday == today) "Today" else "Next: ${nextMonday.format(dateFormatter)}"
+    val mondayText = if (nextMonday == today) todayText else stringResource(R.string.fasting_next_format, nextMonday.format(dateFormatter))
 
     // Calculate next Thursday
     val nextThursday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
-    val thursdayText = if (nextThursday == today) "Today" else "Next: ${nextThursday.format(dateFormatter)}"
+    val thursdayText = if (nextThursday == today) todayText else stringResource(R.string.fasting_next_format, nextThursday.format(dateFormatter))
 
     // Calculate Ayyam al-Beed status (13th, 14th, 15th of lunar month)
-    val ayyamText = calculateAyyamAlBeedStatus(today)
+    val ayyamDays = calculateAyyamAlBeedDays(today)
+    val ayyamText = when {
+        ayyamDays == 0 -> todayText
+        ayyamDays == 1 -> stringResource(R.string.fasting_tomorrow)
+        else -> stringResource(R.string.fasting_in_days_format, ayyamDays)
+    }
 
     Column(modifier = modifier) {
         Text(
-            text = "Recommended Fasts",
+            text = stringResource(R.string.fasting_recommended_fasts),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onBackground
@@ -765,43 +782,37 @@ private fun RecommendedFastsSection(
             RecommendedFastCard(
                 icon = Icons.Default.CalendarMonth,
                 iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
-                name = "Monday Fasting",
-                description = "Sunnah of the Prophet \uFDFA",
+                name = stringResource(R.string.fasting_monday),
+                description = stringResource(R.string.fasting_sunnah_desc),
                 nextDate = mondayText
             )
             RecommendedFastCard(
                 icon = Icons.Default.CalendarMonth,
                 iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
-                name = "Thursday Fasting",
-                description = "Sunnah of the Prophet \uFDFA",
+                name = stringResource(R.string.fasting_thursday),
+                description = stringResource(R.string.fasting_sunnah_desc),
                 nextDate = thursdayText
             )
             RecommendedFastCard(
                 icon = Icons.Default.NightsStay,
                 iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
-                name = "Ayyam al-Beed",
-                description = "13th, 14th, 15th of lunar month",
+                name = stringResource(R.string.fasting_ayyam_al_beed),
+                description = stringResource(R.string.fasting_ayyam_desc),
                 nextDate = ayyamText
             )
         }
     }
 }
 
-private fun calculateAyyamAlBeedStatus(today: LocalDate): String {
+private fun calculateAyyamAlBeedDays(today: LocalDate): Int {
     val hijriDate = HijriDateCalculator.toHijri(today)
     return when (val hijriDay = hijriDate.day) {
-        13, 14, 15 -> "Today" // Currently Ayyam al-Beed
-        in 1..12 -> {
-            // Calculate days until 13th
-            val daysUntil = 13 - hijriDay
-            if (daysUntil == 1) "Tomorrow" else "In $daysUntil days"
-        }
+        13, 14, 15 -> 0 // Currently Ayyam al-Beed
+        in 1..12 -> 13 - hijriDay
         else -> {
-            // After the 15th, calculate days until next month's 13th
             val daysInMonth = HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
             val daysUntilNextMonth = daysInMonth - hijriDay
-            val daysUntil = daysUntilNextMonth + 13
-            "In $daysUntil days"
+            daysUntilNextMonth + 13
         }
     }
 }
@@ -890,7 +901,7 @@ private fun LogFastButton(
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-            text = "Log Today's Fast",
+            text = stringResource(R.string.fasting_log_today),
             style = MaterialTheme.typography.bodyLarge,
             fontWeight = FontWeight.SemiBold
         )
@@ -912,8 +923,8 @@ private fun MakeupFastsContent(
     ) {
         if (makeupState.allMakeupFasts.isEmpty()) {
             NimazEmptyState(
-                title = "No Makeup Fasts",
-                message = "All your fasts are up to date!",
+                title = stringResource(R.string.fasting_no_makeup),
+                message = stringResource(R.string.fasting_all_up_to_date),
                 iconTint = GreenAccent
             )
         } else {
@@ -929,15 +940,15 @@ private fun MakeupFastsContent(
             // Stats Grid
             NimazStatsGrid(
                 stats = listOf(
-                    NimazStatData("$completedCount", "Completed", GreenAccent),
-                    NimazStatData("${makeupState.pendingCount}", "Pending", OrangeAccent),
-                    NimazStatData("$totalCount", "Total")
+                    NimazStatData("$completedCount", stringResource(R.string.fasting_completed_label), GreenAccent),
+                    NimazStatData("${makeupState.pendingCount}", stringResource(R.string.fasting_pending_label), OrangeAccent),
+                    NimazStatData("$totalCount", stringResource(R.string.fasting_total_label))
                 )
             )
 
             // Info Banner
             NimazBanner(
-                message = "Makeup fasts should ideally be completed before the next Ramadan. Fasting on Mondays and Thursdays is recommended.",
+                message = stringResource(R.string.fasting_makeup_info),
                 variant = NimazBannerVariant.INFO,
                 icon = Icons.Default.Info,
                 showBorder = true
@@ -946,8 +957,8 @@ private fun MakeupFastsContent(
             // Pending Section
             if (makeupState.pendingMakeupFasts.isNotEmpty()) {
                 NimazSectionHeader(
-                    title = "Pending",
-                    trailingText = "${makeupState.pendingCount} pending",
+                    title = stringResource(R.string.fasting_pending),
+                    trailingText = stringResource(R.string.fasting_pending_count, makeupState.pendingCount),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -956,7 +967,7 @@ private fun MakeupFastsContent(
                         makeupFast = makeupFast,
                         onComplete = { onCompleteMakeupFast(makeupFast.id) },
                         onEdit = {
-                            Toast.makeText(context, "Edit makeup fast dialog coming soon", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, context.getString(R.string.fasting_edit_coming_soon), Toast.LENGTH_SHORT).show()
                         }
                     )
                 }
@@ -966,8 +977,8 @@ private fun MakeupFastsContent(
             if (completedFasts.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(4.dp))
                 NimazSectionHeader(
-                    title = "Completed",
-                    trailingText = "${completedFasts.size} fasts",
+                    title = stringResource(R.string.fasting_completed_label),
+                    trailingText = stringResource(R.string.fasting_fasts_count, completedFasts.size),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -997,7 +1008,7 @@ private fun MakeupSummaryCard(
     ) {
         Column {
             Text(
-                text = "Fasts to Make Up",
+                text = stringResource(R.string.fasting_fasts_to_makeup),
                 style = MaterialTheme.typography.labelMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
@@ -1012,7 +1023,7 @@ private fun MakeupSummaryCard(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "remaining to complete",
+                text = stringResource(R.string.fasting_remaining_to_complete),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
@@ -1072,7 +1083,7 @@ private fun MakeupPendingFastCard(
                     color = OrangeAccent.copy(alpha = 0.2f)
                 ) {
                     Text(
-                        text = "Pending",
+                        text = stringResource(R.string.fasting_pending),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = OrangeAccent,
@@ -1108,7 +1119,7 @@ private fun MakeupPendingFastCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Edit",
+                            text = stringResource(R.string.fasting_edit),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1135,7 +1146,7 @@ private fun MakeupPendingFastCard(
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Mark Complete",
+                            text = stringResource(R.string.fasting_mark_complete),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -1163,14 +1174,14 @@ private fun MakeupCompletedFastItem(
             .toLocalDate()
             .format(formatter)
         if (makeupFast.status == MakeupFastStatus.FIDYA_PAID)
-            "Fidya paid on $date"
+            stringResource(R.string.fasting_fidya_paid_on, date)
         else
-            "Made up on $date"
-    } ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) "Fidya paid" else "Completed"
+            stringResource(R.string.fasting_made_up_on, date)
+    } ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) stringResource(R.string.fasting_fidya_paid) else stringResource(R.string.fasting_completed)
 
     val originalLabel = makeupFast.originalHijriDate?.let {
-        "Originally: $it"
-    } ?: "Originally: $missedDate"
+        stringResource(R.string.fasting_originally, it)
+    } ?: stringResource(R.string.fasting_originally, missedDate)
 
     Card(
         modifier = modifier.fillMaxWidth(),

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.repository
 
+import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -25,6 +26,7 @@ interface QuranRepository {
     fun getAyahsByJuz(juzNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     fun getAyahsByPage(pageNumber: Int, translatorId: String? = null): Flow<List<Ayah>>
     fun getSajdaAyahs(): Flow<List<Ayah>>
+    suspend fun getPageAyahRanges(): List<PageAyahRange>
 
     // Surah with Ayahs
     fun getSurahWithAyahs(surahNumber: Int, translatorId: String?): Flow<SurahWithAyahs?>

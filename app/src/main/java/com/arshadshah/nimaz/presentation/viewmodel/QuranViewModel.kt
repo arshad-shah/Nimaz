@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
+import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
@@ -47,6 +48,7 @@ data class QuranHomeUiState(
     val activeKhatam: Khatam? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
+    val pageAyahRanges: List<PageAyahRange> = emptyList(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -146,6 +148,7 @@ class QuranViewModel @Inject constructor(
         loadBookmarks()
         loadFavorites()
         loadFavoriteAyahIds()
+        loadPageAyahRanges()
         observeQuranSettings()
         setupDebouncedSearch()
         observeActiveKhatam()
@@ -330,6 +333,13 @@ class QuranViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    private fun loadPageAyahRanges() {
+        viewModelScope.launch {
+            val ranges = quranUseCases.getPageAyahRanges()
+            _homeState.update { it.copy(pageAyahRanges = ranges) }
         }
     }
 

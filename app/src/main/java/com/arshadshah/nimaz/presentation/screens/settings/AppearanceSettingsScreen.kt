@@ -21,8 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +39,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AppTheme
@@ -70,13 +69,15 @@ fun AppearanceSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
             // Theme Section
             item {
-                NimazSectionTitle(text = "Theme")
+                NimazSectionHeader(title = "Theme")
             }
             item {
                 ThemeSelectionCard(
@@ -87,7 +88,7 @@ fun AppearanceSettingsScreen(
 
             // Display Section
             item {
-                NimazSectionTitle(text = "Display")
+                NimazSectionHeader(title = "Display")
             }
             item {
                 DisplaySettingsCard(
@@ -112,7 +113,7 @@ fun AppearanceSettingsScreen(
 
             // Home Screen Section
             item {
-                NimazSectionTitle(text = "Home Screen")
+                NimazSectionHeader(title = "Home Screen")
             }
             item {
                 HomeScreenSettingsCard(
@@ -124,7 +125,7 @@ fun AppearanceSettingsScreen(
             }
 
             item {
-                Spacer(modifier = Modifier.height(24.dp))
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -137,12 +138,7 @@ private fun ThemeSelectionCard(
     selectedTheme: AppTheme,
     onThemeSelected: (AppTheme) -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
-    ) {
+    NimazMenuGroup {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -316,42 +312,34 @@ private fun DisplaySettingsCard(
     onIslamicPatternsToggle: () -> Unit,
     onAnimationsToggle: () -> Unit
 ) {
-
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+    NimazMenuGroup {
+        NimazSettingsItem(
+            title = "Islamic Patterns",
+            subtitle = "Show decorative patterns",
+            checked = showIslamicPatterns,
+            onCheckedChange = { onIslamicPatternsToggle() }
         )
-    ) {
-        Column {
-            NimazSettingsItem(
-                title = "Islamic Patterns",
-                subtitle = "Show decorative patterns",
-                checked = showIslamicPatterns,
-                onCheckedChange = { onIslamicPatternsToggle() }
-            )
-            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            NimazSettingsItem(
-                title = "Animations",
-                subtitle = "Enable smooth transitions",
-                checked = animationsEnabled,
-                onCheckedChange = { onAnimationsToggle() }
-            )
-            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            NimazSettingsItem(
-                title = "Haptic Feedback",
-                subtitle = "Vibration on interactions",
-                checked = hapticFeedback,
-                onCheckedChange = { onHapticFeedbackToggle() }
-            )
-            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-            NimazSettingsItem(
-                title = "24-Hour Time",
-                subtitle = "Use 24-hour format",
-                checked = use24HourFormat,
-                onCheckedChange = { on24HourToggle() }
-            )
-        }
+        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazSettingsItem(
+            title = "Animations",
+            subtitle = "Enable smooth transitions",
+            checked = animationsEnabled,
+            onCheckedChange = { onAnimationsToggle() }
+        )
+        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazSettingsItem(
+            title = "Haptic Feedback",
+            subtitle = "Vibration on interactions",
+            checked = hapticFeedback,
+            onCheckedChange = { onHapticFeedbackToggle() }
+        )
+        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazSettingsItem(
+            title = "24-Hour Time",
+            subtitle = "Use 24-hour format",
+            checked = use24HourFormat,
+            onCheckedChange = { on24HourToggle() }
+        )
     }
 }
 
@@ -362,19 +350,12 @@ private fun HomeScreenSettingsCard(
     useHijriPrimary: Boolean,
     onHijriPrimaryToggle: () -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+    NimazMenuGroup {
+        NimazSettingsItem(
+            title = "Show Islamic Date",
+            subtitle = "Display Hijri calendar",
+            checked = useHijriPrimary,
+            onCheckedChange = { onHijriPrimaryToggle() }
         )
-    ) {
-        Column {
-            NimazSettingsItem(
-                title = "Show Islamic Date",
-                subtitle = "Display Hijri calendar",
-                checked = useHijriPrimary,
-                onCheckedChange = { onHijriPrimaryToggle() }
-            )
-        }
     }
 }

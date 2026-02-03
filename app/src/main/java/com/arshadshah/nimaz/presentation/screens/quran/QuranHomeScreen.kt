@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -66,9 +67,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material.icons.filled.CheckCircle
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.domain.model.QuranBookmark
@@ -105,14 +108,14 @@ fun QuranHomeScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazTopAppBar(
-                title = "Quran",
+                title = stringResource(R.string.quran_home_title),
                 scrollBehavior = scrollBehavior,
                 actions = {
                     // Search icon
                     IconButton(onClick = onNavigateToSearch) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search"
+                            contentDescription = stringResource(R.string.quran_home_search)
                         )
                     }
                     // Bookmarks icon with badge - navigates to dedicated bookmarks screen
@@ -131,14 +134,14 @@ fun QuranHomeScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Bookmark,
-                                contentDescription = "Bookmarks"
+                                contentDescription = stringResource(R.string.quran_home_bookmarks)
                             )
                         }
                     }
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Quran Settings"
+                            contentDescription = stringResource(R.string.quran_home_quran_settings)
                         )
                     }
                 }
@@ -152,7 +155,7 @@ fun QuranHomeScreen(
         ) {
             // Top-level tabs: Home / Browse / Favorites (Bookmarks moved to topbar icon)
             NimazPillTabs(
-                tabs = listOf("Home", "Browse", "Favorites"),
+                tabs = listOf(stringResource(R.string.quran_home_tab_home), stringResource(R.string.quran_home_tab_browse), stringResource(R.string.quran_home_tab_favorites)),
                 selectedIndex = state.topTab.coerceIn(0, 2),
                 onTabSelect = { viewModel.onEvent(QuranEvent.SetTopTab(it)) },
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
@@ -280,14 +283,14 @@ private fun HomeTabContent(
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
-                                text = "Start Reading",
+                                text = stringResource(R.string.quran_home_start_reading),
                                 style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "Begin your Quran journey with Al-Fatiha",
+                                text = stringResource(R.string.quran_home_begin_journey),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = Color(0xFFD4D4D4)
                             )
@@ -308,13 +311,13 @@ private fun HomeTabContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Bookmarks",
+                        text = stringResource(R.string.quran_home_bookmarks),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "See All",
+                        text = stringResource(R.string.quran_home_see_all),
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.clickable { onNavigateToBookmarks() }
@@ -371,7 +374,7 @@ private fun BrowseTabContent(
             selectedTabIndex = state.selectedTab,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
-            listOf("Surah", "Juz", "Page").forEachIndexed { index, title ->
+            listOf(stringResource(R.string.quran_home_tab_surah), stringResource(R.string.quran_home_tab_juz), stringResource(R.string.quran_home_tab_page)).forEachIndexed { index, title ->
                 Tab(
                     selected = state.selectedTab == index,
                     onClick = { onTabSelect(index) },
@@ -414,7 +417,12 @@ private fun BrowseTabContent(
                 }
                 2 -> {
                     // Page grid items added directly to avoid nested LazyColumn
-                    pageGridItems(onNavigateToPage = onNavigateToPage)
+                    pageGridItems(
+                        onNavigateToPage = onNavigateToPage,
+                        khatamReadAyahIds = khatamReadAyahIds,
+                        isKhatamActive = isKhatamActive,
+                        pageAyahRanges = state.pageAyahRanges
+                    )
                 }
             }
         }
@@ -448,12 +456,12 @@ private fun FavoritesTabContent(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "No favorite ayahs yet",
+                            text = stringResource(R.string.quran_home_no_favorite_ayahs),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Tap the heart icon on any ayah to add it here",
+                            text = stringResource(R.string.quran_home_favorite_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -466,7 +474,7 @@ private fun FavoritesTabContent(
                 key = { "fav_${it.ayahId}" }
             ) { favorite ->
                 val surahName = surahs.find { it.number == favorite.surahNumber }?.nameEnglish
-                    ?: "Surah ${favorite.surahNumber}"
+                    ?: stringResource(R.string.quran_home_surah_fallback, favorite.surahNumber)
                 FavoriteAyahItem(
                     surahName = surahName,
                     ayahNumber = favorite.ayahNumber,
@@ -504,12 +512,12 @@ private fun BookmarksTabContent(
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
-                            text = "No bookmarks yet",
+                            text = stringResource(R.string.quran_home_no_bookmarks),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "Tap the bookmark icon on any ayah to add it here",
+                            text = stringResource(R.string.quran_home_bookmark_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                         )
@@ -561,7 +569,7 @@ private fun BookmarkListItem(
             Spacer(modifier = Modifier.width(14.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = bookmark.surahName ?: "Surah ${bookmark.surahNumber}",
+                    text = bookmark.surahName ?: stringResource(R.string.quran_home_surah_fallback, bookmark.surahNumber),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -569,7 +577,7 @@ private fun BookmarkListItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Text(
-                    text = "Verse ${bookmark.ayahNumber}",
+                    text = stringResource(R.string.quran_home_verse_format, bookmark.ayahNumber),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -627,7 +635,7 @@ private fun FavoriteAyahItem(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Verse $ayahNumber",
+                    text = stringResource(R.string.quran_home_verse_format, ayahNumber),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -680,7 +688,7 @@ private fun KhatamProgressCard(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                     ) {
                         Text(
-                            text = "$completedCount completed",
+                            text = stringResource(R.string.quran_home_completed_count, completedCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -702,7 +710,7 @@ private fun KhatamProgressCard(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Ayahs Read",
+                            text = stringResource(R.string.quran_home_ayahs_read),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -715,7 +723,7 @@ private fun KhatamProgressCard(
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            text = "Remaining",
+                            text = stringResource(R.string.quran_home_remaining),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -750,7 +758,7 @@ private fun KhatamProgressCard(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = "${(progressFraction * 100).toInt()}% complete",
+                    text = stringResource(R.string.quran_home_percent_complete, (progressFraction * 100).toInt()),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)
@@ -781,13 +789,13 @@ private fun KhatamProgressCard(
                 )
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Start a Khatam",
+                        text = stringResource(R.string.quran_home_start_khatam),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = "Track your Quran reading progress",
+                        text = stringResource(R.string.quran_home_track_progress),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -822,7 +830,7 @@ private fun BookmarkCard(
             modifier = Modifier.padding(12.dp)
         ) {
             Text(
-                text = bookmark.surahName ?: "Surah ${bookmark.surahNumber}",
+                text = bookmark.surahName ?: stringResource(R.string.quran_home_surah_fallback, bookmark.surahNumber),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface,
@@ -831,7 +839,7 @@ private fun BookmarkCard(
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
-                text = "Verse ${bookmark.ayahNumber}",
+                text = stringResource(R.string.quran_home_verse_format, bookmark.ayahNumber),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -921,7 +929,7 @@ private fun JuzGrid(
                                         MaterialTheme.colorScheme.primary
                                 )
                                 Text(
-                                    text = "Juz",
+                                    text = stringResource(R.string.quran_home_juz_label),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = if (isComplete)
                                         MaterialTheme.colorScheme.onPrimaryContainer
@@ -963,9 +971,22 @@ private fun getJuzEndPage(juz: Int): Int = if (juz < 30) juzStartPages[juz] - 1 
  */
 @OptIn(ExperimentalMaterial3Api::class)
 private fun LazyListScope.pageGridItems(
-    onNavigateToPage: (Int) -> Unit
+    onNavigateToPage: (Int) -> Unit,
+    khatamReadAyahIds: Set<Int> = emptySet(),
+    isKhatamActive: Boolean = false,
+    pageAyahRanges: List<PageAyahRange> = emptyList()
 ) {
     val columns = 5
+
+    // Pre-compute page progress map
+    val pageProgressMap = if (isKhatamActive && pageAyahRanges.isNotEmpty()) {
+        pageAyahRanges.associate { range ->
+            val readCount = khatamReadAyahIds.count { it in range.minAyahId..range.maxAyahId }
+            range.page to (readCount to range.ayahCount)
+        }
+    } else {
+        emptyMap()
+    }
 
     // Jump-to-page input as first item
     item(key = "page_jump_input") {
@@ -977,8 +998,8 @@ private fun LazyListScope.pageGridItems(
                     jumpToPage = newValue
                 }
             },
-            label = { Text("Jump to Page (1-604)") },
-            placeholder = { Text("Enter page number") },
+            label = { Text(stringResource(R.string.quran_home_jump_to_page)) },
+            placeholder = { Text(stringResource(R.string.quran_home_enter_page_number)) },
             singleLine = true,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
@@ -1005,7 +1026,7 @@ private fun LazyListScope.pageGridItems(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                        contentDescription = "Go to page",
+                        contentDescription = stringResource(R.string.quran_home_go_to_page),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }
@@ -1030,7 +1051,7 @@ private fun LazyListScope.pageGridItems(
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Juz $juz (Pages $startPage-$endPage)",
+                    text = stringResource(R.string.quran_home_juz_pages_format, juz, startPage, endPage),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -1050,6 +1071,10 @@ private fun LazyListScope.pageGridItems(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 row.forEach { pageNumber ->
+                    val (readCount, totalCount) = pageProgressMap[pageNumber] ?: (0 to 0)
+                    val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
+                    val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+
                     Card(
                         onClick = { onNavigateToPage(pageNumber) },
                         modifier = Modifier
@@ -1057,18 +1082,34 @@ private fun LazyListScope.pageGridItems(
                             .aspectRatio(1f),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = if (isComplete)
+                                MaterialTheme.colorScheme.primaryContainer
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                         )
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
+                            // Progress ring when khatam is active and partially read
+                            if (isKhatamActive && progress > 0f && !isComplete) {
+                                CircularProgressIndicator(
+                                    progress = { progress },
+                                    modifier = Modifier.size(48.dp),
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                    strokeWidth = 3.dp
+                                )
+                            }
                             Text(
                                 text = pageNumber.toString(),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
+                                color = if (isComplete)
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                else
+                                    MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -1130,7 +1171,7 @@ private fun ContinueReadingCard(
                     .padding(20.dp)
             ) {
                 Text(
-                    text = "CONTINUE READING",
+                    text = stringResource(R.string.quran_home_continue_reading),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFF2DD4BF),
                     letterSpacing = 1.5.sp,
@@ -1140,7 +1181,7 @@ private fun ContinueReadingCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = surahName?.nameEnglish ?: "Surah $surahNumber",
+                    text = surahName?.nameEnglish ?: stringResource(R.string.quran_home_surah_fallback, surahNumber),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -1161,17 +1202,17 @@ private fun ContinueReadingCard(
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
                     Text(
-                        text = "Verse $ayahNumber",
+                        text = stringResource(R.string.quran_home_verse_format, ayahNumber),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD4D4D4)
                     )
                     Text(
-                        text = "Juz $juzNumber",
+                        text = stringResource(R.string.quran_home_juz_format, juzNumber),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD4D4D4)
                     )
                     Text(
-                        text = "Page $pageNumber",
+                        text = stringResource(R.string.quran_home_page_format, pageNumber),
                         style = MaterialTheme.typography.bodySmall,
                         color = Color(0xFFD4D4D4)
                     )
@@ -1246,7 +1287,7 @@ private fun SurahListItem(
                     if (isComplete) {
                         Icon(
                             imageVector = Icons.Filled.CheckCircle,
-                            contentDescription = "Completed",
+                            contentDescription = stringResource(R.string.quran_home_completed),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.size(36.dp)
                         )
@@ -1288,7 +1329,7 @@ private fun SurahListItem(
                     ) {
                         val isMeccan = surah.revelationType == RevelationType.MECCAN
                         Text(
-                            text = if (isMeccan) "Makkah" else "Madinah",
+                            text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(R.string.quran_home_madinah),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1298,7 +1339,7 @@ private fun SurahListItem(
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = "${surah.ayahCount} Verses",
+                            text = stringResource(R.string.quran_home_verses_count, surah.ayahCount),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1317,7 +1358,7 @@ private fun SurahListItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = "Surah Info",
+                        contentDescription = stringResource(R.string.quran_home_surah_info),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )

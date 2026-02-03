@@ -42,11 +42,11 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -55,7 +55,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.arshadshah.nimaz.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,7 +65,8 @@ import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -97,7 +100,15 @@ fun NotificationSettingsScreen(
     val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
     val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
     val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
+    val adhanPreviewError by viewModel.adhanPreviewError.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    LaunchedEffect(adhanPreviewError) {
+        adhanPreviewError?.let { error ->
+            Toast.makeText(context, error, Toast.LENGTH_LONG).show()
+            viewModel.clearAdhanPreviewError()
+        }
+    }
 
     // Individual prayer settings with per-prayer adhan toggles
     val prayers = listOf(
@@ -135,7 +146,7 @@ fun NotificationSettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Notifications",
+                title = stringResource(R.string.notifications),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -144,17 +155,15 @@ fun NotificationSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
             // Global Toggle
             item {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainer
-                ) {
+                NimazMenuGroup {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -163,13 +172,13 @@ fun NotificationSettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Enable Notifications",
+                                text = stringResource(R.string.notification_settings_enable),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "Receive prayer time alerts",
+                                text = stringResource(R.string.notification_settings_enable_subtitle),
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -182,74 +191,56 @@ fun NotificationSettingsScreen(
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
             }
 
             // Prayer Notifications Section
             if (notificationState.notificationsEnabled) {
                 item {
-                    NimazSectionTitle(text = "PRAYER NOTIFICATIONS", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_prayer_section))
                 }
 
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer
-                    ) {
-                        Column {
-                            prayers.forEachIndexed { index, prayer ->
-                                PrayerNotificationRow(
-                                    prayer = prayer,
-                                    onToggle = {
-                                        viewModel.onEvent(
-                                            SettingsEvent.SetPrayerNotification(
-                                                prayer.key,
-                                                !prayer.isEnabled
-                                            )
+                    NimazMenuGroup {
+                        prayers.forEachIndexed { index, prayer ->
+                            PrayerNotificationRow(
+                                prayer = prayer,
+                                onToggle = {
+                                    viewModel.onEvent(
+                                        SettingsEvent.SetPrayerNotification(
+                                            prayer.key,
+                                            !prayer.isEnabled
                                         )
-                                    },
-                                    onSoundToggle = {
-                                        // Toggle individual prayer's adhan setting
-                                        val currentState = when (prayer.key) {
-                                            "fajr" -> notificationState.fajrAdhanEnabled
-                                            "dhuhr" -> notificationState.dhuhrAdhanEnabled
-                                            "asr" -> notificationState.asrAdhanEnabled
-                                            "maghrib" -> notificationState.maghribAdhanEnabled
-                                            "isha" -> notificationState.ishaAdhanEnabled
-                                            else -> true
-                                        }
-                                        viewModel.onEvent(SettingsEvent.SetPrayerAdhanEnabled(prayer.key, !currentState))
-                                    },
-                                    globalAdhanEnabled = notificationState.adhanEnabled
-                                )
-                                if (index < prayers.lastIndex) {
-                                    Box(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp)
-                                            .height(1.dp)
-                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
                                     )
-                                }
+                                },
+                                onSoundToggle = {
+                                    // Toggle individual prayer's adhan setting
+                                    val currentState = when (prayer.key) {
+                                        "fajr" -> notificationState.fajrAdhanEnabled
+                                        "dhuhr" -> notificationState.dhuhrAdhanEnabled
+                                        "asr" -> notificationState.asrAdhanEnabled
+                                        "maghrib" -> notificationState.maghribAdhanEnabled
+                                        "isha" -> notificationState.ishaAdhanEnabled
+                                        else -> true
+                                    }
+                                    viewModel.onEvent(SettingsEvent.SetPrayerAdhanEnabled(prayer.key, !currentState))
+                                },
+                                globalAdhanEnabled = notificationState.adhanEnabled
+                            )
+                            if (index < prayers.lastIndex) {
+                                NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 // Adhan Sound Section
                 item {
-                    NimazSectionTitle(text = "ADHAN SOUND", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_adhan_section))
                 }
 
                 // Global Adhan Toggle
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer
-                    ) {
+                    NimazMenuGroup {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -258,13 +249,13 @@ fun NotificationSettingsScreen(
                         ) {
                             Column(modifier = Modifier.weight(1f)) {
                                 Text(
-                                    text = "Enable Adhan Sound",
+                                    text = stringResource(R.string.notification_settings_enable_adhan),
                                     style = MaterialTheme.typography.bodyLarge,
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface
                                 )
                                 Text(
-                                    text = "Play adhan at prayer times",
+                                    text = stringResource(R.string.notification_settings_enable_adhan_subtitle),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -277,19 +268,13 @@ fun NotificationSettingsScreen(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(12.dp))
                 }
 
                 // Muezzin Selection (only show if adhan is enabled)
                 if (notificationState.adhanEnabled) {
                     item {
-                        Surface(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(16.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainer
-                        ) {
-                            Column {
-                                adhanSounds.forEachIndexed { index, sound ->
+                        NimazMenuGroup {
+                            adhanSounds.forEachIndexed { index, sound ->
                                 val soundDownloadState = downloadState[sound]
                                 val isThisPlaying = isPlaying && currentlyPlaying == sound
                                 val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
@@ -315,107 +300,88 @@ fun NotificationSettingsScreen(
                                     }
                                 )
                                 if (index < adhanSounds.lastIndex) {
-                                    Box(
-                                        Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 16.dp)
-                                            .height(1.dp)
-                                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-                                    )
+                                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                }
                 } // End of if (notificationState.adhanEnabled)
 
                 // Additional Alerts Section
                 item {
-                    NimazSectionTitle(text = "ADDITIONAL ALERTS", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_additional_section))
                 }
 
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer
-                    ) {
-                        Column {
-                            // Pre-Adhan Reminder
-                            NimazSettingsItem(
-                                title = "Pre-Adhan Reminder",
-                                subtitle = "${notificationState.reminderMinutes} minutes before",
-                                checked = notificationState.showReminderBefore,
-                                onCheckedChange = {
-                                    viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
-                                }
-                            )
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    NimazMenuGroup {
+                        // Pre-Adhan Reminder
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_pre_adhan),
+                            subtitle = stringResource(R.string.notification_settings_pre_adhan_subtitle, notificationState.reminderMinutes),
+                            checked = notificationState.showReminderBefore,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
+                            }
+                        )
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                            // Sunrise Alert
-                            NimazSettingsItem(
-                                title = "Sunrise Alert",
-                                subtitle = "End of Fajr prayer time",
-                                checked = notificationState.sunriseNotification,
-                                onCheckedChange = {
-                                    viewModel.onEvent(
-                                        SettingsEvent.SetPrayerNotification(
-                                            "sunrise",
-                                            !notificationState.sunriseNotification
-                                        )
+                        // Sunrise Alert
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_sunrise),
+                            subtitle = stringResource(R.string.notification_settings_sunrise_subtitle),
+                            checked = notificationState.sunriseNotification,
+                            onCheckedChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetPrayerNotification(
+                                        "sunrise",
+                                        !notificationState.sunriseNotification
                                     )
-                                }
-                            )
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                                )
+                            }
+                        )
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                            // Friday Prayer Reminder (maps to persistent notification)
-                            NimazSettingsItem(
-                                title = "Friday Prayer Reminder",
-                                subtitle = "1 hour before Jummah",
-                                checked = notificationState.persistentNotification,
-                                onCheckedChange = {
-                                    viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification))
-                                }
-                            )
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        // Friday Prayer Reminder (maps to persistent notification)
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_friday_reminder),
+                            subtitle = stringResource(R.string.notification_settings_friday_subtitle),
+                            checked = notificationState.persistentNotification,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification))
+                            }
+                        )
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                            // Vibration
-                            NimazSettingsItem(
-                                title = "Vibration",
-                                subtitle = "Vibrate with notification",
-                                checked = notificationState.vibrationEnabled,
-                                onCheckedChange = {
-                                    viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
-                                }
-                            )
-                            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        // Vibration
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_vibration),
+                            subtitle = stringResource(R.string.notification_settings_vibration_subtitle),
+                            checked = notificationState.vibrationEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetVibrationEnabled(!notificationState.vibrationEnabled))
+                            }
+                        )
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                            // Honor Do Not Disturb
-                            NimazSettingsItem(
-                                title = "Honor Do Not Disturb",
-                                subtitle = "Skip adhan when DND is active",
-                                checked = notificationState.respectDnd,
-                                onCheckedChange = {
-                                    viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
-                                }
-                            )
-                        }
+                        // Honor Do Not Disturb
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_dnd),
+                            subtitle = stringResource(R.string.notification_settings_dnd_subtitle),
+                            checked = notificationState.respectDnd,
+                            onCheckedChange = {
+                                viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
+                            }
+                        )
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 // Troubleshooting Section
                 item {
-                    NimazSectionTitle(text = "TROUBLESHOOTING", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_troubleshooting_section))
                 }
 
                 item {
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer
-                    ) {
+                    NimazMenuGroup {
                         Column(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -423,7 +389,7 @@ fun NotificationSettingsScreen(
                             Button(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestNotification)
-                                    Toast.makeText(context, "Test notification sent", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.notification_settings_test_sent), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
@@ -434,13 +400,13 @@ fun NotificationSettingsScreen(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Test Notification")
+                                Text(stringResource(R.string.notification_settings_test))
                             }
 
                             Button(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestAllNotifications)
-                                    Toast.makeText(context, "Testing all prayer notifications...", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.notification_settings_test_all_sent), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
@@ -454,13 +420,13 @@ fun NotificationSettingsScreen(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Test All Prayers")
+                                Text(stringResource(R.string.notification_settings_test_all))
                             }
 
                             OutlinedButton(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.ResetNotifications)
-                                    Toast.makeText(context, "Notifications reset successfully", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.notification_settings_reset_success), Toast.LENGTH_SHORT).show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
@@ -471,27 +437,22 @@ fun NotificationSettingsScreen(
                                     modifier = Modifier.size(18.dp)
                                 )
                                 Spacer(modifier = Modifier.width(8.dp))
-                                Text("Reset Notifications")
+                                Text(stringResource(R.string.notification_settings_reset))
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 // Battery Optimization Section
                 item {
-                    NimazSectionTitle(text = "BATTERY OPTIMIZATION", modifier = Modifier.padding(start = 5.dp, bottom = 12.dp), uppercase = false)
+                    NimazSectionHeader(title = stringResource(R.string.notification_settings_battery_section))
                 }
 
                 item {
                     val powerManager = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
                     val isExempted = powerManager.isIgnoringBatteryOptimizations(context.packageName)
 
-                    Surface(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainer
-                    ) {
+                    NimazMenuGroup {
                         Column(modifier = Modifier.padding(16.dp)) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
@@ -499,14 +460,14 @@ fun NotificationSettingsScreen(
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
-                                        text = "Battery Optimization",
+                                        text = stringResource(R.string.notification_settings_battery_title),
                                         style = MaterialTheme.typography.bodyLarge,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onSurface
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = if (isExempted) "Disabled (recommended)" else "Enabled — may delay notifications",
+                                        text = if (isExempted) stringResource(R.string.notification_settings_battery_disabled) else stringResource(R.string.notification_settings_battery_enabled),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (isExempted) MaterialTheme.colorScheme.primary
                                         else Color(0xFFF59E0B)
@@ -515,7 +476,7 @@ fun NotificationSettingsScreen(
                                 if (isExempted) {
                                     Icon(
                                         imageVector = Icons.Default.Check,
-                                        contentDescription = "Exempted",
+                                        contentDescription = stringResource(R.string.notification_settings_battery_exempted),
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(24.dp)
                                     )
@@ -524,7 +485,7 @@ fun NotificationSettingsScreen(
                             if (!isExempted) {
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
-                                    text = "When battery optimization is enabled, Android may delay or skip prayer notifications to save battery. Disabling it ensures notifications arrive on time.",
+                                    text = stringResource(R.string.notification_settings_battery_explanation),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -541,26 +502,26 @@ fun NotificationSettingsScreen(
                                         contentColor = Color.White
                                     )
                                 ) {
-                                    Text("Disable Battery Optimization")
+                                    Text(stringResource(R.string.notification_settings_disable_battery))
                                 }
                             }
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
 
                 // Info Banner
                 item {
                     NimazBanner(
-                        message = "Make sure to enable notifications in your device settings and disable battery optimization for accurate prayer alerts.",
+                        message = stringResource(R.string.notification_settings_info_banner),
                         variant = NimazBannerVariant.INFO,
                         icon = Icons.Default.Info,
                         showBorder = true,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    Spacer(modifier = Modifier.height(24.dp))
                 }
             }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
@@ -598,7 +559,7 @@ private fun PrayerNotificationRow(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "Prayer notification",
+                text = stringResource(R.string.notification_settings_prayer_notification),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -619,7 +580,7 @@ private fun PrayerNotificationRow(
             Icon(
                 imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
                 else Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = if (prayer.isSoundOn) "Sound on" else "Sound off",
+                contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on) else stringResource(R.string.notification_settings_sound_off),
                 tint = when {
                     !globalAdhanEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     prayer.isSoundOn -> MaterialTheme.colorScheme.primary
@@ -691,7 +652,7 @@ private fun AdhanOptionRow(
                 if (isDownloaded) {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Downloaded",
+                        contentDescription = stringResource(R.string.notification_settings_downloaded),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(12.dp)
                     )
@@ -720,7 +681,7 @@ private fun AdhanOptionRow(
                 isPlaying -> {
                     Icon(
                         imageVector = Icons.Default.Stop,
-                        contentDescription = "Stop",
+                        contentDescription = stringResource(R.string.notification_settings_stop),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(16.dp)
                     )
@@ -728,7 +689,7 @@ private fun AdhanOptionRow(
                 !isDownloaded -> {
                     Icon(
                         imageVector = Icons.Default.Download,
-                        contentDescription = "Download and Play",
+                        contentDescription = stringResource(R.string.notification_settings_download_play),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -736,7 +697,7 @@ private fun AdhanOptionRow(
                 else -> {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Preview",
+                        contentDescription = stringResource(R.string.notification_settings_preview),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(16.dp)
                     )
@@ -822,4 +783,3 @@ private fun AdhanOptionRowDownloadingPreview() {
         )
     }
 }
-

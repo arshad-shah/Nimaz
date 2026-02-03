@@ -51,7 +51,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -75,7 +77,7 @@ fun DuaReaderScreen(
     Scaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = state.dua?.titleEnglish ?: "Loading...",
+                title = state.dua?.titleEnglish ?: stringResource(R.string.dua_reader_loading),
                 onBackClick = onNavigateBack,
                 subtitle = state.dua?.occasion?.displayName(),
                 actions = {
@@ -97,7 +99,7 @@ fun DuaReaderScreen(
                         Icon(
                             imageVector = if (isFavorite) Icons.Default.Bookmark
                             else Icons.Default.BookmarkBorder,
-                            contentDescription = "Favorite",
+                            contentDescription = stringResource(R.string.dua_reader_favorite),
                             tint = tint
                         )
                     }
@@ -132,7 +134,7 @@ fun DuaReaderScreen(
                             if (prevId != null && prevId.toInt() > 0) {
                                 viewModel.onEvent(DuaEvent.LoadDua(prevId))
                             } else {
-                                Toast.makeText(context, "This is the first dua", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(context, context.getString(R.string.dua_reader_first_dua), Toast.LENGTH_SHORT).show()
                             }
                         },
                         onNext = {
@@ -191,7 +193,7 @@ fun DuaReaderScreen(
                                 appendLine(dua.textEnglish)
                                 if (!dua.reference.isNullOrEmpty()) {
                                     appendLine()
-                                    appendLine("Source: ${dua.reference}")
+                                    appendLine(context.getString(R.string.dua_reader_source_label, dua.reference))
                                 }
                             }
                             val sendIntent = Intent().apply {
@@ -199,7 +201,7 @@ fun DuaReaderScreen(
                                 putExtra(Intent.EXTRA_TEXT, textToShare)
                                 type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, "Share"))
+                            context.startActivity(Intent.createChooser(sendIntent, context.getString(R.string.dua_reader_share)))
                         },
                         onDoneClick = onNavigateBack
                     )
@@ -245,7 +247,7 @@ private fun DuaNavigationBar(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Text(
-                        text = "Prev",
+                        text = stringResource(R.string.dua_reader_prev),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -253,7 +255,7 @@ private fun DuaNavigationBar(
             }
 
             Text(
-                text = "${currentIndex} of ...",
+                text = stringResource(R.string.dua_reader_index_format, currentIndex),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -270,7 +272,7 @@ private fun DuaNavigationBar(
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "Next",
+                        text = stringResource(R.string.dua_reader_next),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -373,7 +375,7 @@ private fun DuaCard(
                         if (!dua.reference.isNullOrEmpty()) {
                             MetaItem(
                                 icon = Icons.Default.Book,
-                                label = "Source",
+                                label = stringResource(R.string.dua_reader_source),
                                 value = dua.reference
                             )
                         }
@@ -383,8 +385,8 @@ private fun DuaCard(
                             if (count > 0) {
                                 MetaItem(
                                     icon = Icons.Default.Refresh,
-                                    label = "Recommended",
-                                    value = "Recite $count time${if (count > 1) "s" else ""}"
+                                    label = stringResource(R.string.dua_reader_recommended),
+                                    value = if (count > 1) stringResource(R.string.dua_reader_recite_times, count) else stringResource(R.string.dua_reader_recite_once, count)
                                 )
                             }
                         }
@@ -460,13 +462,13 @@ private fun RecitationCounter(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Recitation Counter",
+                    text = stringResource(R.string.dua_reader_recitation_counter),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Target: ${targetCount}x",
+                    text = stringResource(R.string.dua_reader_target_format, targetCount),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -565,7 +567,7 @@ private fun VirtueCard(
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             Text(
-                text = "Virtue of this Dua",
+                text = stringResource(R.string.dua_reader_virtue),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -621,7 +623,7 @@ private fun BottomActions(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Share",
+                        text = stringResource(R.string.dua_reader_share),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -648,7 +650,7 @@ private fun BottomActions(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Done",
+                        text = stringResource(R.string.dua_reader_done),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimary
                     )

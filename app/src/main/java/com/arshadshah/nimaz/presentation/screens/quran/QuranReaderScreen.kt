@@ -366,6 +366,31 @@ fun QuranReaderScreen(
                     }
                 },
                 actions = {
+                    // Khatam progress indicator
+                    if (state.activeKhatamId != null) {
+                        val khatamProgress = if (com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS > 0)
+                            state.khatamReadAyahIds.size.toFloat() / com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS
+                        else 0f
+                        Box(
+                            modifier = Modifier
+                                .padding(end = 4.dp)
+                                .size(32.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator(
+                                progress = { khatamProgress },
+                                modifier = Modifier.size(28.dp),
+                                color = MaterialTheme.colorScheme.tertiary,
+                                trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                strokeWidth = 3.dp
+                            )
+                            Text(
+                                text = "${(khatamProgress * 100).toInt()}%",
+                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 7.sp),
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
+                    }
                     if (state.activeKhatamId == null && (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ)) {
                         IconButton(onClick = { usePageView = !usePageView }) {
                             Icon(

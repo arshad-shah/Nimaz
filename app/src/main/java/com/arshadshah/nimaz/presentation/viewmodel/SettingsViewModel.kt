@@ -37,13 +37,11 @@ enum class AppLanguage(
     val flag: String
 ) {
     ENGLISH("en", "English", "English", "GB"),
-    ARABIC("ar", "Arabic", "العربية", "SA"),
     TURKISH("tr", "Turkish", "Türkçe", "TR"),
     INDONESIAN("id", "Indonesian", "Bahasa Indonesia", "ID"),
     MALAY("ms", "Malay", "Bahasa Melayu", "MY"),
     FRENCH("fr", "French", "Français", "FR"),
-    GERMAN("de", "German", "Deutsch", "DE"),
-    URDU("ur", "Urdu", "اردو", "PK")
+    GERMAN("de", "German", "Deutsch", "DE")
 }
 
 enum class AsrJuristicMethod {
@@ -236,6 +234,13 @@ class SettingsViewModel @Inject constructor(
     private val _shouldRestart = MutableStateFlow(false)
     val shouldRestart: StateFlow<Boolean> = _shouldRestart.asStateFlow()
 
+    private val _adhanPreviewError = MutableStateFlow<String?>(null)
+    val adhanPreviewError: StateFlow<String?> = _adhanPreviewError.asStateFlow()
+
+    fun clearAdhanPreviewError() {
+        _adhanPreviewError.value = null
+    }
+
     init {
         loadSettings()
         loadLocations()
@@ -399,16 +404,20 @@ class SettingsViewModel @Inject constructor(
             SettingsEvent.PreviewAdhanSound -> {
                 val sound = AdhanSound.fromName(_notificationState.value.selectedAdhanSound)
                 viewModelScope.launch {
-                    // Check if downloaded, if not download first
-                    if (!adhanAudioManager.isDownloaded(sound, false)) {
-                        // Download the regular adhan first
-                        val success = adhanAudioManager.downloadAdhan(sound, false)
-                        if (!success) {
-                            return@launch
+                    try {
+                        // Ensure both variants are downloaded
+                        if (!adhanAudioManager.isFullyDownloaded(sound)) {
+                            val success = adhanAudioManager.downloadAdhanWithFajr(sound)
+                            if (!success) {
+                                _adhanPreviewError.value = "Failed to download adhan audio. Please check your internet connection."
+                                return@launch
+                            }
                         }
+                        // Now play the preview
+                        adhanAudioManager.preview(sound, false)
+                    } catch (e: Exception) {
+                        _adhanPreviewError.value = "Failed to play adhan preview: ${e.message}"
                     }
-                    // Now play the preview
-                    adhanAudioManager.preview(sound, false)
                 }
             }
             SettingsEvent.StopAdhanPreview -> {

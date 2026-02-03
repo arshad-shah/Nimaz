@@ -38,6 +38,7 @@ import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.IncrementAyahsReadUseCase
 import com.arshadshah.nimaz.domain.usecase.IsAyahBookmarkedUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleQuranBookmarkUseCase
@@ -198,7 +199,8 @@ object UseCaseModule {
             getReadingProgress = GetReadingProgressUseCase(repository),
             updateReadingPosition = UpdateReadingPositionUseCase(repository),
             incrementAyahsRead = IncrementAyahsReadUseCase(repository),
-            getSurahInfo = GetSurahInfoUseCase(repository)
+            getSurahInfo = GetSurahInfoUseCase(repository),
+            getPageAyahRanges = GetPageAyahRangesUseCase(repository)
         )
     }
 

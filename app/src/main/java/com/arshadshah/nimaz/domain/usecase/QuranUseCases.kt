@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -149,6 +150,12 @@ class GetSurahInfoUseCase @Inject constructor(
     suspend operator fun invoke(surahNumber: Int): SurahInfo? = repository.getSurahInfo(surahNumber)
 }
 
+class GetPageAyahRangesUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(): List<PageAyahRange> = repository.getPageAyahRanges()
+}
+
 // Wrapper class for all Quran use cases
 data class QuranUseCases(
     val getSurahList: GetSurahListUseCase,
@@ -169,5 +176,6 @@ data class QuranUseCases(
     val getReadingProgress: GetReadingProgressUseCase,
     val updateReadingPosition: UpdateReadingPositionUseCase,
     val incrementAyahsRead: IncrementAyahsReadUseCase,
-    val getSurahInfo: GetSurahInfoUseCase
+    val getSurahInfo: GetSurahInfoUseCase,
+    val getPageAyahRanges: GetPageAyahRangesUseCase
 )

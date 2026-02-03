@@ -13,9 +13,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -31,13 +29,13 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionOption
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsSection
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
 import com.arshadshah.nimaz.presentation.viewmodel.HighLatitudeRule
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -72,13 +70,18 @@ fun PrayerSettingsScreen(
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            item { Spacer(modifier = Modifier.height(4.dp)) }
+
             // Calculation Method Section
             item {
-                NimazSettingsSection(title = "CALCULATION METHOD") {
+                NimazSectionHeader(title = "Calculation Method")
+            }
+            item {
+                NimazMenuGroup {
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
                         tintIcon = true,
@@ -86,7 +89,7 @@ fun PrayerSettingsScreen(
                         value = prayerState.calculationMethod.displayName(),
                         onClick = { showCalculationMethodDialog = true }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
                         title = "Asr Calculation",
@@ -96,7 +99,7 @@ fun PrayerSettingsScreen(
                         },
                         onClick = { showAsrMethodDialog = true }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
                         title = "High Latitude Method",
@@ -124,7 +127,10 @@ fun PrayerSettingsScreen(
 
             // Manual Adjustments Section
             item {
-                NimazSettingsSection(title = "MANUAL ADJUSTMENTS (MINUTES)") {
+                NimazSectionHeader(title = "Manual Adjustments (Minutes)")
+            }
+            item {
+                NimazMenuGroup {
                     NimazNumberStepper(
                         label = "Fajr",
                         value = prayerState.fajrAdjustment,
@@ -132,7 +138,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("fajr", it))
                         }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
                         label = "Sunrise",
                         value = prayerState.sunriseAdjustment,
@@ -140,7 +146,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("sunrise", it))
                         }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
                         label = "Dhuhr",
                         value = prayerState.dhuhrAdjustment,
@@ -148,7 +154,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("dhuhr", it))
                         }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
                         label = "Asr",
                         value = prayerState.asrAdjustment,
@@ -156,7 +162,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("asr", it))
                         }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
                         label = "Maghrib",
                         value = prayerState.maghribAdjustment,
@@ -164,7 +170,7 @@ fun PrayerSettingsScreen(
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("maghrib", it))
                         }
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
                         label = "Isha",
                         value = prayerState.ishaAdjustment,
@@ -177,14 +183,17 @@ fun PrayerSettingsScreen(
 
             // Notifications Section
             item {
-                NimazSettingsSection(title = "NOTIFICATIONS") {
+                NimazSectionHeader(title = "Notifications")
+            }
+            item {
+                NimazMenuGroup {
                     NimazSettingsItem(
                         icon = Icons.Default.Notifications,
                         title = "Adhan Notifications",
                         value = "All prayers enabled",
                         onClick = onNavigateToNotifications
                     )
-                    NimazDivider()
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
                         title = "Pre-Adhan Reminder",
@@ -265,4 +274,3 @@ fun PrayerSettingsScreen(
         )
     }
 }
-

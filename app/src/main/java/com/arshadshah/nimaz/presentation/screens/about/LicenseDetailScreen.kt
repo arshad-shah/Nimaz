@@ -27,7 +27,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import com.arshadshah.nimaz.R
 import androidx.compose.ui.unit.dp
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
@@ -53,7 +55,7 @@ fun LicenseDetailScreen(
             library = libs.libraries.find { it.hashCode() == libraryHashCode }
         }
         if (library == null) {
-            error = "Library not found"
+            error = context.getString(R.string.license_detail_library_not_found)
         }
         isLoading = false
     }
@@ -62,7 +64,7 @@ fun LicenseDetailScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = library?.name ?: "License Detail",
+                title = library?.name ?: stringResource(R.string.license_detail_title),
                 onBackClick = onNavigateBack
             )
         }
@@ -86,7 +88,7 @@ fun LicenseDetailScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = error ?: "Unknown error",
+                        text = error ?: stringResource(R.string.unknown_error),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -135,7 +137,7 @@ private fun LibraryDetailContent(
 
                 library.artifactVersion?.let { version ->
                     Text(
-                        text = "Version $version",
+                        text = stringResource(R.string.license_detail_version, version),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -143,7 +145,7 @@ private fun LibraryDetailContent(
 
                 library.developers.firstOrNull()?.name?.let { author ->
                     Text(
-                        text = "Author: $author",
+                        text = stringResource(R.string.license_detail_author, author),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
