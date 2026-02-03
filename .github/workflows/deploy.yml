@@ -34,6 +34,13 @@ jobs:
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
 
+      - name: Decode Service Account Key JSON File
+        uses: timheuer/base64-to-file@v1
+        id: service_account_json_file
+        with:
+          fileName: "serviceAccount.json"
+          encodedString: ${{ secrets.PLAY_STORE_CONFIG_JSON }}
+
       - name: Decode Keystore File
         uses: timheuer/base64-to-file@v1
         id: android_keystore
@@ -41,17 +48,18 @@ jobs:
           fileName: "android_keystore.keystore"
           encodedString: ${{ secrets.KEYSTORE_FILE }}
 
-      - name: Build signed release AAB
-        run: bundle exec fastlane android build_only
+      - name: Build & deploy Android release
+        run: bundle exec fastlane android deploy_internal
         env:
           KEYSTORE_FILE: ${{ steps.android_keystore.outputs.filePath }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: signed-release-aab
+          name: assets
           path: |
             ${{ github.workspace }}/app/build/outputs/bundle/release
