@@ -12,6 +12,11 @@ platform :android do
       gradle(task: "lint")
     end
 
+  desc "Build and sign release AAB without uploading to Play Store"
+  lane :build_only do
+    build_and_sign_apk_or_aab
+  end
+
   desc "Deploy a new version to the Google Play internal track"
   lane :deploy_internal do
     build_and_sign_apk_or_aab
