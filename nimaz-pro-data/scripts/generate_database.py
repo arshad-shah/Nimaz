@@ -304,6 +304,52 @@ def create_tables(conn):
     cursor.execute('CREATE INDEX IF NOT EXISTS index_makeup_fasts_originalDate ON makeup_fasts(originalDate)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_makeup_fasts_status ON makeup_fasts(status)')
 
+    # Khatams (Quran completion tracking)
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS khatams (
+            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            name TEXT NOT NULL,
+            notes TEXT,
+            status TEXT NOT NULL DEFAULT 'active',
+            is_active INTEGER NOT NULL DEFAULT 0,
+            daily_target INTEGER NOT NULL DEFAULT 20,
+            deadline INTEGER,
+            reminder_enabled INTEGER NOT NULL DEFAULT 0,
+            reminder_time TEXT,
+            total_ayahs_read INTEGER NOT NULL DEFAULT 0,
+            created_at INTEGER NOT NULL,
+            started_at INTEGER,
+            completed_at INTEGER,
+            updated_at INTEGER NOT NULL
+        )
+    ''')
+
+    # Khatam Ayahs
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS khatam_ayahs (
+            khatam_id INTEGER NOT NULL,
+            ayah_id INTEGER NOT NULL,
+            read_at INTEGER NOT NULL,
+            PRIMARY KEY(khatam_id, ayah_id),
+            FOREIGN KEY(khatam_id) REFERENCES khatams(id) ON DELETE CASCADE
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_khatam_ayahs_khatam_id ON khatam_ayahs(khatam_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_khatam_ayahs_ayah_id ON khatam_ayahs(ayah_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_khatam_ayahs_read_at ON khatam_ayahs(read_at)')
+
+    # Khatam Daily Log
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS khatam_daily_log (
+            khatam_id INTEGER NOT NULL,
+            date INTEGER NOT NULL,
+            ayahs_read INTEGER NOT NULL DEFAULT 0,
+            PRIMARY KEY(khatam_id, date),
+            FOREIGN KEY(khatam_id) REFERENCES khatams(id) ON DELETE CASCADE
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_khatam_daily_log_khatam_id ON khatam_daily_log(khatam_id)')
+
     # Tasbih Sessions
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS tasbih_sessions (
@@ -734,6 +780,11 @@ def main():
 
     print("\nPopulating database...")
     populate_database(conn)
+
+    # Set Room database version so migrations are skipped
+    conn.execute("PRAGMA user_version = 10")
+    conn.commit()
+    print("\nSet user_version = 10 (Room schema version)")
 
     conn.close()
 

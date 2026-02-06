@@ -1,8 +1,10 @@
 name: Android Build & Deploy
 
 on:
+  push:
+    branches: [ dev ]
   pull_request:
-    branches: [ master ]
+    branches: [ dev ]
 
 jobs:
   deploy:
@@ -12,6 +14,10 @@ jobs:
         with:
           fetch-depth: 0
           ref: ${{ github.head_ref }}
+          lfs: true  # Enable Git LFS checkout
+
+      - name: Checkout LFS objects
+        run: git lfs checkout
 
       - name: Switch to PR branch and setup Git
         run: |
@@ -20,19 +26,30 @@ jobs:
           git config --global user.name "CI-Bot"
 
       - name: Setup JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v2.5.0
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
 
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3
+          ruby-version: 3.1.4
           bundler-cache: true
 
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
+
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: |
+          mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
 
       - name: Decode Service Account Key JSON File
         uses: timheuer/base64-to-file@v1
@@ -53,12 +70,12 @@ jobs:
         env:
           KEYSTORE_FILE: ${{ steps.android_keystore.outputs.filePath }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS}}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: assets
           path: |

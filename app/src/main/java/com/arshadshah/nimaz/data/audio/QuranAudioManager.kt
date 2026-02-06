@@ -54,6 +54,7 @@ data class AudioState(
         get() = if (duration > 0) position.toFloat() / duration else 0f
 }
 
+@UnstableApi
 @Singleton
 class QuranAudioManager @Inject constructor(
     @ApplicationContext private val context: Context
