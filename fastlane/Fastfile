@@ -1,7 +1,5 @@
 default_platform(:android)
 
-METADATA_PATH = "fastlane/metadata/android"
-
 platform :android do
   desc "Runs all the tests"
     lane :test do
@@ -14,28 +12,51 @@ platform :android do
       gradle(task: "lint")
     end
 
-  desc "Build and sign release AAB without uploading to Play Store"
-  lane :build_only do
-    build_and_sign_apk_or_aab
-  end
 
-  desc "Deploy to a Google Play track (internal, beta, or production). Usage: fastlane deploy track:internal"
-  lane :deploy do |options|
-    track = options[:track] || "internal"
-    UI.message("Deploying to track: #{track}")
+  desc "Deploy a new version to the Google Play internal track"
+  lane :deploy_internal do
     build_and_sign_apk_or_aab
     upload_to_play_store(
-      track: track,
-      json_key: ENV["ANDROID_JSON_KEY_FILE"],
-      skip_upload_metadata: false,
-      skip_upload_changelogs: false,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
-      metadata_path: METADATA_PATH
+      track: "internal",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
+    )
+  end
+
+  desc "Deploy a new version to the Google Play beta track"
+  lane :deploy_beta do
+    build_and_sign_apk_or_aab
+    upload_to_play_store(
+      track: "beta",
+      json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
+    )
+  end
+
+  private_lane :fetch_and_increment_build_number do
+    sh "git config user.email 'CI@BOT.com'"
+    sh "git config user.name 'CI-BOT'"
+    increment_version_code(
+            app_project_dir: "**/app",
+      )
+    increment_version_name(app_project_dir: '**/app', bump_type: 'patch')
+    git_add(path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle")
+    git_commit(
+          path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
+          message: "Bumped Version Code and name"
+        )
+    # Get the current branch name
+    current_branch = sh('git rev-parse --abbrev-ref HEAD').strip
+
+    push_to_git_remote(
+      remote: "origin",
+      local_branch: current_branch,
+      remote_branch: current_branch,
+      tags: true
     )
   end
 
   private_lane :build_and_sign_apk_or_aab do
+    fetch_and_increment_build_number
+
     gradle(
       task: "bundle",
       build_type: "release",
