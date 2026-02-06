@@ -39,8 +39,6 @@ object DatabaseModule {
             NimazDatabase.DATABASE_NAME
         )
             .createFromAsset("database/nimaz_prepopulated.db")
-            .addMigrations(NimazDatabase.MIGRATION_7_8, NimazDatabase.MIGRATION_8_9)
-            .fallbackToDestructiveMigration(dropAllTables = true)
             .build()
     }
 
