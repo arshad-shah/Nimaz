@@ -2,18 +2,7 @@ name: Android Build & Deploy
 
 on:
   pull_request:
-    branches: [ master ]
-  workflow_dispatch:
-    inputs:
-      track:
-        description: "Play Store track to deploy to"
-        required: true
-        default: "internal"
-        type: choice
-        options:
-          - internal
-          - beta
-          - production
+    branches: [ dev ]
 
 jobs:
   deploy:
@@ -22,27 +11,43 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref || github.ref }}
+          ref: ${{ github.head_ref }}
+          lfs: true  # Enable Git LFS checkout
 
-      - name: Setup Git
+      - name: Checkout LFS objects
+        run: git lfs checkout
+
+      - name: Switch to PR branch and setup Git
         run: |
+          git checkout ${{ github.head_ref }}
           git config --global user.email "CI@bot.com"
           git config --global user.name "CI-Bot"
 
       - name: Setup JDK
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v2.5.0
         with:
           distribution: temurin
-          java-version: "21"
+          java-version: "17"
 
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3
+          ruby-version: 3.1.4
           bundler-cache: true
 
       - name: Set execution flag for gradlew
         run: chmod +x gradlew
+
+      - name: Decode Firebase Config
+        uses: timheuer/base64-to-file@v1
+        id: firebase_config
+        with:
+          fileName: "google-services.json"
+          encodedString: ${{ secrets.FIREBASE_CONFIG }}
+
+      - name: Move Firebase Config
+        run: |
+          mv ${{ steps.firebase_config.outputs.filePath }} app/google-services.json
 
       - name: Decode Service Account Key JSON File
         uses: timheuer/base64-to-file@v1
@@ -58,95 +63,17 @@ jobs:
           fileName: "android_keystore.keystore"
           encodedString: ${{ secrets.KEYSTORE_FILE }}
 
-      - name: Generate AI release notes and prepare changelogs
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          set -euo pipefail
-
-          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts)
-          VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
-          echo "Detected versionCode=$VERSION_CODE versionName=$VERSION_NAME"
-
-          # --- Collect git commits since last tag (or last 50 commits) ---
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          if [ -n "$LAST_TAG" ]; then
-            COMMITS=$(git log "$LAST_TAG"..HEAD --pretty=format:"- %s" --no-merges | head -50)
-          else
-            COMMITS=$(git log --pretty=format:"- %s" --no-merges -50)
-          fi
-
-          if [ -z "$COMMITS" ]; then
-            COMMITS="- Bug fixes and improvements"
-          fi
-
-          echo "--- Commits being sent to AI ---"
-          echo "$COMMITS"
-
-          # --- If RELEASE_NOTES.md exists, use it as manual override ---
-          if [ -f "RELEASE_NOTES.md" ] && [ -s "RELEASE_NOTES.md" ]; then
-            MANUAL_NOTES=$(cat RELEASE_NOTES.md)
-            # Only use manual notes if they are not the default template
-            if echo "$MANUAL_NOTES" | grep -q "Complete app rewrite"; then
-              echo "RELEASE_NOTES.md contains initial template, generating fresh notes from commits..."
-              USE_MANUAL=false
-            else
-              echo "Using manual RELEASE_NOTES.md as override"
-              USE_MANUAL=true
-            fi
-          else
-            USE_MANUAL=false
-          fi
-
-          if [ "$USE_MANUAL" = true ]; then
-            RELEASE_NOTES="$MANUAL_NOTES"
-          elif [ -z "${OPENAI_API_KEY:-}" ]; then
-            echo "WARNING: OPENAI_API_KEY secret is not set. Falling back to default release notes."
-            RELEASE_NOTES="Bug fixes and improvements."
-          else
-            # --- Build prompt from template file + commits ---
-            PROMPT=$(cat .github/release-notes-prompt.txt)
-            PROMPT="${PROMPT}${COMMITS}"
-            PROMPT_JSON=$(echo "$PROMPT" | python3 -c 'import sys,json; print(json.dumps(sys.stdin.read()))')
-
-            # --- Call OpenAI API ---
-            HTTP_CODE=$(curl -s -o /tmp/openai_response.json -w "%{http_code}" https://api.openai.com/v1/chat/completions -H "Content-Type: application/json" -H "Authorization: Bearer $OPENAI_API_KEY" -d "{\"model\":\"gpt-4o-mini\",\"messages\":[{\"role\":\"user\",\"content\":$PROMPT_JSON}],\"max_tokens\":300,\"temperature\":0.7}")
-
-            if [ "$HTTP_CODE" -ne 200 ]; then
-              echo "WARNING: OpenAI API returned HTTP $HTTP_CODE:"
-              cat /tmp/openai_response.json
-              echo ""
-              RELEASE_NOTES="Bug fixes and improvements."
-            else
-              RELEASE_NOTES=$(python3 -c "import json;d=json.load(open('/tmp/openai_response.json'));print(d['choices'][0]['message']['content'].strip() if d.get('choices') else 'Bug fixes and improvements.')" | head -c 500)
-            fi
-          fi
-
-          echo "--- Generated Release Notes ---"
-          echo "$RELEASE_NOTES"
-
-          # --- Write changelogs for all locales ---
-          LOCALES="en-US de-DE fr-FR id ms tr-TR ar ur"
-          for LOCALE in $LOCALES; do
-            CHANGELOG_DIR="fastlane/metadata/android/${LOCALE}/changelogs"
-            mkdir -p "$CHANGELOG_DIR"
-            echo "$RELEASE_NOTES" > "${CHANGELOG_DIR}/${VERSION_CODE}.txt"
-          done
-
-          echo "Changelogs written for versionCode=$VERSION_CODE across $LOCALES"
-
       - name: Build & deploy Android release
-        run: bundle exec fastlane android deploy track:${{ github.event.inputs.track || 'internal' }}
+        run: bundle exec fastlane android deploy_internal
         env:
           KEYSTORE_FILE: ${{ steps.android_keystore.outputs.filePath }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS}}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           ANDROID_JSON_KEY_FILE: ${{ steps.service_account_json_file.outputs.filePath }}
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.0
         with:
           name: assets
           path: |
