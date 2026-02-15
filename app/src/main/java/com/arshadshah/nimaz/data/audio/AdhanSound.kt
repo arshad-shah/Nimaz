@@ -17,9 +17,10 @@ enum class AdhanSound(
         origin = "Kuwait",
         fileName = "adhan_mishary.mp3",
         fajrFileName = "adhan_mishary_fajr.mp3",
-        // Source: Internet Archive - Public domain
-        downloadUrl = "https://archive.org/download/AdhanMisharyRashid/Adhan%20Mishary%20Rashid.mp3",
-        fajrDownloadUrl = "https://archive.org/download/AdhanFajrAndDuaBySyeikhMisharyRashidAlAfasy/Adhan%20Fajr%20and%20dua%20by%20Syeikh%20Mishary%20Rashid%20Al%20Afasy.mp3"
+        // Source: Assabile.com - Regular adhan (Kuwait)
+        downloadUrl = "https://media.assabile.com/assabile/adhan_3435370/b45e93f1efb3.mp3",
+        // Source: Assabile.com - Fajr adhan (Kuwait)
+        fajrDownloadUrl = "https://media.assabile.com/assabile/adhan_3435370/ddb21f7363eb.mp3"
     ),
     ABDUL_BASIT(
         displayName = "Abdul Basit Abdul Samad",

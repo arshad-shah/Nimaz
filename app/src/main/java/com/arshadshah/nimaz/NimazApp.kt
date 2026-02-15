@@ -93,15 +93,23 @@ class NimazApp : Application(), Configuration.Provider {
 
     /**
      * Downloads the default adhan (Mishary) on first launch if not already downloaded.
-     * This ensures adhans are ready for notifications.
+     * Also validates existing files and re-downloads if corrupted.
      */
     private fun downloadDefaultAdhanIfNeeded() {
         CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
-                // Check if default adhan is already downloaded
+                // Clean up stale temp files from interrupted downloads
+                adhanAudioManager.cleanupTempFiles()
+
+                // Delete files from old URL versions so they get re-downloaded
+                adhanAudioManager.invalidateStaleDownloads()
+
+                // isFullyDownloaded now validates file content (magic bytes + size),
+                // so corrupted files will be caught and re-downloaded
                 val defaultSound = AdhanSound.MISHARY
-                if (!adhanAudioManager.isFullyDownloaded(defaultSound)) {
-                    // Start the download service
+                val beepReady = adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
+
+                if (!adhanAudioManager.isFullyDownloaded(defaultSound) || !beepReady) {
                     AdhanDownloadService.downloadDefault(this@NimazApp)
                 }
             } catch (e: Exception) {
