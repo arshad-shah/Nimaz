@@ -44,6 +44,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -148,10 +149,12 @@ fun QuranHomeScreen(
             )
         }
     ) { paddingValues ->
+        val bottomNavPadding = LocalBottomNavPadding.current
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .padding(bottom = bottomNavPadding)
         ) {
             // Top-level tabs: Home / Browse / Favorites (Bookmarks moved to topbar icon)
             NimazPillTabs(

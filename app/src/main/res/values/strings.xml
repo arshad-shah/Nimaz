@@ -399,6 +399,8 @@
     <string name="quick_presets">QUICK PRESETS</string>
     <string name="target_format">Target: %d</string>
     <string name="tap_to_count">Tap to count</string>
+    <string name="free_count">Free</string>
+    <string name="free_count_label">Free Count</string>
     <string name="reset_action">Reset</string>
     <string name="toggle_sound">Toggle Sound</string>
     <string name="toggle_vibration">Toggle Vibration</string>

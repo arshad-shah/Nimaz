@@ -22,16 +22,18 @@ data class NimazStatData(
 @Composable
 fun NimazStatsGrid(
     stats: List<NimazStatData>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    compact: Boolean = false
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        horizontalArrangement = Arrangement.spacedBy(if (compact) 6.dp else 10.dp)
     ) {
         stats.forEach { stat ->
             NimazStatCard(
                 value = stat.value,
                 label = stat.label,
+                compact = compact,
                 valueColor = stat.color ?: MaterialTheme.colorScheme.primary,
                 modifier = Modifier.weight(1f)
             )

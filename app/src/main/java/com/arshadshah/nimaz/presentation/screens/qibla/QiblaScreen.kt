@@ -45,6 +45,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -188,9 +189,11 @@ fun QiblaScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
     ) { paddingValues ->
+        val bottomNavPadding = LocalBottomNavPadding.current
         Box(
             modifier = Modifier
                 .padding(paddingValues)
+                .padding(bottom = bottomNavPadding)
                 .fillMaxSize()
                 .background(
                     if (state.isArMode) Color.Black

@@ -6,10 +6,13 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
+import android.util.Log
 import androidx.glance.appwidget.updateAll
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidget
 import com.arshadshah.nimaz.widget.prayertimes.PrayerTimesWidget
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 
 /**
@@ -22,6 +25,7 @@ object WidgetUpdateScheduler {
     private const val ACTION_WIDGET_TICK = "com.arshadshah.nimaz.ACTION_WIDGET_TICK"
     private const val REQUEST_CODE = 9876
     private const val INTERVAL_MS = 60_000L // 1 minute
+    private const val TAG = "WidgetUpdateScheduler"
 
     fun schedule(context: Context) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -82,16 +86,21 @@ object WidgetUpdateScheduler {
 }
 
 class WidgetTickReceiver : BroadcastReceiver() {
-    private val scope = MainScope()
 
     override fun onReceive(context: Context, intent: Intent?) {
-        scope.launch {
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
             try {
                 NextPrayerWidget().updateAll(context)
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.e("WidgetTickReceiver", "Failed to update NextPrayerWidget", e)
+            }
             try {
                 PrayerTimesWidget().updateAll(context)
-            } catch (_: Exception) {}
+            } catch (e: Exception) {
+                Log.e("WidgetTickReceiver", "Failed to update PrayerTimesWidget", e)
+            }
+            pendingResult.finish()
         }
     }
 }

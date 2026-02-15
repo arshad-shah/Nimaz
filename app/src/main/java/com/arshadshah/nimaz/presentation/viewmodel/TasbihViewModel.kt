@@ -74,6 +74,7 @@ sealed interface TasbihEvent {
     data class ToggleVibration(val enabled: Boolean) : TasbihEvent
     data class ToggleSound(val enabled: Boolean) : TasbihEvent
     data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
+    data object ClearPreset : TasbihEvent
     data object Increment : TasbihEvent
     data object Reset : TasbihEvent
     data object StartSession : TasbihEvent
@@ -129,8 +130,9 @@ class TasbihViewModel @Inject constructor(
     fun onEvent(event: TasbihEvent) {
         when (event) {
             is TasbihEvent.SelectPreset -> selectPreset(event.preset)
+            TasbihEvent.ClearPreset -> clearPreset()
             is TasbihEvent.FilterByCategory -> filterByCategory(event.category)
-            is TasbihEvent.SetTargetCount -> _counterState.update { it.copy(targetCount = event.count) }
+            is TasbihEvent.SetTargetCount -> setTargetCount(event.count)
             is TasbihEvent.CreateCustomPreset -> createCustomPreset(event.preset)
             is TasbihEvent.UpdateCustomPreset -> updateCustomPreset(event.preset)
             is TasbihEvent.DeleteCustomPreset -> deleteCustomPreset(event.presetId)
@@ -166,6 +168,67 @@ class TasbihViewModel @Inject constructor(
                         isLoading = false
                     )
                 }
+            }
+        }
+    }
+
+    private fun clearPreset() {
+        val currentSession = _counterState.value.currentSession
+        val currentCount = _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
+
+        if (currentSession != null && currentCount > 0) {
+            timerJob?.cancel()
+            val completedAt = System.currentTimeMillis()
+            val duration = completedAt - currentSession.startedAt
+
+            viewModelScope.launch {
+                tasbihRepository.completeSession(currentSession.id, completedAt, duration)
+                loadHistory()
+                loadStats()
+            }
+        }
+
+        _counterState.update {
+            it.copy(
+                selectedPreset = null,
+                targetCount = 33,
+                count = 0,
+                laps = 0,
+                currentSession = null,
+                isActive = false,
+                elapsedTimeMs = 0
+            )
+        }
+    }
+
+    private fun setTargetCount(newTarget: Int) {
+        val safeTarget = newTarget.coerceAtLeast(1)
+
+        _counterState.update { state ->
+            val currentCount = state.count
+            var newCount = currentCount
+            var newLaps = state.laps
+
+            // If count >= new target and autoLap is on, convert overflow into laps
+            if (state.autoLap && currentCount >= safeTarget) {
+                val extraLaps = currentCount / safeTarget
+                newLaps += extraLaps
+                newCount = currentCount % safeTarget
+            }
+
+            state.copy(
+                targetCount = safeTarget,
+                count = newCount,
+                laps = newLaps
+            )
+        }
+
+        // Persist the updated state to the database
+        _counterState.value.currentSession?.let { session ->
+            viewModelScope.launch {
+                val state = _counterState.value
+                val totalCount = state.count + (state.laps * state.targetCount)
+                tasbihRepository.updateSessionCount(session.id, totalCount, state.laps)
             }
         }
     }
@@ -236,8 +299,8 @@ class TasbihViewModel @Inject constructor(
         triggerVibration()
         playClickSound()
 
-        // Auto-start a session if none exists and a preset is selected
-        if (_counterState.value.currentSession == null && _counterState.value.selectedPreset != null) {
+        // Auto-start a session if none exists
+        if (_counterState.value.currentSession == null) {
             startSessionAndIncrement()
             return
         }
@@ -275,17 +338,17 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun startSessionAndIncrement() {
-        val preset = _counterState.value.selectedPreset ?: return
+        val preset = _counterState.value.selectedPreset
 
         sessionStartTime = System.currentTimeMillis()
 
         viewModelScope.launch {
             val session = TasbihSession(
                 id = 0,
-                presetId = preset.id,
-                presetName = preset.name,
+                presetId = preset?.id,
+                presetName = preset?.name ?: "Free Count",
                 date = getTodayEpoch(),
-                currentCount = 1, // Start with count of 1
+                currentCount = 1,
                 targetCount = _counterState.value.targetCount,
                 totalLaps = 0,
                 isCompleted = false,
@@ -301,7 +364,7 @@ class TasbihViewModel @Inject constructor(
                 it.copy(
                     currentSession = insertedSession,
                     isActive = true,
-                    count = 1, // Start with count of 1
+                    count = 1,
                     laps = 0,
                     elapsedTimeMs = 0
                 )
@@ -341,15 +404,15 @@ class TasbihViewModel @Inject constructor(
     }
 
     private fun startSession() {
-        val preset = _counterState.value.selectedPreset ?: return
+        val preset = _counterState.value.selectedPreset
 
         sessionStartTime = System.currentTimeMillis()
 
         viewModelScope.launch {
             val session = TasbihSession(
                 id = 0,
-                presetId = preset.id,
-                presetName = preset.name,
+                presetId = preset?.id,
+                presetName = preset?.name ?: "Free Count",
                 date = getTodayEpoch(),
                 currentCount = 0,
                 targetCount = _counterState.value.targetCount,

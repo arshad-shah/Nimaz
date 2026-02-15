@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -128,9 +129,10 @@ fun HomeScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
             } else {
+                val bottomNavPadding = LocalBottomNavPadding.current
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
+                    contentPadding = PaddingValues(bottom = bottomNavPadding)
                 ) {
 
                 // Header with Prayer Info

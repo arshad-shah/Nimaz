@@ -18,14 +18,18 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -89,6 +93,8 @@ import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
+
+val LocalBottomNavPadding = compositionLocalOf { 0.dp }
 
 @Composable
 fun NavGraph() {
@@ -165,14 +171,12 @@ fun NavGraph() {
             }
         }
     ) { innerPadding ->
+        CompositionLocalProvider(
+            LocalBottomNavPadding provides innerPadding.calculateBottomPadding()
+        ) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            // Only apply bottom padding (for nav bar). Each screen's own
-            // Scaffold/TopAppBar handles the top status bar inset.
-            modifier = Modifier.padding(
-                PaddingValues(bottom = innerPadding.calculateBottomPadding())
-            )
         ) {
             // Onboarding
             composable<Route.Onboarding> {
@@ -929,6 +933,7 @@ fun NavGraph() {
                     }
                 )
             }
+        }
         }
     }
 }

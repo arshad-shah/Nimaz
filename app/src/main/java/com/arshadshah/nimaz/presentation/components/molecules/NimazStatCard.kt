@@ -24,24 +24,28 @@ fun NimazStatCard(
     value: String,
     label: String,
     modifier: Modifier = Modifier,
+    compact: Boolean = false,
     valueColor: Color = MaterialTheme.colorScheme.primary,
     containerColor: Color = MaterialTheme.colorScheme.surfaceVariant
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(if (compact) 10.dp else 14.dp))
             .background(containerColor)
-            .padding(15.dp),
+            .padding(if (compact) 8.dp else 15.dp),
         contentAlignment = Alignment.Center
     ) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(
                 text = value,
-                style = MaterialTheme.typography.headlineSmall,
+                style = if (compact) MaterialTheme.typography.titleMedium
+                else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
                 color = valueColor
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            if (!compact) {
+                Spacer(modifier = Modifier.height(4.dp))
+            }
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
