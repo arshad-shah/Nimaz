@@ -111,6 +111,8 @@ sealed interface QuranEvent {
     data class UnmarkAyahReadForKhatam(val ayahId: Int) : QuranEvent
     data class ToggleKhatamAyah(val ayahId: Int) : QuranEvent
     data class MarkSurahAsReadForKhatam(val surahNumber: Int) : QuranEvent
+
+    data class TogglePageKhatam(val ayahIds: List<Int>) : QuranEvent
 }
 
 @HiltViewModel
@@ -195,6 +197,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.UnmarkAyahReadForKhatam -> unmarkAyahReadForKhatam(event.ayahId)
             is QuranEvent.ToggleKhatamAyah -> toggleKhatamAyah(event.ayahId)
             is QuranEvent.MarkSurahAsReadForKhatam -> markSurahAsReadForKhatam(event.surahNumber)
+            is QuranEvent.TogglePageKhatam -> togglePageKhatam(event.ayahIds)
         }
     }
 
@@ -624,6 +627,16 @@ class QuranViewModel @Inject constructor(
             khatamUseCases.markSurahAsRead(khatamId, surahNumber)
         }
     }
+
+    private fun togglePageKhatam(ayahIds: List<Int>) {
+       val khatamId = _readerState.value.activeKhatamId ?: return
+       val readIds = _readerState.value.khatamReadAyahIds
+       val unreadIds = ayahIds.filter { it !in readIds }
+       if (unreadIds.isEmpty()) return
+       viewModelScope.launch {
+           khatamUseCases.markAyahsRead(khatamId, unreadIds)
+       }
+   }
 
     private fun unmarkAyahReadForKhatam(ayahId: Int) {
         val khatamId = _readerState.value.activeKhatamId ?: return

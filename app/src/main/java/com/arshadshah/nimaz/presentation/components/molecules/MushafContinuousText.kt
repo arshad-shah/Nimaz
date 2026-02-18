@@ -32,17 +32,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-// Mushaf line color - subtle teal to match the frame
 private val MushafLineColor = Color(0xFF0F766E).copy(alpha = 0.5f)
 
-// Bismillah text to strip from first ayah (uses alef wasla ٱ as in database)
 private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
-/**
- * Strip bismillah from first ayah's Arabic text for all surahs EXCEPT:
- * - Surah 1 (Al-Fatiha) - bismillah IS ayah 1
- * - Surah 9 (At-Tawbah) - has no bismillah
- */
 private fun Ayah.getDisplayArabicText(): String {
     return if (ayahNumber == 1 && surahNumber != 1 && surahNumber != 9) {
         textArabic
@@ -54,64 +47,66 @@ private fun Ayah.getDisplayArabicText(): String {
     }
 }
 
-/**
- * Format ayah end marker with ornamental brackets and Arabic-Indic numerals.
- * Uses direct character mapping for consistent Arabic numeral display across all devices.
- */
 private fun formatAyahEndMarker(ayahNumber: Int): String {
-    val unicodeAyaEndStart = "\uFD3F" // ﴿
-    val unicodeAyaEndEnd = "\uFD3E"   // ﴾
+    val unicodeAyaEndStart = "\uFD3F"
+    val unicodeAyaEndEnd = "\uFD3E"
     val arabicNumber = toArabicNumber(ayahNumber)
     return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
 }
 
 /**
  * Core component that renders continuous Arabic text with clickable ayah spans.
- * Uses AnnotatedString with ClickableText for click detection.
- * Includes ruled lines like a traditional printed Mushaf.
+ * Reports the tap Y position for tooltip anchoring.
  *
- * @param ayahs List of ayahs to render as continuous text
- * @param onAyahClick Callback when an ayah is clicked
- * @param highlightedAyahId ID of currently highlighted ayah (e.g., during audio playback)
- * @param arabicFontSize Font size for Arabic text in sp
- * @param showRuledLines Whether to show ruled lines behind the text (default true)
- * @param lineColor Color of the ruled lines
- * @param showTajweed Whether to show tajweed color markers
- * @param modifier Modifier for the composable
+ * Two highlight modes:
+ * - [highlightedAyahId]: Audio playback highlight (primaryContainer)
+ * - [selectedAyahId]: Tooltip selection highlight (tertiaryContainer)
+ *
+ * @param ayahs List of ayahs to render
+ * @param onAyahClick Callback with tapped ayah and tap Y coordinate within this component
+ * @param highlightedAyahId Audio-highlighted ayah ID
+ * @param selectedAyahId Tooltip-selected ayah ID
+ * @param arabicFontSize Font size in sp
+ * @param showRuledLines Show ruled lines behind text
+ * @param showTajweed Show tajweed colors
  */
 @Composable
 fun MushafContinuousText(
     ayahs: List<Ayah>,
-    onAyahClick: (Ayah) -> Unit,
+    onAyahClick: (Ayah, Float) -> Unit,
     modifier: Modifier = Modifier,
     highlightedAyahId: Int? = null,
+    selectedAyahId: Int? = null,
     arabicFontSize: Float = 28f,
     showRuledLines: Boolean = true,
     lineColor: Color = MushafLineColor,
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
+    selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     showTajweed: Boolean = false
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
-    val annotatedText = remember(ayahs, highlightedAyahId, highlightColor, textColor, showTajweed, isDarkTheme) {
+    val annotatedText = remember(
+        ayahs, highlightedAyahId, selectedAyahId,
+        highlightColor, selectedColor, textColor, showTajweed, isDarkTheme
+    ) {
         buildMushafAnnotatedString(
             ayahs = ayahs,
             highlightedAyahId = highlightedAyahId,
+            selectedAyahId = selectedAyahId,
             highlightColor = highlightColor,
+            selectedColor = selectedColor,
             textColor = textColor,
             showTajweed = showTajweed,
             isDarkTheme = isDarkTheme
         )
     }
 
-    // Store the full TextLayoutResult to get actual line positions
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-        Box(
-            modifier = modifier.fillMaxWidth()
-        ) {
+        Box(modifier = modifier.fillMaxWidth()) {
             ClickableText(
                 text = annotatedText,
                 style = TextStyle(
@@ -124,17 +119,21 @@ fun MushafContinuousText(
                 ),
                 onClick = { offset ->
                     annotatedText.getStringAnnotations(
-                        tag = AYAH_TAG,
-                        start = offset,
-                        end = offset
+                        tag = AYAH_TAG, start = offset, end = offset
                     ).firstOrNull()?.let { annotation ->
                         val ayahId = annotation.item.toIntOrNull()
-                        ayahs.find { it.id == ayahId }?.let(onAyahClick)
+                        ayahs.find { it.id == ayahId }?.let { ayah ->
+                            val tapY = textLayoutResult?.let { layout ->
+                                val line = layout.getLineForOffset(offset)
+                                val lineTop = layout.getLineTop(line)
+                                val lineBottom = layout.getLineBottom(line)
+                                (lineTop + lineBottom) / 2f
+                            } ?: 0f
+                            onAyahClick(ayah, tapY)
+                        }
                     }
                 },
-                onTextLayout = { result ->
-                    textLayoutResult = result
-                },
+                onTextLayout = { result -> textLayoutResult = result },
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(
@@ -142,7 +141,6 @@ fun MushafContinuousText(
                             Modifier.drawBehind {
                                 textLayoutResult?.let { layout ->
                                     for (i in 0 until layout.lineCount) {
-                                        // Use actual line bottom position from TextLayoutResult
                                         val y = layout.getLineBottom(i)
                                         drawLine(
                                             color = lineColor,
@@ -153,29 +151,55 @@ fun MushafContinuousText(
                                     }
                                 }
                             }
-                        } else {
-                            Modifier
-                        }
+                        } else Modifier
                     )
             )
         }
     }
 }
 
+/**
+ * Backward-compatible overload without tap position.
+ */
+@Composable
+fun MushafContinuousText(
+    ayahs: List<Ayah>,
+    onAyahClick: (Ayah) -> Unit,
+    modifier: Modifier = Modifier,
+    highlightedAyahId: Int? = null,
+    selectedAyahId: Int? = null,
+    arabicFontSize: Float = 28f,
+    showRuledLines: Boolean = true,
+    lineColor: Color = MushafLineColor,
+    highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
+    selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
+    showTajweed: Boolean = false
+) {
+    MushafContinuousText(
+        ayahs = ayahs,
+        onAyahClick = { ayah, _ -> onAyahClick(ayah) },
+        modifier = modifier,
+        highlightedAyahId = highlightedAyahId,
+        selectedAyahId = selectedAyahId,
+        arabicFontSize = arabicFontSize,
+        showRuledLines = showRuledLines,
+        lineColor = lineColor,
+        highlightColor = highlightColor,
+        selectedColor = selectedColor,
+        textColor = textColor,
+        showTajweed = showTajweed
+    )
+}
+
 private const val AYAH_TAG = "AYAH"
 
-/**
- * Builds the annotated string for Mushaf display with:
- * - Continuous text from all ayahs
- * - Inline ayah end markers
- * - Click annotations for each ayah
- * - Highlighting for the currently playing ayah
- * - Tajweed color coding when enabled
- */
 private fun buildMushafAnnotatedString(
     ayahs: List<Ayah>,
     highlightedAyahId: Int?,
+    selectedAyahId: Int?,
     highlightColor: Color,
+    selectedColor: Color,
     textColor: Color,
     showTajweed: Boolean = false,
     isDarkTheme: Boolean = false
@@ -184,40 +208,28 @@ private fun buildMushafAnnotatedString(
         ayahs.forEachIndexed { index, ayah ->
             val start = length
 
-            // Append the ayah text (with tajweed if enabled and available)
             if (showTajweed && ayah.textTajweed != null) {
-                // Parse tajweed text and append with colors
                 val tajweedAnnotated = TajweedParser.parse(
                     tajweedText = ayah.textTajweed,
                     isDarkTheme = isDarkTheme,
                     defaultColor = textColor
                 )
-                // We need to strip bismillah from tajweed text for first ayahs too
-                val displayTajweed = if (ayah.ayahNumber == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9) {
-                    // Strip bismillah pattern from the beginning
-                    val stripped = TajweedParser.stripTags(ayah.textTajweed)
-                        .removePrefix("$BISMILLAH_TEXT ")
-                        .removePrefix(BISMILLAH_TEXT)
-                        .trim()
-                    // Re-parse the original but offset-adjusted (simplified: just show tajweed text as-is for now)
-                    // Since the tajweed text includes markup, we'll just use the full tajweed version
-                    tajweedAnnotated
-                } else {
-                    tajweedAnnotated
-                }
+                val displayTajweed =
+                    if (ayah.ayahNumber == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9) {
+                        tajweedAnnotated
+                    } else {
+                        tajweedAnnotated
+                    }
                 append(displayTajweed)
             } else {
-                // Use regular display text
                 append(ayah.getDisplayArabicText())
             }
 
-            // Append space and end marker
             append(" ")
             append(formatAyahEndMarker(ayah.ayahNumber))
 
             val end = length
 
-            // Add click annotation for the entire ayah span
             addStringAnnotation(
                 tag = AYAH_TAG,
                 annotation = ayah.id.toString(),
@@ -225,16 +237,22 @@ private fun buildMushafAnnotatedString(
                 end = end
             )
 
-            // Apply highlight style if this is the currently playing ayah
+            // Audio highlight takes priority
             if (ayah.id == highlightedAyahId) {
                 addStyle(
                     style = SpanStyle(background = highlightColor),
                     start = start,
                     end = end
                 )
+            } else if (ayah.id == selectedAyahId) {
+                // Selection highlight (tooltip active)
+                addStyle(
+                    style = SpanStyle(background = selectedColor),
+                    start = start,
+                    end = end
+                )
             }
 
-            // Add space between ayahs (except for the last one)
             if (index < ayahs.size - 1) {
                 append(" ")
             }
@@ -250,7 +268,7 @@ private fun MushafContinuousTextPreview() {
     NimazTheme {
         MushafContinuousText(
             ayahs = sampleFatihahAyahs,
-            onAyahClick = {},
+            onAyahClick = { _, _ -> },
             arabicFontSize = 28f
         )
     }
@@ -262,142 +280,87 @@ private fun MushafContinuousTextWithHighlightPreview() {
     NimazTheme {
         MushafContinuousText(
             ayahs = sampleFatihahAyahs,
-            onAyahClick = {},
-            highlightedAyahId = 3, // Highlight ayah 3
+            onAyahClick = { _, _ -> },
+            highlightedAyahId = 3,
             arabicFontSize = 28f
         )
     }
 }
 
-@Preview(showBackground = true, name = "Mushaf Continuous Text - Large Font")
+@Preview(showBackground = true, name = "Mushaf Continuous Text - With Selection")
 @Composable
-private fun MushafContinuousTextLargeFontPreview() {
+private fun MushafContinuousTextWithSelectionPreview() {
     NimazTheme {
         MushafContinuousText(
             ayahs = sampleFatihahAyahs,
-            onAyahClick = {},
-            arabicFontSize = 32f
+            onAyahClick = { _, _ -> },
+            selectedAyahId = 5,
+            arabicFontSize = 28f
         )
     }
 }
 
-@Preview(showBackground = true, name = "Mushaf Continuous Text - Without Ruled Lines")
-@Composable
-private fun MushafContinuousTextNoLinesPreview() {
-    NimazTheme {
-        MushafContinuousText(
-            ayahs = sampleFatihahAyahs,
-            onAyahClick = {},
-            arabicFontSize = 28f,
-            showRuledLines = false
-        )
-    }
-}
-
-// Sample data for previews
 internal val sampleFatihahAyahs = listOf(
     Ayah(
-        id = 1,
-        surahNumber = 1,
-        ayahNumber = 1,
+        id = 1, surahNumber = 1, ayahNumber = 1,
         textArabic = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
         textSimple = "بسم الله الرحمن الرحيم",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "In the name of Allah, the Entirely Merciful, the Especially Merciful.",
         isBookmarked = false
     ),
     Ayah(
-        id = 2,
-        surahNumber = 1,
-        ayahNumber = 2,
+        id = 2, surahNumber = 1, ayahNumber = 2,
         textArabic = "ٱلْحَمْدُ لِلَّهِ رَبِّ ٱلْعَٰلَمِينَ",
         textSimple = "الحمد لله رب العالمين",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "All praise is due to Allah, Lord of the worlds.",
         isBookmarked = false
     ),
     Ayah(
-        id = 3,
-        surahNumber = 1,
-        ayahNumber = 3,
+        id = 3, surahNumber = 1, ayahNumber = 3,
         textArabic = "ٱلرَّحْمَٰنِ ٱلرَّحِيمِ",
         textSimple = "الرحمن الرحيم",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "The Entirely Merciful, the Especially Merciful.",
         isBookmarked = false
     ),
     Ayah(
-        id = 4,
-        surahNumber = 1,
-        ayahNumber = 4,
+        id = 4, surahNumber = 1, ayahNumber = 4,
         textArabic = "مَٰلِكِ يَوْمِ ٱلدِّينِ",
         textSimple = "مالك يوم الدين",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "Sovereign of the Day of Recompense.",
         isBookmarked = false
     ),
     Ayah(
-        id = 5,
-        surahNumber = 1,
-        ayahNumber = 5,
+        id = 5, surahNumber = 1, ayahNumber = 5,
         textArabic = "إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ",
         textSimple = "إياك نعبد وإياك نستعين",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "It is You we worship and You we ask for help.",
         isBookmarked = false
     ),
     Ayah(
-        id = 6,
-        surahNumber = 1,
-        ayahNumber = 6,
+        id = 6, surahNumber = 1, ayahNumber = 6,
         textArabic = "ٱهْدِنَا ٱلصِّرَٰطَ ٱلْمُسْتَقِيمَ",
         textSimple = "اهدنا الصراط المستقيم",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "Guide us to the straight path.",
         isBookmarked = false
     ),
     Ayah(
-        id = 7,
-        surahNumber = 1,
-        ayahNumber = 7,
+        id = 7, surahNumber = 1, ayahNumber = 7,
         textArabic = "صِرَٰطَ ٱلَّذِينَ أَنْعَمْتَ عَلَيْهِمْ غَيْرِ ٱلْمَغْضُوبِ عَلَيْهِمْ وَلَا ٱلضَّآلِّينَ",
         textSimple = "صراط الذين أنعمت عليهم غير المغضوب عليهم ولا الضالين",
-        juzNumber = 1,
-        hizbNumber = 1,
-        rubNumber = 0,
-        pageNumber = 1,
-        sajdaType = null,
-        sajdaNumber = null,
+        juzNumber = 1, hizbNumber = 1, rubNumber = 0, pageNumber = 1,
+        sajdaType = null, sajdaNumber = null,
         translation = "The path of those upon whom You have bestowed favor, not of those who have earned anger or of those who are astray.",
         isBookmarked = false
     )

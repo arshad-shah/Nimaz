@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -128,6 +129,7 @@ class FastingViewModel @Inject constructor(
 
     init {
         loadToday()
+        loadRamadan()
         observeLocationAndLoadPrayerTimes()
         loadCalendarMonth()
         loadMakeupFasts()
@@ -270,12 +272,13 @@ class FastingViewModel @Inject constructor(
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
+            val hijri = HijriDateCalculator.toHijri(date)
             val record = FastRecord(
                 id = 0,
                 date = dateEpoch,
-                hijriDate = null, // Would be calculated
-                hijriMonth = null,
-                hijriYear = null,
+                hijriDate = hijri.formattedShort(),
+                hijriMonth = hijri.month,
+                hijriYear = hijri.year,
                 fastType = fastType,
                 status = FastStatus.FASTED,
                 exemptionReason = null,
@@ -320,12 +323,13 @@ class FastingViewModel @Inject constructor(
                 fastingRepository.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
             } else {
                 val now = System.currentTimeMillis()
+                val hijri = HijriDateCalculator.toHijri(date)
                 val record = FastRecord(
                     id = 0,
                     date = dateEpoch,
-                    hijriDate = null,
-                    hijriMonth = null,
-                    hijriYear = null,
+                    hijriDate = hijri.formattedShort(),
+                    hijriMonth = hijri.month,
+                    hijriYear = hijri.year,
                     fastType = FastType.RAMADAN,
                     status = FastStatus.NOT_FASTED,
                     exemptionReason = null,
@@ -380,19 +384,40 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun loadRamadan() {
-        // This would need Hijri calendar support to determine Ramadan dates
-        // For now, loading records by Hijri month 9 (Ramadan)
         viewModelScope.launch {
-            fastingRepository.getFastRecordsByHijriMonth(9).collect { records ->
-                val fasted = records.count { it.status == FastStatus.FASTED }
-                val missed = records.count { it.status == FastStatus.NOT_FASTED }
+            val today = LocalDate.now()
+            val hijriToday = HijriDateCalculator.toHijri(today)
+            val isCurrentlyRamadan = hijriToday.month == 9
 
+            if (isCurrentlyRamadan) {
+                val currentDay = hijriToday.day
+                val daysInRamadan = HijriDateCalculator.getDaysInHijriMonth(hijriToday.year, 9)
+                val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(hijriToday.year)
+                val ramadanEnd = HijriDateCalculator.getLastDayOfRamadan(hijriToday.year)
+
+                val startEpoch = ramadanStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                val endEpoch = ramadanEnd.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
+                fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
+                    val fasted = records.count { it.status == FastStatus.FASTED }
+                    val missed = records.count { it.status == FastStatus.NOT_FASTED }
+
+                    _ramadanState.update {
+                        it.copy(
+                            ramadanRecords = records,
+                            fastedDays = fasted,
+                            missedDays = missed,
+                            remainingDays = daysInRamadan - currentDay,
+                            currentDay = currentDay,
+                            isRamadan = true,
+                            isLoading = false
+                        )
+                    }
+                }
+            } else {
                 _ramadanState.update {
                     it.copy(
-                        ramadanRecords = records,
-                        fastedDays = fasted,
-                        missedDays = missed,
-                        remainingDays = 30 - records.size,
+                        isRamadan = false,
                         isLoading = false
                     )
                 }

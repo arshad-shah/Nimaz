@@ -25,6 +25,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -47,6 +50,7 @@ import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +63,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -77,13 +80,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -297,31 +298,34 @@ fun QuranReaderScreen(
     }
     val headerLoading = state.isLoading && state.readingMode != ReadingMode.PAGE
 
-    // Page mode pager state
+    // Page mode state — HorizontalPager with RTL layout so swipe-left = next page
     val totalPages = 604
-    val pagerState = when {
-        state.readingMode == ReadingMode.PAGE && pageNumber != null -> {
-            rememberPagerState(
-                initialPage = (pageNumber - 1).coerceIn(0, totalPages - 1),
-                pageCount = { totalPages }
-            )
+
+    // Stable initial page — computed once when entering page view
+    val initialPageForPager = remember(state.readingMode, usePageView) {
+        when {
+            state.readingMode == ReadingMode.PAGE && pageNumber != null -> pageNumber
+            usePageView && displayAyahs.isNotEmpty() -> displayAyahs.first().page
+            else -> null
         }
-        usePageView && displayAyahs.isNotEmpty() -> {
-            val initialPage = displayAyahs.first().page
-            rememberPagerState(
-                initialPage = (initialPage - 1).coerceIn(0, totalPages - 1),
-                pageCount = { totalPages }
-            )
-        }
-        else -> null
     }
 
-    // Load page when pager settles
+    // pagerState uses 0-based index; page 1 = index 0, page 604 = index 603
+    val pagerState = if (initialPageForPager != null) {
+        rememberPagerState(
+            initialPage = initialPageForPager - 1,
+            pageCount = { totalPages }
+        )
+    } else {
+        null
+    }
+
+    // Load page when pager settles on a new page
     pagerState?.let { ps ->
-        LaunchedEffect(ps.settledPage) {
-            val newPageNumber = ps.settledPage + 1
-            if (newPageNumber != pageNumber) {
-                viewModel.onEvent(QuranEvent.LoadPage(newPageNumber))
+        val settledPage = ps.settledPage + 1 // 1-based Quran page
+        LaunchedEffect(settledPage) {
+            if (settledPage in 1..totalPages) {
+                viewModel.onEvent(QuranEvent.LoadPage(settledPage))
             }
         }
     }
@@ -413,6 +417,14 @@ fun QuranReaderScreen(
             )
         },
         bottomBar = {
+            // In page mode, use current page's ayahs for audio playback
+            val currentPageAyahsForAudio = if (pagerState != null) {
+                val currentQuranPageForAudio = pagerState.settledPage + 1
+                state.pageCache[currentQuranPageForAudio] ?: displayAyahs
+            } else {
+                displayAyahs
+            }
+
             AudioBottomBar(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
@@ -429,15 +441,15 @@ fun QuranReaderScreen(
                     } else if (audioState.isActive && !audioState.isPreparing) {
                         viewModel.onEvent(QuranEvent.ResumeAudio)
                     } else if (!audioState.isPreparing) {
-                        if (state.readingMode == ReadingMode.SURAH && surahNumber != null) {
+                        if (state.readingMode == ReadingMode.SURAH && surahNumber != null && pagerState == null) {
                             val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
                             viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
-                        } else if (displayAyahs.isNotEmpty()) {
+                        } else if (currentPageAyahsForAudio.isNotEmpty()) {
                             viewModel.onEvent(
                                 QuranEvent.PlayAyahAudio(
-                                    ayahGlobalId = displayAyahs.first().id,
-                                    surahNumber = displayAyahs.first().surahNumber,
-                                    ayahNumber = displayAyahs.first().ayahNumber
+                                    ayahGlobalId = currentPageAyahsForAudio.first().id,
+                                    surahNumber = currentPageAyahsForAudio.first().surahNumber,
+                                    ayahNumber = currentPageAyahsForAudio.first().ayahNumber
                                 )
                             )
                         }
@@ -461,95 +473,122 @@ fun QuranReaderScreen(
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                 }
             } else if (pagerState != null && (state.readingMode == ReadingMode.PAGE || usePageView)) {
-                // Page mode with HorizontalPager using MushafPage
+                // Page mode with HorizontalPager (RTL so swipe-left = next page)
                 val homeState by viewModel.homeState.collectAsState()
 
-                // Build surah map for MushafPage
                 val surahMap = remember(homeState.surahs) {
                     homeState.surahs.associateBy { it.number }
                 }
 
-                CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize()
-                    ) { page ->
-                        val pageNum = page + 1
-                        val pageAyahs = state.pageCache[pageNum] ?: displayAyahs.takeIf {
-                            pagerState.settledPage == page
-                        } ?: emptyList()
+                // Current Quran page number (1-based)
+                val currentQuranPage = pagerState.settledPage + 1
 
-                        LaunchedEffect(pageNum) {
-                            if (pageNum !in state.pageCache.keys) {
-                                viewModel.onEvent(QuranEvent.LoadPage(pageNum))
+                // Ayahs for the current page (used for khatam & info bar)
+                val currentPageAyahs = state.pageCache[currentQuranPage] ?: displayAyahs.takeIf {
+                    displayAyahs.firstOrNull()?.page == currentQuranPage
+                } ?: emptyList()
+
+                Column(modifier = Modifier.fillMaxSize()) {
+                    // Compact info/nav bar (fixed, above pager)
+                    MushafPageBar(
+                        pageNumber = currentQuranPage,
+                        totalPages = totalPages,
+                        ayahs = currentPageAyahs,
+                        isKhatamActive = state.activeKhatamId != null,
+                        khatamReadAyahIds = state.khatamReadAyahIds,
+                        onKhatamTogglePage = { pageAyahs ->
+                            viewModel.onEvent(
+                                QuranEvent.TogglePageKhatam(pageAyahs.map { it.id })
+                            )
+                        },
+                        onNavigatePrevious = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                            }
+                        },
+                        onNavigateNext = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(pagerState.currentPage + 1)
                             }
                         }
+                    )
 
-                        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                            val highlightedAyahId = if (audioState.isActive) audioState.currentAyahId else null
+                    // RTL HorizontalPager — page 1 on the right, swipe left for next
+                    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize(),
+                            beyondViewportPageCount = 1,
+                            key = { it + 1 } // Use Quran page number as key
+                        ) { pageIndex ->
+                            // Restore LTR for page content
+                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                val pageNum = pageIndex + 1 // 1-based Quran page
 
-                            MushafPage(
-                                pageNumber = pageNum,
-                                ayahs = pageAyahs,
-                                surahMap = surahMap,
-                                arabicFontSize = state.arabicFontSize,
-                                totalPages = totalPages,
-                                highlightedAyahId = highlightedAyahId,
-                                favoriteAyahIds = favoriteAyahIds,
-                                showTajweed = state.showTajweed,
-                                onNavigatePrevious = {
-                                    coroutineScope.launch {
-                                        if (pagerState.currentPage < totalPages - 1) {
-                                            pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                        }
+                                val pageAyahs = state.pageCache[pageNum] ?: displayAyahs.takeIf {
+                                    displayAyahs.firstOrNull()?.page == pageNum
+                                } ?: emptyList()
+
+                                LaunchedEffect(pageNum) {
+                                    if (pageNum !in state.pageCache.keys) {
+                                        viewModel.onEvent(QuranEvent.LoadPage(pageNum))
                                     }
-                                },
-                                onNavigateNext = {
-                                    coroutineScope.launch {
-                                        if (pagerState.currentPage > 0) {
-                                            pagerState.animateScrollToPage(pagerState.currentPage - 1)
-                                        }
-                                    }
-                                },
-                                onBookmarkClick = { ayah ->
-                                    viewModel.onEvent(
-                                        QuranEvent.ToggleBookmark(
-                                            ayahId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
+                                }
+
+                                val highlightedAyahId = if (audioState.isActive) audioState.currentAyahId else null
+
+                                MushafPage(
+                                    pageNumber = pageNum,
+                                    ayahs = pageAyahs,
+                                    surahMap = surahMap,
+                                    arabicFontSize = state.arabicFontSize,
+                                    highlightedAyahId = highlightedAyahId,
+                                    favoriteAyahIds = favoriteAyahIds,
+                                    showTajweed = state.showTajweed,
+                                    showTranslation = state.showTranslation,
+                                    showTransliteration = state.showTransliteration,
+                                    onBookmarkClick = { ayah ->
+                                        viewModel.onEvent(
+                                            QuranEvent.ToggleBookmark(
+                                                ayahId = ayah.id,
+                                                surahNumber = ayah.surahNumber,
+                                                ayahNumber = ayah.numberInSurah
+                                            )
                                         )
-                                    )
-                                },
-                                onFavoriteClick = { ayah ->
-                                    viewModel.onEvent(
-                                        QuranEvent.ToggleFavorite(
-                                            ayahId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
+                                    },
+                                    onFavoriteClick = { ayah ->
+                                        viewModel.onEvent(
+                                            QuranEvent.ToggleFavorite(
+                                                ayahId = ayah.id,
+                                                surahNumber = ayah.surahNumber,
+                                                ayahNumber = ayah.numberInSurah
+                                            )
                                         )
-                                    )
-                                },
-                                onPlayClick = { ayah ->
-                                    viewModel.onEvent(
-                                        QuranEvent.PlayAyahAudio(
-                                            ayahGlobalId = ayah.id,
-                                            surahNumber = ayah.surahNumber,
-                                            ayahNumber = ayah.numberInSurah
+                                    },
+                                    onPlayClick = { ayah ->
+                                        viewModel.onEvent(
+                                            QuranEvent.PlayAyahAudio(
+                                                ayahGlobalId = ayah.id,
+                                                surahNumber = ayah.surahNumber,
+                                                ayahNumber = ayah.numberInSurah
+                                            )
                                         )
-                                    )
-                                },
-                                onShareClick = { /* Share is handled in bottom sheet */ },
-                                onCopyClick = { /* Copy is handled in bottom sheet */ },
-                                onTafseerClick = { ayah ->
-                                    onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
-                                },
-                                isKhatamActive = state.activeKhatamId != null,
-                                khatamReadAyahIds = state.khatamReadAyahIds,
-                                onKhatamToggle = { ayah ->
-                                    viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
-                                },
-                                modifier = Modifier.fillMaxSize()
-                            )
+                                    },
+                                    onShareClick = { },
+                                    onCopyClick = { },
+                                    onTafseerClick = { ayah ->
+                                        onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                                    },
+                                    isKhatamActive = state.activeKhatamId != null,
+                                    khatamReadAyahIds = state.khatamReadAyahIds,
+                                    onKhatamToggle = { ayah ->
+                                        viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id))
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(MaterialTheme.colorScheme.background)
+                                )
+                            }
                         }
                     }
                 }
@@ -717,7 +756,115 @@ fun QuranReaderScreen(
 }
 
 // ---------------------------------------------------------------------------
-// Audio Bottom Bar using BottomAppBar
+// Compact Mushaf Page Bar (fixed above PageCurl)
+// ---------------------------------------------------------------------------
+@Composable
+private fun MushafPageBar(
+    pageNumber: Int,
+    totalPages: Int,
+    ayahs: List<Ayah>,
+    isKhatamActive: Boolean,
+    khatamReadAyahIds: Set<Int>,
+    onKhatamTogglePage: (List<Ayah>) -> Unit,
+    onNavigatePrevious: () -> Unit,
+    onNavigateNext: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val firstAyah = ayahs.firstOrNull()
+    val juzNumber = firstAyah?.juz ?: 0
+    val hizbNumber = firstAyah?.hizbNumber ?: 0
+
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 1.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 4.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Previous page (higher Quran page number)
+            IconButton(
+                onClick = onNavigatePrevious,
+                enabled = pageNumber < totalPages,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Previous Page",
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+
+            // Page info
+            Row(
+                modifier = Modifier.weight(1f),
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Page $pageNumber",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (juzNumber > 0) {
+                    Text(
+                        text = "  •  Juz $juzNumber",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                if (hizbNumber > 0) {
+                    Text(
+                        text = "  •  Hizb $hizbNumber",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+
+            // Khatam toggle for the page
+            if (isKhatamActive && ayahs.isNotEmpty()) {
+                val pageAyahIds = ayahs.map { it.id }.toSet()
+                val allPageRead = pageAyahIds.all { it in khatamReadAyahIds }
+
+                IconButton(
+                    onClick = { if (!allPageRead) onKhatamTogglePage(ayahs) },
+                    enabled = !allPageRead,
+                    modifier = Modifier.size(40.dp)
+                ) {
+                    Icon(
+                        imageVector = if (allPageRead) Icons.Filled.CheckCircle
+                        else Icons.Outlined.RadioButtonUnchecked,
+                        contentDescription = if (allPageRead) "Page read" else "Mark page as read",
+                        tint = if (allPageRead) Color(0xFF22C55E)
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(22.dp)
+                    )
+                }
+            }
+
+            // Next page (lower Quran page number)
+            IconButton(
+                onClick = onNavigateNext,
+                enabled = pageNumber > 1,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = "Next Page",
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Audio Bottom Bar
 // ---------------------------------------------------------------------------
 @Composable
 private fun AudioBottomBar(
@@ -738,119 +885,75 @@ private fun AudioBottomBar(
         modifier = modifier,
         containerColor = MaterialTheme.colorScheme.surfaceContainer,
         contentColor = MaterialTheme.colorScheme.onSurface,
-        tonalElevation = 3.dp
+        tonalElevation = 3.dp,
+        contentPadding = PaddingValues(0.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
-            // Progress bar - show download progress when preparing, playback progress otherwise
+            // Thin progress bar at top
             if (isAudioActive || isPreparing) {
-                if (isPreparing && totalToDownload > 0) {
-                    LinearProgressIndicator(
-                        progress = { downloadProgress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = MaterialTheme.colorScheme.tertiary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                } else {
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                    )
-                }
+                LinearProgressIndicator(
+                    progress = {
+                        if (isPreparing && totalToDownload > 0) downloadProgress else progress
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(2.dp),
+                    color = if (isPreparing) MaterialTheme.colorScheme.tertiary
+                    else MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                )
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Left side: audio info or prompt
-                Column(modifier = Modifier.weight(1f)) {
-                    if (isPreparing && totalToDownload > 0) {
-                        Text(
-                            text = "Preparing Audio",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                        Text(
-                            text = "Downloading $downloadedCount of $totalToDownload ayahs...",
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                    } else if (isAudioActive) {
-                        Text(
-                            text = "Now Playing",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = audioTitle,
-                            style = MaterialTheme.typography.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            color = MaterialTheme.colorScheme.onSurface
+                // Play/Pause button
+                FilledIconButton(onClick = onPlayClick, modifier = Modifier.size(36.dp)) {
+                    if (isDownloading || isPreparing) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            strokeWidth = 2.dp,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text(
-                            text = "Tap to play audio",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        Icon(
+                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                            contentDescription = if (isPlaying) "Pause" else "Play",
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                 }
 
-                // Play/Pause button
-                Surface(
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.primary,
-                    onClick = onPlayClick,
-                    modifier = Modifier.size(44.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        if (isDownloading || isPreparing) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(22.dp),
-                                strokeWidth = 2.dp,
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(
-                                imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                                contentDescription = if (isPlaying) "Pause" else "Play",
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
-                        }
-                    }
-                }
+                // Audio info text
+                Text(
+                    text = when {
+                        isPreparing && totalToDownload > 0 -> "Downloading $downloadedCount/$totalToDownload..."
+                        isAudioActive -> audioTitle
+                        else -> "Tap to play audio"
+                    },
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = if (isAudioActive) MaterialTheme.colorScheme.onSurface
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
+                )
 
                 // Stop button (only when audio active or preparing)
                 if (isAudioActive || isPreparing) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        onClick = onStopClick,
-                        modifier = Modifier.size(40.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                            Icon(
-                                imageVector = Icons.Default.Close,
-                                contentDescription = "Stop",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                    IconButton(onClick = onStopClick, modifier = Modifier.size(36.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Close,
+                            contentDescription = "Stop",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
                     }
                 }
             }
@@ -1007,18 +1110,16 @@ private fun PageSurahSeparator(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .padding(vertical = 6.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
                 .background(
                     Brush.linearGradient(
                         listOf(Color(0xFF115E59), Color(0xFF042F2E))
                     )
                 )
-                .border(1.dp, Color(0xFF0F766E), RoundedCornerShape(14.dp))
                 .padding(vertical = 14.dp, horizontal = 18.dp)
         ) {
             Row(
