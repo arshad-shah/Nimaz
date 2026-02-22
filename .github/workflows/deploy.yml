@@ -26,15 +26,15 @@ jobs:
           git config --global user.name "CI-Bot"
 
       - name: Setup JDK
-        uses: actions/setup-java@v2.5.0
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: "21"
 
       - name: Set up ruby env
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.1.4
+          ruby-version: 3.3
           bundler-cache: true
 
       - name: Set execution flag for gradlew

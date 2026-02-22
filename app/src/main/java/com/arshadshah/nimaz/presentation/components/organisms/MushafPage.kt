@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -144,6 +145,7 @@ fun MushafPage(
 
             // Mushaf frame
             MushafFrame(
+                pageNumber = pageNumber,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 8.dp)
@@ -267,7 +269,11 @@ fun MushafPage(
 // ---------------------------------------------------------------------------
 
 @Composable
-private fun MushafFrame(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+private fun MushafFrame(
+    pageNumber: Int,
+    modifier: Modifier = Modifier,
+    content: @Composable () -> Unit
+) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(4.dp))
@@ -280,6 +286,18 @@ private fun MushafFrame(modifier: Modifier = Modifier, content: @Composable () -
             MushafOrnamentalLine()
             content()
             MushafOrnamentalLine()
+
+            // Page number footer
+            Text(
+                text = pageNumber.toString(),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MushafFrameColor,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 6.dp)
+            )
         }
     }
 }

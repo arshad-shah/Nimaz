@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -79,13 +81,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
+import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihPresetsUiState
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihStatsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -124,110 +130,252 @@ fun TasbihScreen(
             )
         }
     ) { paddingValues ->
-        val bottomNavPadding = LocalBottomNavPadding.current
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(bottom = bottomNavPadding)
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            val isCompact = maxHeight < 600.dp
-            val availableForCircle = maxHeight - 240.dp
-            val circleSize = availableForCircle.coerceIn(180.dp, 300.dp)
-            val counterFontSize = if (circleSize < 220.dp) 52.sp
-                else if (circleSize < 270.dp) 64.sp
-                else 76.sp
+        val windowSizeClass = currentWindowSizeClass()
 
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
+        if (windowSizeClass.isCompact) {
+            // Phone layout: horizontal preset row + counter below
+            TasbihCompactContent(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background),
+                presetsState = presetsState,
+                counterState = counterState,
+                statsState = statsState,
+                viewModel = viewModel,
+            )
+        } else {
+            // Tablet layout: presets sidebar left, enlarged counter right
+            Row(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .background(MaterialTheme.colorScheme.background)
             ) {
-                // Presets row — compact, no label
-                LazyRow(
-                    contentPadding = PaddingValues(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(top = if (isCompact) 4.dp else 8.dp)
+                // Left sidebar: presets list (vertical)
+                Column(
+                    modifier = Modifier
+                        .weight(0.35f)
+                        .fillMaxHeight()
+                        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
                 ) {
-                    item(key = "free_count") {
-                        FreeCountChip(
-                            isSelected = counterState.selectedPreset == null,
-                            onClick = { viewModel.onEvent(TasbihEvent.ClearPreset) }
-                        )
-                    }
-                    items(
-                        items = presetsState.defaultPresets,
-                        key = { it.id }
-                    ) { preset ->
-                        PresetChip(
-                            preset = preset,
-                            isSelected = counterState.selectedPreset?.id == preset.id,
-                            onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
-                        )
-                    }
-                    items(
-                        items = presetsState.customPresets,
-                        key = { it.id }
-                    ) { preset ->
-                        PresetChip(
-                            preset = preset,
-                            isSelected = counterState.selectedPreset?.id == preset.id,
-                            onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
-                        )
+                    Text(
+                        text = stringResource(R.string.tasbih_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
+                    )
+
+                    LazyColumn(
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        item(key = "free_count") {
+                            FreeCountChip(
+                                isSelected = counterState.selectedPreset == null,
+                                onClick = { viewModel.onEvent(TasbihEvent.ClearPreset) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        items(
+                            items = presetsState.defaultPresets,
+                            key = { it.id }
+                        ) { preset ->
+                            PresetChip(
+                                preset = preset,
+                                isSelected = counterState.selectedPreset?.id == preset.id,
+                                onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                        items(
+                            items = presetsState.customPresets,
+                            key = { it.id }
+                        ) { preset ->
+                            PresetChip(
+                                preset = preset,
+                                isSelected = counterState.selectedPreset?.id == preset.id,
+                                onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
                     }
                 }
 
-                // Push everything below to center/bottom
-                Spacer(modifier = Modifier.weight(1f))
+                // Right side: enlarged counter
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .weight(0.65f)
+                        .fillMaxHeight()
+                ) {
+                    val availableForCircle = maxHeight - 200.dp
+                    val circleSize = availableForCircle.coerceIn(220.dp, 380.dp)
+                    val counterFontSize = if (circleSize < 280.dp) 64.sp
+                        else if (circleSize < 340.dp) 76.sp
+                        else 88.sp
 
-                // Dhikr context — sits just above the counter
-                DhikrDisplay(
-                    selectedPreset = counterState.selectedPreset,
-                    targetCount = counterState.targetCount,
-                    onTargetCountChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
-                    modifier = Modifier.padding(bottom = if (isCompact) 8.dp else 12.dp)
-                )
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        // Dhikr context
+                        DhikrDisplay(
+                            selectedPreset = counterState.selectedPreset,
+                            targetCount = counterState.targetCount,
+                            onTargetCountChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
 
-                // Counter circle — the hero
-                CounterCircle(
-                    count = counterState.count,
-                    targetCount = counterState.targetCount,
-                    laps = counterState.laps,
-                    onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                    circleSize = circleSize,
-                    counterFontSize = counterFontSize
-                )
+                        // Counter circle — enlarged on tablet
+                        CounterCircle(
+                            count = counterState.count,
+                            targetCount = counterState.targetCount,
+                            laps = counterState.laps,
+                            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                            circleSize = circleSize,
+                            counterFontSize = counterFontSize
+                        )
 
-                Spacer(modifier = Modifier.height(if (isCompact) 10.dp else 16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                // Inline stats — minimal text row
-                val currentSessionCount =
-                    counterState.count + (counterState.laps * counterState.targetCount)
-                val liveTotalToday = statsState.baseTotalToday + currentSessionCount
+                        // Inline stats
+                        val currentSessionCount =
+                            counterState.count + (counterState.laps * counterState.targetCount)
+                        val liveTotalToday = statsState.baseTotalToday + currentSessionCount
 
-                InlineStats(
-                    totalToday = liveTotalToday,
-                    laps = counterState.laps,
-                    sessions = statsState.completedSessions
-                )
+                        InlineStats(
+                            totalToday = liveTotalToday,
+                            laps = counterState.laps,
+                            sessions = statsState.completedSessions
+                        )
 
-                Spacer(modifier = Modifier.height(if (isCompact) 10.dp else 16.dp))
+                        Spacer(modifier = Modifier.height(20.dp))
 
-                // Control buttons
-                ControlButtons(
-                    soundEnabled = counterState.soundEnabled,
-                    vibrationEnabled = counterState.vibrationEnabled,
-                    onReset = { viewModel.onEvent(TasbihEvent.Reset) },
-                    onToggleSound = {
-                        viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled))
-                    },
-                    onToggleVibration = {
-                        viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled))
+                        // Control buttons
+                        ControlButtons(
+                            soundEnabled = counterState.soundEnabled,
+                            vibrationEnabled = counterState.vibrationEnabled,
+                            onReset = { viewModel.onEvent(TasbihEvent.Reset) },
+                            onToggleSound = {
+                                viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled))
+                            },
+                            onToggleVibration = {
+                                viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled))
+                            }
+                        )
                     }
-                )
-
-                Spacer(modifier = Modifier.height(if (isCompact) 8.dp else 16.dp))
+                }
             }
+        }
+    }
+}
+
+@Composable
+private fun TasbihCompactContent(
+    modifier: Modifier = Modifier,
+    presetsState: TasbihPresetsUiState,
+    counterState: TasbihCounterUiState,
+    statsState: TasbihStatsUiState,
+    viewModel: TasbihViewModel,
+) {
+    BoxWithConstraints(modifier = modifier) {
+        val isSmallHeight = maxHeight < 600.dp
+        val availableForCircle = maxHeight - 240.dp
+        val circleSize = availableForCircle.coerceIn(180.dp, 300.dp)
+        val counterFontSize = if (circleSize < 220.dp) 52.sp
+            else if (circleSize < 270.dp) 64.sp
+            else 76.sp
+
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Presets row — compact, no label
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier.padding(top = if (isSmallHeight) 4.dp else 8.dp)
+            ) {
+                item(key = "free_count") {
+                    FreeCountChip(
+                        isSelected = counterState.selectedPreset == null,
+                        onClick = { viewModel.onEvent(TasbihEvent.ClearPreset) }
+                    )
+                }
+                items(
+                    items = presetsState.defaultPresets,
+                    key = { it.id }
+                ) { preset ->
+                    PresetChip(
+                        preset = preset,
+                        isSelected = counterState.selectedPreset?.id == preset.id,
+                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
+                    )
+                }
+                items(
+                    items = presetsState.customPresets,
+                    key = { it.id }
+                ) { preset ->
+                    PresetChip(
+                        preset = preset,
+                        isSelected = counterState.selectedPreset?.id == preset.id,
+                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
+                    )
+                }
+            }
+
+            // Push everything below to center/bottom
+            Spacer(modifier = Modifier.weight(1f))
+
+            // Dhikr context — sits just above the counter
+            DhikrDisplay(
+                selectedPreset = counterState.selectedPreset,
+                targetCount = counterState.targetCount,
+                onTargetCountChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
+                modifier = Modifier.padding(bottom = if (isSmallHeight) 8.dp else 12.dp)
+            )
+
+            // Counter circle — the hero
+            CounterCircle(
+                count = counterState.count,
+                targetCount = counterState.targetCount,
+                laps = counterState.laps,
+                onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                circleSize = circleSize,
+                counterFontSize = counterFontSize
+            )
+
+            Spacer(modifier = Modifier.height(if (isSmallHeight) 10.dp else 16.dp))
+
+            // Inline stats — minimal text row
+            val currentSessionCount =
+                counterState.count + (counterState.laps * counterState.targetCount)
+            val liveTotalToday = statsState.baseTotalToday + currentSessionCount
+
+            InlineStats(
+                totalToday = liveTotalToday,
+                laps = counterState.laps,
+                sessions = statsState.completedSessions
+            )
+
+            Spacer(modifier = Modifier.height(if (isSmallHeight) 10.dp else 16.dp))
+
+            // Control buttons
+            ControlButtons(
+                soundEnabled = counterState.soundEnabled,
+                vibrationEnabled = counterState.vibrationEnabled,
+                onReset = { viewModel.onEvent(TasbihEvent.Reset) },
+                onToggleSound = {
+                    viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled))
+                },
+                onToggleVibration = {
+                    viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled))
+                }
+            )
+
+            Spacer(modifier = Modifier.height(if (isSmallHeight) 8.dp else 16.dp))
         }
     }
 }

@@ -44,7 +44,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
@@ -99,6 +98,10 @@ fun QuranHomeScreen(
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, ayah -> onNavigateToSurah(surah) },
     onNavigateToKhatam: () -> Unit = {},
     onNavigateToKhatamDetail: (Long) -> Unit = {},
+    // Tablet: highlight currently selected item in list pane
+    selectedSurahNumber: Int? = null,
+    selectedJuzNumber: Int? = null,
+    selectedPageNumber: Int? = null,
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val state by viewModel.homeState.collectAsState()
@@ -149,12 +152,10 @@ fun QuranHomeScreen(
             )
         }
     ) { paddingValues ->
-        val bottomNavPadding = LocalBottomNavPadding.current
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(bottom = bottomNavPadding)
         ) {
             // Top-level tabs: Home / Browse / Favorites (Bookmarks moved to topbar icon)
             NimazPillTabs(
@@ -188,7 +189,10 @@ fun QuranHomeScreen(
                         onNavigateToJuz = onNavigateToJuz,
                         onNavigateToPage = onNavigateToPage,
                         onTabSelect = { viewModel.onEvent(QuranEvent.SetTab(it)) },
-                        onNavigateToSurahInfo = onNavigateToSurahInfo
+                        onNavigateToSurahInfo = onNavigateToSurahInfo,
+                        selectedSurahNumber = selectedSurahNumber,
+                        selectedJuzNumber = selectedJuzNumber,
+                        selectedPageNumber = selectedPageNumber
                     )
                     2 -> FavoritesTabContent(
                         favorites = state.favorites,
@@ -354,7 +358,10 @@ private fun BrowseTabContent(
     onNavigateToJuz: (Int) -> Unit,
     onNavigateToPage: (Int) -> Unit,
     onTabSelect: (Int) -> Unit,
-    onNavigateToSurahInfo: (Int) -> Unit = {}
+    onNavigateToSurahInfo: (Int) -> Unit = {},
+    selectedSurahNumber: Int? = null,
+    selectedJuzNumber: Int? = null,
+    selectedPageNumber: Int? = null
 ) {
     val isKhatamActive = state.activeKhatam != null
     val khatamReadAyahIds = state.khatamReadAyahIds
@@ -405,7 +412,8 @@ private fun BrowseTabContent(
                             onInfoClick = { onNavigateToSurahInfo(surah.number) },
                             khatamReadCount = readCount,
                             khatamTotalAyahs = surah.ayahCount,
-                            isKhatamActive = isKhatamActive
+                            isKhatamActive = isKhatamActive,
+                            isSelected = selectedSurahNumber == surah.number
                         )
                     }
                 }
@@ -414,7 +422,8 @@ private fun BrowseTabContent(
                         JuzGrid(
                             onNavigateToJuz = onNavigateToJuz,
                             khatamReadAyahIds = khatamReadAyahIds,
-                            isKhatamActive = isKhatamActive
+                            isKhatamActive = isKhatamActive,
+                            selectedJuzNumber = selectedJuzNumber
                         )
                     }
                 }
@@ -424,7 +433,8 @@ private fun BrowseTabContent(
                         onNavigateToPage = onNavigateToPage,
                         khatamReadAyahIds = khatamReadAyahIds,
                         isKhatamActive = isKhatamActive,
-                        pageAyahRanges = state.pageAyahRanges
+                        pageAyahRanges = state.pageAyahRanges,
+                        selectedPageNumber = selectedPageNumber
                     )
                 }
             }
@@ -865,6 +875,7 @@ private fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
+    selectedJuzNumber: Int? = null,
     modifier: Modifier = Modifier
 ) {
     val columns = 5
@@ -893,18 +904,27 @@ private fun JuzGrid(
                     val (readCount, totalCount) = juzProgress[juzNumber] ?: (0 to 0)
                     val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+                    val isSelected = selectedJuzNumber == juzNumber
 
                     Card(
                         onClick = { onNavigateToJuz(juzNumber) },
                         modifier = Modifier
                             .weight(1f)
-                            .aspectRatio(1f),
+                            .aspectRatio(1f)
+                            .then(
+                                if (isSelected) Modifier.border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) else Modifier
+                            ),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isComplete)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = when {
+                                isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                                isComplete -> MaterialTheme.colorScheme.primaryContainer
+                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            }
                         )
                     ) {
                         Box(
@@ -926,7 +946,7 @@ private fun JuzGrid(
                                     text = juzNumber.toString(),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isComplete)
+                                    color = if (isComplete || isSelected)
                                         MaterialTheme.colorScheme.onPrimaryContainer
                                     else
                                         MaterialTheme.colorScheme.primary
@@ -934,7 +954,7 @@ private fun JuzGrid(
                                 Text(
                                     text = stringResource(R.string.quran_home_juz_label),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = if (isComplete)
+                                    color = if (isComplete || isSelected)
                                         MaterialTheme.colorScheme.onPrimaryContainer
                                     else
                                         MaterialTheme.colorScheme.onSurfaceVariant
@@ -977,7 +997,8 @@ private fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
     khatamReadAyahIds: Set<Int> = emptySet(),
     isKhatamActive: Boolean = false,
-    pageAyahRanges: List<PageAyahRange> = emptyList()
+    pageAyahRanges: List<PageAyahRange> = emptyList(),
+    selectedPageNumber: Int? = null
 ) {
     val columns = 5
 
@@ -1077,18 +1098,27 @@ private fun LazyListScope.pageGridItems(
                     val (readCount, totalCount) = pageProgressMap[pageNumber] ?: (0 to 0)
                     val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+                    val isSelected = selectedPageNumber == pageNumber
 
                     Card(
                         onClick = { onNavigateToPage(pageNumber) },
                         modifier = Modifier
                             .weight(1f)
-                            .aspectRatio(1f),
+                            .aspectRatio(1f)
+                            .then(
+                                if (isSelected) Modifier.border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(12.dp)
+                                ) else Modifier
+                            ),
                         shape = RoundedCornerShape(12.dp),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isComplete)
-                                MaterialTheme.colorScheme.primaryContainer
-                            else
-                                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            containerColor = when {
+                                isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                                isComplete -> MaterialTheme.colorScheme.primaryContainer
+                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                            }
                         )
                     ) {
                         Box(
@@ -1109,7 +1139,7 @@ private fun LazyListScope.pageGridItems(
                                 text = pageNumber.toString(),
                                 style = MaterialTheme.typography.titleSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = if (isComplete)
+                                color = if (isComplete || isSelected)
                                     MaterialTheme.colorScheme.onPrimaryContainer
                                 else
                                     MaterialTheme.colorScheme.primary
@@ -1264,15 +1294,27 @@ private fun SurahListItem(
     khatamReadCount: Int = 0,
     khatamTotalAyahs: Int = 0,
     isKhatamActive: Boolean = false,
+    isSelected: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .then(
+                if (isSelected) Modifier.border(
+                    width = 2.dp,
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(14.dp)
+                ) else Modifier
+            ),
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            containerColor = if (isSelected)
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+            else
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {

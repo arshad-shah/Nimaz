@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
-import com.arshadshah.nimaz.core.navigation.LocalBottomNavPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -100,13 +98,11 @@ fun MoreMenuScreen(
             )
         }
     ) { paddingValues ->
-        val bottomNavPadding = LocalBottomNavPadding.current
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-            contentPadding = PaddingValues(bottom = bottomNavPadding),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { Spacer(modifier = Modifier.height(4.dp)) }

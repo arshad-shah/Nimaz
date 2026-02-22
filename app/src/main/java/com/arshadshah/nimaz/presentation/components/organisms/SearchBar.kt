@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -103,8 +104,15 @@ fun NimazSearchBar(
 ) {
     val focusManager = LocalFocusManager.current
 
+    val maxWidth = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .then(
+                if (maxWidth != androidx.compose.ui.unit.Dp.Unspecified)
+                    Modifier.widthIn(max = maxWidth)
+                else Modifier
+            )
+            .fillMaxWidth(),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
@@ -186,7 +194,16 @@ fun ExpandableSearchBar(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    val expandableMaxWidth = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
+    Column(
+        modifier = modifier
+            .then(
+                if (expandableMaxWidth != androidx.compose.ui.unit.Dp.Unspecified)
+                    Modifier.widthIn(max = expandableMaxWidth)
+                else Modifier
+            )
+            .fillMaxWidth()
+    ) {
         // Search input
         Surface(
             modifier = Modifier.fillMaxWidth(),
