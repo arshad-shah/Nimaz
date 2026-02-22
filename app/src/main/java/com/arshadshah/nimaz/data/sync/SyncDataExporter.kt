@@ -22,8 +22,9 @@ class SyncDataExporter @Inject constructor(
     private val zakatDao: ZakatDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
-    suspend fun export(): SyncPayload {
+    suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
         // Quran
+        onProgress("Exporting Quran data...")
         val bookmarks = quranDao.getAllBookmarksSync().map {
             SyncBookmark(it.id, it.ayahId, it.surahNumber, it.ayahNumber, it.note, it.color, it.createdAt, it.updatedAt)
         }
@@ -35,9 +36,12 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Prayer & Fasting
+        onProgress("Exporting prayer records...")
         val prayerRecords = prayerDao.getAllPrayerRecords().map {
             SyncPrayerRecord(it.id, it.date, it.prayerName, it.status, it.prayedAt, it.scheduledTime, it.isJamaah, it.isQadaFor, it.note, it.createdAt, it.updatedAt)
         }
+
+        onProgress("Exporting fasting records...")
         val fastRecords = fastingDao.getAllFastRecords().map {
             SyncFastRecord(it.id, it.date, it.hijriDate, it.hijriMonth, it.hijriYear, it.fastType, it.status, it.exemptionReason, it.suhoorTime, it.iftarTime, it.note, it.createdAt, it.updatedAt)
         }
@@ -46,6 +50,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Tasbih
+        onProgress("Exporting tasbih data...")
         val presets = tasbihDao.getAllPresetsSync().map {
             SyncTasbihPreset(it.id, it.name, it.arabic, it.transliteration, it.translation, it.targetCount, it.isCustom, it.displayOrder, it.updatedAt)
         }
@@ -54,6 +59,7 @@ class SyncDataExporter @Inject constructor(
         }
 
         // Khatam
+        onProgress("Exporting khatam data...")
         val khatams = khatamDao.getAllKhatamsSync().map {
             SyncKhatam(it.id, it.name, it.notes, it.status, it.isActive, it.dailyTarget, it.deadline, it.reminderEnabled, it.reminderTime, it.totalAyahsRead, it.createdAt, it.startedAt, it.completedAt, it.updatedAt)
         }
@@ -68,20 +74,20 @@ class SyncDataExporter @Inject constructor(
             }
         }
 
-        // Tafseer
+        // Tafseer & Zakat
+        onProgress("Exporting tafseer & zakat data...")
         val highlights = tafseerDao.getAllHighlightsSync().map {
             SyncTafseerHighlight(it.id, it.ayahId, it.tafseerId, it.startOffset, it.endOffset, it.color, it.note, it.createdAt, it.updatedAt)
         }
         val notes = tafseerDao.getAllNotesSync().map {
             SyncTafseerNote(it.id, it.ayahId, it.tafseerId, it.text, it.createdAt, it.updatedAt)
         }
-
-        // Zakat
         val zakatHistory = zakatDao.getAllHistorySync().map {
             SyncZakatHistory(it.id, it.calculatedAt, it.totalAssets, it.totalLiabilities, it.netWorth, it.zakatDue, it.nisabType, it.nisabValue, it.isPaid, it.paidAt, it.notes, it.updatedAt)
         }
 
         // Preferences
+        onProgress("Exporting preferences...")
         val preferences = preferencesDataStore.exportAllPreferences()
 
         return SyncPayload(

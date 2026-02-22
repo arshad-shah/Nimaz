@@ -251,12 +251,11 @@ fun AdaptiveMoreScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
 enum class MoreDetailPane {
     LOCATION, NOTIFICATIONS, APPEARANCE, LANGUAGE, WIDGETS, ABOUT, HELP
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class MoreDetailArgs(
     val pane: MoreDetailPane,
-)
+) : android.os.Parcelable

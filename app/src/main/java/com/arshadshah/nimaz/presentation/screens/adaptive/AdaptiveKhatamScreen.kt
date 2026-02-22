@@ -74,7 +74,7 @@ fun AdaptiveKhatamScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class KhatamDetailNavArgs(
     val khatamId: Long,
-)
+) : android.os.Parcelable

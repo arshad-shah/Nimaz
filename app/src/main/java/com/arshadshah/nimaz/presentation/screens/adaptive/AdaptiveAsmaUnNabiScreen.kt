@@ -66,7 +66,7 @@ fun AdaptiveAsmaUnNabiScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class AsmaUnNabiDetailArgs(
     val nameId: Int,
-)
+) : android.os.Parcelable

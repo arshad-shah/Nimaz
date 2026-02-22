@@ -38,27 +38,58 @@ class SyncDataImporter @Inject constructor(
     private val zakatDao: ZakatDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
+    /**
+     * Full import in one transaction (kept for backwards compatibility).
+     */
     suspend fun import(payload: SyncPayload) {
-        database.runInTransaction {
-            kotlinx.coroutines.runBlocking {
-                importBookmarks(payload.bookmarks)
-                importFavorites(payload.favorites)
-                importReadingProgress(payload.readingProgress)
-                importPrayerRecords(payload.prayerRecords)
-                importFastRecords(payload.fastRecords)
-                importMakeupFasts(payload.makeupFasts)
-                importTasbihPresets(payload.tasbihPresets)
-                importTasbihSessions(payload.tasbihSessions)
-                importKhatams(payload.khatams)
-                importKhatamAyahs(payload.khatamAyahs)
-                importKhatamDailyLogs(payload.khatamDailyLogs)
-                importTafseerHighlights(payload.tafseerHighlights)
-                importTafseerNotes(payload.tafseerNotes)
-                importZakatHistory(payload.zakatHistory)
-            }
-        }
+        importQuranData(payload)
+        importPrayerData(payload)
+        importFastingData(payload)
+        importTasbihData(payload)
+        importKhatamData(payload)
+        importTafseerData(payload)
+        importZakatData(payload)
+        importPreferencesData(payload)
+    }
 
-        // Preferences imported outside transaction (DataStore is separate)
+    // --- Granular import methods for step-by-step progress ---
+
+    suspend fun importQuranData(payload: SyncPayload) {
+        importBookmarks(payload.bookmarks)
+        importFavorites(payload.favorites)
+        importReadingProgress(payload.readingProgress)
+    }
+
+    suspend fun importPrayerData(payload: SyncPayload) {
+        importPrayerRecords(payload.prayerRecords)
+    }
+
+    suspend fun importFastingData(payload: SyncPayload) {
+        importFastRecords(payload.fastRecords)
+        importMakeupFasts(payload.makeupFasts)
+    }
+
+    suspend fun importTasbihData(payload: SyncPayload) {
+        importTasbihPresets(payload.tasbihPresets)
+        importTasbihSessions(payload.tasbihSessions)
+    }
+
+    suspend fun importKhatamData(payload: SyncPayload) {
+        importKhatams(payload.khatams)
+        importKhatamAyahs(payload.khatamAyahs)
+        importKhatamDailyLogs(payload.khatamDailyLogs)
+    }
+
+    suspend fun importTafseerData(payload: SyncPayload) {
+        importTafseerHighlights(payload.tafseerHighlights)
+        importTafseerNotes(payload.tafseerNotes)
+    }
+
+    suspend fun importZakatData(payload: SyncPayload) {
+        importZakatHistory(payload.zakatHistory)
+    }
+
+    suspend fun importPreferencesData(payload: SyncPayload) {
         if (payload.preferences.isNotEmpty()) {
             preferencesDataStore.importPreferences(payload.preferences)
         }
@@ -305,7 +336,6 @@ class SyncDataImporter @Inject constructor(
     }
 
     private suspend fun importKhatamAyahs(incoming: List<SyncKhatamAyah>) {
-        // Union merge — IGNORE conflict strategy in DAO handles deduplication
         val entities = incoming.map {
             KhatamAyahEntity(
                 khatamId = it.khatamId,

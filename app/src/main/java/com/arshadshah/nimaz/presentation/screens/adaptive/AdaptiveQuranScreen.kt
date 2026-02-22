@@ -150,10 +150,10 @@ fun AdaptiveQuranScreen(
  * Arguments for the Quran detail pane. Only one of surahNumber/juzNumber/pageNumber
  * should be set at a time (matching QuranReaderScreen's parameter pattern).
  */
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class QuranDetailArgs(
     val surahNumber: Int? = null,
     val juzNumber: Int? = null,
     val pageNumber: Int? = null,
     val ayahNumber: Int = 1,
-)
+) : android.os.Parcelable

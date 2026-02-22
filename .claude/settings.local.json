@@ -73,7 +73,8 @@
       "mcp__plugin_context7_context7__query-docs",
       "Bash(gh pr checks:*)",
       "Bash(gh run view:*)",
-      "Bash(gh pr view:*)"
+      "Bash(gh pr view:*)",
+      "WebFetch(domain:developers.google.com)"
     ]
   }
 }

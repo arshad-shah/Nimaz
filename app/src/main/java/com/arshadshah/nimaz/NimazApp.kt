@@ -3,18 +3,8 @@ package com.arshadshah.nimaz
 import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
-import com.arshadshah.nimaz.core.util.LocaleHelper
-import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
-import com.arshadshah.nimaz.data.audio.AdhanAudioManager
-import com.arshadshah.nimaz.data.audio.AdhanDownloadService
-import com.arshadshah.nimaz.data.audio.AdhanSound
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.init.AppInitializer
 import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltAndroidApp
@@ -24,13 +14,7 @@ class NimazApp : Application(), Configuration.Provider {
     lateinit var workerFactory: HiltWorkerFactory
 
     @Inject
-    lateinit var prayerNotificationScheduler: PrayerNotificationScheduler
-
-    @Inject
-    lateinit var preferencesDataStore: PreferencesDataStore
-
-    @Inject
-    lateinit var adhanAudioManager: AdhanAudioManager
+    lateinit var appInitializer: AppInitializer
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
@@ -39,82 +23,6 @@ class NimazApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
-        applySavedLocale()
-        scheduleInitialNotifications()
-        downloadDefaultAdhanIfNeeded()
-    }
-
-    private fun applySavedLocale() {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            try {
-                val langCode = preferencesDataStore.appLanguage.first()
-                if (langCode.isNotEmpty() && langCode != "en") {
-                    LocaleHelper.setLocale(this@NimazApp, langCode)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    private fun scheduleInitialNotifications() {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            try {
-                val prefs = preferencesDataStore.userPreferences.first()
-                if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
-                    // Build enabled prayers set
-                    val enabledPrayers = buildSet {
-                        if (preferencesDataStore.fajrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.FAJR)
-                        if (preferencesDataStore.sunriseNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.SUNRISE)
-                        if (preferencesDataStore.dhuhrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.DHUHR)
-                        if (preferencesDataStore.asrNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ASR)
-                        if (preferencesDataStore.maghribNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.MAGHRIB)
-                        if (preferencesDataStore.ishaNotificationEnabled.first()) add(com.arshadshah.nimaz.domain.model.PrayerType.ISHA)
-                    }
-
-                    // Get pre-reminder settings
-                    val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
-                    val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
-
-                    prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
-                        latitude = prefs.latitude,
-                        longitude = prefs.longitude,
-                        notificationsEnabled = prefs.prayerNotificationsEnabled,
-                        enabledPrayers = enabledPrayers,
-                        preReminderEnabled = preReminderEnabled,
-                        preReminderMinutes = preReminderMinutes
-                    )
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
-
-    /**
-     * Downloads the default adhan (Mishary) on first launch if not already downloaded.
-     * Also validates existing files and re-downloads if corrupted.
-     */
-    private fun downloadDefaultAdhanIfNeeded() {
-        CoroutineScope(Dispatchers.IO + SupervisorJob()).launch {
-            try {
-                // Clean up stale temp files from interrupted downloads
-                adhanAudioManager.cleanupTempFiles()
-
-                // Delete files from old URL versions so they get re-downloaded
-                adhanAudioManager.invalidateStaleDownloads()
-
-                // isFullyDownloaded now validates file content (magic bytes + size),
-                // so corrupted files will be caught and re-downloaded
-                val defaultSound = AdhanSound.MISHARY
-                val beepReady = adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
-
-                if (!adhanAudioManager.isFullyDownloaded(defaultSound) || !beepReady) {
-                    AdhanDownloadService.downloadDefault(this@NimazApp)
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
+        appInitializer.initialize()
     }
 }

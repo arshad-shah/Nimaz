@@ -88,8 +88,8 @@ fun AdaptiveDuaScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class DuaDetailArgs(
     val categoryId: String,
     val duaId: String? = null,
-)
+) : android.os.Parcelable

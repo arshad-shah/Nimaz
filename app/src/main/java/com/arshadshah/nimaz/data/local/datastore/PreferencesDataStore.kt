@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -539,13 +540,10 @@ class PreferencesDataStore @Inject constructor(
 
     // Export all preferences as key-value map for sync
     suspend fun exportAllPreferences(): Map<String, String> {
-        val prefs = mutableMapOf<String, String>()
-        dataStore.data.map { preferences ->
-            preferences.asMap().forEach { (key, value) ->
-                prefs[key.name] = value.toString()
-            }
-        }.collect { }
-        return prefs
+        val preferences = dataStore.data.first()
+        return preferences.asMap().map { (key, value) ->
+            key.name to value.toString()
+        }.toMap()
     }
 
     // Import preferences from sync payload

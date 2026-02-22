@@ -92,8 +92,8 @@ fun AdaptiveHadithScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class HadithDetailArgs(
     val bookId: String,
     val chapterId: String? = null,
-)
+) : android.os.Parcelable

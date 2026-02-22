@@ -169,12 +169,11 @@ fun AdaptiveSettingsScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
 enum class SettingsDetailPane {
     PRAYER, NOTIFICATIONS, QURAN, APPEARANCE, LOCATION, LANGUAGE, WIDGETS, SYNC
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class SettingsDetailArgs(
     val pane: SettingsDetailPane,
-)
+) : android.os.Parcelable

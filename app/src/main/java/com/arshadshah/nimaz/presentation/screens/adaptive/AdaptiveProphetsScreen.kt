@@ -66,7 +66,7 @@ fun AdaptiveProphetsScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class ProphetDetailArgs(
     val prophetId: Int,
-)
+) : android.os.Parcelable

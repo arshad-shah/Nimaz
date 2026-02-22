@@ -66,7 +66,7 @@ fun AdaptiveAsmaUlHusnaScreen(
     }
 }
 
-@kotlinx.serialization.Serializable
+@kotlinx.parcelize.Parcelize
 data class AsmaUlHusnaDetailArgs(
     val nameId: Int,
-)
+) : android.os.Parcelable
