@@ -3,10 +3,18 @@ package com.arshadshah.nimaz.presentation.screens.adaptive
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.core.navigation.Route
@@ -19,6 +27,7 @@ import com.arshadshah.nimaz.presentation.theme.isCompact
  * Adaptive Quran screen that shows:
  * - Phone (Compact): QuranHomeScreen only, navigates to QuranReader via NavController
  * - Tablet (Medium/Expanded): Two-pane layout with surah list on left, reader on right
+ *   - Collapses to single pane when reader is in page/mushaf mode
  */
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -57,9 +66,29 @@ fun AdaptiveQuranScreen(
         )
     } else {
         // Tablet: Two-pane list-detail layout
-        // Content key is a pair of (surahNumber, ayahNumber)
-        val navigator = rememberListDetailPaneScaffoldNavigator<QuranDetailArgs>()
         val scope = rememberCoroutineScope()
+
+        // Track whether the detail pane is in page/mushaf mode
+        var isDetailInPageMode by remember { mutableStateOf(false) }
+
+        // When page mode is active, force single-pane to give the reader full width
+        val defaultDirective = calculatePaneScaffoldDirective(currentWindowAdaptiveInfo())
+        val scaffoldDirective = if (isDetailInPageMode) {
+            PaneScaffoldDirective(
+                maxHorizontalPartitions = 1,
+                horizontalPartitionSpacerSize = 0.dp,
+                maxVerticalPartitions = defaultDirective.maxVerticalPartitions,
+                verticalPartitionSpacerSize = defaultDirective.verticalPartitionSpacerSize,
+                defaultPanePreferredWidth = defaultDirective.defaultPanePreferredWidth,
+                excludedBounds = defaultDirective.excludedBounds
+            )
+        } else {
+            defaultDirective
+        }
+
+        val navigator = rememberListDetailPaneScaffoldNavigator<QuranDetailArgs>(
+            scaffoldDirective = scaffoldDirective
+        )
 
         // Extract current selection from navigator for list pane highlighting
         val currentArgs = navigator.currentDestination?.contentKey
@@ -125,7 +154,10 @@ fun AdaptiveQuranScreen(
                             juzNumber = args.juzNumber,
                             pageNumber = args.pageNumber,
                             initialAyahNumber = args.ayahNumber,
-                            onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                            onNavigateBack = {
+                                isDetailInPageMode = false
+                                scope.launch { navigator.navigateBack() }
+                            },
                             onNavigateToQuranSettings = onNavigateToSettings,
                             onNavigateToTafseer = { surah, ayah ->
                                 navController.navigate(Route.Tafseer(surah, ayah))
@@ -137,6 +169,9 @@ fun AdaptiveQuranScreen(
                                         QuranDetailArgs(surahNumber = nextSurah)
                                     )
                                 }
+                            },
+                            onPageModeChanged = { inPageMode ->
+                                isDetailInPageMode = inPageMode
                             }
                         )
                     }

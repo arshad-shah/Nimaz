@@ -156,6 +156,7 @@ fun QuranReaderScreen(
     onNavigateToQuranSettings: () -> Unit = {},
     onNavigateToTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit = { _, _ -> },
     onNavigateToNextSurah: (Int) -> Unit = {},
+    onPageModeChanged: (Boolean) -> Unit = {},
     viewModel: QuranViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -167,6 +168,12 @@ fun QuranReaderScreen(
     var savedListIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedListOffset by rememberSaveable { mutableIntStateOf(0) }
     var pendingScrollRestore by rememberSaveable { mutableStateOf(false) }
+
+    // Notify parent when page mode changes (for adaptive layout to collapse side panel)
+    val isInPageMode = state.readingMode == ReadingMode.PAGE || usePageView
+    LaunchedEffect(isInPageMode) {
+        onPageModeChanged(isInPageMode)
+    }
 
     // Keep screen on based on settings
     DisposableEffect(state.keepScreenOn) {
@@ -335,6 +342,22 @@ fun QuranReaderScreen(
         )
     } else {
         null
+    }
+
+    // Scroll pager when pageNumber changes (e.g. external navigation, bookmark, search)
+    pagerState?.let { ps ->
+        LaunchedEffect(pageNumber, isDualPageMode) {
+            if (pageNumber != null) {
+                val targetIndex = if (isDualPageMode) {
+                    (pageNumber - 1) / 2
+                } else {
+                    pageNumber - 1
+                }
+                if (ps.currentPage != targetIndex) {
+                    ps.animateScrollToPage(targetIndex)
+                }
+            }
+        }
     }
 
     // Load page(s) when pager settles
@@ -594,45 +617,6 @@ fun QuranReaderScreen(
                                     }
 
                                     Row(modifier = Modifier.fillMaxSize()) {
-                                        // Right page (lower page number — displayed on the right in a physical Mushaf)
-                                        MushafPage(
-                                            pageNumber = rightPageNum,
-                                            ayahs = rightPageAyahs,
-                                            surahMap = surahMap,
-                                            arabicFontSize = state.arabicFontSize,
-                                            highlightedAyahId = highlightedAyahId,
-                                            favoriteAyahIds = favoriteAyahIds,
-                                            showTajweed = state.showTajweed,
-                                            showTranslation = state.showTranslation,
-                                            showTransliteration = state.showTransliteration,
-                                            onBookmarkClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-                                            },
-                                            onFavoriteClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-                                            },
-                                            onPlayClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
-                                            },
-                                            onShareClick = { },
-                                            onCopyClick = { },
-                                            onTafseerClick = { ayah -> onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah) },
-                                            isKhatamActive = state.activeKhatamId != null,
-                                            khatamReadAyahIds = state.khatamReadAyahIds,
-                                            onKhatamToggle = { ayah -> viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .fillMaxHeight()
-                                                .background(MaterialTheme.colorScheme.background)
-                                        )
-
-                                        // Spine divider
-                                        VerticalDivider(
-                                            modifier = Modifier.fillMaxHeight(),
-                                            thickness = 1.dp,
-                                            color = MaterialTheme.colorScheme.outlineVariant
-                                        )
-
                                         // Left page (higher page number — displayed on the left in a physical Mushaf)
                                         if (leftPageNum != rightPageNum) {
                                             MushafPage(
@@ -666,6 +650,45 @@ fun QuranReaderScreen(
                                                     .background(MaterialTheme.colorScheme.background)
                                             )
                                         }
+
+                                        // Spine divider
+                                        VerticalDivider(
+                                            modifier = Modifier.fillMaxHeight(),
+                                            thickness = 1.dp,
+                                            color = MaterialTheme.colorScheme.outlineVariant
+                                        )
+
+                                        // Right page (lower page number — displayed on the right in a physical Mushaf)
+                                        MushafPage(
+                                            pageNumber = rightPageNum,
+                                            ayahs = rightPageAyahs,
+                                            surahMap = surahMap,
+                                            arabicFontSize = state.arabicFontSize,
+                                            highlightedAyahId = highlightedAyahId,
+                                            favoriteAyahIds = favoriteAyahIds,
+                                            showTajweed = state.showTajweed,
+                                            showTranslation = state.showTranslation,
+                                            showTransliteration = state.showTransliteration,
+                                            onBookmarkClick = { ayah ->
+                                                viewModel.onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            },
+                                            onFavoriteClick = { ayah ->
+                                                viewModel.onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            },
+                                            onPlayClick = { ayah ->
+                                                viewModel.onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            },
+                                            onShareClick = { },
+                                            onCopyClick = { },
+                                            onTafseerClick = { ayah -> onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah) },
+                                            isKhatamActive = state.activeKhatamId != null,
+                                            khatamReadAyahIds = state.khatamReadAyahIds,
+                                            onKhatamToggle = { ayah -> viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .fillMaxHeight()
+                                                .background(MaterialTheme.colorScheme.background)
+                                        )
                                     }
                                 } else {
                                     // Single-page mode
@@ -909,15 +932,15 @@ private fun MushafPageBar(
                 .padding(horizontal = 4.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Previous page (higher Quran page number)
+            // Next page (higher Quran page number — leftward in mushaf)
             IconButton(
-                onClick = onNavigatePrevious,
+                onClick = onNavigateNext,
                 enabled = (secondPageNumber ?: pageNumber) < totalPages,
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous Page",
+                    contentDescription = "Next Page",
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -971,15 +994,15 @@ private fun MushafPageBar(
                 }
             }
 
-            // Next page (lower Quran page number)
+            // Previous page (lower Quran page number — rightward in mushaf)
             IconButton(
-                onClick = onNavigateNext,
+                onClick = onNavigatePrevious,
                 enabled = pageNumber > 1,
                 modifier = Modifier.size(40.dp)
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next Page",
+                    contentDescription = "Previous Page",
                     modifier = Modifier.size(22.dp)
                 )
             }

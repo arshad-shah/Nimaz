@@ -135,65 +135,59 @@ fun MushafPage(
                 parentWindowY = coordinates.positionInWindow().y
             }
     ) {
-        // Scrollable page content
-        Column(
+        // Mushaf frame fills all available space; content scrolls inside
+        MushafFrame(
+            pageNumber = pageNumber,
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState)
+                .padding(horizontal = 8.dp, vertical = 4.dp)
         ) {
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Mushaf frame
-            MushafFrame(
-                pageNumber = pageNumber,
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .verticalScroll(scrollState)
+                    .padding(vertical = 8.dp)
             ) {
-                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                    ayahsBySurah.forEach { (surahNumber, surahAyahs) ->
-                        val surah = surahMap[surahNumber]
-                        val isNewSurah = surahAyahs.firstOrNull()?.ayahNumber == 1
+                ayahsBySurah.forEach { (surahNumber, surahAyahs) ->
+                    val surah = surahMap[surahNumber]
+                    val isNewSurah = surahAyahs.firstOrNull()?.ayahNumber == 1
 
-                        if (isNewSurah && surah != null) {
-                            MushafSurahHeader(
-                                surah = surah,
-                                showBismillah = surahNumber != 1 && surahNumber != 9
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        // Track this text block's window position for tooltip
-                        var textWindowY by remember { mutableFloatStateOf(0f) }
-
-                        Box(
-                            modifier = Modifier.onGloballyPositioned { coords ->
-                                textWindowY = coords.positionInWindow().y
-                            }
-                        ) {
-                            MushafContinuousText(
-                                ayahs = surahAyahs,
-                                onAyahClick = { ayah, localTapY ->
-                                    tooltipAyah = ayah
-                                    // Convert local Y within text to viewport-relative Y
-                                    // positionInWindow already accounts for scroll state
-                                    tooltipTapY = (textWindowY - parentWindowY) + localTapY
-                                },
-                                highlightedAyahId = highlightedAyahId,
-                                selectedAyahId = tooltipAyah?.id,
-                                arabicFontSize = arabicFontSize,
-                                showTajweed = showTajweed,
-                                modifier = Modifier.padding(horizontal = 4.dp)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
+                    if (isNewSurah && surah != null) {
+                        MushafSurahHeader(
+                            surah = surah,
+                            showBismillah = surahNumber != 1 && surahNumber != 9
+                        )
                     }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Track this text block's window position for tooltip
+                    var textWindowY by remember { mutableFloatStateOf(0f) }
+
+                    Box(
+                        modifier = Modifier.onGloballyPositioned { coords ->
+                            textWindowY = coords.positionInWindow().y
+                        }
+                    ) {
+                        MushafContinuousText(
+                            ayahs = surahAyahs,
+                            onAyahClick = { ayah, localTapY ->
+                                tooltipAyah = ayah
+                                // Convert local Y within text to viewport-relative Y
+                                // positionInWindow already accounts for scroll state
+                                tooltipTapY = (textWindowY - parentWindowY) + localTapY
+                            },
+                            highlightedAyahId = highlightedAyahId,
+                            selectedAyahId = tooltipAyah?.id,
+                            arabicFontSize = arabicFontSize,
+                            showTajweed = showTajweed,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
                 }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
         }
 
         // Tooltip overlay (anchored near tap position)
@@ -282,9 +276,11 @@ private fun MushafFrame(
             .border(1.dp, MushafFrameColorLight, RoundedCornerShape(2.dp))
             .padding(2.dp)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.fillMaxSize()) {
             MushafOrnamentalLine()
-            content()
+            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                content()
+            }
             MushafOrnamentalLine()
 
             // Page number footer

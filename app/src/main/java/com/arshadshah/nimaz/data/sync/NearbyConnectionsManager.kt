@@ -19,8 +19,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.IOException
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -47,6 +51,10 @@ class NearbyConnectionsManager @Inject constructor(
     companion object {
         private const val TAG = "NearbySync"
         private const val SERVICE_ID = "com.arshadshah.nimaz.sync"
+        // Max safe size for BYTES payload (leaving margin below 32768)
+        private const val MAX_BYTES_PAYLOAD_SIZE = 31_000
+        // Prefix byte to distinguish compressed data from signal JSON
+        private const val DATA_PREFIX: Byte = 0x1F // same as GZIP magic byte
     }
 
     private val connectionsClient by lazy { Nearby.getConnectionsClient(context) }
@@ -130,7 +138,30 @@ class NearbyConnectionsManager @Inject constructor(
                         Log.d(TAG, "BYTES payload ${payload.id}: asBytes() returned null")
                         return
                     }
-                    Log.d(TAG, "BYTES payload ${payload.id}: ${bytes.size} bytes")
+                    Log.d(TAG, "BYTES payload ${payload.id}: ${bytes.size} bytes, first byte=0x${String.format("%02X", bytes[0])}")
+
+                    // Check for compressed data (prefix byte 0x1F = GZIP magic)
+                    if (bytes.isNotEmpty() && bytes[0] == DATA_PREFIX) {
+                        Log.d(TAG, "BYTES payload ${payload.id}: detected compressed data")
+                        // Skip transfer updates for this data payload
+                        signalPayloadIds.add(payload.id)
+                        try {
+                            val compressed = bytes.copyOfRange(1, bytes.size)
+                            val decompressed = gzipDecompress(compressed)
+                            Log.d(TAG, "BYTES payload ${payload.id}: decompressed ${compressed.size} → ${decompressed.size} bytes")
+                            onDataReceived?.invoke(decompressed)
+                                ?: run {
+                                    Log.e(TAG, "BYTES data payload: onDataReceived is null!")
+                                    _connectionState.value = ConnectionState.Error("No data handler registered")
+                                }
+                        } catch (e: Exception) {
+                            Log.e(TAG, "BYTES data payload: decompression failed", e)
+                            _connectionState.value = ConnectionState.Error("Failed to decompress: ${e.message}")
+                        }
+                        return
+                    }
+
+                    // Try to decode as signal
                     val signal = SyncSignal.decode(bytes)
                     if (signal != null) {
                         Log.d(TAG, "Decoded signal: $signal")
@@ -138,7 +169,7 @@ class NearbyConnectionsManager @Inject constructor(
                         onSignalReceived?.invoke(signal)
                             ?: Log.d(TAG, "WARNING: onSignalReceived is null!")
                     } else {
-                        Log.d(TAG, "BYTES payload is not a signal, raw: ${String(bytes).take(100)}")
+                        Log.d(TAG, "BYTES payload is not a signal or data, raw: ${String(bytes).take(100)}")
                     }
                 }
                 Payload.Type.STREAM -> {
@@ -370,26 +401,45 @@ class NearbyConnectionsManager @Inject constructor(
         Log.d(TAG, "sendData: ${data.size} bytes to endpoint=$endpointId")
         _connectionState.value = ConnectionState.Transferring(0f)
 
-        // Write to temp file and use FILE payload — more reliable than STREAM
-        // over Bluetooth, and the library handles retries and medium upgrades.
-        pendingSendFile = File(context.cacheDir, "sync_export.json")
-        pendingSendFile!!.writeBytes(data)
-        Log.d(TAG, "sendData: wrote ${data.size} bytes to temp file")
+        // GZIP compress the data — JSON typically compresses 5-10x
+        val compressed = gzipCompress(data)
+        Log.d(TAG, "sendData: compressed ${data.size} → ${compressed.size} bytes " +
+                "(${100 * compressed.size / data.size}%)")
 
-        val payload = Payload.fromFile(pendingSendFile!!)
-        Log.d(TAG, "sendData: created FILE payload id=${payload.id}")
-        // Do NOT delete the temp file here — the library reads from it during
-        // the transfer. It's cleaned up in onPayloadTransferUpdate(SUCCESS)
-        // on the sender side, or in stopAll().
-        connectionsClient.sendPayload(endpointId, payload)
-            .addOnSuccessListener {
-                Log.d(TAG, "sendData: sendPayload task accepted (queued for transfer)")
-            }
-            .addOnFailureListener { e ->
-                Log.e(TAG, "sendData: sendPayload task FAILED", e)
-                cleanupSendFile()
-                _connectionState.value = ConnectionState.Error("Send failed: ${e.message}")
-            }
+        if (compressed.size <= MAX_BYTES_PAYLOAD_SIZE) {
+            // Small enough for BYTES payload (most reliable transport).
+            // Prefix with DATA_PREFIX byte to distinguish from signal payloads.
+            val payload = Payload.fromBytes(byteArrayOf(DATA_PREFIX) + compressed)
+            Log.d(TAG, "sendData: using BYTES payload id=${payload.id}, size=${compressed.size + 1}")
+            connectionsClient.sendPayload(endpointId, payload)
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "sendData: BYTES sendPayload FAILED", e)
+                    _connectionState.value = ConnectionState.Error("Send failed: ${e.message}")
+                }
+        } else {
+            // Too large for BYTES — fall back to FILE payload
+            Log.d(TAG, "sendData: compressed too large for BYTES, using FILE payload")
+            pendingSendFile = File(context.cacheDir, "sync_export.gz")
+            pendingSendFile!!.writeBytes(compressed)
+            val payload = Payload.fromFile(pendingSendFile!!)
+            Log.d(TAG, "sendData: created FILE payload id=${payload.id}")
+            connectionsClient.sendPayload(endpointId, payload)
+                .addOnFailureListener { e ->
+                    Log.e(TAG, "sendData: FILE sendPayload FAILED", e)
+                    cleanupSendFile()
+                    _connectionState.value = ConnectionState.Error("Send failed: ${e.message}")
+                }
+        }
+    }
+
+    private fun gzipCompress(data: ByteArray): ByteArray {
+        val bos = ByteArrayOutputStream(data.size / 4)
+        GZIPOutputStream(bos).use { it.write(data) }
+        return bos.toByteArray()
+    }
+
+    private fun gzipDecompress(data: ByteArray): ByteArray {
+        return GZIPInputStream(ByteArrayInputStream(data)).use { it.readBytes() }
     }
 
     fun setOnDataReceived(callback: (ByteArray) -> Unit) {
