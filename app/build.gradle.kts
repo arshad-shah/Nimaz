@@ -122,6 +122,9 @@ dependencies {
     // Location
     implementation(libs.play.services.location)
 
+    // Nearby Connections (device-to-device sync)
+    implementation(libs.play.services.nearby)
+
     // CameraX
     implementation(libs.camerax.core)
     implementation(libs.camerax.camera2)

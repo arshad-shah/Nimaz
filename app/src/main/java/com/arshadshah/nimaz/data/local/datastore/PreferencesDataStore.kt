@@ -537,6 +537,47 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
+    // Export all preferences as key-value map for sync
+    suspend fun exportAllPreferences(): Map<String, String> {
+        val prefs = mutableMapOf<String, String>()
+        dataStore.data.map { preferences ->
+            preferences.asMap().forEach { (key, value) ->
+                prefs[key.name] = value.toString()
+            }
+        }.collect { }
+        return prefs
+    }
+
+    // Import preferences from sync payload
+    suspend fun importPreferences(prefsMap: Map<String, String>) {
+        dataStore.edit { preferences ->
+            prefsMap.forEach { (key, value) ->
+                when {
+                    key == "onboarding_completed" -> return@forEach // Never overwrite onboarding
+                    // Boolean keys
+                    value == "true" || value == "false" -> {
+                        preferences[booleanPreferencesKey(key)] = value.toBoolean()
+                    }
+                    // Try numeric types
+                    value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains("location_id")) -> {
+                        preferences[intPreferencesKey(key)] = value.toInt()
+                    }
+                    value.toDoubleOrNull() != null && (key.contains("latitude") || key.contains("longitude") || key.contains("font_size")) -> {
+                        if (key.contains("font_size") && !key.contains("arabic_font_size_string")) {
+                            preferences[floatPreferencesKey(key)] = value.toFloat()
+                        } else {
+                            preferences[doublePreferencesKey(key)] = value.toDouble()
+                        }
+                    }
+                    // Default to string
+                    else -> {
+                        preferences[stringPreferencesKey(key)] = value
+                    }
+                }
+            }
+        }
+    }
+
     // Combined user preferences
     val userPreferences: Flow<UserPreferences> = dataStore.data.map { preferences ->
         UserPreferences(

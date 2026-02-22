@@ -26,6 +26,7 @@ coroutines = "1.10.2"
 serialization = "1.10.0"
 datetime = "0.7.1"
 playServicesLocation = "21.3.0"
+playServicesNearby = "19.3.0"
 playAppUpdate = "2.1.0"
 camerax = "1.4.1"
 aboutLibs = "11.6.0"
@@ -95,6 +96,7 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 
 # Location
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
+play-services-nearby = { group = "com.google.android.gms", name = "play-services-nearby", version.ref = "playServicesNearby" }
 
 # CameraX
 camerax-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }

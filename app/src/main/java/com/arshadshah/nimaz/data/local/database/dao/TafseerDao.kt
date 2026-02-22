@@ -69,6 +69,19 @@ interface TafseerDao {
     @Query("DELETE FROM tafseer_notes")
     suspend fun deleteAllNotes()
 
+    // Sync export queries
+    @Query("SELECT * FROM tafseer_highlights ORDER BY created_at DESC")
+    suspend fun getAllHighlightsSync(): List<TafseerHighlightEntity>
+
+    @Query("SELECT * FROM tafseer_notes ORDER BY created_at DESC")
+    suspend fun getAllNotesSync(): List<TafseerNoteEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertHighlights(highlights: List<TafseerHighlightEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertNotes(notes: List<TafseerNoteEntity>)
+
     @Transaction
     suspend fun deleteAllUserData() {
         deleteAllHighlights()

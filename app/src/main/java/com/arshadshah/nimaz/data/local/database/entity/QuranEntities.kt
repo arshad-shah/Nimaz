@@ -110,7 +110,8 @@ data class QuranFavoriteEntity(
     @PrimaryKey val ayahId: Int,
     val surahNumber: Int,
     val ayahNumber: Int,
-    val createdAt: Long = System.currentTimeMillis()
+    val createdAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
 @Entity(tableName = "surah_info")

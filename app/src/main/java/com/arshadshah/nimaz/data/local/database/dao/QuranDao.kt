@@ -183,6 +183,15 @@ interface QuranDao {
         deleteAllReadingProgress()
     }
 
+    @Query("SELECT * FROM quran_bookmarks ORDER BY createdAt DESC")
+    suspend fun getAllBookmarksSync(): List<QuranBookmarkEntity>
+
+    @Query("SELECT * FROM quran_favorites ORDER BY createdAt DESC")
+    suspend fun getAllFavoritesSync(): List<QuranFavoriteEntity>
+
+    @Query("SELECT * FROM reading_progress WHERE id = 1")
+    suspend fun getReadingProgressSync(): ReadingProgressEntity?
+
     @Query("DELETE FROM quran_bookmarks")
     suspend fun deleteAllBookmarks()
 

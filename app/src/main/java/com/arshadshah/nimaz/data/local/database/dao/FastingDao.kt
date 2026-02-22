@@ -87,6 +87,12 @@ interface FastingDao {
     """)
     suspend fun getRecentFastedRecords(todayTimestamp: Long): List<FastRecordEntity>
 
+    @Query("SELECT * FROM fast_records ORDER BY date ASC")
+    suspend fun getAllFastRecords(): List<FastRecordEntity>
+
+    @Query("SELECT * FROM makeup_fasts ORDER BY originalDate ASC")
+    suspend fun getAllMakeupFastsSync(): List<MakeupFastEntity>
+
     @Query("DELETE FROM fast_records")
     suspend fun deleteAllFastRecords()
 

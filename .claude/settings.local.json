@@ -69,7 +69,11 @@
       "Bash(for f in \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/MathUtils.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/Polygon.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/RectUtils.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/ExperimentalPageCurlApi.kt\")",
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_click",
-      "mcp__plugin_playwright_playwright__browser_close"
+      "mcp__plugin_playwright_playwright__browser_close",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr view:*)"
     ]
   }
 }

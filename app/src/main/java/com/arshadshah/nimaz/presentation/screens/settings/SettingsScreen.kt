@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -60,6 +61,7 @@ fun SettingsScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToLanguage: () -> Unit,
     onNavigateToWidgets: () -> Unit,
+    onNavigateToSync: () -> Unit = {},
     onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -161,6 +163,13 @@ fun SettingsScreen(
             item { NimazSectionHeader(title = stringResource(R.string.data)) }
             item {
                 NimazMenuGroup {
+                    NimazMenuItem(
+                        title = "Sync Data",
+                        subtitle = "Transfer data between devices",
+                        icon = Icons.Default.Sync,
+                        onClick = onNavigateToSync
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.reset_settings),
                         subtitle = stringResource(R.string.reset_settings_subtitle),

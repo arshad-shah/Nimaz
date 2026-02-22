@@ -692,6 +692,7 @@ fun NavGraph() {
                     onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
                     onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
                     onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
+                    onNavigateToSync = { navController.navigate(Route.SettingsSync) },
                     onRestartApp = { restartApp(context) }
                 )
             }
@@ -895,6 +896,12 @@ fun NavGraph() {
 
             composable<Route.SettingsHelp> {
                 com.arshadshah.nimaz.presentation.screens.help.HelpSupportScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Route.SettingsSync> {
+                com.arshadshah.nimaz.presentation.screens.settings.SyncScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

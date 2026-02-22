@@ -100,6 +100,12 @@ interface TasbihDao {
     @Query("SELECT SUM(duration) FROM tasbih_sessions WHERE date BETWEEN :startDate AND :endDate")
     suspend fun getTotalDurationInRange(startDate: Long, endDate: Long): Long?
 
+    @Query("SELECT * FROM tasbih_presets ORDER BY display_order ASC")
+    suspend fun getAllPresetsSync(): List<TasbihPresetEntity>
+
+    @Query("SELECT * FROM tasbih_sessions ORDER BY startedAt DESC")
+    suspend fun getAllSessionsSync(): List<TasbihSessionEntity>
+
     @Query("DELETE FROM tasbih_sessions")
     suspend fun deleteAllSessions()
 

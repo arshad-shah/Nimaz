@@ -155,4 +155,14 @@ interface KhatamDao {
 
     @Query("UPDATE khatams SET status = 'active', updated_at = :timestamp WHERE id = :khatamId")
     suspend fun reactivateKhatam(khatamId: Long, timestamp: Long = System.currentTimeMillis())
+
+    // Sync export queries
+    @Query("SELECT * FROM khatams ORDER BY updated_at DESC")
+    suspend fun getAllKhatamsSync(): List<KhatamEntity>
+
+    @Query("SELECT * FROM khatam_ayahs WHERE khatam_id = :khatamId")
+    suspend fun getKhatamAyahsSync(khatamId: Long): List<KhatamAyahEntity>
+
+    @Query("SELECT * FROM khatam_daily_log WHERE khatam_id = :khatamId ORDER BY date DESC")
+    suspend fun getDailyLogsSync(khatamId: Long): List<KhatamDailyLogEntity>
 }

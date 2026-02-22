@@ -18,7 +18,8 @@ data class TasbihPresetEntity(
     @ColumnInfo(name = "is_custom")
     val isCustom: Int, // 0 = default, 1 = custom
     @ColumnInfo(name = "display_order")
-    val displayOrder: Int
+    val displayOrder: Int,
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
 @Entity(
@@ -42,5 +43,6 @@ data class TasbihSessionEntity(
     val duration: Long?, // Total time spent in millis
     val startedAt: Long,
     val completedAt: Long?,
-    val note: String?
+    val note: String?,
+    val updatedAt: Long = System.currentTimeMillis()
 )

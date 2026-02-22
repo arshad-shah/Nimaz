@@ -167,6 +167,9 @@ sealed interface Route {
     @Serializable
     data object SettingsHelp : Route
 
+    @Serializable
+    data object SettingsSync : Route
+
     // Onboarding
     @Serializable
     data object Onboarding : Route
