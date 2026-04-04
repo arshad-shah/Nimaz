@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -40,7 +42,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 internal fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
     khatamReadAyahIds: Set<Int> = emptySet(),
@@ -143,13 +145,26 @@ internal fun LazyListScope.pageGridItems(
             }
             if (surahStarts.isNotEmpty()) {
                 item(key = "surah_start_${row.first()}") {
-                    val label = surahStarts.joinToString(", ") { "\u25B8 $it" }
-                    Text(
-                        text = label,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp)
-                    )
+                    FlowRow(
+                        modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        surahStarts.forEach { surahName ->
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                            ) {
+                                Text(
+                                    text = "\u25B8 $surahName",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
             item(key = "page_row_${row.first()}") {
