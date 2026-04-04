@@ -159,7 +159,7 @@ internal fun LazyListScope.pageGridItems(
                                     text = "\u25B8 $surahName",
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.primary,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp)
                                 )
                             }
@@ -189,9 +189,9 @@ internal fun LazyListScope.pageGridItems(
                                         MaterialTheme.colorScheme.primary
                                     else
                                         MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(10.dp)
+                                    shape = RoundedCornerShape(12.dp)
                                 ),
-                            shape = RoundedCornerShape(10.dp),
+                            shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
                                 containerColor = when {
                                     isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
