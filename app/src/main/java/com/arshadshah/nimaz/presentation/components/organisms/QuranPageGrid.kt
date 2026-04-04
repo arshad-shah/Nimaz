@@ -167,7 +167,7 @@ internal fun LazyListScope.pageGridItems(
                                             modifier = Modifier.size(12.dp)
                                         )
                                         Text(
-                                            text = stringResource(R.string.quran_home_surah_start_indicator, surahName, pageNumber),
+                                            text = surahName,
                                             style = MaterialTheme.typography.labelSmall,
                                             fontWeight = FontWeight.Medium,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant

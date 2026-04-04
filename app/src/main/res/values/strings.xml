@@ -642,7 +642,6 @@
     <string name="quran_home_page_range_format">p. %1$d–%2$d</string>
     <string name="quran_home_surah_starts">▸ %1$s starts</string>
     <string name="quran_home_juz_indicator">Juz %1$d</string>
-    <string name="quran_home_surah_start_indicator">%1$s · p.%2$d</string>
     <string name="quran_home_continue_reading">CONTINUE READING</string>
     <string name="quran_home_percent_complete">%1$d%% complete</string>
     <string name="quran_home_completed">Completed</string>
