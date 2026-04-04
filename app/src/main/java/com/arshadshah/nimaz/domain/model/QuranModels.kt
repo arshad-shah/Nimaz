@@ -8,7 +8,8 @@ data class Surah(
     val revelationType: RevelationType,
     val ayahCount: Int,
     val juzStart: Int,
-    val orderInMushaf: Int
+    val orderInMushaf: Int,
+    val startPage: Int = 1
 ) {
     // Alias for backwards compatibility
     val numberOfAyahs: Int get() = ayahCount

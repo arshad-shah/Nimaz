@@ -41,6 +41,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 
+private val SurahNumberSlotWidth = 40.dp
+private val SurahNumberSlotSpacing = 12.dp
+
 private fun getJuzForPage(page: Int): Int {
     val juzStartPages = listOf(
         1, 22, 42, 62, 82, 102, 121, 142, 162, 182,
@@ -98,7 +101,7 @@ internal fun SurahListItem(
             ) {
                 // Surah number indicator
                 Box(
-                    modifier = Modifier.size(40.dp),
+                    modifier = Modifier.size(SurahNumberSlotWidth),
                     contentAlignment = Alignment.Center
                 ) {
                     if (isComplete) {
@@ -128,7 +131,7 @@ internal fun SurahListItem(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(SurahNumberSlotSpacing))
 
                 // English name — takes remaining space, truncates if needed
                 Text(
@@ -166,7 +169,7 @@ internal fun SurahListItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 52.dp, end = 14.dp, bottom = 14.dp),
+                    .padding(start = SurahNumberSlotWidth + SurahNumberSlotSpacing, end = 14.dp, bottom = 14.dp),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val isMeccan = surah.revelationType == RevelationType.MECCAN
@@ -225,7 +228,7 @@ private fun MetadataBadge(
             textAlign = TextAlign.Center,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
         )
     }
 }

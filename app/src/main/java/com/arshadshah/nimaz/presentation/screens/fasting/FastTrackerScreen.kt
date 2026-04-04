@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,6 +32,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -41,6 +42,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -49,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -76,6 +77,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.viewmodel.FastManagementSheetState
 import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
 import java.time.DayOfWeek
@@ -102,9 +104,28 @@ fun FastTrackerScreen(
     val makeupState by viewModel.makeupState.collectAsState()
     val ramadanState by viewModel.ramadanState.collectAsState()
     val calendarState by viewModel.calendarState.collectAsState()
+    val sheetState by viewModel.sheetState.collectAsState()
 
     var selectedTab by remember { mutableIntStateOf(0) }
     val tabs = listOf(stringResource(R.string.fasting_tab_ramadan), stringResource(R.string.fasting_tab_voluntary), stringResource(R.string.fasting_tab_makeup))
+
+    // Fast management bottom sheet
+    FastManagementBottomSheet(
+        isVisible = sheetState.isVisible,
+        date = sheetState.date,
+        existingRecord = sheetState.existingRecord,
+        initialStatus = sheetState.selectedStatus,
+        initialFastType = sheetState.selectedFastType,
+        initialExemptionReason = sheetState.selectedExemptionReason,
+        initialNote = sheetState.note,
+        onSave = { status, fastType, exemptionReason, note ->
+            viewModel.onEvent(
+                FastingEvent.SaveFastForDate(sheetState.date, status, fastType, exemptionReason, note)
+            )
+        },
+        onDelete = { viewModel.onEvent(FastingEvent.DeleteFastRecord(sheetState.date)) },
+        onDismiss = { viewModel.onEvent(FastingEvent.DismissFastSheet) }
+    )
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -119,12 +140,11 @@ fun FastTrackerScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // Tabs
             item {
-                TabRow(
+                PrimaryTabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = MaterialTheme.colorScheme.surface,
                     contentColor = MaterialTheme.colorScheme.primary,
@@ -226,7 +246,10 @@ fun FastTrackerScreen(
                                 val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
                                 viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
                             },
-                            onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) },
+                            onSelectDate = { date ->
+                                viewModel.onEvent(FastingEvent.SelectDate(date))
+                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                            },
                             showRamadanIndicators = true
                         )
                     }
@@ -234,7 +257,7 @@ fun FastTrackerScreen(
                     // Log Fast Button
                     item {
                         LogFastButton(
-                            onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                            onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
                         )
                     }
                 }
@@ -273,19 +296,28 @@ fun FastTrackerScreen(
                                 val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
                                 viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
                             },
-                            onSelectDate = { date -> viewModel.onEvent(FastingEvent.SelectDate(date)) }
+                            onSelectDate = { date ->
+                                viewModel.onEvent(FastingEvent.SelectDate(date))
+                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                            }
                         )
                     }
 
                     // Recommended Fasts
                     item {
-                        RecommendedFastsSection()
+                        RecommendedFastsSection(
+                            records = calendarState.records,
+                            onLogFast = { date ->
+                                viewModel.onEvent(FastingEvent.SelectDate(date))
+                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                            }
+                        )
                     }
 
                     // Log Fast Button
                     item {
                         LogFastButton(
-                            onClick = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
+                            onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
                         )
                     }
                 }
@@ -296,6 +328,12 @@ fun FastTrackerScreen(
                             makeupState = makeupState,
                             onCompleteMakeupFast = { makeupFastId ->
                                 viewModel.onEvent(FastingEvent.CompleteMakeupFast(makeupFastId))
+                            },
+                            onUpdateMakeupFast = { updatedFast ->
+                                viewModel.onEvent(FastingEvent.UpdateMakeupFast(updatedFast))
+                            },
+                            onPayFidya = { id, amount ->
+                                viewModel.onEvent(FastingEvent.PayFidya(id, amount))
                             }
                         )
                     }
@@ -746,12 +784,21 @@ private fun FastingCalendarSection(
 
 @Composable
 private fun RecommendedFastsSection(
+    records: List<FastRecord> = emptyList(),
+    onLogFast: (LocalDate) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val today = LocalDate.now()
     val dateFormatter = DateTimeFormatter.ofPattern("MMM d")
 
     val todayText = stringResource(R.string.fasting_today)
+
+    // Build a set of fasted dates for quick lookup
+    val fastedDates = remember(records) {
+        records.filter { it.status == FastStatus.FASTED }
+            .map { LocalDate.ofEpochDay(it.date / (24 * 60 * 60 * 1000)) }
+            .toSet()
+    }
 
     // Calculate next Monday
     val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
@@ -769,6 +816,66 @@ private fun RecommendedFastsSection(
         else -> stringResource(R.string.fasting_in_days_format, ayyamDays)
     }
 
+    // Islamic calendar recommended fasts
+    val hijriToday = remember { HijriDateCalculator.today() }
+    val islamicFasts = remember(hijriToday.year) {
+        val events = HijriDateCalculator.getIslamicEvents(hijriToday.year) +
+                HijriDateCalculator.getIslamicEvents(hijriToday.year + 1)
+
+        data class RecommendedIslamicFast(
+            val name: String,
+            val date: LocalDate,
+            val description: String
+        )
+
+        buildList {
+            // Day of Ashura (10 Muharram)
+            events.filter { it.name == "Day of Ashura" }.forEach { event ->
+                val date = event.toGregorianDate()
+                if (!date.isBefore(today)) {
+                    add(RecommendedIslamicFast(
+                        name = "Day of Ashura",
+                        date = date,
+                        description = "10th Muharram - highly recommended fast"
+                    ))
+                }
+            }
+            // Day of Arafah (9 Dhul Hijjah)
+            events.filter { it.name == "Day of Arafah" }.forEach { event ->
+                val date = event.toGregorianDate()
+                if (!date.isBefore(today)) {
+                    add(RecommendedIslamicFast(
+                        name = "Day of Arafah",
+                        date = date,
+                        description = "9th Dhul Hijjah - expiates two years"
+                    ))
+                }
+            }
+            // 6 Days of Shawwal
+            try {
+                val shawwalStart = HijriDateCalculator.toGregorian(2, 10, hijriToday.year)
+                if (!shawwalStart.isBefore(today)) {
+                    add(RecommendedIslamicFast(
+                        name = "6 Days of Shawwal",
+                        date = shawwalStart,
+                        description = "Fasting 6 days after Eid al-Fitr"
+                    ))
+                }
+            } catch (_: Exception) { }
+            // Mid-Sha'ban (15 Sha'ban)
+            try {
+                val midShaban = HijriDateCalculator.toGregorian(15, 8, hijriToday.year)
+                if (!midShaban.isBefore(today)) {
+                    add(RecommendedIslamicFast(
+                        name = "Mid-Sha'ban",
+                        date = midShaban,
+                        description = "15th Sha'ban - recommended fast"
+                    ))
+                }
+            } catch (_: Exception) { }
+        }.take(3) // Show at most 3 upcoming
+    }
+
     Column(modifier = modifier) {
         Text(
             text = stringResource(R.string.fasting_recommended_fasts),
@@ -784,22 +891,64 @@ private fun RecommendedFastsSection(
                 iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
                 name = stringResource(R.string.fasting_monday),
                 description = stringResource(R.string.fasting_sunnah_desc),
-                nextDate = mondayText
+                nextDate = mondayText,
+                isFasted = nextMonday in fastedDates,
+                onClick = { onLogFast(nextMonday) }
             )
             RecommendedFastCard(
                 icon = Icons.Default.CalendarMonth,
                 iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
                 name = stringResource(R.string.fasting_thursday),
                 description = stringResource(R.string.fasting_sunnah_desc),
-                nextDate = thursdayText
+                nextDate = thursdayText,
+                isFasted = nextThursday in fastedDates,
+                onClick = { onLogFast(nextThursday) }
             )
             RecommendedFastCard(
                 icon = Icons.Default.NightsStay,
                 iconBgColor = NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                 name = stringResource(R.string.fasting_ayyam_al_beed),
                 description = stringResource(R.string.fasting_ayyam_desc),
-                nextDate = ayyamText
+                nextDate = ayyamText,
+                onClick = {
+                    // Open sheet for the next Ayyam al-Beed day
+                    val hijri = HijriDateCalculator.toHijri(today)
+                    val targetDay = if (hijri.day <= 15) 13 else {
+                        // Next month's 13th
+                        13
+                    }
+                    try {
+                        val nextMonth = if (hijri.day > 15) {
+                            if (hijri.month == 12) 1 else hijri.month + 1
+                        } else hijri.month
+                        val nextYear = if (hijri.day > 15 && hijri.month == 12) hijri.year + 1 else hijri.year
+                        val ayyamDate = HijriDateCalculator.toGregorian(targetDay, nextMonth, nextYear)
+                        onLogFast(ayyamDate)
+                    } catch (_: Exception) {
+                        onLogFast(today)
+                    }
+                }
             )
+
+            // Islamic calendar fasts
+            islamicFasts.forEach { fast ->
+                val fastDate = fast.date
+                val daysUntil = java.time.temporal.ChronoUnit.DAYS.between(today, fastDate).toInt()
+                val dateText = when {
+                    daysUntil == 0 -> todayText
+                    daysUntil == 1 -> stringResource(R.string.fasting_tomorrow)
+                    else -> stringResource(R.string.fasting_next_format, fastDate.format(dateFormatter))
+                }
+                RecommendedFastCard(
+                    icon = Icons.Default.NightsStay,
+                    iconBgColor = Color(0xFF10B981).copy(alpha = 0.2f),
+                    name = fast.name,
+                    description = fast.description,
+                    nextDate = dateText,
+                    isFasted = fastDate in fastedDates,
+                    onClick = { onLogFast(fastDate) }
+                )
+            }
         }
     }
 }
@@ -824,6 +973,8 @@ private fun RecommendedFastCard(
     name: String,
     description: String,
     nextDate: String,
+    isFasted: Boolean = false,
+    onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -831,6 +982,7 @@ private fun RecommendedFastCard(
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(onClick = onClick)
             .padding(15.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -864,17 +1016,34 @@ private fun RecommendedFastCard(
             )
         }
 
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                .padding(horizontal = 10.dp, vertical = 4.dp)
-        ) {
-            Text(
-                text = nextDate,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary
-            )
+        if (isFasted) {
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(GreenAccent.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Check,
+                    contentDescription = null,
+                    tint = GreenAccent,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
+        } else {
+            Box(
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                    .padding(horizontal = 10.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = nextDate,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
         }
     }
 }
@@ -913,9 +1082,26 @@ private fun LogFastButton(
 private fun MakeupFastsContent(
     makeupState: com.arshadshah.nimaz.presentation.viewmodel.MakeupFastsUiState,
     onCompleteMakeupFast: (Long) -> Unit,
+    onUpdateMakeupFast: (MakeupFast) -> Unit = {},
+    onPayFidya: (Long, Double) -> Unit = { _, _ -> },
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    var editingMakeupFast by remember { mutableStateOf<MakeupFast?>(null) }
+
+    // Makeup fast edit bottom sheet
+    MakeupFastEditBottomSheet(
+        makeupFast = editingMakeupFast,
+        isVisible = editingMakeupFast != null,
+        onDismiss = { editingMakeupFast = null },
+        onSave = { updated ->
+            onUpdateMakeupFast(updated)
+            editingMakeupFast = null
+        },
+        onPayFidya = { id, amount ->
+            onPayFidya(id, amount)
+            editingMakeupFast = null
+        }
+    )
 
     Column(
         modifier = modifier,
@@ -962,14 +1148,11 @@ private fun MakeupFastsContent(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                val editComingSoonMsg = stringResource(R.string.fasting_edit_coming_soon)
                 makeupState.pendingMakeupFasts.forEach { makeupFast ->
                     MakeupPendingFastCard(
                         makeupFast = makeupFast,
                         onComplete = { onCompleteMakeupFast(makeupFast.id) },
-                        onEdit = {
-                            Toast.makeText(context, editComingSoonMsg, Toast.LENGTH_SHORT).show()
-                        }
+                        onEdit = { editingMakeupFast = makeupFast }
                     )
                 }
             }

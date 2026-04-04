@@ -351,25 +351,24 @@ private fun HomeCompactContent(
     batteryOptimizationLauncher: androidx.activity.result.ActivityResultLauncher<android.content.Intent>,
     viewModel: HomeViewModel,
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-    ) {
-        // Header with Prayer Info
-        item {
-            HomeHeader(
-                locationName = state.locationName,
-                hijriDate = state.hijriDate,
-                gregorianDate = java.time.LocalDate.now().format(
-                    DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
-                ),
-                nextPrayer = state.nextPrayer,
-                nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: "",
-                timeUntilNextPrayer = state.timeUntilNextPrayer,
-                onSettingsClick = onNavigateToSettings
-            )
-        }
+    Column(modifier = Modifier.fillMaxSize()) {
+        // Header with Prayer Info - fixed at top
+        HomeHeader(
+            locationName = state.locationName,
+            hijriDate = state.hijriDate,
+            gregorianDate = java.time.LocalDate.now().format(
+                DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
+            ),
+            nextPrayer = state.nextPrayer,
+            nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: "",
+            timeUntilNextPrayer = state.timeUntilNextPrayer,
+            onSettingsClick = onNavigateToSettings
+        )
 
-        // In-App Update Banner
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+        ) {
+            // In-App Update Banner
         when (updateState) {
             is UpdateState.UpdateAvailable -> {
                 item {
@@ -528,6 +527,7 @@ private fun HomeCompactContent(
             )
         }
     }
+    } // Column
 }
 
 @Composable
@@ -577,7 +577,8 @@ private fun HomeHeader(
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
                         text = locationName.ifEmpty { stringResource(R.string.location) },
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.ExtraBold,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -677,6 +678,7 @@ private fun HeaderIconButton(
             .size(40.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f))
+            .border(1.dp, MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(12.dp))
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -761,6 +763,7 @@ private fun CountdownUnit(
             modifier = Modifier
                 .size(70.dp)
                 .clip(RoundedCornerShape(12.dp))
+                .border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(12.dp))
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .alpha(alpha),
             contentAlignment = Alignment.Center

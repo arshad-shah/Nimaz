@@ -65,6 +65,12 @@ interface FastingDao {
     @Query("UPDATE makeup_fasts SET status = 'fidya_paid', fidyaAmount = :amount, updatedAt = :timestamp WHERE id = :id")
     suspend fun markFidyaPaid(id: Long, amount: Double, timestamp: Long = System.currentTimeMillis())
 
+    @Query("DELETE FROM fast_records WHERE date = :date")
+    suspend fun deleteFastRecordByDate(date: Long)
+
+    @Query("SELECT COUNT(*) FROM makeup_fasts WHERE originalDate = :originalDate")
+    suspend fun getMakeupFastCountForDate(originalDate: Long): Int
+
     // Statistics
     @Query("SELECT COUNT(*) FROM fast_records WHERE status = 'fasted' AND date BETWEEN :startDate AND :endDate")
     suspend fun getFastedCountInRange(startDate: Long, endDate: Long): Int

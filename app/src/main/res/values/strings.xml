@@ -639,6 +639,9 @@
     <string name="quran_home_juz_format">Juz %1$d</string>
     <string name="quran_home_page_format">Page %1$d</string>
     <string name="quran_home_surah_fallback">Surah %1$d</string>
+    <string name="quran_home_page_range_format">p. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s starts</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
     <string name="quran_home_continue_reading">CONTINUE READING</string>
     <string name="quran_home_percent_complete">%1$d%% complete</string>
     <string name="quran_home_completed">Completed</string>
@@ -723,6 +726,18 @@
     <string name="fasting_made_up_on">Made up on %1$s</string>
     <string name="fasting_fidya_paid">Fidya paid</string>
     <string name="fasting_originally">Originally: %1$s</string>
+
+    <!-- Fast Management Bottom Sheet -->
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Fast Type</string>
+    <string name="fasting_sheet_note">Note</string>
+    <string name="fasting_sheet_save">Save</string>
+    <string name="fasting_sheet_delete">Delete</string>
+    <string name="fasting_sheet_exemption_reason">Exemption Reason</string>
+    <string name="fasting_sheet_select_reason">Select reason</string>
+    <string name="fasting_sheet_edit_makeup">Edit Makeup Fast</string>
+    <string name="fasting_sheet_reason">Reason</string>
+    <string name="fasting_sheet_fidya_amount">Fidya Amount</string>
 
     <!-- License Detail Screen -->
     <string name="license_detail_title">License Detail</string>
