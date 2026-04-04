@@ -18,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -154,13 +155,24 @@ internal fun LazyListScope.pageGridItems(
                                     shape = RoundedCornerShape(12.dp),
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                                 ) {
-                                    Text(
-                                        text = "\u25B8 $surahName \u00B7 p.$pageNumber",
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Medium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp)
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Filled.PlayArrow,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.size(12.dp)
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.quran_home_surah_start_indicator, surahName, pageNumber),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
