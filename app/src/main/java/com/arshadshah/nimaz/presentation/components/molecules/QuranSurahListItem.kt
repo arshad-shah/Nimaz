@@ -89,12 +89,14 @@ internal fun SurahListItem(
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column {
+            // Top row: number + English name + Arabic name + info button
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(14.dp),
+                    .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Surah number indicator
                 Box(
                     modifier = Modifier.size(40.dp),
                     contentAlignment = Alignment.Center
@@ -126,69 +128,27 @@ internal fun SurahListItem(
                     }
                 }
 
-                Spacer(modifier = Modifier.width(14.dp))
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = surah.nameEnglish,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        val isMeccan = surah.revelationType == RevelationType.MECCAN
-                        Text(
-                            text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(R.string.quran_home_madinah),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = "\u2022",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.quran_home_verses_count, surah.ayahCount),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        if (startPage > 0) {
-                            Text(
-                                text = "\u2022",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = stringResource(R.string.quran_home_page_range_format, startPage, endPage),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = "\u2022",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            Text(
-                                text = stringResource(R.string.quran_home_juz_indicator, getJuzForPage(startPage)),
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
+                // English name — takes remaining space, truncates if needed
+                Text(
+                    text = surah.nameEnglish,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
+                )
 
+                // Arabic name — intrinsic width, never truncated
                 ArabicText(
                     text = surah.nameArabic,
                     size = ArabicTextSize.MEDIUM,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
+                // Info button
                 IconButton(
                     onClick = onInfoClick,
                     modifier = Modifier.size(36.dp)
@@ -202,7 +162,35 @@ internal fun SurahListItem(
                 }
             }
 
-            // Khatam progress bar
+            // Metadata badges row — aligned with English name (40dp box + 12dp spacer = 52dp start)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 52.dp, end = 14.dp, bottom = 14.dp),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                val isMeccan = surah.revelationType == RevelationType.MECCAN
+                MetadataBadge(
+                    text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(R.string.quran_home_madinah),
+                    modifier = Modifier.weight(1f)
+                )
+                MetadataBadge(
+                    text = stringResource(R.string.quran_home_verses_count, surah.ayahCount),
+                    modifier = Modifier.weight(1f)
+                )
+                if (startPage > 0) {
+                    MetadataBadge(
+                        text = stringResource(R.string.quran_home_page_range_format, startPage, endPage),
+                        modifier = Modifier.weight(1f)
+                    )
+                    MetadataBadge(
+                        text = stringResource(R.string.quran_home_juz_indicator, getJuzForPage(startPage)),
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+
+            // Khatam progress bar (unchanged)
             if (isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount > 0) {
                 LinearProgressIndicator(
                     progress = { khatamReadCount.toFloat() / khatamTotalAyahs },
