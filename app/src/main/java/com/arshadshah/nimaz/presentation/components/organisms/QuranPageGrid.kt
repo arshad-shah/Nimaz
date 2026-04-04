@@ -139,29 +139,29 @@ internal fun LazyListScope.pageGridItems(
         val pagesInJuz = (startPage..endPage).toList()
         val chunkedPages = pagesInJuz.chunked(columns)
         chunkedPages.forEach { row ->
-            // Check if any page in this row starts a new surah
-            val surahStarts = row.flatMap { pageNumber ->
-                surahStartPageMap[pageNumber] ?: emptyList()
-            }
-            if (surahStarts.isNotEmpty()) {
-                item(key = "surah_start_${row.first()}") {
-                    FlowRow(
-                        modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        surahStarts.forEach { surahName ->
-                            Surface(
-                                shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                            ) {
-                                Text(
-                                    text = "\u25B8 $surahName",
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.Medium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp)
-                                )
+            // Show per-page surah start indicators above the row
+            row.forEach { pageNumber ->
+                val surahs = surahStartPageMap[pageNumber]
+                if (!surahs.isNullOrEmpty()) {
+                    item(key = "surah_start_page_$pageNumber") {
+                        FlowRow(
+                            modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            surahs.forEach { surahName ->
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+                                ) {
+                                    Text(
+                                        text = "\u25B8 $surahName \u00B7 p.$pageNumber",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp)
+                                    )
+                                }
                             }
                         }
                     }
