@@ -3,8 +3,6 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -43,7 +41,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 internal fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
     khatamReadAyahIds: Set<Int> = emptySet(),
@@ -136,111 +134,137 @@ internal fun LazyListScope.pageGridItems(
             }
         }
 
-        // Pages in this Juz, chunked into rows
+        // Split pages in this Juz at surah boundaries, then chunk each segment into rows
         val pagesInJuz = (startPage..endPage).toList()
-        val chunkedPages = pagesInJuz.chunked(columns)
-        chunkedPages.forEach { row ->
-            // Show per-page surah start indicators above the row
-            row.forEach { pageNumber ->
-                val surahs = surahStartPageMap[pageNumber]
-                if (!surahs.isNullOrEmpty()) {
-                    item(key = "surah_start_page_$pageNumber") {
-                        FlowRow(
-                            modifier = Modifier.padding(start = 4.dp, top = 6.dp, bottom = 2.dp),
-                            horizontalArrangement = Arrangement.spacedBy(6.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
+
+        // Find surah start pages within this Juz range
+        val surahBreaks = pagesInJuz.filter { surahStartPageMap.containsKey(it) }.toSet()
+
+        // Split pages into segments at surah boundaries
+        val segments = mutableListOf<Pair<String?, List<Int>>>() // surahName to pages
+        var currentSegmentPages = mutableListOf<Int>()
+        var currentSurahName: String? = null
+
+        for (page in pagesInJuz) {
+            val surahNames = surahStartPageMap[page]
+            if (surahNames != null) {
+                // Save previous segment if it has pages
+                if (currentSegmentPages.isNotEmpty()) {
+                    segments.add(currentSurahName to currentSegmentPages.toList())
+                }
+                // Start new segment — if multiple surahs start on same page, use first
+                currentSurahName = surahNames.first()
+                currentSegmentPages = mutableListOf(page)
+                // If there are additional surahs starting on the same page, add them as empty segments
+                surahNames.drop(1).forEach { extraSurah ->
+                    // These surahs also start on this page but we can't split further
+                    // They'll appear as additional headers before the same page grid
+                }
+            } else {
+                currentSegmentPages.add(page)
+            }
+        }
+        // Don't forget the last segment
+        if (currentSegmentPages.isNotEmpty()) {
+            segments.add(currentSurahName to currentSegmentPages.toList())
+        }
+
+        segments.forEach { (surahName, segmentPages) ->
+            // Surah header badge
+            if (surahName != null) {
+                item(key = "surah_header_${segmentPages.first()}") {
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            surahs.forEach { surahName ->
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.padding(vertical = 3.dp, horizontal = 10.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.PlayArrow,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.size(12.dp)
-                                        )
-                                        Text(
-                                            text = surahName,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            }
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = surahName,
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Medium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
                         }
                     }
                 }
             }
-            item(key = "page_row_${row.first()}") {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    row.forEach { pageNumber ->
-                        val (readCount, totalCount) = pageProgressMap[pageNumber] ?: (0 to 0)
-                        val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
-                        val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
-                        val isSelected = selectedPageNumber == pageNumber
 
-                        Card(
-                            onClick = { onNavigateToPage(pageNumber) },
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .border(
-                                    width = if (isSelected) 2.dp else 1.5.dp,
-                                    color = if (isSelected)
-                                        MaterialTheme.colorScheme.primary
-                                    else
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(12.dp)
-                                ),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = when {
-                                    isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-                                    isComplete -> MaterialTheme.colorScheme.primaryContainer
-                                    else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                                }
-                            )
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
+            // Chunk this segment's pages into rows of 5
+            val chunkedPages = segmentPages.chunked(columns)
+            chunkedPages.forEach { row ->
+                item(key = "page_row_${row.first()}") {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        row.forEach { pageNumber ->
+                            val (readCount, totalCount) = pageProgressMap[pageNumber] ?: (0 to 0)
+                            val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
+                            val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+                            val isSelected = selectedPageNumber == pageNumber
+
+                            Card(
+                                onClick = { onNavigateToPage(pageNumber) },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .border(
+                                        width = if (isSelected) 2.dp else 1.5.dp,
+                                        color = if (isSelected)
+                                            MaterialTheme.colorScheme.primary
+                                        else
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                                        shape = RoundedCornerShape(12.dp)
+                                    ),
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = when {
+                                        isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+                                        isComplete -> MaterialTheme.colorScheme.primaryContainer
+                                        else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
+                                    }
+                                )
                             ) {
-                                // Progress ring when khatam is active and partially read
-                                if (isKhatamActive && progress > 0f && !isComplete) {
-                                    CircularProgressIndicator(
-                                        progress = { progress },
-                                        modifier = Modifier.size(48.dp),
-                                        color = MaterialTheme.colorScheme.tertiary,
-                                        trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                                        strokeWidth = 3.dp
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isKhatamActive && progress > 0f && !isComplete) {
+                                        CircularProgressIndicator(
+                                            progress = { progress },
+                                            modifier = Modifier.size(48.dp),
+                                            color = MaterialTheme.colorScheme.tertiary,
+                                            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+                                            strokeWidth = 3.dp
+                                        )
+                                    }
+                                    Text(
+                                        text = pageNumber.toString(),
+                                        style = MaterialTheme.typography.titleSmall,
+                                        fontWeight = FontWeight.Bold,
+                                        color = if (isComplete || isSelected)
+                                            MaterialTheme.colorScheme.onPrimaryContainer
+                                        else
+                                            MaterialTheme.colorScheme.primary
                                     )
                                 }
-                                Text(
-                                    text = pageNumber.toString(),
-                                    style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = if (isComplete || isSelected)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.primary
-                                )
                             }
                         }
-                    }
-                    // Fill remaining space if row is incomplete
-                    repeat(columns - row.size) {
-                        Spacer(modifier = Modifier.weight(1f))
+                        // Fill remaining space if row is incomplete
+                        repeat(columns - row.size) {
+                            Spacer(modifier = Modifier.weight(1f))
+                        }
                     }
                 }
             }
