@@ -256,3 +256,27 @@ private fun SurahListItemPreview() {
         )
     }
 }
+
+@Preview(showBackground = true)
+@Composable
+private fun SurahListItemLongNamePreview() {
+    NimazTheme {
+        SurahListItem(
+            surah = Surah(
+                number = 58,
+                nameArabic = "\u0627\u0644\u0645\u062C\u0627\u062F\u0644\u0629",
+                nameEnglish = "Al-Mujadilah",
+                nameTransliteration = "The Pleading Woman",
+                revelationType = RevelationType.MEDINAN,
+                ayahCount = 22,
+                juzStart = 28,
+                orderInMushaf = 105,
+                startPage = 542
+            ),
+            onClick = {},
+            onInfoClick = {},
+            startPage = 542,
+            endPage = 545
+        )
+    }
+}
