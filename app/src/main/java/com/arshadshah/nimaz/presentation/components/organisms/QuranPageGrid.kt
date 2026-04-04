@@ -119,7 +119,7 @@ internal fun LazyListScope.pageGridItems(
         // Juz header
         item(key = "page_juz_header_$juz") {
             Surface(
-                color = MaterialTheme.colorScheme.primaryContainer,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -127,7 +127,7 @@ internal fun LazyListScope.pageGridItems(
                     text = stringResource(R.string.quran_home_juz_pages_format, juz, startPage, endPage),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp)
                 )
             }
