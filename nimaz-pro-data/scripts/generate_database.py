@@ -781,10 +781,19 @@ def main():
     print("\nPopulating database...")
     populate_database(conn)
 
-    # Set Room database version so migrations are skipped
-    conn.execute("PRAGMA user_version = 10")
+    # Correct start_page values from actual ayah page data
+    conn.execute("""
+        UPDATE surahs SET start_page = (
+            SELECT MIN(a.page) FROM ayahs a WHERE a.surah_id = surahs.id
+        )
+    """)
     conn.commit()
-    print("\nSet user_version = 10 (Room schema version)")
+    print("\nCorrected surah start_page values from ayah data")
+
+    # Set Room database version so migrations are skipped
+    conn.execute("PRAGMA user_version = 12")
+    conn.commit()
+    print("\nSet user_version = 12 (Room schema version)")
 
     conn.close()
 

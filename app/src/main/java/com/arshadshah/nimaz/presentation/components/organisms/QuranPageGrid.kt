@@ -112,6 +112,11 @@ internal fun LazyListScope.pageGridItems(
         )
     }
 
+    // Build sorted surah starts for lookups (find which surah a page belongs to)
+    val sortedSurahStarts = surahStartPageMap.entries
+        .flatMap { (page, names) -> names.map { page to it } }
+        .sortedBy { it.first }
+
     // Add items for each Juz section
     (1..30).forEach { juz ->
         val startPage = getJuzStartPage(juz)
@@ -137,13 +142,12 @@ internal fun LazyListScope.pageGridItems(
         // Split pages in this Juz at surah boundaries, then chunk each segment into rows
         val pagesInJuz = (startPage..endPage).toList()
 
-        // Find surah start pages within this Juz range
-        val surahBreaks = pagesInJuz.filter { surahStartPageMap.containsKey(it) }.toSet()
-
         // Split pages into segments at surah boundaries
-        val segments = mutableListOf<Pair<String?, List<Int>>>() // surahName to pages
+        val segments = mutableListOf<Pair<String?, List<Int>>>()
         var currentSegmentPages = mutableListOf<Int>()
-        var currentSurahName: String? = null
+        // Initialize with the surah that contains this Juz's first page
+        var currentSurahName: String? = sortedSurahStarts
+            .lastOrNull { it.first <= startPage }?.second
 
         for (page in pagesInJuz) {
             val surahNames = surahStartPageMap[page]
@@ -155,11 +159,6 @@ internal fun LazyListScope.pageGridItems(
                 // Start new segment — if multiple surahs start on same page, use first
                 currentSurahName = surahNames.first()
                 currentSegmentPages = mutableListOf(page)
-                // If there are additional surahs starting on the same page, add them as empty segments
-                surahNames.drop(1).forEach { extraSurah ->
-                    // These surahs also start on this page but we can't split further
-                    // They'll appear as additional headers before the same page grid
-                }
             } else {
                 currentSegmentPages.add(page)
             }
