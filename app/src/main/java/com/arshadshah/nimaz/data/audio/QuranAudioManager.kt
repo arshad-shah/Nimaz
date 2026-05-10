@@ -262,7 +262,13 @@ class QuranAudioManager @Inject constructor(
                 }
 
                 override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
-                    // This is called when transitioning to next ayah - gapless!
+                    // Honor "Continuous Reading" setting: pause when an ayah ends naturally
+                    // so the user can advance manually. User-driven transitions (next/prev,
+                    // seek, playlist change) are still allowed through.
+                    if (!continuousPlayback && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                        newPlayer.pause()
+                    }
+
                     val newIndex = newPlayer.currentMediaItemIndex
                     if (newIndex >= 0 && newIndex < ayahPlaylist.size) {
                         currentPlaylistIndex = newIndex

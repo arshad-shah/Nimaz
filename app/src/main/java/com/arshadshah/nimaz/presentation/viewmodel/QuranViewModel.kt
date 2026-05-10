@@ -226,6 +226,9 @@ class QuranViewModel @Inject constructor(
                 Triple(display, behavior, showTajweed)
             }.collect { (display, behavior, showTajweed) ->
                 audioManager.setReciter(behavior.reciterId)
+                // Push continuous-reading reactively so toggling the setting while
+                // in the reader takes effect immediately, not on next play-start.
+                audioManager.setContinuousPlayback(behavior.continuousReading)
                 _readerState.update {
                     it.copy(
                         selectedTranslatorId = display.translatorId,

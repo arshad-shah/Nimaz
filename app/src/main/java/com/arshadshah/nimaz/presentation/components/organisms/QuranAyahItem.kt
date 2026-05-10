@@ -101,6 +101,7 @@ internal fun AyahItem(
     arabicFontSize: Float,
     fontSize: Float,
     isHighlighted: Boolean = false,
+    isAudioPlaying: Boolean = false,
     isFavorite: Boolean = false,
     isKhatamRead: Boolean = false,
     isKhatamMode: Boolean = false,
@@ -218,9 +219,9 @@ internal fun AyahItem(
                     modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
-                        imageVector = if (isHighlighted) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isHighlighted) "Playing" else "Play",
-                        tint = if (isHighlighted) MaterialTheme.colorScheme.primary
+                        imageVector = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = if (isAudioPlaying) "Pause" else "Play",
+                        tint = if (isAudioPlaying || isHighlighted) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )

@@ -141,6 +141,7 @@ fun TafseerScreen(
                         highlights = if (isCurrentPage) state.highlights else emptyList(),
                         totalAyahs = state.ayahs.size,
                         selectedSource = state.selectedSource,
+                        availableSources = if (isCurrentPage) state.availableSources else emptySet(),
                         onSourceSwitch = { source ->
                             viewModel.onEvent(TafseerEvent.SwitchSource(source))
                         },

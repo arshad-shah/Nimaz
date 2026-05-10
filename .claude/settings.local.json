@@ -75,7 +75,8 @@
       "Bash(gh run view:*)",
       "Bash(gh pr view:*)",
       "WebFetch(domain:developers.google.com)",
-      "Bash(./gradlew testDebugUnitTest --tests \"com.arshadshah.nimaz.core.util.*\")"
+      "Bash(./gradlew testDebugUnitTest --tests \"com.arshadshah.nimaz.core.util.*\")",
+      "PowerShell(sqlite3 app/src/main/assets/database/nimaz_prepopulated.db $query)"
     ]
   }
 }

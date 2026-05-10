@@ -2,20 +2,25 @@ package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
@@ -38,16 +43,28 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.SecondaryTabRow
@@ -63,10 +80,14 @@ import com.arshadshah.nimaz.presentation.components.molecules.KhatamProgressCard
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.organisms.JuzGrid
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.computeJuzHeaderIndices
 import com.arshadshah.nimaz.presentation.components.organisms.pageGridItems
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
+import androidx.compose.ui.tooling.preview.Preview
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -397,54 +418,152 @@ private fun BrowseTabContent(
             }
         }
 
-        LazyColumn(
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            when (state.selectedTab) {
-                0 -> {
-                    items(
-                        items = state.filteredSurahs,
-                        key = { it.number }
-                    ) { surah ->
-                        val surahRange = surahAyahRanges[surah.number]
-                        val readCount = if (isKhatamActive && surahRange != null)
-                            khatamReadAyahIds.count { it in surahRange } else 0
-                        val (startPage, endPage) = surahPageRanges[surah.number] ?: (surah.startPage to surah.startPage)
-                        SurahListItem(
-                            surah = surah,
-                            onClick = { onNavigateToSurah(surah.number) },
-                            onInfoClick = { onNavigateToSurahInfo(surah.number) },
-                            khatamReadCount = readCount,
-                            khatamTotalAyahs = surah.ayahCount,
-                            isKhatamActive = isKhatamActive,
-                            isSelected = selectedSurahNumber == surah.number,
-                            startPage = startPage,
-                            endPage = endPage
+        // Sticky jump-to-page input for the Page tab
+        if (state.selectedTab == 2) {
+            var jumpToPage by remember { mutableStateOf("") }
+            OutlinedTextField(
+                value = jumpToPage,
+                onValueChange = { newValue ->
+                    if (newValue.isEmpty() || newValue.all { it.isDigit() }) {
+                        jumpToPage = newValue
+                    }
+                },
+                label = { Text(stringResource(R.string.quran_home_jump_to_page)) },
+                placeholder = { Text(stringResource(R.string.quran_home_enter_page_number)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Number,
+                    imeAction = ImeAction.Go
+                ),
+                keyboardActions = KeyboardActions(
+                    onGo = {
+                        jumpToPage.toIntOrNull()?.let { page ->
+                            if (page in 1..604) {
+                                onNavigateToPage(page)
+                            }
+                        }
+                    }
+                ),
+                trailingIcon = {
+                    IconButton(
+                        onClick = {
+                            jumpToPage.toIntOrNull()?.let { page ->
+                                if (page in 1..604) {
+                                    onNavigateToPage(page)
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = stringResource(R.string.quran_home_go_to_page),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 4.dp),
+                shape = RoundedCornerShape(12.dp)
+            )
+        }
+
+        // Shared list state for the page tab (used by scrollbar)
+        val pageListState = rememberLazyListState()
+        val coroutineScope = rememberCoroutineScope()
+
+        // Pre-compute juz header indices for the scrollbar
+        val juzHeaderIndices = remember(surahStartPageMap) {
+            computeJuzHeaderIndices(surahStartPageMap)
+        }
+
+        // Reverse lookup: item index → juz number (find which juz the first visible item belongs to)
+        val currentJuz by remember {
+            derivedStateOf {
+                val firstVisibleIndex = pageListState.firstVisibleItemIndex
+                var result = 1
+                for (juz in 1..30) {
+                    val headerIndex = juzHeaderIndices[juz] ?: 0
+                    if (headerIndex <= firstVisibleIndex) result = juz
+                    else break
                 }
-                1 -> {
-                    item(key = "juz_grid") {
-                        JuzGrid(
-                            onNavigateToJuz = onNavigateToJuz,
+                result
+            }
+        }
+
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = if (state.selectedTab == 2) pageListState else rememberLazyListState(),
+                contentPadding = PaddingValues(
+                    start = 16.dp,
+                    end = if (state.selectedTab == 2) 40.dp else 16.dp,
+                    top = 8.dp,
+                    bottom = 8.dp
+                ),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                when (state.selectedTab) {
+                    0 -> {
+                        items(
+                            items = state.filteredSurahs,
+                            key = { it.number }
+                        ) { surah ->
+                            val surahRange = surahAyahRanges[surah.number]
+                            val readCount = if (isKhatamActive && surahRange != null)
+                                khatamReadAyahIds.count { it in surahRange } else 0
+                            val (startPage, endPage) = surahPageRanges[surah.number] ?: (surah.startPage to surah.startPage)
+                            SurahListItem(
+                                surah = surah,
+                                onClick = { onNavigateToSurah(surah.number) },
+                                onInfoClick = { onNavigateToSurahInfo(surah.number) },
+                                khatamReadCount = readCount,
+                                khatamTotalAyahs = surah.ayahCount,
+                                isKhatamActive = isKhatamActive,
+                                isSelected = selectedSurahNumber == surah.number,
+                                startPage = startPage,
+                                endPage = endPage
+                            )
+                        }
+                    }
+                    1 -> {
+                        item(key = "juz_grid") {
+                            JuzGrid(
+                                onNavigateToJuz = onNavigateToJuz,
+                                khatamReadAyahIds = khatamReadAyahIds,
+                                isKhatamActive = isKhatamActive,
+                                selectedJuzNumber = selectedJuzNumber
+                            )
+                        }
+                    }
+                    2 -> {
+                        // Page grid items added directly to avoid nested LazyColumn
+                        pageGridItems(
+                            onNavigateToPage = onNavigateToPage,
                             khatamReadAyahIds = khatamReadAyahIds,
                             isKhatamActive = isKhatamActive,
-                            selectedJuzNumber = selectedJuzNumber
+                            pageAyahRanges = state.pageAyahRanges,
+                            selectedPageNumber = selectedPageNumber,
+                            surahStartPageMap = surahStartPageMap
                         )
                     }
                 }
-                2 -> {
-                    // Page grid items added directly to avoid nested LazyColumn
-                    pageGridItems(
-                        onNavigateToPage = onNavigateToPage,
-                        khatamReadAyahIds = khatamReadAyahIds,
-                        isKhatamActive = isKhatamActive,
-                        pageAyahRanges = state.pageAyahRanges,
-                        selectedPageNumber = selectedPageNumber,
-                        surahStartPageMap = surahStartPageMap
-                    )
-                }
+            }
+
+            // Juz scrollbar rail — only shown on Page tab
+            if (state.selectedTab == 2) {
+                JuzScrollbar(
+                    currentJuz = currentJuz,
+                    onJuzSelected = { juz ->
+                        val targetIndex = juzHeaderIndices[juz] ?: 0
+                        coroutineScope.launch {
+                            pageListState.animateScrollToItem(targetIndex)
+                        }
+                    },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .fillMaxHeight()
+                        .padding(end = 2.dp, top = 4.dp, bottom = 4.dp)
+                )
             }
         }
     }
@@ -556,5 +675,79 @@ private fun BookmarksTabContent(
             )
             }
         }
+    }
+}
+
+/**
+ * Thin vertical scrollbar with Juz 1–30 indicators.
+ * Tap a number to scroll, or drag along the rail for fast scrubbing.
+ */
+@Composable
+private fun JuzScrollbar(
+    currentJuz: Int,
+    onJuzSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    /** Map a y-offset inside the rail to a juz number (1..30). */
+    fun yToJuz(y: Float, height: Float): Int =
+        ((y / height) * 30).toInt().coerceIn(0, 29) + 1
+
+    Column(
+        modifier = modifier
+            .width(32.dp)
+            .clip(RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f))
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { change, _ ->
+                    change.consume()
+                    onJuzSelected(yToJuz(change.position.y, size.height.toFloat()))
+                }
+            }
+            .pointerInput(Unit) {
+                detectTapGestures { offset ->
+                    onJuzSelected(yToJuz(offset.y, size.height.toFloat()))
+                }
+            },
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val activeBackground = MaterialTheme.colorScheme.primary
+        val activeTextColor = MaterialTheme.colorScheme.onPrimary
+        val inactiveTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+
+        (1..30).forEach { juz ->
+            val isCurrent = juz == currentJuz
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+                    .then(
+                        if (isCurrent) Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(activeBackground)
+                        else Modifier
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = juz.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isCurrent) activeTextColor else inactiveTextColor
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = false, heightDp = 600, showSystemUi = false, backgroundColor = 0xFFFFFFFF)
+@Composable
+private fun JuzScrollbarPreview() {
+    NimazTheme {
+        JuzScrollbar(
+            currentJuz = 1,
+            onJuzSelected = {},
+            modifier = Modifier.fillMaxHeight()
+        )
     }
 }

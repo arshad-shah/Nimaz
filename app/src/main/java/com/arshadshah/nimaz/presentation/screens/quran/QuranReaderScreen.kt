@@ -93,6 +93,8 @@ fun QuranReaderScreen(
     val context = LocalContext.current
     val state by viewModel.readerState.collectAsState()
     val audioState by viewModel.audioState.collectAsState()
+    val homeState by viewModel.homeState.collectAsState()
+    val surahByNumber = remember(homeState.surahs) { homeState.surahs.associateBy { it.number } }
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var usePageView by rememberSaveable { mutableStateOf(false) }
@@ -412,6 +414,22 @@ fun QuranReaderScreen(
                 displayAyahs
             }
 
+            // The ayah the reader is currently looking at — drives both the
+            // position display and "play from here" semantics.
+            val currentReaderAyah = if (pagerState != null) {
+                currentPageAyahsForAudio.firstOrNull()
+            } else if (displayAyahs.isNotEmpty()) {
+                val idx = (listState.firstVisibleItemIndex - 1)
+                    .coerceIn(0, displayAyahs.lastIndex)
+                displayAyahs[idx]
+            } else null
+
+            val readerSurah = currentReaderAyah?.let { surahByNumber[it.surahNumber] }
+            val readerSurahName = readerSurah?.nameEnglish
+                ?: state.surahWithAyahs?.surah?.nameEnglish
+                ?: ""
+            val readerTotalAyahs = readerSurah?.ayahCount ?: 0
+
             AudioBottomBar(
                 isAudioActive = audioState.isActive,
                 isPlaying = audioState.isPlaying,
@@ -420,26 +438,26 @@ fun QuranReaderScreen(
                 downloadProgress = audioState.downloadProgress,
                 downloadedCount = audioState.downloadedCount,
                 totalToDownload = audioState.totalToDownload,
-                audioTitle = audioState.currentSubtitle ?: audioState.currentTitle,
-                progress = if (audioState.duration > 0) audioState.position.toFloat() / audioState.duration else 0f,
+                surahName = readerSurahName,
+                currentAyahInSurah = currentReaderAyah?.numberInSurah ?: 0,
+                totalAyahsInSurah = readerTotalAyahs,
+                pageNumber = currentReaderAyah?.page ?: 0,
+                juzNumber = currentReaderAyah?.juz ?: 0,
                 onPlayClick = {
                     if (audioState.isPlaying) {
                         viewModel.onEvent(QuranEvent.PauseAudio)
                     } else if (audioState.isActive && !audioState.isPreparing) {
                         viewModel.onEvent(QuranEvent.ResumeAudio)
-                    } else if (!audioState.isPreparing) {
-                        if (state.readingMode == ReadingMode.SURAH && surahNumber != null && pagerState == null) {
-                            val name = state.surahWithAyahs?.surah?.nameEnglish ?: "Surah $surahNumber"
-                            viewModel.onEvent(QuranEvent.PlaySurahAudio(surahNumber, name))
-                        } else if (currentPageAyahsForAudio.isNotEmpty()) {
-                            viewModel.onEvent(
-                                QuranEvent.PlayAyahAudio(
-                                    ayahGlobalId = currentPageAyahsForAudio.first().id,
-                                    surahNumber = currentPageAyahsForAudio.first().surahNumber,
-                                    ayahNumber = currentPageAyahsForAudio.first().ayahNumber
-                                )
+                    } else if (!audioState.isPreparing && currentReaderAyah != null) {
+                        // Start audio from the currently displayed ayah, not the
+                        // surah's first — preserves the reader's context.
+                        viewModel.onEvent(
+                            QuranEvent.PlayAyahAudio(
+                                ayahGlobalId = currentReaderAyah.id,
+                                surahNumber = currentReaderAyah.surahNumber,
+                                ayahNumber = currentReaderAyah.numberInSurah
                             )
-                        }
+                        )
                     }
                 },
                 onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
@@ -461,11 +479,7 @@ fun QuranReaderScreen(
                 }
             } else if (pagerState != null && (state.readingMode == ReadingMode.PAGE || usePageView)) {
                 // Page mode with HorizontalPager (RTL so swipe-left = next page)
-                val homeState by viewModel.homeState.collectAsState()
-
-                val surahMap = remember(homeState.surahs) {
-                    homeState.surahs.associateBy { it.number }
-                }
+                val surahMap = surahByNumber
 
                 // Current Quran page numbers (1-based)
                 val currentRightPage = if (isDualPageMode) {
@@ -671,7 +685,6 @@ fun QuranReaderScreen(
                 }
             } else {
                 // Surah/Juz mode: standard LazyColumn
-                val homeState by viewModel.homeState.collectAsState()
                 val surahStartIds = remember(displayAyahs) {
                     if (displayAyahs.isEmpty()) emptySet()
                     else {
@@ -769,7 +782,7 @@ fun QuranReaderScreen(
                         key = { it.id }
                     ) { ayah ->
                         if (state.readingMode == ReadingMode.JUZ && ayah.id in surahStartIds) {
-                            val surah = homeState.surahs.find { it.number == ayah.surahNumber }
+                            val surah = surahByNumber[ayah.surahNumber]
                             PageSurahSeparator(
                                 surahNumber = ayah.surahNumber,
                                 surahNameArabic = surah?.nameArabic ?: "",
@@ -779,6 +792,7 @@ fun QuranReaderScreen(
                         }
 
                         val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
+                        val isAudioPlaying = isHighlighted && audioState.isPlaying
 
                         AyahItem(
                             ayah = ayah,
@@ -787,6 +801,7 @@ fun QuranReaderScreen(
                             arabicFontSize = state.arabicFontSize,
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
+                            isAudioPlaying = isAudioPlaying,
                             isFavorite = ayah.id in favoriteAyahIds,
                             isKhatamRead = ayah.id in state.khatamReadAyahIds,
                             isKhatamMode = state.activeKhatamId != null,
