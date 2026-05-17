@@ -43,25 +43,30 @@ fun SurahInfoScreen(
         viewModel.onEvent(QuranEvent.LoadSurahInfo(surahNumber))
     }
 
+    // The audio control bar should only reflect playback that belongs to THIS
+    // surah. If a different surah is playing/paused in the background, this
+    // screen should still show the Listen button so the user can start playback
+    // for the surah they are looking at.
+    val isAudioForThisSurah = audioState.isActive && audioState.currentSurahNumber == surahNumber
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
             BottomActions(
-                isAudioActive = audioState.isActive,
-                isPlaying = audioState.isPlaying,
-                isDownloading = audioState.isDownloading,
-                isPreparing = audioState.isPreparing,
-                downloadProgress = audioState.downloadProgress,
-                downloadedCount = audioState.downloadedCount,
-                totalToDownload = audioState.totalToDownload,
-                currentAyah = audioState.currentAyahIndex + 1,
-                totalAyahs = audioState.totalAyahs,
-                surahProgress = audioState.surahProgress,
+                isAudioActive = isAudioForThisSurah,
+                isPlaying = isAudioForThisSurah && audioState.isPlaying,
+                isDownloading = isAudioForThisSurah && audioState.isDownloading,
+                isPreparing = isAudioForThisSurah && audioState.isPreparing,
+                downloadProgress = if (isAudioForThisSurah) audioState.downloadProgress else 0f,
+                downloadedCount = if (isAudioForThisSurah) audioState.downloadedCount else 0,
+                totalToDownload = if (isAudioForThisSurah) audioState.totalToDownload else 0,
+                currentAyah = if (isAudioForThisSurah) audioState.currentAyahIndex + 1 else 0,
+                totalAyahs = if (isAudioForThisSurah) audioState.totalAyahs else 0,
+                surahProgress = if (isAudioForThisSurah) audioState.surahProgress else 0f,
                 onPlayAudio = {
-                    // Only start new playback if not already active
-                    if (!audioState.isActive) {
-                        viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber))
-                    }
+                    // Always (re)start playback for this surah. If a different
+                    // surah is currently playing, playSurahFromInfo replaces it.
+                    viewModel.onEvent(QuranEvent.PlaySurahFromInfo(surahNumber))
                 },
                 onResumeAudio = { viewModel.onEvent(QuranEvent.ResumeAudio) },
                 onPauseAudio = { viewModel.onEvent(QuranEvent.PauseAudio) },

@@ -33,7 +33,6 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material.icons.filled.TrendingUp
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -44,7 +43,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -67,6 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamListUiState
@@ -285,38 +284,21 @@ fun KhatamListScreen(
     // Delete confirmation dialog
     if (showDeleteConfirm) {
         val khatamToDelete = selectedKhatamForAction
-        AlertDialog(
-            onDismissRequest = {
+        NimazConfirmDialog(
+            title = stringResource(R.string.khatam_delete_title),
+            message = stringResource(R.string.khatam_delete_message, khatamToDelete?.name ?: ""),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = {
+                khatamToDelete?.let { viewModel.onEvent(KhatamEvent.DeleteKhatam(it.id)) }
+                selectedKhatamForAction = null
+            },
+            onDismiss = {
                 showDeleteConfirm = false
                 selectedKhatamForAction = null
             },
-            title = { Text(stringResource(R.string.khatam_delete_title)) },
-            text = {
-                Text(stringResource(R.string.khatam_delete_message, khatamToDelete?.name ?: ""))
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        khatamToDelete?.let {
-                            viewModel.onEvent(KhatamEvent.DeleteKhatam(it.id))
-                        }
-                        showDeleteConfirm = false
-                        selectedKhatamForAction = null
-                    }
-                ) {
-                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        showDeleteConfirm = false
-                        selectedKhatamForAction = null
-                    }
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
         )
     }
 }

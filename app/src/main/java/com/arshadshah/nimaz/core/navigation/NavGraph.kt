@@ -91,10 +91,39 @@ import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 
 @Composable
-fun NavGraph() {
+fun NavGraph(
+    pendingQuranSurah: Int? = null,
+    onPendingQuranSurahConsumed: () -> Unit = {},
+    pendingIslamicCalendar: Boolean = false,
+    onPendingIslamicCalendarConsumed: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Deep-link from the Quran audio notification / lock-screen player.
+    // Per UX choice: clear the back stack to Home so Back returns to the Quran
+    // home screen rather than wherever the user happened to be.
+    LaunchedEffect(pendingQuranSurah) {
+        val surah = pendingQuranSurah ?: return@LaunchedEffect
+        navController.navigate(Route.QuranReader(surahNumber = surah)) {
+            popUpTo(Route.Home) { inclusive = false }
+            launchSingleTop = true
+        }
+        onPendingQuranSurahConsumed()
+    }
+
+    // Deep-link from the Hijri calendar home-screen widget. popUpTo(Home) so
+    // system Back returns the user to the home screen — never strands them
+    // mid-stack on a cold launch from the widget tap.
+    LaunchedEffect(pendingIslamicCalendar) {
+        if (!pendingIslamicCalendar) return@LaunchedEffect
+        navController.navigate(Route.IslamicCalendar) {
+            popUpTo(Route.Home) { inclusive = false }
+            launchSingleTop = true
+        }
+        onPendingIslamicCalendarConsumed()
+    }
 
     // Onboarding ViewModel to check status
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()

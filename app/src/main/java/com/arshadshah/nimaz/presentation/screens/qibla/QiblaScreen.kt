@@ -39,7 +39,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -48,7 +47,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -82,6 +80,9 @@ import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogConfirmButton
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
@@ -147,45 +148,15 @@ fun QiblaScreen(
         )
     }
 
-    // Camera rationale dialog
     if (showCameraRationale) {
-        AlertDialog(
-            onDismissRequest = { showCameraRationale = false },
-            icon = {
-                Icon(
-                    imageVector = Icons.Default.CameraAlt,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
-            },
-            title = {
-                Text(
-                    text = stringResource(R.string.camera_permission_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.camera_permission_message),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    showCameraRationale = false
-                    cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                }) {
-                    Text(stringResource(R.string.grant_permission))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCameraRationale = false }) {
-                    Text(stringResource(R.string.not_now))
-                }
-            }
+        NimazConfirmDialog(
+            title = stringResource(R.string.camera_permission_title),
+            message = stringResource(R.string.camera_permission_message),
+            confirmText = stringResource(R.string.grant_permission),
+            cancelText = stringResource(R.string.not_now),
+            titleIcon = Icons.Default.CameraAlt,
+            onConfirm = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) },
+            onDismiss = { showCameraRationale = false },
         )
     }
 
@@ -722,50 +693,55 @@ private fun CalibrationDialog(
     accuracy: CompassAccuracy,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        icon = {
-            Icon(
-                imageVector = Icons.Default.Warning,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.error,
-                modifier = Modifier.size(32.dp)
-            )
-        },
-        title = {
+    // Custom-content dialog: steps + tip are structured manually, so we
+    // opt out of the auto content-card wrap and provide our own card.
+    NimazDialog(
+        title = stringResource(R.string.calibrate_compass),
+        onDismiss = onDismiss,
+        titleIcon = Icons.Default.Warning,
+        accentColor = MaterialTheme.colorScheme.error,
+        showCloseButton = false,
+        wrapContent = false,
+        content = {
+            Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = stringResource(R.string.calibrate_compass),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = FontWeight.Bold
+                text = stringResource(
+                    R.string.current_accuracy_format,
+                    accuracy.name.lowercase().replaceFirstChar { it.uppercase() }
+                ),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        },
-        text = {
-            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                Text(
-                    text = stringResource(R.string.current_accuracy_format, accuracy.name.lowercase().replaceFirstChar { it.uppercase() }),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            Spacer(modifier = Modifier.height(12.dp))
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 Text(
                     text = stringResource(R.string.improve_accuracy),
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 CalibrationStep("1", stringResource(R.string.calibration_step_1))
                 CalibrationStep("2", stringResource(R.string.calibration_step_2))
                 CalibrationStep("3", stringResource(R.string.calibration_step_3))
                 CalibrationStep("4", stringResource(R.string.calibration_step_4))
-                Text(
-                    text = stringResource(R.string.calibration_tip),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = stringResource(R.string.calibration_tip),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(4.dp))
         },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.got_it))
-            }
+        actions = {
+            NimazDialogConfirmButton(text = stringResource(R.string.got_it), onClick = onDismiss)
         }
     )
 }

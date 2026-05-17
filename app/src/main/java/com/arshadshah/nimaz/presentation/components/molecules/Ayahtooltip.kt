@@ -102,7 +102,7 @@ fun AyahTooltip(
 ) {
     val density = LocalDensity.current
 
-    val tooltipHeightDp = 56.dp
+    val tooltipHeightDp = 52.dp
     val beakHeightDp = 10.dp
     val verticalGapDp = 6.dp
     val totalHeightDp = tooltipHeightDp + beakHeightDp + verticalGapDp

@@ -659,8 +659,9 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        audioManager.release()
-    }
+    // Intentionally do NOT release the audio manager here. It is @Singleton
+    // and outlives any single screen's ViewModel — the foreground service
+    // (QuranAudioService) owns the playback lifecycle. Releasing on every
+    // NavBackStackEntry pop killed audio whenever the user navigated away
+    // from the screen that started it.
 }

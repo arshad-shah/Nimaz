@@ -414,15 +414,23 @@ fun QuranReaderScreen(
                 displayAyahs
             }
 
-            // The ayah the reader is currently looking at — drives both the
-            // position display and "play from here" semantics.
-            val currentReaderAyah = if (pagerState != null) {
-                currentPageAyahsForAudio.firstOrNull()
-            } else if (displayAyahs.isNotEmpty()) {
-                val idx = (listState.firstVisibleItemIndex - 1)
-                    .coerceIn(0, displayAyahs.lastIndex)
-                displayAyahs[idx]
+            // When audio is active, the bar should track the highlighted (audible)
+            // ayah — sourced from audioState so it matches the highlight without
+            // depending on the auto-scroll animation settling. Scroll position is
+            // only the right source for "play from here" before playback starts.
+            val playingAyah = if (audioState.isActive && audioState.currentAyahId > 0) {
+                displayAyahs.find { it.id == audioState.currentAyahId }
             } else null
+
+            val currentReaderAyah = playingAyah ?: when {
+                pagerState != null -> currentPageAyahsForAudio.firstOrNull()
+                displayAyahs.isNotEmpty() -> {
+                    val idx = (listState.firstVisibleItemIndex - 1)
+                        .coerceIn(0, displayAyahs.lastIndex)
+                    displayAyahs[idx]
+                }
+                else -> null
+            }
 
             val readerSurah = currentReaderAyah?.let { surahByNumber[it.surahNumber] }
             val readerSurahName = readerSurah?.nameEnglish

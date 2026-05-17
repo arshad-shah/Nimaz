@@ -33,6 +33,7 @@ data class AudioState(
     val isDownloading: Boolean = false,
     val downloadProgress: Float = 0f,
     val currentAyahId: Int = 0,
+    val currentSurahNumber: Int = 0,
     // Total playlist duration and position (across all ayahs)
     val duration: Long = 0L,
     val position: Long = 0L,
@@ -234,7 +235,8 @@ class QuranAudioManager @Inject constructor(
                                     it.copy(
                                         isPlaying = false,
                                         isActive = false,
-                                        currentAyahId = 0
+                                        currentAyahId = 0,
+                                        currentSurahNumber = 0
                                     )
                                 }
                             }
@@ -277,6 +279,7 @@ class QuranAudioManager @Inject constructor(
                         _audioState.update {
                             it.copy(
                                 currentAyahId = item.ayahGlobalId,
+                                currentSurahNumber = item.surahNumber,
                                 currentAyahIndex = newIndex,
                                 currentTitle = dynamicTitle,
                                 currentSubtitle = it.reciterName
@@ -401,7 +404,8 @@ class QuranAudioManager @Inject constructor(
                 error = null,
                 totalAyahs = ayahs.size,
                 currentAyahIndex = startIndex,
-                currentAyahId = ayahs.getOrNull(startIndex)?.ayahGlobalId ?: 0
+                currentAyahId = ayahs.getOrNull(startIndex)?.ayahGlobalId ?: 0,
+                currentSurahNumber = ayahs.getOrNull(startIndex)?.surahNumber ?: 0
             )
         }
 
@@ -518,7 +522,8 @@ class QuranAudioManager @Inject constructor(
                 currentSubtitle = "Surah $surahNumber",
                 totalAyahs = 1,
                 currentAyahIndex = 0,
-                currentAyahId = ayahGlobalNumber
+                currentAyahId = ayahGlobalNumber,
+                currentSurahNumber = surahNumber
             )
         }
 
