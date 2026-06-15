@@ -7,6 +7,11 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.about.libs.plugin)
+    jacoco
+}
+
+jacoco {
+    toolVersion = "0.8.12"
 }
 
 // Firebase (Crashlytics + Analytics) is configured via google-services.json,
@@ -73,6 +78,15 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+
+    testOptions {
+        unitTests {
+            // Required so Robolectric can read merged Android resources/manifest,
+            // which the Compose UI tests for the atoms rely on.
+            isIncludeAndroidResources = true
+            isReturnDefaultValues = true
+        }
     }
 }
 
@@ -177,6 +191,15 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
 
+    // Compose UI testing under Robolectric (used by the atoms coverage tests in
+    // src/testDebug). The ui-test-manifest is registered as debugImplementation
+    // above so the merged debug manifest exposes the ComponentActivity that
+    // createComposeRule() launches.
+    testImplementation(platform(libs.androidx.compose.bom))
+    testImplementation(libs.androidx.compose.ui.test.junit4)
+    testImplementation(libs.androidx.compose.material3)
+    testImplementation(libs.androidx.compose.material.icons.extended)
+
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -192,4 +215,116 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// ── Code coverage (JaCoCo) ──────────────────────────────────────────────────
+// Robolectric runs the unit tests off-device, so coverage of the Compose
+// "atoms" is collected from the standard `testDebugUnitTest` execution data.
+tasks.withType<Test>().configureEach {
+    extensions.configure(JacocoTaskExtension::class) {
+        // Needed for Robolectric + inline/synthetic classes to be reported.
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+// Class-file noise that should never count toward coverage (generated code,
+// Compose compiler artifacts, DI, framework stubs, and @Preview singletons).
+val coverageExclusions = listOf(
+    "**/R.class",
+    "**/R$*.class",
+    "**/BuildConfig.*",
+    "**/Manifest*.*",
+    "**/*Test*.*",
+    "**/*\$Companion*.*",
+    // Compose compiler generates a ComposableSingletons class per file that
+    // holds the lambdas used only by the @Preview functions — exclude it.
+    "**/*ComposableSingletons*.*",
+    // Hilt / Dagger generated code
+    "**/di/**",
+    "**/*_Factory*.*",
+    "**/*_HiltModules*.*",
+    "**/*_Impl*.*",
+    "**/hilt_aggregated_deps/**",
+    "**/dagger/hilt/**",
+    "**/*Hilt_*.*",
+)
+
+val kotlinDebugClassesDir = layout.buildDirectory.dir("tmp/kotlin-classes/debug").get().asFile
+val buildOutputDir = layout.buildDirectory.get().asFile
+
+fun atomsClassTree(): ConfigurableFileTree =
+    fileTree(kotlinDebugClassesDir) {
+        include("**/presentation/components/atoms/**")
+        exclude(coverageExclusions)
+    }
+
+fun debugClassTree(): ConfigurableFileTree =
+    fileTree(kotlinDebugClassesDir) {
+        exclude(coverageExclusions)
+    }
+
+fun coverageExecutionData(): ConfigurableFileTree =
+    fileTree(buildOutputDir) {
+        include("**/jacoco/testDebugUnitTest.exec", "**/outputs/unit_test_code_coverage/**/*.exec")
+    }
+
+val coverageSourceDirs = files("src/main/java")
+
+// Module-wide coverage report — satisfies "add code coverage to this app".
+tasks.register<JacocoReport>("jacocoTestReport") {
+    group = "verification"
+    description = "Generates a JaCoCo coverage report for the debug unit tests."
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(debugClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+}
+
+// Focused report for the presentation atoms package.
+tasks.register<JacocoReport>("jacocoAtomsReport") {
+    group = "verification"
+    description = "Generates a JaCoCo coverage report scoped to the presentation atoms."
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(atomsClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+}
+
+// Optional gate the team can run locally/CI to enforce atom coverage. Kept out
+// of the default `check` graph so it never blocks the existing CI lane.
+tasks.register<JacocoCoverageVerification>("jacocoAtomsCoverageVerification") {
+    group = "verification"
+    description = "Verifies coverage thresholds for the presentation atoms."
+    dependsOn("testDebugUnitTest")
+
+    classDirectories.setFrom(atomsClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+
+    violationRules {
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.arshadshah.nimaz.presentation.components.atoms")
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
 }
