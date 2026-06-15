@@ -9,28 +9,30 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    # Skip the automated version-bump PR (and its merge) so it never
-    # re-triggers a build/deploy. The bump commit/PR title carries [skip ci]
-    # for squash merges; the head_ref guard covers the open PR itself.
-    if: >-
-      github.head_ref != 'automated/version-bump' &&
-      !contains(github.event.head_commit.message, '[skip ci]')
+    # Skip the automated version-bump commit so it never re-triggers a
+    # build/deploy. That commit carries a [skip ci] marker in its message.
+    if: ${{ !contains(github.event.head_commit.message, '[skip ci]') }}
     permissions:
       contents: write
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
+          # Build the PR's source branch on pull_request events, and the pushed
+          # branch (dev) on push events. Authenticate with RELEASE_PAT so the
+          # post-deploy version bump can be pushed back to the protected dev
+          # branch (its owner is allowed to bypass branch protection). Falls
+          # back to the default token so the build still works if the PAT is
+          # absent (only the final push step then fails).
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.RELEASE_PAT || github.token }}
           lfs: true  # Enable Git LFS checkout
 
       - name: Checkout LFS objects
         run: git lfs checkout
 
-      - name: Switch to PR branch and setup Git
+      - name: Setup Git identity
         run: |
-          git checkout ${{ github.head_ref }}
           git config --global user.email "CI@bot.com"
           git config --global user.name "CI-Bot"
 
@@ -91,29 +93,29 @@ jobs:
             ${{ github.workspace }}/app/build/outputs/bundle/release
 
       # The build above bumped versionCode/versionName in app/build.gradle.kts
-      # (in the working tree only). Open a PR with that change so the committed
-      # baseline stays in sync for the next deploy. This runs only on a real
-      # push to dev (a merged change), never on the bump PR itself.
+      # (working tree only). Commit that change and push it straight back to the
+      # protected dev branch so the committed baseline stays in sync for the next
+      # deploy. This runs only on a real push to dev (a merged change).
       #
-      # The PR is created with the default GITHUB_TOKEN, so GitHub's
-      # anti-recursion rule keeps it from triggering further CI runs. It is NOT
-      # auto-merged: a maintainer reviews and merges it. Use "Squash and merge"
-      # so the [skip ci] marker is preserved and the merge does not re-deploy.
-      - name: Open version bump PR
+      # The push uses RELEASE_PAT, whose owner is allowed to bypass branch
+      # protection, so no PR/manual merge is needed. The commit message carries a
+      # [skip ci] marker so this push does not re-trigger the deploy workflow
+      # (the job-level guard skips it). If dev advanced during the build, rebase
+      # and retry so the push stays a fast-forward.
+      - name: Commit and push version bump
         if: github.event_name == 'push'
-        uses: peter-evans/create-pull-request@v6
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          add-paths: app/build.gradle.kts
-          branch: automated/version-bump
-          base: dev
-          delete-branch: true
-          commit-message: "chore(release): bump version [skip ci]"
-          title: "chore(release): bump version [skip ci]"
-          labels: version-bump
-          body: |
-            Automated version bump created after deploying to the Play Store internal track.
-
-            - Only updates `versionCode` / `versionName` in `app/build.gradle.kts`.
-            - CI checks and deployment are intentionally skipped for this PR.
-            - **Merge with "Squash and merge"** so the `[skip ci]` marker is kept and the merge does not re-trigger a deploy.
+        run: |
+          git add app/build.gradle.kts
+          if git diff --cached --quiet; then
+            echo "No version change to commit; skipping."
+            exit 0
+          fi
+          git commit -m "chore(release): bump version [skip ci]"
+          for attempt in 1 2 3; do
+            if git push origin "HEAD:${{ github.ref_name }}"; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $attempt); rebasing on latest ${{ github.ref_name }} and retrying."
+            git pull --rebase --autostash origin "${{ github.ref_name }}"
+          done
+          git push origin "HEAD:${{ github.ref_name }}"
