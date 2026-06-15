@@ -38,7 +38,7 @@ object DatabaseModule {
             NimazDatabase::class.java,
             NimazDatabase.DATABASE_NAME
         )
-            .createFromAsset("database/nimaz_prepopulated.db")
+            .createFromAsset("database/nimaz_prepopulated.db", NimazDatabase.PREPACKAGED_CALLBACK)
             .addMigrations(
                 NimazDatabase.MIGRATION_7_8,
                 NimazDatabase.MIGRATION_8_9,

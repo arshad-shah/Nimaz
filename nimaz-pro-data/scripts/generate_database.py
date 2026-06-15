@@ -148,7 +148,8 @@ def create_tables(conn):
             translation TEXT NOT NULL,
             target_count INTEGER NOT NULL,
             is_custom INTEGER NOT NULL,
-            display_order INTEGER NOT NULL
+            display_order INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL DEFAULT 0
         )
     ''')
 
@@ -196,7 +197,8 @@ def create_tables(conn):
             ayahId INTEGER NOT NULL PRIMARY KEY,
             surahNumber INTEGER NOT NULL,
             ayahNumber INTEGER NOT NULL,
-            createdAt INTEGER NOT NULL
+            createdAt INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL DEFAULT 0
         )
     ''')
 
@@ -330,6 +332,7 @@ def create_tables(conn):
             khatam_id INTEGER NOT NULL,
             ayah_id INTEGER NOT NULL,
             read_at INTEGER NOT NULL,
+            updatedAt INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(khatam_id, ayah_id),
             FOREIGN KEY(khatam_id) REFERENCES khatams(id) ON DELETE CASCADE
         )
@@ -344,6 +347,7 @@ def create_tables(conn):
             khatam_id INTEGER NOT NULL,
             date INTEGER NOT NULL,
             ayahs_read INTEGER NOT NULL DEFAULT 0,
+            updatedAt INTEGER NOT NULL DEFAULT 0,
             PRIMARY KEY(khatam_id, date),
             FOREIGN KEY(khatam_id) REFERENCES khatams(id) ON DELETE CASCADE
         )
@@ -364,7 +368,8 @@ def create_tables(conn):
             duration INTEGER,
             startedAt INTEGER NOT NULL,
             completedAt INTEGER,
-            note TEXT
+            note TEXT,
+            updatedAt INTEGER NOT NULL DEFAULT 0
         )
     ''')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_tasbih_sessions_presetId ON tasbih_sessions(presetId)')
@@ -384,7 +389,8 @@ def create_tables(conn):
             nisabValue REAL NOT NULL,
             isPaid INTEGER NOT NULL,
             paidAt INTEGER,
-            notes TEXT
+            notes TEXT,
+            updatedAt INTEGER NOT NULL DEFAULT 0
         )
     ''')
 
@@ -402,7 +408,7 @@ def create_tables(conn):
     ''')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_texts_ayah_id ON tafseer_texts(ayah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_texts_tafseer_id ON tafseer_texts(tafseer_id)')
-    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_tafseer_texts_ayah_tafseer ON tafseer_texts(ayah_id, tafseer_id)')
+    cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_tafseer_texts_ayah_id_tafseer_id ON tafseer_texts(ayah_id, tafseer_id)')
 
     # Tafseer Highlights (user data)
     cursor.execute('''
@@ -418,7 +424,7 @@ def create_tables(conn):
             updated_at INTEGER NOT NULL
         )
     ''')
-    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_highlights_ayah_tafseer ON tafseer_highlights(ayah_id, tafseer_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_highlights_ayah_id_tafseer_id ON tafseer_highlights(ayah_id, tafseer_id)')
 
     # Tafseer Notes (user data)
     cursor.execute('''
@@ -431,7 +437,7 @@ def create_tables(conn):
             updated_at INTEGER NOT NULL
         )
     ''')
-    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_notes_ayah_tafseer ON tafseer_notes(ayah_id, tafseer_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_tafseer_notes_ayah_id_tafseer_id ON tafseer_notes(ayah_id, tafseer_id)')
 
     # Locations
     cursor.execute('''
@@ -687,7 +693,9 @@ def populate_database(conn):
     presets = load_json('tasbih_presets.json')
     for p in presets:
         cursor.execute('''
-            INSERT OR REPLACE INTO tasbih_presets VALUES (?,?,?,?,?,?,?,?)
+            INSERT OR REPLACE INTO tasbih_presets
+                (id, name, arabic, transliteration, translation, target_count, is_custom, display_order)
+            VALUES (?,?,?,?,?,?,?,?)
         ''', (p.get('id'), p['name'], p['arabic'], p['transliteration'],
               p['translation'], p['target_count'], 1 if p.get('is_custom') else 0,
               p['display_order']))

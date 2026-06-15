@@ -129,6 +129,50 @@ abstract class NimazDatabase : RoomDatabase() {
         // which makes migration-related crashes far easier to diagnose.
         const val SCHEMA_VERSION = 12
 
+        // Tables that gained an `updatedAt` column in schema v10/v11.
+        private val UPDATED_AT_TABLES = listOf(
+            "quran_favorites",
+            "tasbih_presets",
+            "tasbih_sessions",
+            "zakat_history",
+            "khatam_ayahs",
+            "khatam_daily_log",
+        )
+
+        /**
+         * Repairs the bundled, pre-packaged database right after it is copied
+         * from assets and *before* Room validates its schema.
+         *
+         * The asset database is generated and stamped at the current schema
+         * version, so Room runs no migrations against it — it validates directly.
+         * The generator, however, shipped it without the `updatedAt` columns
+         * added in v10/v11 and with the tafseer composite indices under the wrong
+         * names, so validation failed on every fresh install with
+         * "Pre-packaged database has an invalid schema". Bringing the copied
+         * database in line with the expected schema here fixes fresh installs
+         * without having to regenerate the multi-hundred-MB asset. Every
+         * statement is idempotent, so it is also a harmless no-op once the asset
+         * is regenerated correctly.
+         */
+        val PREPACKAGED_CALLBACK = object : RoomDatabase.PrePackagedDatabaseCallback() {
+            override fun onOpenPrepackagedDatabase(db: SupportSQLiteDatabase) {
+                UPDATED_AT_TABLES.forEach { table ->
+                    db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
+                }
+
+                // Recreate the tafseer composite indices under the names Room
+                // expects (the generator used "*_ayah_tafseer").
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_texts_ayah_tafseer`")
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
+
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
+
+                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_notes_ayah_tafseer`")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `tafseer_notes` (`ayah_id`, `tafseer_id`)")
+            }
+        }
+
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Fix incorrect start_page values in surahs table
