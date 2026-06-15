@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.init
 
 import android.content.Context
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -46,8 +47,9 @@ class AppInitializer @Inject constructor(
                     notificationTask.await()
                     adhanTask.await()
                 }
-            } catch (_: Exception) {
-                // Timeout or other failure — proceed to UI anyway
+            } catch (e: Exception) {
+                // Timeout or other failure — report it but proceed to UI anyway
+                CrashReporter.recordException(e)
             } finally {
                 _isReady.value = true
             }
@@ -61,7 +63,7 @@ class AppInitializer @Inject constructor(
                 LocaleHelper.setLocale(context, langCode)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.recordException(e)
         }
     }
 
@@ -91,7 +93,7 @@ class AppInitializer @Inject constructor(
                 )
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.recordException(e)
         }
     }
 
@@ -107,7 +109,7 @@ class AppInitializer @Inject constructor(
                 AdhanDownloadService.downloadDefault(context)
             }
         } catch (e: Exception) {
-            e.printStackTrace()
+            CrashReporter.recordException(e)
         }
     }
 }

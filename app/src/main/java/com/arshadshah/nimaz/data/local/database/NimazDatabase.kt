@@ -124,6 +124,11 @@ abstract class NimazDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "nimaz_database"
 
+        // Current Room schema version. Keep in sync with @Database(version = ...)
+        // above. Exposed so crash reports can be tagged with the schema version,
+        // which makes migration-related crashes far easier to diagnose.
+        const val SCHEMA_VERSION = 12
+
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Fix incorrect start_page values in surahs table

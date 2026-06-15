@@ -9,6 +9,18 @@ plugins {
     alias(libs.plugins.about.libs.plugin)
 }
 
+// Firebase (Crashlytics + Analytics) is configured via google-services.json,
+// which CI injects from secrets only for the release/deploy build. PR checks and
+// local debug builds run without it, so apply the Google plugins only when the
+// file is present — the google-services plugin otherwise fails the build. The
+// Firebase SDK calls in the app are guarded to no-op when Firebase is not
+// initialized, so builds without the config still run correctly (just without
+// crash/analytics reporting).
+if (file("google-services.json").exists()) {
+    apply(plugin = libs.plugins.google.services.get().pluginId)
+    apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+}
+
 android {
     namespace = "com.arshadshah.nimaz"
     compileSdk = 36
@@ -151,6 +163,11 @@ dependencies {
     // In-App Review
     implementation(libs.app.review)
     implementation(libs.app.review.ktx)
+
+    // Firebase (Crashlytics + Analytics) — versions pinned by the BoM
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     // Testing
     testImplementation(libs.junit)
