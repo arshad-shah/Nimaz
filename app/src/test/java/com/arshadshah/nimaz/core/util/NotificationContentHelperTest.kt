@@ -20,11 +20,15 @@ class NotificationContentHelperTest {
 
     @Test
     fun `getPrayerTitle is case insensitive`() {
+        // Titles are picked at random from a prayer-specific list, so the two
+        // calls can't be compared directly and won't necessarily contain "fajr"
+        // (e.g. "The Morning Prayer Awaits"). Case-insensitivity means "fajr" is
+        // recognised the same as "FAJR" and never falls through to the
+        // "<name> Time" fallback that getPrayerTitle returns for unknown prayers.
         val titleUpper = NotificationContentHelper.getPrayerTitle("FAJR")
         val titleLower = NotificationContentHelper.getPrayerTitle("fajr")
-        // Both should contain "Fajr" in some form
-        assertThat(titleUpper.lowercase()).contains("fajr")
-        assertThat(titleLower.lowercase()).contains("fajr")
+        assertThat(titleUpper).isNotEqualTo("FAJR Time")
+        assertThat(titleLower).isNotEqualTo("fajr Time")
     }
 
     @Test
