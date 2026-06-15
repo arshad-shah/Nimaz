@@ -116,7 +116,6 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
-    implementation(libs.androidx.ui.test.junit4)
     ksp(libs.hilt.compiler)
     implementation(libs.hilt.navigation.compose)
 
@@ -191,14 +190,14 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
 
-    // NOTE: The Compose UI test APIs used by the atoms tests in src/testDebug
-    // (createComposeRule, onNodeWithText, performClick, …) and the Compose
-    // runtime/material3 are already on the unit-test classpath transitively via
-    // the module's main `implementation` dependencies (ui-test-junit4, material3,
-    // material-icons-extended) and `debugImplementation(ui-test-manifest)`.
-    // Re-declaring them here (especially pulling in the Compose BOM) perturbs
-    // AGP's consistent dependency resolution for the androidTest classpath, so we
-    // intentionally rely on the inherited versions instead.
+    // Compose UI test harness for the Robolectric atom tests in src/testDebug
+    // (createComposeRule, onNodeWithText, performClick, …). Declared here as a
+    // test-only dependency at an explicit version — NOT via the Compose BOM —
+    // so it does not perturb AGP's consistent resolution for the androidTest
+    // classpath. The Compose runtime / material3 / icons it builds against are
+    // inherited from the module's main `implementation` deps, and the
+    // ComponentActivity it launches comes from `debugImplementation(ui-test-manifest)`.
+    testImplementation(libs.androidx.ui.test.junit4)
 
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
