@@ -12,10 +12,12 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Preserve line numbers so Crashlytics can map obfuscated release stack traces
+# back to source (the Crashlytics Gradle plugin uploads the mapping file).
+-keepattributes SourceFile,LineNumberTable
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Hide the original source file name while keeping line numbers.
+-renamesourcefileattribute SourceFile
+
+# Keep custom exception type names readable in crash reports.
+-keep public class * extends java.lang.Exception

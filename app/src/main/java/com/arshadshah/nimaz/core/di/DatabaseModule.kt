@@ -42,6 +42,7 @@ object DatabaseModule {
             .addMigrations(
                 NimazDatabase.MIGRATION_7_8,
                 NimazDatabase.MIGRATION_8_9,
+                NimazDatabase.MIGRATION_9_10,
                 NimazDatabase.MIGRATION_10_11,
                 NimazDatabase.MIGRATION_11_12
             )

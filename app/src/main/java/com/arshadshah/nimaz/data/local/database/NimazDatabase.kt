@@ -124,6 +124,11 @@ abstract class NimazDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "nimaz_database"
 
+        // Current Room schema version. Keep in sync with @Database(version = ...)
+        // above. Exposed so crash reports can be tagged with the schema version,
+        // which makes migration-related crashes far easier to diagnose.
+        const val SCHEMA_VERSION = 12
+
         val MIGRATION_11_12 = object : Migration(11, 12) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Fix incorrect start_page values in surahs table
@@ -137,15 +142,31 @@ abstract class NimazDatabase : RoomDatabase() {
             }
         }
 
+        // Schema v10 added `updatedAt` to quran_favorites. The original release
+        // bumped the database version to 10 without ever registering this
+        // migration, so any device sitting at schema v9 crashes on launch with
+        // "A migration from 9 to 10 was required but not found" the moment Room
+        // opens the database. Restore the missing step here.
+        val MIGRATION_9_10 = object : Migration(9, 10) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                val now = System.currentTimeMillis()
+                db.addColumnIfMissing("quran_favorites", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+            }
+        }
+
         val MIGRATION_10_11 = object : Migration(10, 11) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 val now = System.currentTimeMillis()
-                db.execSQL("ALTER TABLE quran_favorites ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
-                db.execSQL("ALTER TABLE tasbih_presets ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
-                db.execSQL("ALTER TABLE tasbih_sessions ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
-                db.execSQL("ALTER TABLE khatam_ayahs ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
-                db.execSQL("ALTER TABLE khatam_daily_log ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
-                db.execSQL("ALTER TABLE zakat_history ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                // quran_favorites.updatedAt already exists at schema v10 (added by
+                // MIGRATION_9_10). Guard every ALTER so re-running on a database
+                // that already has the column is a no-op instead of a
+                // "duplicate column name" crash.
+                db.addColumnIfMissing("quran_favorites", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing("tasbih_presets", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing("tasbih_sessions", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing("khatam_ayahs", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing("khatam_daily_log", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing("zakat_history", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
             }
         }
 
@@ -293,5 +314,27 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_daily_log_khatam_id` ON `khatam_daily_log` (`khatam_id`)")
             }
         }
+    }
+}
+
+/**
+ * Adds [column] to [table] only when it is not already present. SQLite has no
+ * "ADD COLUMN IF NOT EXISTS", so a migration that runs against a database where
+ * the column already exists would otherwise throw "duplicate column name".
+ * Keeping the ALTER idempotent lets migrations stay safe regardless of which
+ * exact schema version a device is upgrading from.
+ */
+private fun SupportSQLiteDatabase.addColumnIfMissing(
+    table: String,
+    column: String,
+    definition: String,
+) {
+    val columnExists = query("PRAGMA table_info(`$table`)").use { cursor ->
+        val nameIndex = cursor.getColumnIndex("name")
+        generateSequence { if (cursor.moveToNext()) cursor.getString(nameIndex) else null }
+            .any { it == column }
+    }
+    if (!columnExists) {
+        execSQL("ALTER TABLE `$table` ADD COLUMN $column $definition")
     }
 }

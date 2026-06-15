@@ -41,6 +41,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import com.google.android.play.core.review.ReviewManagerFactory
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import kotlin.system.exitProcess
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
@@ -100,6 +101,21 @@ fun NavGraph(
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Analytics: log a screen_view whenever the active destination changes.
+    // Type-safe routes serialize as a fully-qualified name with optional args
+    // (e.g. "...Route$QuranReader/{surahNumber}?..."), so trim down to the simple
+    // screen name for readable analytics.
+    val analyticsContext = androidx.compose.ui.platform.LocalContext.current
+    LaunchedEffect(currentDestination?.route) {
+        val route = currentDestination?.route ?: return@LaunchedEffect
+        val screenName = route
+            .substringBefore('/')
+            .substringBefore('?')
+            .substringAfterLast('.')
+            .substringAfterLast('$')
+        AppAnalytics.logScreenView(analyticsContext, screenName)
+    }
 
     // Deep-link from the Quran audio notification / lock-screen player.
     // Per UX choice: clear the back stack to Home so Back returns to the Quran

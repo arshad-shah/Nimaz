@@ -7,4 +7,9 @@ plugins {
     alias(libs.plugins.ksp) apply false
     alias(libs.plugins.hilt) apply false
     alias(libs.plugins.about.libs.plugin) apply false
+    // Put the Firebase plugins on the classpath. The app module applies them
+    // conditionally (only when google-services.json is present) so PR-check and
+    // local debug builds without the config file still succeed.
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
 }
