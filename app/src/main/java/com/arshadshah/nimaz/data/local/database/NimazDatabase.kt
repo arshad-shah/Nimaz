@@ -154,7 +154,7 @@ abstract class NimazDatabase : RoomDatabase() {
          * statement is idempotent, so it is also a harmless no-op once the asset
          * is regenerated correctly.
          */
-        val PREPACKAGED_CALLBACK = object : RoomDatabase.PrePackagedDatabaseCallback() {
+        val PREPACKAGED_CALLBACK = object : RoomDatabase.PrepackagedDatabaseCallback() {
             override fun onOpenPrepackagedDatabase(db: SupportSQLiteDatabase) {
                 UPDATED_AT_TABLES.forEach { table ->
                     db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
