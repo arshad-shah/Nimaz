@@ -34,13 +34,30 @@ platform :android do
   private_lane :fetch_and_increment_build_number do
     sh "git config user.email 'CI@BOT.com'"
     sh "git config user.name 'CI-BOT'"
-    increment_version_code(
-            app_project_dir: "**/app",
-      )
-    increment_version_name(app_project_dir: '**/app', bump_type: 'patch')
-    git_add(path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle")
+
+    # The project uses the Kotlin DSL (build.gradle.kts), which the
+    # android_versioning plugin does not support, so bump the versions
+    # directly here.
+    gradle_file = File.expand_path("../app/build.gradle.kts", __dir__)
+    contents = File.read(gradle_file)
+
+    current_code = contents[/versionCode\s*=\s*(\d+)/, 1]
+    UI.user_error!("Could not find versionCode in #{gradle_file}") if current_code.nil?
+    new_code = current_code.to_i + 1
+    contents = contents.sub(/versionCode\s*=\s*\d+/, "versionCode = #{new_code}")
+
+    current_name = contents[/versionName\s*=\s*"([^"]+)"/, 1]
+    UI.user_error!("Could not find versionName in #{gradle_file}") if current_name.nil?
+    major, minor, patch = current_name.split(".").map(&:to_i)
+    new_name = "#{major}.#{minor}.#{patch + 1}"
+    contents = contents.sub(/versionName\s*=\s*"[^"]+"/, "versionName = \"#{new_name}\"")
+
+    File.write(gradle_file, contents)
+    UI.success("Bumped versionCode #{current_code} -> #{new_code}, versionName #{current_name} -> #{new_name}")
+
+    git_add(path: gradle_file)
     git_commit(
-          path: "/home/runner/work/Nimaz/Nimaz/app/build.gradle",
+          path: gradle_file,
           message: "Bumped Version Code and name"
         )
     # Get the current branch name
