@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+Bu güncellemede yenilikler:
+
+• Namaz verilerinizi cihazlar arasında eşitleyin — hesap gerekmez.
+• Yeni ana ekran widget'ları: sonraki namaz ve namaz takibi.
+• Mushaf sayfa görünümlü yeni Kuran okuyucu — anında çeviri ve Tefsir için herhangi bir ayete dokunun.
+• Ayet ayet sesli okuma.
+• Namaz ve oruç kartlarıyla yenilenen "Bugün" ekranı.
+• Daha güvenilir Ezan sesi, indirmeler ve bildirimler.
+• Çeşitli hata düzeltmeleri ve performans iyileştirmeleri.
