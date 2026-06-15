@@ -102,7 +102,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 12,
+    version = 13,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -127,7 +127,7 @@ abstract class NimazDatabase : RoomDatabase() {
         // Current Room schema version. Keep in sync with @Database(version = ...)
         // above. Exposed so crash reports can be tagged with the schema version,
         // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 12
+        const val SCHEMA_VERSION = 13
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(
@@ -140,36 +140,59 @@ abstract class NimazDatabase : RoomDatabase() {
         )
 
         /**
-         * Repairs the bundled, pre-packaged database right after it is copied
-         * from assets and *before* Room validates its schema.
+         * Brings a database that was created from the legacy pre-packaged asset
+         * in line with the current schema: it adds the `updatedAt` columns
+         * introduced in v10/v11 and recreates the tafseer composite indices
+         * under the names Room expects (the generator used "*_ayah_tafseer").
          *
-         * The asset database is generated and stamped at the current schema
-         * version, so Room runs no migrations against it — it validates directly.
-         * The generator, however, shipped it without the `updatedAt` columns
-         * added in v10/v11 and with the tafseer composite indices under the wrong
-         * names, so validation failed on every fresh install with
-         * "Pre-packaged database has an invalid schema". Bringing the copied
-         * database in line with the expected schema here fixes fresh installs
-         * without having to regenerate the multi-hundred-MB asset. Every
-         * statement is idempotent, so it is also a harmless no-op once the asset
-         * is regenerated correctly.
+         * The shipped asset was stamped at user_version 12 while it still lacked
+         * these, so it has to be repaired through two different paths:
+         *  - when the asset is freshly copied, via [PREPACKAGED_CALLBACK], and
+         *  - when a device already sits at version 12 with the stale schema, via
+         *    [MIGRATION_12_13].
+         *
+         * Every statement is idempotent, so running it through either path — or
+         * both, or once the asset is finally regenerated — is always safe.
+         */
+        private fun repairLegacyAssetSchema(db: SupportSQLiteDatabase) {
+            UPDATED_AT_TABLES.forEach { table ->
+                db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
+            }
+
+            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_texts_ayah_tafseer`")
+            db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
+
+            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
+
+            db.execSQL("DROP INDEX IF EXISTS `index_tafseer_notes_ayah_tafseer`")
+            db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `tafseer_notes` (`ayah_id`, `tafseer_id`)")
+        }
+
+        /**
+         * Repairs the bundled, pre-packaged database right after it is copied
+         * from assets and *before* Room validates its schema. Only runs on a
+         * fresh copy, which is why the same repair is also exposed as
+         * [MIGRATION_12_13] for devices that already hold the stale database.
          */
         val PREPACKAGED_CALLBACK = object : RoomDatabase.PrepackagedDatabaseCallback() {
             override fun onOpenPrepackagedDatabase(db: SupportSQLiteDatabase) {
-                UPDATED_AT_TABLES.forEach { table ->
-                    db.addColumnIfMissing(table, "updatedAt", "INTEGER NOT NULL DEFAULT 0")
-                }
+                repairLegacyAssetSchema(db)
+            }
+        }
 
-                // Recreate the tafseer composite indices under the names Room
-                // expects (the generator used "*_ayah_tafseer").
-                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_texts_ayah_tafseer`")
-                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_tafseer_texts_ayah_id_tafseer_id` ON `tafseer_texts` (`ayah_id`, `tafseer_id`)")
-
-                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_highlights_ayah_tafseer`")
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_highlights_ayah_id_tafseer_id` ON `tafseer_highlights` (`ayah_id`, `tafseer_id`)")
-
-                db.execSQL("DROP INDEX IF EXISTS `index_tafseer_notes_ayah_tafseer`")
-                db.execSQL("CREATE INDEX IF NOT EXISTS `index_tafseer_notes_ayah_id_tafseer_id` ON `tafseer_notes` (`ayah_id`, `tafseer_id`)")
+        // Devices that installed an earlier release received the pre-packaged
+        // asset stamped at user_version 12 while it was still missing the
+        // `updatedAt` columns (v10/v11) and shipped the tafseer composite
+        // indices under the wrong names. Because their database already reports
+        // version 12, neither the pre-packaged copy callback nor the pre-12
+        // migrations ever run again, so Room validates the stale schema and
+        // crashes on launch with "Pre-packaged database has an invalid schema"
+        // (most visibly on quran_favorites, the first affected table). Re-apply
+        // the same idempotent repairs here so those installs heal on upgrade.
+        val MIGRATION_12_13 = object : Migration(12, 13) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                repairLegacyAssetSchema(db)
             }
         }
 
