@@ -32,43 +32,28 @@ platform :android do
   end
 
   private_lane :fetch_and_increment_build_number do
-    sh "git config user.email 'CI@BOT.com'"
-    sh "git config user.name 'CI-BOT'"
-
+    # We deliberately do NOT commit/push a version bump back to the repo.
+    # The `dev` branch is protected (changes must go through a PR + CodeQL),
+    # so a direct CI push is correctly rejected. Instead we derive a unique,
+    # strictly-increasing versionCode at build time from the CI run number and
+    # expose it to Gradle via the VERSION_CODE env var. build.gradle.kts reads
+    # this value, falling back to its committed base when building locally.
+    #
     # The project uses the Kotlin DSL (build.gradle.kts), which the
-    # android_versioning plugin does not support, so bump the versions
-    # directly here.
+    # android_versioning plugin does not support, hence the manual approach.
     gradle_file = File.expand_path("../app/build.gradle.kts", __dir__)
     contents = File.read(gradle_file)
 
-    current_code = contents[/versionCode\s*=\s*(\d+)/, 1]
-    UI.user_error!("Could not find versionCode in #{gradle_file}") if current_code.nil?
-    new_code = current_code.to_i + 1
-    contents = contents.sub(/versionCode\s*=\s*\d+/, "versionCode = #{new_code}")
+    base_code = contents[/baseVersionCode\s*=\s*(\d+)/, 1] || contents[/versionCode\s*=\s*(\d+)/, 1]
+    UI.user_error!("Could not find a base versionCode in #{gradle_file}") if base_code.nil?
 
-    current_name = contents[/versionName\s*=\s*"([^"]+)"/, 1]
-    UI.user_error!("Could not find versionName in #{gradle_file}") if current_name.nil?
-    major, minor, patch = current_name.split(".").map(&:to_i)
-    new_name = "#{major}.#{minor}.#{patch + 1}"
-    contents = contents.sub(/versionName\s*=\s*"[^"]+"/, "versionName = \"#{new_name}\"")
+    # GITHUB_RUN_NUMBER increments on every workflow run, guaranteeing a
+    # monotonically increasing versionCode without persisting anything to git.
+    run_number = ENV["GITHUB_RUN_NUMBER"].to_i
+    new_code = base_code.to_i + run_number
 
-    File.write(gradle_file, contents)
-    UI.success("Bumped versionCode #{current_code} -> #{new_code}, versionName #{current_name} -> #{new_name}")
-
-    git_add(path: gradle_file)
-    git_commit(
-          path: gradle_file,
-          message: "Bumped Version Code and name"
-        )
-    # Get the current branch name
-    current_branch = sh('git rev-parse --abbrev-ref HEAD').strip
-
-    push_to_git_remote(
-      remote: "origin",
-      local_branch: current_branch,
-      remote_branch: current_branch,
-      tags: true
-    )
+    ENV["VERSION_CODE"] = new_code.to_s
+    UI.success("Using versionCode #{new_code} (base #{base_code} + run #{run_number})")
   end
 
   private_lane :build_and_sign_apk_or_aab do
