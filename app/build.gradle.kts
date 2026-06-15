@@ -191,14 +191,14 @@ dependencies {
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
 
-    // Compose UI testing under Robolectric (used by the atoms coverage tests in
-    // src/testDebug). The ui-test-manifest is registered as debugImplementation
-    // above so the merged debug manifest exposes the ComponentActivity that
-    // createComposeRule() launches.
-    testImplementation(platform(libs.androidx.compose.bom))
-    testImplementation(libs.androidx.compose.ui.test.junit4)
-    testImplementation(libs.androidx.compose.material3)
-    testImplementation(libs.androidx.compose.material.icons.extended)
+    // NOTE: The Compose UI test APIs used by the atoms tests in src/testDebug
+    // (createComposeRule, onNodeWithText, performClick, …) and the Compose
+    // runtime/material3 are already on the unit-test classpath transitively via
+    // the module's main `implementation` dependencies (ui-test-junit4, material3,
+    // material-icons-extended) and `debugImplementation(ui-test-manifest)`.
+    // Re-declaring them here (especially pulling in the Compose BOM) perturbs
+    // AGP's consistent dependency resolution for the androidTest classpath, so we
+    // intentionally rely on the inherited versions instead.
 
     // Instrumented Testing
     androidTestImplementation(libs.androidx.junit)
