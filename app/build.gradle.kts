@@ -17,15 +17,10 @@ android {
         applicationId = "com.arshadshah.nimaz"
         minSdk = 29
         targetSdk = 36
-
-        // Base version. `versionName` is the human-readable release version and is
-        // bumped intentionally via a normal PR. `versionCode` must be unique and
-        // strictly increasing for every Play Store upload, so in CI it is derived
-        // from the workflow run number (see VERSION_CODE in fastlane). This avoids
-        // committing/pushing a bump back to the protected branch.
-        val baseVersionCode = 300
-        versionCode = (System.getenv("VERSION_CODE")?.toIntOrNull() ?: baseVersionCode)
-        versionName = "3.0.1"
+        // Source of truth for the app version. CI bumps these at build time and
+        // opens a PR with the change instead of pushing to the protected branch.
+        versionCode = 300
+        versionName = "3.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
