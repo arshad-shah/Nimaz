@@ -8,12 +8,15 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -62,6 +65,8 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
+import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
+import com.arshadshah.nimaz.presentation.theme.isCompact
 import java.text.NumberFormat
 import java.util.Locale
 
@@ -99,38 +104,148 @@ fun ZakatCalculatorScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        val windowSizeClass = currentWindowSizeClass()
+
+        if (windowSizeClass.isCompact) {
+            ZakatCompactContent(
+                state = state,
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
+        } else {
+            ZakatTabletContent(
+                state = state,
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
+        }
+    }
+}
+
+@Composable
+private fun ZakatCompactContent(
+    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    viewModel: ZakatViewModel,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        item {
+            ZakatResultSummaryCard(
+                zakatDue = state.calculation?.zakatDue ?: 0.0,
+                nisabValue = state.calculation?.nisabValue ?: 0.0,
+                isAboveNisab = state.calculation?.isAboveNisab ?: false,
+                nisabType = state.nisabType,
+                currency = state.currency
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            NisabSelector(
+                selectedType = state.nisabType,
+                goldPrice = state.goldPricePerGram,
+                silverPrice = state.silverPricePerGram,
+                onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+            )
+        }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            NimazSectionHeader(
+                title = "Assets",
+                trailingContent = {
+                    Text(
+                        text = formatCurrency(
+                            state.assets.total +
+                                    (state.assets.goldGrams * state.goldPricePerGram) +
+                                    (state.assets.silverGrams * state.silverPricePerGram),
+                            state.currency
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            )
+        }
+        item { AssetInputCards(state = state, viewModel = viewModel) }
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            NimazSectionHeader(
+                title = "Liabilities",
+                trailingContent = {
+                    Text(
+                        text = formatCurrency(state.liabilities.total, state.currency),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            )
+        }
+        item { LiabilityInputCards(state = state, viewModel = viewModel) }
+        state.calculation?.let { calculation ->
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                BreakdownCard(
+                    totalAssets = calculation.totalAssets,
+                    totalLiabilities = calculation.totalLiabilities,
+                    netWorth = calculation.netWorth,
+                    nisabValue = calculation.nisabValue,
+                    isAboveNisab = calculation.isAboveNisab,
+                    zakatDue = calculation.zakatDue,
+                    currency = state.currency,
+                    onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
+                )
+            }
+        }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+    }
+}
+
+@Composable
+private fun ZakatTabletContent(
+    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    viewModel: ZakatViewModel,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 32.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Result card spans full width
+        ZakatResultSummaryCard(
+            zakatDue = state.calculation?.zakatDue ?: 0.0,
+            nisabValue = state.calculation?.nisabValue ?: 0.0,
+            isAboveNisab = state.calculation?.isAboveNisab ?: false,
+            nisabType = state.nisabType,
+            currency = state.currency
+        )
+
+        // Nisab selector spans full width
+        NisabSelector(
+            selectedType = state.nisabType,
+            goldPrice = state.goldPricePerGram,
+            silverPrice = state.silverPricePerGram,
+            onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
+        )
+
+        // Two columns: Assets left, Liabilities right
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Result Card - gold gradient at top
-            item {
-                ZakatResultSummaryCard(
-                    zakatDue = state.calculation?.zakatDue ?: 0.0,
-                    nisabValue = state.calculation?.nisabValue ?: 0.0,
-                    isAboveNisab = state.calculation?.isAboveNisab ?: false,
-                    nisabType = state.nisabType,
-                    currency = state.currency
-                )
-            }
-
-            // Nisab Type Selector
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                NisabSelector(
-                    selectedType = state.nisabType,
-                    goldPrice = state.goldPricePerGram,
-                    silverPrice = state.silverPricePerGram,
-                    onTypeChange = { viewModel.onEvent(ZakatEvent.SetNisabType(it)) }
-                )
-            }
-
-            // Assets Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
+            // Assets column
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 NimazSectionHeader(
                     title = "Assets",
                     trailingContent = {
@@ -146,121 +261,14 @@ fun ZakatCalculatorScreen(
                         )
                     }
                 )
+                AssetInputCards(state = state, viewModel = viewModel)
             }
 
-            item {
-                InputCard(
-                    icon = Icons.Default.Wallet,
-                    iconTint = NimazColors.ZakatColors.Cash,
-                    iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
-                    label = "Cash on Hand",
-                    hint = "Physical cash you possess",
-                    value = state.assets.cashOnHand,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateCash(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.AccountBalance,
-                    iconTint = NimazColors.ZakatColors.Cash,
-                    iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
-                    label = "Bank Balance",
-                    hint = "All bank accounts combined",
-                    value = state.assets.bankBalance,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBankBalance(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Savings,
-                    iconTint = NimazColors.ZakatColors.Gold,
-                    iconBackground = NimazColors.ZakatColors.Gold.copy(alpha = 0.2f),
-                    label = "Gold",
-                    hint = "Weight in grams",
-                    value = state.assets.goldGrams,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateGold(it)) },
-                    suffix = "g"
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Savings,
-                    iconTint = NimazColors.ZakatColors.Silver,
-                    iconBackground = NimazColors.ZakatColors.Silver.copy(alpha = 0.2f),
-                    label = "Silver",
-                    hint = "Weight in grams",
-                    value = state.assets.silverGrams,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateSilver(it)) },
-                    suffix = "g"
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.ShowChart,
-                    iconTint = NimazColors.ZakatColors.Investment,
-                    iconBackground = NimazColors.ZakatColors.Investment.copy(alpha = 0.2f),
-                    label = "Investments",
-                    hint = "Stocks, bonds, mutual funds",
-                    value = state.assets.investments,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateInvestments(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Business,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    label = "Business Inventory",
-                    hint = "Goods held for trade",
-                    value = state.assets.businessInventory,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBusinessInventory(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Receipt,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    label = "Receivables",
-                    hint = "Money owed to you",
-                    value = state.assets.receivables,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateReceivables(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Home,
-                    iconTint = MaterialTheme.colorScheme.primary,
-                    iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                    label = "Rental Income",
-                    hint = "Income from properties",
-                    value = state.assets.rentalIncome,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateRentalIncome(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.MoreHoriz,
-                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    iconBackground = MaterialTheme.colorScheme.surfaceVariant,
-                    label = "Other Assets",
-                    hint = "Any other zakatable assets",
-                    value = state.assets.otherAssets,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherAssets(it)) }
-                )
-            }
-
-            // Liabilities Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
+            // Liabilities column
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
                 NimazSectionHeader(
                     title = "Liabilities",
                     trailingContent = {
@@ -271,78 +279,162 @@ fun ZakatCalculatorScreen(
                         )
                     }
                 )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.CreditCard,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-                    label = "Debts Owed",
-                    hint = "Personal debts",
-                    value = state.liabilities.debts,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateDebts(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.AccountBalance,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-                    label = "Loans",
-                    hint = "Bank or personal loans",
-                    value = state.liabilities.loans,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateLoans(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.Receipt,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-                    label = "Bills Due",
-                    hint = "Outstanding bills",
-                    value = state.liabilities.billsDue,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBillsDue(it)) }
-                )
-            }
-
-            item {
-                InputCard(
-                    icon = Icons.Default.MoreHoriz,
-                    iconTint = MaterialTheme.colorScheme.error,
-                    iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-                    label = "Other Liabilities",
-                    hint = "Any other liabilities",
-                    value = state.liabilities.otherLiabilities,
-                    onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherLiabilities(it)) }
-                )
-            }
-
-            // Breakdown Section
-            state.calculation?.let { calculation ->
-                item {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    BreakdownCard(
-                        totalAssets = calculation.totalAssets,
-                        totalLiabilities = calculation.totalLiabilities,
-                        netWorth = calculation.netWorth,
-                        nisabValue = calculation.nisabValue,
-                        isAboveNisab = calculation.isAboveNisab,
-                        zakatDue = calculation.zakatDue,
-                        currency = state.currency,
-                        onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
-                    )
-                }
-            }
-
-            // Bottom spacing
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
+                LiabilityInputCards(state = state, viewModel = viewModel)
             }
         }
+
+        // Breakdown spans full width
+        state.calculation?.let { calculation ->
+            BreakdownCard(
+                totalAssets = calculation.totalAssets,
+                totalLiabilities = calculation.totalLiabilities,
+                netWorth = calculation.netWorth,
+                nisabValue = calculation.nisabValue,
+                isAboveNisab = calculation.isAboveNisab,
+                zakatDue = calculation.zakatDue,
+                currency = state.currency,
+                onSaveClick = { viewModel.onEvent(ZakatEvent.SaveCalculation) }
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun AssetInputCards(
+    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    viewModel: ZakatViewModel
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        InputCard(
+            icon = Icons.Default.Wallet,
+            iconTint = NimazColors.ZakatColors.Cash,
+            iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
+            label = "Cash on Hand",
+            hint = "Physical cash you possess",
+            value = state.assets.cashOnHand,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateCash(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.AccountBalance,
+            iconTint = NimazColors.ZakatColors.Cash,
+            iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
+            label = "Bank Balance",
+            hint = "All bank accounts combined",
+            value = state.assets.bankBalance,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBankBalance(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.Savings,
+            iconTint = NimazColors.ZakatColors.Gold,
+            iconBackground = NimazColors.ZakatColors.Gold.copy(alpha = 0.2f),
+            label = "Gold",
+            hint = "Weight in grams",
+            value = state.assets.goldGrams,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateGold(it)) },
+            suffix = "g"
+        )
+        InputCard(
+            icon = Icons.Default.Savings,
+            iconTint = NimazColors.ZakatColors.Silver,
+            iconBackground = NimazColors.ZakatColors.Silver.copy(alpha = 0.2f),
+            label = "Silver",
+            hint = "Weight in grams",
+            value = state.assets.silverGrams,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateSilver(it)) },
+            suffix = "g"
+        )
+        InputCard(
+            icon = Icons.Default.ShowChart,
+            iconTint = NimazColors.ZakatColors.Investment,
+            iconBackground = NimazColors.ZakatColors.Investment.copy(alpha = 0.2f),
+            label = "Investments",
+            hint = "Stocks, bonds, mutual funds",
+            value = state.assets.investments,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateInvestments(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.Business,
+            iconTint = MaterialTheme.colorScheme.primary,
+            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            label = "Business Inventory",
+            hint = "Goods held for trade",
+            value = state.assets.businessInventory,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBusinessInventory(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.Receipt,
+            iconTint = MaterialTheme.colorScheme.primary,
+            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            label = "Receivables",
+            hint = "Money owed to you",
+            value = state.assets.receivables,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateReceivables(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.Home,
+            iconTint = MaterialTheme.colorScheme.primary,
+            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+            label = "Rental Income",
+            hint = "Income from properties",
+            value = state.assets.rentalIncome,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateRentalIncome(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.MoreHoriz,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+            iconBackground = MaterialTheme.colorScheme.surfaceVariant,
+            label = "Other Assets",
+            hint = "Any other zakatable assets",
+            value = state.assets.otherAssets,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherAssets(it)) }
+        )
+    }
+}
+
+@Composable
+private fun LiabilityInputCards(
+    state: com.arshadshah.nimaz.presentation.viewmodel.ZakatCalculatorUiState,
+    viewModel: ZakatViewModel
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        InputCard(
+            icon = Icons.Default.CreditCard,
+            iconTint = MaterialTheme.colorScheme.error,
+            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+            label = "Debts Owed",
+            hint = "Personal debts",
+            value = state.liabilities.debts,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateDebts(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.AccountBalance,
+            iconTint = MaterialTheme.colorScheme.error,
+            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+            label = "Loans",
+            hint = "Bank or personal loans",
+            value = state.liabilities.loans,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateLoans(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.Receipt,
+            iconTint = MaterialTheme.colorScheme.error,
+            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+            label = "Bills Due",
+            hint = "Outstanding bills",
+            value = state.liabilities.billsDue,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBillsDue(it)) }
+        )
+        InputCard(
+            icon = Icons.Default.MoreHoriz,
+            iconTint = MaterialTheme.colorScheme.error,
+            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
+            label = "Other Liabilities",
+            hint = "Any other liabilities",
+            value = state.liabilities.otherLiabilities,
+            onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherLiabilities(it)) }
+        )
     }
 }
 

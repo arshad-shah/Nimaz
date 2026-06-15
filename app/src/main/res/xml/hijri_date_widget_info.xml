@@ -10,5 +10,7 @@
     android:maxResizeHeight="180dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="3600000"
+    android:initialLayout="@layout/glance_default_loading"
+    android:previewLayout="@layout/widget_hijri_date_preview"
     android:description="@string/widget_hijri_date_description"
     android:widgetCategory="home_screen" />

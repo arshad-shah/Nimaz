@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -127,7 +128,8 @@ fun DuaReaderScreen(
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
+                        .padding(paddingValues),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Navigation bar
                     DuaNavigationBar(
@@ -152,6 +154,7 @@ fun DuaReaderScreen(
                     Column(
                         modifier = Modifier
                             .weight(1f)
+                            .widthIn(max = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxReadableWidth())
                             .verticalScroll(rememberScrollState())
                             .padding(horizontal = 20.dp, vertical = 25.dp),
                         verticalArrangement = Arrangement.spacedBy(20.dp)

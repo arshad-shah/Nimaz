@@ -1,22 +1,31 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsFocusedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -51,10 +60,13 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
@@ -81,7 +93,31 @@ enum class SearchResultType {
 }
 
 /**
- * Standard search bar.
+ * Pinned height for the search bar. Matches Material 3's standard
+ * single-line input height so the bar lines up visually with text fields
+ * elsewhere in the app and stays consistent whether or not the trailing
+ * area (clear button, loading spinner, custom slot) is rendered.
+ */
+private val NimazSearchBarHeight = 56.dp
+
+/**
+ * The single search-bar primitive for the app. Every screen that needs a
+ * search input should use this — it provides everything the various ad-hoc
+ * search bars across the codebase used to do individually:
+ *
+ * - Focus-driven primary border (animated) so users see the field is active.
+ * - Optional [isLoading] spinner that swaps in where the clear button would
+ *   sit — for screens that fire async lookups (location search, etc.).
+ * - Optional [autoFocus] for full-screen search and picker dialogs where
+ *   the keyboard should pop up immediately.
+ * - Optional [trailing] slot for filter / voice / scan icons that some
+ *   screens may want next to the clear button.
+ * - Animated visibility on the clear button so its appearance/disappearance
+ *   doesn't feel jumpy as the user types.
+ *
+ * API is fully backwards-compatible — existing callers (NimazListPicker,
+ * SearchScreen, the asma/prophets list screens) continue to work with just
+ * the original parameters.
  */
 @Composable
 fun NimazSearchBar(
@@ -90,39 +126,86 @@ fun NimazSearchBar(
     modifier: Modifier = Modifier,
     placeholder: String = "Search...",
     enabled: Boolean = true,
+    isLoading: Boolean = false,
     showClearButton: Boolean = true,
+    autoFocus: Boolean = false,
     onClear: () -> Unit = {},
     onSearch: (String) -> Unit = {},
     leadingIcon: @Composable (() -> Unit)? = {
         Icon(
             imageVector = Icons.Default.Search,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp)
         )
-    }
+    },
+    trailing: @Composable (RowScope.() -> Unit)? = null,
 ) {
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val isFocused by interactionSource.collectIsFocusedAsState()
 
+    // Animate the border to communicate focus state. M3 OutlinedTextField does
+    // the same thing; we replicate it here so this primitive matches.
+    val borderColor by animateColorAsState(
+        targetValue = if (isFocused) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            Color.Transparent
+        },
+        label = "search_focus_border"
+    )
+    val borderWidth: Dp by animateDpAsState(
+        targetValue = if (isFocused) 1.5.dp else 0.dp,
+        label = "search_focus_border_width"
+    )
+
+    LaunchedEffect(autoFocus) {
+        if (autoFocus) focusRequester.requestFocus()
+    }
+
+    val maxWidth = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
     Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(28.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        modifier = modifier
+            .then(
+                if (maxWidth != Dp.Unspecified) Modifier.widthIn(max = maxWidth)
+                else Modifier
+            )
+            .fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        color = MaterialTheme.colorScheme.surfaceContainerHighest,
+        tonalElevation = 1.dp,
+        border = if (borderWidth > 0.dp) {
+            androidx.compose.foundation.BorderStroke(borderWidth, borderColor)
+        } else null,
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                // Pin the bar's height to the M3 search-bar standard so it
+                // looks identical whether or not the clear button / loading
+                // spinner / trailing slot is rendered. Without this floor,
+                // the bar collapses to ~36dp when nothing's typed and pops up
+                // to ~56dp the moment a trailing affordance appears.
+                .heightIn(min = NimazSearchBarHeight)
+                .padding(start = 16.dp, end = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             leadingIcon?.invoke()
-
-            Spacer(modifier = Modifier.width(12.dp))
+            if (leadingIcon != null) {
+                Spacer(modifier = Modifier.width(12.dp))
+            }
 
             BasicTextField(
                 value = query,
                 onValueChange = onQueryChange,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier
+                    .weight(1f)
+                    .focusRequester(focusRequester)
+                    .semantics { contentDescription = placeholder },
                 enabled = enabled,
+                interactionSource = interactionSource,
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface
                 ),
@@ -149,18 +232,49 @@ fun NimazSearchBar(
                 }
             )
 
-            if (showClearButton && query.isNotEmpty()) {
+            // Trailing affordances: loading spinner OR clear button (mutually
+            // exclusive — when loading, clearing makes no sense), plus an
+            // optional caller-supplied trailing slot.
+            AnimatedVisibility(
+                visible = isLoading,
+                enter = fadeIn() + scaleIn(initialScale = 0.7f),
+                exit = fadeOut() + scaleOut(targetScale = 0.7f)
+            ) {
+                Box(
+                    modifier = Modifier.size(40.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            AnimatedVisibility(
+                visible = !isLoading && showClearButton && query.isNotEmpty(),
+                enter = fadeIn() + scaleIn(initialScale = 0.7f),
+                exit = fadeOut() + scaleOut(targetScale = 0.7f)
+            ) {
                 IconButton(
-                    onClick = onClear,
-                    modifier = Modifier.size(24.dp)
+                    onClick = {
+                        onClear()
+                        focusRequester.requestFocus()
+                    },
+                    modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear search",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                 }
+            }
+
+            if (trailing != null) {
+                trailing()
             }
         }
     }
@@ -186,7 +300,16 @@ fun ExpandableSearchBar(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    Column(modifier = modifier.fillMaxWidth()) {
+    val expandableMaxWidth = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
+    Column(
+        modifier = modifier
+            .then(
+                if (expandableMaxWidth != androidx.compose.ui.unit.Dp.Unspecified)
+                    Modifier.widthIn(max = expandableMaxWidth)
+                else Modifier
+            )
+            .fillMaxWidth()
+    ) {
         // Search input
         Surface(
             modifier = Modifier.fillMaxWidth(),
@@ -524,9 +647,94 @@ private fun getSearchResultTypeLabel(type: SearchResultType): String {
     }
 }
 
-@Preview(showBackground = true)
+// ──── NimazSearchBar previews ───────────────────────────────────────────────
+//
+// Open these in Android Studio's preview pane. The "0. Showcase" preview
+// stacks every state with a caption so all variants read in one glance — use
+// it for design iteration. The individual previews below let you zoom in on
+// each state for focused inspection.
+
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 760,
+    name = "0. Showcase — all states"
+)
 @Composable
-private fun NimazSearchBarEmptyPreview() {
+private fun NimazSearchBar_Showcase_Preview() {
+    NimazTheme {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            PreviewSection(label = "Empty (default placeholder)") {
+                NimazSearchBar(query = "", onQueryChange = {})
+            }
+            PreviewSection(label = "With query (clear button visible)") {
+                NimazSearchBar(
+                    query = "Al-Fatiha",
+                    onQueryChange = {},
+                    onClear = {},
+                )
+            }
+            PreviewSection(label = "Loading (async lookup in flight)") {
+                NimazSearchBar(
+                    query = "Mecca",
+                    onQueryChange = {},
+                    isLoading = true,
+                    placeholder = "Search city or address...",
+                )
+            }
+            PreviewSection(label = "Disabled") {
+                NimazSearchBar(
+                    query = "",
+                    onQueryChange = {},
+                    enabled = false,
+                    placeholder = "Search unavailable while syncing…",
+                )
+            }
+            PreviewSection(label = "Trailing slot (filter chip)") {
+                NimazSearchBar(
+                    query = "",
+                    onQueryChange = {},
+                    placeholder = "Search reciters...",
+                    trailing = {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.TrendingUp,
+                                contentDescription = "Filter",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    },
+                )
+            }
+            PreviewSection(label = "Long query (truncation behaviour)") {
+                NimazSearchBar(
+                    query = "Surat al-Kahf wal-Anbiya wal-Saffat verses about patience",
+                    onQueryChange = {},
+                    onClear = {},
+                )
+            }
+            PreviewSection(label = "No leading icon (terse contexts)") {
+                NimazSearchBar(
+                    query = "Karachi",
+                    onQueryChange = {},
+                    onClear = {},
+                    leadingIcon = null,
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "1. Empty (default)")
+@Composable
+private fun NimazSearchBar_Empty_Preview() {
     NimazTheme {
         NimazSearchBar(
             query = "",
@@ -536,9 +744,9 @@ private fun NimazSearchBarEmptyPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 412, name = "2. With query")
 @Composable
-private fun NimazSearchBarWithQueryPreview() {
+private fun NimazSearchBar_WithQuery_Preview() {
     NimazTheme {
         NimazSearchBar(
             query = "Al-Fatiha",
@@ -549,7 +757,118 @@ private fun NimazSearchBarWithQueryPreview() {
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 412, name = "3. Loading (location search)")
+@Composable
+private fun NimazSearchBar_Loading_Preview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "Mecca",
+            onQueryChange = {},
+            isLoading = true,
+            placeholder = "Search city or address...",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "4. Disabled")
+@Composable
+private fun NimazSearchBar_Disabled_Preview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "",
+            onQueryChange = {},
+            enabled = false,
+            placeholder = "Search unavailable",
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "5. With trailing filter slot")
+@Composable
+private fun NimazSearchBar_Trailing_Preview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "",
+            onQueryChange = {},
+            placeholder = "Search reciters...",
+            trailing = {
+                Spacer(modifier = Modifier.width(4.dp))
+                IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.TrendingUp,
+                        contentDescription = "Filter",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            },
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "6. Long query (truncates)")
+@Composable
+private fun NimazSearchBar_LongQuery_Preview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "Surat al-Kahf wal-Anbiya wal-Saffat verses about patience",
+            onQueryChange = {},
+            onClear = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "7. No leading icon")
+@Composable
+private fun NimazSearchBar_NoLeadingIcon_Preview() {
+    NimazTheme {
+        NimazSearchBar(
+            query = "Karachi",
+            onQueryChange = {},
+            onClear = {},
+            leadingIcon = null,
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, heightDp = 260, name = "8. On dialog surface")
+@Composable
+private fun NimazSearchBar_OnDialogSurface_Preview() {
+    // Verifies the bar still reads as a distinct input when placed inside a
+    // tonal-elevated Surface like NimazListPicker / NimazDialog.
+    NimazTheme {
+        Surface(
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp,
+            shape = RoundedCornerShape(28.dp),
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "Calculation Method",
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                NimazSearchBar(
+                    query = "",
+                    onQueryChange = {},
+                    placeholder = "Search",
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 412, name = "9. ExpandableSearchBar")
 @Composable
 private fun ExpandableSearchBarPreview() {
     NimazTheme {
@@ -561,5 +880,22 @@ private fun ExpandableSearchBarPreview() {
             suggestions = listOf("Surah Yasin", "Juz Amma"),
             modifier = Modifier.padding(16.dp)
         )
+    }
+}
+
+@Composable
+private fun PreviewSection(
+    label: String,
+    content: @Composable () -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(horizontal = 4.dp)
+        )
+        content()
     }
 }

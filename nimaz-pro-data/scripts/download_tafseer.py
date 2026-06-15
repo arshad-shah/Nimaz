@@ -116,6 +116,46 @@ def fetch_all_pages(base_url):
     return all_tafsirs
 
 
+def fill_grouped_tafsirs(results):
+    """
+    Quran.com tafsirs group commentary across ayah ranges: only the first ayah
+    of a range carries the text; subsequent ayahs in the same group return empty.
+    Some tafseers (e.g. Ma'arif) instead attach the surah-opening commentary to a
+    later ayah, leaving leading ayahs empty.
+
+    Propagate text across these groupings, strictly within a single surah:
+      - Forward-fill: empty entries copy the most recent non-empty text in the surah.
+      - Backward-fill: leading empties (before the first non-empty) copy from the
+        first non-empty entry in the surah.
+      - Surahs with no text at all in the source are left empty.
+    """
+    by_surah = {}
+    for entry in results:
+        by_surah.setdefault(entry["surah_number"], []).append(entry)
+
+    for surah, entries in by_surah.items():
+        entries.sort(key=lambda e: e["ayah_number"])
+
+        first_nonempty_idx = next(
+            (i for i, e in enumerate(entries) if e["text"]), None
+        )
+        if first_nonempty_idx is None:
+            continue  # genuinely empty surah in the source — leave as-is
+
+        # Backward-fill leading empties from the first non-empty entry
+        leading_text = entries[first_nonempty_idx]["text"]
+        for i in range(first_nonempty_idx):
+            entries[i]["text"] = leading_text
+
+        # Forward-fill remaining empties from the most recent non-empty entry
+        last_text = leading_text
+        for e in entries[first_nonempty_idx:]:
+            if e["text"]:
+                last_text = e["text"]
+            else:
+                e["text"] = last_text
+
+
 def download_tafseer(slug, name, output_filename):
     """Download all ayah tafseers for a given tafseer slug using by_chapter endpoint."""
     output_path = JSON_DIR / output_filename
@@ -165,15 +205,45 @@ def download_tafseer(slug, name, output_filename):
         # Rate limiting - be respectful to the API
         time.sleep(0.2)
 
+    before_non_empty = sum(1 for r in results if r['text'])
+    fill_grouped_tafsirs(results)
+    after_non_empty = sum(1 for r in results if r['text'])
+
     with open(output_path, 'w', encoding='utf-8') as f:
         json.dump(results, f, ensure_ascii=False, indent=2)
 
-    non_empty = sum(1 for r in results if r['text'])
-    print(f"Saved {len(results)} entries ({non_empty} non-empty) to {output_path}")
+    print(
+        f"Saved {len(results)} entries to {output_path} "
+        f"(API non-empty: {before_non_empty}, after grouped-fill: {after_non_empty})"
+    )
     return results
 
 
+def fill_existing_files():
+    """Apply grouped-tafsir fill to JSON files already on disk (no re-download)."""
+    for _slug, name, filename in TAFSEERS:
+        path = JSON_DIR / filename
+        if not path.exists():
+            print(f"Skipping {name}: {path} not found")
+            continue
+        with open(path, 'r', encoding='utf-8') as f:
+            results = json.load(f)
+        before = sum(1 for r in results if r['text'])
+        fill_grouped_tafsirs(results)
+        after = sum(1 for r in results if r['text'])
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(results, f, ensure_ascii=False, indent=2)
+        print(f"{name}: filled {after - before} entries ({before} -> {after} non-empty of {len(results)})")
+
+
 def main():
+    import sys
+    if len(sys.argv) > 1 and sys.argv[1] == "--fill-only":
+        print("Filling existing tafseer JSON files (no download)...")
+        fill_existing_files()
+        print("Done!")
+        return
+
     print("=" * 60)
     print("Nimaz Pro - Tafseer Data Downloader")
     print("Using quran.com API v4")

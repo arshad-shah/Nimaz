@@ -145,6 +145,7 @@ fun TafseerPageContent(
     highlights: List<TafseerHighlight>,
     totalAyahs: Int,
     selectedSource: TafseerSource,
+    availableSources: Set<TafseerSource>,
     onSourceSwitch: (TafseerSource) -> Unit,
     onHighlightCreated: (startOffset: Int, endOffset: Int, color: String) -> Unit,
     onHighlightDeleted: (highlightId: Long) -> Unit,
@@ -260,11 +261,10 @@ fun TafseerPageContent(
                                 )
                             }
                         } else {
-                            Text(
-                                text = "No tafseer available for this ayah.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.padding(vertical = 16.dp)
+                            TafseerEmptyState(
+                                selectedSource = selectedSource,
+                                availableSources = availableSources,
+                                onSourceSwitch = onSourceSwitch
                             )
                         }
                     }
@@ -631,6 +631,50 @@ private fun HighlightNotesListContent(
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
+            }
+        }
+    }
+}
+
+// ── Empty State ────────────────────────────────────────────────────────────────
+
+@Composable
+private fun TafseerEmptyState(
+    selectedSource: TafseerSource,
+    availableSources: Set<TafseerSource>,
+    onSourceSwitch: (TafseerSource) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val alternate = TafseerSource.entries
+        .firstOrNull { it != selectedSource && it in availableSources }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 24.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "No ${selectedSource.displayName} commentary for this ayah",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurface,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = if (alternate != null) {
+                "${alternate.displayName} has commentary for this ayah."
+            } else {
+                "Commentary for this ayah isn't available in any installed source yet."
+            },
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        if (alternate != null) {
+            TextButton(onClick = { onSourceSwitch(alternate) }) {
+                Text("Read in ${alternate.displayName}")
             }
         }
     }

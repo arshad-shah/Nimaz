@@ -327,8 +327,9 @@ class QuranRepositoryImpl @Inject constructor(
             nameTransliteration = nameTransliteration,
             revelationType = RevelationType.fromString(revelationType),
             ayahCount = versesCount,
-            juzStart = 1, // Not available in database, default to 1
-            orderInMushaf = orderRevealed
+            juzStart = 1,
+            orderInMushaf = orderRevealed,
+            startPage = startPage
         )
     }
 

@@ -16,15 +16,12 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,6 +40,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -60,6 +58,7 @@ fun SettingsScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToLanguage: () -> Unit,
     onNavigateToWidgets: () -> Unit,
+    onNavigateToSync: () -> Unit = {},
     onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -162,6 +161,13 @@ fun SettingsScreen(
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
+                        title = "Sync Data",
+                        subtitle = "Transfer data between devices",
+                        icon = Icons.Default.Sync,
+                        onClick = onNavigateToSync
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = stringResource(R.string.reset_settings),
                         subtitle = stringResource(R.string.reset_settings_subtitle),
                         icon = Icons.Default.Restore,
@@ -179,30 +185,15 @@ fun SettingsScreen(
     }
 
     if (showResetDialog) {
-        AlertDialog(
-            onDismissRequest = { showResetDialog = false },
-            title = { Text(stringResource(R.string.reset_settings_dialog_title)) },
-            text = {
-                Text(stringResource(R.string.reset_settings_dialog_message))
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showResetDialog = false
-                        viewModel.onEvent(SettingsEvent.ResetToDefaults)
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(stringResource(R.string.reset))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showResetDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+        NimazConfirmDialog(
+            title = stringResource(R.string.reset_settings_dialog_title),
+            message = stringResource(R.string.reset_settings_dialog_message),
+            confirmText = stringResource(R.string.reset),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Restore,
+            isDestructive = true,
+            onConfirm = { viewModel.onEvent(SettingsEvent.ResetToDefaults) },
+            onDismiss = { showResetDialog = false },
         )
     }
 }

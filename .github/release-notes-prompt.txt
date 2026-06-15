@@ -1,0 +1,13 @@
+Write Google Play Store release notes for an Islamic app called Nimaz.
+
+STRICT RULES:
+- Max 500 characters total
+- Write ONLY what end users care about (new features, fixes they notice, UX improvements)
+- NEVER mention: CI/CD, deployment, workflows, metadata, store listings, pipelines, database versions, migrations, code refactoring, internal tooling, release processes
+- If all commits are internal/technical with nothing user-facing, write ONLY: "Bug fixes and performance improvements."
+- No greetings, no sign-offs, no "thank you", no "enjoy"
+- No bold, no headers, no markdown formatting
+- Plain text with simple bullet points using - prefix
+- Keep it short and natural, like how top apps write changelogs
+
+Commits to analyze (ignore any that are purely internal):

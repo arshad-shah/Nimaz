@@ -52,6 +52,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
+import com.arshadshah.nimaz.presentation.theme.isCompact
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -84,61 +88,114 @@ fun IslamicCalendarScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            // Today Card - gradient hero
+        val windowSizeClass = currentWindowSizeClass()
+
+        if (windowSizeClass.isCompact) {
+            CalendarCompactContent(
+                state = state,
+                eventsState = eventsState,
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
+        } else {
+            CalendarTabletContent(
+                state = state,
+                eventsState = eventsState,
+                viewModel = viewModel,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
+        }
+    }
+}
+
+@Composable
+private fun CalendarCompactContent(
+    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
+    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    viewModel: CalendarViewModel,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 20.dp, vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        item {
+            TodayHeroCard(
+                selectedDate = state.selectedDate,
+                hijriDay = state.selectedHijriDate?.day,
+                hijriMonth = state.selectedHijriDate?.month,
+                hijriYear = state.selectedHijriDate?.year
+            )
+        }
+        item {
+            CalendarSection(state = state, viewModel = viewModel)
+        }
+        if (eventsState.eventsForSelectedDate.isNotEmpty()) {
             item {
-                TodayHeroCard(
-                    selectedDate = state.selectedDate,
-                    hijriDay = state.selectedHijriDate?.day,
-                    hijriMonth = state.selectedHijriDate?.month,
-                    hijriYear = state.selectedHijriDate?.year
+                Text(
+                    text = stringResource(R.string.events),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
-
-            // Calendar
-            item {
-                state.currentMonth?.let { month ->
-                    val eventMap = remember(month.days) {
-                        month.days.associate { day -> day.gregorianDate to day.events }
-                    }
-
-                    NimazCalendar(
-                        displayedMonth = YearMonth.from(state.selectedDate),
-                        selectedDate = state.selectedDate,
-                        onDateSelected = { viewModel.onEvent(CalendarEvent.SelectDate(it)) },
-                        onPreviousMonth = { viewModel.onEvent(CalendarEvent.NavigateToPreviousMonth) },
-                        onNextMonth = { viewModel.onEvent(CalendarEvent.NavigateToNextMonth) },
-                        headerTitle = "${getHijriMonthName(month.hijriMonth)} ${month.hijriYear}",
-                        headerSubtitle = {
-                            ArabicText(
-                                text = getHijriMonthNameArabic(month.hijriMonth),
-                                size = ArabicTextSize.SMALL,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Start
-                            )
-                        },
-                        dayStateProvider = { date ->
-                            val events = eventMap[date] ?: emptyList()
-                            CalendarDayState(
-                                indicatorColor = getEventDotColor(events)
-                            )
-                        },
-                        legendItems = listOf(
-                            CalendarLegendItem(Color(0xFFEAB308), stringResource(R.string.eid)),
-                            CalendarLegendItem(Color(0xFF22C55E), stringResource(R.string.holy_night)),
-                            CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))
-                        )
-                    )
-                }
+            items(eventsState.eventsForSelectedDate) { event ->
+                IslamicEventCard(event = event)
             }
+        }
+        if (eventsState.upcomingEvents.isNotEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.upcoming_events),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onBackground
+                )
+            }
+            items(eventsState.upcomingEvents.take(5)) { event ->
+                IslamicEventCard(event = event)
+            }
+        }
+        item { Spacer(modifier = Modifier.height(16.dp)) }
+    }
+}
 
-            // Events for Selected Date
+@Composable
+private fun CalendarTabletContent(
+    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
+    eventsState: com.arshadshah.nimaz.presentation.viewmodel.EventsUiState,
+    viewModel: CalendarViewModel,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .padding(horizontal = 32.dp, vertical = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Left: Hero card + Calendar
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            TodayHeroCard(
+                selectedDate = state.selectedDate,
+                hijriDay = state.selectedHijriDate?.day,
+                hijriMonth = state.selectedHijriDate?.month,
+                hijriYear = state.selectedHijriDate?.year
+            )
+            CalendarSection(state = state, viewModel = viewModel)
+        }
+
+        // Right: Events
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
             if (eventsState.eventsForSelectedDate.isNotEmpty()) {
                 item {
                     Text(
@@ -152,10 +209,9 @@ fun IslamicCalendarScreen(
                     IslamicEventCard(event = event)
                 }
             }
-
-            // Upcoming Events Section
             if (eventsState.upcomingEvents.isNotEmpty()) {
                 item {
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = stringResource(R.string.upcoming_events),
                         style = MaterialTheme.typography.titleMedium,
@@ -163,15 +219,62 @@ fun IslamicCalendarScreen(
                         color = MaterialTheme.colorScheme.onBackground
                     )
                 }
-
                 items(eventsState.upcomingEvents.take(5)) { event ->
                     IslamicEventCard(event = event)
                 }
             }
-
-            // Bottom spacing
+            if (eventsState.eventsForSelectedDate.isEmpty() && eventsState.upcomingEvents.isEmpty()) {
+                item {
+                    Text(
+                        text = stringResource(R.string.events),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                }
+            }
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
+    }
+}
+
+@Composable
+private fun CalendarSection(
+    state: com.arshadshah.nimaz.presentation.viewmodel.CalendarUiState,
+    viewModel: CalendarViewModel
+) {
+    state.currentMonth?.let { month ->
+        val eventMap = remember(month.days) {
+            month.days.associate { day -> day.gregorianDate to day.events }
+        }
+
+        NimazCalendar(
+            displayedMonth = YearMonth.from(state.selectedDate),
+            selectedDate = state.selectedDate,
+            onDateSelected = { viewModel.onEvent(CalendarEvent.SelectDate(it)) },
+            onPreviousMonth = { viewModel.onEvent(CalendarEvent.NavigateToPreviousMonth) },
+            onNextMonth = { viewModel.onEvent(CalendarEvent.NavigateToNextMonth) },
+            headerTitle = "${getHijriMonthName(month.hijriMonth)} ${month.hijriYear}",
+            headerSubtitle = {
+                ArabicText(
+                    text = getHijriMonthNameArabic(month.hijriMonth),
+                    size = ArabicTextSize.SMALL,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Start
+                )
+            },
+            dayStateProvider = { date ->
+                val events = eventMap[date] ?: emptyList()
+                CalendarDayState(
+                    indicatorColor = getEventDotColor(events)
+                )
+            },
+            legendItems = listOf(
+                CalendarLegendItem(Color(0xFFEAB308), stringResource(R.string.eid)),
+                CalendarLegendItem(Color(0xFF22C55E), stringResource(R.string.holy_night)),
+                CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))
+            )
+        )
     }
 }
 

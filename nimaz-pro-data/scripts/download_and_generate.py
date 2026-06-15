@@ -1224,6 +1224,18 @@ def create_database():
               p['display_order']))
     print(f"    Inserted {len(presets)} tasbih presets")
 
+    # Correct start_page values from actual ayah page data
+    cursor.execute("""
+        UPDATE surahs SET start_page = (
+            SELECT MIN(a.page) FROM ayahs a WHERE a.surah_id = surahs.id
+        )
+    """)
+    print("    Corrected surah start_page values from ayah data")
+
+    # Set Room database version so migrations are skipped
+    conn.execute("PRAGMA user_version = 12")
+    print("    Set user_version = 12 (Room schema version)")
+
     conn.commit()
     conn.close()
 

@@ -10,6 +10,7 @@
     android:maxResizeHeight="180dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/glance_default_loading"
     android:previewLayout="@layout/widget_next_prayer_preview"
     android:description="@string/widget_next_prayer_description"
     android:widgetCategory="home_screen" />

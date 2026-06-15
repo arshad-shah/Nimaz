@@ -1,9 +1,7 @@
 package com.arshadshah.nimaz.core.navigation
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
@@ -13,10 +11,12 @@ import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -27,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.window.core.layout.WindowWidthSizeClass
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
@@ -44,8 +45,6 @@ import kotlin.system.exitProcess
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
@@ -53,25 +52,27 @@ import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
-import com.arshadshah.nimaz.presentation.screens.hadith.HadithCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
 import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
-import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaListScreen
 import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
-import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiListScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamListScreen
-import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
-import com.arshadshah.nimaz.presentation.screens.prophets.ProphetsListScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
-import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUlHusnaScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUnNabiScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveDuaScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveHadithScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveKhatamScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveMoreScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveProphetsScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveQuranScreen
+import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
@@ -83,7 +84,6 @@ import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
-import com.arshadshah.nimaz.presentation.screens.settings.SettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
@@ -91,10 +91,39 @@ import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 
 @Composable
-fun NavGraph() {
+fun NavGraph(
+    pendingQuranSurah: Int? = null,
+    onPendingQuranSurahConsumed: () -> Unit = {},
+    pendingIslamicCalendar: Boolean = false,
+    onPendingIslamicCalendarConsumed: () -> Unit = {},
+) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
+
+    // Deep-link from the Quran audio notification / lock-screen player.
+    // Per UX choice: clear the back stack to Home so Back returns to the Quran
+    // home screen rather than wherever the user happened to be.
+    LaunchedEffect(pendingQuranSurah) {
+        val surah = pendingQuranSurah ?: return@LaunchedEffect
+        navController.navigate(Route.QuranReader(surahNumber = surah)) {
+            popUpTo(Route.Home) { inclusive = false }
+            launchSingleTop = true
+        }
+        onPendingQuranSurahConsumed()
+    }
+
+    // Deep-link from the Hijri calendar home-screen widget. popUpTo(Home) so
+    // system Back returns the user to the home screen — never strands them
+    // mid-stack on a cold launch from the widget tap.
+    LaunchedEffect(pendingIslamicCalendar) {
+        if (!pendingIslamicCalendar) return@LaunchedEffect
+        navController.navigate(Route.IslamicCalendar) {
+            popUpTo(Route.Home) { inclusive = false }
+            launchSingleTop = true
+        }
+        onPendingIslamicCalendarConsumed()
+    }
 
     // Onboarding ViewModel to check status
     val onboardingViewModel: OnboardingViewModel = hiltViewModel()
@@ -103,8 +132,8 @@ fun NavGraph() {
     // Track if we've determined the start destination
     var startDestinationDetermined by remember { mutableStateOf(false) }
 
-    // Check if we should show bottom navigation
-    val showBottomNav = currentDestination?.hierarchy?.any { dest ->
+    // Check if we should show navigation (only on main bottom nav screens)
+    val showNav = currentDestination?.hierarchy?.any { dest ->
         dest.hasRoute<Route.Home>() ||
         dest.hasRoute<Route.Quran>() ||
         dest.hasRoute<Route.Tasbih>() ||
@@ -137,42 +166,54 @@ fun NavGraph() {
         }
     }
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomNav) {
-                NavigationBar {
-                    bottomNavItems.forEach { item ->
-                        val selected = currentDestination?.hierarchy?.any {
-                            it.hasRoute(item.route::class)
-                        } == true
+    // Determine navigation layout type:
+    // - Phone (Compact): BottomNav
+    // - Tablet (Medium/Expanded): NavigationRail
+    // - Hidden on detail screens
+    val adaptiveInfo = currentWindowAdaptiveInfo()
+    val navLayoutType = if (!showNav) {
+        NavigationSuiteType.None
+    } else {
+        val defaultType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+        // Force NavigationRail on all non-compact sizes (user preference: no drawer)
+        if (adaptiveInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+            NavigationSuiteType.NavigationRail
+        } else {
+            defaultType
+        }
+    }
 
-                        NavigationBarItem(
-                            icon = { Icon(item.icon, contentDescription = item.label) },
-                            label = { Text(item.label) },
-                            selected = selected,
-                            onClick = {
-                                navController.navigate(item.route) {
-                                    popUpTo(navController.graph.findStartDestination().id) {
-                                        saveState = true
-                                    }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
+    NavigationSuiteScaffold(
+        layoutType = navLayoutType,
+        navigationSuiteColors = NavigationSuiteDefaults.colors(
+            navigationRailContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+        ),
+        navigationSuiteItems = {
+            bottomNavItems.forEach { navItem ->
+                val selected = currentDestination?.hierarchy?.any {
+                    it.hasRoute(navItem.route::class)
+                } == true
+
+                item(
+                    icon = { Icon(navItem.icon, contentDescription = navItem.label) },
+                    label = { Text(navItem.label) },
+                    selected = selected,
+                    onClick = {
+                        navController.navigate(navItem.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
-                        )
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
-                }
+                )
             }
         }
-    ) { innerPadding ->
+    ) {
         NavHost(
             navController = navController,
             startDestination = startDestination,
-            // Only apply bottom padding (for nav bar). Each screen's own
-            // Scaffold/TopAppBar handles the top status bar inset.
-            modifier = Modifier.padding(
-                PaddingValues(bottom = innerPadding.calculateBottomPadding())
-            )
         ) {
             // Onboarding
             composable<Route.Onboarding> {
@@ -203,24 +244,13 @@ fun NavGraph() {
             }
 
             composable<Route.Quran> {
-                QuranHomeScreen(
+                AdaptiveQuranScreen(
+                    navController = navController,
                     onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
-                    onNavigateToSurah = { surahNumber ->
-                        navController.navigate(Route.QuranReader(surahNumber))
-                    },
-                    onNavigateToJuz = { juzNumber ->
-                        navController.navigate(Route.QuranJuz(juzNumber))
-                    },
-                    onNavigateToPage = { pageNumber ->
-                        navController.navigate(Route.QuranPage(pageNumber))
-                    },
                     onNavigateToBookmarks = { navController.navigate(Route.QuranBookmarks) },
                     onNavigateToSettings = { navController.navigate(Route.SettingsQuran) },
                     onNavigateToSurahInfo = { surahNumber ->
                         navController.navigate(Route.SurahInfo(surahNumber))
-                    },
-                    onNavigateToQuranAyah = { surahNumber, ayahNumber ->
-                        navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
                     },
                     onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
                     onNavigateToKhatamDetail = { khatamId ->
@@ -245,58 +275,9 @@ fun NavGraph() {
 
             composable<Route.More> {
                 val context = androidx.compose.ui.platform.LocalContext.current
-                val settingsViewModel: SettingsViewModel = hiltViewModel()
-                val shouldRestart by settingsViewModel.shouldRestart.collectAsState()
-
-                LaunchedEffect(shouldRestart) {
-                    if (shouldRestart) restartApp(context)
-                }
-
-                MoreMenuScreen(
-                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-                    onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
-                    onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
-                    onNavigateToAppearance = { navController.navigate(Route.SettingsAppearance) },
-                    onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
-                    onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
-                    onNavigateToAbout = { navController.navigate(Route.SettingsAbout) },
-                    onNavigateToHelp = { navController.navigate(Route.SettingsHelp) },
-                    onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-                    onNavigateToFasting = { navController.navigate(Route.FastingHome) },
-                    onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToDuas = { navController.navigate(Route.DuaHome) },
-                    onNavigateToTafseer = { navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1)) },
-                    onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
-                    onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
-                    onNavigateToKhatam = { navController.navigate(Route.KhatamList) },
-                    onNavigateToAsmaUlHusna = { navController.navigate(Route.AsmaUlHusnaList) },
-                    onNavigateToAsmaUnNabi = { navController.navigate(Route.AsmaUnNabiList) },
-                    onNavigateToProphets = { navController.navigate(Route.ProphetsList) },
-                    onShareApp = {
-                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
-                        }
-                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
-                    },
-                    onRateApp = {
-                        val activity = context as? Activity
-                        if (activity != null) {
-                            val manager = ReviewManagerFactory.create(context)
-                            manager.requestReviewFlow().addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    manager.launchReviewFlow(activity, task.result)
-                                } else {
-                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
-                                    context.startActivity(intent)
-                                }
-                            }
-                        }
-                    },
-                    onDeleteAllData = {
-                        settingsViewModel.onEvent(SettingsEvent.DeleteAllData)
-                    }
+                AdaptiveMoreScreen(
+                    navController = navController,
+                    onRestartApp = { restartApp(context) },
                 )
             }
 
@@ -398,13 +379,11 @@ fun NavGraph() {
 
             // Hadith screens
             composable<Route.HadithHome> {
-                HadithCollectionScreen(
+                AdaptiveHadithScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToBook = { bookId ->
-                        navController.navigate(Route.HadithBook(bookId))
-                    },
                     onNavigateToSearch = { navController.navigate(Route.HadithSearch) },
-                    onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) }
+                    onNavigateToBookmarks = { navController.navigate(Route.HadithBookmarks) },
                 )
             }
 
@@ -472,12 +451,10 @@ fun NavGraph() {
 
             // Dua screens
             composable<Route.DuaHome> {
-                DuasCollectionScreen(
+                AdaptiveDuaScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToCategory = { categoryId ->
-                        navController.navigate(Route.DuaCategory(categoryId))
-                    },
-                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) }
+                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
                 )
             }
 
@@ -679,16 +656,9 @@ fun NavGraph() {
             // Settings
             composable<Route.Settings> {
                 val context = androidx.compose.ui.platform.LocalContext.current
-                SettingsScreen(
-                    onNavigateBack = { navController.popBackStack() },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
-                    onNavigateToQuranSettings = { navController.navigate(Route.SettingsQuran) },
-                    onNavigateToAppearance = { navController.navigate(Route.SettingsAppearance) },
-                    onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
-                    onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
-                    onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
-                    onRestartApp = { restartApp(context) }
+                AdaptiveSettingsScreen(
+                    navController = navController,
+                    onRestartApp = { restartApp(context) },
                 )
             }
 
@@ -807,11 +777,9 @@ fun NavGraph() {
 
             // Asma ul Husna screens
             composable<Route.AsmaUlHusnaList> {
-                AsmaUlHusnaListScreen(
+                AdaptiveAsmaUlHusnaScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { nameId ->
-                        navController.navigate(Route.AsmaUlHusnaDetail(nameId))
-                    }
                 )
             }
 
@@ -825,11 +793,9 @@ fun NavGraph() {
 
             // Asma un Nabi screens
             composable<Route.AsmaUnNabiList> {
-                AsmaUnNabiListScreen(
+                AdaptiveAsmaUnNabiScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { nameId ->
-                        navController.navigate(Route.AsmaUnNabiDetail(nameId))
-                    }
                 )
             }
 
@@ -843,11 +809,9 @@ fun NavGraph() {
 
             // Prophets screens
             composable<Route.ProphetsList> {
-                ProphetsListScreen(
+                AdaptiveProphetsScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { prophetId ->
-                        navController.navigate(Route.ProphetDetail(prophetId))
-                    }
                 )
             }
 
@@ -861,14 +825,10 @@ fun NavGraph() {
 
             // Khatam screens
             composable<Route.KhatamList> {
-                KhatamListScreen(
+                AdaptiveKhatamScreen(
+                    navController = navController,
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToDetail = { khatamId ->
-                        navController.navigate(Route.KhatamDetail(khatamId))
-                    },
-                    onNavigateToCreate = {
-                        navController.navigate(Route.KhatamCreate)
-                    }
+                    onNavigateToCreate = { navController.navigate(Route.KhatamCreate) },
                 )
             }
 
@@ -891,6 +851,12 @@ fun NavGraph() {
 
             composable<Route.SettingsHelp> {
                 com.arshadshah.nimaz.presentation.screens.help.HelpSupportScreen(
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            composable<Route.SettingsSync> {
+                com.arshadshah.nimaz.presentation.screens.settings.SyncScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

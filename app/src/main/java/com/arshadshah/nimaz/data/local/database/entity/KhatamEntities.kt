@@ -57,7 +57,8 @@ data class KhatamAyahEntity(
     @ColumnInfo(name = "ayah_id")
     val ayahId: Int,
     @ColumnInfo(name = "read_at")
-    val readAt: Long = System.currentTimeMillis()
+    val readAt: Long = System.currentTimeMillis(),
+    val updatedAt: Long = System.currentTimeMillis()
 )
 
 @Entity(
@@ -80,5 +81,6 @@ data class KhatamDailyLogEntity(
     val khatamId: Long,
     val date: Long, // date as epoch millis (start of day)
     @ColumnInfo(name = "ayahs_read")
-    val ayahsRead: Int = 0
+    val ayahsRead: Int = 0,
+    val updatedAt: Long = System.currentTimeMillis()
 )

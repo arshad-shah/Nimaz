@@ -4,17 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
+import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -77,6 +81,16 @@ enum class FastingStatsPeriod {
     THIS_MONTH, THIS_YEAR, ALL_TIME
 }
 
+data class FastManagementSheetState(
+    val isVisible: Boolean = false,
+    val date: LocalDate = LocalDate.now(),
+    val existingRecord: FastRecord? = null,
+    val selectedStatus: FastStatus = FastStatus.FASTED,
+    val selectedFastType: FastType = FastType.VOLUNTARY,
+    val selectedExemptionReason: ExemptionReason? = null,
+    val note: String = ""
+)
+
 sealed interface FastingEvent {
     data class SelectDate(val date: LocalDate) : FastingEvent
     data class StartFast(val date: LocalDate, val fastType: FastType) : FastingEvent
@@ -94,6 +108,18 @@ sealed interface FastingEvent {
     data object LoadMakeupFasts : FastingEvent
     data object LoadStats : FastingEvent
     data object ToggleTodayFast : FastingEvent
+    data class OpenFastSheet(val date: LocalDate) : FastingEvent
+    data object DismissFastSheet : FastingEvent
+    data class SaveFastForDate(
+        val date: LocalDate,
+        val status: FastStatus,
+        val fastType: FastType,
+        val exemptionReason: ExemptionReason?,
+        val note: String
+    ) : FastingEvent
+    data class DeleteFastRecord(val date: LocalDate) : FastingEvent
+    data class UpdateMakeupFast(val makeupFast: MakeupFast) : FastingEvent
+    data class LogRecommendedFast(val date: LocalDate, val fastType: FastType) : FastingEvent
 }
 
 @HiltViewModel
@@ -118,6 +144,14 @@ class FastingViewModel @Inject constructor(
     private val _statsState = MutableStateFlow(FastingStatsUiState())
     val statsState: StateFlow<FastingStatsUiState> = _statsState.asStateFlow()
 
+    private val _sheetState = MutableStateFlow(FastManagementSheetState())
+    val sheetState: StateFlow<FastManagementSheetState> = _sheetState.asStateFlow()
+
+    private var calendarJob: Job? = null
+    private var ramadanJob: Job? = null
+    private var makeupPendingJob: Job? = null
+    private var makeupAllJob: Job? = null
+
     private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
 
     companion object {
@@ -128,6 +162,7 @@ class FastingViewModel @Inject constructor(
 
     init {
         loadToday()
+        loadRamadan()
         observeLocationAndLoadPrayerTimes()
         loadCalendarMonth()
         loadMakeupFasts()
@@ -241,6 +276,12 @@ class FastingViewModel @Inject constructor(
             FastingEvent.LoadMakeupFasts -> loadMakeupFasts()
             FastingEvent.LoadStats -> loadStats()
             FastingEvent.ToggleTodayFast -> toggleTodayFast()
+            is FastingEvent.OpenFastSheet -> openFastSheet(event.date)
+            FastingEvent.DismissFastSheet -> _sheetState.update { it.copy(isVisible = false) }
+            is FastingEvent.SaveFastForDate -> saveFastForDate(event.date, event.status, event.fastType, event.exemptionReason, event.note)
+            is FastingEvent.DeleteFastRecord -> deleteFastRecord(event.date)
+            is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
+            is FastingEvent.LogRecommendedFast -> startFast(event.date, event.fastType)
         }
     }
 
@@ -270,12 +311,13 @@ class FastingViewModel @Inject constructor(
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
+            val hijri = HijriDateCalculator.toHijri(date)
             val record = FastRecord(
                 id = 0,
                 date = dateEpoch,
-                hijriDate = null, // Would be calculated
-                hijriMonth = null,
-                hijriYear = null,
+                hijriDate = hijri.formattedShort(),
+                hijriMonth = hijri.month,
+                hijriYear = hijri.year,
                 fastType = fastType,
                 status = FastStatus.FASTED,
                 exemptionReason = null,
@@ -320,12 +362,13 @@ class FastingViewModel @Inject constructor(
                 fastingRepository.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
             } else {
                 val now = System.currentTimeMillis()
+                val hijri = HijriDateCalculator.toHijri(date)
                 val record = FastRecord(
                     id = 0,
                     date = dateEpoch,
-                    hijriDate = null,
-                    hijriMonth = null,
-                    hijriYear = null,
+                    hijriDate = hijri.formattedShort(),
+                    hijriMonth = hijri.month,
+                    hijriYear = hijri.year,
                     fastType = FastType.RAMADAN,
                     status = FastStatus.NOT_FASTED,
                     exemptionReason = null,
@@ -343,16 +386,23 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun toggleTodayFast() {
-        val today = LocalDate.now()
+        val date = _trackerState.value.selectedDate
         val currentRecord = _trackerState.value.todayRecord
 
         if (currentRecord == null) {
-            startFast(today, _trackerState.value.selectedFastType)
+            startFast(date, _trackerState.value.selectedFastType)
         } else {
             when (currentRecord.status) {
-                FastStatus.FASTED -> breakFast(today) // Toggle off
-                FastStatus.NOT_FASTED -> startFast(today, _trackerState.value.selectedFastType)
-                else -> {} // Do nothing for other statuses
+                FastStatus.FASTED -> breakFast(date)
+                FastStatus.NOT_FASTED -> {
+                    val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                    viewModelScope.launch {
+                        fastingRepository.updateFastStatus(dateEpoch, FastStatus.FASTED)
+                        selectDate(date)
+                        loadStats()
+                    }
+                }
+                else -> {}
             }
         }
     }
@@ -363,6 +413,8 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun loadCalendarMonth() {
+        calendarJob?.cancel()
+
         val month = _calendarState.value.selectedMonth
         val year = _calendarState.value.selectedYear
 
@@ -372,7 +424,7 @@ class FastingViewModel @Inject constructor(
         val startEpoch = startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
         val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
 
-        viewModelScope.launch {
+        calendarJob = viewModelScope.launch {
             fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _calendarState.update { it.copy(records = records, isLoading = false) }
             }
@@ -380,19 +432,41 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun loadRamadan() {
-        // This would need Hijri calendar support to determine Ramadan dates
-        // For now, loading records by Hijri month 9 (Ramadan)
-        viewModelScope.launch {
-            fastingRepository.getFastRecordsByHijriMonth(9).collect { records ->
-                val fasted = records.count { it.status == FastStatus.FASTED }
-                val missed = records.count { it.status == FastStatus.NOT_FASTED }
+        ramadanJob?.cancel()
+        ramadanJob = viewModelScope.launch {
+            val today = LocalDate.now()
+            val hijriToday = HijriDateCalculator.toHijri(today)
+            val isCurrentlyRamadan = hijriToday.month == 9
 
+            if (isCurrentlyRamadan) {
+                val currentDay = hijriToday.day
+                val daysInRamadan = HijriDateCalculator.getDaysInHijriMonth(hijriToday.year, 9)
+                val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(hijriToday.year)
+                val ramadanEnd = HijriDateCalculator.getLastDayOfRamadan(hijriToday.year)
+
+                val startEpoch = ramadanStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                val endEpoch = ramadanEnd.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
+                fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
+                    val fasted = records.count { it.status == FastStatus.FASTED }
+                    val missed = records.count { it.status == FastStatus.NOT_FASTED }
+
+                    _ramadanState.update {
+                        it.copy(
+                            ramadanRecords = records,
+                            fastedDays = fasted,
+                            missedDays = missed,
+                            remainingDays = daysInRamadan - currentDay,
+                            currentDay = currentDay,
+                            isRamadan = true,
+                            isLoading = false
+                        )
+                    }
+                }
+            } else {
                 _ramadanState.update {
                     it.copy(
-                        ramadanRecords = records,
-                        fastedDays = fasted,
-                        missedDays = missed,
-                        remainingDays = 30 - records.size,
+                        isRamadan = false,
                         isLoading = false
                     )
                 }
@@ -401,12 +475,14 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun loadMakeupFasts() {
-        viewModelScope.launch {
+        makeupPendingJob?.cancel()
+        makeupAllJob?.cancel()
+        makeupPendingJob = viewModelScope.launch {
             fastingRepository.getPendingMakeupFasts().collect { pending ->
                 _makeupState.update { it.copy(pendingMakeupFasts = pending, pendingCount = pending.size) }
             }
         }
-        viewModelScope.launch {
+        makeupAllJob = viewModelScope.launch {
             fastingRepository.getAllMakeupFasts().collect { all ->
                 _makeupState.update { it.copy(allMakeupFasts = all) }
             }
@@ -470,6 +546,116 @@ class FastingViewModel @Inject constructor(
                     isLoading = false
                 )
             }
+        }
+    }
+
+    private fun openFastSheet(date: LocalDate) {
+        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
+        viewModelScope.launch {
+            val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
+            val hijri = HijriDateCalculator.toHijri(date)
+            val isRamadan = hijri.month == 9
+
+            _sheetState.update {
+                FastManagementSheetState(
+                    isVisible = true,
+                    date = date,
+                    existingRecord = existingRecord,
+                    selectedStatus = existingRecord?.status ?: FastStatus.FASTED,
+                    selectedFastType = existingRecord?.fastType
+                        ?: if (isRamadan) FastType.RAMADAN else FastType.VOLUNTARY,
+                    selectedExemptionReason = existingRecord?.exemptionReason,
+                    note = existingRecord?.note ?: ""
+                )
+            }
+        }
+    }
+
+    private fun saveFastForDate(
+        date: LocalDate,
+        status: FastStatus,
+        fastType: FastType,
+        exemptionReason: ExemptionReason?,
+        note: String
+    ) {
+        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
+        viewModelScope.launch {
+            val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
+            val now = System.currentTimeMillis()
+            val hijri = HijriDateCalculator.toHijri(date)
+
+            val record = FastRecord(
+                id = existingRecord?.id ?: 0,
+                date = dateEpoch,
+                hijriDate = hijri.formattedShort(),
+                hijriMonth = hijri.month,
+                hijriYear = hijri.year,
+                fastType = fastType,
+                status = status,
+                exemptionReason = if (status == FastStatus.EXEMPTED) exemptionReason else null,
+                suhoorTime = existingRecord?.suhoorTime,
+                iftarTime = existingRecord?.iftarTime,
+                note = note.ifBlank { null },
+                createdAt = existingRecord?.createdAt ?: now,
+                updatedAt = now
+            )
+
+            if (existingRecord != null) {
+                fastingRepository.updateFastRecord(record)
+            } else {
+                fastingRepository.insertFastRecord(record)
+            }
+
+            // Auto-create makeup fast for missed/exempted Ramadan days
+            if (fastType == FastType.RAMADAN &&
+                (status == FastStatus.NOT_FASTED || status == FastStatus.EXEMPTED)
+            ) {
+                val existingMakeupCount = fastingRepository.getMakeupFastCountForDate(dateEpoch)
+                if (existingMakeupCount == 0) {
+                    val makeupFast = MakeupFast(
+                        id = 0,
+                        originalDate = dateEpoch,
+                        originalHijriDate = hijri.formattedShort(),
+                        reason = exemptionReason?.displayName() ?: "Missed Ramadan fast",
+                        status = MakeupFastStatus.PENDING,
+                        completedDate = null,
+                        fidyaAmount = null,
+                        note = note.ifBlank { null },
+                        createdAt = now,
+                        updatedAt = now
+                    )
+                    fastingRepository.insertMakeupFast(makeupFast)
+                }
+            }
+
+            _sheetState.update { it.copy(isVisible = false) }
+            selectDate(date)
+            loadCalendarMonth()
+            loadStats()
+            loadRamadan()
+            loadMakeupFasts()
+        }
+    }
+
+    private fun deleteFastRecord(date: LocalDate) {
+        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+
+        viewModelScope.launch {
+            fastingRepository.deleteFastRecordByDate(dateEpoch)
+            _sheetState.update { it.copy(isVisible = false) }
+            selectDate(date)
+            loadCalendarMonth()
+            loadStats()
+            loadRamadan()
+        }
+    }
+
+    private fun updateMakeupFastRecord(makeupFast: MakeupFast) {
+        viewModelScope.launch {
+            fastingRepository.updateMakeupFast(makeupFast)
+            loadMakeupFasts()
         }
     }
 }

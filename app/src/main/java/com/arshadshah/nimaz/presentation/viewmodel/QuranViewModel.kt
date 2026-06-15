@@ -111,6 +111,8 @@ sealed interface QuranEvent {
     data class UnmarkAyahReadForKhatam(val ayahId: Int) : QuranEvent
     data class ToggleKhatamAyah(val ayahId: Int) : QuranEvent
     data class MarkSurahAsReadForKhatam(val surahNumber: Int) : QuranEvent
+
+    data class TogglePageKhatam(val ayahIds: List<Int>) : QuranEvent
 }
 
 @HiltViewModel
@@ -195,6 +197,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.UnmarkAyahReadForKhatam -> unmarkAyahReadForKhatam(event.ayahId)
             is QuranEvent.ToggleKhatamAyah -> toggleKhatamAyah(event.ayahId)
             is QuranEvent.MarkSurahAsReadForKhatam -> markSurahAsReadForKhatam(event.surahNumber)
+            is QuranEvent.TogglePageKhatam -> togglePageKhatam(event.ayahIds)
         }
     }
 
@@ -223,6 +226,9 @@ class QuranViewModel @Inject constructor(
                 Triple(display, behavior, showTajweed)
             }.collect { (display, behavior, showTajweed) ->
                 audioManager.setReciter(behavior.reciterId)
+                // Push continuous-reading reactively so toggling the setting while
+                // in the reader takes effect immediately, not on next play-start.
+                audioManager.setContinuousPlayback(behavior.continuousReading)
                 _readerState.update {
                     it.copy(
                         selectedTranslatorId = display.translatorId,
@@ -625,6 +631,16 @@ class QuranViewModel @Inject constructor(
         }
     }
 
+    private fun togglePageKhatam(ayahIds: List<Int>) {
+       val khatamId = _readerState.value.activeKhatamId ?: return
+       val readIds = _readerState.value.khatamReadAyahIds
+       val unreadIds = ayahIds.filter { it !in readIds }
+       if (unreadIds.isEmpty()) return
+       viewModelScope.launch {
+           khatamUseCases.markAyahsRead(khatamId, unreadIds)
+       }
+   }
+
     private fun unmarkAyahReadForKhatam(ayahId: Int) {
         val khatamId = _readerState.value.activeKhatamId ?: return
         viewModelScope.launch {
@@ -643,8 +659,9 @@ class QuranViewModel @Inject constructor(
         }
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        audioManager.release()
-    }
+    // Intentionally do NOT release the audio manager here. It is @Singleton
+    // and outlives any single screen's ViewModel — the foreground service
+    // (QuranAudioService) owns the playback lifecycle. Releasing on every
+    // NavBackStackEntry pop killed audio whenever the user navigated away
+    // from the screen that started it.
 }

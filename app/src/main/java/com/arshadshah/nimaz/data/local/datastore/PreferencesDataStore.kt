@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -534,6 +535,44 @@ class PreferencesDataStore @Inject constructor(
             preferences[PreferencesKeys.LATITUDE] = latitude
             preferences[PreferencesKeys.LONGITUDE] = longitude
             preferences[PreferencesKeys.LOCATION_NAME] = name
+        }
+    }
+
+    // Export all preferences as key-value map for sync
+    suspend fun exportAllPreferences(): Map<String, String> {
+        val preferences = dataStore.data.first()
+        return preferences.asMap().map { (key, value) ->
+            key.name to value.toString()
+        }.toMap()
+    }
+
+    // Import preferences from sync payload
+    suspend fun importPreferences(prefsMap: Map<String, String>) {
+        dataStore.edit { preferences ->
+            prefsMap.forEach { (key, value) ->
+                when {
+                    key == "onboarding_completed" -> return@forEach // Never overwrite onboarding
+                    // Boolean keys
+                    value == "true" || value == "false" -> {
+                        preferences[booleanPreferencesKey(key)] = value.toBoolean()
+                    }
+                    // Try numeric types
+                    value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains("location_id")) -> {
+                        preferences[intPreferencesKey(key)] = value.toInt()
+                    }
+                    value.toDoubleOrNull() != null && (key.contains("latitude") || key.contains("longitude") || key.contains("font_size")) -> {
+                        if (key.contains("font_size") && !key.contains("arabic_font_size_string")) {
+                            preferences[floatPreferencesKey(key)] = value.toFloat()
+                        } else {
+                            preferences[doublePreferencesKey(key)] = value.toDouble()
+                        }
+                    }
+                    // Default to string
+                    else -> {
+                        preferences[stringPreferencesKey(key)] = value
+                    }
+                }
+            }
         }
     }
 

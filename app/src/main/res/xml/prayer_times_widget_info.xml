@@ -10,6 +10,7 @@
     android:maxResizeHeight="120dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="1800000"
+    android:initialLayout="@layout/glance_default_loading"
     android:previewLayout="@layout/widget_prayer_times_preview"
     android:description="@string/widget_prayer_times_description"
     android:widgetCategory="home_screen" />

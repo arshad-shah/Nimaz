@@ -1,6 +1,57 @@
 <resources>
     <string name="app_name">Nimaz</string>
 
+    <!-- Onboarding -->
+    <string name="onboarding_welcome_title">Welcome to Nimaz</string>
+    <string name="onboarding_welcome_description">Your complete Islamic companion app for prayer times, Quran, Hadith, and more</string>
+    <string name="onboarding_prayer_title">Prayer Times</string>
+    <string name="onboarding_prayer_description">Never miss a prayer with accurate times based on your location</string>
+    <string name="onboarding_quran_title">Quran &amp; Hadith</string>
+    <string name="onboarding_quran_description">Read and listen to the Quran with translations and explore authentic Hadith</string>
+    <string name="onboarding_location_title">Location Access</string>
+    <string name="onboarding_location_description">Allow location access for accurate prayer times and Qibla direction</string>
+    <string name="onboarding_notification_title">Notifications</string>
+    <string name="onboarding_notification_description">Get reminded for prayers with beautiful Adhan notifications</string>
+    <string name="onboarding_battery_title">Battery Optimization</string>
+    <string name="onboarding_battery_description">Disable battery optimization for reliable prayer notifications</string>
+    <string name="onboarding_feature_prayer_times">Accurate prayer times</string>
+    <string name="onboarding_feature_quran">Complete Quran with audio</string>
+    <string name="onboarding_feature_hadith">Authentic Hadith collections</string>
+    <string name="onboarding_feature_duas">Daily duas and supplications</string>
+    <string name="onboarding_feature_calc_methods">Multiple calculation methods</string>
+    <string name="onboarding_feature_custom_adjustments">Custom adjustments</string>
+    <string name="onboarding_feature_tracking">Prayer tracking</string>
+    <string name="onboarding_feature_statistics">Statistics and streaks</string>
+    <string name="onboarding_feature_translations">Multiple translations</string>
+    <string name="onboarding_feature_audio">Audio recitations</string>
+    <string name="onboarding_feature_bookmarks">Bookmarks and notes</string>
+    <string name="onboarding_feature_search">Search functionality</string>
+    <string name="onboarding_feature_auto_location">Automatic location detection</string>
+    <string name="onboarding_feature_precise_times">Precise prayer times</string>
+    <string name="onboarding_feature_qibla">Accurate Qibla direction</string>
+    <string name="onboarding_feature_distance_mecca">Distance to Mecca</string>
+    <string name="onboarding_feature_prayer_alerts">Prayer time alerts</string>
+    <string name="onboarding_feature_adhan_sounds">Custom Adhan sounds</string>
+    <string name="onboarding_feature_pre_reminders">Pre-prayer reminders</string>
+    <string name="onboarding_feature_quiet_hours">Quiet hours support</string>
+    <string name="onboarding_feature_reliable_notif">Reliable notifications</string>
+    <string name="onboarding_feature_background_alerts">Background prayer alerts</string>
+    <string name="onboarding_feature_consistent_reminders">Consistent reminders</string>
+    <string name="onboarding_feature_no_missed">No missed prayers</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_location_granted">Location Access Granted</string>
+    <string name="onboarding_notification_granted">Notifications Enabled</string>
+    <string name="onboarding_battery_granted">Battery Optimization Disabled</string>
+    <string name="onboarding_grant_location">Grant Location Access</string>
+    <string name="onboarding_enable_notifications">Enable Notifications</string>
+    <string name="onboarding_disable_battery_opt">Disable Battery Optimization</string>
+    <string name="onboarding_permissions_title">Permissions</string>
+    <string name="onboarding_permissions_description">Nimaz needs a few permissions for the best experience</string>
+    <string name="onboarding_grant">Grant</string>
+
     <!-- Common / Shared -->
     <string name="all">All</string>
     <string name="favorites">Favorites</string>
@@ -399,6 +450,8 @@
     <string name="quick_presets">QUICK PRESETS</string>
     <string name="target_format">Target: %d</string>
     <string name="tap_to_count">Tap to count</string>
+    <string name="free_count">Free</string>
+    <string name="free_count_label">Free Count</string>
     <string name="reset_action">Reset</string>
     <string name="toggle_sound">Toggle Sound</string>
     <string name="toggle_vibration">Toggle Vibration</string>
@@ -586,6 +639,9 @@
     <string name="quran_home_juz_format">Juz %1$d</string>
     <string name="quran_home_page_format">Page %1$d</string>
     <string name="quran_home_surah_fallback">Surah %1$d</string>
+    <string name="quran_home_page_range_format">p. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s starts</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
     <string name="quran_home_continue_reading">CONTINUE READING</string>
     <string name="quran_home_percent_complete">%1$d%% complete</string>
     <string name="quran_home_completed">Completed</string>
@@ -671,6 +727,18 @@
     <string name="fasting_fidya_paid">Fidya paid</string>
     <string name="fasting_originally">Originally: %1$s</string>
 
+    <!-- Fast Management Bottom Sheet -->
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Fast Type</string>
+    <string name="fasting_sheet_note">Note</string>
+    <string name="fasting_sheet_save">Save</string>
+    <string name="fasting_sheet_delete">Delete</string>
+    <string name="fasting_sheet_exemption_reason">Exemption Reason</string>
+    <string name="fasting_sheet_select_reason">Select reason</string>
+    <string name="fasting_sheet_edit_makeup">Edit Makeup Fast</string>
+    <string name="fasting_sheet_reason">Reason</string>
+    <string name="fasting_sheet_fidya_amount">Fidya Amount</string>
+
     <!-- License Detail Screen -->
     <string name="license_detail_title">License Detail</string>
     <string name="license_detail_library_not_found">Library not found</string>
@@ -687,6 +755,22 @@
     <string name="notification_settings_additional_section">ADDITIONAL ALERTS</string>
     <string name="notification_settings_pre_adhan">Pre-Adhan Reminder</string>
     <string name="notification_settings_pre_adhan_subtitle">%1$d minutes before</string>
+
+    <!-- Adhan Download Notifications -->
+    <string name="adhan_download_channel_name">Adhan Downloads</string>
+    <string name="adhan_download_channel_description">Shows progress when downloading adhan audio</string>
+    <string name="adhan_download_preparing">Preparing adhan download…</string>
+    <string name="adhan_download_title">Downloading %1$s</string>
+    <string name="adhan_download_step">Step %1$d of %2$d — %3$s</string>
+    <string name="adhan_variant_regular">Regular adhan</string>
+    <string name="adhan_variant_fajr">Fajr adhan</string>
+    <string name="adhan_download_complete">Adhan ready</string>
+    <string name="adhan_download_complete_subtitle">%1$s is ready for prayer notifications</string>
+    <string name="adhan_download_partial">Adhan partially downloaded</string>
+    <string name="adhan_download_partial_subtitle">Some %1$s files could not be downloaded. Will retry later.</string>
+    <string name="adhan_download_failed">Adhan download failed</string>
+    <string name="adhan_download_failed_subtitle">Check your internet connection and try again</string>
+
     <string name="notification_settings_sunrise">Sunrise Alert</string>
     <string name="notification_settings_sunrise_subtitle">End of Fajr prayer time</string>
     <string name="notification_settings_friday_reminder">Friday Prayer Reminder</string>

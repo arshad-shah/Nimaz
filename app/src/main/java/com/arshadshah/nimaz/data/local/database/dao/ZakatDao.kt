@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.local.database.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 import kotlinx.coroutines.flow.Flow
@@ -22,6 +23,12 @@ interface ZakatDao {
 
     @Query("DELETE FROM zakat_history WHERE id = :id")
     suspend fun deleteCalculation(id: Long)
+
+    @Query("SELECT * FROM zakat_history ORDER BY calculatedAt DESC")
+    suspend fun getAllHistorySync(): List<ZakatHistoryEntity>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertCalculations(entries: List<ZakatHistoryEntity>)
 
     @Query("DELETE FROM zakat_history")
     suspend fun deleteAllUserData()

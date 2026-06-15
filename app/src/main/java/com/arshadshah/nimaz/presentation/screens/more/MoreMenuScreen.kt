@@ -29,8 +29,6 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,7 +36,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
@@ -364,30 +362,15 @@ private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
     }
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(stringResource(R.string.delete_all_data_dialog_title)) },
-            text = {
-                Text(stringResource(R.string.delete_all_data_dialog_message))
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        showDialog = false
-                        onDeleteAllData()
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
-                    )
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+        NimazConfirmDialog(
+            title = stringResource(R.string.delete_all_data_dialog_title),
+            message = stringResource(R.string.delete_all_data_dialog_message),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = onDeleteAllData,
+            onDismiss = { showDialog = false },
         )
     }
 }

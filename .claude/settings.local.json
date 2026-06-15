@@ -53,7 +53,30 @@
       "Bash(\"C:\\\\Users\\\\shaha\\\\AndroidStudioProjects\\\\nimazpro\\\\gradlew.bat\" compileDebugKotlin)",
       "Bash(ls:*)",
       "Bash(grep:*)",
-      "Bash(git -C \"C:\\\\Users\\\\shaha\\\\StudioProjects\\\\Nimaz\" remote -v)"
+      "Bash(git -C \"C:\\\\Users\\\\shaha\\\\StudioProjects\\\\Nimaz\" remote -v)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nASO-optimized store metadata, fix prepopulated DB version, and harden deploy workflow\n\n- Add translated, keyword-optimized titles, short descriptions, and full\n  descriptions for all 8 locales \\(en-US, ar, ur, de-DE, fr-FR, tr-TR, id, ms\\)\n- Fix prepopulated database user_version \\(was 0, now 10\\) which caused\n  fallbackToDestructiveMigration to wipe all reference data on first open\n- Make OpenAI release notes generation resilient: log errors, fall back\n  gracefully to default notes when API key is missing or call fails\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git lfs ls-files:*)",
+      "Bash(git commit:*)",
+      "Bash(curl:*)",
+      "WebFetch(domain:mvnrepository.com)",
+      "WebFetch(domain:central.sonatype.com)",
+      "Bash(gh api:*)",
+      "mcp__plugin_context7_context7__resolve-library-id",
+      "Bash(for f in \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/page/CurlDraw.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/page/DragCommonGesture.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/page/DragGesture.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/page/DragStartEnd.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/page/TapGesture.kt\")",
+      "Bash(do echo \"=== $f ===\")",
+      "Bash(for f in \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/MathUtils.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/Polygon.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/utils/RectUtils.kt\" \"pagecurl/src/main/kotlin/eu/wewox/pagecurl/ExperimentalPageCurlApi.kt\")",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_click",
+      "mcp__plugin_playwright_playwright__browser_close",
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(gh pr checks:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh pr view:*)",
+      "WebFetch(domain:developers.google.com)",
+      "Bash(./gradlew testDebugUnitTest --tests \"com.arshadshah.nimaz.core.util.*\")",
+      "PowerShell(sqlite3 app/src/main/assets/database/nimaz_prepopulated.db $query)"
     ]
   }
 }

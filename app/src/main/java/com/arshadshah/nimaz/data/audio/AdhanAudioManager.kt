@@ -3,8 +3,10 @@ package com.arshadshah.nimaz.data.audio
 import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
+import android.util.Log
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +33,17 @@ sealed class DownloadState {
 class AdhanAudioManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
+    companion object {
+        private const val TAG = "AdhanAudioManager"
+        /**
+         * Bump this when adhan download URLs change to force re-download of existing files.
+         * v1 = initial archive.org URLs
+         * v2 = switched Mishary to assabile.com (regular URL was serving fajr variant)
+         */
+        private const val ADHAN_URL_VERSION = 2
+        private const val VERSION_FILE = ".adhan_url_version"
+    }
+
     private var mediaPlayer: MediaPlayer? = null
 
     private val _isPlaying = MutableStateFlow(false)
@@ -46,18 +59,74 @@ class AdhanAudioManager @Inject constructor(
         get() = File(context.filesDir, "adhan").also { it.mkdirs() }
 
     /**
-     * Checks if the adhan sound is downloaded.
+     * Checks if adhan URLs have changed since last download and deletes stale files.
+     * Call this on app startup before checking isDownloaded/isFullyDownloaded.
+     */
+    fun invalidateStaleDownloads() {
+        val versionFile = File(adhanDir, VERSION_FILE)
+        val currentVersion = if (versionFile.exists()) {
+            versionFile.readText().trim().toIntOrNull() ?: 0
+        } else {
+            0
+        }
+
+        if (currentVersion < ADHAN_URL_VERSION) {
+            Log.i(TAG, "Adhan URL version changed ($currentVersion -> $ADHAN_URL_VERSION), deleting stale files")
+            // Delete all non-beep adhan files so they get re-downloaded from new URLs
+            adhanDir.listFiles()?.forEach { file ->
+                if (!file.name.startsWith("adhan_beep") && file.name != VERSION_FILE) {
+                    Log.d(TAG, "Deleting stale file: ${file.name}")
+                    file.delete()
+                }
+            }
+            // Write new version
+            versionFile.writeText(ADHAN_URL_VERSION.toString())
+        }
+    }
+
+    /**
+     * Checks if the adhan sound is downloaded and valid.
+     * Validates file size and audio magic bytes to catch corrupted/HTML files.
      * @param isFajr If true, checks for the Fajr variant.
      */
     fun isDownloaded(sound: AdhanSound, isFajr: Boolean = false): Boolean {
         val fileName = sound.getFileName(isFajr)
         val file = File(adhanDir, fileName)
-        if (file.exists() && file.length() < 1000) {
-            // Corrupted/empty file — delete so it gets re-downloaded
+        if (!file.exists()) return false
+
+        // Delete files that are too small or not valid audio
+        if (file.length() < 10_000 || !isValidAudioFile(file)) {
+            Log.w(TAG, "Invalid file detected: $fileName (size=${file.length()}, valid=${isValidAudioFile(file)}), deleting")
             file.delete()
             return false
         }
-        return file.exists()
+        return true
+    }
+
+    /**
+     * Validates that a file starts with audio magic bytes (MP3 or WAV).
+     * Catches cases where an HTML error page was saved as .mp3.
+     */
+    private fun isValidAudioFile(file: File): Boolean {
+        if (!file.exists() || file.length() < 4) return false
+        return try {
+            file.inputStream().use { stream ->
+                val header = ByteArray(4)
+                if (stream.read(header) < 4) return false
+
+                // MP3: starts with ID3 tag or MPEG sync word (0xFF 0xFB/0xF3/0xF2)
+                val isId3 = header[0] == 'I'.code.toByte() && header[1] == 'D'.code.toByte() && header[2] == '3'.code.toByte()
+                val isMpegSync = header[0] == 0xFF.toByte() && (header[1].toInt() and 0xE0) == 0xE0
+
+                // WAV: starts with RIFF
+                val isWav = header[0] == 'R'.code.toByte() && header[1] == 'I'.code.toByte() &&
+                        header[2] == 'F'.code.toByte() && header[3] == 'F'.code.toByte()
+
+                isId3 || isMpegSync || isWav
+            }
+        } catch (e: Exception) {
+            false
+        }
     }
 
     /**
@@ -129,98 +198,201 @@ class AdhanAudioManager @Inject constructor(
     }
 
     /**
-     * Downloads an adhan sound from its CDN URL.
+     * Downloads an adhan sound from its CDN URL with retry logic and validation.
      * For SIMPLE_BEEP, generates the sound programmatically.
      * @param isFajr If true, downloads the Fajr variant.
+     * @param maxRetries Number of retry attempts on failure.
      */
-    suspend fun downloadAdhan(sound: AdhanSound, isFajr: Boolean = false): Boolean {
+    suspend fun downloadAdhan(
+        sound: AdhanSound,
+        isFajr: Boolean = false,
+        maxRetries: Int = 3,
+        onProgress: ((progress: Int) -> Unit)? = null
+    ): Boolean {
         return withContext(Dispatchers.IO) {
-            try {
-                val fileName = sound.getFileName(isFajr)
-                val downloadUrl = sound.getDownloadUrl(isFajr)
-                val outputFile = File(adhanDir, fileName)
+            val fileName = sound.getFileName(isFajr)
+            val outputFile = File(adhanDir, fileName)
+            val tempFile = File(adhanDir, "${fileName}.tmp")
 
-                if (outputFile.exists()) {
-                    updateDownloadState(sound, DownloadState.Completed)
-                    return@withContext true
-                }
+            // Clean up stale temp file from interrupted downloads
+            if (tempFile.exists()) {
+                tempFile.delete()
+            }
 
-                // Handle simple beep separately - generate it programmatically
-                if (sound == AdhanSound.SIMPLE_BEEP) {
-                    return@withContext generateBeepSound(outputFile)
-                }
+            // Check if already downloaded AND valid
+            if (isDownloaded(sound, isFajr)) {
+                updateDownloadState(sound, DownloadState.Completed)
+                return@withContext true
+            }
 
-                // Download from CDN
-                if (downloadUrl.isEmpty()) {
-                    updateDownloadState(sound, DownloadState.Failed("No download URL available"))
-                    return@withContext false
-                }
+            // Delete invalid existing file so we can re-download
+            if (outputFile.exists()) {
+                outputFile.delete()
+            }
 
-                updateDownloadState(sound, DownloadState.Downloading(0))
+            // Handle simple beep separately
+            if (sound == AdhanSound.SIMPLE_BEEP) {
+                return@withContext generateBeepSound(outputFile)
+            }
 
-                val url = URL(downloadUrl)
-                val connection = url.openConnection() as HttpURLConnection
-                connection.connectTimeout = 15000
-                connection.readTimeout = 30000
-                connection.instanceFollowRedirects = true
+            val downloadUrl = sound.getDownloadUrl(isFajr)
+            if (downloadUrl.isEmpty()) {
+                updateDownloadState(sound, DownloadState.Failed("No download URL available"))
+                return@withContext false
+            }
 
+            var lastError: String = "Unknown error"
+
+            for (attempt in 1..maxRetries) {
                 try {
-                    connection.connect()
-                    val responseCode = connection.responseCode
+                    Log.d(TAG, "Downloading $fileName (attempt $attempt/$maxRetries)")
+                    updateDownloadState(sound, DownloadState.Downloading(0))
 
-                    if (responseCode != HttpURLConnection.HTTP_OK) {
-                        updateDownloadState(sound, DownloadState.Failed("HTTP $responseCode"))
-                        return@withContext false
+                    val success = downloadFile(downloadUrl, tempFile, sound, onProgress)
+                    if (!success) {
+                        lastError = "Download returned no data"
+                        tempFile.delete()
+                        if (attempt < maxRetries) {
+                            delay(2000L * attempt) // Backoff: 2s, 4s, 6s
+                        }
+                        continue
                     }
 
-                    val fileLength = connection.contentLength
-                    val tempFile = File(adhanDir, "${fileName}.tmp")
+                    // Validate the downloaded file is actual audio, not an HTML error page
+                    if (!isValidAudioFile(tempFile)) {
+                        lastError = "Downloaded file is not valid audio (possibly HTML error page)"
+                        Log.w(TAG, "$lastError: $fileName (size=${tempFile.length()})")
+                        tempFile.delete()
+                        if (attempt < maxRetries) {
+                            delay(2000L * attempt)
+                        }
+                        continue
+                    }
 
-                    connection.inputStream.use { input ->
-                        FileOutputStream(tempFile).use { output ->
-                            val buffer = ByteArray(8192)
-                            var bytesRead: Int
-                            var totalBytesRead = 0L
+                    // Validate minimum size (real adhan files are at least 100KB)
+                    if (tempFile.length() < 100_000) {
+                        lastError = "Downloaded file too small: ${tempFile.length()} bytes"
+                        Log.w(TAG, "$lastError: $fileName")
+                        tempFile.delete()
+                        if (attempt < maxRetries) {
+                            delay(2000L * attempt)
+                        }
+                        continue
+                    }
 
-                            while (input.read(buffer).also { bytesRead = it } != -1) {
-                                output.write(buffer, 0, bytesRead)
-                                totalBytesRead += bytesRead
-
-                                if (fileLength > 0) {
-                                    val progress = ((totalBytesRead * 100) / fileLength).toInt()
-                                    updateDownloadState(sound, DownloadState.Downloading(progress))
-                                }
-                            }
+                    // Move temp to final
+                    if (tempFile.renameTo(outputFile)) {
+                        Log.d(TAG, "Successfully downloaded $fileName (${outputFile.length()} bytes)")
+                        updateDownloadState(sound, DownloadState.Completed)
+                        return@withContext true
+                    } else {
+                        // renameTo can fail on some devices — try copy + delete
+                        try {
+                            tempFile.copyTo(outputFile, overwrite = true)
+                            tempFile.delete()
+                            Log.d(TAG, "Successfully downloaded $fileName via copy (${outputFile.length()} bytes)")
+                            updateDownloadState(sound, DownloadState.Completed)
+                            return@withContext true
+                        } catch (e: Exception) {
+                            lastError = "Failed to save file: ${e.message}"
+                            tempFile.delete()
+                            outputFile.delete()
                         }
                     }
-
-                    // Rename temp file to final file
-                    if (tempFile.renameTo(outputFile)) {
-                        updateDownloadState(sound, DownloadState.Completed)
-                        true
-                    } else {
-                        tempFile.delete()
-                        updateDownloadState(sound, DownloadState.Failed("Failed to save file"))
-                        false
+                } catch (e: Exception) {
+                    lastError = e.message ?: "Download failed"
+                    Log.e(TAG, "Download attempt $attempt failed for $fileName: $lastError")
+                    tempFile.delete()
+                    if (attempt < maxRetries) {
+                        delay(2000L * attempt)
                     }
-                } finally {
-                    connection.disconnect()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
-                updateDownloadState(sound, DownloadState.Failed(e.message ?: "Download failed"))
-                false
             }
+
+            Log.e(TAG, "All $maxRetries attempts failed for $fileName: $lastError")
+            updateDownloadState(sound, DownloadState.Failed(lastError))
+            false
+        }
+    }
+
+    /**
+     * Downloads a file from a URL to a local file, with content-type validation.
+     * Returns true if the download completed, false otherwise.
+     */
+    private fun downloadFile(
+        downloadUrl: String,
+        outputFile: File,
+        sound: AdhanSound,
+        onProgress: ((Int) -> Unit)? = null
+    ): Boolean {
+        val url = URL(downloadUrl)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.connectTimeout = 20_000
+        connection.readTimeout = 60_000
+        connection.instanceFollowRedirects = true
+        connection.setRequestProperty("User-Agent", "NimazApp/1.0")
+
+        try {
+            connection.connect()
+            val responseCode = connection.responseCode
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                Log.w(TAG, "HTTP $responseCode for $downloadUrl")
+                return false
+            }
+
+            // Validate content type — reject HTML error pages
+            val contentType = connection.contentType ?: ""
+            if (contentType.contains("text/html", ignoreCase = true)) {
+                Log.w(TAG, "Server returned HTML instead of audio for $downloadUrl")
+                return false
+            }
+
+            val fileLength = connection.contentLength
+
+            connection.inputStream.use { input ->
+                FileOutputStream(outputFile).use { output ->
+                    val buffer = ByteArray(8192)
+                    var bytesRead: Int
+                    var totalBytesRead = 0L
+
+                    while (input.read(buffer).also { bytesRead = it } != -1) {
+                        output.write(buffer, 0, bytesRead)
+                        totalBytesRead += bytesRead
+
+                        if (fileLength > 0) {
+                            val progress = ((totalBytesRead * 100) / fileLength).toInt()
+                            updateDownloadState(sound, DownloadState.Downloading(progress))
+                            onProgress?.invoke(progress)
+                        }
+                    }
+                }
+            }
+
+            return outputFile.exists() && outputFile.length() > 0
+        } finally {
+            connection.disconnect()
         }
     }
 
     /**
      * Downloads both regular and Fajr variants of an adhan sound.
+     * Retries each variant independently to maximize success.
      */
     suspend fun downloadAdhanWithFajr(sound: AdhanSound): Boolean {
         val regularSuccess = downloadAdhan(sound, isFajr = false)
         val fajrSuccess = downloadAdhan(sound, isFajr = true)
         return regularSuccess && fajrSuccess
+    }
+
+    /**
+     * Cleans up stale temp files from interrupted downloads.
+     */
+    fun cleanupTempFiles() {
+        adhanDir.listFiles()?.filter { it.name.endsWith(".tmp") }?.forEach { file ->
+            Log.d(TAG, "Cleaning up stale temp file: ${file.name}")
+            file.delete()
+        }
     }
 
     /**

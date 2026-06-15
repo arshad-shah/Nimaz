@@ -159,10 +159,11 @@ class AdhanPlaybackService : Service() {
 
         val adhanDir = File(filesDir, "adhan")
         val primaryFile = File(adhanDir, adhanSound.getFileName(isFajr))
-        val altFile = File(adhanDir, adhanSound.getFileName(!isFajr))
 
-        // Store fallback for use in error handler
-        fallbackFile = if (isValidAudioFile(altFile)) altFile else null
+        // Fallback to beep sound — never fall back to the wrong adhan variant
+        // (e.g. playing fajr adhan at Dhuhr is incorrect)
+        val beepFile = File(adhanDir, AdhanSound.SIMPLE_BEEP.getFileName(false))
+        fallbackFile = if (isValidAudioFile(beepFile)) beepFile else null
         fallbackPrayerName = prayerName
 
         if (isValidAudioFile(primaryFile)) {
@@ -171,15 +172,17 @@ class AdhanPlaybackService : Service() {
             return
         }
 
-        // Primary file missing or corrupt — try the other variant
-        if (isValidAudioFile(altFile)) {
-            android.util.Log.d("AdhanPlayback", "Primary invalid, falling back to: ${altFile.name}")
-            fallbackFile = null // Already using fallback, no second chance
-            playFile(altFile, prayerName)
+        // Primary file missing or corrupt — fall back to beep, NOT the other variant
+        android.util.Log.w("AdhanPlayback", "Primary file invalid: ${primaryFile.name} (exists=${primaryFile.exists()}, size=${if (primaryFile.exists()) primaryFile.length() else 0})")
+
+        if (isValidAudioFile(beepFile)) {
+            android.util.Log.d("AdhanPlayback", "Falling back to beep sound")
+            fallbackFile = null // Already using fallback
+            playFile(beepFile, prayerName)
             return
         }
 
-        android.util.Log.w("AdhanPlayback", "No valid adhan file found for ${adhanSound.name}")
+        android.util.Log.w("AdhanPlayback", "No valid adhan or beep file found for ${adhanSound.name}")
         stopSelf()
     }
 

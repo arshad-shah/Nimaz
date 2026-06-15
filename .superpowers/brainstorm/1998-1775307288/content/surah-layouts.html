@@ -1,0 +1,193 @@
+<h2>Surah List Item Redesign</h2>
+<p class="subtitle">Pick a layout that handles long names + metadata without crushing</p>
+
+<div class="cards">
+
+  <!-- Option A: Two-row stacked -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+        <!-- Row 1: Number + Names -->
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">2</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:600;color:#fff;">Al-Baqarah</div>
+          </div>
+          <div style="font-family:'Traditional Arabic',serif;font-size:22px;color:rgba(255,255,255,0.7);direction:rtl;">البقرة</div>
+          <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;flex-shrink:0;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+          </div>
+        </div>
+        <!-- Row 2: Metadata chips -->
+        <div style="display:flex;gap:6px;margin-top:8px;margin-left:48px;flex-wrap:wrap;">
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Madinah</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">286 verses</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Pages 2-49</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Juz 1</span>
+        </div>
+        <!-- Progress bar -->
+        <div style="margin-top:8px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+          <div style="width:35%;height:100%;background:#78a0ff;border-radius:2px;"></div>
+        </div>
+      </div>
+
+      <!-- Long name example -->
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;margin-top:8px;opacity:0.85;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">58</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:15px;font-weight:600;color:#fff;">Al-Mujadilah</div>
+          </div>
+          <div style="font-family:'Traditional Arabic',serif;font-size:22px;color:rgba(255,255,255,0.7);direction:rtl;">المجادلة</div>
+          <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;flex-shrink:0;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+          </div>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:8px;margin-left:48px;flex-wrap:wrap;">
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Madinah</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">22 verses</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Pages 542-545</span>
+          <span style="background:rgba(120,160,255,0.15);color:rgba(180,200,255,0.9);font-size:11px;padding:2px 8px;border-radius:10px;">Juz 28</span>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Two-Row Stacked</h3>
+      <p>Names on top row, metadata chips on second row below. Chips wrap naturally on small screens. Gives each element breathing room.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Compact with right-aligned Arabic -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;">
+            <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">2</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <div style="font-size:15px;font-weight:600;color:#fff;">Al-Baqarah</div>
+              <div style="font-family:'Traditional Arabic',serif;font-size:22px;color:rgba(255,255,255,0.7);direction:rtl;margin-left:12px;">البقرة</div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;">Madinah · 286 verses · Pages 2-49 · Juz 1</div>
+          </div>
+          <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;flex-shrink:0;margin-top:4px;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+          </div>
+        </div>
+        <div style="margin-top:8px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+          <div style="width:35%;height:100%;background:#78a0ff;border-radius:2px;"></div>
+        </div>
+      </div>
+
+      <!-- Long name -->
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;margin-top:8px;opacity:0.85;">
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:4px;">
+            <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">58</span>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;">
+              <div style="font-size:15px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">Al-Mujadilah</div>
+              <div style="font-family:'Traditional Arabic',serif;font-size:22px;color:rgba(255,255,255,0.7);direction:rtl;margin-left:12px;flex-shrink:0;">المجادلة</div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:4px;">Madinah · 22 verses · Pages 542-545 · Juz 28</div>
+          </div>
+          <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;flex-shrink:0;margin-top:4px;">
+            <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Compact Names-Over-Metadata</h3>
+      <p>English + Arabic names share one line (space-between), metadata as a single text line below. Info icon stays right-aligned. Most compact option.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Three-row with prominent Arabic -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+        <div style="display:flex;gap:12px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+            <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;">
+              <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">2</span>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:15px;font-weight:600;color:#fff;">Al-Baqarah</div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <div style="font-family:'Traditional Arabic',serif;font-size:24px;color:rgba(255,255,255,0.7);direction:rtl;">البقرة</div>
+                <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">The Cow</div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Madinah</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">286 verses</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Pages 2-49</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Juz 1</span>
+            </div>
+          </div>
+        </div>
+        <div style="margin-top:8px;height:3px;background:rgba(255,255,255,0.1);border-radius:2px;overflow:hidden;">
+          <div style="width:35%;height:100%;background:#78a0ff;border-radius:2px;"></div>
+        </div>
+      </div>
+
+      <!-- Long name -->
+      <div style="background:#1a1a2e;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;margin-top:8px;opacity:0.85;">
+        <div style="display:flex;gap:12px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;">
+            <div style="width:36px;height:36px;border:2px solid rgba(120,160,255,0.5);transform:rotate(45deg);border-radius:3px;display:flex;align-items:center;justify-content:center;">
+              <span style="transform:rotate(-45deg);color:#78a0ff;font-weight:600;font-size:13px;">58</span>
+            </div>
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div style="font-size:15px;font-weight:600;color:#fff;">Al-Mujadilah</div>
+              <div style="display:flex;align-items:center;gap:4px;">
+                <div style="font-family:'Traditional Arabic',serif;font-size:24px;color:rgba(255,255,255,0.7);direction:rtl;">المجادلة</div>
+                <div style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;opacity:0.5;">
+                  <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.5)" fill="none" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="rgba(255,255,255,0.5)" stroke-width="2"/><circle cx="12" cy="16" r="1" fill="rgba(255,255,255,0.5)"/></svg>
+                </div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:2px;">The Pleading Woman</div>
+            <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;">
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Madinah</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">22 verses</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Pages 542-545</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.3);">·</span>
+              <span style="font-size:11px;color:rgba(255,255,255,0.5);">Juz 28</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Three-Row with Translation</h3>
+      <p>Top row: English name ↔ Arabic name + info. Second row: transliteration/meaning. Third row: metadata. Most spacious — also adds the English meaning. Slightly taller per item.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:24px;">
+  <h3>Why these layouts fix the crushing</h3>
+  <p class="subtitle">All three move metadata to its own row, so it never competes for horizontal space with the names. The English and Arabic names share the top row with <code>space-between</code>, giving each side room to breathe.</p>
+</div>

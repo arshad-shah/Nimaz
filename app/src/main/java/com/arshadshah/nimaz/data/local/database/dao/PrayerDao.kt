@@ -97,6 +97,9 @@ interface PrayerDao {
     """)
     suspend fun markPastPrayersAsMissed(todayDate: Long, timestamp: Long = System.currentTimeMillis()): Int
 
+    @Query("SELECT * FROM prayer_records ORDER BY date ASC, scheduledTime ASC")
+    suspend fun getAllPrayerRecords(): List<PrayerRecordEntity>
+
     @Query("DELETE FROM prayer_records")
     suspend fun deleteAllUserData()
 }

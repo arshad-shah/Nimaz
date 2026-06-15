@@ -15,5 +15,6 @@ data class ZakatHistoryEntity(
     val nisabValue: Double,
     val isPaid: Boolean = false,
     val paidAt: Long? = null,
-    val notes: String? = null
+    val notes: String? = null,
+    val updatedAt: Long = System.currentTimeMillis()
 )

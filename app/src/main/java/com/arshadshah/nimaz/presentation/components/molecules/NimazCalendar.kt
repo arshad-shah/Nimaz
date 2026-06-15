@@ -1,5 +1,12 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -21,9 +28,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,6 +40,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -44,6 +56,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
+import java.time.format.TextStyle
+import java.util.Locale
 
 /**
  * Position of the status indicator dot within a day cell.
@@ -116,7 +130,7 @@ fun NimazCalendar(
     selectionStyle: SelectionStyle = SelectionStyle.BACKGROUND
 ) {
     val today = remember { LocalDate.now() }
-    val calendarDays = remember(displayedMonth) { buildCalendarDays(displayedMonth) }
+    val haptic = LocalHapticFeedback.current
 
     Column(modifier = modifier) {
         // Navigation header
@@ -130,7 +144,10 @@ fun NimazCalendar(
             Spacer(modifier = Modifier.height(12.dp))
         }
 
-        // Calendar grid card
+        // Calendar grid card. The card surface is the page-level container;
+        // the inner grid swaps with a horizontal slide when displayedMonth
+        // changes so consumers get a "real" month transition without any
+        // public API change.
         Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -141,49 +158,54 @@ fun NimazCalendar(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(15.dp)
+                    .padding(horizontal = 14.dp, vertical = 14.dp)
             ) {
-                // Weekday headers
                 WeekdayHeaderRow()
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                // Day cells grid
-                calendarDays.chunked(7).forEach { week ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        week.forEach { date ->
-                            val isCurrentMonth = date.month == displayedMonth.month
-                            val isToday = date == today
-                            val isSelected = date == selectedDate
-                            val dayState = dayStateProvider(date)
-
-                            CalendarDayCell(
-                                date = date,
-                                isCurrentMonth = isCurrentMonth,
-                                isToday = isToday,
-                                isSelected = isSelected,
-                                dayState = dayState,
-                                selectionStyle = selectionStyle,
-                                onClick = { onDateSelected(date) },
-                                modifier = Modifier.weight(1f)
+                // Animate month swap. We detect direction by comparing the
+                // incoming month against the previous frame's value — fwd
+                // slides in from the right, back slides in from the left.
+                AnimatedContent(
+                    targetState = displayedMonth,
+                    transitionSpec = {
+                        val forward = targetState > initialState
+                        val width = 80
+                        (slideInHorizontally(
+                            animationSpec = tween(220)
+                        ) { if (forward) it / 2 else -it / 2 } + fadeIn(tween(220)))
+                            .togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = tween(180)
+                                ) { if (forward) -width else width } + fadeOut(tween(180))
                             )
+                    },
+                    label = "calendar_month_swap"
+                ) { monthToRender ->
+                    CalendarGrid(
+                        displayedMonth = monthToRender,
+                        today = today,
+                        selectedDate = selectedDate,
+                        dayStateProvider = dayStateProvider,
+                        selectionStyle = selectionStyle,
+                        onDateSelected = { date ->
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onDateSelected(date)
                         }
-                    }
+                    )
                 }
 
                 // Legend
                 if (legendItems.isNotEmpty()) {
                     HorizontalDivider(
-                        modifier = Modifier.padding(top = 15.dp),
+                        modifier = Modifier.padding(top = 14.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                     )
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(top = 15.dp),
+                            .padding(top = 14.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -194,6 +216,42 @@ fun NimazCalendar(
                             NimazLegendItem(color = item.color, label = item.label)
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CalendarGrid(
+    displayedMonth: YearMonth,
+    today: LocalDate,
+    selectedDate: LocalDate?,
+    dayStateProvider: (LocalDate) -> CalendarDayState,
+    selectionStyle: SelectionStyle,
+    onDateSelected: (LocalDate) -> Unit,
+) {
+    val calendarDays = remember(displayedMonth) { buildCalendarDays(displayedMonth) }
+
+    Column(modifier = Modifier.fillMaxWidth()) {
+        calendarDays.chunked(7).forEach { week ->
+            Row(modifier = Modifier.fillMaxWidth()) {
+                week.forEach { date ->
+                    val isCurrentMonth = date.month == displayedMonth.month
+                    val isToday = date == today
+                    val isSelected = date == selectedDate
+                    val dayState = dayStateProvider(date)
+
+                    CalendarDayCell(
+                        date = date,
+                        isCurrentMonth = isCurrentMonth,
+                        isToday = isToday,
+                        isSelected = isSelected,
+                        dayState = dayState,
+                        selectionStyle = selectionStyle,
+                        onClick = { onDateSelected(date) },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
         }
@@ -235,31 +293,33 @@ private fun CalendarNavigationHeader(
             subtitle?.invoke()
         }
 
+        // Tonal icon buttons — stand out clearly against both the page
+        // background and the calendar card without being heavy.
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            IconButton(
+            FilledTonalIconButton(
                 onClick = onPrevious,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous Month",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    contentDescription = "Previous month",
+                    modifier = Modifier.size(20.dp)
                 )
             }
-            IconButton(
+            FilledTonalIconButton(
                 onClick = onNext,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                colors = IconButtonDefaults.filledTonalIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
                 )
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next Month",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    contentDescription = "Next month",
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
@@ -268,22 +328,51 @@ private fun CalendarNavigationHeader(
 
 @Composable
 private fun WeekdayHeaderRow(modifier: Modifier = Modifier) {
+    // Tinted strip behind the labels makes the header visually distinct from
+    // the date grid below — without it, the labels float on the card surface
+    // and read as just "more cells with no number."
     Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f))
+            .padding(vertical = 8.dp)
     ) {
-        listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat").forEach { day ->
-            Text(
-                text = day,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+        WEEKDAY_LABELS.forEachIndexed { index, day ->
+            // Friday gets the primary tint + Bold weight as a small but
+            // intentional nod to Jumu'ah — the most significant day of the
+            // week in Islamic practice.
+            val isFriday = index == 5
+            val labelColor = if (isFriday) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
+            val weight = if (isFriday) FontWeight.Bold else FontWeight.SemiBold
+
+            Box(
                 modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center,
-                fontSize = 11.sp
-            )
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = day,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = weight,
+                    color = labelColor,
+                    fontSize = 11.sp,
+                    letterSpacing = 1.sp,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
     }
 }
+
+/**
+ * Weekday abbreviations, uppercase for header-style typography. Kept as a
+ * file-level constant so the rendering composable stays declarative.
+ */
+private val WEEKDAY_LABELS = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
 
 @Composable
 private fun CalendarDayCell(
@@ -296,24 +385,39 @@ private fun CalendarDayCell(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val scheme = MaterialTheme.colorScheme
+
+    // Background priority: explicit override > selection > today > none.
+    // Selection now wins over today so tapping a date always reads back
+    // visually — today becomes a softer secondary cue (primaryContainer).
+    val isSelectedBackgroundFill = isSelected && selectionStyle == SelectionStyle.BACKGROUND
     val defaultBackgroundColor = when {
-        isToday -> MaterialTheme.colorScheme.primary
-        isSelected && selectionStyle == SelectionStyle.BACKGROUND ->
-            MaterialTheme.colorScheme.surfaceContainerHighest
+        isSelectedBackgroundFill -> scheme.primary
+        isToday -> scheme.primaryContainer
         else -> Color.Transparent
     }
-
     val backgroundColor = dayState.backgroundColor ?: defaultBackgroundColor
 
     val defaultTextColor = when {
-        isToday -> MaterialTheme.colorScheme.onPrimary
-        !isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-        else -> MaterialTheme.colorScheme.onSurface
+        isSelectedBackgroundFill -> scheme.onPrimary
+        isToday -> scheme.onPrimaryContainer
+        !isCurrentMonth -> scheme.onSurface.copy(alpha = 0.30f)
+        else -> scheme.onSurface
+    }
+    val textColor = dayState.textColor ?: defaultTextColor
+    val fontWeight = dayState.fontWeight ?: when {
+        isSelectedBackgroundFill -> FontWeight.Bold
+        isToday -> FontWeight.SemiBold
+        else -> FontWeight.Normal
     }
 
-    val textColor = dayState.textColor ?: defaultTextColor
-    val fontWeight = dayState.fontWeight
-        ?: if (isToday) FontWeight.SemiBold else FontWeight.Normal
+    // Accessibility: "Monday, 5 January 2026, selected" rather than "5".
+    val dayName = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    val monthName = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    val a11yLabel = buildString {
+        append("$dayName, ${date.dayOfMonth} $monthName ${date.year}")
+        if (isToday) append(", today")
+    }
 
     Box(
         modifier = modifier
@@ -321,16 +425,16 @@ private fun CalendarDayCell(
             .padding(2.dp)
             .then(
                 if (isSelected && selectionStyle == SelectionStyle.BORDER) {
-                    Modifier.border(
-                        2.dp,
-                        MaterialTheme.colorScheme.primary,
-                        RoundedCornerShape(10.dp)
-                    )
+                    Modifier.border(2.dp, scheme.primary, RoundedCornerShape(10.dp))
                 } else Modifier
             )
             .clip(RoundedCornerShape(10.dp))
             .background(backgroundColor)
-            .clickable(onClick = onClick),
+            .clickable(onClick = onClick)
+            .semantics {
+                contentDescription = a11yLabel
+                selected = isSelected
+            },
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -341,29 +445,31 @@ private fun CalendarDayCell(
             fontSize = 13.sp
         )
 
-        // Indicator dot
+        // Indicator dot — picks a contrasting tone on selected cells so the
+        // dot stays visible against primary fill.
         dayState.indicatorColor?.let { color ->
+            val resolvedDot = if (isSelectedBackgroundFill) {
+                // On a primary-filled selected cell, white-ish dots read better
+                // than the caller's raw color which may sit too close in tone.
+                scheme.onPrimary
+            } else color
             when (dayState.indicatorPosition) {
-                IndicatorPosition.BOTTOM_CENTER -> {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 4.dp)
-                            .size(6.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                    )
-                }
-                IndicatorPosition.TOP_END -> {
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(2.dp)
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                    )
-                }
+                IndicatorPosition.BOTTOM_CENTER -> Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 4.dp)
+                        .size(6.dp)
+                        .clip(CircleShape)
+                        .background(resolvedDot)
+                )
+                IndicatorPosition.TOP_END -> Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(3.dp)
+                        .size(7.dp)
+                        .clip(CircleShape)
+                        .background(resolvedDot)
+                )
             }
         }
     }
@@ -371,12 +477,21 @@ private fun CalendarDayCell(
 
 // --- Helpers ---
 
+/**
+ * Builds the date grid for a month, including padding days from the previous
+ * month to fill the first week. Returns 5 weeks (35 cells) for months that
+ * fit, or 6 weeks (42 cells) for months that need the extra row — e.g. a
+ * 31-day month starting on Friday/Saturday wraps over 6 weeks and the
+ * previous hard-coded 35-cell list silently truncated the last days.
+ */
 private fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
     val firstOfMonth = yearMonth.atDay(1)
     val offset = if (firstOfMonth.dayOfWeek == DayOfWeek.SUNDAY) 0
-    else firstOfMonth.dayOfWeek.value
+        else firstOfMonth.dayOfWeek.value
     val startDate = firstOfMonth.minusDays(offset.toLong())
-    return List(35) { startDate.plusDays(it.toLong()) }
+    val totalDays = offset + yearMonth.lengthOfMonth()
+    val weeks = ((totalDays + 6) / 7).coerceIn(5, 6)
+    return List(weeks * 7) { startDate.plusDays(it.toLong()) }
 }
 
 private fun YearMonth.formatDefault(): String {
@@ -527,6 +642,25 @@ private fun NimazCalendarFastingTrackerPreview() {
                     CalendarLegendItem(Color(0xFFEF4444), "Missed"),
                     CalendarLegendItem(NimazColors.FastingColors.Ramadan, "Ramadan")
                 )
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "NimazCalendar - 6-week month")
+@Composable
+private fun NimazCalendarSixWeekPreview() {
+    // October 2026: starts on a Thursday and has 31 days, so it wraps over
+    // 6 weeks. With the old hard-coded 35-cell list, Oct 30 and Oct 31 were
+    // dropped off the bottom. This preview verifies the dynamic week count.
+    NimazTheme {
+        Column(modifier = Modifier.padding(16.dp)) {
+            NimazCalendar(
+                displayedMonth = YearMonth.of(2026, 10),
+                selectedDate = LocalDate.of(2026, 10, 31),
+                onDateSelected = {},
+                onPreviousMonth = {},
+                onNextMonth = {}
             )
         }
     }

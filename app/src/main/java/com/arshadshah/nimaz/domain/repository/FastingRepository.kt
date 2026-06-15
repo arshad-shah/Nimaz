@@ -21,6 +21,9 @@ interface FastingRepository {
     suspend fun updateFastRecord(record: FastRecord)
     suspend fun updateFastStatus(date: Long, status: FastStatus)
 
+    suspend fun deleteFastRecordByDate(date: Long)
+    suspend fun getMakeupFastCountForDate(originalDate: Long): Int
+
     // Makeup fast operations
     fun getPendingMakeupFasts(): Flow<List<MakeupFast>>
     fun getAllMakeupFasts(): Flow<List<MakeupFast>>

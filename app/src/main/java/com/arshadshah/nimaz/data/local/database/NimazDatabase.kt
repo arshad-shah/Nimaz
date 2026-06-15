@@ -102,7 +102,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 10,
+    version = 12,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -123,6 +123,31 @@ abstract class NimazDatabase : RoomDatabase() {
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"
+
+        val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Fix incorrect start_page values in surahs table
+                // The start_page column had values from a different Mushaf edition
+                // that didn't match the actual ayah page data
+                db.execSQL("""
+                    UPDATE surahs SET start_page = (
+                        SELECT MIN(a.page) FROM ayahs a WHERE a.surah_id = surahs.id
+                    )
+                """.trimIndent())
+            }
+        }
+
+        val MIGRATION_10_11 = object : Migration(10, 11) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                val now = System.currentTimeMillis()
+                db.execSQL("ALTER TABLE quran_favorites ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("ALTER TABLE tasbih_presets ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("ALTER TABLE tasbih_sessions ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("ALTER TABLE khatam_ayahs ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("ALTER TABLE khatam_daily_log ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+                db.execSQL("ALTER TABLE zakat_history ADD COLUMN updatedAt INTEGER NOT NULL DEFAULT $now")
+            }
+        }
 
         val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {

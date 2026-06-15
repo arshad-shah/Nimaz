@@ -28,7 +28,10 @@ data class TafseerUiState(
     val notes: List<TafseerNote> = emptyList(),
     val surahName: String = "",
     val isLoading: Boolean = true,
-    val exportedText: String? = null
+    val exportedText: String? = null,
+    // Sources whose seed data actually has non-empty text for the current ayah.
+    // Used to recommend an alternate source when the selected one has no content.
+    val availableSources: Set<TafseerSource> = emptySet()
 )
 
 sealed interface TafseerEvent {
@@ -117,7 +120,16 @@ class TafseerViewModel @Inject constructor(
 
         viewModelScope.launch {
             val tafseer = tafseerRepository.getTafseerForAyah(ayah.id, tafseerId)
-            _state.value = _state.value.copy(currentTafseer = tafseer)
+            // Probe every source so the UI can suggest an alternate one when the
+            // selected source has no content for this ayah (seed coverage is partial).
+            val available = TafseerSource.entries.filter { source ->
+                tafseerRepository.getTafseerForAyah(ayah.id, source.id)
+                    ?.text?.isNotBlank() == true
+            }.toSet()
+            _state.value = _state.value.copy(
+                currentTafseer = tafseer,
+                availableSources = available
+            )
         }
 
         viewModelScope.launch {

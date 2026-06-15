@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
+    id("kotlin-parcelize")
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
     alias(libs.plugins.about.libs.plugin)
@@ -16,6 +17,8 @@ android {
         applicationId = "com.arshadshah.nimaz"
         minSdk = 29
         targetSdk = 36
+        // Source of truth for the app version. CI bumps these at build time and
+        // opens a PR with the change instead of pushing to the protected branch.
         versionCode = 300
         versionName = "3.0.0"
 
@@ -45,6 +48,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            ndk {
+                debugSymbolLevel = "SYMBOL_TABLE"
+            }
         }
     }
     compileOptions {
@@ -60,6 +66,7 @@ android {
 dependencies {
     // Core
     implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.core.splashscreen)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.runtime.compose)
@@ -71,6 +78,10 @@ dependencies {
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material3.adaptive)
+    implementation(libs.androidx.compose.material3.adaptive.layout)
+    implementation(libs.androidx.compose.material3.adaptive.navigation)
+    implementation(libs.androidx.compose.material3.adaptive.navigation.suite)
     implementation(libs.androidx.compose.material.icons.extended)
 
     // Navigation
@@ -118,6 +129,9 @@ dependencies {
 
     // Location
     implementation(libs.play.services.location)
+
+    // Nearby Connections (device-to-device sync)
+    implementation(libs.play.services.nearby)
 
     // CameraX
     implementation(libs.camerax.core)

@@ -10,6 +10,7 @@
     android:maxResizeHeight="100dp"
     android:resizeMode="horizontal|vertical"
     android:updatePeriodMillis="3600000"
+    android:initialLayout="@layout/glance_default_loading"
     android:previewLayout="@layout/widget_prayer_tracker_preview"
     android:description="@string/widget_prayer_tracker_description"
     android:widgetCategory="home_screen" />

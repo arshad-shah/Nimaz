@@ -65,6 +65,14 @@ class FastingRepositoryImpl @Inject constructor(
         fastingDao.updateFastStatus(date, status.name.lowercase())
     }
 
+    override suspend fun deleteFastRecordByDate(date: Long) {
+        fastingDao.deleteFastRecordByDate(date)
+    }
+
+    override suspend fun getMakeupFastCountForDate(originalDate: Long): Int {
+        return fastingDao.getMakeupFastCountForDate(originalDate)
+    }
+
     override fun getPendingMakeupFasts(): Flow<List<MakeupFast>> {
         return fastingDao.getPendingMakeupFasts().map { entities ->
             entities.map { it.toDomain() }

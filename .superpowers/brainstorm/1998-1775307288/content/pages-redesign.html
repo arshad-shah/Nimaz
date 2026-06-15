@@ -1,0 +1,212 @@
+<h2>Pages Tab Redesign</h2>
+<p class="subtitle">Visual refresh for page cards + improved Surah start indicators</p>
+
+<div class="cards">
+
+  <!-- Option A: Refined grid with surah chip banners -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111827;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+
+        <!-- Juz header -->
+        <div style="background:rgba(120,160,255,0.15);border-radius:10px;padding:8px 14px;margin-bottom:10px;">
+          <span style="font-size:14px;font-weight:600;color:#a0c0ff;">Juz 1 <span style="font-weight:400;opacity:0.7;">(Pages 1–21)</span></span>
+        </div>
+
+        <!-- Surah start banner with badge pills -->
+        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="background:rgba(120,160,255,0.12);color:#78a0ff;font-size:10px;padding:3px 10px;border-radius:12px;font-weight:500;">▸ Al-Fatihah</span>
+        </div>
+
+        <!-- Page row -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">1</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">2</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">3</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">4</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">5</span>
+          </div>
+        </div>
+
+        <!-- Surah start banner for Al-Baqarah -->
+        <div style="display:flex;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+          <span style="background:rgba(120,160,255,0.12);color:#78a0ff;font-size:10px;padding:3px 10px;border-radius:12px;font-weight:500;">▸ Al-Baqarah starts</span>
+        </div>
+
+        <!-- Another page row with progress ring -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;border:2px solid rgba(120,160,255,0.5);">
+            <span style="color:#c8d8ff;font-size:14px;font-weight:700;">6</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;position:relative;border:1.5px solid rgba(120,160,255,0.2);">
+            <div style="position:absolute;width:36px;height:36px;border:2.5px solid rgba(100,200,150,0.7);border-radius:50%;border-top-color:transparent;transform:rotate(120deg);"></div>
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">7</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">8</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">9</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">10</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Refined Grid + Surah Chip Banners (Recommended)</h3>
+      <p>Keep the 5-column grid but: subtle border on cards, refined colors, and surah starts shown as pill badges above their row. Surah indicator says "▸ Al-Baqarah starts" per page, not grouped per row.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Page cards with surah name inside -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111827;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+
+        <!-- Juz header -->
+        <div style="background:rgba(120,160,255,0.15);border-radius:10px;padding:8px 14px;margin-bottom:10px;">
+          <span style="font-size:14px;font-weight:600;color:#a0c0ff;">Juz 1 <span style="font-weight:400;opacity:0.7;">(Pages 1–21)</span></span>
+        </div>
+
+        <!-- Page row with surah name embedded in card -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">1</span>
+            <span style="color:rgba(120,160,255,0.6);font-size:7px;font-weight:500;text-align:center;line-height:1.1;">الفاتحة</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">2</span>
+            <span style="color:rgba(120,160,255,0.6);font-size:7px;font-weight:500;text-align:center;line-height:1.1;">البقرة</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">3</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">4</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">5</span>
+          </div>
+        </div>
+
+        <!-- Another row -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;background:rgba(120,160,255,0.25);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:2px solid rgba(120,160,255,0.5);gap:2px;">
+            <span style="color:#c8d8ff;font-size:14px;font-weight:700;">6</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">7</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">8</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">9</span>
+          </div>
+          <div style="flex:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px;border:1.5px solid rgba(120,160,255,0.2);gap:2px;">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">10</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Surah Name Inside Card</h3>
+      <p>Cards that start a Surah show the Arabic surah name inside the card below the page number. No separate banner row. More compact but tiny text on small cards.</p>
+    </div>
+  </div>
+
+  <!-- Option C: Surah divider rows -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#111827;border-radius:12px;padding:14px;font-family:system-ui;color:#e0e0e0;width:100%;">
+
+        <!-- Juz header -->
+        <div style="background:rgba(120,160,255,0.15);border-radius:10px;padding:8px 14px;margin-bottom:10px;">
+          <span style="font-size:14px;font-weight:600;color:#a0c0ff;">Juz 1 <span style="font-weight:400;opacity:0.7;">(Pages 1–21)</span></span>
+        </div>
+
+        <!-- Full-width surah divider -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="flex:1;height:1px;background:rgba(120,160,255,0.2);"></div>
+          <span style="color:#78a0ff;font-size:11px;font-weight:600;">Al-Fatihah · p.1</span>
+          <div style="flex:1;height:1px;background:rgba(120,160,255,0.2);"></div>
+        </div>
+
+        <!-- Page row -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">1</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">2</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">3</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">4</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">5</span>
+          </div>
+        </div>
+
+        <!-- Another surah divider -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+          <div style="flex:1;height:1px;background:rgba(120,160,255,0.2);"></div>
+          <span style="color:#78a0ff;font-size:11px;font-weight:600;">Al-Baqarah · p.2</span>
+          <div style="flex:1;height:1px;background:rgba(120,160,255,0.2);"></div>
+        </div>
+
+        <!-- Page row -->
+        <div style="display:flex;gap:6px;margin-bottom:8px;">
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.25);border-radius:10px;display:flex;align-items:center;justify-content:center;border:2px solid rgba(120,160,255,0.5);">
+            <span style="color:#c8d8ff;font-size:14px;font-weight:700;">6</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">7</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">8</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">9</span>
+          </div>
+          <div style="flex:1;aspect-ratio:1;background:rgba(120,160,255,0.08);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1.5px solid rgba(120,160,255,0.2);">
+            <span style="color:#78a0ff;font-size:14px;font-weight:700;">10</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C — Centered Surah Dividers</h3>
+      <p>Surah starts shown as elegant centered dividers with horizontal rules. Shows surah name + starting page. Clean visual break between surah sections within a Juz.</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Changes across all options</h3>
+  <ul style="font-size:13px;color:rgba(255,255,255,0.7);line-height:1.6;">
+    <li>Page cards get subtle <strong>borders</strong> (1.5dp, primary 20% alpha) for definition</li>
+    <li>Card background refined to <strong>primary 8% alpha</strong> (currently surfaceVariant 50%)</li>
+    <li>Juz header gets lighter treatment — <strong>primaryContainer 15%</strong> instead of solid</li>
+    <li>Surah indicators become <strong>per-page accurate</strong> (not grouped by row)</li>
+    <li>Progress ring and selected/completed states unchanged</li>
+  </ul>
+</div>

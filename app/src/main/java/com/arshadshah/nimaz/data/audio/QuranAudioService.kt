@@ -14,6 +14,7 @@ import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.MediaSession
 import androidx.media3.session.MediaStyleNotificationHelper
+import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -48,6 +49,11 @@ class QuranAudioService : Service() {
         const val ACTION_NEXT = "com.arshadshah.nimaz.ACTION_QURAN_NEXT"
         const val ACTION_PREVIOUS = "com.arshadshah.nimaz.ACTION_QURAN_PREVIOUS"
         const val ACTION_STOP = "com.arshadshah.nimaz.ACTION_QURAN_STOP"
+
+        // Sent on the MainActivity intent when the user taps the notification body
+        // or the lock screen player. MainActivity reads the surah from the singleton
+        // QuranAudioManager and navigates to the reader.
+        const val ACTION_OPEN_PLAYING_SURAH = "com.arshadshah.nimaz.ACTION_OPEN_PLAYING_SURAH"
 
         /**
          * Start the Quran audio foreground service.
@@ -109,8 +115,28 @@ class QuranAudioService : Service() {
 
         existing?.release()
         return MediaSession.Builder(this, player)
+            .setSessionActivity(buildOpenPlayingSurahPendingIntent())
             .build()
             .also { mediaSession = it }
+    }
+
+    /**
+     * PendingIntent that opens MainActivity with ACTION_OPEN_PLAYING_SURAH so the
+     * NavGraph can route to the surah currently being played. The surah is read at
+     * the moment of the click from QuranAudioManager.audioState (the singleton),
+     * not encoded in extras — so the intent stays valid as the surah changes.
+     */
+    private fun buildOpenPlayingSurahPendingIntent(): PendingIntent {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            action = ACTION_OPEN_PLAYING_SURAH
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        return PendingIntent.getActivity(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     private fun releaseMediaSession() {
@@ -160,16 +186,9 @@ class QuranAudioService : Service() {
         val nextIntent = createActionIntent(ACTION_NEXT)
         val stopIntent = createActionIntent(ACTION_STOP)
 
-        // Open app intent
-        val openAppIntent = packageManager.getLaunchIntentForPackage(packageName)
-        val openAppPendingIntent = openAppIntent?.let {
-            PendingIntent.getActivity(
-                this,
-                0,
-                it,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        // Tapping the notification body opens MainActivity, which reads the
+        // playing surah from the singleton AudioManager and navigates the user there.
+        val openAppPendingIntent = buildOpenPlayingSurahPendingIntent()
 
         // Build subtitle with reciter info
         val subtitle = if (state.isPreparing && state.totalToDownload > 0) {

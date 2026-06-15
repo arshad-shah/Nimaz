@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
+import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
@@ -173,9 +174,16 @@ class BootReceiver : BroadcastReceiver() {
 
                 if (shouldPlayAdhan) {
                     val adhanSound = AdhanSound.fromName(selectedAdhan)
-                    // Always check both variants so either can serve as fallback
-                    val hasAdhan = adhanAudioManager.isDownloaded(adhanSound, true) ||
-                            adhanAudioManager.isDownloaded(adhanSound, false)
+                    // Check for the specific variant needed, or accept beep as fallback
+                    val hasCorrectVariant = adhanAudioManager.isDownloaded(adhanSound, isFajr)
+                    val hasBeepFallback = adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
+                    val hasAdhan = hasCorrectVariant || hasBeepFallback
+
+                    // If the correct variant is missing, schedule a re-download for next time
+                    if (!hasCorrectVariant) {
+                        android.util.Log.w("BootReceiver", "Missing ${adhanSound.name} variant (isFajr=$isFajr), triggering re-download")
+                        AdhanDownloadService.downloadSelected(context, adhanSound)
+                    }
 
                     if (hasAdhan) {
                         // Adhan service notification serves as both prayer + adhan notification

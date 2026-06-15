@@ -30,10 +30,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionDialog
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSelectionOption
+import com.arshadshah.nimaz.presentation.components.molecules.NimazPickerItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
@@ -209,68 +209,88 @@ fun PrayerSettingsScreen(
         }
     }
 
-    // Selection dialogs
+    // Selection dialogs use the generic NimazListPicker — type-safe in T, with
+    // auto-dismiss on selection (no extra Done tap) and built-in search for
+    // long lists.
     if (showCalculationMethodDialog) {
-        val calcOptions = CalculationMethod.entries.map { method ->
-            NimazSelectionOption(
-                title = method.displayName(),
-                description = when (method) {
-                    CalculationMethod.MUSLIM_WORLD_LEAGUE -> "Used in Europe, Far East, parts of the US"
-                    CalculationMethod.EGYPTIAN -> "Used in Africa, Syria, Lebanon, Malaysia"
-                    CalculationMethod.KARACHI -> "Used in Pakistan, Bangladesh, India, Afghanistan"
-                    CalculationMethod.UMM_AL_QURA -> "Used in the Arabian Peninsula"
-                    CalculationMethod.DUBAI -> "Used in the UAE"
-                    CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Used in the UK, parts of Europe"
-                    CalculationMethod.NORTH_AMERICA -> "Used in the US and Canada"
-                    CalculationMethod.KUWAIT -> "Used in Kuwait"
-                    CalculationMethod.QATAR -> "Used in Qatar"
-                    CalculationMethod.SINGAPORE -> "Used in Singapore, Malaysia, Indonesia"
-                    CalculationMethod.TURKEY -> "Used in Turkey and Central Asia"
-                }
-            )
-        }
-        NimazSelectionDialog(
+        NimazListPicker(
             title = "Calculation Method",
-            options = calcOptions,
-            selectedIndex = CalculationMethod.entries.indexOf(prayerState.calculationMethod),
-            onSelect = { index ->
-                viewModel.onEvent(SettingsEvent.SetCalculationMethod(CalculationMethod.entries[index]))
-                showCalculationMethodDialog = false
+            items = CalculationMethod.entries.map { method ->
+                NimazPickerItem(
+                    value = method,
+                    title = method.displayName(),
+                    description = calculationMethodRegion(method),
+                )
             },
-            onDismiss = { showCalculationMethodDialog = false }
+            selected = prayerState.calculationMethod,
+            onSelected = { viewModel.onEvent(SettingsEvent.SetCalculationMethod(it)) },
+            onDismiss = { showCalculationMethodDialog = false },
         )
     }
 
     if (showAsrMethodDialog) {
-        NimazSelectionDialog(
+        NimazListPicker(
             title = "Asr Calculation",
-            options = listOf(
-                NimazSelectionOption("Standard (Shafi'i, Maliki, Hanbali)", "Shadow equals object length"),
-                NimazSelectionOption("Hanafi", "Shadow equals twice object length")
+            items = listOf(
+                NimazPickerItem(
+                    value = AsrJuristicMethod.STANDARD,
+                    title = "Standard (Shafi'i, Maliki, Hanbali)",
+                    description = "Shadow equals object length",
+                ),
+                NimazPickerItem(
+                    value = AsrJuristicMethod.HANAFI,
+                    title = "Hanafi",
+                    description = "Shadow equals twice object length",
+                ),
             ),
-            selectedIndex = AsrJuristicMethod.entries.indexOf(prayerState.asrMethod),
-            onSelect = { index ->
-                viewModel.onEvent(SettingsEvent.SetAsrMethod(AsrJuristicMethod.entries[index]))
-                showAsrMethodDialog = false
-            },
-            onDismiss = { showAsrMethodDialog = false }
+            selected = prayerState.asrMethod,
+            onSelected = { viewModel.onEvent(SettingsEvent.SetAsrMethod(it)) },
+            onDismiss = { showAsrMethodDialog = false },
         )
     }
 
     if (showHighLatitudeDialog) {
-        NimazSelectionDialog(
+        NimazListPicker(
             title = "High Latitude Method",
-            options = listOf(
-                NimazSelectionOption("Middle of the Night", "Split the night in half from sunset to sunrise"),
-                NimazSelectionOption("Seventh of the Night", "Use 1/7th of the night for Fajr and Isha"),
-                NimazSelectionOption("Twilight Angle", "Use the angle-based method for Fajr and Isha")
+            items = listOf(
+                NimazPickerItem(
+                    value = HighLatitudeRule.MIDDLE_OF_NIGHT,
+                    title = "Middle of the Night",
+                    description = "Split the night in half from sunset to sunrise",
+                ),
+                NimazPickerItem(
+                    value = HighLatitudeRule.SEVENTH_OF_NIGHT,
+                    title = "Seventh of the Night",
+                    description = "Use 1/7th of the night for Fajr and Isha",
+                ),
+                NimazPickerItem(
+                    value = HighLatitudeRule.TWILIGHT_ANGLE,
+                    title = "Twilight Angle",
+                    description = "Use the angle-based method for Fajr and Isha",
+                ),
             ),
-            selectedIndex = HighLatitudeRule.entries.indexOf(prayerState.highLatitudeRule),
-            onSelect = { index ->
-                viewModel.onEvent(SettingsEvent.SetHighLatitudeRule(HighLatitudeRule.entries[index]))
-                showHighLatitudeDialog = false
-            },
-            onDismiss = { showHighLatitudeDialog = false }
+            selected = prayerState.highLatitudeRule,
+            onSelected = { viewModel.onEvent(SettingsEvent.SetHighLatitudeRule(it)) },
+            onDismiss = { showHighLatitudeDialog = false },
         )
     }
+}
+
+/**
+ * Region description for each calculation method, used as the picker item's
+ * subtitle so users can pick by where they live rather than by an unfamiliar
+ * acronym ("Used in Pakistan" beats "Karachi" if you don't already know it).
+ */
+private fun calculationMethodRegion(method: CalculationMethod): String = when (method) {
+    CalculationMethod.MUSLIM_WORLD_LEAGUE -> "Used in Europe, Far East, parts of the US"
+    CalculationMethod.EGYPTIAN -> "Used in Africa, Syria, Lebanon, Malaysia"
+    CalculationMethod.KARACHI -> "Used in Pakistan, Bangladesh, India, Afghanistan"
+    CalculationMethod.UMM_AL_QURA -> "Used in the Arabian Peninsula"
+    CalculationMethod.DUBAI -> "Used in the UAE"
+    CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Used in the UK, parts of Europe"
+    CalculationMethod.NORTH_AMERICA -> "Used in the US and Canada"
+    CalculationMethod.KUWAIT -> "Used in Kuwait"
+    CalculationMethod.QATAR -> "Used in Qatar"
+    CalculationMethod.SINGAPORE -> "Used in Singapore, Malaysia, Indonesia"
+    CalculationMethod.TURKEY -> "Used in Turkey and Central Asia"
 }
