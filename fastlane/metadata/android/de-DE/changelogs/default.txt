@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+Neu in diesem Update:
+
+• Synchronisiere deine Gebetsdaten zwischen Geräten – ganz ohne Konto.
+• Neue Startbildschirm-Widgets: nächstes Gebet & Gebets-Tracker.
+• Überarbeiteter Quran-Leser mit Mushaf-Seitenansicht – tippe auf einen Vers für sofortige Übersetzung & Tafsir.
+• Vers-für-Vers-Audiorezitation.
+• Aktualisierter „Heute"-Bildschirm mit Gebets- und Fastenkarten.
+• Zuverlässigerer Adhan-Ton, Downloads & Benachrichtigungen.
+• Diverse Fehlerbehebungen und Leistungsverbesserungen.

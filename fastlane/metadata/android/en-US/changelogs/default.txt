@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+What's new in this update:
+
+• Sync your prayer data between devices — no account needed.
+• New home screen widgets: next prayer & prayer tracker.
+• Redesigned Quran reader with Mushaf page view — tap any verse for instant translation & Tafseer.
+• Verse-by-verse audio recitation.
+• Refreshed Today screen with prayer & fasting cards.
+• More reliable Adhan audio, downloads & notifications.
+• Various bug fixes and performance improvements.

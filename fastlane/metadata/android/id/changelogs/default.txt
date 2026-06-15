@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+Yang baru di pembaruan ini:
+
+• Sinkronkan data salat antar perangkat — tanpa akun.
+• Widget layar utama baru: salat berikutnya & pelacak salat.
+• Pembaca Al-Quran baru dengan tampilan halaman Mushaf — ketuk ayat untuk terjemahan & Tafsir instan.
+• Murotal audio ayat per ayat.
+• Layar "Hari Ini" yang disegarkan dengan kartu salat & puasa.
+• Audio Azan, unduhan & notifikasi yang lebih andal.
+• Berbagai perbaikan bug dan peningkatan performa.

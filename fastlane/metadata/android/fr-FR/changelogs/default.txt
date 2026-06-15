@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+Nouveautés de cette mise à jour :
+
+• Synchronisez vos données de prière entre appareils – sans compte.
+• Nouveaux widgets : prochaine prière et suivi des prières.
+• Lecteur de Coran repensé en vue page Mushaf – touchez un verset pour sa traduction et son Tafsir.
+• Récitation audio verset par verset.
+• Écran « Aujourd'hui » avec cartes de prière et de jeûne.
+• Audio Adhan, téléchargements et notifications plus fiables.
+• Corrections de bugs et améliorations des performances.

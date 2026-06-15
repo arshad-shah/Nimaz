@@ -1,1 +1,9 @@
-Bug fixes and improvements.
+Apa yang baharu dalam kemas kini ini:
+
+• Segerakkan data solat antara peranti — tanpa akaun.
+• Widget skrin utama baharu: solat seterusnya & penjejak solat.
+• Pembaca Al-Quran baharu dengan paparan halaman Mushaf — ketik mana-mana ayat untuk terjemahan & Tafsir segera.
+• Bacaan audio ayat demi ayat.
+• Skrin "Hari Ini" diperbaharui dengan kad solat & puasa.
+• Audio Azan, muat turun & pemberitahuan yang lebih dipercayai.
+• Pelbagai pembaikan pepijat dan peningkatan prestasi.
