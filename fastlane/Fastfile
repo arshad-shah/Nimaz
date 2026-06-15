@@ -32,12 +32,14 @@ platform :android do
   end
 
   private_lane :fetch_and_increment_build_number do
-    sh "git config user.email 'CI@BOT.com'"
-    sh "git config user.name 'CI-BOT'"
-
+    # Bump the version in build.gradle.kts for this build. We deliberately do
+    # NOT commit or push here: the `dev` branch is protected (changes must go
+    # through a PR + CodeQL), so a direct CI push is correctly rejected. The
+    # build uses the bumped file in this run, and the workflow opens a PR with
+    # the change so the committed baseline stays in sync for the next deploy.
+    #
     # The project uses the Kotlin DSL (build.gradle.kts), which the
-    # android_versioning plugin does not support, so bump the versions
-    # directly here.
+    # android_versioning plugin does not support, hence the manual approach.
     gradle_file = File.expand_path("../app/build.gradle.kts", __dir__)
     contents = File.read(gradle_file)
 
@@ -54,21 +56,6 @@ platform :android do
 
     File.write(gradle_file, contents)
     UI.success("Bumped versionCode #{current_code} -> #{new_code}, versionName #{current_name} -> #{new_name}")
-
-    git_add(path: gradle_file)
-    git_commit(
-          path: gradle_file,
-          message: "Bumped Version Code and name"
-        )
-    # Get the current branch name
-    current_branch = sh('git rev-parse --abbrev-ref HEAD').strip
-
-    push_to_git_remote(
-      remote: "origin",
-      local_branch: current_branch,
-      remote_branch: current_branch,
-      tags: true
-    )
   end
 
   private_lane :build_and_sign_apk_or_aab do

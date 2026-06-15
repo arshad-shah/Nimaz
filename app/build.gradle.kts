@@ -17,6 +17,8 @@ android {
         applicationId = "com.arshadshah.nimaz"
         minSdk = 29
         targetSdk = 36
+        // Source of truth for the app version. CI bumps these at build time and
+        // opens a PR with the change instead of pushing to the protected branch.
         versionCode = 300
         versionName = "3.0.0"
 
