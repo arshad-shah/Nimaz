@@ -35,7 +35,7 @@ platform :android do
     # Bump the version in build.gradle.kts for this build. We only edit the
     # working tree here; committing and pushing the bump back to dev is handled
     # by the deploy workflow after the build/upload succeeds (it pushes with a
-    # PAT that can bypass branch protection).
+    # GitHub App token that can bypass branch protection).
     #
     # The project uses the Kotlin DSL (build.gradle.kts), which the
     # android_versioning plugin does not support, hence the manual approach.

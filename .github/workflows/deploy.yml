@@ -15,26 +15,49 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Mint a short-lived installation token for a GitHub App. This is safer
+      # than a long-lived PAT: the token auto-expires (~1h), is scoped to only
+      # the permissions/repos granted to the App, and acts as the App's own bot
+      # identity (which can be added to dev's branch-protection bypass list).
+      # continue-on-error keeps PR/fork builds working when the App secrets are
+      # unavailable; checkout then falls back to the default token.
+      - name: Generate GitHub App token
+        id: app-token
+        continue-on-error: true
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.BUMP_APP_ID }}
+          private-key: ${{ secrets.BUMP_APP_PRIVATE_KEY }}
+
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
           # Build the PR's source branch on pull_request events, and the pushed
-          # branch (dev) on push events. Authenticate with RELEASE_PAT so the
+          # branch (dev) on push events. Authenticate with the App token so the
           # post-deploy version bump can be pushed back to the protected dev
-          # branch (its owner is allowed to bypass branch protection). Falls
-          # back to the default token so the build still works if the PAT is
-          # absent (only the final push step then fails).
+          # branch; fall back to the default token if the App is absent (only
+          # the final push step then fails).
           ref: ${{ github.head_ref || github.ref_name }}
-          token: ${{ secrets.RELEASE_PAT || github.token }}
+          token: ${{ steps.app-token.outputs.token || github.token }}
           lfs: true  # Enable Git LFS checkout
 
       - name: Checkout LFS objects
         run: git lfs checkout
 
       - name: Setup Git identity
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
-          git config --global user.email "CI@bot.com"
-          git config --global user.name "CI-Bot"
+          slug='${{ steps.app-token.outputs.app-slug }}'
+          if [ -n "$slug" ]; then
+            # Attribute the bump commit to the App's bot user so it links to the App.
+            uid="$(gh api "/users/${slug}[bot]" --jq .id)"
+            git config --global user.name "${slug}[bot]"
+            git config --global user.email "${uid}+${slug}[bot]@users.noreply.github.com"
+          else
+            git config --global user.name "CI-Bot"
+            git config --global user.email "CI@bot.com"
+          fi
 
       - name: Setup JDK
         uses: actions/setup-java@v4
@@ -97,8 +120,8 @@ jobs:
       # protected dev branch so the committed baseline stays in sync for the next
       # deploy. This runs only on a real push to dev (a merged change).
       #
-      # The push uses RELEASE_PAT, whose owner is allowed to bypass branch
-      # protection, so no PR/manual merge is needed. The commit message carries a
+      # The push uses the GitHub App token (the App is allowed to bypass branch
+      # protection), so no PR/manual merge is needed. The commit message carries a
       # [skip ci] marker so this push does not re-trigger the deploy workflow
       # (the job-level guard skips it). If dev advanced during the build, rebase
       # and retry so the push stays a fast-forward.

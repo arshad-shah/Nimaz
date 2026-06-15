@@ -18,7 +18,7 @@ android {
         minSdk = 29
         targetSdk = 36
         // Source of truth for the app version. CI bumps these at build time and
-        // pushes the change back to dev (with a bypass PAT) after a successful
+        // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
         versionCode = 300
         versionName = "3.0.0"
