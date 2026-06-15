@@ -1,9 +1,12 @@
 name: Android Build & Deploy
 
 on:
+  # Deploy only on a real push to dev (a merged change). Never on pull_request:
+  # this lane uploads to the Play Store and bumps the version, which must not
+  # happen for unreviewed PR code (and re-using a version code makes the upload
+  # fail with "Version code N has already been used"). PRs are validated by the
+  # Android PR Checks workflow instead.
   push:
-    branches: [ dev ]
-  pull_request:
     branches: [ dev ]
 
 jobs:
