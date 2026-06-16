@@ -216,7 +216,7 @@ fun AdaptiveMoreScreen(
                                 onNavigateToPrivacyPolicy = {
                                     val intent = Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/policy")
+                                        Uri.parse("https://nimaz.arshadshah.com/privacy")
                                     )
                                     context.startActivity(intent)
                                 },

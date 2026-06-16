@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,6 +46,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 fun HadithOfTheDayCard(
     hadith: String,
     modifier: Modifier = Modifier,
+    reference: String? = null,
     fillHeight: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
 ) {
@@ -100,12 +100,27 @@ fun HadithOfTheDayCard(
                 overflow = TextOverflow.Ellipsis,
                 modifier = if (fillHeight) {
                     Modifier
-                        .fillMaxSize()
+                        .weight(1f)
+                        .fillMaxWidth()
                         .padding(top = 4.dp)
                 } else {
                     Modifier.fillMaxWidth()
                 }
             )
+            if (!reference.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = reference,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = HadithAccent,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp)
+                )
+            }
         }
     }
 }

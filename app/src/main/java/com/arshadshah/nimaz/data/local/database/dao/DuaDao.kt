@@ -28,6 +28,10 @@ interface DuaDao {
     @Query("SELECT * FROM duas WHERE category_id = :categoryId ORDER BY display_order ASC")
     fun getDuasByCategory(categoryId: Int): Flow<List<DuaEntity>>
 
+    // One-shot read used by the home screen's "Dua of the Moment" selection.
+    @Query("SELECT * FROM duas WHERE category_id = :categoryId ORDER BY display_order ASC")
+    suspend fun getDuasByCategoryOnce(categoryId: Int): List<DuaEntity>
+
     @Query("SELECT * FROM duas WHERE id = :duaId")
     suspend fun getDuaById(duaId: Int): DuaEntity?
 
