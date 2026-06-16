@@ -169,7 +169,7 @@ class PrayerRepositoryImplTest {
             )
         }
         coVerify(exactly = 0) {
-            prayerDao.updatePrayerStatus(any(), any(), any(), any(), any())
+            prayerDao.updatePrayerStatus(any(), any(), any(), any(), any(), any())
         }
     }
 
@@ -181,8 +181,10 @@ class PrayerRepositoryImplTest {
             todayEpoch, PrayerName.FAJR, PrayerStatus.LATE, prayedAt = 1600, isJamaah = false
         )
 
+        // The DAO method has a trailing `timestamp: Long = now()` default param,
+        // so match it with any() rather than a fixed value.
         coVerify {
-            prayerDao.updatePrayerStatus(todayEpoch, "fajr", "late", 1600, false)
+            prayerDao.updatePrayerStatus(todayEpoch, "fajr", "late", 1600L, false, any())
         }
         coVerify(exactly = 0) { prayerDao.insertPrayerRecord(any()) }
     }
