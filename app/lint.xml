@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!--
+      Glance's resource-based ColorProvider(@ColorRes) is annotated
+      @RestrictedApi(LIBRARY_GROUP) in the current Glance version, even though
+      app code is expected to call it to keep day/night color resources. The
+      home-screen widgets use it throughout, which lint flags as RestrictedApi.
+      Suppress only that specific false positive (matched on the message) rather
+      than disabling the RestrictedApi check or dropping themed color resources.
+    -->
+    <issue id="RestrictedApi">
+        <ignore regexp="ColorProvider can only be called from within the same library group" />
+    </issue>
+</lint>

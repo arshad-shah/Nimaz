@@ -711,4 +711,20 @@
     <string name="adhan_download_partial_subtitle">Bazı %1$s dosyaları indirilemedi. Daha sonra tekrar denenecek.</string>
     <string name="adhan_download_failed">Ezan indirmesi başarısız</string>
     <string name="adhan_download_failed_subtitle">İnternet bağlantınızı kontrol edip tekrar deneyin</string>
+    <!-- Fasting sheet / Quran home / free-day labels -->
+    <string name="free_count">Serbest</string>
+    <string name="free_count_label">Serbest sayısı</string>
+    <string name="quran_home_page_range_format">s. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s başlıyor</string>
+    <string name="quran_home_juz_indicator">Cüz %1$d</string>
+    <string name="fasting_sheet_status">Durum</string>
+    <string name="fasting_sheet_type">Oruç Türü</string>
+    <string name="fasting_sheet_note">Not</string>
+    <string name="fasting_sheet_save">Kaydet</string>
+    <string name="fasting_sheet_delete">Sil</string>
+    <string name="fasting_sheet_exemption_reason">Muafiyet Nedeni</string>
+    <string name="fasting_sheet_select_reason">Neden seçin</string>
+    <string name="fasting_sheet_edit_makeup">Kaza Orucunu Düzenle</string>
+    <string name="fasting_sheet_reason">Neden</string>
+    <string name="fasting_sheet_fidya_amount">Fidye Tutarı</string>
 </resources>

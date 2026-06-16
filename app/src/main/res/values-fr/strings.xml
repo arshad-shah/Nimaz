@@ -710,4 +710,20 @@
     <string name="adhan_download_partial_subtitle">Certains fichiers %1$s n\'ont pas pu être téléchargés. Nouvel essai ultérieur.</string>
     <string name="adhan_download_failed">Échec du téléchargement de l\'Adhan</string>
     <string name="adhan_download_failed_subtitle">Vérifiez votre connexion Internet et réessayez</string>
+    <!-- Fasting sheet / Quran home / free-day labels -->
+    <string name="free_count">Libre</string>
+    <string name="free_count_label">Nombre libre</string>
+    <string name="quran_home_page_range_format">p. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s commence</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
+    <string name="fasting_sheet_status">Statut</string>
+    <string name="fasting_sheet_type">Type de jeûne</string>
+    <string name="fasting_sheet_note">Note</string>
+    <string name="fasting_sheet_save">Enregistrer</string>
+    <string name="fasting_sheet_delete">Supprimer</string>
+    <string name="fasting_sheet_exemption_reason">Motif d\'exemption</string>
+    <string name="fasting_sheet_select_reason">Sélectionner un motif</string>
+    <string name="fasting_sheet_edit_makeup">Modifier le jeûne de rattrapage</string>
+    <string name="fasting_sheet_reason">Motif</string>
+    <string name="fasting_sheet_fidya_amount">Montant de la Fidya</string>
 </resources>

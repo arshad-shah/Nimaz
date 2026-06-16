@@ -90,8 +90,8 @@ android {
     }
 
     lint {
-        // Also emit a text report (in addition to the default HTML/XML) so a
-        // finalizer task can echo it to the CI console — see printLintTextReport.
+        // Also emit a text report (in addition to the default HTML/XML); the CI
+        // "Print lint report" diagnostic step cats it into the job log.
         textReport = true
     }
 }
@@ -221,33 +221,6 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 }
-
-// ── Lint report echo ────────────────────────────────────────────────────────
-// `lintDebug` aborts the build on error and writes details only to the HTML/XML
-// (and intermediate text) report, none of which land in the CI console. Echo the
-// generated text report so the full issue list is visible in the job log. Wired
-// as a finalizer of the report task so it runs even though lintDebug then fails.
-val buildDirForLint = layout.buildDirectory.get().asFile
-val printLintTextReport = tasks.register("printLintTextReport") {
-    doLast {
-        val reports = if (buildDirForLint.exists()) {
-            buildDirForLint.walkTopDown()
-                .filter { it.isFile && it.name.startsWith("lint-results") && it.extension == "txt" }
-                .toList()
-        } else emptyList()
-        if (reports.isEmpty()) {
-            println("LINT-REPORT-ECHO: no lint-results*.txt found under ${buildDirForLint.path}")
-        }
-        reports.forEach { report ->
-            println("===== BEGIN LINT TEXT REPORT (${report.path}) =====")
-            println(report.readText())
-            println("===== END LINT TEXT REPORT (${report.name}) =====")
-        }
-    }
-}
-// Attach to the failing tasks; finalizers run even when the finalized task fails.
-tasks.matching { it.name == "lintReportDebug" || it.name == "lintDebug" || it.name == "lint" }
-    .configureEach { finalizedBy(printLintTextReport) }
 
 // ── Code coverage (JaCoCo) ──────────────────────────────────────────────────
 // Robolectric runs the unit tests off-device, so coverage of the Compose

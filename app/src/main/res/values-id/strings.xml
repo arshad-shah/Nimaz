@@ -711,4 +711,20 @@
     <string name="adhan_download_partial_subtitle">Beberapa file %1$s tidak dapat diunduh. Akan dicoba lagi nanti.</string>
     <string name="adhan_download_failed">Unduhan adzan gagal</string>
     <string name="adhan_download_failed_subtitle">Periksa koneksi internet Anda dan coba lagi</string>
+    <!-- Fasting sheet / Quran home / free-day labels -->
+    <string name="free_count">Bebas</string>
+    <string name="free_count_label">Jumlah bebas</string>
+    <string name="quran_home_page_range_format">hlm. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s dimulai</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Jenis Puasa</string>
+    <string name="fasting_sheet_note">Catatan</string>
+    <string name="fasting_sheet_save">Simpan</string>
+    <string name="fasting_sheet_delete">Hapus</string>
+    <string name="fasting_sheet_exemption_reason">Alasan Pengecualian</string>
+    <string name="fasting_sheet_select_reason">Pilih alasan</string>
+    <string name="fasting_sheet_edit_makeup">Edit Puasa Qadha</string>
+    <string name="fasting_sheet_reason">Alasan</string>
+    <string name="fasting_sheet_fidya_amount">Jumlah Fidyah</string>
 </resources>
