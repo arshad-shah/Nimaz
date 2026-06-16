@@ -423,3 +423,57 @@ tasks.register<JacocoCoverageVerification>("jacocoOrganismsCoverageVerification"
         }
     }
 }
+
+// ── Business-logic coverage (domain + data + core utilities) ────────────────
+// The non-UI layers where a wrong value is a correctness bug rather than a
+// visual one. Generated/DI/entity noise is stripped via coverageExclusions.
+fun businessLogicClassTree(): ConfigurableFileTree =
+    fileTree(kotlinDebugClassesDir) {
+        include(
+            "**/com/arshadshah/nimaz/domain/**",
+            "**/com/arshadshah/nimaz/data/**",
+            "**/com/arshadshah/nimaz/core/util/**",
+        )
+        exclude(coverageExclusions)
+    }
+
+// Focused report for the business-logic layers (consumed by the CI summary).
+tasks.register<JacocoReport>("jacocoDomainDataReport") {
+    group = "verification"
+    description = "Generates a JaCoCo coverage report scoped to domain + data + core util."
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(businessLogicClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+}
+
+// Regression floor for the business-logic layers. Deliberately conservative so
+// it never blocks day-to-day work; ratchet `minimum` up toward the figure the
+// "Report coverage" CI step prints once a baseline is established.
+tasks.register<JacocoCoverageVerification>("jacocoDomainDataCoverageVerification") {
+    group = "verification"
+    description = "Verifies a minimum coverage floor for the business-logic layers."
+    dependsOn("testDebugUnitTest")
+
+    classDirectories.setFrom(businessLogicClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+
+    violationRules {
+        rule {
+            element = "BUNDLE"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.10".toBigDecimal()
+            }
+        }
+    }
+}

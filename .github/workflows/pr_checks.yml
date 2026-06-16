@@ -28,6 +28,52 @@ jobs:
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 
+      - name: Generate coverage reports
+        if: always()
+        run: bash ./gradlew jacocoTestReport jacocoDomainDataReport --stacktrace
+
+      - name: Report coverage
+        if: always()
+        run: |
+          python3 - <<'PY' | tee -a "$GITHUB_STEP_SUMMARY"
+          import os, re, xml.etree.ElementTree as ET
+
+          def report(path, label):
+              if not os.path.exists(path):
+                  print(f"### {label}\n- report not found at `{path}`\n")
+                  return
+              data = re.sub(r"<!DOCTYPE[^>]*>", "", open(path, encoding="utf-8").read())
+              root = ET.fromstring(data)
+              res = {c.get("type"): (int(c.get("covered")), int(c.get("missed")))
+                     for c in root.findall("counter")}
+              def fmt(t):
+                  cov, miss = res.get(t, (0, 0))
+                  tot = cov + miss
+                  pct = (100.0 * cov / tot) if tot else 0.0
+                  return f"{pct:.1f}% ({cov}/{tot})"
+              print(f"### {label}")
+              print(f"- Instruction: {fmt('INSTRUCTION')}")
+              print(f"- Line: {fmt('LINE')}")
+              print(f"- Branch: {fmt('BRANCH')}")
+              print("")
+
+          print("## Code coverage (debug unit tests)")
+          report("app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml",
+                 "Whole module")
+          report("app/build/reports/jacoco/jacocoDomainDataReport/jacocoDomainDataReport.xml",
+                 "Business logic (domain + data + core util)")
+          PY
+
+      - name: Enforce business-logic coverage floor
+        run: bash ./gradlew jacocoDomainDataCoverageVerification --stacktrace
+
+      - name: Upload Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: app/build/reports/jacoco/
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
