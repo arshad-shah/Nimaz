@@ -90,11 +90,9 @@ android {
     }
 
     lint {
-        // Print the full lint text report to the build console (and thus the CI
-        // job log) so every issue is visible without downloading the HTML/XML
-        // report artifact.
+        // Also emit a text report (in addition to the default HTML/XML) so a
+        // finalizer task can echo it to the CI console — see printLintTextReport.
         textReport = true
-        textOutput = file("stdout")
     }
 }
 
@@ -222,6 +220,29 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
+}
+
+// ── Lint report echo ────────────────────────────────────────────────────────
+// `lintDebug` aborts the build on error and writes details only to the HTML/XML
+// (and intermediate text) report, none of which land in the CI console. Echo the
+// generated text report so the full issue list is visible in the job log. Wired
+// as a finalizer of the report task so it runs even though lintDebug then fails.
+val printLintTextReport = tasks.register("printLintTextReport") {
+    doLast {
+        val reportDir = layout.buildDirectory.dir("intermediates/lint_intermediate_text_report").get().asFile
+        if (reportDir.exists()) {
+            reportDir.walkTopDown().filter { it.isFile && it.extension == "txt" }.forEach { report ->
+                println("===== BEGIN LINT TEXT REPORT (${report.name}) =====")
+                println(report.readText())
+                println("===== END LINT TEXT REPORT (${report.name}) =====")
+            }
+        } else {
+            println("No lint text report found at ${reportDir.path}")
+        }
+    }
+}
+tasks.matching { it.name == "lintReportDebug" }.configureEach {
+    finalizedBy(printLintTextReport)
 }
 
 // ── Code coverage (JaCoCo) ──────────────────────────────────────────────────
