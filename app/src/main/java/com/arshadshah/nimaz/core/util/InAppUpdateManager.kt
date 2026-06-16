@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.core.util
 
 import android.app.Activity
 import android.util.Log
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -17,6 +19,14 @@ sealed interface UpdateState {
     data object Idle : UpdateState
     data object Checking : UpdateState
     data object UpdateAvailable : UpdateState
+
+    /**
+     * The user requested an update and we're fetching the AppUpdateInfo / bringing
+     * up the Play confirmation dialog. This can take several seconds on slow
+     * connections, so it's surfaced as a distinct loading state to give immediate
+     * feedback that the tap was registered.
+     */
+    data object Starting : UpdateState
     data object Downloading : UpdateState
     data class Downloaded(val completeUpdate: () -> Unit) : UpdateState
     data object NoUpdateAvailable : UpdateState
@@ -30,8 +40,14 @@ class InAppUpdateManager(private val activity: Activity) {
     private val _updateState = MutableStateFlow<UpdateState>(UpdateState.Idle)
     val updateState: StateFlow<UpdateState> = _updateState.asStateFlow()
 
+    // Launcher for the Play update confirmation dialog. Must be registered by the
+    // host Activity before it is STARTED (see MainActivity), so it's injected
+    // rather than created here.
+    private var updateFlowLauncher: ActivityResultLauncher<IntentSenderRequest>? = null
+
     private val installStateListener = InstallStateUpdatedListener { state ->
         when (state.installStatus()) {
+            InstallStatus.PENDING,
             InstallStatus.DOWNLOADING -> {
                 _updateState.value = UpdateState.Downloading
             }
@@ -46,8 +62,17 @@ class InAppUpdateManager(private val activity: Activity) {
                 _updateState.value = UpdateState.Error("Update download failed")
             }
 
+            InstallStatus.CANCELED -> {
+                // User cancelled the download — return to an actionable state.
+                _updateState.value = UpdateState.UpdateAvailable
+            }
+
             else -> {}
         }
+    }
+
+    fun setUpdateFlowLauncher(launcher: ActivityResultLauncher<IntentSenderRequest>) {
+        updateFlowLauncher = launcher
     }
 
     fun checkForUpdate() {
@@ -73,17 +98,57 @@ class InAppUpdateManager(private val activity: Activity) {
     }
 
     fun startUpdate() {
+        // Reflect the tap immediately. Fetching AppUpdateInfo and showing the Play
+        // dialog is asynchronous and can take a few seconds on slow connections;
+        // without this the banner/button would appear unresponsive ("nothing
+        // happened") even though the flow is in progress.
+        _updateState.value = UpdateState.Starting
+
         appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
-            if (info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE)
-            ) {
-                appUpdateManager.startUpdateFlowForResult(
-                    info,
-                    activity,
-                    AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE),
-                    UPDATE_REQUEST_CODE
-                )
+            val launcher = updateFlowLauncher
+            when {
+                info.installStatus() == InstallStatus.DOWNLOADED -> {
+                    _updateState.value = UpdateState.Downloaded {
+                        appUpdateManager.completeUpdate()
+                    }
+                }
+
+                info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
+                    info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) &&
+                    launcher != null -> {
+                    val launched = appUpdateManager.startUpdateFlowForResult(
+                        info,
+                        launcher,
+                        AppUpdateOptions.defaultOptions(AppUpdateType.FLEXIBLE)
+                    )
+                    if (!launched) {
+                        // Couldn't launch the dialog — restore the actionable state.
+                        _updateState.value = UpdateState.UpdateAvailable
+                    }
+                    // Otherwise the install listener / onUpdateFlowResult drive the
+                    // next state once the user responds to the dialog.
+                }
+
+                else -> {
+                    _updateState.value = UpdateState.NoUpdateAvailable
+                }
             }
+        }.addOnFailureListener { e ->
+            Log.e(TAG, "Start update failed", e)
+            _updateState.value = UpdateState.Error(e.message ?: "Update failed to start")
+        }
+    }
+
+    /**
+     * Result of the Play update confirmation dialog, forwarded by the host
+     * Activity. When the user dismisses or cancels the dialog we fall back to
+     * [UpdateState.UpdateAvailable] so the banner/button becomes interactive again
+     * instead of being stuck on the [UpdateState.Starting] spinner. On a confirmed
+     * update the install listener takes over and drives the download states.
+     */
+    fun onUpdateFlowResult(resultCode: Int) {
+        if (resultCode != Activity.RESULT_OK && _updateState.value == UpdateState.Starting) {
+            _updateState.value = UpdateState.UpdateAvailable
         }
     }
 
@@ -103,6 +168,5 @@ class InAppUpdateManager(private val activity: Activity) {
 
     companion object {
         private const val TAG = "InAppUpdateManager"
-        const val UPDATE_REQUEST_CODE = 1001
     }
 }

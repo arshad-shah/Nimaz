@@ -446,6 +446,7 @@ private fun buildHomeBannerItems(
     val fix = stringResource(R.string.fix)
 
     val updateAvailable = stringResource(R.string.update_available)
+    val startingUpdate = stringResource(R.string.starting_update)
     val downloadingUpdate = stringResource(R.string.downloading_update)
     val updateReady = stringResource(R.string.update_ready)
     val updateAction = stringResource(R.string.update_action)
@@ -508,6 +509,15 @@ private fun buildHomeBannerItems(
                     variant = HomeBannerVariant.UPDATE,
                     actionLabel = updateAction,
                     onAction = { updateManager?.startUpdate() },
+                )
+            )
+            is UpdateState.Starting -> add(
+                HomeBannerItem(
+                    id = "starting_update",
+                    icon = Icons.Default.Download,
+                    title = startingUpdate,
+                    variant = HomeBannerVariant.UPDATE,
+                    isLoading = true,
                 )
             )
             is UpdateState.Downloading -> add(

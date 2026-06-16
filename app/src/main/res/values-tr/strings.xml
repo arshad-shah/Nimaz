@@ -35,6 +35,7 @@
     <string name="update_available">Nimaz\'ın yeni bir sürümü mevcut</string>
     <string name="update_action">Güncelle</string>
     <string name="downloading_update">Güncelleme indiriliyor…</string>
+    <string name="starting_update">Güncelleme başlatılıyor…</string>
     <string name="update_ready">Güncelleme yüklenmeye hazır</string>
     <string name="restart">Yeniden Başlat</string>
     <string name="notifications_disabled_title">Bildirimler Devre Dışı</string>
@@ -133,6 +134,8 @@
     <string name="open_source_licenses_subtitle">Üçüncü taraf kütüphaneler</string>
     <string name="check_for_updates">Güncellemeleri Kontrol Et</string>
     <string name="update_new_version">Yeni sürüm mevcut</string>
+    <string name="update_checking">Kontrol ediliyor…</string>
+    <string name="update_starting">Başlatılıyor…</string>
     <string name="update_downloading">İndiriliyor…</string>
     <string name="update_downloaded">Yüklenmeye hazır</string>
     <string name="update_up_to_date">Güncelsiniz</string>

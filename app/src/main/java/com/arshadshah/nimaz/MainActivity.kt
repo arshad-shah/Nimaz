@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
@@ -45,6 +46,16 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var inAppUpdateManager: InAppUpdateManager
 
+    // Receives the result of the Play in-app update confirmation dialog so the
+    // manager can fall back to an interactive state if the user cancels. Must be
+    // registered before the activity is STARTED, hence a field initializer.
+    private val updateFlowLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (::inAppUpdateManager.isInitialized) {
+                inAppUpdateManager.onUpdateFlowResult(result.resultCode)
+            }
+        }
+
     // Pending surah to navigate to from a Quran audio notification tap. NavGraph
     // observes this and consumes it after navigation.
     private var pendingQuranSurah by mutableStateOf<Int?>(null)
@@ -68,6 +79,7 @@ class MainActivity : ComponentActivity() {
 
         // Initialize in-app update manager
         inAppUpdateManager = InAppUpdateManager(this)
+        inAppUpdateManager.setUpdateFlowLauncher(updateFlowLauncher)
         inAppUpdateManager.checkForUpdate()
 
         setContent {

@@ -35,6 +35,7 @@
     <string name="update_available">Versi baru Nimaz tersedia</string>
     <string name="update_action">Perbarui</string>
     <string name="downloading_update">Mengunduh pembaruan…</string>
+    <string name="starting_update">Memulai pembaruan…</string>
     <string name="update_ready">Pembaruan siap dipasang</string>
     <string name="restart">Mulai Ulang</string>
     <string name="notifications_disabled_title">Notifikasi Dinonaktifkan</string>
@@ -133,6 +134,8 @@
     <string name="open_source_licenses_subtitle">Pustaka pihak ketiga</string>
     <string name="check_for_updates">Periksa Pembaruan</string>
     <string name="update_new_version">Versi baru tersedia</string>
+    <string name="update_checking">Memeriksa…</string>
+    <string name="update_starting">Memulai…</string>
     <string name="update_downloading">Mengunduh…</string>
     <string name="update_downloaded">Siap dipasang</string>
     <string name="update_up_to_date">Anda sudah menggunakan versi terbaru</string>

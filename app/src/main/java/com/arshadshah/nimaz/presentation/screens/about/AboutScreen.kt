@@ -255,7 +255,9 @@ private fun LinksCard(
         val updateManager = LocalInAppUpdateManager.current
         val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
         val updateSubtitle = when (updateState) {
+            is UpdateState.Checking -> stringResource(R.string.update_checking)
             is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
+            is UpdateState.Starting -> stringResource(R.string.update_starting)
             is UpdateState.Downloading -> stringResource(R.string.update_downloading)
             is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
             is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
@@ -270,6 +272,10 @@ private fun LinksCard(
                 when (updateState) {
                     is UpdateState.UpdateAvailable -> updateManager?.startUpdate()
                     is UpdateState.Downloaded -> updateState.completeUpdate()
+                    // Already in progress — ignore taps so we don't restart the flow.
+                    is UpdateState.Checking,
+                    is UpdateState.Starting,
+                    is UpdateState.Downloading -> Unit
                     else -> updateManager?.checkForUpdate()
                 }
             },
