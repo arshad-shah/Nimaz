@@ -1,0 +1,90 @@
+package com.arshadshah.nimaz.presentation.components.organisms
+
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithText
+import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
+import com.google.common.truth.Truth.assertThat
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class TodayCarouselTest {
+
+    @get:Rule
+    val composeRule = createComposeRule()
+
+    private fun prayer(
+        type: PrayerType,
+        status: PrayerStatus = PrayerStatus.NOT_PRAYED
+    ) = PrayerTimeDisplay(
+        type = type,
+        name = type.displayName,
+        time = "12:00 PM",
+        isPassed = false,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = status
+    )
+
+    private val samplePrayers = listOf(
+        prayer(PrayerType.FAJR, PrayerStatus.PRAYED),
+        prayer(PrayerType.DHUHR),
+        prayer(PrayerType.ASR),
+        prayer(PrayerType.MAGHRIB),
+        prayer(PrayerType.ISHA),
+    )
+
+    @Test
+    fun `renders the summary page by default`() {
+        composeRule.setThemedContent {
+            TodayCarousel(
+                prayerTimes = samplePrayers,
+                fastingToday = false,
+                dailyHadith = null
+            )
+        }
+
+        // SUMMARY is the first page (DailySummaryCard), visible without swiping.
+        // R.string.todays_progress == "Today's Progress"
+        composeRule.onNodeWithText("Today's Progress").assertExists()
+    }
+
+    @Test
+    fun `summary page shows the prayer count`() {
+        composeRule.setThemedContent {
+            TodayCarousel(
+                prayerTimes = samplePrayers,
+                fastingToday = false,
+                dailyHadith = null
+            )
+        }
+
+        // R.string.prayers_count_format == "%1$d of %2$d prayers"; one of five prayed.
+        composeRule.onNodeWithText("1 of 5 prayers").assertExists()
+    }
+
+    @Test
+    fun `renders with a hadith without crashing`() {
+        composeRule.setThemedContent {
+            TodayCarousel(
+                prayerTimes = samplePrayers,
+                fastingToday = true,
+                dailyHadith = "A sample hadith of the day."
+            )
+        }
+
+        // SUMMARY is still the front page; the HADITH page is added but off-screen.
+        composeRule.onNodeWithText("Today's Progress").assertExists()
+    }
+
+    @Test
+    fun `TodayCarouselPage enum exposes summary and hadith pages`() {
+        assertThat(TodayCarouselPage.values().toList())
+            .containsExactly(TodayCarouselPage.SUMMARY, TodayCarouselPage.HADITH)
+            .inOrder()
+    }
+}
