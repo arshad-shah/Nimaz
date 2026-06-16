@@ -24,6 +24,7 @@ jacoco {
 if (file("google-services.json").exists()) {
     apply(plugin = libs.plugins.google.services.get().pluginId)
     apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+    apply(plugin = libs.plugins.firebase.perf.get().pluginId)
 }
 
 android {
@@ -177,10 +178,11 @@ dependencies {
     implementation(libs.app.review)
     implementation(libs.app.review.ktx)
 
-    // Firebase (Crashlytics + Analytics) — versions pinned by the BoM
+    // Firebase (Crashlytics + Analytics + Performance) — versions pinned by the BoM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.perf)
 
     // Testing
     testImplementation(libs.junit)

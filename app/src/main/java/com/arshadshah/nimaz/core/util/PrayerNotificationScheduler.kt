@@ -10,6 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -135,6 +136,8 @@ class PrayerNotificationScheduler @Inject constructor(
             cancelPreReminderNotification(it)
         }
 
+        val perfTrace = PerfMonitor.newTrace(PerfMonitor.Traces.NOTIFICATION_SCHEDULE)
+
         val prayerTimes = prayerTimeCalculator.getPrayerTimes(
             latitude = latitude,
             longitude = longitude,
@@ -177,6 +180,11 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Schedule daily summary notification at 11 PM
         scheduleDailySummary()
+
+        PerfMonitor.stop(
+            perfTrace,
+            metrics = mapOf("scheduled_count" to scheduledCount.toLong()),
+        )
 
         // Record the scheduling outcome along with the OS-level prerequisites that
         // determine whether these alarms will actually fire on time.

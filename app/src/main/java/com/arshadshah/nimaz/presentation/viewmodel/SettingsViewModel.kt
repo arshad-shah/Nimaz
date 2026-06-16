@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -247,6 +248,24 @@ class SettingsViewModel @Inject constructor(
     }
 
     fun onEvent(event: SettingsEvent) {
+        // Record meaningful configuration changes. Notification and calculation
+        // settings are the ones most often behind "it's doing the wrong thing".
+        when (event) {
+            is SettingsEvent.SetTheme -> AppAnalytics.logSettingChanged("theme", event.theme.name)
+            is SettingsEvent.SetLanguage -> AppAnalytics.logSettingChanged("language", event.language.name)
+            is SettingsEvent.SetCalculationMethod -> AppAnalytics.logSettingChanged("calculation_method", event.method.name)
+            is SettingsEvent.SetAsrMethod -> AppAnalytics.logSettingChanged("asr_method", event.method.name)
+            is SettingsEvent.SetHighLatitudeRule -> AppAnalytics.logSettingChanged("high_latitude_rule", event.rule.name)
+            is SettingsEvent.SetNotificationsEnabled -> AppAnalytics.logSettingChanged("notifications_enabled", event.enabled.toString())
+            is SettingsEvent.SetPrayerNotification -> AppAnalytics.logSettingChanged("prayer_notification_${event.prayer.lowercase()}", event.enabled.toString())
+            is SettingsEvent.SetAdhanEnabled -> AppAnalytics.logSettingChanged("adhan_enabled", event.enabled.toString())
+            is SettingsEvent.SetPrayerAdhanEnabled -> AppAnalytics.logSettingChanged("adhan_${event.prayer.lowercase()}", event.enabled.toString())
+            is SettingsEvent.SetAdhanSound -> AppAnalytics.logSettingChanged("adhan_sound", event.sound)
+            is SettingsEvent.SetRespectDnd -> AppAnalytics.logSettingChanged("respect_dnd", event.enabled.toString())
+            is SettingsEvent.SetShowReminderBefore -> AppAnalytics.logSettingChanged("pre_reminder_enabled", event.enabled.toString())
+            is SettingsEvent.SetReminderMinutes -> AppAnalytics.logSettingChanged("reminder_minutes", event.minutes.toString())
+            else -> {}
+        }
         when (event) {
             // General
             is SettingsEvent.SetTheme -> {

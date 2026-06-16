@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
@@ -93,6 +94,14 @@ class ZakatViewModel @Inject constructor(
     }
 
     fun onEvent(event: ZakatEvent) {
+        // Log only the actions, never the monetary amounts (financial data stays
+        // out of analytics).
+        when (event) {
+            ZakatEvent.Calculate -> AppAnalytics.logFeatureUsed("zakat", "calculate")
+            ZakatEvent.SaveCalculation -> AppAnalytics.logFeatureUsed("zakat", "save")
+            is ZakatEvent.MarkAsPaid -> AppAnalytics.logFeatureUsed("zakat", "mark_paid")
+            else -> {}
+        }
         when (event) {
             is ZakatEvent.UpdateCash -> updateAsset { it.copy(cashOnHand = event.amount) }
             is ZakatEvent.UpdateBankBalance -> updateAsset { it.copy(bankBalance = event.amount) }

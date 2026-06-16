@@ -36,6 +36,7 @@ uiTestJunit4 = "1.10.1"
 googleServices = "4.4.2"
 firebaseCrashlyticsPlugin = "3.0.2"
 firebaseBom = "33.7.0"
+firebasePerfPlugin = "1.4.2"
 
 [libraries]
 # Core
@@ -129,6 +130,7 @@ app-review-ktx = { group = "com.google.android.play", name = "review-ktx", versi
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-perf = { group = "com.google.firebase", name = "firebase-perf" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -154,3 +156,4 @@ hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 about-libs-plugin = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibs" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }

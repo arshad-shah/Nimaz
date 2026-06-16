@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -79,6 +80,14 @@ class SearchViewModel @Inject constructor(
     private val pendingSearchCount = AtomicInteger(0)
 
     fun onEvent(event: SearchEvent) {
+        // Record the search action with its filter and query length only — never
+        // the query text itself.
+        if (event is SearchEvent.ExecuteSearch) {
+            AppAnalytics.logSearch(
+                filter = _searchState.value.selectedFilter.name,
+                queryLength = _searchState.value.query.trim().length,
+            )
+        }
         when (event) {
             is SearchEvent.UpdateQuery -> updateQuery(event.query)
             is SearchEvent.SetFilter -> setFilter(event.filter)

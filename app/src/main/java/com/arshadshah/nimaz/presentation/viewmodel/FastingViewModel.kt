@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.ExemptionReason
@@ -259,6 +260,16 @@ class FastingViewModel @Inject constructor(
     }
 
     fun onEvent(event: FastingEvent) {
+        when (event) {
+            is FastingEvent.StartFast -> AppAnalytics.logFastTracked("start", event.fastType.name)
+            is FastingEvent.CompleteFast -> AppAnalytics.logFastTracked("complete")
+            is FastingEvent.BreakFast -> AppAnalytics.logFastTracked("break")
+            is FastingEvent.MissFast -> AppAnalytics.logFastTracked("miss")
+            is FastingEvent.LogRecommendedFast -> AppAnalytics.logFastTracked("recommended", event.fastType.name)
+            is FastingEvent.PayFidya -> AppAnalytics.logFeatureUsed("fasting", "pay_fidya")
+            is FastingEvent.AddMakeupFast -> AppAnalytics.logFeatureUsed("fasting", "add_makeup")
+            else -> {}
+        }
         when (event) {
             is FastingEvent.SelectDate -> selectDate(event.date)
             is FastingEvent.StartFast -> startFast(event.date, event.fastType)

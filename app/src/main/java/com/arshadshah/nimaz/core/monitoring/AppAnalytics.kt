@@ -261,6 +261,50 @@ object AppAnalytics {
         )
     }
 
+    /** Logged when a prayer's tracker status changes — the app's core engagement signal. */
+    fun logPrayerTracked(prayer: String, status: String, isJamaah: Boolean = false) {
+        logEvent(
+            Event.PRAYER_TRACKED,
+            Param.PRAYER_TYPE to prayer,
+            Param.STATUS to status,
+            Param.IS_JAMAAH to isJamaah,
+        )
+    }
+
+    /** Logged when a fasting record changes. */
+    fun logFastTracked(action: String, fastType: String? = null) {
+        logEvent(
+            Event.FAST_TRACKED,
+            Param.ACTION to action,
+            Param.FAST_TYPE to fastType,
+        )
+    }
+
+    /**
+     * Logged when a user changes a setting. Seeing which settings people change —
+     * and to what — surfaces misconfiguration (e.g. notifications switched off, an
+     * unusual calculation method) behind "it's doing the wrong thing" reports.
+     */
+    fun logSettingChanged(setting: String, value: String) {
+        logEvent(
+            Event.SETTING_CHANGED,
+            Param.SETTING to setting,
+            Param.VALUE to value,
+        )
+    }
+
+    /**
+     * Logged when a search runs. The raw query is deliberately not recorded — only
+     * the active filter and the query length — to keep user input out of analytics.
+     */
+    fun logSearch(filter: String, queryLength: Int) {
+        logEvent(
+            Event.SEARCH,
+            Param.FILTER to filter,
+            Param.QUERY_LENGTH to queryLength,
+        )
+    }
+
     // ---------------------------------------------------------------------
     // Diagnostics snapshot
     // ---------------------------------------------------------------------
@@ -358,6 +402,10 @@ object AppAnalytics {
         const val APP_ERROR = "app_error"
         const val FEATURE_USED = "feature_used"
         const val DIAGNOSTICS = "diagnostics_snapshot"
+        const val PRAYER_TRACKED = "prayer_tracked"
+        const val FAST_TRACKED = "fast_tracked"
+        const val SETTING_CHANGED = "setting_changed"
+        const val SEARCH = "search_performed"
     }
 
     /** Custom parameter names (Firebase limit: 40 chars). */
@@ -392,6 +440,13 @@ object AppAnalytics {
         const val ERROR_MESSAGE = "error_message"
         const val FEATURE = "feature"
         const val ACTION = "action"
+        const val STATUS = "status"
+        const val IS_JAMAAH = "is_jamaah"
+        const val FAST_TYPE = "fast_type"
+        const val SETTING = "setting"
+        const val VALUE = "value"
+        const val FILTER = "filter"
+        const val QUERY_LENGTH = "query_length"
     }
 
     /** User-property names (Firebase limit: 24 chars). */

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.core.init
 import android.content.Context
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -40,6 +41,7 @@ class AppInitializer @Inject constructor(
         scope.launch {
             val startMs = System.currentTimeMillis()
             var timedOut = false
+            val perfTrace = PerfMonitor.newTrace(PerfMonitor.Traces.APP_INITIALIZE)
             try {
                 withTimeout(5_000L) {
                     val localeTask = async { applySavedLocale() }
@@ -61,6 +63,10 @@ class AppInitializer @Inject constructor(
                 )
             } finally {
                 _isReady.value = true
+                PerfMonitor.stop(
+                    perfTrace,
+                    attributes = mapOf("timed_out" to timedOut.toString()),
+                )
                 AppAnalytics.logAppInit(
                     durationMs = System.currentTimeMillis() - startMs,
                     timedOut = timedOut,
