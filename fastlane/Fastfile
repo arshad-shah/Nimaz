@@ -18,6 +18,8 @@ platform :android do
     build_and_sign_apk_or_aab
     upload_to_play_store(
       track: "internal",
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      skip_upload_apk: true, # Only the AAB is uploaded to the Play Store; the APK is kept for the GitHub release
       json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
     )
   end
@@ -27,6 +29,8 @@ platform :android do
     build_and_sign_apk_or_aab
     upload_to_play_store(
       track: "beta",
+      aab: lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH],
+      skip_upload_apk: true, # Only the AAB is uploaded to the Play Store; the APK is kept for the GitHub release
       json_key: ENV["ANDROID_JSON_KEY_FILE"] # Use your Google Play JSON key
     )
   end
@@ -69,9 +73,10 @@ platform :android do
 
     # Build a signed APK first. This is not uploaded to the Play Store (which
     # takes the AAB) but is attached to the GitHub release so the exact
-    # published version can be sideloaded/audited. Building it before the bundle
-    # keeps the AAB as the last gradle output, so upload_to_play_store still
-    # picks the .aab up from the lane context automatically.
+    # published version can be sideloaded/audited. Because both an APK and an
+    # AAB end up in the lane context, the upload lanes pass the AAB path
+    # explicitly and set skip_upload_apk so upload_to_play_store doesn't error
+    # on finding both artifacts.
     gradle(
       task: "assemble",
       build_type: "release",
