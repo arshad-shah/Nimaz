@@ -266,6 +266,12 @@ fun moleculesClassTree(): ConfigurableFileTree =
         exclude(coverageExclusions)
     }
 
+fun organismsClassTree(): ConfigurableFileTree =
+    fileTree(kotlinDebugClassesDir) {
+        include("**/presentation/components/organisms/**")
+        exclude(coverageExclusions)
+    }
+
 fun debugClassTree(): ConfigurableFileTree =
     fileTree(kotlinDebugClassesDir) {
         exclude(coverageExclusions)
@@ -368,6 +374,47 @@ tasks.register<JacocoCoverageVerification>("jacocoMoleculesCoverageVerification"
         rule {
             element = "PACKAGE"
             includes = listOf("com.arshadshah.nimaz.presentation.components.molecules")
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+}
+
+// Focused report for the presentation organisms package.
+tasks.register<JacocoReport>("jacocoOrganismsReport") {
+    group = "verification"
+    description = "Generates a JaCoCo coverage report scoped to the presentation organisms."
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(organismsClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+}
+
+// Optional gate the team can run locally/CI to enforce organism coverage. Kept
+// out of the default `check` graph so it never blocks the existing CI lane.
+tasks.register<JacocoCoverageVerification>("jacocoOrganismsCoverageVerification") {
+    group = "verification"
+    description = "Verifies coverage thresholds for the presentation organisms."
+    dependsOn("testDebugUnitTest")
+
+    classDirectories.setFrom(organismsClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+
+    violationRules {
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.arshadshah.nimaz.presentation.components.organisms")
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
