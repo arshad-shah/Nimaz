@@ -1,9 +1,5 @@
 Nouveautés de cette mise à jour :
 
-• Synchronisez vos données de prière entre appareils – sans compte.
-• Nouveaux widgets : prochaine prière et suivi des prières.
-• Lecteur de Coran repensé en vue page Mushaf – touchez un verset pour sa traduction et son Tafsir.
-• Récitation audio verset par verset.
-• Écran « Aujourd'hui » avec cartes de prière et de jeûne.
-• Audio Adhan, téléchargements et notifications plus fiables.
-• Corrections de bugs et améliorations des performances.
+• Le calendrier islamique indique désormais le début de chaque mois hégirien par une bande colorée et le nom du mois, pour repérer les changements de mois d'un coup d'œil.
+• Les mises à jour de l'application affichent maintenant une progression claire — fini de se demander si une mise à jour a démarré, même sur les connexions lentes.
+• Améliorations de la fiabilité et des performances en arrière-plan.

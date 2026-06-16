@@ -1,9 +1,5 @@
 Bu güncellemede yenilikler:
 
-• Namaz verilerinizi cihazlar arasında eşitleyin — hesap gerekmez.
-• Yeni ana ekran widget'ları: sonraki namaz ve namaz takibi.
-• Mushaf sayfa görünümlü yeni Kuran okuyucu — anında çeviri ve Tefsir için herhangi bir ayete dokunun.
-• Ayet ayet sesli okuma.
-• Namaz ve oruç kartlarıyla yenilenen "Bugün" ekranı.
-• Daha güvenilir Ezan sesi, indirmeler ve bildirimler.
-• Çeşitli hata düzeltmeleri ve performans iyileştirmeleri.
+• İslami takvim artık her Hicri ayın başlangıcını renkli bir şerit ve ay adıyla işaretliyor; böylece ay geçişlerini bir bakışta görebilirsiniz.
+• Uygulama güncellemeleri artık net bir ilerleme gösteriyor — yavaş bağlantılarda bile güncellemenin başlayıp başlamadığını merak etmenize gerek kalmıyor.
+• Arka planda güvenilirlik ve performans iyileştirmeleri.
