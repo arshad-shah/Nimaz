@@ -28,6 +28,7 @@
     <string name="today_fasting">Aujourd\'hui : jeûne</string>
     <string name="no_fast_today">Pas de jeûne aujourd\'hui</string>
     <string name="hadith_of_the_day">Hadith du jour</string>
+    <string name="dua_of_the_moment">Dua du moment</string>
     <string name="prayer_times">Horaires de prière</string>
     <string name="hours">Heures</string>
     <string name="minutes">Minutes</string>
@@ -163,6 +164,8 @@
     <string name="made_with">Fait avec </string>
     <string name="for_the_ummah"> pour la Oumma</string>
     <string name="copyright_format">© %d Nimaz. Tous droits réservés.</string>
+    <string name="help_intro_title">Comment pouvons-nous vous aider ?</string>
+    <string name="help_intro_subtitle">Parcourez les questions fréquentes, découvrez le fonctionnement de chaque fonction et résolvez les problèmes — ou contactez-nous et nous vous répondrons.</string>
     <string name="faq_title">Foire aux questions</string>
     <string name="feature_guides">Guides des fonctionnalités</string>
     <string name="contact_us">Nous contacter</string>

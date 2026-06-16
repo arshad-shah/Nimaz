@@ -28,6 +28,7 @@
     <string name="today_fasting">Bugün: Oruçlu</string>
     <string name="no_fast_today">Bugün oruç yok</string>
     <string name="hadith_of_the_day">Günün Hadisi</string>
+    <string name="dua_of_the_moment">Anın Duası</string>
     <string name="prayer_times">Namaz Vakitleri</string>
     <string name="hours">Saat</string>
     <string name="minutes">Dakika</string>
@@ -163,6 +164,8 @@
     <string name="made_with">Ümmet için </string>
     <string name="for_the_ummah"> ile yapıldı</string>
     <string name="copyright_format">© %d Nimaz. Tüm hakları saklıdır.</string>
+    <string name="help_intro_title">Size nasıl yardımcı olabiliriz?</string>
+    <string name="help_intro_subtitle">Sık sorulan soruları inceleyin, her özelliğin nasıl çalıştığını öğrenin ve sorunları giderin — ya da bize ulaşın, size geri dönelim.</string>
     <string name="faq_title">Sıkça Sorulan Sorular</string>
     <string name="feature_guides">Özellik Rehberleri</string>
     <string name="contact_us">Bize Ulaşın</string>
