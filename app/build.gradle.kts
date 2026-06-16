@@ -93,6 +93,27 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    // The instrumented-test dependencies (mockk, truth, hilt-testing, …) each
+    // bundle META-INF license/notice files, which collide when packaging the
+    // androidTest APK (DuplicateRelativeFileException). Drop the duplicates.
+    packaging {
+        resources {
+            excludes += setOf(
+                "/META-INF/LICENSE.md",
+                "/META-INF/LICENSE-notice.md",
+                "/META-INF/LICENSE",
+                "/META-INF/LICENSE.txt",
+                "/META-INF/NOTICE.md",
+                "/META-INF/NOTICE",
+                "/META-INF/NOTICE.txt",
+                "/META-INF/{AL2.0,LGPL2.1}",
+                "/META-INF/*.kotlin_module",
+                "/META-INF/DEPENDENCIES",
+                "/META-INF/INDEX.LIST",
+            )
+        }
+    }
 }
 
 dependencies {
