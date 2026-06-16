@@ -10,61 +10,63 @@ import org.junit.Test
  * argument is dropped, navigation to that destination breaks at runtime. These
  * tests pin the route contract (round-trip + argument preservation + defaults)
  * and the bottom-navigation wiring.
+ *
+ * Each concrete route is round-tripped via its own (reified) serializer — the
+ * `Route` parent interface is intentionally not `@Serializable`, only its
+ * subtypes are, matching how Navigation encodes typed destinations.
  */
 class RouteSerializationTest {
 
     private val json = Json
 
-    private inline fun <reified T : Route> roundTrip(route: T): Route {
-        val encoded = json.encodeToString(Route.serializer(), route)
-        return json.decodeFromString(Route.serializer(), encoded)
+    private inline fun <reified T : Route> assertRoundTrips(route: T) {
+        val decoded: T = json.decodeFromString(json.encodeToString(route))
+        assertThat(decoded).isEqualTo(route)
     }
 
     @Test
     fun `object routes round-trip to the same singleton`() {
-        val objects = listOf(
-            Route.Home, Route.Quran, Route.Tasbih, Route.QiblaNav, Route.More,
-            Route.PrayerTimes, Route.ZakatCalculator, Route.Qibla, Route.Settings,
-            Route.Onboarding, Route.GlobalSearch, Route.KhatamList
-        )
-        for (route in objects) {
-            assertThat(roundTrip(route)).isEqualTo(route)
-        }
+        assertRoundTrips(Route.Home)
+        assertRoundTrips(Route.Quran)
+        assertRoundTrips(Route.Tasbih)
+        assertRoundTrips(Route.QiblaNav)
+        assertRoundTrips(Route.More)
+        assertRoundTrips(Route.PrayerTimes)
+        assertRoundTrips(Route.ZakatCalculator)
+        assertRoundTrips(Route.Qibla)
+        assertRoundTrips(Route.Settings)
+        assertRoundTrips(Route.Onboarding)
+        assertRoundTrips(Route.GlobalSearch)
+        assertRoundTrips(Route.KhatamList)
     }
 
     @Test
     fun `parameterized routes preserve their arguments`() {
-        assertThat(roundTrip(Route.QuranReader(surahNumber = 2, ayahNumber = 255)))
-            .isEqualTo(Route.QuranReader(2, 255))
-        assertThat(roundTrip(Route.HadithBook(bookId = "bukhari")))
-            .isEqualTo(Route.HadithBook("bukhari"))
-        assertThat(roundTrip(Route.TasbihCounter(presetId = 7L)))
-            .isEqualTo(Route.TasbihCounter(7L))
-        assertThat(roundTrip(Route.IslamicMonth(month = 9, year = 1446)))
-            .isEqualTo(Route.IslamicMonth(9, 1446))
-        assertThat(roundTrip(Route.KhatamDetail(khatamId = 3L)))
-            .isEqualTo(Route.KhatamDetail(3L))
-        assertThat(roundTrip(Route.AsmaUlHusnaDetail(nameId = 42)))
-            .isEqualTo(Route.AsmaUlHusnaDetail(42))
+        assertRoundTrips(Route.QuranReader(surahNumber = 2, ayahNumber = 255))
+        assertRoundTrips(Route.HadithBook(bookId = "bukhari"))
+        assertRoundTrips(Route.HadithChapter(bookId = "bukhari", chapterId = "1"))
+        assertRoundTrips(Route.TasbihCounter(presetId = 7L))
+        assertRoundTrips(Route.IslamicMonth(month = 9, year = 1446))
+        assertRoundTrips(Route.KhatamDetail(khatamId = 3L))
+        assertRoundTrips(Route.AsmaUlHusnaDetail(nameId = 42))
+        assertRoundTrips(Route.LicenseDetail(libraryHashCode = 123))
     }
 
     @Test
     fun `default route arguments are applied and survive a round-trip`() {
-        // QuranReader.ayahNumber and PrayerTracker.initialTab have defaults.
         assertThat(Route.QuranReader(surahNumber = 1).ayahNumber).isEqualTo(1)
         assertThat(Route.PrayerTracker().initialTab).isEqualTo(0)
         assertThat(Route.TasbihCounter().presetId).isNull()
 
-        val decoded = roundTrip(Route.QuranReader(surahNumber = 5))
-        assertThat(decoded).isEqualTo(Route.QuranReader(5, 1))
+        // A QuranReader created with only the surah keeps its default ayah of 1.
+        assertRoundTrips(Route.QuranReader(surahNumber = 5))
+        assertThat(Route.QuranReader(surahNumber = 5)).isEqualTo(Route.QuranReader(5, 1))
     }
 
     @Test
     fun `nullable route arguments round-trip when present and absent`() {
-        assertThat(roundTrip(Route.TasbihCounter(presetId = null)))
-            .isEqualTo(Route.TasbihCounter(null))
-        assertThat(roundTrip(Route.TasbihCounter(presetId = 99L)))
-            .isEqualTo(Route.TasbihCounter(99L))
+        assertRoundTrips(Route.TasbihCounter(presetId = null))
+        assertRoundTrips(Route.TasbihCounter(presetId = 99L))
     }
 
     @Test
