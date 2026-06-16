@@ -258,6 +258,12 @@ fun atomsClassTree(): ConfigurableFileTree =
         exclude(coverageExclusions)
     }
 
+fun moleculesClassTree(): ConfigurableFileTree =
+    fileTree(kotlinDebugClassesDir) {
+        include("**/presentation/components/molecules/**")
+        exclude(coverageExclusions)
+    }
+
 fun debugClassTree(): ConfigurableFileTree =
     fileTree(kotlinDebugClassesDir) {
         exclude(coverageExclusions)
@@ -319,6 +325,47 @@ tasks.register<JacocoCoverageVerification>("jacocoAtomsCoverageVerification") {
         rule {
             element = "PACKAGE"
             includes = listOf("com.arshadshah.nimaz.presentation.components.atoms")
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.90".toBigDecimal()
+            }
+        }
+    }
+}
+
+// Focused report for the presentation molecules package.
+tasks.register<JacocoReport>("jacocoMoleculesReport") {
+    group = "verification"
+    description = "Generates a JaCoCo coverage report scoped to the presentation molecules."
+    dependsOn("testDebugUnitTest")
+
+    reports {
+        html.required.set(true)
+        xml.required.set(true)
+        csv.required.set(false)
+    }
+
+    classDirectories.setFrom(moleculesClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+}
+
+// Optional gate the team can run locally/CI to enforce molecule coverage. Kept
+// out of the default `check` graph so it never blocks the existing CI lane.
+tasks.register<JacocoCoverageVerification>("jacocoMoleculesCoverageVerification") {
+    group = "verification"
+    description = "Verifies coverage thresholds for the presentation molecules."
+    dependsOn("testDebugUnitTest")
+
+    classDirectories.setFrom(moleculesClassTree())
+    sourceDirectories.setFrom(coverageSourceDirs)
+    executionData.setFrom(coverageExecutionData())
+
+    violationRules {
+        rule {
+            element = "PACKAGE"
+            includes = listOf("com.arshadshah.nimaz.presentation.components.molecules")
             limit {
                 counter = "INSTRUCTION"
                 value = "COVEREDRATIO"
