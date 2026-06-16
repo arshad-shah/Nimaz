@@ -1,9 +1,5 @@
 What's new in this update:
 
-• Sync your prayer data between devices — no account needed.
-• New home screen widgets: next prayer & prayer tracker.
-• Redesigned Quran reader with Mushaf page view — tap any verse for instant translation & Tafseer.
-• Verse-by-verse audio recitation.
-• Refreshed Today screen with prayer & fasting cards.
-• More reliable Adhan audio, downloads & notifications.
-• Various bug fixes and performance improvements.
+• Islamic calendar now marks the start of each Hijri month with a colored stripe and the month name, so you can spot month boundaries at a glance.
+• App updates now show clear progress — no more guessing whether an update started, even on slower connections.
+• Behind-the-scenes reliability and performance improvements.

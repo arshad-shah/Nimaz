@@ -1,9 +1,5 @@
 Yang baru di pembaruan ini:
 
-• Sinkronkan data salat antar perangkat — tanpa akun.
-• Widget layar utama baru: salat berikutnya & pelacak salat.
-• Pembaca Al-Quran baru dengan tampilan halaman Mushaf — ketuk ayat untuk terjemahan & Tafsir instan.
-• Murotal audio ayat per ayat.
-• Layar "Hari Ini" yang disegarkan dengan kartu salat & puasa.
-• Audio Azan, unduhan & notifikasi yang lebih andal.
-• Berbagai perbaikan bug dan peningkatan performa.
+• Kalender Islam kini menandai awal setiap bulan Hijriah dengan garis berwarna dan nama bulan, sehingga batas bulan mudah dikenali sekilas.
+• Pembaruan aplikasi kini menampilkan progres yang jelas — tidak perlu lagi menebak apakah pembaruan sudah dimulai, bahkan pada koneksi lambat.
+• Peningkatan keandalan dan performa di balik layar.

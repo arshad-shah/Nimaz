@@ -1,9 +1,5 @@
 Apa yang baharu dalam kemas kini ini:
 
-• Segerakkan data solat antara peranti — tanpa akaun.
-• Widget skrin utama baharu: solat seterusnya & penjejak solat.
-• Pembaca Al-Quran baharu dengan paparan halaman Mushaf — ketik mana-mana ayat untuk terjemahan & Tafsir segera.
-• Bacaan audio ayat demi ayat.
-• Skrin "Hari Ini" diperbaharui dengan kad solat & puasa.
-• Audio Azan, muat turun & pemberitahuan yang lebih dipercayai.
-• Pelbagai pembaikan pepijat dan peningkatan prestasi.
+• Kalendar Islam kini menandakan permulaan setiap bulan Hijrah dengan jalur berwarna dan nama bulan, supaya sempadan bulan mudah dikenali sepintas lalu.
+• Kemas kini aplikasi kini menunjukkan kemajuan yang jelas — tidak perlu lagi meneka sama ada kemas kini telah bermula, walaupun pada sambungan perlahan.
+• Penambahbaikan kebolehpercayaan dan prestasi di sebalik tabir.

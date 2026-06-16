@@ -1,9 +1,5 @@
 Neu in diesem Update:
 
-• Synchronisiere deine Gebetsdaten zwischen Geräten – ganz ohne Konto.
-• Neue Startbildschirm-Widgets: nächstes Gebet & Gebets-Tracker.
-• Überarbeiteter Quran-Leser mit Mushaf-Seitenansicht – tippe auf einen Vers für sofortige Übersetzung & Tafsir.
-• Vers-für-Vers-Audiorezitation.
-• Aktualisierter „Heute"-Bildschirm mit Gebets- und Fastenkarten.
-• Zuverlässigerer Adhan-Ton, Downloads & Benachrichtigungen.
-• Diverse Fehlerbehebungen und Leistungsverbesserungen.
+• Der islamische Kalender markiert jetzt den Beginn jedes Hijri-Monats mit einem farbigen Streifen und dem Monatsnamen – so erkennst du Monatsgrenzen auf einen Blick.
+• App-Updates zeigen jetzt einen klaren Fortschritt – kein Rätselraten mehr, ob ein Update gestartet ist, auch bei langsameren Verbindungen.
+• Verbesserungen bei Zuverlässigkeit und Leistung im Hintergrund.

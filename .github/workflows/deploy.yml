@@ -145,3 +145,74 @@ jobs:
             git pull --rebase --autostash origin "${{ github.ref_name }}"
           done
           git push origin "HEAD:${{ github.ref_name }}"
+
+      # Read the version that was just built/uploaded (and committed above) so
+      # the tag and GitHub release name the exact published build.
+      - name: Read released version
+        id: version
+        if: github.event_name == 'push'
+        run: |
+          name="$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)"
+          code="$(grep -oP 'versionCode\s*=\s*\K\d+' app/build.gradle.kts)"
+          echo "name=$name"   >> "$GITHUB_OUTPUT"
+          echo "code=$code"   >> "$GITHUB_OUTPUT"
+          echo "tag=v$name"   >> "$GITHUB_OUTPUT"
+          echo "Released versionName=$name versionCode=$code -> tag v$name"
+
+      # Tag the bump commit (its tree holds exactly the published version) with
+      # an annotated tag whose message is the Play Store changelog, giving an
+      # auditable point that maps a git commit to a Play Store release. Skipped
+      # if the tag already exists (e.g. a re-run with no fresh bump).
+      - name: Create and push release tag
+        id: tag
+        if: github.event_name == 'push'
+        run: |
+          tag="${{ steps.version.outputs.tag }}"
+          notes="fastlane/metadata/android/en-US/changelogs/default.txt"
+          if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null 2>&1; then
+            echo "Tag $tag already exists on origin; skipping tag + GitHub release."
+            echo "created=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git tag -a "$tag" -F "$notes"
+          for attempt in 1 2 3; do
+            if git push origin "refs/tags/$tag"; then
+              echo "created=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "Tag push failed (attempt $attempt); retrying."
+            sleep $((attempt * 2))
+          done
+          git push origin "refs/tags/$tag"
+          echo "created=true" >> "$GITHUB_OUTPUT"
+
+      # Collect the signed artifacts produced by fastlane and rename them with
+      # the version so the GitHub release assets are self-describing.
+      - name: Stage release artifacts
+        if: steps.tag.outputs.created == 'true'
+        run: |
+          set -e
+          v="${{ steps.version.outputs.name }}"
+          mkdir -p release-artifacts
+          aab="$(find app/build/outputs/bundle/release -name '*.aab' | head -n1)"
+          apk="$(find app/build/outputs/apk/release    -name '*.apk' | head -n1)"
+          if [ -z "$aab" ]; then echo "::error::No signed .aab found"; exit 1; fi
+          if [ -z "$apk" ]; then echo "::error::No signed .apk found"; exit 1; fi
+          cp "$aab" "release-artifacts/Nimaz-v${v}.aab"
+          cp "$apk" "release-artifacts/Nimaz-v${v}.apk"
+          ls -la release-artifacts
+
+      # Publish a GitHub release on the new tag: same changelog text shown on the
+      # Play Store, with the signed .aab (the store upload) and a signed .apk
+      # (sideloadable) attached.
+      - name: Create GitHub release
+        if: steps.tag.outputs.created == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: Nimaz ${{ steps.version.outputs.tag }}
+          body_path: fastlane/metadata/android/en-US/changelogs/default.txt
+          files: |
+            release-artifacts/Nimaz-v${{ steps.version.outputs.name }}.aab
+            release-artifacts/Nimaz-v${{ steps.version.outputs.name }}.apk
+          token: ${{ steps.app-token.outputs.token || github.token }}

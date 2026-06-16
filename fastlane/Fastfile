@@ -60,15 +60,29 @@ platform :android do
   private_lane :build_and_sign_apk_or_aab do
     fetch_and_increment_build_number
 
+    signing_props = {
+      "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
+      "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
+      "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
+      "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
+    }
+
+    # Build a signed APK first. This is not uploaded to the Play Store (which
+    # takes the AAB) but is attached to the GitHub release so the exact
+    # published version can be sideloaded/audited. Building it before the bundle
+    # keeps the AAB as the last gradle output, so upload_to_play_store still
+    # picks the .aab up from the lane context automatically.
+    gradle(
+      task: "assemble",
+      build_type: "release",
+      properties: signing_props
+    )
+
+    # Build the signed AAB that is uploaded to the Play Store.
     gradle(
       task: "bundle",
       build_type: "release",
-      properties: {
-          "android.injected.signing.store.file" => ENV["KEYSTORE_FILE"],
-          "android.injected.signing.store.password" => ENV["KEYSTORE_PASSWORD"],
-          "android.injected.signing.key.alias" => ENV["KEY_ALIAS"],
-          "android.injected.signing.key.password" => ENV["KEY_PASSWORD"]
-      }
+      properties: signing_props
     )
   end
 end

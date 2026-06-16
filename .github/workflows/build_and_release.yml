@@ -1,12 +1,15 @@
 name: Build and Release
 
+# NOTE: This workflow builds an unsigned DEBUG APK only. It intentionally does
+# NOT trigger on "v*" tags: signed releases for those tags (with Play Store
+# changelog + signed .aab/.apk assets) are produced by the deploy workflow after
+# a successful Play Store upload. Triggering here on v* would create duplicate,
+# debug-only GitHub releases that collide with that flow.
 on:
   push:
     branches:
       - release*
       - master
-    tags:
-      - "v*"
 
 jobs:
   apk:
