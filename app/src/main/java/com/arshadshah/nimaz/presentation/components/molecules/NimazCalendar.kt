@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -20,7 +21,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -76,13 +76,20 @@ enum class IndicatorPosition {
  *   Null uses the default (today/selected/transparent).
  * @param textColor Custom text color override. Null uses the default.
  * @param fontWeight Custom font weight override. Null uses the default.
+ * @param isHijriMonthStart Marks this cell as the first day of a Hijri month.
+ *   Renders a colored top stripe so the start (and, by the cell before it, the
+ *   end) of each Islamic month is easy to spot when scanning the grid.
+ * @param hijriMonthStartLabel Short Hijri month name shown on the start cell
+ *   (e.g. "Rajab"). Only drawn when [isHijriMonthStart] is true.
  */
 data class CalendarDayState(
     val indicatorColor: Color? = null,
     val indicatorPosition: IndicatorPosition = IndicatorPosition.BOTTOM_CENTER,
     val backgroundColor: Color? = null,
     val textColor: Color? = null,
-    val fontWeight: FontWeight? = null
+    val fontWeight: FontWeight? = null,
+    val isHijriMonthStart: Boolean = false,
+    val hijriMonthStartLabel: String? = null
 )
 
 /**
@@ -202,17 +209,17 @@ fun NimazCalendar(
                         modifier = Modifier.padding(top = 14.dp),
                         color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                     )
-                    Row(
+                    FlowRow(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 14.dp),
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(
+                            16.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        legendItems.forEachIndexed { index, item ->
-                            if (index > 0) {
-                                Spacer(modifier = Modifier.width(16.dp))
-                            }
+                        legendItems.forEach { item ->
                             NimazLegendItem(color = item.color, label = item.label)
                         }
                     }
@@ -445,6 +452,35 @@ private fun CalendarDayCell(
             fontSize = 13.sp
         )
 
+        // Hijri month-start marker — a colored top stripe plus the short month
+        // name. Because each Islamic month begins exactly one cell after the
+        // previous one ends, marking the start also visually delimits the end
+        // of the preceding month. On a primary-filled selected cell the accent
+        // flips to onPrimary so it stays legible.
+        if (dayState.isHijriMonthStart) {
+            val accent = if (isSelectedBackgroundFill) scheme.onPrimary else scheme.primary
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .fillMaxWidth()
+                    .height(3.dp)
+                    .background(accent)
+            )
+            dayState.hijriMonthStartLabel?.let { label ->
+                Text(
+                    text = label,
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(top = 5.dp),
+                    color = accent,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 8.sp,
+                    maxLines = 1,
+                    softWrap = false
+                )
+            }
+        }
+
         // Indicator dot — picks a contrasting tone on selected cells so the
         // dot stays visible against primary fill.
         dayState.indicatorColor?.let { color ->
@@ -542,8 +578,12 @@ private fun NimazCalendarIslamicPreview() {
                 onNextMonth = {},
                 headerTitle = "Rajab 1447",
                 dayStateProvider = { date ->
+                    // Jan 20, 2026 is 1 Sha'ban 1447 — demo the month-start marker.
+                    val isMonthStart = date == LocalDate.of(2026, 1, 20)
                     CalendarDayState(
-                        indicatorColor = eventDays[date]
+                        indicatorColor = eventDays[date],
+                        isHijriMonthStart = isMonthStart,
+                        hijriMonthStartLabel = if (isMonthStart) "Shab" else null
                     )
                 },
                 legendItems = listOf(

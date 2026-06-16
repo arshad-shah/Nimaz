@@ -398,6 +398,7 @@
     <string name="islamic_calendar">Kalendar Islam</string>
     <string name="eid">Hari Raya</string>
     <string name="holy_night">Malam Mulia</string>
+    <string name="month_start">Awal bulan</string>
     <string name="events">Peristiwa</string>
     <string name="upcoming_events">Peristiwa Akan Datang</string>
     <string name="hadith_title">Hadis</string>
