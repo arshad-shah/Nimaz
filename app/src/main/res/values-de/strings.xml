@@ -709,4 +709,20 @@
     <string name="adhan_download_partial_subtitle">Einige %1$s-Dateien konnten nicht heruntergeladen werden. Wird später erneut versucht.</string>
     <string name="adhan_download_failed">Adhan-Download fehlgeschlagen</string>
     <string name="adhan_download_failed_subtitle">Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut</string>
+    <!-- Fasting sheet / Quran home / free-day labels -->
+    <string name="free_count">Frei</string>
+    <string name="free_count_label">Freie Anzahl</string>
+    <string name="quran_home_page_range_format">S. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s beginnt</string>
+    <string name="quran_home_juz_indicator">Juz %1$d</string>
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Fastenart</string>
+    <string name="fasting_sheet_note">Notiz</string>
+    <string name="fasting_sheet_save">Speichern</string>
+    <string name="fasting_sheet_delete">Löschen</string>
+    <string name="fasting_sheet_exemption_reason">Befreiungsgrund</string>
+    <string name="fasting_sheet_select_reason">Grund auswählen</string>
+    <string name="fasting_sheet_edit_makeup">Nachholfasten bearbeiten</string>
+    <string name="fasting_sheet_reason">Grund</string>
+    <string name="fasting_sheet_fidya_amount">Fidya-Betrag</string>
 </resources>

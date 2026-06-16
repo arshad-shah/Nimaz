@@ -710,4 +710,20 @@
     <string name="adhan_download_partial_subtitle">Beberapa fail %1$s tidak dapat dimuat turun. Akan dicuba semula kemudian.</string>
     <string name="adhan_download_failed">Muat turun azan gagal</string>
     <string name="adhan_download_failed_subtitle">Semak sambungan internet anda dan cuba semula</string>
+    <!-- Fasting sheet / Quran home / free-day labels -->
+    <string name="free_count">Bebas</string>
+    <string name="free_count_label">Kiraan bebas</string>
+    <string name="quran_home_page_range_format">ms. %1$d–%2$d</string>
+    <string name="quran_home_surah_starts">▸ %1$s bermula</string>
+    <string name="quran_home_juz_indicator">Juzuk %1$d</string>
+    <string name="fasting_sheet_status">Status</string>
+    <string name="fasting_sheet_type">Jenis Puasa</string>
+    <string name="fasting_sheet_note">Nota</string>
+    <string name="fasting_sheet_save">Simpan</string>
+    <string name="fasting_sheet_delete">Padam</string>
+    <string name="fasting_sheet_exemption_reason">Sebab Pengecualian</string>
+    <string name="fasting_sheet_select_reason">Pilih sebab</string>
+    <string name="fasting_sheet_edit_makeup">Edit Puasa Ganti</string>
+    <string name="fasting_sheet_reason">Sebab</string>
+    <string name="fasting_sheet_fidya_amount">Jumlah Fidyah</string>
 </resources>

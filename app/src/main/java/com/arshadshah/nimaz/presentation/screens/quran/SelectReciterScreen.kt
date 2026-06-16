@@ -1,3 +1,5 @@
+@file:androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
