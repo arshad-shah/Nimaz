@@ -28,6 +28,16 @@ jobs:
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 
+      # TEMPORARY diagnostic: echo the full lint text report into the job log so
+      # the complete list of issues is visible while fixing them. Remove once
+      # lint is green.
+      - name: Print lint report (diagnostic)
+        if: always()
+        run: |
+          echo "===== LINT TEXT REPORTS ====="
+          find app/build -name 'lint-results*.txt' -print -exec cat {} \; 2>/dev/null || true
+          echo "===== END LINT TEXT REPORTS ====="
+
       - name: Upload Test Results
         uses: actions/upload-artifact@v4
         with:
