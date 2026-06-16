@@ -91,6 +91,7 @@
     <!-- Home Screen - Banners -->
     <string name="update_available">A new version of Nimaz is available</string>
     <string name="update_action">Update</string>
+    <string name="starting_update">Starting update…</string>
     <string name="downloading_update">Downloading update…</string>
     <string name="update_ready">Update ready to install</string>
     <string name="restart">Restart</string>
@@ -198,6 +199,8 @@
     <string name="open_source_licenses_subtitle">Third-party libraries</string>
     <string name="check_for_updates">Check for Updates</string>
     <string name="update_new_version">New version available</string>
+    <string name="update_checking">Checking…</string>
+    <string name="update_starting">Starting…</string>
     <string name="update_downloading">Downloading…</string>
     <string name="update_downloaded">Ready to install</string>
     <string name="update_up_to_date">You\'re up to date</string>
