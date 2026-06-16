@@ -875,6 +875,13 @@ fun NavGraph(
 
             composable<Route.SettingsHelp> {
                 com.arshadshah.nimaz.presentation.screens.help.HelpSupportScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToBugReport = { navController.navigate(Route.BugReport) }
+                )
+            }
+
+            composable<Route.BugReport> {
+                com.arshadshah.nimaz.presentation.screens.help.BugReportScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

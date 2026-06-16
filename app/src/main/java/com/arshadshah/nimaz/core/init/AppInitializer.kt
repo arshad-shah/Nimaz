@@ -47,10 +47,12 @@ class AppInitializer @Inject constructor(
                     val localeTask = async { applySavedLocale() }
                     val notificationTask = async { scheduleInitialNotifications() }
                     val adhanTask = async { downloadDefaultAdhanIfNeeded() }
+                    val crashKeysTask = async { setCrashReporterKeys() }
 
                     localeTask.await()
                     notificationTask.await()
                     adhanTask.await()
+                    crashKeysTask.await()
                 }
             } catch (e: Exception) {
                 // Timeout or other failure — report it but proceed to UI anyway
@@ -127,6 +129,48 @@ class AppInitializer @Inject constructor(
         } catch (e: Exception) {
             CrashReporter.recordException(e)
             AppAnalytics.logError("notification_scheduling", e.javaClass.simpleName, e.message)
+        }
+    }
+
+    /**
+     * Attaches the Nimaz configuration behind the most common bug classes as
+     * Crashlytics custom keys, so every crash report carries the prayer-time
+     * calculation settings and the notification-delivery prerequisites. No precise
+     * location is read — only a coarse flag for whether a location is configured.
+     */
+    private suspend fun setCrashReporterKeys() {
+        try {
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.CALCULATION_METHOD,
+                preferencesDataStore.calculationMethod.first(),
+            )
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.ASR_METHOD,
+                preferencesDataStore.asrCalculation.first(),
+            )
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.HIGH_LATITUDE_RULE,
+                preferencesDataStore.highLatitudeRule.first(),
+            )
+            val locationSet = preferencesDataStore.locationName.first().isNotBlank()
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.LOCATION_MODE,
+                if (locationSet) "set" else "not_set",
+            )
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.POST_NOTIF_GRANTED,
+                AppAnalytics.postNotificationsGranted(context),
+            )
+            CrashReporter.setCustomKey(
+                CrashReporter.Keys.EXACT_ALARM_ALLOWED,
+                AppAnalytics.exactAlarmAllowed(context),
+            )
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as? android.os.PowerManager
+            val batteryExempt = powerManager
+                ?.isIgnoringBatteryOptimizations(context.packageName) ?: false
+            CrashReporter.setCustomKey(CrashReporter.Keys.BATTERY_OPTIMIZED, !batteryExempt)
+        } catch (e: Exception) {
+            CrashReporter.recordException(e)
         }
     }
 

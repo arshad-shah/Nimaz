@@ -1,0 +1,26 @@
+rules_version = '2';
+
+// Cloud Storage rules for Nimaz bug report screenshots.
+//
+// Authenticated anonymous clients may upload a screenshot under
+// bug_reports/{reportId}/ at submit time. No client reads — screenshots are
+// viewed by the team through the Firebase console or a privileged backend.
+//
+// Deploy with:  firebase deploy --only storage
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /bug_reports/{reportId}/{fileName} {
+      // Create only: authenticated, image content, capped at 10 MB.
+      allow create: if request.auth != null
+                    && request.resource.size < 10 * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+
+      allow read, update, delete: if false;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

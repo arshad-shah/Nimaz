@@ -27,6 +27,8 @@ class NimazApp : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         AppAnalytics.init(this)
+        // Keep dev crashes out of production Crashlytics data.
+        CrashReporter.setCollectionEnabled(!BuildConfig.DEBUG)
         CrashReporter.log("NimazApp.onCreate")
         CrashReporter.setCustomKey("db_schema_version", NimazDatabase.SCHEMA_VERSION)
         appInitializer.initialize()

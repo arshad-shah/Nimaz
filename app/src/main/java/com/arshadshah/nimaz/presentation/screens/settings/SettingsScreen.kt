@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
@@ -59,6 +60,7 @@ fun SettingsScreen(
     onNavigateToLanguage: () -> Unit,
     onNavigateToWidgets: () -> Unit,
     onNavigateToSync: () -> Unit = {},
+    onNavigateToBugReport: () -> Unit = {},
     onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -173,6 +175,18 @@ fun SettingsScreen(
                         icon = Icons.Default.Restore,
                         iconTint = MaterialTheme.colorScheme.error,
                         onClick = { showResetDialog = true }
+                    )
+                }
+            }
+
+            // Report a Bug — kept as the last actionable item in settings.
+            item {
+                NimazMenuGroup {
+                    NimazMenuItem(
+                        title = stringResource(R.string.bug_report_title),
+                        subtitle = stringResource(R.string.bug_report_card_subtitle),
+                        icon = Icons.Default.BugReport,
+                        onClick = onNavigateToBugReport
                     )
                 }
             }

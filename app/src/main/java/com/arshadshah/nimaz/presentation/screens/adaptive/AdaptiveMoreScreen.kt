@@ -241,7 +241,8 @@ fun AdaptiveMoreScreen(
                                 }
                             )
                             MoreDetailPane.HELP -> HelpSupportScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
+                                onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                onNavigateToBugReport = { navController.navigate(Route.BugReport) }
                             )
                         }
                     }

@@ -178,11 +178,19 @@ dependencies {
     implementation(libs.app.review)
     implementation(libs.app.review.ktx)
 
-    // Firebase (Crashlytics + Analytics + Performance) — versions pinned by the BoM
+    // Firebase (Crashlytics + Analytics + Performance + Firestore + Storage + Auth) —
+    // versions pinned by the BoM. Firestore/Storage/Auth back the in-app bug report
+    // form; all Firebase calls are guarded so builds without google-services.json no-op.
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.perf)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.storage)
+    implementation(libs.firebase.auth)
+
+    // Coroutines bridge for awaiting Firebase Task results
+    implementation(libs.kotlinx.coroutines.play.services)
 
     // Testing
     testImplementation(libs.junit)

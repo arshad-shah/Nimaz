@@ -1,0 +1,41 @@
+rules_version = '2';
+
+// Security rules for the Nimaz in-app bug report system.
+//
+// Clients are authenticated with Firebase Anonymous Auth. They may only CREATE
+// bug reports — never read, update, or delete them. Reports are read by the team
+// through the Firebase console or a trusted backend (Cloud Function / Admin SDK),
+// which bypasses these rules.
+//
+// Deploy with:  firebase deploy --only firestore:rules
+//
+// Recommended hardening: enable App Check (Play Integrity) so only genuine app
+// installs can write, and consider rate limiting via a Cloud Function.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /bug_reports/{reportId} {
+      // Authenticated anonymous clients may submit a report.
+      allow create: if request.auth != null
+                    && isValidBugReport(request.resource.data);
+
+      // No client reads or mutations — reports are triage-only via the console
+      // or a privileged backend.
+      allow read, update, delete: if false;
+    }
+
+    // Everything else is denied by default.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// Basic shape/size validation to keep junk and oversized payloads out.
+function isValidBugReport(data) {
+  return data.description is string
+      && data.description.size() > 0
+      && data.description.size() <= 5000
+      && data.category is string
+      && data.createdAt == request.time;
+}

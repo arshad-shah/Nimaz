@@ -37,4 +37,28 @@ object CrashReporter {
     fun setCustomKey(key: String, value: Boolean) {
         crashlytics?.setCustomKey(key, value)
     }
+
+    /**
+     * Enables or disables crash collection. Called once at start-up so dev crashes
+     * from debug builds never pollute the production Crashlytics data.
+     */
+    fun setCollectionEnabled(enabled: Boolean) {
+        crashlytics?.isCrashlyticsCollectionEnabled = enabled
+    }
+
+    /**
+     * Custom-key names attached to every crash report. These carry the context
+     * behind Nimaz's most common bugs — prayer-time calculation configuration and
+     * the notification-delivery prerequisites — so reports are actionable. Pulled
+     * from the app's settings; see [com.arshadshah.nimaz.core.init.AppInitializer].
+     */
+    object Keys {
+        const val CALCULATION_METHOD = "calculation_method"
+        const val ASR_METHOD = "asr_method"
+        const val HIGH_LATITUDE_RULE = "high_latitude_rule"
+        const val LOCATION_MODE = "location_mode"
+        const val POST_NOTIF_GRANTED = "post_notif_granted"
+        const val EXACT_ALARM_ALLOWED = "exact_alarm_allowed"
+        const val BATTERY_OPTIMIZED = "battery_optimized"
+    }
 }

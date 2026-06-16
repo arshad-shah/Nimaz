@@ -238,6 +238,57 @@
     <string name="nimaz_support_request">Nimaz Support Request</string>
     <string name="send_email">Send Email</string>
 
+    <!-- Bug Report -->
+    <string name="bug_report_title">Report a Bug</string>
+    <string name="bug_report_card_subtitle">Tell us what went wrong</string>
+    <string name="bug_report_intro">Describe the problem you ran into. Diagnostics about your device and Nimaz settings are attached to help us reproduce it.</string>
+    <string name="bug_report_category">Category</string>
+    <string name="bug_report_description">Description</string>
+    <string name="bug_report_description_hint">What happened?</string>
+    <string name="bug_report_description_required">Please describe the problem</string>
+    <string name="bug_report_steps">Steps to reproduce</string>
+    <string name="bug_report_steps_hint">What did you do before the problem appeared?</string>
+    <string name="bug_report_email">Contact email</string>
+    <string name="bug_report_email_hint">So we can follow up (optional)</string>
+    <string name="bug_report_screenshot">Screenshot</string>
+    <string name="bug_report_attach_screenshot">Attach a screenshot</string>
+    <string name="bug_report_screenshot_attached">Screenshot attached</string>
+    <string name="bug_report_remove_screenshot">Remove screenshot</string>
+    <string name="bug_report_diagnostics">Diagnostics</string>
+    <string name="bug_report_include_diagnostics">Include diagnostics</string>
+    <string name="bug_report_diagnostics_subtitle">Device and Nimaz settings shown below. No precise location is included.</string>
+    <string name="bug_report_submit">Submit Report</string>
+    <string name="bug_report_submitting">Submitting</string>
+    <string name="bug_report_success_sent">Thank you. Your report has been sent.</string>
+    <string name="bug_report_success_queued">Saved. Your report will be sent when you are back online.</string>
+    <string name="bug_report_error">Could not submit your report. Please try again.</string>
+
+    <!-- Bug Report categories -->
+    <string name="bug_category_prayer_times">Prayer Times</string>
+    <string name="bug_category_notifications_adhan">Notifications &amp; Adhan</string>
+    <string name="bug_category_qibla">Qibla</string>
+    <string name="bug_category_quran">Quran</string>
+    <string name="bug_category_tasbih">Tasbih</string>
+    <string name="bug_category_prayer_tracking">Prayer Tracking</string>
+    <string name="bug_category_calendar_hijri">Calendar / Hijri</string>
+    <string name="bug_category_fasting">Fasting</string>
+    <string name="bug_category_zakat">Zakat</string>
+    <string name="bug_category_other">Other</string>
+
+    <!-- Bug Report diagnostics labels -->
+    <string name="bug_report_diag_app_version">App version</string>
+    <string name="bug_report_diag_device">Device</string>
+    <string name="bug_report_diag_android">Android</string>
+    <string name="bug_report_diag_locale">Locale</string>
+    <string name="bug_report_diag_timezone">Timezone</string>
+    <string name="bug_report_diag_calc_method">Calculation method</string>
+    <string name="bug_report_diag_asr_method">Asr method</string>
+    <string name="bug_report_diag_high_latitude">High latitude rule</string>
+    <string name="bug_report_diag_location_mode">Location</string>
+    <string name="bug_report_diag_notifications">Notifications allowed</string>
+    <string name="bug_report_diag_exact_alarm">Exact alarms allowed</string>
+    <string name="bug_report_diag_battery">Battery optimization exempt</string>
+
     <!-- FAQ Questions & Answers -->
     <string name="faq_prayer_times_q">How are prayer times calculated?</string>
     <string name="faq_prayer_times_a">Prayer times are calculated using your location and the calculation method you select in Prayer Settings. Different methods are used by different regions and Islamic organizations.</string>
