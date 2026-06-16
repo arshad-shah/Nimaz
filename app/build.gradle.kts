@@ -441,7 +441,11 @@ fun businessLogicClassTree(): ConfigurableFileTree =
 tasks.register<JacocoReport>("jacocoDomainDataReport") {
     group = "verification"
     description = "Generates a JaCoCo coverage report scoped to domain + data + core util."
-    dependsOn("testDebugUnitTest")
+    // Depend on jacocoTestReport too: both reports read execution data from a
+    // file tree rooted at the build dir, which overlaps jacocoTestReport's
+    // output. Declaring the dependency satisfies Gradle's input/output
+    // validation when both reports run in the same invocation (as CI does).
+    dependsOn("testDebugUnitTest", "jacocoTestReport")
 
     reports {
         html.required.set(true)
