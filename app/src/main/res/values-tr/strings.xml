@@ -398,6 +398,7 @@
     <string name="islamic_calendar">İslami Takvim</string>
     <string name="eid">Bayram</string>
     <string name="holy_night">Kandil</string>
+    <string name="month_start">Ay başı</string>
     <string name="events">Etkinlikler</string>
     <string name="upcoming_events">Yaklaşan Etkinlikler</string>
     <string name="hadith_title">Hadis</string>
