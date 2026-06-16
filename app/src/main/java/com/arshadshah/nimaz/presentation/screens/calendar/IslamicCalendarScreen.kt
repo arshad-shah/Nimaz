@@ -38,6 +38,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthNameArabic
 import com.arshadshah.nimaz.domain.model.HijriMonth
@@ -265,11 +266,21 @@ private fun CalendarSection(
             },
             dayStateProvider = { date ->
                 val events = eventMap[date] ?: emptyList()
+                // A Gregorian day whose Hijri day-of-month is 1 is the first day
+                // of an Islamic month — mark it so the start (and the end, one
+                // cell earlier) of each month is obvious on the grid.
+                val hijri = HijriDateCalculator.toHijri(date)
+                val isMonthStart = hijri.day == 1
                 CalendarDayState(
-                    indicatorColor = getEventDotColor(events)
+                    indicatorColor = getEventDotColor(events),
+                    isHijriMonthStart = isMonthStart,
+                    hijriMonthStartLabel = if (isMonthStart) {
+                        HijriDateCalculator.getHijriMonthNameShort(hijri.month)
+                    } else null
                 )
             },
             legendItems = listOf(
+                CalendarLegendItem(MaterialTheme.colorScheme.primary, stringResource(R.string.month_start)),
                 CalendarLegendItem(Color(0xFFEAB308), stringResource(R.string.eid)),
                 CalendarLegendItem(Color(0xFF22C55E), stringResource(R.string.holy_night)),
                 CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))

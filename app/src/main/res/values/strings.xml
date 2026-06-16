@@ -503,6 +503,7 @@
     <string name="islamic_calendar">Islamic Calendar</string>
     <string name="eid">Eid</string>
     <string name="holy_night">Holy Night</string>
+    <string name="month_start">Month start</string>
     <string name="events">Events</string>
     <string name="upcoming_events">Upcoming Events</string>
 

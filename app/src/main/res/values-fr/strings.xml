@@ -398,6 +398,7 @@
     <string name="islamic_calendar">Calendrier islamique</string>
     <string name="eid">Aïd</string>
     <string name="holy_night">Nuit sacrée</string>
+    <string name="month_start">Début du mois</string>
     <string name="events">Événements</string>
     <string name="upcoming_events">Événements à venir</string>
     <string name="hadith_title">Hadith</string>
