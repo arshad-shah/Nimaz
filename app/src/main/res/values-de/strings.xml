@@ -28,6 +28,7 @@
     <string name="today_fasting">Heute: Fasten</string>
     <string name="no_fast_today">Heute kein Fasten</string>
     <string name="hadith_of_the_day">Hadith des Tages</string>
+    <string name="dua_of_the_moment">Dua des Augenblicks</string>
     <string name="prayer_times">Gebetszeiten</string>
     <string name="hours">Stunden</string>
     <string name="minutes">Minuten</string>
@@ -163,11 +164,13 @@
     <string name="made_with">Erstellt mit </string>
     <string name="for_the_ummah"> für die Ummah</string>
     <string name="copyright_format">© %d Nimaz. Alle Rechte vorbehalten.</string>
+    <string name="help_intro_title">Wie können wir helfen?</string>
+    <string name="help_intro_subtitle">Durchsuche häufige Fragen, lerne die Funktionen kennen und behebe Probleme – oder kontaktiere uns, wir melden uns.</string>
     <string name="faq_title">Häufig gestellte Fragen</string>
     <string name="feature_guides">Funktionsanleitungen</string>
     <string name="contact_us">Kontaktieren Sie uns</string>
     <string name="email_support">E-Mail-Support</string>
-    <string name="support_email">support@nimaz.app</string>
+    <string name="support_email">info@arshadshah.com</string>
     <string name="nimaz_support_request">Nimaz Supportanfrage</string>
     <string name="send_email">E-Mail senden</string>
     <string name="troubleshooting_title">Fehlerbehebung</string>

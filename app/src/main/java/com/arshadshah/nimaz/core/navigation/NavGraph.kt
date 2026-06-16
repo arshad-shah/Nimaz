@@ -741,7 +741,7 @@ fun NavGraph(
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/policy"))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/privacy"))
                         context.startActivity(intent)
                     },
                     onNavigateToTerms = {
