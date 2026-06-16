@@ -88,6 +88,14 @@ android {
             isReturnDefaultValues = true
         }
     }
+
+    lint {
+        // Print the full lint text report to the build console (and thus the CI
+        // job log) so every issue is visible without downloading the HTML/XML
+        // report artifact.
+        textReport = true
+        textOutput = file("stdout")
+    }
 }
 
 dependencies {
