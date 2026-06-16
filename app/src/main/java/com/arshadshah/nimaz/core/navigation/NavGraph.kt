@@ -107,6 +107,7 @@ fun NavGraph(
     // (e.g. "...Route$QuranReader/{surahNumber}?..."), so trim down to the simple
     // screen name for readable analytics.
     val analyticsContext = androidx.compose.ui.platform.LocalContext.current
+    var previousScreen by remember { mutableStateOf<String?>(null) }
     LaunchedEffect(currentDestination?.route) {
         val route = currentDestination?.route ?: return@LaunchedEffect
         val screenName = route
@@ -114,7 +115,14 @@ fun NavGraph(
             .substringBefore('?')
             .substringAfterLast('.')
             .substringAfterLast('$')
-        AppAnalytics.logScreenView(analyticsContext, screenName)
+        // Attach the screen the user came from so funnel reports can surface
+        // dead-ends and back-and-forth loops where users get stuck.
+        AppAnalytics.logScreenView(
+            screenName = screenName,
+            previousScreen = previousScreen,
+            context = analyticsContext,
+        )
+        previousScreen = screenName
     }
 
     // Deep-link from the Quran audio notification / lock-screen player.

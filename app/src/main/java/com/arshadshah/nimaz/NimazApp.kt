@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.hilt.work.HiltWorkerFactory
 import androidx.work.Configuration
 import com.arshadshah.nimaz.core.init.AppInitializer
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import dagger.hilt.android.HiltAndroidApp
@@ -25,6 +26,7 @@ class NimazApp : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        AppAnalytics.init(this)
         CrashReporter.log("NimazApp.onCreate")
         CrashReporter.setCustomKey("db_schema_version", NimazDatabase.SCHEMA_VERSION)
         appInitializer.initialize()

@@ -11,6 +11,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
@@ -185,6 +186,11 @@ class QiblaViewModel @Inject constructor(
     }
 
     fun onEvent(event: QiblaEvent) {
+        when (event) {
+            QiblaEvent.StartCompass -> AppAnalytics.logFeatureUsed("qibla", "start_compass")
+            is QiblaEvent.SetArMode -> AppAnalytics.logFeatureUsed("qibla", if (event.enabled) "ar_on" else "ar_off")
+            else -> {}
+        }
         when (event) {
             is QiblaEvent.UpdateAccuracy -> updateAccuracy(event.accuracy)
             is QiblaEvent.SetLocation -> setLocation(event.location)

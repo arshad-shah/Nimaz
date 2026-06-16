@@ -17,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
 import androidx.media3.common.util.UnstableApi
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
 import com.arshadshah.nimaz.core.util.BootReceiver
 import com.arshadshah.nimaz.core.util.InAppUpdateManager
@@ -145,9 +146,11 @@ class MainActivity : ComponentActivity() {
     private fun handleIntent(intent: Intent?) {
         if (intent?.getBooleanExtra(BootReceiver.EXTRA_STOP_ADHAN, false) == true) {
             AdhanPlaybackService.stopAdhan(this)
+            AppAnalytics.logNotificationOpened(source = "prayer_notification")
         }
 
         if (intent?.action == QuranAudioService.ACTION_OPEN_PLAYING_SURAH) {
+            AppAnalytics.logNotificationOpened(source = "quran_audio")
             val surah = quranAudioManager.audioState.value.currentSurahNumber
             if (surah > 0) {
                 pendingQuranSurah = surah
@@ -155,6 +158,7 @@ class MainActivity : ComponentActivity() {
         }
 
         if (intent?.action == HijriCalendarWidget.ACTION_OPEN_ISLAMIC_CALENDAR) {
+            AppAnalytics.logNotificationOpened(source = "hijri_calendar_widget")
             pendingIslamicCalendar = true
         }
     }

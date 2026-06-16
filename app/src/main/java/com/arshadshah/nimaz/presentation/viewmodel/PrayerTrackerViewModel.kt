@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
@@ -101,6 +102,17 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     fun onEvent(event: PrayerTrackerEvent) {
+        when (event) {
+            is PrayerTrackerEvent.MarkPrayerPrayed ->
+                AppAnalytics.logPrayerTracked(event.prayerName.name, "prayed", event.isJamaah)
+            is PrayerTrackerEvent.MarkPrayerMissed ->
+                AppAnalytics.logPrayerTracked(event.prayerName.name, "missed")
+            is PrayerTrackerEvent.UpdatePrayerStatus ->
+                AppAnalytics.logPrayerTracked(event.prayerName.name, event.status.name, event.isJamaah)
+            is PrayerTrackerEvent.MarkQadaCompleted ->
+                AppAnalytics.logFeatureUsed("prayer_tracker", "qada_completed")
+            else -> {}
+        }
         when (event) {
             is PrayerTrackerEvent.SelectDate -> selectDate(event.date)
             is PrayerTrackerEvent.UpdatePrayerStatus -> updatePrayerStatus(

@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -51,10 +52,12 @@ class BootReceiver : BroadcastReceiver() {
             Intent.ACTION_LOCKED_BOOT_COMPLETED,
             "android.intent.action.QUICKBOOT_POWERON",
             "com.htc.intent.action.QUICKBOOT_POWERON" -> {
+                AppAnalytics.logNotificationReschedule(trigger = "boot")
                 reschedulePrayerNotifications()
             }
 
             PrayerNotificationScheduler.ACTION_MIDNIGHT_RESCHEDULE -> {
+                AppAnalytics.logNotificationReschedule(trigger = "midnight")
                 markMissedPrayersAndReschedule()
             }
 
@@ -142,16 +145,31 @@ class BootReceiver : BroadcastReceiver() {
         val isFajr = prayerType.equals("FAJR", ignoreCase = true)
         val isSunrise = prayerType.equals("SUNRISE", ignoreCase = true)
 
+        // Gap between when this notification was scheduled to fire and now. A large
+        // value points to Doze / battery-optimization delaying delivery — the main
+        // "notifications don't fire on time" failure mode.
+        val deliveryLatencySeconds = deliveryLatencySeconds(prayerTime)
+
         scope.launch {
             try {
                 val prayerNotificationEnabled = isPrayerNotificationEnabled(prayerType)
-                if (!prayerNotificationEnabled) return@launch
+                if (!prayerNotificationEnabled) {
+                    AppAnalytics.logNotificationSuppressed(prayerType, reason = "prayer_disabled")
+                    return@launch
+                }
 
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
                 if (isPreReminder) {
                     val reminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
                     showEnhancedPreReminderNotification(context, prayerName, prayerType, reminderMinutes, vibrationEnabled)
+                    AppAnalytics.logNotificationDisplayed(
+                        prayerType = prayerType,
+                        isPreReminder = true,
+                        adhanPlayed = false,
+                        dndBlocked = false,
+                        deliveryLatencySeconds = deliveryLatencySeconds,
+                    )
                     return@launch
                 }
 
@@ -172,6 +190,8 @@ class BootReceiver : BroadcastReceiver() {
                 val notifMessage = NotificationContentHelper.getPrayerMessage(prayerType, prayerTime)
                 val notifColor = getPrayerColor(prayerType)
 
+                var adhanPlayed = false
+
                 if (shouldPlayAdhan) {
                     val adhanSound = AdhanSound.fromName(selectedAdhan)
                     // Check for the specific variant needed, or accept beep as fallback
@@ -183,6 +203,7 @@ class BootReceiver : BroadcastReceiver() {
                     if (!hasCorrectVariant) {
                         android.util.Log.w("BootReceiver", "Missing ${adhanSound.name} variant (isFajr=$isFajr), triggering re-download")
                         AdhanDownloadService.downloadSelected(context, adhanSound)
+                        AppAnalytics.logAdhanFileMissing(adhanSound = adhanSound.name, isFajr = isFajr)
                     }
 
                     if (hasAdhan) {
@@ -198,6 +219,7 @@ class BootReceiver : BroadcastReceiver() {
                             notificationMessage = notifMessage,
                             notificationColor = notifColor
                         )
+                        adhanPlayed = true
                     } else {
                         // Adhan file not available, show standalone notification
                         showEnhancedPrayerNotification(
@@ -223,6 +245,7 @@ class BootReceiver : BroadcastReceiver() {
                             notificationMessage = notifMessage,
                             notificationColor = notifColor
                         )
+                        adhanPlayed = true
                     } else {
                         showEnhancedPrayerNotification(
                             context = context,
@@ -244,12 +267,38 @@ class BootReceiver : BroadcastReceiver() {
                         vibrationEnabled = vibrationEnabled
                     )
                 }
+
+                AppAnalytics.logNotificationDisplayed(
+                    prayerType = prayerType,
+                    isPreReminder = false,
+                    adhanPlayed = adhanPlayed,
+                    dndBlocked = dndBlocksAdhan,
+                    deliveryLatencySeconds = deliveryLatencySeconds,
+                )
             } catch (e: Exception) {
                 e.printStackTrace()
                 showEnhancedPrayerNotification(context, prayerName, prayerType, prayerTime, false, true)
+                AppAnalytics.logError("notification_display", e.javaClass.simpleName, e.message)
+                AppAnalytics.logNotificationDisplayed(
+                    prayerType = prayerType,
+                    isPreReminder = isPreReminder,
+                    adhanPlayed = false,
+                    dndBlocked = false,
+                    deliveryLatencySeconds = deliveryLatencySeconds,
+                )
             }
         }
     }
+
+    /**
+     * Seconds between the time a notification was scheduled to fire and now.
+     * Returns null when the scheduled time can't be parsed (e.g. the human-readable
+     * time strings used by the manual test notifications).
+     */
+    private fun deliveryLatencySeconds(scheduledTimeIso: String): Long? = runCatching {
+        val scheduled = java.time.LocalDateTime.parse(scheduledTimeIso)
+        java.time.Duration.between(scheduled, java.time.LocalDateTime.now()).seconds
+    }.getOrNull()
 
     private suspend fun isPrayerNotificationEnabled(prayerType: String): Boolean {
         return when (prayerType.uppercase()) {
@@ -425,9 +474,11 @@ class BootReceiver : BroadcastReceiver() {
                 )
 
                 showDailySummaryNotification(context, summaryContent)
+                AppAnalytics.logDailySummaryShown(prayedCount = prayedCount, missedCount = missedCount)
 
             } catch (e: Exception) {
                 e.printStackTrace()
+                AppAnalytics.logError("daily_summary", e.javaClass.simpleName, e.message)
             }
         }
     }

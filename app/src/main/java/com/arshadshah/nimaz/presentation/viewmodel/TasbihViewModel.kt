@@ -9,6 +9,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
@@ -128,6 +129,14 @@ class TasbihViewModel @Inject constructor(
     }
 
     fun onEvent(event: TasbihEvent) {
+        when (event) {
+            TasbihEvent.StartSession -> AppAnalytics.logFeatureUsed("tasbih", "session_start")
+            TasbihEvent.CompleteSession -> AppAnalytics.logFeatureUsed("tasbih", "session_complete")
+            TasbihEvent.Reset -> AppAnalytics.logFeatureUsed("tasbih", "reset")
+            is TasbihEvent.CreateCustomPreset -> AppAnalytics.logFeatureUsed("tasbih", "preset_created")
+            is TasbihEvent.DeleteCustomPreset -> AppAnalytics.logFeatureUsed("tasbih", "preset_deleted")
+            else -> {}
+        }
         when (event) {
             is TasbihEvent.SelectPreset -> selectPreset(event.preset)
             TasbihEvent.ClearPreset -> clearPreset()

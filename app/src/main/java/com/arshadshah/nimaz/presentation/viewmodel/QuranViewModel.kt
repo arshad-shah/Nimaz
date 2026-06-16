@@ -4,6 +4,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
@@ -169,6 +170,14 @@ class QuranViewModel @Inject constructor(
     }
 
     fun onEvent(event: QuranEvent) {
+        when (event) {
+            is QuranEvent.LoadSurah -> AppAnalytics.logFeatureUsed("quran", "open_surah")
+            is QuranEvent.PlaySurahAudio -> AppAnalytics.logFeatureUsed("quran", "play_surah_audio")
+            is QuranEvent.PlayAyahAudio -> AppAnalytics.logFeatureUsed("quran", "play_ayah_audio")
+            is QuranEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed("quran", "toggle_bookmark")
+            is QuranEvent.Search -> AppAnalytics.logSearch("quran", event.query.trim().length)
+            else -> {}
+        }
         when (event) {
             is QuranEvent.LoadSurah -> loadSurah(event.surahNumber)
             is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
