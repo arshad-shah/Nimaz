@@ -57,11 +57,11 @@ import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
+import androidx.compose.ui.platform.LocalLocale
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -240,7 +240,8 @@ private fun DayPrayerCard(
         PrayerTimeEntry("Isha", dayTimes.isha, NimazColors.PrayerColors.Isha)
     )
 
-    val dayOfWeek = dayTimes.date.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault())
+    val dayOfWeek =
+        dayTimes.date.dayOfWeek.getDisplayName(TextStyle.SHORT, LocalLocale.current.platformLocale)
     val dayNumber = dayTimes.date.dayOfMonth.toString()
 
     if (isToday) {

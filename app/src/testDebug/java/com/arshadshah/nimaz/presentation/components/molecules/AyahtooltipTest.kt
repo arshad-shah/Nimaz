@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.test.click
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
@@ -20,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 class AyahtooltipTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `renders default action icons (below-tap layout)`() {

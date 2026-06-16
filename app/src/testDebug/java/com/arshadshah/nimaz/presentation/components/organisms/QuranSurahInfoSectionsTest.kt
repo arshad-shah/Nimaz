@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.RevelationType
@@ -15,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 class QuranSurahInfoSectionsTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun surah(
         revelationType: RevelationType = RevelationType.MECCAN,

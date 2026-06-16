@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import com.google.common.truth.Truth.assertThat
@@ -15,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazBadgeTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     // ── Enums / sealed types ────────────────────────────────────────────────
 

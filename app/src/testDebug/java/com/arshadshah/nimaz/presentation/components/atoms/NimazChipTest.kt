@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -16,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazChipTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `chip enums are complete`() {

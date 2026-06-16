@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
@@ -20,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 class AyahTranslationBottomSheetTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun ayah(
         id: Int = 2,

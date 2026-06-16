@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
@@ -15,7 +14,7 @@ import org.robolectric.RobolectricTestRunner
 class PrayerStatsChartTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun stats(
         totalPrayed: Int = 120,

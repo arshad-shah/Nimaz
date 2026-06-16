@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.google.common.truth.Truth.assertThat
@@ -14,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 class TafseerHighlightableTextTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun highlight(
         id: Long = 1L,

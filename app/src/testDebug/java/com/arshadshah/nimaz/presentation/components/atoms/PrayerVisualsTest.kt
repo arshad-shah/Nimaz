@@ -5,7 +5,6 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -17,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 class PrayerVisualsTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `getArabicPrayerName maps every prayer type`() {

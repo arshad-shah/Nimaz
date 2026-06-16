@@ -40,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -204,7 +205,7 @@ private fun HistoryEntryCard(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val dateFormat = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
+    val dateFormat = SimpleDateFormat("MMM d, yyyy", LocalLocale.current.platformLocale)
     val dateString = dateFormat.format(Date(entry.calculatedAt))
 
     Card(

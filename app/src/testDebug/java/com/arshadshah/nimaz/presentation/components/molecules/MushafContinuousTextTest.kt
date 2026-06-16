@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -16,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 class MushafContinuousTextTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun ayah(
         id: Int,
