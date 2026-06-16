@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.google.common.truth.Truth.assertThat
@@ -184,7 +186,11 @@ class AyahActionsBottomSheetTest {
             )
         }
 
-        composeRule.onNodeWithContentDescription("Tafseer").performClick()
+        // Tafseer is the last action in a SpaceEvenly row that overflows the
+        // narrow Robolectric viewport, so it can be off-screen; invoke its click
+        // action directly rather than relying on coordinate-based hit testing.
+        composeRule.onNodeWithContentDescription("Tafseer")
+            .performSemanticsAction(SemanticsActions.OnClick)
         assertThat(fired).isTrue()
     }
 
@@ -200,7 +206,10 @@ class AyahActionsBottomSheetTest {
             )
         }
 
-        composeRule.onNodeWithContentDescription("Read").performClick()
+        // The read toggle sits near the end of the overflowing actions row, so
+        // invoke its click action directly to avoid off-screen hit testing.
+        composeRule.onNodeWithContentDescription("Read")
+            .performSemanticsAction(SemanticsActions.OnClick)
         assertThat(fired).isTrue()
     }
 

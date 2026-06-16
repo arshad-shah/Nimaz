@@ -65,14 +65,16 @@ class MushafPageTest {
     @Test
     fun `renders the page number footer`() {
         composeRule.setThemedContent {
+            // Use a distinctive page number so the footer does not collide with
+            // the surah/ayah number "1" rendered in the page header.
             MushafPage(
-                pageNumber = 1,
+                pageNumber = 99,
                 ayahs = listOf(ayah(id = 1, surahNumber = 1, ayahNumber = 1)),
                 surahMap = mapOf(1 to fatihah)
             )
         }
 
-        composeRule.onNodeWithText("1").assertExists()
+        composeRule.onNodeWithText("99").assertExists()
     }
 
     @Test

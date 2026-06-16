@@ -89,9 +89,11 @@ class JumuahCardTest {
             )
         }
 
-        // R.string.jumuah_hadith_quote
+        // R.string.jumuah_hadith_quote. The unescaped double quotes in the
+        // resource are whitespace-preservation markers and are stripped by the
+        // Android resource parser, so the rendered text carries no quote chars.
         composeRule.onNodeWithText(
-            "\"The best day on which the sun rises is Friday.\" — Sahih Muslim"
+            "The best day on which the sun rises is Friday. — Sahih Muslim"
         ).assertExists()
     }
 }

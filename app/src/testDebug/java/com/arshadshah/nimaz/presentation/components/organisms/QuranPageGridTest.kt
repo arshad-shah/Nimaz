@@ -34,14 +34,15 @@ class QuranPageGridTest {
             LazyColumn {
                 pageGridItems(
                     onNavigateToPage = {},
-                    // Page 1 (within Juz 1: pages 1..21) becomes a full-width
+                    // Page 3 (within Juz 1: pages 1..21) becomes a full-width
                     // card showing its number and the supplied surah chip(s).
-                    surahStartPageMap = mapOf(1 to listOf("Al-Fatihah"))
+                    // Page 3 avoids the Juz 1 header's start/end page badges (1, 21).
+                    surahStartPageMap = mapOf(3 to listOf("Al-Fatihah"))
                 )
             }
         }
 
-        composeRule.onNodeWithText("1").assertExists()
+        composeRule.onNodeWithText("3").assertExists()
         composeRule.onNodeWithText("Al-Fatihah").assertExists()
     }
 
@@ -71,9 +72,10 @@ class QuranPageGridTest {
             }
         }
 
-        // Page 1 is in the first compact grid of Juz 1 and visible at the top.
-        composeRule.onNodeWithText("1").performClick()
-        assertThat(navigatedTo).isEqualTo(1)
+        // Page 3 is in the first compact grid of Juz 1, visible near the top.
+        // It avoids the Juz 1 header's start/end page badges (1, 21).
+        composeRule.onNodeWithText("3").performClick()
+        assertThat(navigatedTo).isEqualTo(3)
     }
 
     @Test
