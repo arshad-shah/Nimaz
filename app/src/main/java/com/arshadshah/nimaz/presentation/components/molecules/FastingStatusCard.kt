@@ -55,6 +55,7 @@ fun FastingStatusCard(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {

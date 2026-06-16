@@ -1,9 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.help
 
 import android.content.Intent
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,9 +20,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.ExpandLess
-import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -31,22 +34,21 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.core.net.toUri
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -176,173 +178,59 @@ fun HelpSupportScreen(
                 .fillMaxSize()
                 .padding(paddingValues),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            // FAQ Section
+            // Intro / hero card
             item {
-                NimazSectionHeader(title = stringResource(R.string.faq_title))
+                HelpIntroCard()
+                Spacer(modifier = Modifier.height(6.dp))
             }
 
+            // FAQ Section
+            item {
+                HelpSectionHeader(R.string.faq_title)
+            }
             items(faqItems) { faq ->
-                FaqCard(faq)
+                NimazAccordion(
+                    title = stringResource(faq.questionResId),
+                    leadingIcon = Icons.AutoMirrored.Filled.HelpOutline,
+                ) {
+                    Text(
+                        text = stringResource(faq.answerResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp
+                    )
+                }
             }
 
             // Feature Guides Section
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                NimazSectionHeader(title = stringResource(R.string.feature_guides))
+                HelpSectionHeader(R.string.feature_guides, topSpacing = true)
             }
-
             items(featureGuides) { guide ->
-                FeatureGuideCard(guide)
+                NimazAccordion(
+                    title = stringResource(guide.titleResId),
+                    leadingIcon = Icons.Default.MenuBook,
+                ) {
+                    Text(
+                        text = stringResource(guide.descriptionResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp
+                    )
+                }
             }
 
             // Troubleshooting Section
             item {
-                Spacer(modifier = Modifier.height(8.dp))
-                NimazSectionHeader(title = stringResource(R.string.troubleshooting_title))
+                HelpSectionHeader(R.string.troubleshooting_title, topSpacing = true)
             }
-
             items(troubleshootingItems) { item ->
-                TroubleshootingCard(item)
-            }
-
-            // Contact Section
-            item {
-                Spacer(modifier = Modifier.height(8.dp))
-                NimazSectionHeader(title = stringResource(R.string.contact_us))
-            }
-
-            item {
-                val supportSubject = stringResource(R.string.nimaz_support_request)
-                val sendEmailLabel = stringResource(R.string.send_email)
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                data = "mailto:support@nimaz.app".toUri()
-                                putExtra(Intent.EXTRA_SUBJECT, supportSubject)
-                            }
-                            context.startActivity(Intent.createChooser(intent, sendEmailLabel))
-                        },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                NimazAccordion(
+                    title = stringResource(item.titleResId),
+                    leadingIcon = Icons.Default.Build,
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Email,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.email_support),
-                                style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = stringResource(R.string.support_email),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
-                }
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-        }
-    }
-}
-
-@Composable
-private fun FaqCard(faq: FaqItem) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(faq.questionResId),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            AnimatedVisibility(visible = expanded) {
-                Text(
-                    text = stringResource(faq.answerResId),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 8.dp),
-                    lineHeight = 20.sp
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun TroubleshootingCard(item: TroubleshootingItem) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { expanded = !expanded },
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(item.titleResId),
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            AnimatedVisibility(visible = expanded) {
-                Column(modifier = Modifier.padding(top = 8.dp)) {
                     Text(
                         text = stringResource(item.symptomResId),
                         style = MaterialTheme.typography.bodyMedium,
@@ -359,72 +247,162 @@ private fun TroubleshootingCard(item: TroubleshootingItem) {
                     )
                 }
             }
+
+            // Contact Section
+            item {
+                HelpSectionHeader(R.string.contact_us, topSpacing = true)
+            }
+            item {
+                val supportSubject = stringResource(R.string.nimaz_support_request)
+                val sendEmailLabel = stringResource(R.string.send_email)
+                val supportEmail = stringResource(R.string.support_email)
+                ContactCard(
+                    email = supportEmail,
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                            data = "mailto:$supportEmail".toUri()
+                            putExtra(Intent.EXTRA_SUBJECT, supportSubject)
+                        }
+                        context.startActivity(Intent.createChooser(intent, sendEmailLabel))
+                    }
+                )
+            }
+
+            item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
 }
 
 @Composable
-private fun FeatureGuideCard(guide: FeatureGuide) {
+private fun HelpSectionHeader(titleResId: Int, topSpacing: Boolean = false) {
+    if (topSpacing) {
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+    NimazSectionHeader(title = stringResource(titleResId))
+}
+
+@Composable
+private fun HelpIntroCard() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.SupportAgent,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(26.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.help_intro_title),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = stringResource(R.string.help_intro_subtitle),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    lineHeight = 18.sp
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContactCard(email: String, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(guide.titleResId),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = stringResource(guide.descriptionResId),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ContactIcon(Icons.Default.Email)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.email_support),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = email,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp)
             )
         }
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "FaqCard")
 @Composable
-private fun FaqCardPreview() {
-    NimazTheme {
-        FaqCard(
-            faq = FaqItem(
-                R.string.faq_prayer_times_q,
-                R.string.faq_prayer_times_a
-            )
+private fun ContactIcon(icon: ImageVector) {
+    Box(
+        modifier = Modifier
+            .size(40.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(22.dp)
         )
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "TroubleshootingCard")
+@Preview(showBackground = true, widthDp = 400, name = "Help intro")
 @Composable
-private fun TroubleshootingCardPreview() {
+private fun HelpIntroCardPreview() {
     NimazTheme {
-        TroubleshootingCard(
-            item = TroubleshootingItem(
-                R.string.trouble_no_notifications_title,
-                R.string.trouble_no_notifications_symptom,
-                R.string.trouble_no_notifications_solution
-            )
-        )
+        HelpIntroCard()
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "FeatureGuideCard")
+@Preview(showBackground = true, widthDp = 400, name = "Contact card")
 @Composable
-private fun FeatureGuideCardPreview() {
+private fun ContactCardPreview() {
     NimazTheme {
-        FeatureGuideCard(
-            guide = FeatureGuide(
-                R.string.guide_prayer_times_title,
-                R.string.guide_prayer_times_desc
-            )
-        )
+        ContactCard(email = "info@arshadshah.com", onClick = {})
     }
 }

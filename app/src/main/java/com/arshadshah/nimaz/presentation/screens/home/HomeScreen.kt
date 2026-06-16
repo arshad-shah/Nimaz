@@ -270,6 +270,8 @@ private fun HomeCompactContent(
                 prayerTimes = state.prayerTimes,
                 fastingToday = state.fastingToday,
                 dailyHadith = state.dailyHadith,
+                dailyHadithReference = state.dailyHadithReference,
+                dailyDua = state.dailyDua,
             )
         }
 
@@ -408,6 +410,8 @@ private fun HomeTabletContent(
                 TodayInfoCards(
                     fastingToday = state.fastingToday,
                     dailyHadith = state.dailyHadith,
+                    dailyHadithReference = state.dailyHadithReference,
+                    dailyDua = state.dailyDua,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
 

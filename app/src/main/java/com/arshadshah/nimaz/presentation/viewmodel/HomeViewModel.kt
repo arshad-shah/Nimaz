@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
@@ -38,6 +39,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.time.Clock
 import kotlin.time.Duration
@@ -54,6 +56,8 @@ data class HomeUiState(
     val longitude: Double = 0.0,
     val fastingToday: Boolean = false,
     val dailyHadith: String? = null,
+    val dailyHadithReference: String? = null,
+    val dailyDua: DailyDua? = null,
     val isFriday: Boolean = false,
     val jumuahTime: String = "",
     val timeUntilJumuah: String = "",
@@ -64,6 +68,19 @@ data class HomeUiState(
     val hasNotificationPermission: Boolean = true,
     val hasLocationPermission: Boolean = true,
     val isBatteryOptimized: Boolean = false
+)
+
+/**
+ * A single dua surfaced on the home screen's "Today" section, picked to match
+ * the current time of day (morning / evening / before sleep adhkar).
+ */
+data class DailyDua(
+    val title: String,
+    val arabic: String,
+    val translation: String,
+    val source: String,
+    val categoryLabel: String,
+    val categoryIcon: String,
 )
 
 data class PrayerTimeDisplay(
@@ -90,7 +107,8 @@ class HomeViewModel @Inject constructor(
     private val prayerRepository: PrayerRepository,
     private val preferencesDataStore: PreferencesDataStore,
     private val fastingDao: FastingDao,
-    private val hadithDao: HadithDao
+    private val hadithDao: HadithDao,
+    private val duaDao: DuaDao
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -103,6 +121,7 @@ class HomeViewModel @Inject constructor(
         loadPrayerRecords()
         observeFastingStatus()
         loadDailyHadith()
+        loadDailyDua()
         startTimeUpdates()
     }
 
@@ -133,30 +152,73 @@ class HomeViewModel @Inject constructor(
                 val totalHadiths = hadithDao.getHadithCount()
                 if (totalHadiths == 0) return@launch
 
-                // Use day of year + year to create a unique offset that doesn't repeat within a year
-                val today = LocalDate.now()
-                val dayOfYear = today.dayOfYear
-                val year = today.year
-
-                // Create a seed based on day and year for deterministic but varied selection
-                // This ensures: 1) Same hadith every time on the same day
-                //               2) Different hadith each day of the year
-                //               3) Different sequence each year
-                val seed = (dayOfYear + year * 367L) % totalHadiths
-                val offset = seed.toInt()
+                // Spread the daily selection across the whole collection. The
+                // previous approach incremented the offset by one per day, so
+                // consecutive days landed on adjacent (near-identical) hadiths
+                // and barely appeared to change. Multiplying the day index by a
+                // large odd constant (Knuth's multiplicative hash) scatters
+                // each day to a very different part of the database while still
+                // being deterministic: the same day always yields the same
+                // hadith.
+                val daysSinceEpoch = LocalDate.now().toEpochDay()
+                val offset = Math.floorMod(daysSinceEpoch * 2654435761L, totalHadiths.toLong()).toInt()
 
                 val hadith = hadithDao.getHadithByOffset(offset)
                 _state.update {
                     it.copy(
-                        dailyHadith = hadith?.textEnglish?.take(150)?.let { text ->
-                            if (text.length >= 150) "$text..." else text
-                        }
+                        dailyHadith = hadith?.textEnglish?.let { text ->
+                            if (text.length > 150) text.take(150).trimEnd() + "…" else text
+                        },
+                        dailyHadithReference = hadith?.reference?.takeIf { ref -> ref.isNotBlank() }
                     )
                 }
             } catch (_: Exception) {
                 // No hadith data available
             }
         }
+    }
+
+    /**
+     * Loads a dua matching the current time of day (morning / evening / before
+     * sleep adhkar) and rotates the specific dua daily within that category.
+     */
+    private fun loadDailyDua() {
+        viewModelScope.launch {
+            try {
+                val categoryId = duaCategoryForHour(LocalTime.now().hour)
+                val category = duaDao.getCategoryById(categoryId) ?: return@launch
+                val duas = duaDao.getDuasByCategoryOnce(categoryId)
+                if (duas.isEmpty()) return@launch
+
+                val index = (LocalDate.now().dayOfYear % duas.size).coerceIn(0, duas.size - 1)
+                val dua = duas[index]
+                _state.update {
+                    it.copy(
+                        dailyDua = DailyDua(
+                            title = dua.titleEnglish,
+                            arabic = dua.textArabic,
+                            translation = dua.translation,
+                            source = dua.source,
+                            categoryLabel = category.nameEnglish,
+                            categoryIcon = category.icon
+                        )
+                    )
+                }
+            } catch (_: Exception) {
+                // No dua data available
+            }
+        }
+    }
+
+    /**
+     * Maps the hour of day to a dua category id (matching the prepopulated
+     * `dua_categories` table): morning adhkar through the day, evening adhkar
+     * in the late afternoon, and before-sleep adhkar at night.
+     */
+    private fun duaCategoryForHour(hour: Int): Int = when (hour) {
+        in 4..15 -> DUA_CATEGORY_MORNING
+        in 16..20 -> DUA_CATEGORY_EVENING
+        else -> DUA_CATEGORY_BEFORE_SLEEP
     }
 
     private val _prayerRecords = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
@@ -318,6 +380,11 @@ class HomeViewModel @Inject constructor(
         private const val DEFAULT_LATITUDE = 53.3498
         private const val DEFAULT_LONGITUDE = -6.2603
         private const val DEFAULT_LOCATION_NAME = "Dublin, Ireland"
+
+        // Dua category ids from the prepopulated `dua_categories` table.
+        private const val DUA_CATEGORY_MORNING = 1       // Morning Adhkar
+        private const val DUA_CATEGORY_EVENING = 2       // Evening Adhkar
+        private const val DUA_CATEGORY_BEFORE_SLEEP = 5  // Before Sleep
     }
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
