@@ -56,8 +56,10 @@ interface HadithDao {
     @Query("SELECT COUNT(*) FROM hadiths")
     suspend fun getHadithCount(): Int
 
-    // Get hadith by offset (for hadith of the day - deterministic selection)
-    @Query("SELECT * FROM hadiths LIMIT 1 OFFSET :offset")
+    // Get hadith by offset (for hadith of the day - deterministic selection).
+    // ORDER BY id keeps the offset stable regardless of SQLite's internal row
+    // ordering, so the same offset always maps to the same hadith.
+    @Query("SELECT * FROM hadiths ORDER BY id ASC LIMIT 1 OFFSET :offset")
     suspend fun getHadithByOffset(offset: Int): HadithEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

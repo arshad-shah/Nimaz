@@ -39,7 +39,7 @@ class TodayCarouselTest {
     )
 
     @Test
-    fun `renders the summary page by default`() {
+    fun `renders the progress page by default`() {
         composeRule.setThemedContent {
             TodayCarousel(
                 prayerTimes = samplePrayers,
@@ -48,13 +48,13 @@ class TodayCarouselTest {
             )
         }
 
-        // SUMMARY is the first page (DailySummaryCard), visible without swiping.
+        // PROGRESS is the first page (TodaysProgressCard), visible without swiping.
         // R.string.todays_progress == "Today's Progress"
         composeRule.onNodeWithText("Today's Progress").assertExists()
     }
 
     @Test
-    fun `summary page shows the prayer count`() {
+    fun `progress page shows the prayer count`() {
         composeRule.setThemedContent {
             TodayCarousel(
                 prayerTimes = samplePrayers,
@@ -77,14 +77,19 @@ class TodayCarouselTest {
             )
         }
 
-        // SUMMARY is still the front page; the HADITH page is added but off-screen.
+        // PROGRESS is still the front page; the HADITH page is added but off-screen.
         composeRule.onNodeWithText("Today's Progress").assertExists()
     }
 
     @Test
-    fun `TodayCarouselPage enum exposes summary and hadith pages`() {
+    fun `TodayCarouselPage enum exposes progress, fasting, hadith and dua pages`() {
         assertThat(TodayCarouselPage.values().toList())
-            .containsExactly(TodayCarouselPage.SUMMARY, TodayCarouselPage.HADITH)
+            .containsExactly(
+                TodayCarouselPage.PROGRESS,
+                TodayCarouselPage.FASTING,
+                TodayCarouselPage.HADITH,
+                TodayCarouselPage.DUA
+            )
             .inOrder()
     }
 }
