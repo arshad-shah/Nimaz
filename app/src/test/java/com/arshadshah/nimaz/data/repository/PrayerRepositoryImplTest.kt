@@ -101,7 +101,7 @@ class PrayerRepositoryImplTest {
                 match { it.prayerName == "fajr" && it.status == "prayed" && it.isJamaah }
             )
         }
-        coVerify(exactly = 0) { prayerDao.updatePrayerStatus(any(), any(), any(), any(), any()) }
+        coVerify(exactly = 0) { prayerDao.updatePrayerStatus(any(), any(), any(), any(), any(), any()) }
     }
 
     @Test
@@ -110,10 +110,12 @@ class PrayerRepositoryImplTest {
 
         repository.updatePrayerStatus(today, PrayerName.FAJR, PrayerStatus.MISSED, null, false)
 
-        // All-matcher form so the nullable prayedAt is matched with isNull() rather
-        // than a bare literal (MockK can't mix raw values and matchers).
+        // All-matcher form. The trailing any() matches the defaulted
+        // `timestamp = System.currentTimeMillis()` param — without it MockK fills the
+        // default at verify time, producing an eq() against a different timestamp than
+        // the call recorded. isNull() matches the nullable prayedAt.
         coVerify {
-            prayerDao.updatePrayerStatus(eq(today), eq("fajr"), eq("missed"), isNull(), eq(false))
+            prayerDao.updatePrayerStatus(eq(today), eq("fajr"), eq("missed"), isNull(), eq(false), any())
         }
         coVerify(exactly = 0) { prayerDao.insertPrayerRecord(any()) }
     }
