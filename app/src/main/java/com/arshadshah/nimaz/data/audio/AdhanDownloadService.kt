@@ -45,11 +45,10 @@ class AdhanDownloadService : Service() {
             val intent = Intent(context, AdhanDownloadService::class.java).apply {
                 action = ACTION_DOWNLOAD_DEFAULT
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            startServiceWithFallback(
+                start = { startForegroundCompat(context, intent) },
+                fallback = { AdhanDownloadWorker.enqueue(context, null) }
+            )
         }
 
         fun downloadSelected(context: Context, adhanSound: AdhanSound) {
@@ -57,10 +56,40 @@ class AdhanDownloadService : Service() {
                 action = ACTION_DOWNLOAD_SELECTED
                 putExtra(EXTRA_ADHAN_SOUND, adhanSound.name)
             }
+            startServiceWithFallback(
+                start = { startForegroundCompat(context, intent) },
+                fallback = { AdhanDownloadWorker.enqueue(context, adhanSound) }
+            )
+        }
+
+        private fun startForegroundCompat(context: Context, intent: Intent) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(intent)
             } else {
                 context.startService(intent)
+            }
+        }
+
+        /**
+         * Runs [start] to launch the foreground download service, degrading to
+         * [fallback] when the foreground service cannot be started.
+         *
+         * Both download triggers (app initialization and prayer-notification
+         * broadcasts) can run while the app is in the background. On Android 12+
+         * starting a foreground service from the background throws
+         * [android.app.ForegroundServiceStartNotAllowedException]. Letting that
+         * propagate aborts the download (and was being reported as a non-fatal
+         * crash), so we catch it and enqueue a background WorkManager job
+         * instead, which is allowed to run from the background.
+         *
+         * Visible for testing.
+         */
+        internal fun startServiceWithFallback(start: () -> Unit, fallback: () -> Unit) {
+            try {
+                start()
+            } catch (e: Exception) {
+                Log.w(TAG, "Foreground service start not allowed; using background download", e)
+                fallback()
             }
         }
     }
