@@ -216,14 +216,14 @@ fun AdaptiveMoreScreen(
                                 onNavigateToPrivacyPolicy = {
                                     val intent = Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/privacy-policy")
+                                        Uri.parse("https://nimaz.arshadshah.com/policy")
                                     )
                                     context.startActivity(intent)
                                 },
                                 onNavigateToTerms = {
                                     val intent = Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/terms-of-service")
+                                        Uri.parse("https://nimaz.arshadshah.com/terms")
                                     )
                                     context.startActivity(intent)
                                 },
