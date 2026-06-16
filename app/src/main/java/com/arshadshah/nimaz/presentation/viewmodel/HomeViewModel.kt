@@ -96,6 +96,12 @@ class HomeViewModel @Inject constructor(
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
 
+    // Declared before init{} so it is initialized before loadPrayerRecords()
+    // collects into it. The getTodayPrayerRecords() Flow can emit synchronously
+    // on an unconfined dispatch during construction; if this field were declared
+    // after the init block it would still be null at that point, causing an NPE.
+    private val _prayerRecords = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
+
     init {
         checkPermissions()
         observeLocation()
@@ -158,8 +164,6 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-
-    private val _prayerRecords = MutableStateFlow<Map<PrayerName, PrayerStatus>>(emptyMap())
 
     fun onEvent(event: HomeEvent) {
         when (event) {
