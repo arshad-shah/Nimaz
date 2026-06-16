@@ -91,6 +91,16 @@ android {
     }
 }
 
+kotlin {
+    compilerOptions {
+        // Opt in to applying annotations (e.g. Hilt's @ApplicationContext) to both
+        // the value parameter and the backing field/property. This is the future
+        // default and silences the KT-73255 deprecation warning emitted for
+        // constructor-injected parameters. See https://youtrack.jetbrains.com/issue/KT-73255
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
+    }
+}
+
 dependencies {
     // Core
     implementation(libs.androidx.core.ktx)

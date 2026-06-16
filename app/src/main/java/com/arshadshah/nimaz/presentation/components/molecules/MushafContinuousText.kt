@@ -1,9 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -107,7 +109,7 @@ fun MushafContinuousText(
 
     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
         Box(modifier = modifier.fillMaxWidth()) {
-            ClickableText(
+            BasicText(
                 text = annotatedText,
                 style = TextStyle(
                     fontFamily = AmiriFontFamily,
@@ -117,25 +119,26 @@ fun MushafContinuousText(
                     textAlign = TextAlign.Justify,
                     color = textColor
                 ),
-                onClick = { offset ->
-                    annotatedText.getStringAnnotations(
-                        tag = AYAH_TAG, start = offset, end = offset
-                    ).firstOrNull()?.let { annotation ->
-                        val ayahId = annotation.item.toIntOrNull()
-                        ayahs.find { it.id == ayahId }?.let { ayah ->
-                            val tapY = textLayoutResult?.let { layout ->
-                                val line = layout.getLineForOffset(offset)
-                                val lineTop = layout.getLineTop(line)
-                                val lineBottom = layout.getLineBottom(line)
-                                (lineTop + lineBottom) / 2f
-                            } ?: 0f
-                            onAyahClick(ayah, tapY)
-                        }
-                    }
-                },
                 onTextLayout = { result -> textLayoutResult = result },
                 modifier = Modifier
                     .fillMaxWidth()
+                    .pointerInput(annotatedText, ayahs) {
+                        detectTapGestures { position ->
+                            val layout = textLayoutResult ?: return@detectTapGestures
+                            val offset = layout.getOffsetForPosition(position)
+                            annotatedText.getStringAnnotations(
+                                tag = AYAH_TAG, start = offset, end = offset
+                            ).firstOrNull()?.let { annotation ->
+                                val ayahId = annotation.item.toIntOrNull()
+                                ayahs.find { it.id == ayahId }?.let { ayah ->
+                                    val line = layout.getLineForOffset(offset)
+                                    val tapY =
+                                        (layout.getLineTop(line) + layout.getLineBottom(line)) / 2f
+                                    onAyahClick(ayah, tapY)
+                                }
+                            }
+                        }
+                    }
                     .then(
                         if (showRuledLines) {
                             Modifier.drawBehind {

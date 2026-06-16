@@ -23,7 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.SupportAgent
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -211,7 +211,7 @@ fun HelpSupportScreen(
             items(featureGuides) { guide ->
                 NimazAccordion(
                     title = stringResource(guide.titleResId),
-                    leadingIcon = Icons.Default.MenuBook,
+                    leadingIcon = Icons.AutoMirrored.Filled.MenuBook,
                 ) {
                     Text(
                         text = stringResource(guide.descriptionResId),

@@ -78,7 +78,7 @@ class MushafContinuousTextTest {
         // If layout/offset resolution yields no annotation the callback simply
         // won't fire; assert only that, when it fires, it carries a valid ayah.
         if (clickedAyah != null) {
-            assertThatAyahIsKnown(clickedAyah!!)
+            assertThatAyahIsKnown(clickedAyah)
             assert(clickedY >= 0f)
         }
     }

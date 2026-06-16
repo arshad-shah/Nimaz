@@ -27,7 +27,7 @@ object LocaleHelper {
             context.getSystemService(LocaleManager::class.java)
                 ?.applicationLocales = LocaleList.forLanguageTags(languageCode)
         } else {
-            val locale = Locale(languageCode)
+            val locale = Locale.forLanguageTag(languageCode)
             Locale.setDefault(locale)
             val config = context.resources.configuration
             config.setLocale(locale)

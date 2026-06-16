@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 

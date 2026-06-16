@@ -37,7 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -466,7 +466,7 @@ fun ExpandableSearchBar(
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
-                                imageVector = Icons.Default.TrendingUp,
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
@@ -704,7 +704,7 @@ private fun NimazSearchBar_Showcase_Preview() {
                         Spacer(modifier = Modifier.width(4.dp))
                         IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
                             Icon(
-                                imageVector = Icons.Default.TrendingUp,
+                                imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = "Filter",
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
@@ -797,7 +797,7 @@ private fun NimazSearchBar_Trailing_Preview() {
                 Spacer(modifier = Modifier.width(4.dp))
                 IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
                     Icon(
-                        imageVector = Icons.Default.TrendingUp,
+                        imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                         contentDescription = "Filter",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)

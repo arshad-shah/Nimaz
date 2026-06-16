@@ -104,7 +104,7 @@ private fun BannerPill(banner: HomeBannerItem) {
             .background(colors.container)
             .then(
                 if (pillIsTappable) {
-                    Modifier.clickable { banner.onAction?.invoke() }
+                    Modifier.clickable { banner.onAction.invoke() }
                 } else Modifier
             )
             .padding(horizontal = 14.dp, vertical = 6.dp),

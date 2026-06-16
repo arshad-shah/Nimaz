@@ -5,7 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
@@ -27,8 +27,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.window.core.layout.WindowWidthSizeClass
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.isTablet
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -200,7 +200,7 @@ fun NavGraph(
     } else {
         val defaultType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
         // Force NavigationRail on all non-compact sizes (user preference: no drawer)
-        if (adaptiveInfo.windowSizeClass.windowWidthSizeClass != WindowWidthSizeClass.COMPACT) {
+        if (adaptiveInfo.windowSizeClass.isTablet) {
             NavigationSuiteType.NavigationRail
         } else {
             defaultType
@@ -931,7 +931,7 @@ private data class BottomNavItem(
 
 private val bottomNavItems = listOf(
     BottomNavItem(Route.Home, "Home", Icons.Default.Home),
-    BottomNavItem(Route.Quran, "Quran", Icons.Default.MenuBook),
+    BottomNavItem(Route.Quran, "Quran", Icons.AutoMirrored.Filled.MenuBook),
     BottomNavItem(Route.Tasbih, "Tasbih", Icons.Default.TouchApp),
     BottomNavItem(Route.QiblaNav, "Qibla", Icons.Default.Explore),
     BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz)

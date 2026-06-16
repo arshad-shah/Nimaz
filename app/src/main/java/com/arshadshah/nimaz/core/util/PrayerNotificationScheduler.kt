@@ -506,8 +506,8 @@ class PrayerNotificationScheduler @Inject constructor(
         }
     }
 
-    // Extension to convert kotlinx.datetime.Instant to LocalDateTime
-    private fun kotlinx.datetime.Instant.toLocalDateTime(): LocalDateTime {
+    // Extension to convert an Instant to LocalDateTime
+    private fun kotlin.time.Instant.toLocalDateTime(): LocalDateTime {
         return java.time.Instant.ofEpochMilli(this.toEpochMilliseconds())
             .atZone(ZoneId.systemDefault())
             .toLocalDateTime()
