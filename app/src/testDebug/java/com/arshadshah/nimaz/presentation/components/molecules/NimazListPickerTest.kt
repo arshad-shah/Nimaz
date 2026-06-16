@@ -123,7 +123,12 @@ class NimazListPickerTest {
         composeRule.onNodeWithText("Karachi").assertExists()
         composeRule.onNodeWithText("Egyptian").assertExists()
 
-        composeRule.onNodeWithContentDescription("Search...").performTextInput("Karachi")
+        // Filter by a description substring ("Pakistan" is Karachi's region) so
+        // the text typed into the search field does not itself collide with any
+        // list-item title — otherwise onNodeWithText("Karachi") would match both
+        // the field's content and the row. Karachi matches via its description;
+        // Egyptian is filtered out.
+        composeRule.onNodeWithContentDescription("Search...").performTextInput("Pakistan")
         composeRule.onNodeWithText("Karachi").assertExists()
         composeRule.onNodeWithText("Egyptian").assertDoesNotExist()
     }
