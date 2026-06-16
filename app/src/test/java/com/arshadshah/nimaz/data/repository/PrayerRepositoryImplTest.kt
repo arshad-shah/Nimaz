@@ -106,11 +106,15 @@ class PrayerRepositoryImplTest {
 
     @Test
     fun `updatePrayerStatus updates the existing record when present`() = runTest {
-        coEvery { prayerDao.getPrayerRecord(today, "fajr") } returns recordEntity()
+        coEvery { prayerDao.getPrayerRecord(any(), any()) } returns recordEntity()
 
         repository.updatePrayerStatus(today, PrayerName.FAJR, PrayerStatus.MISSED, null, false)
 
-        coVerify { prayerDao.updatePrayerStatus(today, "fajr", "missed", null, false) }
+        // All-matcher form so the nullable prayedAt is matched with isNull() rather
+        // than a bare literal (MockK can't mix raw values and matchers).
+        coVerify {
+            prayerDao.updatePrayerStatus(eq(today), eq("fajr"), eq("missed"), isNull(), eq(false))
+        }
         coVerify(exactly = 0) { prayerDao.insertPrayerRecord(any()) }
     }
 
