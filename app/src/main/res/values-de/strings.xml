@@ -35,6 +35,7 @@
     <string name="update_available">Eine neue Version von Nimaz ist verfügbar</string>
     <string name="update_action">Aktualisieren</string>
     <string name="downloading_update">Update wird heruntergeladen…</string>
+    <string name="starting_update">Update wird gestartet…</string>
     <string name="update_ready">Update zur Installation bereit</string>
     <string name="restart">Neustart</string>
     <string name="notifications_disabled_title">Benachrichtigungen deaktiviert</string>
@@ -133,6 +134,8 @@
     <string name="open_source_licenses_subtitle">Drittanbieter-Bibliotheken</string>
     <string name="check_for_updates">Nach Updates suchen</string>
     <string name="update_new_version">Neue Version verfügbar</string>
+    <string name="update_checking">Wird geprüft…</string>
+    <string name="update_starting">Wird gestartet…</string>
     <string name="update_downloading">Wird heruntergeladen…</string>
     <string name="update_downloaded">Bereit zur Installation</string>
     <string name="update_up_to_date">Sie sind auf dem neuesten Stand</string>
