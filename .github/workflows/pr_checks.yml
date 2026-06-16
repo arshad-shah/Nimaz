@@ -28,6 +28,13 @@ jobs:
       - name: Run Tests and Lint
         run: bundle exec fastlane android test
 
+      # Build (but do NOT run) the instrumented test sources. There is no
+      # emulator in this lane, so this is a compile/sanity check only — it
+      # ensures the androidTest code stays valid and ready for a device /
+      # Firebase Test Lab lane. No tests are executed on a device here.
+      - name: Compile instrumented tests (build only, no emulator)
+        run: bash ./gradlew assembleDebugAndroidTest --stacktrace
+
       - name: Generate coverage reports
         if: always()
         run: bash ./gradlew jacocoTestReport jacocoDomainDataReport --stacktrace

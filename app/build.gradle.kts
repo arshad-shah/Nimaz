@@ -41,7 +41,11 @@ android {
         versionCode = 314
         versionName = "3.0.14"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // HiltTestRunner swaps in HiltTestApplication so @HiltAndroidTest
+        // instrumented tests can inject. Instrumented tests are compiled in CI
+        // but not executed (no emulator); they run on a device / Firebase Test
+        // Lab when that lane is added.
+        testInstrumentationRunner = "com.arshadshah.nimaz.HiltTestRunner"
 
         // Room schema export
         ksp {
