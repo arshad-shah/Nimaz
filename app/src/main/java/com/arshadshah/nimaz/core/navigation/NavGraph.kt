@@ -741,11 +741,11 @@ fun NavGraph(
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/privacy-policy"))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/policy"))
                         context.startActivity(intent)
                     },
                     onNavigateToTerms = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/terms-of-service"))
+                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/terms"))
                         context.startActivity(intent)
                     },
                     onNavigateToLicenses = {

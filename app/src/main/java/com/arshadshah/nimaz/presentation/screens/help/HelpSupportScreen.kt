@@ -53,20 +53,47 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 private data class FaqItem(val questionResId: Int, val answerResId: Int)
 
 private val faqItems = listOf(
+    // Prayer Times
     FaqItem(R.string.faq_prayer_times_q, R.string.faq_prayer_times_a),
+    FaqItem(R.string.faq_calculation_method_q, R.string.faq_calculation_method_a),
+    FaqItem(R.string.faq_asr_method_q, R.string.faq_asr_method_a),
+    FaqItem(R.string.faq_high_latitude_q, R.string.faq_high_latitude_a),
     FaqItem(R.string.faq_mosque_difference_q, R.string.faq_mosque_difference_a),
+    FaqItem(R.string.faq_adjust_times_q, R.string.faq_adjust_times_a),
+    // Location
     FaqItem(R.string.faq_set_location_q, R.string.faq_set_location_a),
-    FaqItem(R.string.faq_qibla_q, R.string.faq_qibla_a),
-    FaqItem(R.string.faq_track_prayers_q, R.string.faq_track_prayers_a),
-    FaqItem(R.string.faq_quran_translation_q, R.string.faq_quran_translation_a),
+    FaqItem(R.string.faq_location_permission_q, R.string.faq_location_permission_a),
+    // Notifications and Adhan
     FaqItem(R.string.faq_notifications_q, R.string.faq_notifications_a),
-    FaqItem(R.string.faq_tasbih_q, R.string.faq_tasbih_a)
+    FaqItem(R.string.faq_adhan_q, R.string.faq_adhan_a),
+    FaqItem(R.string.faq_reminder_q, R.string.faq_reminder_a),
+    FaqItem(R.string.faq_dnd_q, R.string.faq_dnd_a),
+    // Qibla
+    FaqItem(R.string.faq_qibla_q, R.string.faq_qibla_a),
+    // Quran
+    FaqItem(R.string.faq_quran_translation_q, R.string.faq_quran_translation_a),
+    FaqItem(R.string.faq_quran_audio_q, R.string.faq_quran_audio_a),
+    // Tasbih
+    FaqItem(R.string.faq_tasbih_q, R.string.faq_tasbih_a),
+    // Prayer Tracking
+    FaqItem(R.string.faq_track_prayers_q, R.string.faq_track_prayers_a),
+    FaqItem(R.string.faq_qada_q, R.string.faq_qada_a),
+    // Calendar and Hijri
+    FaqItem(R.string.faq_hijri_q, R.string.faq_hijri_a),
+    // Fasting
+    FaqItem(R.string.faq_fasting_q, R.string.faq_fasting_a),
+    // Zakat
+    FaqItem(R.string.faq_zakat_q, R.string.faq_zakat_a),
+    // General and Privacy
+    FaqItem(R.string.faq_privacy_q, R.string.faq_privacy_a),
+    FaqItem(R.string.faq_offline_q, R.string.faq_offline_a)
 )
 
 private data class FeatureGuide(val titleResId: Int, val descriptionResId: Int)
 
 private val featureGuides = listOf(
     FeatureGuide(R.string.guide_prayer_times_title, R.string.guide_prayer_times_desc),
+    FeatureGuide(R.string.guide_tracker_title, R.string.guide_tracker_desc),
     FeatureGuide(R.string.guide_quran_title, R.string.guide_quran_desc),
     FeatureGuide(R.string.guide_qibla_title, R.string.guide_qibla_desc),
     FeatureGuide(R.string.guide_tasbih_title, R.string.guide_tasbih_desc),
@@ -75,6 +102,55 @@ private val featureGuides = listOf(
     FeatureGuide(R.string.guide_fasting_title, R.string.guide_fasting_desc),
     FeatureGuide(R.string.guide_zakat_title, R.string.guide_zakat_desc),
     FeatureGuide(R.string.guide_calendar_title, R.string.guide_calendar_desc)
+)
+
+private data class TroubleshootingItem(
+    val titleResId: Int,
+    val symptomResId: Int,
+    val solutionResId: Int
+)
+
+private val troubleshootingItems = listOf(
+    TroubleshootingItem(
+        R.string.trouble_times_wrong_title,
+        R.string.trouble_times_wrong_symptom,
+        R.string.trouble_times_wrong_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_no_notifications_title,
+        R.string.trouble_no_notifications_symptom,
+        R.string.trouble_no_notifications_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_adhan_silent_title,
+        R.string.trouble_adhan_silent_symptom,
+        R.string.trouble_adhan_silent_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_location_title,
+        R.string.trouble_location_symptom,
+        R.string.trouble_location_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_qibla_title,
+        R.string.trouble_qibla_symptom,
+        R.string.trouble_qibla_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_background_title,
+        R.string.trouble_background_symptom,
+        R.string.trouble_background_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_hijri_title,
+        R.string.trouble_hijri_symptom,
+        R.string.trouble_hijri_solution
+    ),
+    TroubleshootingItem(
+        R.string.trouble_quran_audio_title,
+        R.string.trouble_quran_audio_symptom,
+        R.string.trouble_quran_audio_solution
+    )
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -119,6 +195,16 @@ fun HelpSupportScreen(
 
             items(featureGuides) { guide ->
                 FeatureGuideCard(guide)
+            }
+
+            // Troubleshooting Section
+            item {
+                Spacer(modifier = Modifier.height(8.dp))
+                NimazSectionHeader(title = stringResource(R.string.troubleshooting_title))
+            }
+
+            items(troubleshootingItems) { item ->
+                TroubleshootingCard(item)
             }
 
             // Contact Section
@@ -228,6 +314,56 @@ private fun FaqCard(faq: FaqItem) {
 }
 
 @Composable
+private fun TroubleshootingCard(item: TroubleshootingItem) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { expanded = !expanded },
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(item.titleResId),
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            AnimatedVisibility(visible = expanded) {
+                Column(modifier = Modifier.padding(top = 8.dp)) {
+                    Text(
+                        text = stringResource(item.symptomResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontWeight = FontWeight.Medium,
+                        lineHeight = 20.sp
+                    )
+                    Text(
+                        text = stringResource(item.solutionResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp),
+                        lineHeight = 20.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun FeatureGuideCard(guide: FeatureGuide) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -261,6 +397,20 @@ private fun FaqCardPreview() {
             faq = FaqItem(
                 R.string.faq_prayer_times_q,
                 R.string.faq_prayer_times_a
+            )
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "TroubleshootingCard")
+@Composable
+private fun TroubleshootingCardPreview() {
+    NimazTheme {
+        TroubleshootingCard(
+            item = TroubleshootingItem(
+                R.string.trouble_no_notifications_title,
+                R.string.trouble_no_notifications_symptom,
+                R.string.trouble_no_notifications_solution
             )
         )
     }
