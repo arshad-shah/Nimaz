@@ -9,6 +9,7 @@ import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -119,10 +120,12 @@ class PrayerNotificationScheduler @Inject constructor(
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
+            AppAnalytics.logNotificationsCancelled(reason = "notifications_disabled")
             return
         }
 
         if (latitude == 0.0 && longitude == 0.0) {
+            AppAnalytics.logNotificationsCancelled(reason = "no_location")
             return // No location set
         }
 
@@ -142,6 +145,7 @@ class PrayerNotificationScheduler @Inject constructor(
             adjustments = adjustments
         )
         val now = LocalDateTime.now()
+        var scheduledCount = 0
 
         prayerTimes.forEach { prayerTime ->
             // Skip Sunrise by default, or skip if not in enabledPrayers set
@@ -156,6 +160,7 @@ class PrayerNotificationScheduler @Inject constructor(
             // Only schedule if prayer time is in the future
             if (prayerLocalDateTime.isAfter(now)) {
                 schedulePrayerNotification(prayerTime.type, prayerLocalDateTime)
+                scheduledCount++
 
                 // Schedule pre-reminder if enabled (not for sunrise)
                 if (preReminderEnabled && prayerTime.type != PrayerType.SUNRISE) {
@@ -172,6 +177,15 @@ class PrayerNotificationScheduler @Inject constructor(
 
         // Schedule daily summary notification at 11 PM
         scheduleDailySummary()
+
+        // Record the scheduling outcome along with the OS-level prerequisites that
+        // determine whether these alarms will actually fire on time.
+        AppAnalytics.logNotificationsScheduled(
+            scheduledCount = scheduledCount,
+            preRemindersEnabled = preReminderEnabled,
+            exactAlarmAllowed = AppAnalytics.exactAlarmAllowed(context),
+            postNotificationsGranted = AppAnalytics.postNotificationsGranted(context),
+        )
     }
 
     /**
@@ -396,6 +410,7 @@ class PrayerNotificationScheduler @Inject constructor(
             .build()
 
         notificationManager.notify(TEST_NOTIFICATION_ID, notification)
+        AppAnalytics.logTestNotification(allPrayers = false)
     }
 
     /**
@@ -424,6 +439,7 @@ class PrayerNotificationScheduler @Inject constructor(
             // Send explicit broadcast to trigger the full notification flow
             context.sendBroadcast(intent)
         }
+        AppAnalytics.logTestNotification(allPrayers = true)
     }
 
     /**

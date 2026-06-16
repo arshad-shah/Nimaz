@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.core.init
 
 import android.content.Context
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
@@ -37,6 +38,8 @@ class AppInitializer @Inject constructor(
 
     fun initialize() {
         scope.launch {
+            val startMs = System.currentTimeMillis()
+            var timedOut = false
             try {
                 withTimeout(5_000L) {
                     val localeTask = async { applySavedLocale() }
@@ -49,9 +52,22 @@ class AppInitializer @Inject constructor(
                 }
             } catch (e: Exception) {
                 // Timeout or other failure — report it but proceed to UI anyway
+                timedOut = e is kotlinx.coroutines.TimeoutCancellationException
                 CrashReporter.recordException(e)
+                AppAnalytics.logError(
+                    domain = "app_init",
+                    type = e.javaClass.simpleName,
+                    message = e.message,
+                )
             } finally {
                 _isReady.value = true
+                AppAnalytics.logAppInit(
+                    durationMs = System.currentTimeMillis() - startMs,
+                    timedOut = timedOut,
+                )
+                // Capture the current notification-delivery prerequisites so the
+                // population-level "do notifications work?" question is answerable.
+                AppAnalytics.logDiagnostics(context)
             }
         }
     }
@@ -59,17 +75,27 @@ class AppInitializer @Inject constructor(
     private suspend fun applySavedLocale() {
         try {
             val langCode = preferencesDataStore.appLanguage.first()
+            AppAnalytics.setUserProperty(AppAnalytics.UserProperty.APP_LANGUAGE, langCode.ifEmpty { "en" })
             if (langCode.isNotEmpty() && langCode != "en") {
                 LocaleHelper.setLocale(context, langCode)
             }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
+            AppAnalytics.logError("app_init", e.javaClass.simpleName, e.message)
         }
     }
 
     private suspend fun scheduleInitialNotifications() {
         try {
             val prefs = preferencesDataStore.userPreferences.first()
+            AppAnalytics.setUserProperty(
+                AppAnalytics.UserProperty.NOTIFICATIONS_ENABLED,
+                prefs.prayerNotificationsEnabled.toString(),
+            )
+            AppAnalytics.setUserProperty(
+                AppAnalytics.UserProperty.LOCATION_SET,
+                (prefs.latitude != 0.0 || prefs.longitude != 0.0).toString(),
+            )
             if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
                 val enabledPrayers = buildSet {
                     if (preferencesDataStore.fajrNotificationEnabled.first()) add(PrayerType.FAJR)
@@ -94,6 +120,7 @@ class AppInitializer @Inject constructor(
             }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
+            AppAnalytics.logError("notification_scheduling", e.javaClass.simpleName, e.message)
         }
     }
 
@@ -110,6 +137,7 @@ class AppInitializer @Inject constructor(
             }
         } catch (e: Exception) {
             CrashReporter.recordException(e)
+            AppAnalytics.logError("adhan_download", e.javaClass.simpleName, e.message)
         }
     }
 }

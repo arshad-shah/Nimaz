@@ -13,6 +13,7 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -83,7 +84,10 @@ class OnboardingViewModel @Inject constructor(
         when (event) {
             OnboardingEvent.CheckOnboardingStatus -> checkOnboardingStatus()
             OnboardingEvent.CompleteOnboarding -> completeOnboarding()
-            is OnboardingEvent.SetCurrentPage -> _state.update { it.copy(currentPage = event.page) }
+            is OnboardingEvent.SetCurrentPage -> {
+                _state.update { it.copy(currentPage = event.page) }
+                AppAnalytics.logOnboardingStep(event.page)
+            }
             OnboardingEvent.CheckLocationPermission -> checkLocationPermission()
             OnboardingEvent.CheckNotificationPermission -> checkNotificationPermission()
             OnboardingEvent.CheckBatteryOptimization -> checkBatteryOptimization()
@@ -130,9 +134,16 @@ class OnboardingViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 preferencesDataStore.setOnboardingCompleted(true)
+                val current = _state.value
+                AppAnalytics.logOnboardingCompleted(
+                    locationGranted = current.locationPermissionGranted,
+                    notificationGranted = current.notificationPermissionGranted,
+                    batteryOptimizationDisabled = current.batteryOptimizationDisabled,
+                )
                 _state.update { it.copy(onboardingCompleted = true) }
             } catch (e: Exception) {
                 _state.update { it.copy(error = e.message) }
+                AppAnalytics.logError("onboarding", e.javaClass.simpleName, e.message)
             }
         }
     }
