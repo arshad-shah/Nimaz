@@ -8,20 +8,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.molecules.DuaOfTheMomentCard
 import com.arshadshah.nimaz.presentation.components.molecules.FastingStatusCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.viewmodel.DailyDua
 
 /**
- * Stacked "Today" info cards (fasting status + optional hadith of the day).
- * Used by the tablet home layout where vertical space is plentiful. Mobile
- * uses the swipeable [TodayCarousel] instead.
+ * Stacked "Today" info cards (fasting status, optional hadith of the day, and
+ * an optional time-of-day dua). Used by the tablet home layout where vertical
+ * space is plentiful. Mobile uses the swipeable [TodayCarousel] instead.
  */
 @Composable
 fun TodayInfoCards(
     fastingToday: Boolean,
     dailyHadith: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    dailyHadithReference: String? = null,
+    dailyDua: DailyDua? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -29,7 +33,15 @@ fun TodayInfoCards(
     ) {
         FastingStatusCard(fastingToday = fastingToday)
         if (dailyHadith != null) {
-            HadithOfTheDayCard(hadith = dailyHadith)
+            HadithOfTheDayCard(hadith = dailyHadith, reference = dailyHadithReference)
+        }
+        if (dailyDua != null) {
+            DuaOfTheMomentCard(
+                arabic = dailyDua.arabic,
+                translation = dailyDua.translation,
+                categoryLabel = dailyDua.categoryLabel,
+                categoryIcon = dailyDua.categoryIcon,
+            )
         }
     }
 }

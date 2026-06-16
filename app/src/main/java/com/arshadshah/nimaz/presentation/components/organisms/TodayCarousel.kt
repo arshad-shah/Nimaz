@@ -28,20 +28,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.presentation.components.molecules.DailySummaryCard
+import com.arshadshah.nimaz.presentation.components.molecules.DuaOfTheMomentCard
+import com.arshadshah.nimaz.presentation.components.molecules.FastingStatusCard
 import com.arshadshah.nimaz.presentation.components.molecules.HadithOfTheDayCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.viewmodel.DailyDua
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 
 /**
  * Identifiers for the carousel's pages. Adding a new page = adding a value
  * here, mapping its data in [TodayCarousel], and rendering it in the pager.
  *
- * [SUMMARY] combines prayer progress + fasting status — two "today snapshot"
- * facts that read naturally together. [HADITH] is its own page because it's a
- * different reading mode (longer content, dwell time).
+ * Prayer [PROGRESS] and [FASTING] are now separate cards (previously combined
+ * on one page with a divider). [HADITH] and [DUA] are each their own page
+ * because they're a different reading mode (longer content, dwell time). The
+ * [DUA] page is time-of-day aware (morning / evening / before-sleep adhkar).
  */
-enum class TodayCarouselPage { SUMMARY, HADITH }
+enum class TodayCarouselPage { PROGRESS, FASTING, HADITH, DUA }
 
 /**
  * Swipeable carousel for the home screen's "Today" section. Replaces a
@@ -58,15 +61,17 @@ fun TodayCarousel(
     fastingToday: Boolean,
     dailyHadith: String?,
     modifier: Modifier = Modifier,
-    // Bumped from 180 → 240 because the combined SUMMARY page packs more in
-    // (progress + fasting) and the HADITH page now uses larger body text.
-    pageHeight: androidx.compose.ui.unit.Dp = 180.dp,
+    dailyHadithReference: String? = null,
+    dailyDua: DailyDua? = null,
+    pageHeight: androidx.compose.ui.unit.Dp = 200.dp,
     horizontalPadding: androidx.compose.ui.unit.Dp = 20.dp,
 ) {
-    val pages = remember(dailyHadith) {
+    val pages = remember(dailyHadith, dailyDua) {
         buildList {
-            add(TodayCarouselPage.SUMMARY)
+            add(TodayCarouselPage.PROGRESS)
+            add(TodayCarouselPage.FASTING)
             if (!dailyHadith.isNullOrBlank()) add(TodayCarouselPage.HADITH)
+            if (dailyDua != null) add(TodayCarouselPage.DUA)
         }
     }
 
@@ -83,17 +88,28 @@ fun TodayCarousel(
             pageSpacing = 12.dp,
         ) { pageIndex ->
             when (pages[pageIndex]) {
-                TodayCarouselPage.SUMMARY -> DailySummaryCard(
+                TodayCarouselPage.PROGRESS -> TodaysProgressCard(
                     prayerTimes = prayerTimes,
+                    fillHeight = true,
+                )
+                TodayCarouselPage.FASTING -> FastingStatusCard(
                     fastingToday = fastingToday,
                     fillHeight = true,
                 )
                 TodayCarouselPage.HADITH -> HadithOfTheDayCard(
                     hadith = dailyHadith.orEmpty(),
+                    reference = dailyHadithReference,
                     fillHeight = true,
                     // Higher cap since the page is taller now and body text
                     // got bigger; lets longer ahadith breathe.
-                    maxLines = 8,
+                    maxLines = 7,
+                )
+                TodayCarouselPage.DUA -> DuaOfTheMomentCard(
+                    arabic = dailyDua?.arabic.orEmpty(),
+                    translation = dailyDua?.translation.orEmpty(),
+                    categoryLabel = dailyDua?.categoryLabel.orEmpty(),
+                    categoryIcon = dailyDua?.categoryIcon.orEmpty(),
+                    fillHeight = true,
                 )
             }
         }

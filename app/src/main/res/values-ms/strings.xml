@@ -28,6 +28,7 @@
     <string name="today_fasting">Hari Ini: Puasa</string>
     <string name="no_fast_today">Tiada puasa hari ini</string>
     <string name="hadith_of_the_day">Hadis Hari Ini</string>
+    <string name="dua_of_the_moment">Doa Ketika Ini</string>
     <string name="prayer_times">Waktu Solat</string>
     <string name="hours">Jam</string>
     <string name="minutes">Minit</string>
@@ -163,11 +164,13 @@
     <string name="made_with">Dibuat dengan </string>
     <string name="for_the_ummah"> untuk Ummah</string>
     <string name="copyright_format">\u00A9 %d Nimaz. Hak cipta terpelihara.</string>
+    <string name="help_intro_title">Bagaimana kami boleh membantu?</string>
+    <string name="help_intro_subtitle">Layari soalan lazim, ketahui cara setiap ciri berfungsi, dan selesaikan masalah — atau hubungi kami dan kami akan membalas.</string>
     <string name="faq_title">Soalan Lazim</string>
     <string name="feature_guides">Panduan Ciri</string>
     <string name="contact_us">Hubungi Kami</string>
     <string name="email_support">Sokongan E-mel</string>
-    <string name="support_email">support@nimaz.app</string>
+    <string name="support_email">info@arshadshah.com</string>
     <string name="nimaz_support_request">Permintaan Sokongan Nimaz</string>
     <string name="send_email">Hantar E-mel</string>
     <string name="troubleshooting_title">Penyelesaian Masalah</string>
