@@ -115,13 +115,15 @@ class NimazListPickerTest {
                 searchPlaceholder = "Search",
             )
         }
-        // Search bar's BasicTextField exposes its placeholder as contentDescription.
-        composeRule.onNodeWithContentDescription("Search").assertExists()
+        // The picker does not forward searchPlaceholder to NimazSearchBar, so the
+        // field exposes the search bar's default placeholder ("Search...") as its
+        // contentDescription.
+        composeRule.onNodeWithContentDescription("Search...").assertExists()
 
         composeRule.onNodeWithText("Karachi").assertExists()
         composeRule.onNodeWithText("Egyptian").assertExists()
 
-        composeRule.onNodeWithContentDescription("Search").performTextInput("Karachi")
+        composeRule.onNodeWithContentDescription("Search...").performTextInput("Karachi")
         composeRule.onNodeWithText("Karachi").assertExists()
         composeRule.onNodeWithText("Egyptian").assertDoesNotExist()
     }
@@ -144,7 +146,7 @@ class NimazListPickerTest {
                 emptySearchText = "No matches",
             )
         }
-        composeRule.onNodeWithContentDescription("Search").performTextInput("zzzz")
+        composeRule.onNodeWithContentDescription("Search...").performTextInput("zzzz")
         composeRule.onNodeWithText("No matches").assertExists()
     }
 
