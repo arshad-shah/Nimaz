@@ -45,7 +45,7 @@ Core content and functionality are designed to remain available without constant
 
 For the full dependency catalog, see:
 
-- `/home/runner/work/Nimaz/Nimaz/arshad-shah/Nimaz/gradle/libs.versions.toml`
+- `gradle/libs.versions.toml`
 
 ## Repository Structure
 
@@ -117,13 +117,13 @@ From the repository root:
 - Data generation and sourcing scripts:
   - `nimaz-pro-data/scripts/`
 - Data specification reference:
-  - `/home/runner/work/Nimaz/Nimaz/arshad-shah/Nimaz/docs/nimaz-pro-data-guide.md`
+  - `docs/nimaz-pro-data-guide.md`
 
 ## CI
 
 Pull requests run Android checks through:
 
-- `/home/runner/work/Nimaz/Nimaz/arshad-shah/Nimaz/.github/workflows/pr_checks.yml`
+- `.github/workflows/pr_checks.yml`
 
 Primary CI lane:
 
