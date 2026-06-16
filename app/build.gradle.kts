@@ -88,12 +88,6 @@ android {
             isReturnDefaultValues = true
         }
     }
-
-    lint {
-        // Also emit a text report (in addition to the default HTML/XML); the CI
-        // "Print lint report" diagnostic step cats it into the job log.
-        textReport = true
-    }
 }
 
 dependencies {
