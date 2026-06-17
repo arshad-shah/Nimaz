@@ -42,6 +42,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
+import com.arshadshah.nimaz.core.testing.TestTags
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
@@ -77,7 +79,7 @@ fun HadithCollectionScreen(
     val context = LocalContext.current
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection).testTag(TestTags.SCREEN_HADITH),
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.hadith_title),
