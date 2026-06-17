@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!--
+        Debug-only host activity for instrumented Compose navigation tests.
+        Not present in the release build.
+    -->
+    <application>
+        <activity
+            android:name=".HiltTestActivity"
+            android:exported="false"
+            android:theme="@style/Theme.Nimaz.PostSplash" />
+    </application>
+</manifest>

@@ -2,10 +2,16 @@ package com.arshadshah.nimaz.navigation
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.arshadshah.nimaz.MainActivity
+import com.arshadshah.nimaz.HiltTestActivity
+import com.arshadshah.nimaz.core.navigation.NavGraph
+import com.arshadshah.nimaz.core.navigation.Route
+import com.arshadshah.nimaz.core.testing.TestTags
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Before
@@ -14,12 +20,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 
 /**
- * End-to-end navigation tests that drive the real app through Hilt + Compose.
+ * Bottom-navigation user-flow test driven through the real [NavGraph] (selected
+ * via [TestTags]). Hosted in a Hilt activity and started on Home so the
+ * navigation bar is present (a cold launch lands on Onboarding, which has no
+ * bottom bar).
  *
- * IMPORTANT: these are NOT run in the current CI lane — there is no emulator.
- * They are compiled (`assembleDebugAndroidTest`) so the code is verified and
- * cannot bit-rot, and are ready to execute on a device or Firebase Test Lab
- * once an instrumented-test lane is added. See HiltTestRunner.
+ * NOT run in CI (no emulator) — run locally / on Firebase Test Lab.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -29,37 +35,48 @@ class NavigationInstrumentedTest {
     val hiltRule = HiltAndroidRule(this)
 
     @get:Rule(order = 1)
-    val composeRule = createAndroidComposeRule<MainActivity>()
+    val composeRule = createAndroidComposeRule<HiltTestActivity>()
+
+    private lateinit var navController: NavHostController
 
     @Before
     fun setUp() {
         hiltRule.inject()
+        composeRule.setContent {
+            navController = rememberNavController()
+            NimazTheme {
+                NavGraph(navController = navController)
+            }
+        }
+        composeRule.waitUntil(timeoutMillis = 15_000) {
+            navController.currentDestination != null
+        }
+        // Land on a main screen so the bottom navigation is shown.
+        composeRule.runOnUiThread { navController.navigate(Route.Home) }
+        composeRule.waitForIdle()
     }
 
     @Test
-    fun appLaunches_bottomNavigationIsVisible() {
-        composeRule.waitForIdle()
-        composeRule.onNodeWithText("Home").assertIsDisplayed()
-        composeRule.onNodeWithText("Quran").assertIsDisplayed()
-        composeRule.onNodeWithText("Qibla").assertIsDisplayed()
+    fun bottomNav_allSectionsAreDisplayed() {
+        composeRule.onNodeWithTag(TestTags.NAV_HOME).assertIsDisplayed()
+        composeRule.onNodeWithTag(TestTags.NAV_QURAN).assertIsDisplayed()
+        composeRule.onNodeWithTag(TestTags.NAV_TASBIH).assertIsDisplayed()
+        composeRule.onNodeWithTag(TestTags.NAV_QIBLA).assertIsDisplayed()
+        composeRule.onNodeWithTag(TestTags.NAV_MORE).assertIsDisplayed()
     }
 
     @Test
-    fun bottomNav_navigateToQuran_thenBackToHome() {
+    fun bottomNav_clickThroughEverySection() {
+        composeRule.onNodeWithTag(TestTags.NAV_QURAN).performClick()
         composeRule.waitForIdle()
-
-        composeRule.onNodeWithText("Quran").performClick()
+        composeRule.onNodeWithTag(TestTags.NAV_TASBIH).performClick()
         composeRule.waitForIdle()
-
-        composeRule.onNodeWithText("Home").performClick()
+        composeRule.onNodeWithTag(TestTags.NAV_QIBLA).performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Home").assertIsDisplayed()
-    }
-
-    @Test
-    fun bottomNav_navigateToTasbih() {
+        composeRule.onNodeWithTag(TestTags.NAV_MORE).performClick()
         composeRule.waitForIdle()
-        composeRule.onNodeWithText("Tasbih").performClick()
+        composeRule.onNodeWithTag(TestTags.NAV_HOME).performClick()
         composeRule.waitForIdle()
+        composeRule.onNodeWithTag(TestTags.NAV_HOME).assertIsDisplayed()
     }
 }

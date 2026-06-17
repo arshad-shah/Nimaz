@@ -35,8 +35,11 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import androidx.compose.ui.platform.testTag
+import com.arshadshah.nimaz.core.testing.TestTags
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -93,12 +96,14 @@ import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 
 @Composable
 fun NavGraph(
+    // Injectable so instrumented navigation tests can drive the graph directly;
+    // production callers use the default in-composition controller.
+    navController: NavHostController = rememberNavController(),
     pendingQuranSurah: Int? = null,
     onPendingQuranSurahConsumed: () -> Unit = {},
     pendingIslamicCalendar: Boolean = false,
     onPendingIslamicCalendarConsumed: () -> Unit = {},
 ) {
-    val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
@@ -220,7 +225,7 @@ fun NavGraph(
 
                 item(
                     icon = { Icon(navItem.icon, contentDescription = navItem.label) },
-                    label = { Text(navItem.label) },
+                    label = { Text(navItem.label, modifier = Modifier.testTag(navItem.tag)) },
                     selected = selected,
                     onClick = {
                         navController.navigate(navItem.route) {
@@ -926,15 +931,16 @@ fun NavGraph(
 private data class BottomNavItem(
     val route: Route,
     val label: String,
-    val icon: ImageVector
+    val icon: ImageVector,
+    val tag: String
 )
 
 private val bottomNavItems = listOf(
-    BottomNavItem(Route.Home, "Home", Icons.Default.Home),
-    BottomNavItem(Route.Quran, "Quran", Icons.Default.MenuBook),
-    BottomNavItem(Route.Tasbih, "Tasbih", Icons.Default.TouchApp),
-    BottomNavItem(Route.QiblaNav, "Qibla", Icons.Default.Explore),
-    BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz)
+    BottomNavItem(Route.Home, "Home", Icons.Default.Home, TestTags.NAV_HOME),
+    BottomNavItem(Route.Quran, "Quran", Icons.Default.MenuBook, TestTags.NAV_QURAN),
+    BottomNavItem(Route.Tasbih, "Tasbih", Icons.Default.TouchApp, TestTags.NAV_TASBIH),
+    BottomNavItem(Route.QiblaNav, "Qibla", Icons.Default.Explore, TestTags.NAV_QIBLA),
+    BottomNavItem(Route.More, "More", Icons.Default.MoreHoriz, TestTags.NAV_MORE)
 )
 
 private fun restartApp(context: Context) {
