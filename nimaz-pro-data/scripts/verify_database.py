@@ -32,14 +32,32 @@ def verify_database():
         'prayer_records', 'fast_records', 'makeup_fasts',  # Prayer/Fasting (3)
         'tasbih_presets', 'tasbih_sessions',  # Tasbih (2)
         'zakat_history',  # Zakat (1)
-        'locations', 'islamic_events'  # Other (2)
+        'locations', 'islamic_events',  # Other (2)
+        # Qaida content tables (progress tables are created on-device, not seeded)
+        'qaida_lessons', 'qaida_letters', 'qaida_lines', 'qaida_cells'  # Qaida (4)
     ]
 
     missing = set(expected_tables) - set(tables)
     if missing:
         print(f"\n[WARN] Missing tables: {missing}")
     else:
-        print("\n[OK] All 22 entity tables present!")
+        print(f"\n[OK] All {len(expected_tables)} entity tables present!")
+
+    # Qaida content counts (sub-issue C of #171)
+    print("\n" + "=" * 60)
+    print("Qaida Content Counts")
+    print("=" * 60)
+    expected_qaida_counts = {
+        'qaida_lessons': 17,
+        'qaida_letters': 29,
+        'qaida_lines': 137,
+        'qaida_cells': 434,
+    }
+    for table, expected in expected_qaida_counts.items():
+        cursor.execute(f"SELECT COUNT(*) FROM {table}")
+        actual = cursor.fetchone()[0]
+        status = "OK" if actual == expected else "WARN"
+        print(f"  [{status}] {table}: {actual} (expected {expected})")
 
     # Check ayahs table has transliteration column
     cursor.execute("PRAGMA table_info(ayahs)")

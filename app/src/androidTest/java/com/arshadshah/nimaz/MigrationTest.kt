@@ -35,4 +35,19 @@ class MigrationTest {
         assertThat(cursor.count).isEqualTo(4)
         cursor.close()
     }
+
+    @Test
+    fun migrate14To15_createsQaidaTables() {
+        helper.createDatabase(dbName, 14).close()
+        val db = helper.runMigrationsAndValidate(
+            dbName, 15, true, NimazDatabase.MIGRATION_14_15
+        )
+        val cursor = db.query(
+            "SELECT name FROM sqlite_master WHERE type='table' AND name IN " +
+                "('qaida_lessons','qaida_letters','qaida_lines','qaida_cells'," +
+                "'qaida_lesson_progress','qaida_cell_progress')"
+        )
+        assertThat(cursor.count).isEqualTo(6)
+        cursor.close()
+    }
 }
