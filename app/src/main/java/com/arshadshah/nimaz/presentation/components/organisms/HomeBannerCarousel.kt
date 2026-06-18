@@ -128,7 +128,9 @@ private fun BannerPill(banner: HomeBannerItem) {
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
-        Column(modifier = Modifier.weight(1f, fill = false)) {
+        // Fills the gap between the icon and the trailing action so the pill
+        // spreads across the full page width instead of bunching on the left.
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = banner.title,
                 style = MaterialTheme.typography.labelLarge,
