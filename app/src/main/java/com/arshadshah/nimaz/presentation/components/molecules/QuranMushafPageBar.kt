@@ -24,6 +24,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 internal fun MushafPageBar(
@@ -61,7 +63,7 @@ internal fun MushafPageBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Next Page",
+                    contentDescription = stringResource(R.string.cd_next_page),
                     modifier = Modifier.size(22.dp)
                 )
             }
@@ -123,7 +125,7 @@ internal fun MushafPageBar(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Previous Page",
+                    contentDescription = stringResource(R.string.cd_previous_page),
                     modifier = Modifier.size(22.dp)
                 )
             }

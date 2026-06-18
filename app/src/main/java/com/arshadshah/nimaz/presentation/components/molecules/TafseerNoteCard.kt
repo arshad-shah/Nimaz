@@ -24,6 +24,8 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun TafseerNoteCard(
@@ -58,7 +60,7 @@ fun TafseerNoteCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit",
+                            contentDescription = stringResource(R.string.cd_edit),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(18.dp)
                         )
@@ -69,7 +71,7 @@ fun TafseerNoteCard(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
+                            contentDescription = stringResource(R.string.cd_delete),
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(18.dp)
                         )

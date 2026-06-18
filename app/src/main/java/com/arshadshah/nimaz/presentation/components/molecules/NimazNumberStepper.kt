@@ -24,6 +24,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButtonStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * A reusable number stepper with label, decrement/increment buttons and a value display.
@@ -67,7 +69,7 @@ fun NimazNumberStepper(
         ) {
             NimazIconButton(
                 icon = Icons.Default.Remove,
-                contentDescription = "Decrease",
+                contentDescription = stringResource(R.string.cd_decrease),
                 style = NimazIconButtonStyle.FILLED,
                 size = NimazIconButtonSize.SMALL,
                 enabled = value > minValue,
@@ -92,7 +94,7 @@ fun NimazNumberStepper(
             }
             NimazIconButton(
                 icon = Icons.Default.Add,
-                contentDescription = "Increase",
+                contentDescription = stringResource(R.string.cd_increase),
                 style = NimazIconButtonStyle.FILLED,
                 size = NimazIconButtonSize.SMALL,
                 enabled = value < maxValue,

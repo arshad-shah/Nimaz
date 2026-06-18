@@ -62,6 +62,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -184,7 +186,7 @@ private fun MonthNavigationCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = "Previous month",
+                        contentDescription = stringResource(R.string.cd_previous_month),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }
@@ -208,7 +210,7 @@ private fun MonthNavigationCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.ChevronRight,
-                        contentDescription = "Next month",
+                        contentDescription = stringResource(R.string.cd_next_month),
                         tint = MaterialTheme.colorScheme.onSurface
                     )
                 }

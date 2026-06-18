@@ -69,6 +69,8 @@ import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import java.text.NumberFormat
 import java.util.Locale
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -91,13 +93,13 @@ fun ZakatCalculatorScreen(
                     IconButton(onClick = { viewModel.onEvent(ZakatEvent.ClearAll) }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Reset"
+                            contentDescription = stringResource(R.string.cd_reset)
                         )
                     }
                     IconButton(onClick = onNavigateToHistory) {
                         Icon(
                             imageVector = Icons.Default.History,
-                            contentDescription = "History"
+                            contentDescription = stringResource(R.string.cd_history)
                         )
                     }
                 }

@@ -78,8 +78,8 @@ class TopAppBarTest {
         }
 
         composeRule.onNodeWithText("Settings").assertExists()
-        // Back icon contentDescription is the literal "Navigate back"
-        composeRule.onNodeWithContentDescription("Navigate back").assertExists()
+        // Back icon contentDescription is the localized "Back"
+        composeRule.onNodeWithContentDescription("Back").assertExists()
     }
 
     @Test
@@ -92,7 +92,7 @@ class TopAppBarTest {
             )
         }
 
-        composeRule.onNodeWithContentDescription("Navigate back").performClick()
+        composeRule.onNodeWithContentDescription("Back").performClick()
         assertThat(backClicked).isTrue()
     }
 

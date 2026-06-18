@@ -72,6 +72,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -666,7 +668,7 @@ private fun BottomActionBar(
                 icon = {
                     Icon(
                         imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = "Bookmark",
+                        contentDescription = stringResource(R.string.cd_bookmark),
                         modifier = Modifier.size(22.dp)
                     )
                 },
@@ -680,7 +682,7 @@ private fun BottomActionBar(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.cd_share),
                         modifier = Modifier.size(22.dp)
                     )
                 },
@@ -693,7 +695,7 @@ private fun BottomActionBar(
                 icon = {
                     Icon(
                         imageVector = Icons.Default.ContentCopy,
-                        contentDescription = "Copy",
+                        contentDescription = stringResource(R.string.cd_copy),
                         modifier = Modifier.size(22.dp)
                     )
                 },

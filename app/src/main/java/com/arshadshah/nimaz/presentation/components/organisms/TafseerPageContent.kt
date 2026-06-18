@@ -67,6 +67,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightab
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * Represents a page of tafseer content with its character range in the full text.
@@ -421,7 +423,7 @@ private fun TafseerNavBar(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                            contentDescription = "Previous page",
+                            contentDescription = stringResource(R.string.cd_previous_page),
                             tint = if (currentContentPage > 0) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             modifier = Modifier.size(20.dp)
@@ -443,7 +445,7 @@ private fun TafseerNavBar(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                            contentDescription = "Next page",
+                            contentDescription = stringResource(R.string.cd_next_page),
                             tint = if (currentContentPage < totalContentPages - 1) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
                             modifier = Modifier.size(20.dp)
@@ -743,7 +745,7 @@ private fun TafseerHighlightControls(
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = "$name selected",
+                                    contentDescription = stringResource(R.string.cd_item_selected, name),
                                     tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -759,7 +761,7 @@ private fun TafseerHighlightControls(
                 IconButton(onClick = onNoteButtonClick, modifier = Modifier.size(40.dp)) {
                     Icon(
                         imageVector = Icons.Outlined.EditNote,
-                        contentDescription = "Notes",
+                        contentDescription = stringResource(R.string.cd_notes),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(22.dp)
                     )
