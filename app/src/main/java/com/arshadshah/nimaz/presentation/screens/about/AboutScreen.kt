@@ -19,9 +19,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
 import androidx.compose.material.icons.filled.Language
@@ -31,6 +34,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -96,7 +100,7 @@ fun AboutScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { AppInfoHero() }
-            item { QuickActionsRow(onRateApp = onRateApp, onShareApp = onShareApp, onUpdates = onUpdateClick) }
+            item { QuickActionsRow(onRateApp = onRateApp, onShareApp = onShareApp) }
 
             item {
                 NimazSectionTitle(text = stringResource(R.string.links), modifier = Modifier.padding(start = 5.dp))
@@ -189,7 +193,6 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
 private fun QuickActionsRow(
     onRateApp: () -> Unit,
     onShareApp: () -> Unit,
-    onUpdates: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -205,13 +208,6 @@ private fun QuickActionsRow(
             label = stringResource(R.string.about_share),
             primary = false,
             onClick = onShareApp,
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            icon = Icons.Filled.Refresh,
-            label = stringResource(R.string.about_updates),
-            primary = false,
-            onClick = onUpdates,
             modifier = Modifier.weight(1f)
         )
     }
@@ -252,16 +248,6 @@ private fun LinksCard(
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    val updateSubtitle = when (updateState) {
-        is UpdateState.Checking -> stringResource(R.string.update_checking)
-        is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
-        is UpdateState.Starting -> stringResource(R.string.update_starting)
-        is UpdateState.Downloading -> stringResource(R.string.update_downloading)
-        is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
-        is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
-        is UpdateState.Error -> stringResource(R.string.update_check_failed)
-        else -> stringResource(R.string.update_tap_to_check)
-    }
 
     Column(
         modifier = modifier
@@ -274,7 +260,96 @@ private fun LinksCard(
         LinkItem(Icons.Default.Shield, stringResource(R.string.privacy_policy), stringResource(R.string.privacy_policy_subtitle), onNavigateToPrivacyPolicy, true)
         LinkItem(Icons.Default.Description, stringResource(R.string.terms_of_service), stringResource(R.string.terms_of_service_subtitle), onNavigateToTerms, true)
         LinkItem(Icons.Default.Gavel, stringResource(R.string.open_source_licenses), stringResource(R.string.open_source_licenses_subtitle), onNavigateToLicenses, true)
-        LinkItem(Icons.Default.Refresh, stringResource(R.string.check_for_updates), updateSubtitle, onUpdateClick, false)
+        UpdateLinkItem(updateState = updateState, onClick = onUpdateClick)
+    }
+}
+
+@Composable
+private fun UpdateLinkItem(
+    updateState: UpdateState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val subtitle = when (updateState) {
+        is UpdateState.Checking -> stringResource(R.string.update_checking)
+        is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
+        is UpdateState.Starting -> stringResource(R.string.update_starting)
+        is UpdateState.Downloading -> stringResource(R.string.update_downloading)
+        is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
+        is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
+        is UpdateState.Error -> stringResource(R.string.update_check_failed)
+        else -> stringResource(R.string.update_tap_to_check)
+    }
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surface),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(imageVector = Icons.Default.Refresh, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(text = stringResource(R.string.check_for_updates), style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
+            Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+        UpdateTrailingIndicator(updateState = updateState)
+    }
+}
+
+@Composable
+private fun UpdateTrailingIndicator(updateState: UpdateState) {
+    when (updateState) {
+        is UpdateState.Checking,
+        is UpdateState.Starting,
+        is UpdateState.Downloading -> CircularProgressIndicator(
+            modifier = Modifier.size(18.dp),
+            strokeWidth = 2.dp,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        is UpdateState.UpdateAvailable -> Icon(
+            imageVector = Icons.Default.Download,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+
+        is UpdateState.Downloaded -> Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp)
+        )
+
+        is UpdateState.NoUpdateAvailable -> Icon(
+            imageVector = Icons.Default.CheckCircle,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+            modifier = Modifier.size(20.dp)
+        )
+
+        is UpdateState.Error -> Icon(
+            imageVector = Icons.Default.ErrorOutline,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.error,
+            modifier = Modifier.size(20.dp)
+        )
+
+        else -> Icon(
+            imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier.size(15.dp)
+        )
     }
 }
 
