@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.FastingRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
+import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
@@ -19,6 +20,7 @@ import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
+import com.arshadshah.nimaz.domain.repository.HelpRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
@@ -65,6 +67,11 @@ import com.arshadshah.nimaz.domain.usecase.GetProphetByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleProphetFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteProphetsUseCase
+import com.arshadshah.nimaz.domain.usecase.HelpUseCases
+import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHelpGuideUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHelpUseCase
 import com.arshadshah.nimaz.domain.usecase.AbandonKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveAbandonedKhatamsUseCase
 import com.arshadshah.nimaz.domain.usecase.ReactivateKhatamUseCase
@@ -177,6 +184,12 @@ abstract class RepositoryModule {
     abstract fun bindHelpContentVersionStore(
         impl: DataStoreHelpContentVersionStore
     ): HelpContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindHelpRepository(
+        helpRepositoryImpl: HelpRepositoryImpl
+    ): HelpRepository
 }
 
 @Module
@@ -283,6 +296,19 @@ object UseCaseModule {
             searchProphets = SearchProphetsUseCase(repository),
             toggleFavorite = ToggleProphetFavoriteUseCase(repository),
             getFavorites = GetFavoriteProphetsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideHelpUseCases(
+        repository: HelpRepository
+    ): HelpUseCases {
+        return HelpUseCases(
+            getTopics = GetHelpTopicsUseCase(repository),
+            getTopicDetail = GetHelpTopicDetailUseCase(repository),
+            getGuide = GetHelpGuideUseCase(repository),
+            search = SearchHelpUseCase(repository)
         )
     }
 }
