@@ -1,5 +1,5 @@
 {
-  "contentVersion": 4,
+  "contentVersion": 5,
   "topics": [
     {
       "id": "getting_started", "order": 0, "icon": "rocket_launch", "color": "sky",
@@ -831,11 +831,221 @@
                 "fr": "Choisissez un Nisab or ou argent — si votre richesse nette l'atteint, la Zakat due est de 2,5 %.",
                 "de": "Wähle einen Gold- oder Silber-Nisab — erreicht dein Nettovermögen ihn, beträgt die Zakat 2,5 %."
               } }
+          ] },
+        { "id": "tt_g_fasting", "type": "guide", "order": 8, "icon": "fast", "estimatedMinutes": 1,
+          "title": {
+            "en": "Log a fast", "tr": "Oruç kaydet", "id": "Catat puasa",
+            "ms": "Log puasa", "fr": "Enregistrer un jeûne", "de": "Fasten eintragen"
+          },
+          "steps": [
+            { "id": "tt_g_fasting_s1", "order": 1, "deeplink": "fasting", "pathLabels": ["More", "Daily Practice", "Fasting"],
+              "title": {
+                "en": "Open the Fasting tracker", "tr": "Oruç takibini aç", "id": "Buka pelacak Puasa",
+                "ms": "Buka penjejak Puasa", "fr": "Ouvrir le suivi du jeûne", "de": "Fasten-Tracker öffnen"
+              },
+              "body": {
+                "en": "Go to More → Daily Practice → Fasting. The Tracker tab adapts to Ramadan or voluntary fasts.",
+                "tr": "Daha Fazla → Günlük İbadet → Oruç'a gidin. Takip sekmesi Ramazan ve nafile oruçlara uyum sağlar.",
+                "id": "Buka Lainnya → Amalan Harian → Puasa. Tab Pelacak menyesuaikan puasa Ramadan atau sunnah.",
+                "ms": "Pergi ke Lagi → Amalan Harian → Puasa. Tab Penjejak menyesuaikan puasa Ramadan atau sunat.",
+                "fr": "Allez dans Plus → Pratique quotidienne → Jeûne. L'onglet Suivi s'adapte au Ramadan ou aux jeûnes volontaires.",
+                "de": "Gehe zu Mehr → Tägliche Praxis → Fasten. Der Tab Übersicht passt sich Ramadan oder freiwilligem Fasten an."
+              } },
+            { "id": "tt_g_fasting_s2", "order": 2,
+              "title": {
+                "en": "Mark today or pick a date", "tr": "Bugünü işaretle veya tarih seç", "id": "Tandai hari ini atau pilih tanggal",
+                "ms": "Tanda hari ini atau pilih tarikh", "fr": "Marquer aujourd'hui ou choisir une date", "de": "Heute markieren oder Datum wählen"
+              },
+              "body": {
+                "en": "Toggle Today on the fast card, or tap any calendar date and log the fast there.",
+                "tr": "Oruç kartında Bugün'ü açın ya da takvimden bir güne dokunup orucu kaydedin.",
+                "id": "Aktifkan Hari ini di kartu puasa, atau ketuk tanggal mana pun di kalender lalu catat puasa.",
+                "ms": "Hidupkan Hari ini pada kad puasa, atau ketik mana-mana tarikh kalendar dan log puasa.",
+                "fr": "Activez Aujourd'hui sur la carte du jeûne, ou touchez une date du calendrier pour l'y enregistrer.",
+                "de": "Schalte Heute auf der Fastenkarte ein oder tippe ein Datum im Kalender an und trage das Fasten dort ein."
+              } },
+            { "id": "tt_g_fasting_s3", "order": 3,
+              "title": {
+                "en": "Suhoor, Iftar and Makeup", "tr": "Sahur, İftar ve Kaza", "id": "Sahur, Iftar, dan Qadha",
+                "ms": "Sahur, Iftar dan Ganti", "fr": "Suhour, Iftar et rattrapage", "de": "Suhur, Iftar und Nachholen"
+              },
+              "body": {
+                "en": "Suhoor and Iftar come from your Fajr and Maghrib times. Use the Makeup tab for Qada fasts.",
+                "tr": "Sahur ve İftar, Fajr ve Maghrib vakitlerinizden gelir. Kaza oruçları için Kaza sekmesini kullanın.",
+                "id": "Sahur dan Iftar diambil dari waktu Subuh dan Maghrib Anda. Gunakan tab Qadha untuk puasa qada.",
+                "ms": "Sahur dan Iftar diambil dari waktu Subuh dan Maghrib anda. Guna tab Ganti untuk puasa qada.",
+                "fr": "Le Suhour et l'Iftar proviennent de vos heures de Fajr et Maghrib. Utilisez l'onglet Rattrapage pour les jeûnes Qada.",
+                "de": "Suhur und Iftar stammen aus deinen Fajr- und Maghrib-Zeiten. Nutze den Tab Nachholen für Qada-Fasten."
+              } }
+          ] },
+        { "id": "tt_g_tasbih", "type": "guide", "order": 9, "icon": "task_alt", "estimatedMinutes": 1,
+          "title": {
+            "en": "Count dhikr on the Tasbih", "tr": "Tesbihte zikir say", "id": "Hitung dzikir di Tasbih",
+            "ms": "Kira zikir di Tasbih", "fr": "Compter le dhikr sur le Tasbih", "de": "Dhikr mit dem Tasbih zählen"
+          },
+          "steps": [
+            { "id": "tt_g_tasbih_s1", "order": 1, "deeplink": "tasbih", "pathLabels": ["Tasbih"],
+              "title": {
+                "en": "Open the Tasbih", "tr": "Tesbihi aç", "id": "Buka Tasbih",
+                "ms": "Buka Tasbih", "fr": "Ouvrir le Tasbih", "de": "Tasbih öffnen"
+              },
+              "body": {
+                "en": "Open the Tasbih tab and choose a preset dhikr or Free count.",
+                "tr": "Tesbih sekmesini açın ve hazır bir zikir ya da Serbest sayım seçin.",
+                "id": "Buka tab Tasbih dan pilih dzikir preset atau hitungan Bebas.",
+                "ms": "Buka tab Tasbih dan pilih zikir pratetap atau kiraan Bebas.",
+                "fr": "Ouvrez l'onglet Tasbih et choisissez un dhikr prédéfini ou le comptage libre.",
+                "de": "Öffne den Tasbih-Tab und wähle ein voreingestelltes Dhikr oder freies Zählen."
+              } },
+            { "id": "tt_g_tasbih_s2", "order": 2,
+              "title": {
+                "en": "Tap to count", "tr": "Saymak için dokun", "id": "Ketuk untuk menghitung",
+                "ms": "Ketik untuk mengira", "fr": "Toucher pour compter", "de": "Zum Zählen tippen"
+              },
+              "body": {
+                "en": "Tap the large counter to increment. It records a lap and resets when you reach the target.",
+                "tr": "Büyük sayacı artırmak için dokunun. Hedefe ulaşınca bir tur kaydeder ve sıfırlar.",
+                "id": "Ketuk penghitung besar untuk menambah. Ia mencatat satu putaran dan reset saat target tercapai.",
+                "ms": "Ketik pembilang besar untuk menambah. Ia merekod satu pusingan dan set semula apabila sasaran dicapai.",
+                "fr": "Touchez le grand compteur pour incrémenter. Il enregistre un tour et se réinitialise à l'objectif.",
+                "de": "Tippe den großen Zähler zum Hochzählen. Beim Ziel wird eine Runde gespeichert und zurückgesetzt."
+              } },
+            { "id": "tt_g_tasbih_s3", "order": 3,
+              "title": {
+                "en": "Sound, vibration and history", "tr": "Ses, titreşim ve geçmiş", "id": "Suara, getaran, dan riwayat",
+                "ms": "Bunyi, getaran dan sejarah", "fr": "Son, vibration et historique", "de": "Ton, Vibration und Verlauf"
+              },
+              "body": {
+                "en": "Toggle vibration and sound, reset anytime, and review past sessions in History.",
+                "tr": "Titreşim ve sesi açıp kapatın, istediğiniz zaman sıfırlayın ve geçmiş oturumları Geçmiş'te görün.",
+                "id": "Aktifkan getaran dan suara, reset kapan saja, dan lihat sesi lampau di Riwayat.",
+                "ms": "Hidupkan getaran dan bunyi, set semula bila-bila masa, dan lihat sesi lalu dalam Sejarah.",
+                "fr": "Activez la vibration et le son, réinitialisez à tout moment, et consultez l'historique des sessions.",
+                "de": "Schalte Vibration und Ton ein, setze jederzeit zurück und sieh frühere Sitzungen im Verlauf."
+              } }
           ] }
       ]
     },
     {
-      "id": "troubleshooting", "order": 6, "icon": "build", "color": "orange",
+      "id": "reference", "order": 6, "icon": "menu_book", "color": "teal",
+      "title": {
+        "en": "Hadith & Calendar", "tr": "Hadis ve Takvim", "id": "Hadis & Kalender",
+        "ms": "Hadis & Kalendar", "fr": "Hadith et calendrier", "de": "Hadith & Kalender"
+      },
+      "subtitle": {
+        "en": "Authentic hadith, Islamic dates", "tr": "Sahih hadis, İslami tarihler", "id": "Hadis autentik, tanggal Islam",
+        "ms": "Hadis sahih, tarikh Islam", "fr": "Hadiths authentiques, dates islamiques", "de": "Authentische Hadithe, islamische Daten"
+      },
+      "items": [
+        { "id": "ref_q_hadith", "type": "question", "order": 1,
+          "question": {
+            "en": "How do I read Hadith?", "tr": "Hadisleri nasıl okurum?", "id": "Bagaimana membaca Hadis?",
+            "ms": "Bagaimana membaca Hadis?", "fr": "Comment lire les hadiths ?", "de": "Wie lese ich Hadithe?"
+          },
+          "answer": {
+            "en": "Open More → Learning → Hadith. Pick a collection to read its chapters in sequence, search topics, and bookmark hadith to revisit.",
+            "tr": "Daha Fazla → Öğrenme → Hadis'i açın. Bir koleksiyon seçip bölümleri sırayla okuyun, konularda arama yapın ve hadisleri yer imine ekleyin.",
+            "id": "Buka Lainnya → Pembelajaran → Hadis. Pilih koleksi untuk membaca babnya berurutan, cari topik, dan tandai hadis.",
+            "ms": "Buka Lagi → Pembelajaran → Hadis. Pilih koleksi untuk membaca babnya mengikut urutan, cari topik, dan tanda buku hadis.",
+            "fr": "Ouvrez Plus → Apprentissage → Hadith. Choisissez une collection pour lire ses chapitres, rechercher des sujets et ajouter des hadiths aux favoris.",
+            "de": "Öffne Mehr → Lernen → Hadith. Wähle eine Sammlung, um ihre Kapitel der Reihe nach zu lesen, Themen zu suchen und Hadithe zu speichern."
+          } },
+        { "id": "ref_g_hadith", "type": "guide", "order": 2, "icon": "hadith", "estimatedMinutes": 1,
+          "title": {
+            "en": "Read a hadith collection", "tr": "Bir hadis koleksiyonu oku", "id": "Baca koleksi hadis",
+            "ms": "Baca koleksi hadis", "fr": "Lire une collection de hadiths", "de": "Eine Hadith-Sammlung lesen"
+          },
+          "steps": [
+            { "id": "ref_g_hadith_s1", "order": 1, "deeplink": "hadith", "pathLabels": ["More", "Learning", "Hadith"],
+              "title": {
+                "en": "Open Hadith", "tr": "Hadis'i aç", "id": "Buka Hadis",
+                "ms": "Buka Hadis", "fr": "Ouvrir Hadith", "de": "Hadith öffnen"
+              },
+              "body": {
+                "en": "Go to More → Learning → Hadith to see the available collections.",
+                "tr": "Mevcut koleksiyonları görmek için Daha Fazla → Öğrenme → Hadis'e gidin.",
+                "id": "Buka Lainnya → Pembelajaran → Hadis untuk melihat koleksi yang tersedia.",
+                "ms": "Pergi ke Lagi → Pembelajaran → Hadis untuk melihat koleksi yang tersedia.",
+                "fr": "Allez dans Plus → Apprentissage → Hadith pour voir les collections disponibles.",
+                "de": "Gehe zu Mehr → Lernen → Hadith, um die verfügbaren Sammlungen zu sehen."
+              } },
+            { "id": "ref_g_hadith_s2", "order": 2,
+              "title": {
+                "en": "Open a book and read", "tr": "Bir kitap açıp oku", "id": "Buka kitab dan baca",
+                "ms": "Buka kitab dan baca", "fr": "Ouvrir un livre et lire", "de": "Ein Buch öffnen und lesen"
+              },
+              "body": {
+                "en": "Choose a book to browse its chapters and read the hadith in sequence.",
+                "tr": "Bölümlerine göz atmak ve hadisleri sırayla okumak için bir kitap seçin.",
+                "id": "Pilih kitab untuk menelusuri bab dan membaca hadis secara berurutan.",
+                "ms": "Pilih kitab untuk menyemak babnya dan membaca hadis mengikut urutan.",
+                "fr": "Choisissez un livre pour parcourir ses chapitres et lire les hadiths dans l'ordre.",
+                "de": "Wähle ein Buch, um seine Kapitel zu durchsuchen und die Hadithe der Reihe nach zu lesen."
+              } },
+            { "id": "ref_g_hadith_s3", "order": 3,
+              "title": {
+                "en": "Search and bookmark", "tr": "Ara ve yer imi ekle", "id": "Cari dan tandai",
+                "ms": "Cari dan tanda buku", "fr": "Rechercher et mettre en favori", "de": "Suchen und merken"
+              },
+              "body": {
+                "en": "Search for topics across collections, and bookmark any hadith to revisit later.",
+                "tr": "Koleksiyonlar arasında konu arayın ve sonra dönmek için hadisleri yer imine ekleyin.",
+                "id": "Cari topik di seluruh koleksi, dan tandai hadis untuk dibuka kembali nanti.",
+                "ms": "Cari topik merentas koleksi, dan tanda buku mana-mana hadis untuk dibaca semula.",
+                "fr": "Recherchez des sujets dans les collections et mettez des hadiths en favori pour y revenir.",
+                "de": "Suche Themen über Sammlungen hinweg und merke dir Hadithe für später."
+              } }
+          ] },
+        { "id": "ref_q_calendar", "type": "question", "order": 3,
+          "question": {
+            "en": "Where is the Islamic calendar?", "tr": "İslami takvim nerede?", "id": "Di mana kalender Islam?",
+            "ms": "Di mana kalendar Islam?", "fr": "Où est le calendrier islamique ?", "de": "Wo ist der islamische Kalender?"
+          },
+          "answer": {
+            "en": "Open More → Tools → Calendar to see the Hijri date alongside the Gregorian one, with upcoming Islamic events like Ramadan and the two Eids.",
+            "tr": "Hicri tarihi Miladi ile birlikte ve Ramazan ile iki Bayram gibi yaklaşan İslami olayları görmek için Daha Fazla → Araçlar → Takvim'i açın.",
+            "id": "Buka Lainnya → Alat → Kalender untuk melihat tanggal Hijriah bersama Masehi, dengan acara Islam mendatang seperti Ramadan dan dua Idul.",
+            "ms": "Buka Lagi → Alat → Kalendar untuk melihat tarikh Hijrah bersama Masihi, dengan acara Islam akan datang seperti Ramadan dan dua Hari Raya.",
+            "fr": "Ouvrez Plus → Outils → Calendrier pour voir la date hégirienne et grégorienne, avec les événements islamiques comme le Ramadan et les deux Aïd.",
+            "de": "Öffne Mehr → Werkzeuge → Kalender, um das Hijri- neben dem gregorianischen Datum zu sehen, mit Ereignissen wie Ramadan und den beiden Eids."
+          } },
+        { "id": "ref_g_calendar", "type": "guide", "order": 4, "icon": "calendar", "estimatedMinutes": 1,
+          "title": {
+            "en": "View the Islamic calendar", "tr": "İslami takvimi görüntüle", "id": "Lihat kalender Islam",
+            "ms": "Lihat kalendar Islam", "fr": "Voir le calendrier islamique", "de": "Den islamischen Kalender ansehen"
+          },
+          "steps": [
+            { "id": "ref_g_calendar_s1", "order": 1, "deeplink": "calendar", "pathLabels": ["More", "Tools", "Calendar"],
+              "title": {
+                "en": "Open the Calendar", "tr": "Takvimi aç", "id": "Buka Kalender",
+                "ms": "Buka Kalendar", "fr": "Ouvrir le calendrier", "de": "Kalender öffnen"
+              },
+              "body": {
+                "en": "Go to More → Tools → Calendar.",
+                "tr": "Daha Fazla → Araçlar → Takvim'e gidin.",
+                "id": "Buka Lainnya → Alat → Kalender.",
+                "ms": "Pergi ke Lagi → Alat → Kalendar.",
+                "fr": "Allez dans Plus → Outils → Calendrier.",
+                "de": "Gehe zu Mehr → Werkzeuge → Kalender."
+              } },
+            { "id": "ref_g_calendar_s2", "order": 2,
+              "title": {
+                "en": "Hijri, Gregorian and events", "tr": "Hicri, Miladi ve olaylar", "id": "Hijriah, Masehi, dan acara",
+                "ms": "Hijrah, Masihi dan acara", "fr": "Hégirien, grégorien et événements", "de": "Hijri, Gregorianisch und Ereignisse"
+              },
+              "body": {
+                "en": "See both calendars together and upcoming events. The Hijri date can differ by a day from a local moon sighting.",
+                "tr": "Her iki takvimi birlikte ve yaklaşan olayları görün. Hicri tarih, yerel ay gözlemine göre bir gün farklı olabilir.",
+                "id": "Lihat kedua kalender bersama dan acara mendatang. Tanggal Hijriah bisa berbeda sehari dari rukyat lokal.",
+                "ms": "Lihat kedua-dua kalendar bersama dan acara akan datang. Tarikh Hijrah mungkin berbeza sehari daripada rukyah tempatan.",
+                "fr": "Voyez les deux calendriers et les événements à venir. La date hégirienne peut différer d'un jour de l'observation locale.",
+                "de": "Sieh beide Kalender zusammen und kommende Ereignisse. Das Hijri-Datum kann um einen Tag von der lokalen Mondsichtung abweichen."
+              } }
+          ] }
+      ]
+    },
+    {
+      "id": "troubleshooting", "order": 7, "icon": "build", "color": "orange",
       "title": {
         "en": "Fix a problem", "tr": "Bir sorunu gider", "id": "Atasi masalah",
         "ms": "Baiki masalah", "fr": "Résoudre un problème", "de": "Problem beheben"

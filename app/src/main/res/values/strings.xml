@@ -254,7 +254,6 @@
     <!-- Help & Support Screen -->
     <string name="help_intro_title">How can we help?</string>
     <string name="help_intro_subtitle">Browse common questions, learn how each feature works, and fix issues — or reach out and we\'ll get back to you.</string>
-    <string name="faq_title">Frequently Asked Questions</string>
     <string name="feature_guides">Feature Guides</string>
     <string name="contact_us">Contact Us</string>
     <string name="email_support">Email Support</string>
@@ -263,83 +262,12 @@
     <string name="send_email">Send Email</string>
     <string name="troubleshooting_title">Troubleshooting</string>
 
-    <!-- FAQ Questions & Answers -->
-    <!-- Prayer Times -->
-    <string name="faq_prayer_times_q">How are prayer times calculated?</string>
-    <string name="faq_prayer_times_a">Nimaz calculates prayer times from your saved location together with the calculation method, Asr method, and high latitude rule you choose in More > Prayer Settings > Calculation Method. Times update automatically each day, so you do not need to enter them by hand.</string>
-    <string name="faq_calculation_method_q">Which calculation method should I use?</string>
-    <string name="faq_calculation_method_a">Open More > Prayer Settings > Calculation Method and select the authority used in your region, such as Muslim World League, Islamic Society of North America, Egyptian General Authority, Umm Al-Qura University (Makkah), University of Islamic Sciences Karachi, or Diyanet (Turkey). Each option lists the regions where it is commonly used. If you are unsure, choose the method your local mosque follows.</string>
-    <string name="faq_asr_method_q">What is the difference between the Standard and Hanafi Asr methods?</string>
-    <string name="faq_asr_method_a">In More > Prayer Settings > Calculation Method you can set the Asr method. Standard (Shafi\'i, Maliki, Hanbali) calculates Asr when an object\'s shadow equals its length, while Hanafi uses twice the object\'s length, which makes Asr later in the afternoon. Choose the one that matches the school you follow.</string>
-    <string name="faq_high_latitude_q">What is the high latitude rule?</string>
-    <string name="faq_high_latitude_a">At locations far from the equator, twilight can make Fajr and Isha difficult to calculate. The high latitude rule in More > Prayer Settings > Calculation Method offers Middle of the Night, Seventh of the Night, and Twilight Angle to estimate these times. If Fajr or Isha look unusual, try a different rule.</string>
-    <string name="faq_mosque_difference_q">Why are my prayer times different from my local mosque?</string>
-    <string name="faq_mosque_difference_a">Mosques often use a specific calculation method, Asr method, or fixed minute adjustments. Match your mosque by setting the same calculation and Asr methods in More > Prayer Settings > Calculation Method, then fine tune each prayer under Manual Adjustments (Minutes) on the same screen.</string>
-    <string name="faq_adjust_times_q">Can I adjust individual prayer times?</string>
-    <string name="faq_adjust_times_a">Yes. Open More > Prayer Settings > Calculation Method and scroll to Manual Adjustments (Minutes). You can shift Fajr, Sunrise, Dhuhr, Asr, Maghrib, and Isha forward or back by a set number of minutes to match your local timetable.</string>
-    <!-- Location -->
-    <string name="faq_set_location_q">How do I set my location?</string>
-    <string name="faq_set_location_a">Go to More > Prayer Settings > Location. Tap Use Current Location to detect your position by GPS, or search for your city or address and select it from the results. The chosen location is used for prayer times and Qibla direction.</string>
-    <string name="faq_location_permission_q">Does Nimaz track my location in the background?</string>
-    <string name="faq_location_permission_a">No. Nimaz requests only the standard location permission and reads your position when you tap Use Current Location in More > Prayer Settings > Location. It does not request background location and does not track you continuously. Your selected location stays on your device.</string>
-    <!-- Notifications and Adhan -->
-    <string name="faq_notifications_q">Why am I not receiving prayer notifications?</string>
-    <string name="faq_notifications_a">First enable Enable Notifications in More > Prayer Settings > Notifications and turn on the prayers you want. On Android 13 and newer, allow the notification permission when prompted; on Android 12 and newer, allow exact alarms; and use Disable Battery Optimization on the same screen. The Troubleshooting section below has detailed steps.</string>
-    <string name="faq_adhan_q">How do I choose the adhan sound?</string>
-    <string name="faq_adhan_a">Open More > Prayer Settings > Notifications, turn on Enable Adhan Sound, then pick a muezzin such as Mishary Rashid Alafasy, Abdul Basit Abdul Samad, Makkah (Masjid al-Haram), or Simple Beep. The selected adhan downloads the first time it is used. You can also mute the adhan for individual prayers with the sound icon next to each prayer.</string>
-    <string name="faq_reminder_q">Can I be reminded before a prayer begins?</string>
-    <string name="faq_reminder_a">Yes. In More > Prayer Settings > Notifications, turn on Pre-Adhan Reminder to be alerted a set number of minutes before each prayer. You can also enable the Sunrise Alert and the Friday Prayer Reminder on the same screen.</string>
-    <string name="faq_dnd_q">Will the adhan play during Do Not Disturb?</string>
-    <string name="faq_dnd_a">By default the adhan plays through the alarm channel so it can sound even during Do Not Disturb. If you prefer Nimaz to stay quiet while DND is active, enable Honor Do Not Disturb in More > Prayer Settings > Notifications.</string>
     <!-- Qibla -->
-    <string name="faq_qibla_q">How does the Qibla compass work?</string>
-    <string name="faq_qibla_a">The Qibla tab uses your phone\'s compass sensors and your saved location to point toward the Kaaba in Makkah, and shows the bearing and distance. For an accurate reading, calibrate the compass by moving your phone in a figure-8 motion away from metal and magnets until the accuracy shows Medium or High.</string>
-    <!-- Quran -->
-    <string name="faq_quran_translation_q">How do I change how the Quran is displayed?</string>
-    <string name="faq_quran_translation_a">Open the Quran tab and tap the settings icon to open Quran Settings. There you can turn Show Translation and Show Transliteration on or off, change the Arabic font size, and enable options such as Tajweed colors and Keep Screen On.</string>
-    <string name="faq_quran_audio_q">How do I listen to Quran recitation?</string>
-    <string name="faq_quran_audio_a">In the Quran reader, use the audio controls to play a verse or surah. To change the reciter, open Quran Settings, tap Reciter, and choose from reciters such as Mishary Rashid Alafasy, Abdul Rahman Al-Sudais, or Abdul Basit Abdul Samad. Audio downloads the first time you play it.</string>
-    <!-- Tasbih -->
-    <string name="faq_tasbih_q">How do I use the Tasbih counter?</string>
-    <string name="faq_tasbih_a">Open the Tasbih tab, choose a preset dhikr or use Free count, and tap the large counter to increment. Each preset has a target, and the counter records a lap and resets when the target is reached. Use the control buttons to toggle vibration and sound or to reset, and open History to review past sessions.</string>
     <!-- Prayer Tracking -->
-    <string name="faq_track_prayers_q">Can I track my prayers?</string>
-    <string name="faq_track_prayers_a">Yes. Mark a prayer as prayed from the prayer card on the Home screen, or open More > Prayer Tracker for a full calendar and daily breakdown. The tracker shows your daily progress and streaks so you can follow your consistency over time.</string>
-    <string name="faq_qada_q">How do I track missed (Qada) prayers?</string>
-    <string name="faq_qada_a">Open More > Prayer Tracker and switch to the Qada tab. It lists prayers recorded as missed, grouped by month, and lets you mark each one as completed once you make it up.</string>
-    <!-- Calendar and Hijri -->
-    <string name="faq_hijri_q">Why is the Hijri date sometimes a day off?</string>
-    <string name="faq_hijri_a">Nimaz shows a calculated Hijri date, which can differ by a day from a date announced by local moon sighting. The Hijri calendar and Islamic events are available under More > Tools > Calendar. See the Troubleshooting section for more detail.</string>
-    <!-- Zakat -->
-    <string name="faq_zakat_q">How does the Zakat calculator work?</string>
-    <string name="faq_zakat_a">Open More > Tools > Zakat and enter your assets, such as cash, bank balance, gold, and silver, along with any debts. Choose whether the Nisab threshold is based on gold or silver; if your net wealth meets the Nisab, Nimaz calculates the Zakat due at 2.5%. You can also change the currency used for the calculation.</string>
     <!-- General and Privacy -->
-    <string name="faq_privacy_q">What data does Nimaz collect?</string>
-    <string name="faq_privacy_a">Nimaz is designed to keep your information on your device. Your location, prayer records, bookmarks, and settings are stored locally and used only to provide prayer times, Qibla direction, and tracking. See the in-app Privacy Policy for full details.</string>
-    <string name="faq_offline_q">Does Nimaz work offline?</string>
-    <string name="faq_offline_a">Most features work offline once set up. Prayer times, Qibla, the Tasbih counter, and tracking run on your device without a connection. An internet connection is only needed to detect your location, download adhan sounds, and download Quran recitation audio.</string>
 
-    <!-- Feature Guide Titles & Descriptions -->
-    <string name="guide_prayer_times_title">Prayer Times</string>
-    <string name="guide_prayer_times_desc">See the five daily prayer times and sunrise on the Home screen, with a countdown to the next prayer. Set how times are calculated in More > Prayer Settings > Calculation Method, including the calculation method, Asr method, high latitude rule, and per-prayer minute adjustments.</string>
-    <string name="guide_tracker_title">Prayer Tracker</string>
-    <string name="guide_tracker_desc">Mark prayers as prayed from the Home screen, or open More > Prayer Tracker for a calendar view, daily progress, and streaks. Use the Qada tab to record and complete missed prayers.</string>
-    <string name="guide_quran_title">Quran Reader</string>
-    <string name="guide_quran_desc">Read the Quran with translation, transliteration, and audio recitation from the Quran tab. Adjust the Arabic font size, toggle translation and Tajweed colors, and choose a reciter in Quran Settings; bookmarks and your last read position are saved automatically.</string>
     <string name="guide_qibla_title">Qibla Compass</string>
-    <string name="guide_qibla_desc">Open the Qibla tab to find the direction of the Kaaba using your phone\'s compass and saved location. It shows the bearing, the distance to Makkah, and a calibration guide; an AR view is also available with camera permission.</string>
-    <string name="guide_tasbih_title">Tasbih Counter</string>
-    <string name="guide_tasbih_desc">Count dhikr in the Tasbih tab using built-in presets or your own, each with a target and automatic lap counting. Toggle vibration and sound, reset the count, and review past sessions in History.</string>
-    <string name="guide_notifications_title">Notifications and Adhan</string>
-    <string name="guide_notifications_desc">Control prayer alerts in More > Prayer Settings > Notifications. Enable notifications per prayer, choose an adhan muezzin, set a pre-adhan reminder, and use the Test Notification and battery optimization tools to make sure alerts arrive on time.</string>
-    <string name="guide_hadith_title">Hadith Collection</string>
-    <string name="guide_hadith_desc">Browse authentic hadith collections from More > Learning > Hadith. Open a book to read its chapters and hadith in sequence, search for topics, and bookmark hadith to revisit later.</string>
-    <string name="guide_zakat_title">Zakat Calculator</string>
-    <string name="guide_zakat_desc">Calculate your Zakat in More > Tools > Zakat by entering your assets and liabilities. Choose a gold or silver Nisab threshold and a currency, and Nimaz works out whether Zakat is due and the amount at 2.5%.</string>
-    <string name="guide_calendar_title">Islamic Calendar</string>
-    <string name="guide_calendar_desc">View the Hijri calendar alongside the Gregorian calendar in More > Tools > Calendar, with upcoming Islamic events and important dates such as Ramadan and the two Eids.</string>
 
-    <!-- Troubleshooting / Common Issues -->
     <string name="trouble_times_wrong_title">Prayer times look wrong or off by about an hour</string>
     <string name="trouble_times_wrong_symptom">One or more prayer times seem too early or too late, sometimes by roughly an hour.</string>
     <string name="trouble_times_wrong_solution">Open More > Prayer Settings > Calculation Method and confirm the calculation method, Asr method, and high latitude rule match what your region or mosque uses. Then open More > Prayer Settings > Location and make sure your city is correct and not an old manual location. A difference of about an hour is usually a time zone or daylight-saving issue, so set your phone\'s date, time, and time zone to automatic. Finally, clear any unintended values under Manual Adjustments (Minutes).</string>

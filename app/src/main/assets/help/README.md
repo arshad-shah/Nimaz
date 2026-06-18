@@ -62,6 +62,15 @@ So: **edit content → bump `"contentVersion"` by 1.**
 ```
 
 - `type` is `"question"` (question + answer) or `"guide"` (title + ordered steps).
+- A step's `deeplink` is a **key**, not a route. Keys are mapped to in-app routes
+  in `core/navigation/HelpDeepLink.kt` (`helpDeepLinkRoute`). Currently supported:
+  `prayer_settings`, `notifications`, `location`, `qibla`, `quran_settings`,
+  `language`, `appearance`, `calendar`, `fasting`, `tasbih`, `hadith`, `settings`,
+  `home`. To deep-link somewhere new, add the key → `Route` there first; an
+  unknown key just renders the step without a jump button (`pathLabels` still show).
+- Icon and color strings (`icon`, `color`) are resolved in
+  `presentation/screens/help/HelpContentUi.kt`. Use a name already handled there,
+  or it falls back to a default.
 - Every user-facing string is a language map. **Supported languages:** `en`,
   `tr`, `id`, `ms`, `fr`, `de`. Provide `en` at minimum; the UI falls back to it.
 - `id`s are stable keys — keep them consistent across edits.

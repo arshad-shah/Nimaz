@@ -10,6 +10,9 @@ fun helpDeepLinkRoute(key: String?): Route? = when (key) {
     "language" -> Route.SettingsLanguage
     "appearance" -> Route.SettingsAppearance
     "calendar" -> Route.IslamicCalendar
+    "fasting" -> Route.FastingTracker
+    "tasbih" -> Route.TasbihHome
+    "hadith" -> Route.HadithHome
     "settings" -> Route.Settings
     "home" -> Route.Home
     else -> null
