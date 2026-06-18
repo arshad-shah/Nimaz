@@ -1,0 +1,188 @@
+{
+  "contentVersion": 1,
+  "topics": [
+    {
+      "id": "prayer_times", "order": 1, "icon": "schedule", "color": "indigo",
+      "title": { "en": "Prayer Times" },
+      "subtitle": { "en": "Calculation, Asr, adjustments" },
+      "items": [
+        { "id": "pt_q_calc", "type": "question", "order": 1,
+          "question": { "en": "How are prayer times calculated?" },
+          "answer": { "en": "From your saved location plus the calculation method, Asr method and high-latitude rule you pick. Times refresh automatically every day." } },
+        { "id": "pt_q_mosque", "type": "question", "order": 2,
+          "question": { "en": "Why don't they match my mosque?" },
+          "answer": { "en": "Mosques use a specific method or fixed minute offsets. Match the method, then fine-tune each prayer under Manual Adjustments." } },
+        { "id": "pt_q_asr", "type": "question", "order": 3,
+          "question": { "en": "Why are there two Asr times?" },
+          "answer": { "en": "Standard (Shafi'i, Maliki, Hanbali) uses shadow = object length; Hanafi uses twice that, making Asr later. Pick the school you follow." } },
+        { "id": "pt_q_highlat", "type": "question", "order": 4,
+          "question": { "en": "Fajr or Isha look wrong at high latitude" },
+          "answer": { "en": "Far from the equator, twilight is hard to compute. Try a different high-latitude rule (Middle of the Night, Seventh of the Night, or Twilight Angle)." } },
+        { "id": "pt_g_method", "type": "guide", "order": 5, "icon": "tune", "estimatedMinutes": 1,
+          "title": { "en": "Change calculation method" },
+          "steps": [
+            { "id": "pt_g_method_s1", "order": 1, "deeplink": "prayer_settings",
+              "pathLabels": ["More", "Prayer Settings"],
+              "title": { "en": "Open Prayer Settings" },
+              "body": { "en": "From the bottom bar, go to More → Prayer Settings." } },
+            { "id": "pt_g_method_s2", "order": 2,
+              "title": { "en": "Tap Calculation Method" },
+              "body": { "en": "The method currently in use is highlighted." } },
+            { "id": "pt_g_method_s3", "order": 3,
+              "title": { "en": "Pick your mosque's authority" },
+              "body": { "en": "Choose e.g. Muslim World League or Umm al-Qura — times update instantly, no restart needed." } }
+          ] },
+        { "id": "pt_g_adjust", "type": "guide", "order": 6, "icon": "more_time", "estimatedMinutes": 1,
+          "title": { "en": "Fine-tune a prayer time" },
+          "steps": [
+            { "id": "pt_g_adjust_s1", "order": 1, "deeplink": "prayer_settings",
+              "pathLabels": ["More", "Prayer Settings"],
+              "title": { "en": "Open Prayer Settings" },
+              "body": { "en": "Go to More → Prayer Settings and scroll to Manual Adjustments (Minutes)." } },
+            { "id": "pt_g_adjust_s2", "order": 2,
+              "title": { "en": "Shift the prayer" },
+              "body": { "en": "Move Fajr, Sunrise, Dhuhr, Asr, Maghrib or Isha forward or back to match your local timetable." } }
+          ] }
+      ]
+    },
+    {
+      "id": "notifications_adhan", "order": 2, "icon": "notifications_active", "color": "gold",
+      "title": { "en": "Notifications & Adhan" },
+      "subtitle": { "en": "Reminders, sounds, Do Not Disturb" },
+      "items": [
+        { "id": "na_q_reminder", "type": "question", "order": 1,
+          "question": { "en": "Can I be reminded before a prayer?" },
+          "answer": { "en": "Yes — turn on Pre-Adhan Reminder in Prayer Settings → Notifications to be alerted a set number of minutes before each prayer." } },
+        { "id": "na_q_dnd", "type": "question", "order": 2,
+          "question": { "en": "Will the adhan play during Do Not Disturb?" },
+          "answer": { "en": "By default it plays on the alarm channel, so it sounds even during DND. Turn on Honor Do Not Disturb to keep it quiet while DND is active." } },
+        { "id": "na_g_enable", "type": "guide", "order": 3, "icon": "notifications_active", "estimatedMinutes": 1,
+          "title": { "en": "Turn on prayer notifications" },
+          "steps": [
+            { "id": "na_g_enable_s1", "order": 1, "deeplink": "notifications",
+              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "title": { "en": "Open Notifications" },
+              "body": { "en": "Go to More → Prayer Settings → Notifications." } },
+            { "id": "na_g_enable_s2", "order": 2,
+              "title": { "en": "Enable notifications" },
+              "body": { "en": "Turn on Enable Notifications and the prayers you want alerts for." } },
+            { "id": "na_g_enable_s3", "order": 3,
+              "title": { "en": "Allow system permissions" },
+              "body": { "en": "Grant the notification permission, allow exact alarms, and tap Disable Battery Optimization. Use Test Notification to confirm." } }
+          ] },
+        { "id": "na_g_adhan", "type": "guide", "order": 4, "icon": "tune", "estimatedMinutes": 1,
+          "title": { "en": "Choose the adhan sound" },
+          "steps": [
+            { "id": "na_g_adhan_s1", "order": 1, "deeplink": "notifications",
+              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "title": { "en": "Open Notifications" },
+              "body": { "en": "Go to More → Prayer Settings → Notifications." } },
+            { "id": "na_g_adhan_s2", "order": 2,
+              "title": { "en": "Enable adhan sound and pick a muezzin" },
+              "body": { "en": "Turn on Enable Adhan Sound and choose a reciter — it downloads the first time it's used. Mute individual prayers with the sound icon." } }
+          ] }
+      ]
+    },
+    {
+      "id": "location_qibla", "order": 3, "icon": "explore", "color": "teal",
+      "title": { "en": "Location & Qibla" },
+      "subtitle": { "en": "Set location, compass" },
+      "items": [
+        { "id": "lq_q_privacy", "type": "question", "order": 1,
+          "question": { "en": "Does Nimaz track my location?" },
+          "answer": { "en": "No. It reads your position only when you tap Use Current Location, never in the background, and your location stays on your device." } },
+        { "id": "lq_q_qibla", "type": "question", "order": 2,
+          "question": { "en": "How does the Qibla compass work?" },
+          "answer": { "en": "It uses your phone's compass and saved location to point to the Kaaba. Calibrate with a figure-8 motion away from metal until accuracy reads Medium or High." } },
+        { "id": "lq_g_location", "type": "guide", "order": 3, "icon": "explore", "estimatedMinutes": 1,
+          "title": { "en": "Set your location" },
+          "steps": [
+            { "id": "lq_g_location_s1", "order": 1, "deeplink": "location",
+              "pathLabels": ["More", "Prayer Settings", "Location"],
+              "title": { "en": "Open Location" },
+              "body": { "en": "Go to More → Prayer Settings → Location." } },
+            { "id": "lq_g_location_s2", "order": 2,
+              "title": { "en": "Detect or search" },
+              "body": { "en": "Tap Use Current Location to detect by GPS, or search for your city and select it. This is used for prayer times and Qibla." } }
+          ] }
+      ]
+    },
+    {
+      "id": "quran_audio", "order": 4, "icon": "menu_book", "color": "green",
+      "title": { "en": "Quran & Audio" },
+      "subtitle": { "en": "Reading, recitation" },
+      "items": [
+        { "id": "qa_q_display", "type": "question", "order": 1,
+          "question": { "en": "How do I change how the Quran looks?" },
+          "answer": { "en": "Open the Quran tab and tap the settings icon to toggle translation, transliteration and Tajweed colors, and change the Arabic font size." } },
+        { "id": "qa_q_audio", "type": "question", "order": 2,
+          "question": { "en": "How do I listen to recitation?" },
+          "answer": { "en": "Use the audio controls in the reader to play a verse or surah. Change the reciter in Quran Settings; audio downloads the first time you play it." } },
+        { "id": "qa_g_settings", "type": "guide", "order": 3, "icon": "tune", "estimatedMinutes": 1,
+          "title": { "en": "Open Quran display settings" },
+          "steps": [
+            { "id": "qa_g_settings_s1", "order": 1, "deeplink": "quran_settings",
+              "pathLabels": ["Quran", "Settings"],
+              "title": { "en": "Open Quran Settings" },
+              "body": { "en": "In the Quran tab, tap the settings icon." } },
+            { "id": "qa_g_settings_s2", "order": 2,
+              "title": { "en": "Adjust reading options" },
+              "body": { "en": "Toggle translation, transliteration and Tajweed colors, set the font size, or pick a reciter." } }
+          ] }
+      ]
+    },
+    {
+      "id": "tracking_tools", "order": 5, "icon": "task_alt", "color": "violet",
+      "title": { "en": "Tracking & Tools" },
+      "subtitle": { "en": "Prayers, fasting, tasbih, zakat" },
+      "items": [
+        { "id": "tt_q_track", "type": "question", "order": 1,
+          "question": { "en": "Can I track my prayers?" },
+          "answer": { "en": "Yes — mark a prayer from the Home card, or open More → Prayer Tracker for a calendar, daily progress and streaks." } },
+        { "id": "tt_q_qada", "type": "question", "order": 2,
+          "question": { "en": "How do I track missed (Qada) prayers?" },
+          "answer": { "en": "In More → Prayer Tracker, switch to the Qada tab to see missed prayers by month and mark each one completed when you make it up." } },
+        { "id": "tt_q_tasbih", "type": "question", "order": 3,
+          "question": { "en": "How do I use the Tasbih counter?" },
+          "answer": { "en": "Open the Tasbih tab, pick a preset or free count, and tap to increment. It laps and resets at the target; review past sessions in History." } },
+        { "id": "tt_q_fasting", "type": "question", "order": 4,
+          "question": { "en": "How do I track my fasts?" },
+          "answer": { "en": "Open More → Daily Practice → Fasting. Log fasts across the Ramadan, Voluntary and Makeup tabs, with Suhoor and Iftar times from your prayer times." } },
+        { "id": "tt_q_zakat", "type": "question", "order": 5,
+          "question": { "en": "How does the Zakat calculator work?" },
+          "answer": { "en": "In More → Tools → Zakat, enter your assets and debts and pick a gold or silver Nisab. If your net wealth meets the Nisab, it computes 2.5% due." } }
+      ]
+    },
+    {
+      "id": "troubleshooting", "order": 6, "icon": "build", "color": "orange",
+      "title": { "en": "Fix a problem" },
+      "subtitle": { "en": "Troubleshooting" },
+      "items": [
+        { "id": "ts_q_times_off", "type": "question", "order": 1,
+          "question": { "en": "Prayer times look wrong or off by an hour" },
+          "answer": { "en": "Check the calculation and Asr methods match your region, confirm your city is correct, and set your phone's time zone to automatic (an hour off is usually a time-zone issue). Clear any stray Manual Adjustments." } },
+        { "id": "ts_q_no_notif", "type": "question", "order": 2,
+          "question": { "en": "No notifications or adhan" },
+          "answer": { "en": "Enable notifications per prayer, grant the notification permission and exact alarms, and disable battery optimization. On Samsung/Xiaomi/Oppo/Huawei, also allow background running. Use Test Notification." } },
+        { "id": "ts_q_silent_adhan", "type": "question", "order": 3,
+          "question": { "en": "Adhan appears but is silent" },
+          "answer": { "en": "Turn on Enable Adhan Sound and let a muezzin finish downloading, raise alarm/media volume, and leave silent mode. Choose Simple Beep for a short tone." } },
+        { "id": "ts_q_location", "type": "question", "order": 4,
+          "question": { "en": "Location won't update" },
+          "answer": { "en": "In Prayer Settings → Location tap Use Current Location, grant the permission and turn on GPS. A manually-searched city overrides detection, so reselect it or use current location." } },
+        { "id": "ts_q_qibla", "type": "question", "order": 5,
+          "question": { "en": "Qibla points the wrong way" },
+          "answer": { "en": "Calibrate with a figure-8 motion until accuracy is Medium or High, stay away from metal and magnets, and confirm your location. Some phones have weak magnetic sensors." } },
+        { "id": "ts_q_background", "type": "question", "order": 6,
+          "question": { "en": "Notifications stop after a while" },
+          "answer": { "en": "Disable battery optimization and allow background running for Nimaz; some brands are aggressive (see dontkillmyapp.com). Then tap Reset Notifications to reschedule." } },
+        { "id": "ts_q_hijri", "type": "question", "order": 7,
+          "question": { "en": "Hijri date is off by a day" },
+          "answer": { "en": "Nimaz uses a calculated Hijri calendar, which can differ by a day from local moon sighting. For observances, follow your local sighting authority." } },
+        { "id": "ts_q_audio", "type": "question", "order": 8,
+          "question": { "en": "Audio won't download or play" },
+          "answer": { "en": "Audio downloads on first play, so check your connection and free storage. Let the reciter or muezzin finish downloading; switch networks or pick Simple Beep if a download stalls." } }
+      ]
+    }
+  ]
+}
