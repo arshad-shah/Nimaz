@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.unit.dp
 import org.junit.Rule
@@ -13,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazLegendItemTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `legend item renders dot and label`() {

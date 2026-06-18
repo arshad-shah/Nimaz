@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.test.assertCountEquals
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import org.junit.Rule
@@ -13,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class CountdownTimerTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `parses full hms string into padded units`() {

@@ -24,7 +24,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
@@ -302,7 +302,7 @@ fun AyahActionsContent(
 
             // Tafseer button
             ActionButton(
-                icon = Icons.Default.MenuBook,
+                icon = Icons.AutoMirrored.Filled.MenuBook,
                 label = "Tafseer",
                 onClick = { onTafseerClick(ayah) },
                 tint = MaterialTheme.colorScheme.primary

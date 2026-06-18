@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.PrayerType
 import org.junit.Rule
@@ -12,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 class HomeHeroTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `renders the next prayer name and label`() {

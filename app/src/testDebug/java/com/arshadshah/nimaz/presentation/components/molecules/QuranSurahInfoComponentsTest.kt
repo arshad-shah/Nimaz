@@ -1,8 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -18,7 +17,7 @@ import org.robolectric.RobolectricTestRunner
 class QuranSurahInfoComponentsTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun surah(
         number: Int = 1,
@@ -92,7 +91,7 @@ class QuranSurahInfoComponentsTest {
     fun detailCard_showsLabelAndValue() {
         composeRule.setThemedContent {
             DetailCard(
-                icon = Icons.Default.MenuBook,
+                icon = Icons.AutoMirrored.Filled.MenuBook,
                 label = "Juz",
                 value = "1"
             )

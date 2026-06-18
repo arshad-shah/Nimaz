@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import org.junit.Rule
 import org.junit.Test
@@ -13,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazContainersTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `bottom sheet handle renders`() {

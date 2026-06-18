@@ -1,7 +1,22 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    dependencies {
+        // AGP 9 provides built-in Kotlin support but pins the Kotlin Gradle plugin
+        // (and KSP) to an older baseline (KGP 2.2.10). Force them up to the versions
+        // used by the Compose / serialization compiler plugins so the Kotlin compiler
+        // and its plugins stay on the same version. Keep these in sync with the
+        // `kotlin` and `ksp` entries in gradle/libs.versions.toml.
+        // See https://developer.android.com/build/migrate-to-built-in-kotlin
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21")
+        classpath("com.google.devtools.ksp:symbol-processing-gradle-plugin:2.3.9")
+    }
+}
+
 plugins {
     alias(libs.plugins.android.application) apply false
-    alias(libs.plugins.kotlin.android) apply false
+    // Note: the standalone org.jetbrains.kotlin.android plugin is intentionally NOT
+    // applied — AGP 9 compiles Kotlin through its built-in Kotlin support.
     alias(libs.plugins.kotlin.compose) apply false
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.ksp) apply false

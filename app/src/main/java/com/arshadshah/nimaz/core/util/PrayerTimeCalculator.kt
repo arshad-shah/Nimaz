@@ -11,12 +11,13 @@ import com.batoulapps.adhan2.CalculationParameters
 import com.batoulapps.adhan2.Coordinates
 import com.batoulapps.adhan2.Madhab
 import com.batoulapps.adhan2.data.DateComponents
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Instant
 import com.batoulapps.adhan2.CalculationMethod as AdhanMethod
 import com.batoulapps.adhan2.HighLatitudeRule as AdhanHighLatitudeRule
 import com.batoulapps.adhan2.PrayerTimes as AdhanPrayerTimes
@@ -170,15 +171,6 @@ class PrayerTimeCalculator @Inject constructor() {
     }
 
     private fun Instant.toJavaLocalDateTime(timeZone: TimeZone): LocalDateTime {
-        val kotlinLocalDateTime = this.toKotlinLocalDateTime(timeZone)
-        return LocalDateTime.of(
-            kotlinLocalDateTime.year,
-            kotlinLocalDateTime.monthNumber,
-            kotlinLocalDateTime.dayOfMonth,
-            kotlinLocalDateTime.hour,
-            kotlinLocalDateTime.minute,
-            kotlinLocalDateTime.second,
-            kotlinLocalDateTime.nanosecond
-        )
+        return this.toKotlinLocalDateTime(timeZone).toJavaLocalDateTime()
     }
 }

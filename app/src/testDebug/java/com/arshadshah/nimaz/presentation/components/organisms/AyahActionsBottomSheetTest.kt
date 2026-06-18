@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.semantics.SemanticsActions
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -25,7 +24,7 @@ import org.robolectric.RobolectricTestRunner
 class AyahActionsBottomSheetTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     private fun ayah(
         id: Int = 2,

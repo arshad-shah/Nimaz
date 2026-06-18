@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -16,7 +15,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazIconButtonTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `icon button enums are complete`() {

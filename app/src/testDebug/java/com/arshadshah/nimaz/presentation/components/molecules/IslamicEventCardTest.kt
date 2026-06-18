@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
@@ -17,7 +16,7 @@ import org.robolectric.RobolectricTestRunner
 class IslamicEventCardTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `primitive overload renders core fields with all optionals`() {

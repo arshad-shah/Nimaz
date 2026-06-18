@@ -42,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -57,7 +58,6 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import java.util.Locale
 
 /**
  * Position of the status indicator dot within a day cell.
@@ -419,8 +419,9 @@ private fun CalendarDayCell(
     }
 
     // Accessibility: "Monday, 5 January 2026, selected" rather than "5".
-    val dayName = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-    val monthName = date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+    val locale = LocalLocale.current.platformLocale
+    val dayName = date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
+    val monthName = date.month.getDisplayName(TextStyle.FULL, locale)
     val a11yLabel = buildString {
         append("$dayName, ${date.dayOfMonth} $monthName ${date.year}")
         if (isToday) append(", today")

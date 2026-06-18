@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -13,7 +12,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazStatsGridTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     // ── NimazStatData (public data class) ──────────────────────────────────
 

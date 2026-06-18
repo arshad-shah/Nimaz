@@ -21,7 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -52,7 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
@@ -290,7 +290,7 @@ private fun QuranSearchResultCard(
     modifier: Modifier = Modifier
 ) {
     SearchResultCard(
-        icon = Icons.Default.MenuBook,
+        icon = Icons.AutoMirrored.Filled.MenuBook,
         iconColor = NimazColors.QuranColors.Meccan,
         type = stringResource(R.string.quran_type),
         title = stringResource(R.string.surah_result_format, result.ayah.surahNumber, result.ayah.ayahNumber),

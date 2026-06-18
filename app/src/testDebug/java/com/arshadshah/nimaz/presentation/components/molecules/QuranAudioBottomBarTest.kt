@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -14,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 class QuranAudioBottomBarTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun idleState_showsSurahNameAndPositionChips_andPlayButton() {

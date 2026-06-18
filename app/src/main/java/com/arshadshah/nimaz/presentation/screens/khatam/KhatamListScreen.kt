@@ -28,11 +28,11 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoNotDisturb
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -61,7 +61,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
@@ -425,7 +425,7 @@ private fun KhatamStatsCard(
             tint = MaterialTheme.colorScheme.primary
         )
         StatItem(
-            icon = Icons.Default.TrendingUp,
+            icon = Icons.AutoMirrored.Filled.TrendingUp,
             value = inProgressCount.toString(),
             label = stringResource(R.string.khatam_in_progress),
             tint = MaterialTheme.colorScheme.tertiary
@@ -670,7 +670,7 @@ private fun KhatamCard(
                     )
 
                     else -> Icon(
-                        imageVector = Icons.Default.MenuBook,
+                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(24.dp)
@@ -742,7 +742,7 @@ private fun EmptyState(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         Icon(
-            imageVector = Icons.Default.MenuBook,
+            imageVector = Icons.AutoMirrored.Filled.MenuBook,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             modifier = Modifier.size(64.dp)

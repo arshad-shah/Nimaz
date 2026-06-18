@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import org.junit.Rule
 import org.junit.Test
@@ -11,7 +10,7 @@ import org.robolectric.RobolectricTestRunner
 class QuranInfoAtomsTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `stat item renders value and label`() {

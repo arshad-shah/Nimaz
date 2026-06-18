@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.unit.dp
 import org.junit.Rule
@@ -14,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 class NimazDividerTest {
 
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `divider renders with defaults`() {

@@ -79,7 +79,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -398,7 +398,7 @@ private fun DhikrDisplay(
     ) {
         if (!selectedPreset?.arabicText.isNullOrEmpty()) {
             ArabicText(
-                text = selectedPreset.arabicText ?: "",
+                text = selectedPreset.arabicText,
                 size = ArabicTextSize.LARGE,
                 color = NimazColors.TasbihColors.Milestone,
                 textAlign = TextAlign.Center,

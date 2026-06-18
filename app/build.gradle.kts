@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    // AGP 9 compiles Kotlin via built-in support; the standalone kotlin.android
+    // plugin must not be applied.
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id("kotlin-parcelize")
@@ -29,7 +30,7 @@ if (file("google-services.json").exists()) {
 
 android {
     namespace = "com.arshadshah.nimaz"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "com.arshadshah.nimaz"
@@ -88,6 +89,16 @@ android {
             isIncludeAndroidResources = true
             isReturnDefaultValues = true
         }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        // Opt in to applying annotations (e.g. Hilt's @ApplicationContext) to both
+        // the value parameter and the backing field/property. This is the future
+        // default and silences the KT-73255 deprecation warning emitted for
+        // constructor-injected parameters. See https://youtrack.jetbrains.com/issue/KT-73255
+        freeCompilerArgs.add("-Xannotation-default-target=param-property")
     }
 }
 

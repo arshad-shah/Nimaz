@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -16,7 +15,7 @@ import java.time.YearMonth
 @RunWith(RobolectricTestRunner::class)
 class NimazCalendarTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createComponentComposeRule()
 
     @Test
     fun `renders default month header and weekday labels`() {
