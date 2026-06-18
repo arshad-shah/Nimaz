@@ -216,8 +216,6 @@
     <string name="faq_qada_a">Öffnen Sie Mehr > Gebets-Tracker und wechseln Sie zum Qada-Tab. Dort werden als versäumt erfasste Gebete nach Monaten gruppiert aufgelistet und Sie können jedes einzelne als abgeschlossen markieren, sobald Sie es nachgeholt haben.</string>
     <string name="faq_hijri_q">Warum ist das Hijri-Datum manchmal um einen Tag abweichend?</string>
     <string name="faq_hijri_a">Nimaz zeigt ein berechnetes Hijri-Datum an, das um einen Tag von einem durch lokale Mondbeobachtung bekanntgegebenen Datum abweichen kann. Der Hijri-Kalender und islamische Ereignisse sind unter Mehr > Werkzeuge > Kalender verfügbar. Weitere Einzelheiten finden Sie im Abschnitt Fehlerbehebung.</string>
-    <string name="faq_fasting_q">Wie verfolge ich meine Fastentage?</string>
-    <string name="faq_fasting_a">Öffnen Sie Mehr > Tägliche Praxis > Fasten. Der Tracker hat Ramadan-, Freiwillig- und Nachholungs-Tabs, in denen Sie jeden Fastentag eintragen und Suhoor- und Iftar-Zeiten einsehen können, die auf Ihren Fajr- und Maghrib-Gebetszeiten basieren.</string>
     <string name="faq_zakat_q">Wie funktioniert der Zakat-Rechner?</string>
     <string name="faq_zakat_a">Öffnen Sie Mehr > Werkzeuge > Zakat und geben Sie Ihr Vermögen ein, z. B. Bargeld, Bankguthaben, Gold und Silber, zusammen mit etwaigen Schulden. Wählen Sie, ob der Nisab-Schwellenwert auf Gold oder Silber basiert; wenn Ihr Nettovermögen den Nisab erreicht, berechnet Nimaz die fällige Zakat mit 2,5 %. Sie können auch die für die Berechnung verwendete Währung ändern.</string>
     <string name="faq_privacy_q">Welche Daten erfasst Nimaz?</string>
@@ -238,8 +236,6 @@
     <string name="guide_notifications_desc">Steuern Sie Gebetsbenachrichtigungen unter Mehr > Gebetseinstellungen > Benachrichtigungen. Aktivieren Sie Benachrichtigungen pro Gebet, wählen Sie einen Adhan-Muezzin, stellen Sie eine Vorab-Erinnerung ein und verwenden Sie die Testbenachrichtigung und die Akkuoptimierungs-Tools, um sicherzustellen, dass Benachrichtigungen pünktlich ankommen.</string>
     <string name="guide_hadith_title">Hadith-Sammlung</string>
     <string name="guide_hadith_desc">Durchsuchen Sie authentische Hadith-Sammlungen unter Mehr > Lernen > Hadith. Öffnen Sie ein Buch, um seine Kapitel und Hadithe der Reihe nach zu lesen, suchen Sie nach Themen und setzen Sie Lesezeichen für Hadithe, um sie später wiederzufinden.</string>
-    <string name="guide_fasting_title">Fasten-Tracker</string>
-    <string name="guide_fasting_desc">Verfolgen Sie Fastentage unter Mehr > Tägliche Praxis > Fasten über die Tabs Ramadan, Freiwillig und Nachholung. Sehen Sie Suhoor- und Iftar-Zeiten, die aus Ihren Gebetszeiten abgeleitet werden, und führen Sie ein Protokoll über abgeschlossene und versäumte Fastentage.</string>
     <string name="guide_zakat_title">Zakat-Rechner</string>
     <string name="guide_zakat_desc">Berechnen Sie Ihre Zakat unter Mehr > Werkzeuge > Zakat, indem Sie Ihr Vermögen und Ihre Verbindlichkeiten eingeben. Wählen Sie einen Gold- oder Silber-Nisab-Schwellenwert und eine Währung, und Nimaz ermittelt, ob Zakat fällig ist, und den Betrag mit 2,5 %.</string>
     <string name="guide_calendar_title">Islamischer Kalender</string>
@@ -613,6 +609,7 @@
     <string name="dua_reader_source_label">Quelle: %1$s</string>
 
     <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Übersicht</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
     <string name="fasting_tab_voluntary">Freiwillig</string>
     <string name="fasting_tab_makeup">Nachholen</string>

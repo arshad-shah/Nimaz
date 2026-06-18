@@ -107,7 +107,7 @@ fun FastTrackerScreen(
     val sheetState by viewModel.sheetState.collectAsState()
 
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf(stringResource(R.string.fasting_tab_ramadan), stringResource(R.string.fasting_tab_voluntary), stringResource(R.string.fasting_tab_makeup))
+    val tabs = listOf(stringResource(R.string.fasting_tab_tracker), stringResource(R.string.fasting_tab_makeup))
 
     // Fast management bottom sheet
     FastManagementBottomSheet(
@@ -157,8 +157,7 @@ fun FastTrackerScreen(
                                 selectedTab = index
                                 when (index) {
                                     0 -> viewModel.onEvent(FastingEvent.LoadRamadan)
-                                    1 -> viewModel.onEvent(FastingEvent.SetFastType(FastType.VOLUNTARY))
-                                    2 -> viewModel.onEvent(FastingEvent.LoadMakeupFasts)
+                                    1 -> viewModel.onEvent(FastingEvent.LoadMakeupFasts)
                                 }
                             },
                             text = {
@@ -176,7 +175,7 @@ fun FastTrackerScreen(
             // Content based on selected tab
             when (selectedTab) {
                 0 -> {
-                    // Ramadan Tab
+                    // Tracker — merged Ramadan + Voluntary, context-aware
                     if (ramadanState.isRamadan) {
                         // During Ramadan - show banner and stats
                         item {
@@ -206,8 +205,8 @@ fun FastTrackerScreen(
                                 records = calendarState.records
                             )
                         }
-                    } else {
-                        // Before/After Ramadan - show countdown
+                    } else if (HijriDateCalculator.daysUntilNextRamadan() <= 30) {
+                        // Ramadan approaching (within 30 days) - show countdown
                         item {
                             RamadanCountdownCard()
                         }
@@ -250,8 +249,21 @@ fun FastTrackerScreen(
                                 viewModel.onEvent(FastingEvent.SelectDate(date))
                                 viewModel.onEvent(FastingEvent.OpenFastSheet(date))
                             },
-                            showRamadanIndicators = true
+                            showRamadanIndicators = ramadanState.isRamadan
                         )
+                    }
+
+                    // Recommended voluntary fasts - only outside Ramadan
+                    if (!ramadanState.isRamadan) {
+                        item {
+                            RecommendedFastsSection(
+                                records = calendarState.records,
+                                onLogFast = { date ->
+                                    viewModel.onEvent(FastingEvent.SelectDate(date))
+                                    viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                                }
+                            )
+                        }
                     }
 
                     // Log Fast Button
@@ -262,66 +274,6 @@ fun FastTrackerScreen(
                     }
                 }
                 1 -> {
-                    // Voluntary Tab - Simplified view
-                    // Today's Fast
-                    item {
-                        TodayFastSection(
-                            isFasting = state.isFastingToday,
-                            fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
-                            fastType = FastType.VOLUNTARY,
-                            selectedDate = state.selectedDate,
-                            ramadanDay = null,
-                            suhoorTime = state.suhoorTime,
-                            iftarTime = state.iftarTime,
-                            timeUntilIftar = state.timeUntilIftar,
-                            timeUntilSuhoor = state.timeUntilSuhoor,
-                            isSuhoorTime = state.isSuhoorTime,
-                            onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
-                        )
-                    }
-
-                    // Calendar
-                    item {
-                        FastingCalendarSection(
-                            records = calendarState.records,
-                            selectedMonth = calendarState.selectedMonth,
-                            selectedYear = calendarState.selectedYear,
-                            onPreviousMonth = {
-                                val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
-                                val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
-                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                            },
-                            onNextMonth = {
-                                val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
-                                val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
-                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                            },
-                            onSelectDate = { date ->
-                                viewModel.onEvent(FastingEvent.SelectDate(date))
-                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
-                            }
-                        )
-                    }
-
-                    // Recommended Fasts
-                    item {
-                        RecommendedFastsSection(
-                            records = calendarState.records,
-                            onLogFast = { date ->
-                                viewModel.onEvent(FastingEvent.SelectDate(date))
-                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
-                            }
-                        )
-                    }
-
-                    // Log Fast Button
-                    item {
-                        LogFastButton(
-                            onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
-                        )
-                    }
-                }
-                2 -> {
                     // Makeup Tab - Show makeup fasts inline
                     item {
                         MakeupFastsContent(

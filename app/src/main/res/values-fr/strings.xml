@@ -216,8 +216,6 @@
     <string name="faq_qada_a">Ouvrez Plus > Suivi de prière et passez à l\'onglet Qada. Il liste les prières enregistrées comme manquées, regroupées par mois, et vous permet de marquer chacune comme accomplie une fois rattrapée.</string>
     <string name="faq_hijri_q">Pourquoi la date hégirienne est-elle parfois décalée d\'un jour ?</string>
     <string name="faq_hijri_a">Nimaz affiche une date hégirienne calculée, qui peut différer d\'un jour d\'une date annoncée par observation locale de la lune. Le calendrier hégirien et les événements islamiques sont disponibles dans Plus > Outils > Calendrier. Consultez la section Dépannage pour plus de détails.</string>
-    <string name="faq_fasting_q">Comment suivre mes jeûnes ?</string>
-    <string name="faq_fasting_a">Ouvrez Plus > Pratique quotidienne > Jeûne. Le suivi propose des onglets Ramadan, Volontaire et Rattrapage où vous pouvez enregistrer chaque jeûne et voir les horaires de Suhoor et d\'Iftar, basés sur vos horaires de Fajr et de Maghrib.</string>
     <string name="faq_zakat_q">Comment fonctionne le calculateur de Zakat ?</string>
     <string name="faq_zakat_a">Ouvrez Plus > Outils > Zakat et saisissez vos actifs, tels que les espèces, le solde bancaire, l\'or et l\'argent, ainsi que vos dettes. Choisissez si le seuil du Nisab est basé sur l\'or ou l\'argent ; si votre richesse nette atteint le Nisab, Nimaz calcule la Zakat due à 2,5 %. Vous pouvez également modifier la devise utilisée pour le calcul.</string>
     <string name="faq_privacy_q">Quelles données Nimaz collecte-t-il ?</string>
@@ -238,8 +236,6 @@
     <string name="guide_notifications_desc">Contrôlez les alertes de prière dans Plus > Paramètres de prière > Notifications. Activez les notifications par prière, choisissez un muezzin pour l\'adhan, définissez un rappel pré-adhan, et utilisez les outils Tester la notification et d\'optimisation de la batterie pour vous assurer que les alertes arrivent à temps.</string>
     <string name="guide_hadith_title">Collection de Hadiths</string>
     <string name="guide_hadith_desc">Parcourez des collections de hadiths authentiques depuis Plus > Apprentissage > Hadith. Ouvrez un livre pour lire ses chapitres et hadiths dans l\'ordre, recherchez des sujets et mettez des hadiths en favori pour les retrouver plus tard.</string>
-    <string name="guide_fasting_title">Suivi du jeûne</string>
-    <string name="guide_fasting_desc">Suivez vos jeûnes dans Plus > Pratique quotidienne > Jeûne à travers les onglets Ramadan, Volontaire et Rattrapage. Consultez les horaires de Suhoor et d\'Iftar dérivés de vos horaires de prière et tenez un journal des jeûnes accomplis et manqués.</string>
     <string name="guide_zakat_title">Calculateur de Zakat</string>
     <string name="guide_zakat_desc">Calculez votre Zakat dans Plus > Outils > Zakat en saisissant vos actifs et passifs. Choisissez un seuil de Nisab en or ou en argent et une devise, et Nimaz calcule si la Zakat est due et le montant à 2,5 %.</string>
     <string name="guide_calendar_title">Calendrier islamique</string>
@@ -614,6 +610,7 @@
     <string name="dua_reader_source_label">Source : %1$s</string>
 
     <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Suivi</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
     <string name="fasting_tab_voluntary">Volontaire</string>
     <string name="fasting_tab_makeup">Rattrapage</string>

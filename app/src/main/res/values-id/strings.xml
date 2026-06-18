@@ -216,8 +216,6 @@
     <string name="faq_qada_a">Buka Lainnya > Pelacak Shalat dan beralih ke tab Qada. Tab ini mencantumkan shalat yang tercatat sebagai terlewat, dikelompokkan berdasarkan bulan, dan memungkinkan Anda menandai setiap shalat sebagai selesai setelah Anda menggantinya.</string>
     <string name="faq_hijri_q">Mengapa tanggal Hijriah terkadang berbeda sehari?</string>
     <string name="faq_hijri_a">Nimaz menampilkan tanggal Hijriah yang dihitung, yang mungkin berbeda sehari dari tanggal yang diumumkan berdasarkan rukyat hilal setempat. Kalender Hijriah dan peristiwa Islam tersedia di Lainnya > Alat > Kalender. Lihat bagian Pemecahan Masalah untuk detail lebih lanjut.</string>
-    <string name="faq_fasting_q">Bagaimana cara melacak puasa saya?</string>
-    <string name="faq_fasting_a">Buka Lainnya > Amalan Harian > Puasa. Pelacak memiliki tab Ramadan, Sukarela, dan Qada di mana Anda dapat mencatat setiap puasa dan melihat waktu Sahur dan Iftar, yang didasarkan pada waktu shalat Subuh dan Maghrib Anda.</string>
     <string name="faq_zakat_q">Bagaimana cara kerja kalkulator Zakat?</string>
     <string name="faq_zakat_a">Buka Lainnya > Alat > Zakat dan masukkan aset Anda, seperti uang tunai, saldo bank, emas, dan perak, beserta utang-utang Anda. Pilih apakah ambang Nisab didasarkan pada emas atau perak; jika kekayaan bersih Anda memenuhi Nisab, Nimaz menghitung zakat yang wajib sebesar 2,5%. Anda juga dapat mengubah mata uang yang digunakan untuk perhitungan.</string>
     <string name="faq_privacy_q">Data apa yang dikumpulkan Nimaz?</string>
@@ -238,8 +236,6 @@
     <string name="guide_notifications_desc">Kelola peringatan shalat di Lainnya > Pengaturan Shalat > Notifikasi. Aktifkan notifikasi per shalat, pilih muazin azan, atur pengingat pra-azan, dan gunakan alat Uji Notifikasi dan optimisasi baterai untuk memastikan peringatan tiba tepat waktu.</string>
     <string name="guide_hadith_title">Koleksi Hadis</string>
     <string name="guide_hadith_desc">Jelajahi koleksi hadis sahih dari Lainnya > Pembelajaran > Hadis. Buka sebuah kitab untuk membaca bab dan hadisnya secara berurutan, cari topik, dan tandai hadis untuk dikunjungi kembali nanti.</string>
-    <string name="guide_fasting_title">Pelacak Puasa</string>
-    <string name="guide_fasting_desc">Lacak puasa di Lainnya > Amalan Harian > Puasa di tab Ramadan, Sukarela, dan Qada. Lihat waktu Sahur dan Iftar yang diambil dari waktu shalat Anda dan simpan catatan puasa yang selesai dan terlewat.</string>
     <string name="guide_zakat_title">Kalkulator Zakat</string>
     <string name="guide_zakat_desc">Hitung Zakat Anda di Lainnya > Alat > Zakat dengan memasukkan aset dan kewajiban Anda. Pilih ambang Nisab emas atau perak dan mata uang, lalu Nimaz menghitung apakah Zakat wajib dan jumlahnya sebesar 2,5%.</string>
     <string name="guide_calendar_title">Kalender Islam</string>
@@ -614,6 +610,7 @@
     <string name="dua_reader_source_label">Sumber: %1$s</string>
 
     <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Pelacak</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
     <string name="fasting_tab_voluntary">Sunnah</string>
     <string name="fasting_tab_makeup">Qadha</string>

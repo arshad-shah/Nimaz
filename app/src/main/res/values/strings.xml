@@ -310,9 +310,6 @@
     <!-- Calendar and Hijri -->
     <string name="faq_hijri_q">Why is the Hijri date sometimes a day off?</string>
     <string name="faq_hijri_a">Nimaz shows a calculated Hijri date, which can differ by a day from a date announced by local moon sighting. The Hijri calendar and Islamic events are available under More > Tools > Calendar. See the Troubleshooting section for more detail.</string>
-    <!-- Fasting -->
-    <string name="faq_fasting_q">How do I track my fasts?</string>
-    <string name="faq_fasting_a">Open More > Daily Practice > Fasting. The tracker has Ramadan, Voluntary, and Makeup tabs where you can log each fast and see Suhoor and Iftar times, which are based on your Fajr and Maghrib prayer times.</string>
     <!-- Zakat -->
     <string name="faq_zakat_q">How does the Zakat calculator work?</string>
     <string name="faq_zakat_a">Open More > Tools > Zakat and enter your assets, such as cash, bank balance, gold, and silver, along with any debts. Choose whether the Nisab threshold is based on gold or silver; if your net wealth meets the Nisab, Nimaz calculates the Zakat due at 2.5%. You can also change the currency used for the calculation.</string>
@@ -337,8 +334,6 @@
     <string name="guide_notifications_desc">Control prayer alerts in More > Prayer Settings > Notifications. Enable notifications per prayer, choose an adhan muezzin, set a pre-adhan reminder, and use the Test Notification and battery optimization tools to make sure alerts arrive on time.</string>
     <string name="guide_hadith_title">Hadith Collection</string>
     <string name="guide_hadith_desc">Browse authentic hadith collections from More > Learning > Hadith. Open a book to read its chapters and hadith in sequence, search for topics, and bookmark hadith to revisit later.</string>
-    <string name="guide_fasting_title">Fasting Tracker</string>
-    <string name="guide_fasting_desc">Track fasts in More > Daily Practice > Fasting across the Ramadan, Voluntary, and Makeup tabs. See Suhoor and Iftar times derived from your prayer times and keep a log of completed and missed fasts.</string>
     <string name="guide_zakat_title">Zakat Calculator</string>
     <string name="guide_zakat_desc">Calculate your Zakat in More > Tools > Zakat by entering your assets and liabilities. Choose a gold or silver Nisab threshold and a currency, and Nimaz works out whether Zakat is due and the amount at 2.5%.</string>
     <string name="guide_calendar_title">Islamic Calendar</string>
@@ -772,6 +767,7 @@
     <string name="dua_reader_source_label">Source: %1$s</string>
 
     <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Tracker</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
     <string name="fasting_tab_voluntary">Voluntary</string>
     <string name="fasting_tab_makeup">Makeup</string>

@@ -1,5 +1,5 @@
 {
-  "contentVersion": 3,
+  "contentVersion": 4,
   "topics": [
     {
       "id": "getting_started", "order": 0, "icon": "rocket_launch", "color": "sky",
@@ -732,12 +732,12 @@
             "fr": "Comment suivre mes jeûnes ?", "de": "Wie verfolge ich mein Fasten?"
           },
           "answer": {
-            "en": "Open More → Daily Practice → Fasting. Log fasts across the Ramadan, Voluntary and Makeup tabs, with Suhoor and Iftar times from your prayer times.",
-            "tr": "Daha Fazla → Günlük İbadet → Oruç'u açın. Ramazan, Nafile ve Kaza sekmelerinde oruç kaydedin; sahur ve iftar vakitleri namaz vakitlerinizden gelir.",
-            "id": "Buka Lainnya → Amalan Harian → Puasa. Catat puasa di tab Ramadan, Sunah, dan Qada, dengan waktu Sahur dan Buka dari waktu salat Anda.",
-            "ms": "Buka Lagi → Amalan Harian → Puasa. Log puasa di tab Ramadan, Sunat dan Ganti, dengan waktu Sahur dan Berbuka daripada waktu solat anda.",
-            "fr": "Ouvrez Plus → Pratique quotidienne → Jeûne. Enregistrez les jeûnes dans les onglets Ramadan, Volontaire et Rattrapage, avec les heures de Suhour et d'Iftar issues de vos horaires.",
-            "de": "Öffne Mehr → Tägliche Praxis → Fasten. Erfasse Fasten in den Tabs Ramadan, Freiwillig und Nachholen, mit Suhur- und Iftar-Zeiten aus deinen Gebetszeiten."
+            "en": "Open More → Daily Practice → Fasting. Log fasts across the Tracker and Makeup tabs, with Suhoor and Iftar times from your prayer times.",
+            "tr": "Daha Fazla → Günlük İbadet → Oruç'u açın. Takip ve Kaza sekmelerinde oruç kaydedin; sahur ve iftar vakitleri namaz vakitlerinizden gelir.",
+            "id": "Buka Lainnya → Amalan Harian → Puasa. Catat puasa di tab Pelacak dan Qadha, dengan waktu Sahur dan Buka dari waktu salat Anda.",
+            "ms": "Buka Lagi → Amalan Harian → Puasa. Log puasa di tab Penjejak dan Ganti, dengan waktu Sahur dan Berbuka daripada waktu solat anda.",
+            "fr": "Ouvrez Plus → Pratique quotidienne → Jeûne. Enregistrez les jeûnes dans les onglets Suivi et Rattrapage, avec les heures de Suhour et d'Iftar issues de vos horaires.",
+            "de": "Öffne Mehr → Tägliche Praxis → Fasten. Erfasse Fasten in den Tabs Übersicht und Nachholen, mit Suhur- und Iftar-Zeiten aus deinen Gebetszeiten."
           } },
         { "id": "tt_q_zakat", "type": "question", "order": 5,
           "question": {

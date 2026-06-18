@@ -216,8 +216,6 @@
     <string name="faq_qada_a">Daha Fazla > Namaz Takibi\'ni açın ve Kaza sekmesine geçin. Kaçırılan namazları aya göre gruplandırılmış olarak listeler ve her birini tamamladığınızda kılındı olarak işaretlemenize olanak tanır.</string>
     <string name="faq_hijri_q">Hicri tarih neden bazen bir gün hatalı?</string>
     <string name="faq_hijri_a">Nimaz hesaplanmış bir Hicri tarih gösterir; bu tarih yerel hilal gözlemine dayalı olarak ilan edilen tarihten bir gün farklı olabilir. Hicri takvim ve İslami etkinlikler Daha Fazla > Araçlar > Takvim altında bulunabilir. Daha fazla ayrıntı için Sorun Giderme bölümüne bakın.</string>
-    <string name="faq_fasting_q">Oruçlarımı nasıl takip ederim?</string>
-    <string name="faq_fasting_a">Daha Fazla > Günlük İbadet > Oruç\'u açın. Takip özelliği Ramazan, Gönüllü ve Kaza sekmelerine sahiptir; her orucu kaydedebilir, Fajr ve Maghrib namaz vakitlerine dayalı Sahur ve İftar vakitlerini görebilirsiniz.</string>
     <string name="faq_zakat_q">Zekat hesaplayıcı nasıl çalışır?</string>
     <string name="faq_zakat_a">Daha Fazla > Araçlar > Zekat\'ı açın ve nakit, banka bakiyesi, altın ve gümüş gibi varlıklarınızı ve borçlarınızı girin. Nisap eşiğinin altın mı yoksa gümüş müne dayalı olduğunu seçin; net servetiniz Nisabı karşılıyorsa Nimaz %2,5 oranında ödenecek Zekatı hesaplar. Hesaplama için kullanılan para birimini de değiştirebilirsiniz.</string>
     <string name="faq_privacy_q">Nimaz hangi verileri toplar?</string>
@@ -238,8 +236,6 @@
     <string name="guide_notifications_desc">Namaz uyarılarını Daha Fazla > Namaz Ayarları > Bildirimler\'den yönetin. Her namaz için bildirimleri etkinleştirin, ezan müezzinini seçin, ezan öncesi hatırlatıcı ayarlayın ve bildirimlerin zamanında ulaştığından emin olmak için Test Bildirimi ile pil optimizasyonu araçlarını kullanın.</string>
     <string name="guide_hadith_title">Hadis Koleksiyonu</string>
     <string name="guide_hadith_desc">Daha Fazla > Öğrenme > Hadis\'ten özgün hadis koleksiyonlarına göz atın. Bölümleri ve hadisleri sırayla okumak için bir kitap açın, konulara göre arama yapın ve daha sonra tekrar ziyaret etmek için hadisleri yer imlerine ekleyin.</string>
-    <string name="guide_fasting_title">Oruç Takibi</string>
-    <string name="guide_fasting_desc">Daha Fazla > Günlük İbadet > Oruç\'ta Ramazan, Gönüllü ve Kaza sekmeleri arasında oruçlarınızı takip edin. Namaz vakitlerinizden türetilen Sahur ve İftar saatlerini görün; tamamlanan ve kaçırılan oruçların kaydını tutun.</string>
     <string name="guide_zakat_title">Zekat Hesaplayıcı</string>
     <string name="guide_zakat_desc">Daha Fazla > Araçlar > Zekat\'ta varlıklarınızı ve yükümlülüklerinizi girerek Zekatınızı hesaplayın. Altın veya gümüş Nisap eşiği ve para birimi seçin; Nimaz Zekatın gerekip gerekmediğini ve %2,5 oranında miktarını hesaplar.</string>
     <string name="guide_calendar_title">İslami Takvim</string>
@@ -614,6 +610,7 @@
     <string name="dua_reader_source_label">Kaynak: %1$s</string>
 
     <!-- Fasting Tracker Screen -->
+    <string name="fasting_tab_tracker">Takip</string>
     <string name="fasting_tab_ramadan">Ramazan</string>
     <string name="fasting_tab_voluntary">Nafile</string>
     <string name="fasting_tab_makeup">Kaza</string>
