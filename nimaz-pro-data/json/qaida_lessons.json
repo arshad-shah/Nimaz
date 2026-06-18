@@ -1,0 +1,250 @@
+[
+  {
+    "id": 1,
+    "lesson_number": 1,
+    "title_english": "The Letters",
+    "title_arabic": "الحُرُوفُ المُفْرَدَة",
+    "title_transliteration": "Al-Huroof Al-Mufradah",
+    "description": "Learn the 29 Arabic letters and their names in their isolated form.",
+    "concept_tags": [
+      "letters",
+      "isolated"
+    ],
+    "icon": "🔤",
+    "display_order": 1
+  },
+  {
+    "id": 2,
+    "lesson_number": 2,
+    "title_english": "Joined Letters",
+    "title_arabic": "الحُرُوفُ المُرَكَّبَة",
+    "title_transliteration": "Al-Huroof Al-Murakkabah",
+    "description": "See how letters change shape when joined in initial, medial and final forms.",
+    "concept_tags": [
+      "letters",
+      "joining",
+      "forms"
+    ],
+    "icon": "🔗",
+    "display_order": 2
+  },
+  {
+    "id": 3,
+    "lesson_number": 3,
+    "title_english": "Disjoined Letters",
+    "title_arabic": "الحُرُوفُ المُقَطَّعَة",
+    "title_transliteration": "Al-Huroof Al-Muqatta'ah",
+    "description": "The disjoined letters that open certain surahs, read by their letter names with elongation.",
+    "concept_tags": [
+      "muqattaat",
+      "elongation"
+    ],
+    "icon": "✨",
+    "display_order": 3
+  },
+  {
+    "id": 4,
+    "lesson_number": 4,
+    "title_english": "Harakat (Short Vowels)",
+    "title_arabic": "الحَرَكَات",
+    "title_transliteration": "Al-Harakat",
+    "description": "Fatha (a), Kasra (i) and Damma (u) — the three short vowels placed on letters.",
+    "concept_tags": [
+      "harakat",
+      "fatha",
+      "kasra",
+      "damma"
+    ],
+    "icon": "◌",
+    "display_order": 4
+  },
+  {
+    "id": 5,
+    "lesson_number": 5,
+    "title_english": "Tanween",
+    "title_arabic": "التَّنْوِين",
+    "title_transliteration": "At-Tanween",
+    "description": "Fathatayn (an), Kasratayn (in) and Dammatayn (un) — the doubled-vowel endings.",
+    "concept_tags": [
+      "tanween"
+    ],
+    "icon": "◌ً",
+    "display_order": 5
+  },
+  {
+    "id": 6,
+    "lesson_number": 6,
+    "title_english": "Harakat & Tanween Drills",
+    "title_arabic": "تَمَارِين الحَرَكَات وَالتَّنْوِين",
+    "title_transliteration": "Tamareen Al-Harakat wat-Tanween",
+    "description": "Mixed drills that contrast the short vowels with their tanween counterparts.",
+    "concept_tags": [
+      "harakat",
+      "tanween",
+      "exercise"
+    ],
+    "icon": "🔀",
+    "display_order": 6
+  },
+  {
+    "id": 7,
+    "lesson_number": 7,
+    "title_english": "Standing Harakat",
+    "title_arabic": "الحَرَكَات القَائِمَة",
+    "title_transliteration": "Al-Harakat Al-Qa'imah",
+    "description": "Standing fatha (dagger alif), standing kasra and inverted damma — superscript vowels read long.",
+    "concept_tags": [
+      "harakat",
+      "standing",
+      "elongation"
+    ],
+    "icon": "↕️",
+    "display_order": 7
+  },
+  {
+    "id": 8,
+    "lesson_number": 8,
+    "title_english": "Madd & Leen Letters",
+    "title_arabic": "حُرُوفُ المَدِّ وَاللِّين",
+    "title_transliteration": "Huroof Al-Madd wal-Leen",
+    "description": "Alif, Waw and Yaa as elongation (madd) letters, and Waw/Yaa as soft (leen) letters.",
+    "concept_tags": [
+      "madd",
+      "leen",
+      "elongation"
+    ],
+    "icon": "➰",
+    "display_order": 8
+  },
+  {
+    "id": 9,
+    "lesson_number": 9,
+    "title_english": "Madd, Leen & Tanween Drills",
+    "title_arabic": "تَمَارِين المَدِّ وَاللِّين",
+    "title_transliteration": "Tamareen Al-Madd wal-Leen",
+    "description": "Mixed drills combining madd, leen and tanween in short words.",
+    "concept_tags": [
+      "madd",
+      "leen",
+      "tanween",
+      "exercise"
+    ],
+    "icon": "🔁",
+    "display_order": 9
+  },
+  {
+    "id": 10,
+    "lesson_number": 10,
+    "title_english": "Sukoon (Jazm)",
+    "title_arabic": "السُّكُون",
+    "title_transliteration": "As-Sukoon",
+    "description": "Vowel-less (saakin) letters and how they close a syllable.",
+    "concept_tags": [
+      "sukoon",
+      "jazm"
+    ],
+    "icon": "◌ْ",
+    "display_order": 10
+  },
+  {
+    "id": 11,
+    "lesson_number": 11,
+    "title_english": "Sukoon Drills",
+    "title_arabic": "تَمَارِين السُّكُون",
+    "title_transliteration": "Tamareen As-Sukoon",
+    "description": "Drills reading saakin letters inside real words.",
+    "concept_tags": [
+      "sukoon",
+      "exercise"
+    ],
+    "icon": "📝",
+    "display_order": 11
+  },
+  {
+    "id": 12,
+    "lesson_number": 12,
+    "title_english": "Shadda (Tashdeed)",
+    "title_arabic": "الشَّدَّة",
+    "title_transliteration": "Ash-Shaddah",
+    "description": "Doubled letters marked with shadda — e.g. نَزَّلَ versus نَزَلَ.",
+    "concept_tags": [
+      "shadda",
+      "tashdeed"
+    ],
+    "icon": "◌ّ",
+    "display_order": 12
+  },
+  {
+    "id": 13,
+    "lesson_number": 13,
+    "title_english": "Shadda Drills",
+    "title_arabic": "تَمَارِين الشَّدَّة",
+    "title_transliteration": "Tamareen Ash-Shaddah",
+    "description": "Drills reading shadda inside real words.",
+    "concept_tags": [
+      "shadda",
+      "exercise"
+    ],
+    "icon": "🪄",
+    "display_order": 13
+  },
+  {
+    "id": 14,
+    "lesson_number": 14,
+    "title_english": "Shadda with Sukoon",
+    "title_arabic": "الشَّدَّة مَعَ السُّكُون",
+    "title_transliteration": "Ash-Shaddah ma'a As-Sukoon",
+    "description": "Words that combine a shadda and a sukoon.",
+    "concept_tags": [
+      "shadda",
+      "sukoon"
+    ],
+    "icon": "🧩",
+    "display_order": 14
+  },
+  {
+    "id": 15,
+    "lesson_number": 15,
+    "title_english": "Words with Two Shaddas",
+    "title_arabic": "كَلِمَاتٌ بِشَدَّتَيْن",
+    "title_transliteration": "Kalimat bi-Shaddatayn",
+    "description": "Words that carry two shaddas, building reading stamina.",
+    "concept_tags": [
+      "shadda",
+      "advanced"
+    ],
+    "icon": "🧱",
+    "display_order": 15
+  },
+  {
+    "id": 16,
+    "lesson_number": 16,
+    "title_english": "Madd, Shadda & Sukoon Together",
+    "title_arabic": "المَدُّ وَالشَّدَّةُ وَالسُّكُون",
+    "title_transliteration": "Al-Madd wash-Shaddah was-Sukoon",
+    "description": "Integrated words combining madd, shadda and sukoon, introducing tajweed timing.",
+    "concept_tags": [
+      "madd",
+      "shadda",
+      "sukoon",
+      "tajweed"
+    ],
+    "icon": "🎯",
+    "display_order": 16
+  },
+  {
+    "id": 17,
+    "lesson_number": 17,
+    "title_english": "Comprehensive Revision",
+    "title_arabic": "المُرَاجَعَة الشَّامِلَة",
+    "title_transliteration": "Al-Muraja'ah Ash-Shamilah",
+    "description": "Final practice reading real words and short surahs (Al-Fatihah and An-Nas).",
+    "concept_tags": [
+      "revision",
+      "words",
+      "surah"
+    ],
+    "icon": "🏆",
+    "display_order": 17
+  }
+]
