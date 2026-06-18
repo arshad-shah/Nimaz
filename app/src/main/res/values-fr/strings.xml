@@ -803,4 +803,32 @@
     <string name="battery_optimization_subtitle">Les alarmes peuvent être retardées</string>
     <string name="update_available_subtitle">Appuyez pour mettre à jour</string>
     <string name="update_ready_subtitle">Redémarrez pour terminer l\'installation</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">C\'est l\'heure de prier. Commencez votre journée avec Allah.</string>
+    <string name="notif_short_sunrise">Le soleil s\'est levé — le temps de l\'Ishraq commence.</string>
+    <string name="notif_short_dhuhr">C\'est l\'heure de prier. Faites une pause et tournez-vous vers Allah.</string>
+    <string name="notif_short_asr">C\'est l\'heure de prier. Ne laissez pas passer le Asr.</string>
+    <string name="notif_short_maghrib">C\'est l\'heure de prier, alors que la journée touche à sa fin.</string>
+    <string name="notif_short_isha">C\'est l\'heure de prier. Concluez votre journée avec le Isha.</string>
+    <string name="notif_short_generic">C\'est l\'heure de la prière du %s.</string>
+
+    <string name="notif_pre_reminder_title">%1$s dans %2$d minutes</string>
+    <string name="notif_pre_reminder_1">Préparez votre cœur et faites les ablutions.</string>
+    <string name="notif_pre_reminder_2">Il est temps de vous préparer pour la prière.</string>
+    <string name="notif_pre_reminder_3">Un rappel pour vous préparer à l\'adoration.</string>
+    <string name="notif_pre_reminder_4">Préparez-vous à vous tenir devant votre Seigneur.</string>
+
+    <string name="notif_greeting_predawn">Que votre matinée soit bénie</string>
+    <string name="notif_greeting_morning">Bonjour, qu\'Allah bénisse votre journée</string>
+    <string name="notif_greeting_afternoon">Bon après-midi, restez attentif à vos prières</string>
+    <string name="notif_greeting_evening">Bonsoir, que votre adoration soit acceptée</string>
+    <string name="notif_greeting_night">Que votre nuit soit paisible</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah ! Toutes les prières accomplies</string>
+    <string name="notif_summary_title_default">Récapitulatif quotidien des prières</string>
+    <string name="notif_summary_count">%1$d prières sur %2$d accomplies</string>
+    <string name="ayah_copied_to_clipboard">Verset copié dans le presse-papiers</string>
+    <string name="test_notification_title">Notification de test</string>
+    <string name="test_notification_text">Les notifications de prière fonctionnent correctement</string>
 </resources>

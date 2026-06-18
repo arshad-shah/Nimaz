@@ -1,9 +1,25 @@
 package com.arshadshah.nimaz.core.util
 
+import android.app.Application
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class, sdk = [34])
 class NotificationContentHelperTest {
+
+    private lateinit var context: Context
+
+    @Before
+    fun setUp() {
+        context = ApplicationProvider.getApplicationContext()
+    }
 
     // ── getPrayerTitle ──────────────────────────────────────────────
 
@@ -53,7 +69,7 @@ class NotificationContentHelperTest {
     fun `getShortMessage returns non-empty string for all prayers`() {
         val prayers = listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
         for (prayer in prayers) {
-            val message = NotificationContentHelper.getShortMessage(prayer)
+            val message = NotificationContentHelper.getShortMessage(context, prayer)
             assertThat(message).isNotEmpty()
         }
     }
@@ -61,14 +77,14 @@ class NotificationContentHelperTest {
     @Test
     fun `getShortMessage returns deterministic values`() {
         // Short messages are not randomized - they should be stable
-        val first = NotificationContentHelper.getShortMessage("FAJR")
-        val second = NotificationContentHelper.getShortMessage("FAJR")
+        val first = NotificationContentHelper.getShortMessage(context, "FAJR")
+        val second = NotificationContentHelper.getShortMessage(context, "FAJR")
         assertThat(first).isEqualTo(second)
     }
 
     @Test
     fun `getShortMessage returns fallback for unknown prayer`() {
-        val message = NotificationContentHelper.getShortMessage("WITR")
+        val message = NotificationContentHelper.getShortMessage(context, "WITR")
         assertThat(message).isEqualTo("It's time for Witr prayer.")
     }
 
@@ -76,13 +92,13 @@ class NotificationContentHelperTest {
 
     @Test
     fun `getPreReminderTitle includes prayer name and minutes`() {
-        val title = NotificationContentHelper.getPreReminderTitle("Fajr", 15)
+        val title = NotificationContentHelper.getPreReminderTitle(context, "Fajr", 15)
         assertThat(title).isEqualTo("Fajr in 15 minutes")
     }
 
     @Test
     fun `getPreReminderMessage returns non-empty string`() {
-        val message = NotificationContentHelper.getPreReminderMessage("Fajr")
+        val message = NotificationContentHelper.getPreReminderMessage(context, "Fajr")
         assertThat(message).isNotEmpty()
     }
 
@@ -91,6 +107,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent all prayers completed is positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 5,
             missedCount = 0,
             missedPrayers = emptyList()
@@ -102,6 +119,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent all prayers missed is not positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 0,
             missedCount = 5,
             missedPrayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
@@ -112,6 +130,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent some prayers missed shows count`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 3,
             missedCount = 2,
             missedPrayers = listOf("Fajr", "Isha")
@@ -123,6 +142,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent more missed than prayed is not positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 1,
             missedCount = 4,
             missedPrayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib")
@@ -133,6 +153,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent bigText includes missed prayer names`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 3,
             missedCount = 2,
             missedPrayers = listOf("Fajr", "Isha")

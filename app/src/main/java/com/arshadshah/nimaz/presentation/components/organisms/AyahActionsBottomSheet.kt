@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -374,7 +375,7 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     val clip = ClipData.newPlainText("Quran Ayah", textToCopy)
     clipboard.setPrimaryClip(clip)
 
-    Toast.makeText(context, "Ayah copied to clipboard", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.ayah_copied_to_clipboard), Toast.LENGTH_SHORT).show()
 }
 
 /**

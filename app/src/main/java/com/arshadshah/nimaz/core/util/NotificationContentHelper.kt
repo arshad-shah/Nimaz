@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.core.util
 
+import android.content.Context
+import com.arshadshah.nimaz.R
 import java.time.LocalTime
 
 /**
@@ -136,43 +138,48 @@ object NotificationContentHelper {
      * first line when expanded). No nested quotes — the time already lives in
      * the title, so this is purely the gentle nudge to pray.
      */
-    fun getShortMessage(prayerName: String): String {
+    fun getShortMessage(context: Context, prayerName: String): String {
         return when (prayerName.uppercase()) {
-            "FAJR" -> "It's time to pray. Begin your day with Allah."
-            "SUNRISE" -> "The sun has risen — Ishraq time begins."
-            "DHUHR" -> "It's time to pray. Pause and turn to Allah."
-            "ASR" -> "It's time to pray. Don't let Asr pass by."
-            "MAGHRIB" -> "It's time to pray as the day draws to a close."
-            "ISHA" -> "It's time to pray. Seal your day with Isha."
-            else -> "It's time for ${prayerDisplayName(prayerName)} prayer."
+            "FAJR" -> context.getString(R.string.notif_short_fajr)
+            "SUNRISE" -> context.getString(R.string.notif_short_sunrise)
+            "DHUHR" -> context.getString(R.string.notif_short_dhuhr)
+            "ASR" -> context.getString(R.string.notif_short_asr)
+            "MAGHRIB" -> context.getString(R.string.notif_short_maghrib)
+            "ISHA" -> context.getString(R.string.notif_short_isha)
+            else -> context.getString(R.string.notif_short_generic, prayerDisplayName(prayerName))
         }
     }
 
     /**
      * Get a pre-reminder notification title.
      */
-    fun getPreReminderTitle(prayerName: String, minutesBefore: Int): String {
-        return "$prayerName in $minutesBefore minutes"
+    fun getPreReminderTitle(context: Context, prayerName: String, minutesBefore: Int): String {
+        return context.getString(R.string.notif_pre_reminder_title, prayerName, minutesBefore)
     }
 
     /**
      * Get a pre-reminder notification message.
      */
-    fun getPreReminderMessage(prayerName: String): String {
-        return preReminderMessages.random()
+    fun getPreReminderMessage(context: Context, prayerName: String): String {
+        return listOf(
+            context.getString(R.string.notif_pre_reminder_1),
+            context.getString(R.string.notif_pre_reminder_2),
+            context.getString(R.string.notif_pre_reminder_3),
+            context.getString(R.string.notif_pre_reminder_4)
+        ).random()
     }
 
     /**
      * Get a contextual greeting based on time of day.
      */
-    fun getTimeBasedGreeting(): String {
+    fun getTimeBasedGreeting(context: Context): String {
         val hour = LocalTime.now().hour
         return when {
-            hour < 6 -> "May your morning be blessed"
-            hour < 12 -> "Good morning, may Allah bless your day"
-            hour < 17 -> "Good afternoon, stay mindful of your prayers"
-            hour < 20 -> "Good evening, may your worship be accepted"
-            else -> "May your night be peaceful"
+            hour < 6 -> context.getString(R.string.notif_greeting_predawn)
+            hour < 12 -> context.getString(R.string.notif_greeting_morning)
+            hour < 17 -> context.getString(R.string.notif_greeting_afternoon)
+            hour < 20 -> context.getString(R.string.notif_greeting_evening)
+            else -> context.getString(R.string.notif_greeting_night)
         }
     }
 
@@ -180,6 +187,7 @@ object NotificationContentHelper {
      * Generate daily summary notification content.
      */
     fun getDailySummaryContent(
+        context: Context,
         prayedCount: Int,
         missedCount: Int,
         missedPrayers: List<String>
@@ -189,7 +197,7 @@ object NotificationContentHelper {
         return when {
             prayedCount == totalPrayers -> {
                 DailySummaryContent(
-                    title = "Masha'Allah! All Prayers Complete",
+                    title = context.getString(R.string.notif_summary_title_all_complete),
                     message = allPrayersCompletedMessages.random(),
                     bigText = "You've completed all $totalPrayers prayers today.\n\n" +
                             "Keep up this beautiful consistency!\n" +
@@ -199,7 +207,7 @@ object NotificationContentHelper {
             }
             missedCount == totalPrayers -> {
                 DailySummaryContent(
-                    title = "Daily Prayer Summary",
+                    title = context.getString(R.string.notif_summary_title_default),
                     message = allPrayersMissedMessages.random(),
                     bigText = "Today's prayers have passed.\n\n" +
                             "Don't lose hope - Allah's mercy is vast.\n" +
@@ -211,8 +219,8 @@ object NotificationContentHelper {
             else -> {
                 val missedList = missedPrayers.joinToString(", ")
                 DailySummaryContent(
-                    title = "Daily Prayer Summary",
-                    message = "$prayedCount of $totalPrayers prayers completed",
+                    title = context.getString(R.string.notif_summary_title_default),
+                    message = context.getString(R.string.notif_summary_count, prayedCount, totalPrayers),
                     bigText = "Today's Progress: $prayedCount/$totalPrayers prayers\n\n" +
                             (if (missedPrayers.isNotEmpty()) "Missed: $missedList\n\n" else "") +
                             somePrayersMissedMessages.random() + "\n\n" +

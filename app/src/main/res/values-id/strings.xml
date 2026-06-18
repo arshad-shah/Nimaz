@@ -804,4 +804,32 @@
     <string name="battery_optimization_subtitle">Alarm mungkin tertunda</string>
     <string name="update_available_subtitle">Ketuk perbarui untuk versi terbaru</string>
     <string name="update_ready_subtitle">Mulai ulang untuk menyelesaikan</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Waktunya salat. Mulailah harimu bersama Allah.</string>
+    <string name="notif_short_sunrise">Matahari telah terbit — waktu Isyraq dimulai.</string>
+    <string name="notif_short_dhuhr">Waktunya salat. Berhentilah sejenak dan menghadap Allah.</string>
+    <string name="notif_short_asr">Waktunya salat. Jangan biarkan Asar terlewat.</string>
+    <string name="notif_short_maghrib">Waktunya salat saat hari menjelang petang.</string>
+    <string name="notif_short_isha">Waktunya salat. Tutuplah harimu dengan Isya.</string>
+    <string name="notif_short_generic">Waktunya salat %s.</string>
+
+    <string name="notif_pre_reminder_title">%1$s dalam %2$d menit</string>
+    <string name="notif_pre_reminder_1">Siapkan hatimu dan berwudulah.</string>
+    <string name="notif_pre_reminder_2">Waktunya bersiap untuk salat.</string>
+    <string name="notif_pre_reminder_3">Pengingat untuk bersiap beribadah.</string>
+    <string name="notif_pre_reminder_4">Bersiaplah untuk berdiri di hadapan Tuhanmu.</string>
+
+    <string name="notif_greeting_predawn">Semoga pagimu diberkahi</string>
+    <string name="notif_greeting_morning">Selamat pagi, semoga Allah memberkahi harimu</string>
+    <string name="notif_greeting_afternoon">Selamat siang, tetaplah ingat salatmu</string>
+    <string name="notif_greeting_evening">Selamat sore, semoga ibadahmu diterima</string>
+    <string name="notif_greeting_night">Semoga malammu damai</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! Semua Salat Lengkap</string>
+    <string name="notif_summary_title_default">Ringkasan Salat Harian</string>
+    <string name="notif_summary_count">%1$d dari %2$d salat selesai</string>
+    <string name="ayah_copied_to_clipboard">Ayat disalin ke papan klip</string>
+    <string name="test_notification_title">Notifikasi Uji</string>
+    <string name="test_notification_text">Notifikasi salat berfungsi dengan benar</string>
 </resources>

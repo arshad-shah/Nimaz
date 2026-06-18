@@ -411,8 +411,8 @@ class PrayerNotificationScheduler @Inject constructor(
     fun sendTestNotification() {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID_PRAYER)
             .setSmallIcon(R.drawable.ic_stat_nimaz)
-            .setContentTitle("Test Notification")
-            .setContentText("Prayer notifications are working correctly")
+            .setContentTitle(context.getString(R.string.test_notification_title))
+            .setContentText(context.getString(R.string.test_notification_text))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
             .build()

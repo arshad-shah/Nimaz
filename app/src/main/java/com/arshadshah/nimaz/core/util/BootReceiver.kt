@@ -187,7 +187,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 // Get notification content for merging into adhan service notification
                 val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
-                val notifMessage = NotificationContentHelper.getShortMessage(prayerType)
+                val notifMessage = NotificationContentHelper.getShortMessage(context, prayerType)
                 val notifColor = getPrayerColor(prayerType)
 
                 var adhanPlayed = false
@@ -334,9 +334,9 @@ class BootReceiver : BroadcastReceiver() {
             )
         }
 
-        val title = NotificationContentHelper.getPreReminderTitle(prayerName, minutesBefore)
-        val message = NotificationContentHelper.getPreReminderMessage(prayerName)
-        val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting()}"
+        val title = NotificationContentHelper.getPreReminderTitle(context, prayerName, minutesBefore)
+        val message = NotificationContentHelper.getPreReminderMessage(context, prayerName)
+        val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting(context)}"
 
         val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
             .setSmallIcon(R.drawable.ic_stat_nimaz)
@@ -398,7 +398,7 @@ class BootReceiver : BroadcastReceiver() {
         // Get enhanced content. The time now lives in the title, so the body is
         // just the calm reminder plus a short reflection when expanded.
         val title = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
-        val shortMessage = NotificationContentHelper.getShortMessage(prayerType)
+        val shortMessage = NotificationContentHelper.getShortMessage(context, prayerType)
         val reflection = NotificationContentHelper.getPrayerMessage(prayerType)
         val bigText = "$shortMessage\n\n$reflection"
 
@@ -462,6 +462,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 // Get notification content
                 val summaryContent = NotificationContentHelper.getDailySummaryContent(
+                    context = context,
                     prayedCount = prayedCount,
                     missedCount = missedCount,
                     missedPrayers = missedPrayers

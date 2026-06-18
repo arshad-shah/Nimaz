@@ -804,4 +804,32 @@
     <string name="battery_optimization_subtitle">Uyarılar gecikebilir</string>
     <string name="update_available_subtitle">Güncellemek için dokunun</string>
     <string name="update_ready_subtitle">Tamamlamak için yeniden başlatın</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Namaz vakti. Gününe Allah ile başla.</string>
+    <string name="notif_short_sunrise">Güneş doğdu — İşrak vakti başlıyor.</string>
+    <string name="notif_short_dhuhr">Namaz vakti. Bir an dur ve Allah\'a yönel.</string>
+    <string name="notif_short_asr">Namaz vakti. İkindiyi kaçırma.</string>
+    <string name="notif_short_maghrib">Gün sona ererken namaz vakti.</string>
+    <string name="notif_short_isha">Namaz vakti. Gününü yatsı ile tamamla.</string>
+    <string name="notif_short_generic">%s namazının vakti geldi.</string>
+
+    <string name="notif_pre_reminder_title">%1$s %2$d dakika içinde</string>
+    <string name="notif_pre_reminder_1">Kalbini hazırla ve abdest al.</string>
+    <string name="notif_pre_reminder_2">Namaza hazırlanma vakti.</string>
+    <string name="notif_pre_reminder_3">İbadete hazırlanmak için bir hatırlatma.</string>
+    <string name="notif_pre_reminder_4">Rabbinin huzuruna çıkmaya hazırlan.</string>
+
+    <string name="notif_greeting_predawn">Sabahın mübarek olsun</string>
+    <string name="notif_greeting_morning">Günaydın, Allah gününü bereketlendirsin</string>
+    <string name="notif_greeting_afternoon">İyi günler, namazlarını ihmal etme</string>
+    <string name="notif_greeting_evening">İyi akşamlar, ibadetin kabul olsun</string>
+    <string name="notif_greeting_night">Gecen huzurlu olsun</string>
+
+    <string name="notif_summary_title_all_complete">Maşallah! Tüm Namazlar Tamamlandı</string>
+    <string name="notif_summary_title_default">Günlük Namaz Özeti</string>
+    <string name="notif_summary_count">%2$d namazdan %1$d tanesi tamamlandı</string>
+    <string name="ayah_copied_to_clipboard">Ayet panoya kopyalandı</string>
+    <string name="test_notification_title">Test Bildirimi</string>
+    <string name="test_notification_text">Namaz bildirimleri düzgün çalışıyor</string>
 </resources>

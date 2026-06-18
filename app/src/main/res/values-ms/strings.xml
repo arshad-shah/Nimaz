@@ -803,4 +803,32 @@
     <string name="battery_optimization_subtitle">Penggera mungkin tertangguh</string>
     <string name="update_available_subtitle">Ketik kemas kini untuk versi terkini</string>
     <string name="update_ready_subtitle">Mula semula untuk menyelesaikan pemasangan</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Masanya untuk solat. Mulakan harimu bersama Allah.</string>
+    <string name="notif_short_sunrise">Matahari telah terbit — waktu Isyraq bermula.</string>
+    <string name="notif_short_dhuhr">Masanya untuk solat. Berhenti seketika dan menghadap Allah.</string>
+    <string name="notif_short_asr">Masanya untuk solat. Jangan biarkan Asar berlalu.</string>
+    <string name="notif_short_maghrib">Masanya untuk solat ketika hari menjelang senja.</string>
+    <string name="notif_short_isha">Masanya untuk solat. Akhiri harimu dengan Isyak.</string>
+    <string name="notif_short_generic">Masanya untuk solat %s.</string>
+
+    <string name="notif_pre_reminder_title">%1$s dalam %2$d minit</string>
+    <string name="notif_pre_reminder_1">Sediakan hatimu dan ambil wuduk.</string>
+    <string name="notif_pre_reminder_2">Masanya untuk bersedia menunaikan solat.</string>
+    <string name="notif_pre_reminder_3">Peringatan untuk bersedia beribadah.</string>
+    <string name="notif_pre_reminder_4">Bersedialah untuk berdiri di hadapan Tuhanmu.</string>
+
+    <string name="notif_greeting_predawn">Semoga pagimu diberkati</string>
+    <string name="notif_greeting_morning">Selamat pagi, semoga Allah memberkati harimu</string>
+    <string name="notif_greeting_afternoon">Selamat tengah hari, sentiasalah ingat solatmu</string>
+    <string name="notif_greeting_evening">Selamat petang, semoga ibadahmu diterima</string>
+    <string name="notif_greeting_night">Semoga malammu tenang</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! Semua Solat Lengkap</string>
+    <string name="notif_summary_title_default">Ringkasan Solat Harian</string>
+    <string name="notif_summary_count">%1$d daripada %2$d solat selesai</string>
+    <string name="ayah_copied_to_clipboard">Ayat disalin ke papan keratan</string>
+    <string name="test_notification_title">Notifikasi Ujian</string>
+    <string name="test_notification_text">Notifikasi solat berfungsi dengan betul</string>
 </resources>
