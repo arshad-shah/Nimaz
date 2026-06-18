@@ -118,6 +118,10 @@
     <string name="delete_all_data_dialog_message">Bu işlem namaz takibi, yer imleri, tesbih geçmişi ve ayarlar dahil tüm verilerinizi kalıcı olarak silecektir. Bu işlem geri alınamaz.</string>
     <string name="about">Hakkında</string>
     <string name="app_description">Doğru namaz vakitleri, kıble yönü, Kur\'an okuma ve daha fazlasını içeren kapsamlı bir İslami yardımcı uygulama.</string>
+    <string name="about_tagline">Günlük İslami arkadaşınız — doğru namaz vakitleri, Kur\'an, kıble ve daha fazlası.</string>
+    <string name="about_rate">Puan ver</string>
+    <string name="about_share">Paylaş</string>
+    <string name="about_updates">Güncellemeler</string>
     <string name="links">Bağlantılar</string>
     <string name="developer">Geliştirici</string>
     <string name="data_sources_credits">Veri Kaynakları &amp; Emeği Geçenler</string>

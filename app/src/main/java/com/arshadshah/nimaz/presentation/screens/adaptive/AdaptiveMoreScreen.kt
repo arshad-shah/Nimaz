@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
+import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
@@ -240,21 +241,23 @@ fun AdaptiveMoreScreen(
                                     context.startActivity(intent)
                                 }
                             )
-                            MoreDetailPane.HELP -> HelpScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } },
-                                onNavigateToTopic = { topicId ->
-                                    navController.navigate(Route.HelpTopicDetail(topicId))
-                                },
-                                onContact = {
-                                    val email = context.getString(com.arshadshah.nimaz.R.string.support_email)
-                                    val subject = context.getString(com.arshadshah.nimaz.R.string.nimaz_support_request)
-                                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                        data = Uri.parse("mailto:$email")
-                                        putExtra(Intent.EXTRA_SUBJECT, subject)
+                            MoreDetailPane.HELP -> {
+                                val supportEmail = stringResource(com.arshadshah.nimaz.R.string.support_email)
+                                val supportSubject = stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
+                                HelpScreen(
+                                    onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                    onNavigateToTopic = { topicId ->
+                                        navController.navigate(Route.HelpTopicDetail(topicId))
+                                    },
+                                    onContact = {
+                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:$supportEmail")
+                                            putExtra(Intent.EXTRA_SUBJECT, supportSubject)
+                                        }
+                                        context.startActivity(Intent.createChooser(intent, supportEmail))
                                     }
-                                    context.startActivity(Intent.createChooser(intent, email))
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }

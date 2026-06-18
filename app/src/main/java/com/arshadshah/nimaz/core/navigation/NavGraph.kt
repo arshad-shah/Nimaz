@@ -877,17 +877,17 @@ fun NavGraph(
 
             composable<Route.SettingsHelp> {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val supportEmail = androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
+                val supportSubject = androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                 com.arshadshah.nimaz.presentation.screens.help.HelpScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToTopic = { topicId -> navController.navigate(Route.HelpTopicDetail(topicId)) },
                     onContact = {
-                        val email = context.getString(com.arshadshah.nimaz.R.string.support_email)
-                        val subject = context.getString(com.arshadshah.nimaz.R.string.nimaz_support_request)
                         val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:$email")
-                            putExtra(android.content.Intent.EXTRA_SUBJECT, subject)
+                            data = android.net.Uri.parse("mailto:$supportEmail")
+                            putExtra(android.content.Intent.EXTRA_SUBJECT, supportSubject)
                         }
-                        context.startActivity(android.content.Intent.createChooser(intent, email))
+                        context.startActivity(android.content.Intent.createChooser(intent, supportEmail))
                     }
                 )
             }
