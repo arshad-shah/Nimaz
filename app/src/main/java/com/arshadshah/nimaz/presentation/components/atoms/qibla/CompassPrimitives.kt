@@ -21,11 +21,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
@@ -54,6 +55,54 @@ val QiblaGreen = Color(0xFF22C55E)
 
 /** Red used to mark North across the compass. */
 val CompassNorthColor = Color(0xFFEF4444)
+
+/**
+ * Shared Kaaba glyph — a small isometric cube with the dark kiswah body and a
+ * coloured hizam band + door. Reused by the compass dial (at the needle tip) and
+ * the AR view (at the beam head). Pass [color] = [QiblaGold] while seeking or
+ * [QiblaGreen] when facing; [size] is the glyph's bounding width in px and
+ * [center] its centre. Set [glow] for a soft radial halo behind it.
+ *
+ * Drawn upright in the current draw frame, so inside the rotating dial it turns
+ * with the dial (like the N/E/S/W letters) and in the AR overlay it stays
+ * screen-upright.
+ */
+fun DrawScope.drawKaabaGlyph(
+    center: Offset,
+    size: Float,
+    color: Color,
+    glow: Boolean = true,
+) {
+    val s = size / 64f
+    // glyph art lives in a 64-unit box; its visual centre is ~(36, 32)
+    fun p(x: Float, y: Float) = Offset(center.x + (x - 36f) * s, center.y + (y - 32f) * s)
+    fun quad(a: Offset, b: Offset, c: Offset, d: Offset) = Path().apply {
+        moveTo(a.x, a.y); lineTo(b.x, b.y); lineTo(c.x, c.y); lineTo(d.x, d.y); close()
+    }
+
+    if (glow) {
+        val r = size * 0.72f
+        drawCircle(
+            brush = Brush.radialGradient(
+                colors = listOf(color.copy(alpha = 0.55f), Color.Transparent),
+                center = center,
+                radius = r
+            ),
+            radius = r,
+            center = center
+        )
+    }
+
+    val bandDark = lerp(color, Color.Black, 0.28f)
+    // cube faces (constant dark kiswah)
+    drawPath(quad(p(20f, 18f), p(34f, 11f), p(52f, 16f), p(38f, 23f)), Color(0xFF23252B)) // top
+    drawPath(quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)), Color(0xFF101115)) // side
+    drawPath(quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)), Color(0xFF181A1F)) // front
+    // hizam band (front + side) + door, in the accent colour
+    drawPath(quad(p(20f, 26f), p(38f, 31f), p(38f, 38f), p(20f, 33f)), color)             // band front
+    drawPath(quad(p(38f, 31f), p(52f, 24f), p(52f, 31f), p(38f, 38f)), bandDark)          // band side
+    drawPath(quad(p(26f, 38f), p(33f, 40f), p(33f, 50f), p(26f, 48f)), color)             // door
+}
 
 /** Outer + inner decorative rings of the compass. */
 @Composable
@@ -203,16 +252,16 @@ fun CompassDial(
             color = tailColor
         )
 
-        // Kaaba icon at the needle's front tip
-        val kaabaSize = 16.dp.toPx()
-        val kaabaOffset = 10.dp.toPx()
+        // Kaaba glyph at the needle's front tip (shared with the AR view)
+        val kaabaSize = 24.dp.toPx()
+        val kaabaOffset = 13.dp.toPx()
         val kaabaCenterX = center.x + ((frontLength + kaabaOffset) * sin(qiblaAngleRad)).toFloat()
         val kaabaCenterY = center.y - ((frontLength + kaabaOffset) * cos(qiblaAngleRad)).toFloat()
-        drawRect(
+        drawKaabaGlyph(
+            center = Offset(kaabaCenterX, kaabaCenterY),
+            size = kaabaSize,
             color = arrowColor,
-            topLeft = Offset(kaabaCenterX - kaabaSize / 2, kaabaCenterY - kaabaSize / 2),
-            size = Size(kaabaSize, kaabaSize),
-            style = Stroke(width = 1.5f.dp.toPx())
+            glow = isFacingQibla
         )
 
         // Pivot pin — the needle pivots through this, like a real compass

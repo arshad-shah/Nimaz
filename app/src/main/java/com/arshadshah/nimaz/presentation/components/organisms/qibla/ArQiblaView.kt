@@ -6,31 +6,33 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextMeasurer
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -40,19 +42,25 @@ import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGold
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaStatusCapsule
+import com.arshadshah.nimaz.presentation.components.atoms.qibla.drawKaabaGlyph
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaAccuracyPill
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
+/** Half of the assumed camera horizontal field of view, in degrees. Beyond this
+ *  the Qibla is off the screen and we switch from the beam to the edge arrow. */
+private const val HALF_FOV = 30f
+
 /**
- * The AR Qibla view: a full-bleed back-camera feed with a canvas overlay that
- * points at the real-world Qibla, plus the shared [QiblaStatusCapsule] and
- * [QiblaAccuracyPill] anchored at the bottom. The intact top bar lives in the
- * screen, so this view owns only the camera area below it.
+ * The AR Qibla view: a full-bleed back-camera feed with a "beam of light"
+ * pointing at the real-world Qibla, topped by the shared Kaaba glyph (gold while
+ * seeking, green when facing). When the Qibla is outside the camera's view the
+ * beam is replaced by an arc that sweeps toward a Kaaba glyph at the edge, with a
+ * bold "turn this way" instruction. The shared [QiblaStatusCapsule] and
+ * [QiblaAccuracyPill] sit at the bottom; a green border frames the view on lock.
  *
- * The bottom HUD is width-capped and centered so it reads as a focused strip on
- * tablets rather than stretching edge-to-edge. A green border glow frames the
- * whole view while facing the Qibla.
+ * There is no heading ruler — the beam shows direction and the capsule the turn,
+ * so nothing is duplicated.
  */
 @Composable
 fun ArQiblaView(
@@ -66,7 +74,11 @@ fun ArQiblaView(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    val textMeasurer = rememberTextMeasurer()
+
+    val lowAccuracy = compassAccuracy == CompassAccuracy.LOW ||
+        compassAccuracy == CompassAccuracy.UNRELIABLE
+    val qiblaOffScreen = qiblaInfo != null && abs(rotationToQibla) > HALF_FOV
+    val turnRight = rotationToQibla > 0
 
     Box(modifier = modifier.fillMaxSize()) {
         // ──────────────────────────── Camera Preview ────────────────────────────
@@ -93,35 +105,55 @@ fun ArQiblaView(
 
                 try {
                     cameraProvider?.unbindAll()
-                    cameraProvider?.bindToLifecycle(
-                        lifecycleOwner,
-                        cameraSelector,
-                        preview
-                    )
+                    cameraProvider?.bindToLifecycle(lifecycleOwner, cameraSelector, preview)
                 } catch (_: Exception) {
                     // Camera may not be available
                 }
             }, androidx.core.content.ContextCompat.getMainExecutor(context))
 
-            onDispose {
-                cameraProvider?.unbindAll()
-            }
+            onDispose { cameraProvider?.unbindAll() }
         }
 
-        AndroidView(
-            factory = { previewView },
-            modifier = Modifier.fillMaxSize()
-        )
+        AndroidView(factory = { previewView }, modifier = Modifier.fillMaxSize())
 
-        // ──────────────────────────── AR Overlay ────────────────────────────
+        // ──────────────────────────── AR Overlay (beam / arc + Kaaba) ────────────
         ArOverlay(
-            azimuth = azimuth,
             qiblaInfo = qiblaInfo,
             isFacingQibla = isFacingQibla,
             rotationToQibla = rotationToQibla,
-            textMeasurer = textMeasurer,
+            lowAccuracy = lowAccuracy,
             modifier = Modifier.fillMaxSize()
         )
+
+        // ──────────────────────── Off-screen instruction overlay ─────────────────
+        if (qiblaOffScreen) {
+            // Soft directional wash on the edge you must turn toward.
+            Box(
+                modifier = Modifier
+                    .align(if (turnRight) Alignment.CenterEnd else Alignment.CenterStart)
+                    .fillMaxHeight()
+                    .width(110.dp)
+                    .background(
+                        Brush.horizontalGradient(
+                            colors = if (turnRight)
+                                listOf(Color.Transparent, QiblaGold.copy(alpha = 0.16f))
+                            else
+                                listOf(QiblaGold.copy(alpha = 0.16f), Color.Transparent)
+                        )
+                    )
+            )
+            Text(
+                text = if (turnRight) "Turn right\nto find Qibla" else "Turn left\nto find Qibla",
+                color = Color.White,
+                fontWeight = FontWeight.ExtraBold,
+                fontSize = 19.sp,
+                lineHeight = 24.sp,
+                textAlign = if (turnRight) TextAlign.Start else TextAlign.End,
+                modifier = Modifier
+                    .align(if (turnRight) Alignment.CenterStart else Alignment.CenterEnd)
+                    .padding(horizontal = 22.dp)
+            )
+        }
 
         // ──────────────────────────── Bottom HUD ────────────────────────────
         if (qiblaInfo != null) {
@@ -146,7 +178,7 @@ fun ArQiblaView(
             }
         }
 
-        // ──────────────────────────── Facing Qibla border glow ───────────────────
+        // ──────────────────────── Facing Qibla border glow ───────────────────────
         if (isFacingQibla) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 drawRect(
@@ -166,218 +198,113 @@ fun ArQiblaView(
 }
 
 // =====================================================================================
-//  AR Overlay – Canvas drawing: Qibla marker, edge arrows, compass strip
+//  AR Overlay — the beam of light (or off-screen arc) crowned by the Kaaba glyph
 // =====================================================================================
 @Composable
 private fun ArOverlay(
-    azimuth: Float,
     qiblaInfo: QiblaInfo?,
     isFacingQibla: Boolean,
     rotationToQibla: Float,
-    textMeasurer: TextMeasurer,
-    modifier: Modifier = Modifier
+    lowAccuracy: Boolean,
+    modifier: Modifier = Modifier,
 ) {
-    val arrowColor = if (isFacingQibla) QiblaGreen else QiblaGold
+    val base = if (isFacingQibla) QiblaGreen else QiblaGold
+    val color = if (lowAccuracy) base.copy(alpha = 0.45f) else base
 
     Canvas(modifier = modifier) {
         if (qiblaInfo == null) return@Canvas
 
         val centerX = size.width / 2
-        val centerY = size.height / 2
+        val pixelsPerDegree = size.width / (HALF_FOV * 2f)
+        val arrowX = centerX + rotationToQibla * pixelsPerDegree
+        val onScreen = abs(rotationToQibla) <= HALF_FOV
 
-        // Calculate horizontal offset based on rotation to Qibla
-        val horizontalFov = 60f
-        val pixelsPerDegree = size.width / horizontalFov
-        val offsetX = rotationToQibla * pixelsPerDegree
-
-        val arrowX = centerX + offsetX
-        val isOnScreen = arrowX > -50f && arrowX < size.width + 50f
-
-        if (isOnScreen) {
-            drawQiblaMarker(
-                x = arrowX.coerceIn(40f, size.width - 40f),
-                y = centerY,
-                color = arrowColor,
-                isFacingQibla = isFacingQibla
+        if (onScreen) {
+            drawBeam(
+                x = arrowX.coerceIn(48.dp.toPx(), size.width - 48.dp.toPx()),
+                color = color,
+                isFacing = isFacingQibla
             )
         } else {
-            val edgeX = if (rotationToQibla > 0) size.width - 30f else 30f
-            drawEdgeArrow(
-                x = edgeX,
-                y = centerY,
-                pointRight = rotationToQibla > 0,
-                color = arrowColor
-            )
+            drawArcToKaaba(pointRight = rotationToQibla > 0, color = color)
         }
-
-        // Compass strip
-        drawCompassStrip(
-            azimuth = azimuth,
-            qiblaBearing = qiblaInfo.direction.bearing.toFloat(),
-            y = size.height - 120.dp.toPx(),
-            arrowColor = arrowColor,
-            textMeasurer = textMeasurer
-        )
     }
 }
 
-// =====================================================================================
-//  Qibla marker & edge arrow draw helpers
-// =====================================================================================
-private fun DrawScope.drawQiblaMarker(
-    x: Float,
-    y: Float,
-    color: Color,
-    isFacingQibla: Boolean
-) {
-    val markerSize = if (isFacingQibla) 32.dp.toPx() else 24.dp.toPx()
+/** The vertical beam of light rising to the Kaaba glyph at the Qibla's position. */
+private fun DrawScope.drawBeam(x: Float, color: Color, isFacing: Boolean) {
+    val topY = size.height * 0.34f
+    val botY = size.height * 0.80f
+    val topHalf = 5.dp.toPx()
+    val botHalf = (if (isFacing) 16f else 12f).dp.toPx()
 
-    if (isFacingQibla) {
-        drawCircle(
-            color = color.copy(alpha = 0.2f),
-            radius = markerSize * 2,
-            center = Offset(x, y)
-        )
-    }
-
-    val arrowPath = Path().apply {
-        moveTo(x, y - markerSize)
-        lineTo(x - markerSize * 0.6f, y + markerSize * 0.3f)
-        lineTo(x, y)
-        lineTo(x + markerSize * 0.6f, y + markerSize * 0.3f)
-        close()
-    }
-    drawPath(path = arrowPath, color = color)
-
-    val kaabaSize = 12.dp.toPx()
-    drawRect(
-        color = color,
-        topLeft = Offset(x - kaabaSize / 2, y - markerSize - kaabaSize - 4.dp.toPx()),
-        size = androidx.compose.ui.geometry.Size(kaabaSize, kaabaSize),
-        style = Stroke(width = 2.dp.toPx())
-    )
-}
-
-private fun DrawScope.drawEdgeArrow(
-    x: Float,
-    y: Float,
-    pointRight: Boolean,
-    color: Color
-) {
-    val arrowSize = 20.dp.toPx()
-    val chevronPath = Path().apply {
-        if (pointRight) {
-            moveTo(x - arrowSize / 2, y - arrowSize)
-            lineTo(x + arrowSize / 2, y)
-            lineTo(x - arrowSize / 2, y + arrowSize)
-        } else {
-            moveTo(x + arrowSize / 2, y - arrowSize)
-            lineTo(x - arrowSize / 2, y)
-            lineTo(x + arrowSize / 2, y + arrowSize)
-        }
-    }
+    // Beam body — bright at the top (near the Kaaba), fading into the floor.
     drawPath(
-        path = chevronPath,
-        color = color,
-        style = Stroke(width = 3.dp.toPx())
-    )
-}
-
-// =====================================================================================
-//  Compass strip – wider ticks, cardinal labels, gold diamond Qibla marker
-// =====================================================================================
-private fun DrawScope.drawCompassStrip(
-    azimuth: Float,
-    qiblaBearing: Float,
-    y: Float,
-    arrowColor: Color,
-    textMeasurer: TextMeasurer
-) {
-    val stripHeight = 2.dp.toPx()
-    val centerX = size.width / 2
-    val pixelsPerDegree = size.width / 60f // 60-degree visible range
-
-    // Thin horizontal base line
-    drawLine(
-        color = Color.White.copy(alpha = 0.3f),
-        start = Offset(0f, y),
-        end = Offset(size.width, y),
-        strokeWidth = stripHeight
-    )
-
-    val visibleRange = 30f
-    val cardinalLabels = mapOf(0 to "N", 90 to "E", 180 to "S", 270 to "W")
-
-    for (deg in 0 until 360 step 15) {
-        var diff = deg - azimuth
-        if (diff > 180) diff -= 360
-        if (diff < -180) diff += 360
-
-        if (abs(diff) <= visibleRange) {
-            val tickX = centerX + diff * pixelsPerDegree
-            val isMajor = deg % 90 == 0
-            // Wider ticks: major 12dp, minor 5dp
-            val tickHeight = if (isMajor) 12.dp.toPx() else 5.dp.toPx()
-
-            drawLine(
-                color = Color.White.copy(alpha = if (isMajor) 0.8f else 0.3f),
-                start = Offset(tickX, y - tickHeight),
-                end = Offset(tickX, y + tickHeight),
-                strokeWidth = if (isMajor) 2.5.dp.toPx() else 1.dp.toPx()
-            )
-
-            // Cardinal direction labels near major ticks
-            cardinalLabels[deg]?.let { label ->
-                val textStyle = TextStyle(
-                    color = Color.White.copy(alpha = 0.85f),
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Bold
-                )
-                val measured = textMeasurer.measure(label, textStyle)
-                drawText(
-                    textLayoutResult = measured,
-                    topLeft = Offset(
-                        tickX - measured.size.width / 2f,
-                        y + tickHeight + 4.dp.toPx()
-                    )
-                )
-            }
-        }
-    }
-
-    // Qibla marker – diamond shape
-    var qiblaDiff = qiblaBearing - azimuth
-    if (qiblaDiff > 180) qiblaDiff -= 360
-    if (qiblaDiff < -180) qiblaDiff += 360
-
-    if (abs(qiblaDiff) <= visibleRange) {
-        val qiblaX = centerX + qiblaDiff * pixelsPerDegree
-        val diamondHalf = 7.dp.toPx()
-        val diamondTop = y - diamondHalf - 6.dp.toPx()
-
-        val diamondPath = Path().apply {
-            moveTo(qiblaX, diamondTop - diamondHalf)         // top vertex
-            lineTo(qiblaX + diamondHalf, diamondTop)          // right vertex
-            lineTo(qiblaX, diamondTop + diamondHalf)          // bottom vertex
-            lineTo(qiblaX - diamondHalf, diamondTop)          // left vertex
+        path = Path().apply {
+            moveTo(x - botHalf, botY)
+            lineTo(x - topHalf, topY)
+            lineTo(x + topHalf, topY)
+            lineTo(x + botHalf, botY)
             close()
-        }
-        drawPath(path = diamondPath, color = arrowColor)
+        },
+        brush = Brush.verticalGradient(
+            colors = listOf(color.copy(alpha = color.alpha * 0.55f), Color.Transparent),
+            startY = topY,
+            endY = botY
+        )
+    )
 
-        // Small connecting line from diamond to strip
-        drawLine(
-            color = arrowColor.copy(alpha = 0.6f),
-            start = Offset(qiblaX, diamondTop + diamondHalf),
-            end = Offset(qiblaX, y - 2.dp.toPx()),
-            strokeWidth = 1.5.dp.toPx()
+    // Base footprint — a soft glow pool where the beam meets the ground (facing).
+    if (isFacing) {
+        drawOval(
+            color = color.copy(alpha = 0.22f),
+            topLeft = Offset(x - botHalf * 3f, botY - 8.dp.toPx()),
+            size = Size(botHalf * 6f, 16.dp.toPx())
+        )
+        drawOval(
+            color = color.copy(alpha = 0.35f),
+            topLeft = Offset(x - botHalf * 1.8f, botY - 5.dp.toPx()),
+            size = Size(botHalf * 3.6f, 10.dp.toPx())
         )
     }
 
-    // Center tick (current heading)
-    drawLine(
-        color = Color.White,
-        start = Offset(centerX, y - 14.dp.toPx()),
-        end = Offset(centerX, y + 14.dp.toPx()),
-        strokeWidth = 2.dp.toPx()
+    // The Kaaba, crowning the beam.
+    drawKaabaGlyph(
+        center = Offset(x, topY),
+        size = (if (isFacing) 46f else 40f).dp.toPx(),
+        color = color,
+        glow = true
+    )
+}
+
+/** Off-screen indicator: an arc that sweeps the eye toward a Kaaba glyph hugging
+ *  the edge you need to turn toward. */
+private fun DrawScope.drawArcToKaaba(pointRight: Boolean, color: Color) {
+    val edgeInset = 56.dp.toPx()
+    val kx = if (pointRight) size.width - edgeInset else edgeInset
+    val ky = size.height * 0.32f
+
+    val startY = size.height * 0.42f
+    val endY = size.height * 0.78f
+    val bulge = if (pointRight) -84.dp.toPx() else 84.dp.toPx()
+
+    drawPath(
+        path = Path().apply {
+            moveTo(kx, startY)
+            quadraticTo(kx + bulge, (startY + endY) / 2f, kx, endY)
+        },
+        brush = Brush.verticalGradient(
+            colors = listOf(color, color.copy(alpha = 0.05f)),
+            startY = startY,
+            endY = endY
+        ),
+        style = Stroke(width = 8.dp.toPx(), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+    )
+
+    drawKaabaGlyph(
+        center = Offset(kx, ky),
+        size = 44.dp.toPx(),
+        color = color,
+        glow = true
     )
 }
