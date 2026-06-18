@@ -75,7 +75,9 @@ fun NimazBackTopAppBar(
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     actions: @Composable RowScope.() -> Unit = {},
-    scrollBehavior: TopAppBarScrollBehavior? = null
+    scrollBehavior: TopAppBarScrollBehavior? = null,
+    colors: androidx.compose.material3.TopAppBarColors =
+        androidx.compose.material3.TopAppBarDefaults.topAppBarColors()
 ) {
     NimazTopAppBar(
         title = title,
@@ -90,7 +92,8 @@ fun NimazBackTopAppBar(
             }
         },
         actions = actions,
-        scrollBehavior = scrollBehavior
+        scrollBehavior = scrollBehavior,
+        colors = colors
     )
 }
 
