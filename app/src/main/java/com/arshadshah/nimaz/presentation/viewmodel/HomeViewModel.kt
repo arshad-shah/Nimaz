@@ -19,6 +19,7 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
@@ -57,6 +58,11 @@ data class HomeUiState(
     val fastingToday: Boolean = false,
     val dailyHadith: String? = null,
     val dailyHadithReference: String? = null,
+    val dailyHadithId: String? = null,
+    val dailyHadithGrade: String? = null,
+    // 0f→1f position of "now" along the Fajr→Isha timeline (drives the progress
+    // card's fill); recomputed each tick so it advances with the clock.
+    val prayerTimelineProgress: Float = 0f,
     val dailyDua: DailyDua? = null,
     val isFriday: Boolean = false,
     val jumuahTime: String = "",
@@ -175,7 +181,11 @@ class HomeViewModel @Inject constructor(
                         dailyHadith = hadith?.textEnglish?.let { text ->
                             if (text.length > 150) text.take(150).trimEnd() + "…" else text
                         },
-                        dailyHadithReference = hadith?.reference?.takeIf { ref -> ref.isNotBlank() }
+                        dailyHadithReference = hadith?.reference?.takeIf { ref -> ref.isNotBlank() },
+                        // Carry the id so tapping the card opens this exact hadith
+                        // in the reader, and a short grade label for the card chip.
+                        dailyHadithId = hadith?.id?.toString(),
+                        dailyHadithGrade = shortGradeLabel(hadith?.grade)
                     )
                 }
             } catch (_: Exception) {
@@ -183,6 +193,19 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
+
+    /**
+     * Short, chip-friendly grade label for the home hadith card (e.g. "Sahih").
+     * Returns null for unknown/blank grades so the card simply omits the chip.
+     */
+    private fun shortGradeLabel(rawGrade: String?): String? =
+        when (HadithGrade.fromString(rawGrade)) {
+            HadithGrade.SAHIH -> "Sahih"
+            HadithGrade.HASAN -> "Hasan"
+            HadithGrade.DAIF -> "Da'if"
+            HadithGrade.MAWDU -> "Mawdu'"
+            else -> null
+        }
 
     /**
      * Loads a dua matching the current time of day (morning / evening / before
@@ -500,6 +523,36 @@ class HomeViewModel @Inject constructor(
                     } else ""
                 }
 
+                // Where "now" sits along the Fajr→Isha timeline (0f at Fajr, 1f
+                // at Isha), interpolated within the current interval. Drives the
+                // progress card's fill independently of which prayers are prayed.
+                val timelineProgress: Float = run {
+                    val order = listOf(
+                        PrayerType.FAJR, PrayerType.DHUHR, PrayerType.ASR,
+                        PrayerType.MAGHRIB, PrayerType.ISHA
+                    )
+                    val ts = order.mapNotNull { type ->
+                        prayerTimes.find { it.type == type }?.time
+                    }
+                    when {
+                        ts.size < 2 -> 0f
+                        currentTime <= ts.first() -> 0f
+                        currentTime >= ts.last() -> 1f
+                        else -> {
+                            var result = 1f
+                            for (k in 0 until ts.size - 1) {
+                                if (currentTime >= ts[k] && currentTime < ts[k + 1]) {
+                                    val frac = (currentTime - ts[k]).inWholeSeconds.toFloat() /
+                                            (ts[k + 1] - ts[k]).inWholeSeconds.toFloat()
+                                    result = ((k + frac) / (ts.size - 1)).coerceIn(0f, 1f)
+                                    break
+                                }
+                            }
+                            result
+                        }
+                    }
+                }
+
                 // Apply prayer records to displays
                 val records = _prayerRecords.value
                 val displaysWithStatus = updatedDisplays.map { display ->
@@ -532,6 +585,7 @@ class HomeViewModel @Inject constructor(
                 _state.update {
                     it.copy(
                         prayerTimes = displaysWithStatus,
+                        prayerTimelineProgress = timelineProgress,
                         currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
                         nextPrayer = nextPrayer,
                         timeUntilNextPrayer = timeUntilNext,

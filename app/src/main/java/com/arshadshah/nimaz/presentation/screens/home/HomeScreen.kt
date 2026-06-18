@@ -78,6 +78,7 @@ fun HomeScreen(
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
+    onOpenHadith: (hadithId: String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
@@ -161,6 +162,7 @@ fun HomeScreen(
                         updateManager = updateManager,
                         onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                         onNavigateToPrayerTracker = onNavigateToPrayerTracker,
+                        onOpenHadith = onOpenHadith,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
                         locationPermissionLauncher = locationPermissionLauncher,
@@ -176,6 +178,7 @@ fun HomeScreen(
                         onNavigateToSettings = onNavigateToSettings,
                         onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                         onNavigateToPrayerTracker = onNavigateToPrayerTracker,
+                        onOpenHadith = onOpenHadith,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
                         locationPermissionLauncher = locationPermissionLauncher,
@@ -198,6 +201,7 @@ private fun HomeCompactContent(
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onOpenHadith: (hadithId: String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -271,7 +275,10 @@ private fun HomeCompactContent(
                 fastingToday = state.fastingToday,
                 dailyHadith = state.dailyHadith,
                 dailyHadithReference = state.dailyHadithReference,
+                dailyHadithGrade = state.dailyHadithGrade,
                 dailyDua = state.dailyDua,
+                onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
+                prayerTimelineProgress = state.prayerTimelineProgress,
             )
         }
 
@@ -308,6 +315,7 @@ private fun HomeTabletContent(
     onNavigateToSettings: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onOpenHadith: (hadithId: String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -400,6 +408,7 @@ private fun HomeTabletContent(
 
                 TodaysProgressCard(
                     prayerTimes = state.prayerTimes,
+                    timelineProgress = state.prayerTimelineProgress,
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
 
@@ -411,7 +420,9 @@ private fun HomeTabletContent(
                     fastingToday = state.fastingToday,
                     dailyHadith = state.dailyHadith,
                     dailyHadithReference = state.dailyHadithReference,
+                    dailyHadithGrade = state.dailyHadithGrade,
                     dailyDua = state.dailyDua,
+                    onHadithClick = state.dailyHadithId?.let { id -> { onOpenHadith(id) } },
                     modifier = Modifier.padding(horizontal = 4.dp)
                 )
 
@@ -449,6 +460,12 @@ private fun buildHomeBannerItems(
     val grant = stringResource(R.string.grant)
     val fix = stringResource(R.string.fix)
 
+    val notificationsSubtitle = stringResource(R.string.notifications_disabled_subtitle)
+    val locationSubtitle = stringResource(R.string.location_permission_subtitle)
+    val batterySubtitle = stringResource(R.string.battery_optimization_subtitle)
+    val updateAvailableSubtitle = stringResource(R.string.update_available_subtitle)
+    val updateReadySubtitle = stringResource(R.string.update_ready_subtitle)
+
     val updateAvailable = stringResource(R.string.update_available)
     val startingUpdate = stringResource(R.string.starting_update)
     val downloadingUpdate = stringResource(R.string.downloading_update)
@@ -464,6 +481,7 @@ private fun buildHomeBannerItems(
                     icon = Icons.Default.Notifications,
                     title = notificationsDisabledTitle,
                     variant = HomeBannerVariant.WARNING,
+                    subtitle = notificationsSubtitle,
                     actionLabel = enable,
                     onAction = {
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -480,6 +498,7 @@ private fun buildHomeBannerItems(
                     icon = Icons.Default.LocationOn,
                     title = locationTitle,
                     variant = HomeBannerVariant.WARNING,
+                    subtitle = locationSubtitle,
                     actionLabel = grant,
                     onAction = {
                         locationPermissionLauncher.launch(
@@ -499,6 +518,7 @@ private fun buildHomeBannerItems(
                     icon = Icons.Default.BatteryAlert,
                     title = batteryTitle,
                     variant = HomeBannerVariant.WARNING,
+                    subtitle = batterySubtitle,
                     actionLabel = fix,
                     onAction = { batteryOptimizationLauncher.launch(getBatteryIntent()) },
                 )
@@ -511,6 +531,7 @@ private fun buildHomeBannerItems(
                     icon = Icons.Default.Download,
                     title = updateAvailable,
                     variant = HomeBannerVariant.UPDATE,
+                    subtitle = updateAvailableSubtitle,
                     actionLabel = updateAction,
                     onAction = { updateManager?.startUpdate() },
                 )
@@ -539,6 +560,7 @@ private fun buildHomeBannerItems(
                     icon = Icons.Default.Refresh,
                     title = updateReady,
                     variant = HomeBannerVariant.UPDATE,
+                    subtitle = updateReadySubtitle,
                     actionLabel = restart,
                     onAction = { updateState.completeUpdate() },
                 )

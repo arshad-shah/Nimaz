@@ -15,48 +15,6 @@ object NotificationContentHelper {
         "Bismillah"
     )
 
-    // Prayer-specific titles with variety
-    private val fajrTitles = listOf(
-        "Fajr - The Dawn Prayer",
-        "Rise for Fajr",
-        "Fajr Time Has Arrived",
-        "The Morning Prayer Awaits"
-    )
-
-    private val dhuhrTitles = listOf(
-        "Dhuhr - The Noon Prayer",
-        "Time for Dhuhr",
-        "Dhuhr Prayer Time",
-        "The Midday Prayer"
-    )
-
-    private val asrTitles = listOf(
-        "Asr - The Afternoon Prayer",
-        "Time for Asr",
-        "Asr Prayer Time",
-        "The Afternoon Prayer"
-    )
-
-    private val maghribTitles = listOf(
-        "Maghrib - The Sunset Prayer",
-        "Time for Maghrib",
-        "Break Your Fast with Maghrib",
-        "The Evening Prayer"
-    )
-
-    private val ishaTitles = listOf(
-        "Isha - The Night Prayer",
-        "Time for Isha",
-        "Isha Prayer Time",
-        "The Night Prayer Awaits"
-    )
-
-    private val sunriseTitles = listOf(
-        "Sunrise - Ishraq Time",
-        "The Sun Has Risen",
-        "Sunrise Alert"
-    )
-
     // Motivational messages for each prayer
     private val fajrMessages = listOf(
         "\"Prayer is better than sleep.\" Start your day blessed.",
@@ -137,49 +95,56 @@ object NotificationContentHelper {
     )
 
     /**
-     * Get a notification title for a specific prayer.
+     * Notification title for a prayer: the prayer name with its time appended so
+     * the user reads *what* and *when* at a glance (e.g. "Fajr · 5:30 AM").
+     * Replaces the previous long, random title phrases — tighter and consistent.
      */
-    fun getPrayerTitle(prayerName: String): String {
-        return when (prayerName.uppercase()) {
-            "FAJR" -> fajrTitles.random()
-            "SUNRISE" -> sunriseTitles.random()
-            "DHUHR" -> dhuhrTitles.random()
-            "ASR" -> asrTitles.random()
-            "MAGHRIB" -> maghribTitles.random()
-            "ISHA" -> ishaTitles.random()
-            else -> "$prayerName Time"
-        }
+    fun getPrayerTitle(prayerName: String, prayerTime: String = ""): String {
+        val name = prayerDisplayName(prayerName)
+        return if (prayerTime.isNotBlank()) "$name · $prayerTime" else name
+    }
+
+    /** Clean, title-cased prayer name from a raw type/name string. */
+    private fun prayerDisplayName(prayerName: String): String = when (prayerName.uppercase()) {
+        "FAJR" -> "Fajr"
+        "SUNRISE" -> "Sunrise"
+        "DHUHR" -> "Dhuhr"
+        "ASR" -> "Asr"
+        "MAGHRIB" -> "Maghrib"
+        "ISHA" -> "Isha"
+        else -> prayerName.lowercase().replaceFirstChar { it.uppercase() }
     }
 
     /**
-     * Get a motivational message for a specific prayer.
+     * A short reflection (hadith / aya / encouragement) shown on the expanded
+     * notification, below the reminder line.
      */
-    fun getPrayerMessage(prayerName: String, prayerTime: String = ""): String {
-        val timeInfo = if (prayerTime.isNotEmpty()) " ($prayerTime)" else ""
-        val message = when (prayerName.uppercase()) {
+    fun getPrayerMessage(prayerName: String): String {
+        return when (prayerName.uppercase()) {
             "FAJR" -> fajrMessages.random()
             "SUNRISE" -> sunriseMessages.random()
             "DHUHR" -> dhuhrMessages.random()
             "ASR" -> asrMessages.random()
             "MAGHRIB" -> maghribMessages.random()
             "ISHA" -> ishaMessages.random()
-            else -> "It's time for $prayerName prayer."
+            else -> "It's time for ${prayerDisplayName(prayerName)} prayer."
         }
-        return message
     }
 
     /**
-     * Get a short message for notification content.
+     * Short, calm one-line reminder for the collapsed notification (and the
+     * first line when expanded). No nested quotes — the time already lives in
+     * the title, so this is purely the gentle nudge to pray.
      */
     fun getShortMessage(prayerName: String): String {
         return when (prayerName.uppercase()) {
-            "FAJR" -> "\"Prayer is better than sleep.\" - Answer the Fajr call."
-            "SUNRISE" -> "The sun has risen. Ishraq time begins."
-            "DHUHR" -> "Pause your day. Connect with Allah."
-            "ASR" -> "\"Guard strictly the middle prayer.\" - Time for Asr."
-            "MAGHRIB" -> "The sun has set. Time for Maghrib."
-            "ISHA" -> "Complete your day with Isha prayer."
-            else -> "It's time for $prayerName prayer."
+            "FAJR" -> "It's time to pray. Begin your day with Allah."
+            "SUNRISE" -> "The sun has risen — Ishraq time begins."
+            "DHUHR" -> "It's time to pray. Pause and turn to Allah."
+            "ASR" -> "It's time to pray. Don't let Asr pass by."
+            "MAGHRIB" -> "It's time to pray as the day draws to a close."
+            "ISHA" -> "It's time to pray. Seal your day with Isha."
+            else -> "It's time for ${prayerDisplayName(prayerName)} prayer."
         }
     }
 
@@ -255,21 +220,6 @@ object NotificationContentHelper {
                     isPositive = prayedCount > missedCount
                 )
             }
-        }
-    }
-
-    /**
-     * Get an emoji for the prayer (for use in notification when supported).
-     */
-    fun getPrayerEmoji(prayerName: String): String {
-        return when (prayerName.uppercase()) {
-            "FAJR" -> "🌅"
-            "SUNRISE" -> "☀️"
-            "DHUHR" -> "🕐"
-            "ASR" -> "🌤️"
-            "MAGHRIB" -> "🌅"
-            "ISHA" -> "🌙"
-            else -> "🕌"
         }
     }
 

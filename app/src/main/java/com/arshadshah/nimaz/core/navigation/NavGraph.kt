@@ -263,7 +263,8 @@ fun NavGraph(
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
+                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
+                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
                 )
             }
 
@@ -542,7 +543,8 @@ fun NavGraph(
                     onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
+                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
+                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
                 )
             }
 

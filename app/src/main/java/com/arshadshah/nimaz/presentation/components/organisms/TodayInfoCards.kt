@@ -25,7 +25,9 @@ fun TodayInfoCards(
     dailyHadith: String?,
     modifier: Modifier = Modifier,
     dailyHadithReference: String? = null,
+    dailyHadithGrade: String? = null,
     dailyDua: DailyDua? = null,
+    onHadithClick: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -33,14 +35,19 @@ fun TodayInfoCards(
     ) {
         FastingStatusCard(fastingToday = fastingToday)
         if (dailyHadith != null) {
-            HadithOfTheDayCard(hadith = dailyHadith, reference = dailyHadithReference)
+            HadithOfTheDayCard(
+                hadith = dailyHadith,
+                reference = dailyHadithReference,
+                grade = dailyHadithGrade,
+                onClick = onHadithClick,
+            )
         }
         if (dailyDua != null) {
             DuaOfTheMomentCard(
                 arabic = dailyDua.arabic,
                 translation = dailyDua.translation,
                 categoryLabel = dailyDua.categoryLabel,
-                categoryIcon = dailyDua.categoryIcon,
+                source = dailyDua.source,
             )
         }
     }

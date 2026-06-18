@@ -80,9 +80,12 @@
     <string name="todays_progress">Today\'s Progress</string>
     <string name="prayers_count_format">%1$d of %2$d prayers</string>
     <string name="fasting">Fasting</string>
-    <string name="today_fasting">Today: Fasting</string>
+    <string name="today_fasting">Fasting today</string>
     <string name="no_fast_today">No fast today</string>
+    <string name="fasting_logged">Logged</string>
+    <string name="fasting_not_logged">Not logged</string>
     <string name="hadith_of_the_day">Hadith of the Day</string>
+    <string name="read">Read</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
     <string name="hours">Hours</string>
@@ -105,6 +108,12 @@
     <string name="battery_optimization_title">Battery Optimization Active</string>
     <string name="battery_optimization_message">Battery optimization may prevent timely prayer notifications.</string>
     <string name="fix">Fix</string>
+    <!-- Home banner one-line subtitles -->
+    <string name="notifications_disabled_subtitle">Prayer reminders won\'t show</string>
+    <string name="location_permission_subtitle">Needed for accurate prayer times</string>
+    <string name="battery_optimization_subtitle">Alarms may be delayed</string>
+    <string name="update_available_subtitle">Tap update to get the latest</string>
+    <string name="update_ready_subtitle">Restart to finish installing</string>
 
     <!-- Home Screen - Jumu'ah -->
     <string name="jumuah_mubarak">Jumu\'ah Mubarak</string>
