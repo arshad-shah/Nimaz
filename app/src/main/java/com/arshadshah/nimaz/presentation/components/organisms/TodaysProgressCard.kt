@@ -164,7 +164,7 @@ private fun PrayerTimeline(
             prayers.forEach { prayer ->
                 TimelineNode(
                     modifier = Modifier.weight(1f),
-                    label = prayer.name.take(4),
+                    label = prayer.name.take(5),
                     time = prayer.time,
                     isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED,
                     isCurrent = prayer.isCurrent,

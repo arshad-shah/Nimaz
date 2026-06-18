@@ -8,33 +8,26 @@ class NotificationContentHelperTest {
     // ── getPrayerTitle ──────────────────────────────────────────────
 
     @Test
-    fun `getPrayerTitle returns non-empty string for all prayers`() {
-        val prayers = listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
-        for (prayer in prayers) {
-            val title = NotificationContentHelper.getPrayerTitle(prayer)
-            assertThat(title).isNotEmpty()
-            // Title is randomly selected and may not always contain the prayer name literally
-            // (e.g. "The Morning Prayer Awaits" for Fajr), so just check non-empty
-        }
+    fun `getPrayerTitle returns the prayer name`() {
+        assertThat(NotificationContentHelper.getPrayerTitle("FAJR")).isEqualTo("Fajr")
+        assertThat(NotificationContentHelper.getPrayerTitle("ISHA")).isEqualTo("Isha")
+    }
+
+    @Test
+    fun `getPrayerTitle appends the time when provided`() {
+        val title = NotificationContentHelper.getPrayerTitle("FAJR", "5:30 AM")
+        assertThat(title).isEqualTo("Fajr · 5:30 AM")
     }
 
     @Test
     fun `getPrayerTitle is case insensitive`() {
-        // Titles are picked at random from a prayer-specific list, so the two
-        // calls can't be compared directly and won't necessarily contain "fajr"
-        // (e.g. "The Morning Prayer Awaits"). Case-insensitivity means "fajr" is
-        // recognised the same as "FAJR" and never falls through to the
-        // "<name> Time" fallback that getPrayerTitle returns for unknown prayers.
-        val titleUpper = NotificationContentHelper.getPrayerTitle("FAJR")
-        val titleLower = NotificationContentHelper.getPrayerTitle("fajr")
-        assertThat(titleUpper).isNotEqualTo("FAJR Time")
-        assertThat(titleLower).isNotEqualTo("fajr Time")
+        assertThat(NotificationContentHelper.getPrayerTitle("fajr")).isEqualTo("Fajr")
     }
 
     @Test
-    fun `getPrayerTitle returns fallback for unknown prayer`() {
+    fun `getPrayerTitle title-cases an unknown prayer`() {
         val title = NotificationContentHelper.getPrayerTitle("UNKNOWN")
-        assertThat(title).isEqualTo("UNKNOWN Time")
+        assertThat(title).isEqualTo("Unknown")
     }
 
     // ── getPrayerMessage ────────────────────────────────────────────
@@ -51,7 +44,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getPrayerMessage returns fallback for unknown prayer`() {
         val message = NotificationContentHelper.getPrayerMessage("TAHAJJUD")
-        assertThat(message).isEqualTo("It's time for TAHAJJUD prayer.")
+        assertThat(message).isEqualTo("It's time for Tahajjud prayer.")
     }
 
     // ── getShortMessage ─────────────────────────────────────────────
@@ -76,7 +69,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getShortMessage returns fallback for unknown prayer`() {
         val message = NotificationContentHelper.getShortMessage("WITR")
-        assertThat(message).isEqualTo("It's time for WITR prayer.")
+        assertThat(message).isEqualTo("It's time for Witr prayer.")
     }
 
     // ── getPreReminderTitle / getPreReminderMessage ─────────────────
@@ -91,23 +84,6 @@ class NotificationContentHelperTest {
     fun `getPreReminderMessage returns non-empty string`() {
         val message = NotificationContentHelper.getPreReminderMessage("Fajr")
         assertThat(message).isNotEmpty()
-    }
-
-    // ── getPrayerEmoji ──────────────────────────────────────────────
-
-    @Test
-    fun `getPrayerEmoji returns correct emoji for each prayer`() {
-        assertThat(NotificationContentHelper.getPrayerEmoji("FAJR")).isEqualTo("🌅")
-        assertThat(NotificationContentHelper.getPrayerEmoji("SUNRISE")).isEqualTo("☀️")
-        assertThat(NotificationContentHelper.getPrayerEmoji("DHUHR")).isEqualTo("🕐")
-        assertThat(NotificationContentHelper.getPrayerEmoji("ASR")).isEqualTo("🌤️")
-        assertThat(NotificationContentHelper.getPrayerEmoji("MAGHRIB")).isEqualTo("🌅")
-        assertThat(NotificationContentHelper.getPrayerEmoji("ISHA")).isEqualTo("🌙")
-    }
-
-    @Test
-    fun `getPrayerEmoji returns mosque emoji for unknown prayer`() {
-        assertThat(NotificationContentHelper.getPrayerEmoji("UNKNOWN")).isEqualTo("🕌")
     }
 
     // ── getDailySummaryContent ───────────────────────────────────────
