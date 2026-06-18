@@ -21,9 +21,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.Schedule
@@ -61,6 +63,8 @@ fun helpIcon(key: String?): ImageVector = when (key) {
     "build" -> Icons.Filled.Build
     "tune" -> Icons.Filled.Tune
     "more_time" -> Icons.Filled.MoreTime
+    "rocket_launch" -> Icons.Filled.RocketLaunch
+    "calculate" -> Icons.Filled.Calculate
     else -> Icons.AutoMirrored.Filled.HelpOutline
 }
 
@@ -72,6 +76,7 @@ fun helpColor(key: String): Color = when (key) {
     "green" -> Color(0xFF22C55E)
     "violet" -> Color(0xFF8B5CF6)
     "orange" -> Color(0xFFF97316)
+    "sky" -> Color(0xFF0EA5E9)
     else -> MaterialTheme.colorScheme.primary
 }
 
