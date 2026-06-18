@@ -1,53 +1,34 @@
 package com.arshadshah.nimaz.presentation.screens.prophets
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.Prophet
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NameCard
+import com.arshadshah.nimaz.presentation.components.molecules.NameFilterRow
+import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
@@ -62,13 +43,18 @@ fun ProphetsListScreen(
     viewModel: ProphetViewModel = hiltViewModel()
 ) {
     val state by viewModel.listState.collectAsState()
+    val accent = NamesAccents.prophets()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.prophets_title),
-                onBackClick = onNavigateBack
+                onBackClick = onNavigateBack,
+                colors = TopAppBarDefaults.topAppBarColors(
+                    titleContentColor = accent.contentTint,
+                    navigationIconContentColor = accent.contentTint
+                )
             )
         }
     ) { paddingValues ->
@@ -89,46 +75,18 @@ fun ProphetsListScreen(
             )
 
             // Filter Chips
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = NimazSpacing.Large, vertical = NimazSpacing.ExtraSmall),
-                horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-            ) {
-                FilterChip(
-                    selected = !state.showFavoritesOnly,
-                    onClick = {
-                        if (state.showFavoritesOnly) {
-                            viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter)
-                        }
-                    },
-                    label = { Text(stringResource(R.string.all)) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
+            NameFilterRow(
+                showFavoritesOnly = state.showFavoritesOnly,
+                onShowAll = { viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter) },
+                onShowFavorites = { viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter) },
+                accent = accent,
+                allLabel = stringResource(R.string.all),
+                favoritesLabel = stringResource(R.string.favorites),
+                modifier = Modifier.padding(
+                    horizontal = NimazSpacing.Large,
+                    vertical = NimazSpacing.ExtraSmall
                 )
-                FilterChip(
-                    selected = state.showFavoritesOnly,
-                    onClick = {
-                        if (!state.showFavoritesOnly) {
-                            viewModel.onEvent(ProphetEvent.ToggleFavoritesFilter)
-                        }
-                    },
-                    label = { Text(stringResource(R.string.favorites)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Favorite,
-                            contentDescription = null,
-                            modifier = Modifier.size(FilterChipDefaults.IconSize)
-                        )
-                    },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
-                        selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                )
-            }
+            )
 
             if (state.isLoading) {
                 Box(
@@ -152,151 +110,40 @@ fun ProphetsListScreen(
                         items = displayList,
                         key = { it.id }
                     ) { prophet ->
-                        ProphetCard(
-                            prophet = prophet,
-                            onCardClick = { onNavigateToDetail(prophet.id) },
+                        NameCard(
+                            number = prophet.id,
+                            arabicName = prophet.nameArabic,
+                            primaryLabel = prophet.nameEnglish,
+                            secondaryLabel = prophet.nameTransliteration,
+                            isFavorite = prophet.isFavorite,
+                            accent = accent,
+                            onClick = { onNavigateToDetail(prophet.id) },
                             onFavoriteClick = {
                                 viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id))
-                            }
+                            },
+                            titleLabel = prophet.titleEnglish,
+                            eraChip = prophet.era
                         )
                     }
 
                     if (displayList.isEmpty()) {
                         item {
-                            Box(
+                            NimazEmptyState(
+                                title = if (state.showFavoritesOnly) {
+                                    stringResource(R.string.no_favorites_yet)
+                                } else {
+                                    stringResource(R.string.prophets_no_found)
+                                },
+                                message = "",
+                                icon = Icons.Filled.Favorite,
+                                iconTint = accent.contentTint,
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(vertical = 48.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (state.showFavoritesOnly) {
-                                        stringResource(R.string.no_favorites_yet)
-                                    } else {
-                                        stringResource(R.string.prophets_no_found)
-                                    },
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                                    .padding(vertical = 48.dp)
+                            )
                         }
                     }
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ProphetCard(
-    prophet: Prophet,
-    onCardClick: () -> Unit,
-    onFavoriteClick: () -> Unit
-) {
-    NimazCard(
-        modifier = Modifier.fillMaxWidth(),
-        style = NimazCardStyle.ELEVATED,
-        onClick = onCardClick
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(NimazSpacing.Medium),
-            verticalAlignment = Alignment.Top
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "${prophet.id}",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary,
-                    textAlign = TextAlign.Center
-                )
-            }
-
-            Spacer(modifier = Modifier.width(NimazSpacing.Medium))
-
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.ExtraSmall)
-            ) {
-                ArabicText(
-                    text = prophet.nameArabic,
-                    size = ArabicTextSize.SMALL,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.End
-                )
-
-                Text(
-                    text = prophet.nameEnglish,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Text(
-                    text = prophet.titleEnglish,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Surface(
-                    shape = RoundedCornerShape(NimazSpacing.Small),
-                    color = MaterialTheme.colorScheme.secondaryContainer,
-                    modifier = Modifier.padding(top = 2.dp)
-                ) {
-                    Text(
-                        text = prophet.era,
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        modifier = Modifier.padding(
-                            horizontal = NimazSpacing.Small,
-                            vertical = 2.dp
-                        )
-                    )
-                }
-
-                Text(
-                    text = prophet.storySummary,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    lineHeight = 18.sp
-                )
-            }
-
-            IconButton(onClick = onFavoriteClick) {
-                Icon(
-                    imageVector = if (prophet.isFavorite) {
-                        Icons.Filled.Favorite
-                    } else {
-                        Icons.Outlined.FavoriteBorder
-                    },
-                    contentDescription = if (prophet.isFavorite) {
-                        stringResource(R.string.remove_from_favorites)
-                    } else {
-                        stringResource(R.string.add_to_favorites)
-                    },
-                    tint = if (prophet.isFavorite) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    }
-                )
             }
         }
     }
