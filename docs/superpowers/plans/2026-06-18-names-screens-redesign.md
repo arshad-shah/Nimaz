@@ -1104,8 +1104,16 @@ Use the `run` skill (or `./gradlew :app:installDebug`) and visually confirm on e
 
 - [ ] **Step 4: Final commit (if any cleanup was needed)**
 
+Scope the commit to the names files only — another agent may have unrelated
+(e.g. Qibla) changes in the working tree; never `git add -A`.
+
 ```bash
-git add -A && git commit -m "chore(names): redesign verification cleanup" || echo "nothing to commit"
+git add app/src/main/java/com/arshadshah/nimaz/presentation/components/molecules/Name*.kt \
+        app/src/main/java/com/arshadshah/nimaz/presentation/screens/asma/ \
+        app/src/main/java/com/arshadshah/nimaz/presentation/screens/asmaunnabi/ \
+        app/src/main/java/com/arshadshah/nimaz/presentation/screens/prophets/ \
+        app/src/testDebug/java/com/arshadshah/nimaz/presentation/components/molecules/Name*.kt \
+  && git commit -m "chore(names): redesign verification cleanup" || echo "nothing to commit"
 ```
 
 ---
