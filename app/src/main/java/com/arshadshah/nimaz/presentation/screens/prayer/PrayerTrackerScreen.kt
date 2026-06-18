@@ -62,12 +62,12 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
-import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.IndicatorPosition
-import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.IndicatorPosition
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
-import com.arshadshah.nimaz.presentation.components.molecules.SelectionStyle
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent

@@ -9,6 +9,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import java.time.LocalDate
 import java.time.YearMonth
 
