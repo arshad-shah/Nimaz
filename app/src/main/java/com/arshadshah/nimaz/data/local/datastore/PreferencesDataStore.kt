@@ -49,6 +49,9 @@ class PreferencesDataStore @Inject constructor(
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size")
 
+        // Help content (data-driven; bumped when help.json content changes)
+        val HELP_CONTENT_VERSION = intPreferencesKey("help_content_version")
+
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
         val ASR_CALCULATION = stringPreferencesKey("asr_calculation")
@@ -211,6 +214,17 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setAppLanguage(language: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.APP_LANGUAGE] = language
+        }
+    }
+
+    // Help content version (0 = never seeded)
+    val helpContentVersion: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HELP_CONTENT_VERSION] ?: 0
+    }
+
+    suspend fun setHelpContentVersion(version: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HELP_CONTENT_VERSION] = version
         }
     }
 

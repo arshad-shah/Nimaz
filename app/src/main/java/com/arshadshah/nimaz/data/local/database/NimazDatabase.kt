@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
+import com.arshadshah.nimaz.data.local.database.dao.HelpDao
 import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
@@ -31,6 +32,10 @@ import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
+import com.arshadshah.nimaz.data.local.database.entity.HelpItemEntity
+import com.arshadshah.nimaz.data.local.database.entity.HelpStepEntity
+import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
+import com.arshadshah.nimaz.data.local.database.entity.HelpTopicEntity
 import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
@@ -98,11 +103,16 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         // Prophets
         ProphetEntity::class,
         ProphetBookmarkEntity::class,
+        // Help (data-driven, seeded at runtime from help.json)
+        HelpTopicEntity::class,
+        HelpItemEntity::class,
+        HelpStepEntity::class,
+        HelpStringEntity::class,
         // Other
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 13,
+    version = 14,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -120,6 +130,7 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun asmaUlHusnaDao(): AsmaUlHusnaDao
     abstract fun asmaUnNabiDao(): AsmaUnNabiDao
     abstract fun prophetDao(): ProphetDao
+    abstract fun helpDao(): HelpDao
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"
@@ -127,7 +138,7 @@ abstract class NimazDatabase : RoomDatabase() {
         // Current Room schema version. Keep in sync with @Database(version = ...)
         // above. Exposed so crash reports can be tagged with the schema version,
         // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 13
+        const val SCHEMA_VERSION = 14
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(
@@ -193,6 +204,59 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 repairLegacyAssetSchema(db)
+            }
+        }
+
+        // Adds the data-driven Help content tables. Room runs migrations even
+        // after createFromAsset, so this creates the (empty) tables for both
+        // fresh installs and existing users; HelpContentSeeder fills them from
+        // the bundled help.json at runtime.
+        val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `help_topic` (
+                        `id` TEXT NOT NULL,
+                        `display_order` INTEGER NOT NULL,
+                        `icon_key` TEXT NOT NULL,
+                        `color_key` TEXT NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `help_item` (
+                        `id` TEXT NOT NULL,
+                        `topic_id` TEXT NOT NULL,
+                        `type` TEXT NOT NULL,
+                        `display_order` INTEGER NOT NULL,
+                        `icon_key` TEXT,
+                        `estimated_minutes` INTEGER,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_item_topic_id` ON `help_item` (`topic_id`)")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `help_step` (
+                        `id` TEXT NOT NULL,
+                        `item_id` TEXT NOT NULL,
+                        `display_order` INTEGER NOT NULL,
+                        `deeplink_route` TEXT,
+                        `path_labels` TEXT,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_step_item_id` ON `help_step` (`item_id`)")
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `help_string` (
+                        `owner_type` TEXT NOT NULL,
+                        `owner_id` TEXT NOT NULL,
+                        `field_key` TEXT NOT NULL,
+                        `lang_code` TEXT NOT NULL,
+                        `value` TEXT NOT NULL,
+                        PRIMARY KEY(`owner_type`, `owner_id`, `field_key`, `lang_code`)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_owner_type_owner_id_lang_code` ON `help_string` (`owner_type`, `owner_id`, `lang_code`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_lang_code` ON `help_string` (`lang_code`)")
             }
         }
 

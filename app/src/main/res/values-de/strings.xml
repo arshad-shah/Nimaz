@@ -118,6 +118,10 @@
     <string name="delete_all_data_dialog_message">Dies löscht dauerhaft alle Ihre Daten, einschließlich Gebetsverfolgung, Lesezeichen, Tasbih-Verlauf und Einstellungen. Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="about">Über</string>
     <string name="app_description">Eine umfassende islamische Begleit-App mit genauen Gebetszeiten, Qibla-Richtung, Quran-Lesung und mehr.</string>
+    <string name="about_tagline">Dein täglicher islamischer Begleiter — genaue Gebetszeiten, Koran, Qibla und mehr.</string>
+    <string name="about_rate">Bewerten</string>
+    <string name="about_share">Teilen</string>
+    <string name="about_updates">Updates</string>
     <string name="links">Links</string>
     <string name="developer">Entwickler</string>
     <string name="data_sources_credits">Datenquellen &amp; Danksagungen</string>

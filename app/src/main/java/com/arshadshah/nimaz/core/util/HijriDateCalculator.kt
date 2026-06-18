@@ -62,24 +62,6 @@ object HijriDateCalculator {
         "ذو الحجة"
     )
 
-    // Hijri month names abbreviated for compact UI (e.g. calendar day cells).
-    // Numbered Rabi'/Jumada pairs are disambiguated so a single glance tells
-    // which of the two months a day belongs to.
-    private val hijriMonthNamesShort = listOf(
-        "Muh",
-        "Saf",
-        "Rabi 1",
-        "Rabi 2",
-        "Jum 1",
-        "Jum 2",
-        "Rajab",
-        "Shab",
-        "Ram",
-        "Shaw",
-        "Qidah",
-        "Hijja"
-    )
-
     private val hijrahChronology = HijrahChronology.INSTANCE
 
     fun getHijriMonthName(month: Int): String {
@@ -88,13 +70,6 @@ object HijriDateCalculator {
 
     fun getHijriMonthNameArabic(month: Int): String {
         return hijriMonthNamesArabic.getOrElse(month - 1) { "غير معروف" }
-    }
-
-    /**
-     * Short Hijri month name suitable for tight spaces such as calendar cells.
-     */
-    fun getHijriMonthNameShort(month: Int): String {
-        return hijriMonthNamesShort.getOrElse(month - 1) { "?" }
     }
 
     /**

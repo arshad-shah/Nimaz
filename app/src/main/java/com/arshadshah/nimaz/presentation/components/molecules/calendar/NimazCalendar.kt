@@ -1,4 +1,4 @@
-package com.arshadshah.nimaz.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.molecules.calendar
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
@@ -54,53 +54,11 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
 import com.arshadshah.nimaz.R
 import androidx.compose.ui.res.stringResource
-
-/**
- * Position of the status indicator dot within a day cell.
- */
-enum class IndicatorPosition {
-    BOTTOM_CENTER,
-    TOP_END
-}
-
-/**
- * Visual state for a single calendar day cell.
- *
- * @param indicatorColor Color of the status dot. Null means no dot.
- * @param indicatorPosition Where to place the status dot.
- * @param backgroundColor Custom background color for the cell (e.g., Ramadan highlighting).
- *   Null uses the default (today/selected/transparent).
- * @param textColor Custom text color override. Null uses the default.
- * @param fontWeight Custom font weight override. Null uses the default.
- * @param isHijriMonthStart Marks this cell as the first day of a Hijri month.
- *   Renders a colored top stripe so the start (and, by the cell before it, the
- *   end) of each Islamic month is easy to spot when scanning the grid.
- * @param hijriMonthStartLabel Short Hijri month name shown on the start cell
- *   (e.g. "Rajab"). Only drawn when [isHijriMonthStart] is true.
- */
-data class CalendarDayState(
-    val indicatorColor: Color? = null,
-    val indicatorPosition: IndicatorPosition = IndicatorPosition.BOTTOM_CENTER,
-    val backgroundColor: Color? = null,
-    val textColor: Color? = null,
-    val fontWeight: FontWeight? = null,
-    val isHijriMonthStart: Boolean = false,
-    val hijriMonthStartLabel: String? = null
-)
-
-/**
- * A legend entry displayed below the calendar grid.
- */
-data class CalendarLegendItem(
-    val color: Color,
-    val label: String
-)
 
 /**
  * A reusable month calendar grid with navigation, day selection, status indicators, and legend.
@@ -122,6 +80,8 @@ data class CalendarLegendItem(
  * @param headerTitle Custom title text. Defaults to "Month Year" format.
  * @param headerSubtitle Optional subtitle composable below the title (e.g., Arabic month name).
  * @param selectionStyle How the selected date is visually indicated.
+ * @param headerAlignment Horizontal placement of the title block in the navigation
+ *   header. Defaults to [CalendarHeaderAlignment.START] (the original layout).
  */
 @Composable
 fun NimazCalendar(
@@ -136,7 +96,8 @@ fun NimazCalendar(
     showNavigation: Boolean = true,
     headerTitle: String? = null,
     headerSubtitle: (@Composable () -> Unit)? = null,
-    selectionStyle: SelectionStyle = SelectionStyle.BACKGROUND
+    selectionStyle: SelectionStyle = SelectionStyle.BACKGROUND,
+    headerAlignment: CalendarHeaderAlignment = CalendarHeaderAlignment.START
 ) {
     val today = remember { LocalDate.now() }
     val haptic = LocalHapticFeedback.current
@@ -147,6 +108,7 @@ fun NimazCalendar(
             CalendarNavigationHeader(
                 title = headerTitle ?: displayedMonth.formatDefault(),
                 subtitle = headerSubtitle,
+                alignment = headerAlignment,
                 onPrevious = onPreviousMonth,
                 onNext = onNextMonth
             )
@@ -267,71 +229,110 @@ private fun CalendarGrid(
     }
 }
 
-/**
- * How the selected date is visually indicated.
- */
-enum class SelectionStyle {
-    /** Fills the cell background (used by Islamic calendar, fasting tracker). */
-    BACKGROUND,
-    /** Draws a border around the cell (used by prayer tracker). */
-    BORDER
-}
-
 // --- Internal composables ---
 
 @Composable
 private fun CalendarNavigationHeader(
     title: String,
     subtitle: (@Composable () -> Unit)?,
+    alignment: CalendarHeaderAlignment,
     onPrevious: () -> Unit,
     onNext: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            subtitle?.invoke()
-        }
+        when (alignment) {
+            CalendarHeaderAlignment.START -> {
+                // Title left, both arrows pushed to the right (original layout).
+                HeaderTitleBlock(
+                    title = title,
+                    subtitle = subtitle,
+                    horizontalAlignment = Alignment.Start,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier.weight(1f)
+                )
+                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
+            }
 
-        // Tonal icon buttons — stand out clearly against both the page
-        // background and the calendar card without being heavy.
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            FilledTonalIconButton(
-                onClick = onPrevious,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+            CalendarHeaderAlignment.CENTER -> {
+                // Arrows flank a centered title.
+                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                HeaderTitleBlock(
+                    title = title,
+                    subtitle = subtitle,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
                 )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = stringResource(R.string.cd_previous_month),
-                    modifier = Modifier.size(20.dp)
-                )
+                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
             }
-            FilledTonalIconButton(
-                onClick = onNext,
-                colors = IconButtonDefaults.filledTonalIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = stringResource(R.string.cd_next_month),
-                    modifier = Modifier.size(20.dp)
+
+            CalendarHeaderAlignment.END -> {
+                // Both arrows left, title right-aligned.
+                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
+                HeaderTitleBlock(
+                    title = title,
+                    subtitle = subtitle,
+                    horizontalAlignment = Alignment.End,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun HeaderTitleBlock(
+    title: String,
+    subtitle: (@Composable () -> Unit)?,
+    horizontalAlignment: Alignment.Horizontal,
+    textAlign: TextAlign,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = horizontalAlignment
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onBackground,
+            textAlign = textAlign
+        )
+        subtitle?.invoke()
+    }
+}
+
+/**
+ * Tonal arrow button used in the navigation header. Stands out against both the
+ * page background and the calendar card without being heavy.
+ */
+@Composable
+private fun NavButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    contentDescriptionRes: Int,
+    onClick: () -> Unit
+) {
+    FilledTonalIconButton(
+        onClick = onClick,
+        colors = IconButtonDefaults.filledTonalIconButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = stringResource(contentDescriptionRes),
+            modifier = Modifier.size(20.dp)
+        )
     }
 }
 
@@ -344,7 +345,8 @@ private fun WeekdayHeaderRow(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f))
+            .border(1.dp,MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
             .padding(vertical = 8.dp)
     ) {
         WEEKDAY_LABELS.forEachIndexed { index, day ->
@@ -377,12 +379,6 @@ private fun WeekdayHeaderRow(modifier: Modifier = Modifier) {
     }
 }
 
-/**
- * Weekday abbreviations, uppercase for header-style typography. Kept as a
- * file-level constant so the rendering composable stays declarative.
- */
-private val WEEKDAY_LABELS = listOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
-
 @Composable
 private fun CalendarDayCell(
     date: LocalDate,
@@ -413,8 +409,14 @@ private fun CalendarDayCell(
         !isCurrentMonth -> scheme.onSurface.copy(alpha = 0.30f)
         else -> scheme.onSurface
     }
-    val textColor = dayState.textColor ?: defaultTextColor
+    // A Hijri month start emphasizes the primary number (accent + bold) when the
+    // Hijri date is the centered one — unless an explicit override is supplied or
+    // the cell is a primary-filled selection (where onPrimary already contrasts).
+    val emphasizedPrimaryColor =
+        if (dayState.emphasizePrimary && !isSelectedBackgroundFill) scheme.primary else null
+    val textColor = dayState.textColor ?: emphasizedPrimaryColor ?: defaultTextColor
     val fontWeight = dayState.fontWeight ?: when {
+        dayState.emphasizePrimary -> FontWeight.Bold
         isSelectedBackgroundFill -> FontWeight.Bold
         isToday -> FontWeight.SemiBold
         else -> FontWeight.Normal
@@ -448,40 +450,34 @@ private fun CalendarDayCell(
         contentAlignment = Alignment.Center
     ) {
         Text(
-            text = date.dayOfMonth.toString(),
+            text = dayState.primaryLabel ?: date.dayOfMonth.toString(),
             style = MaterialTheme.typography.bodySmall,
             fontWeight = fontWeight,
             color = textColor,
             fontSize = 13.sp
         )
 
-        // Hijri month-start marker — a colored top stripe plus the short month
-        // name. Because each Islamic month begins exactly one cell after the
-        // previous one ends, marking the start also visually delimits the end
-        // of the preceding month. On a primary-filled selected cell the accent
-        // flips to onPrimary so it stays legible.
-        if (dayState.isHijriMonthStart) {
-            val accent = if (isSelectedBackgroundFill) scheme.onPrimary else scheme.primary
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopCenter)
-                    .fillMaxWidth()
-                    .height(3.dp)
-                    .background(accent)
-            )
-            dayState.hijriMonthStartLabel?.let { label ->
-                Text(
-                    text = label,
-                    modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .padding(top = 5.dp),
-                    color = accent,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 8.sp,
-                    maxLines = 1,
-                    softWrap = false
-                )
+        // Dual-date overlay — the "other" calendar's day, tucked into the top-end
+        // corner in a quiet, muted tone so it never competes with the centered
+        // number. On a Hijri month start it flips to the primary accent + bold,
+        // which is the layout-stable replacement for the old stripe/pill marker.
+        dayState.secondaryLabel?.let { secondary ->
+            val secondaryColor = when {
+                isSelectedBackgroundFill -> scheme.onPrimary.copy(alpha = 0.9f)
+                dayState.emphasizeSecondary -> scheme.primary
+                else -> scheme.onSurfaceVariant.copy(alpha = 0.8f)
             }
+            Text(
+                text = secondary,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 3.dp, end = 4.dp),
+                color = secondaryColor,
+                fontWeight = if (dayState.emphasizeSecondary) FontWeight.Bold else FontWeight.SemiBold,
+                fontSize = 9.sp,
+                maxLines = 1,
+                softWrap = false
+            )
         }
 
         // Indicator dot — picks a contrasting tone on selected cells so the
@@ -512,30 +508,6 @@ private fun CalendarDayCell(
             }
         }
     }
-}
-
-// --- Helpers ---
-
-/**
- * Builds the date grid for a month, including padding days from the previous
- * month to fill the first week. Returns 5 weeks (35 cells) for months that
- * fit, or 6 weeks (42 cells) for months that need the extra row — e.g. a
- * 31-day month starting on Friday/Saturday wraps over 6 weeks and the
- * previous hard-coded 35-cell list silently truncated the last days.
- */
-private fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
-    val firstOfMonth = yearMonth.atDay(1)
-    val offset = if (firstOfMonth.dayOfWeek == DayOfWeek.SUNDAY) 0
-        else firstOfMonth.dayOfWeek.value
-    val startDate = firstOfMonth.minusDays(offset.toLong())
-    val totalDays = offset + yearMonth.lengthOfMonth()
-    val weeks = ((totalDays + 6) / 7).coerceIn(5, 6)
-    return List(weeks * 7) { startDate.plusDays(it.toLong()) }
-}
-
-private fun YearMonth.formatDefault(): String {
-    val monthName = month.name.lowercase().replaceFirstChar { it.uppercase() }
-    return "$monthName $year"
 }
 
 // ==================== PREVIEWS ====================
@@ -581,12 +553,13 @@ private fun NimazCalendarIslamicPreview() {
                 onNextMonth = {},
                 headerTitle = "Rajab 1447",
                 dayStateProvider = { date ->
-                    // Jan 20, 2026 is 1 Sha'ban 1447 — demo the month-start marker.
+                    // Jan 20, 2026 is 1 Sha'ban 1447 — demo the dual-date
+                    // month-start marker (emphasized Hijri day in the corner).
                     val isMonthStart = date == LocalDate.of(2026, 1, 20)
                     CalendarDayState(
                         indicatorColor = eventDays[date],
-                        isHijriMonthStart = isMonthStart,
-                        hijriMonthStartLabel = if (isMonthStart) "Shab" else null
+                        secondaryLabel = if (isMonthStart) "1" else null,
+                        emphasizeSecondary = isMonthStart
                     )
                 },
                 legendItems = listOf(

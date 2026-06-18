@@ -68,9 +68,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.CalendarLegendItem
-import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData

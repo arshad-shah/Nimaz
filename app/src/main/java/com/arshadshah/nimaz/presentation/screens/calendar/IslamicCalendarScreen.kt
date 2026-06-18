@@ -29,7 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
@@ -46,10 +45,10 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.molecules.CalendarDayState
-import com.arshadshah.nimaz.presentation.components.molecules.CalendarLegendItem
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
-import com.arshadshah.nimaz.presentation.components.molecules.NimazCalendar
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarViewModel
@@ -59,7 +58,6 @@ import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -126,14 +124,6 @@ private fun CalendarCompactContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            TodayHeroCard(
-                selectedDate = state.selectedDate,
-                hijriDay = state.selectedHijriDate?.day,
-                hijriMonth = state.selectedHijriDate?.month,
-                hijriYear = state.selectedHijriDate?.year
-            )
-        }
-        item {
             CalendarSection(state = state, viewModel = viewModel)
         }
         if (eventsState.eventsForSelectedDate.isNotEmpty()) {
@@ -183,12 +173,6 @@ private fun CalendarTabletContent(
             modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            TodayHeroCard(
-                selectedDate = state.selectedDate,
-                hijriDay = state.selectedHijriDate?.day,
-                hijriMonth = state.selectedHijriDate?.month,
-                hijriYear = state.selectedHijriDate?.year
-            )
             CalendarSection(state = state, viewModel = viewModel)
         }
 
@@ -266,17 +250,15 @@ private fun CalendarSection(
             },
             dayStateProvider = { date ->
                 val events = eventMap[date] ?: emptyList()
-                // A Gregorian day whose Hijri day-of-month is 1 is the first day
-                // of an Islamic month — mark it so the start (and the end, one
-                // cell earlier) of each month is obvious on the grid.
+                // Dual-date overlay: every cell carries its Hijri day in the
+                // top-end corner. The first day of a Hijri month is emphasized
+                // (accent + bold) — the layout-stable month-start marker that
+                // replaced the old top-stripe + short-name label.
                 val hijri = HijriDateCalculator.toHijri(date)
-                val isMonthStart = hijri.day == 1
                 CalendarDayState(
                     indicatorColor = getEventDotColor(events),
-                    isHijriMonthStart = isMonthStart,
-                    hijriMonthStartLabel = if (isMonthStart) {
-                        HijriDateCalculator.getHijriMonthNameShort(hijri.month)
-                    } else null
+                    secondaryLabel = hijri.day.toString(),
+                    emphasizeSecondary = hijri.day == 1
                 )
             },
             legendItems = listOf(
@@ -286,71 +268,6 @@ private fun CalendarSection(
                 CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))
             )
         )
-    }
-}
-
-// --- Today Hero Card ---
-
-@Composable
-private fun TodayHeroCard(
-    selectedDate: LocalDate,
-    hijriDay: Int?,
-    hijriMonth: Int?,
-    hijriYear: Int?,
-    modifier: Modifier = Modifier
-) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
-    val monthName = hijriMonth?.let { getHijriMonthName(it) } ?: ""
-    val monthArabic = hijriMonth?.let { getHijriMonthNameArabic(it) } ?: ""
-
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.primary,
-                            MaterialTheme.colorScheme.primaryContainer
-                        )
-                    ),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .padding(25.dp)
-        ) {
-            Column {
-                Text(
-                    text = stringResource(R.string.today),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.height(10.dp))
-                Text(
-                    text = if (hijriDay != null && hijriYear != null) "$hijriDay $monthName $hijriYear" else "",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
-                Spacer(modifier = Modifier.height(5.dp))
-                if (monthArabic.isNotEmpty()) {
-                    ArabicText(
-                        text = "$hijriDay $monthArabic $hijriYear",
-                        size = ArabicTextSize.SMALL,
-                        color = MaterialTheme.colorScheme.onPrimary
-                    )
-                    Spacer(modifier = Modifier.height(10.dp))
-                }
-                Text(
-                    text = selectedDate.format(formatter),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.9f)
-                )
-            }
-        }
     }
 }
 

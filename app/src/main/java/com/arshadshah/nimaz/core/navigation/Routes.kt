@@ -168,6 +168,12 @@ sealed interface Route {
     data object SettingsHelp : Route
 
     @Serializable
+    data class HelpTopicDetail(val topicId: String) : Route
+
+    @Serializable
+    data class HelpGuide(val guideId: String) : Route
+
+    @Serializable
     data object SettingsSync : Route
 
     // Onboarding

@@ -118,6 +118,10 @@
     <string name="delete_all_data_dialog_message">Ini akan memadamkan semua data anda secara kekal termasuk penjejakan solat, penanda buku, sejarah tasbih dan tetapan. Tindakan ini tidak boleh dibatalkan.</string>
     <string name="about">Tentang</string>
     <string name="app_description">Aplikasi teman Islam yang komprehensif dengan waktu solat yang tepat, arah kiblat, bacaan Al-Quran dan banyak lagi.</string>
+    <string name="about_tagline">Teman Islami harian anda — waktu solat tepat, Al-Quran, kiblat dan banyak lagi.</string>
+    <string name="about_rate">Nilai</string>
+    <string name="about_share">Kongsi</string>
+    <string name="about_updates">Kemas kini</string>
     <string name="links">Pautan</string>
     <string name="developer">Pembangun</string>
     <string name="data_sources_credits">Sumber Data &amp; Kredit</string>
