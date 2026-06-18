@@ -24,6 +24,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Duration.Companion.milliseconds
 
 @Singleton
 class AppInitializer @Inject constructor(
@@ -43,7 +44,7 @@ class AppInitializer @Inject constructor(
             var timedOut = false
             val perfTrace = PerfMonitor.newTrace(PerfMonitor.Traces.APP_INITIALIZE)
             try {
-                withTimeout(5_000L) {
+                withTimeout(5_000L.milliseconds) {
                     val localeTask = async { applySavedLocale() }
                     val notificationTask = async { scheduleInitialNotifications() }
                     val adhanTask = async { downloadDefaultAdhanIfNeeded() }
@@ -130,7 +131,7 @@ class AppInitializer @Inject constructor(
         }
     }
 
-    private suspend fun downloadDefaultAdhanIfNeeded() {
+    private fun downloadDefaultAdhanIfNeeded() {
         try {
             adhanAudioManager.cleanupTempFiles()
             adhanAudioManager.invalidateStaleDownloads()
