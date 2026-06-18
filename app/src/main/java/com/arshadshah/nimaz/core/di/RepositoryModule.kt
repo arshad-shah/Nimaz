@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.core.di
 
+import com.arshadshah.nimaz.data.local.help.AndroidHelpAssetReader
 import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
+import com.arshadshah.nimaz.data.local.help.HelpAssetReader
 import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
@@ -184,6 +186,12 @@ abstract class RepositoryModule {
     abstract fun bindHelpContentVersionStore(
         impl: DataStoreHelpContentVersionStore
     ): HelpContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindHelpAssetReader(
+        impl: AndroidHelpAssetReader
+    ): HelpAssetReader
 
     @Binds
     @Singleton

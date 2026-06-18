@@ -34,11 +34,13 @@ class HelpContentSeederTest {
             override suspend fun get() = v
             override suspend fun set(version: Int) { v = version }
         }
+        val reader = object : HelpAssetReader {
+            override fun read(path: String): String = json
+        }
         return HelpContentSeeder(
-            context = mockk(relaxed = true),
             dao = dao,
             versionStore = store,
-            readAsset = { json }
+            assetReader = reader
         )
     }
 

@@ -15,6 +15,19 @@ import kotlinx.serialization.encodeToString
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/** Reads a bundled asset's text. Abstracted so the seeder is unit-testable without Android. */
+interface HelpAssetReader {
+    fun read(path: String): String
+}
+
+@Singleton
+class AndroidHelpAssetReader @Inject constructor(
+    @ApplicationContext private val context: Context
+) : HelpAssetReader {
+    override fun read(path: String): String =
+        context.assets.open(path).bufferedReader().use { it.readText() }
+}
+
 /**
  * Populates the help_* tables from the bundled assets/help/help.json.
  *
@@ -25,18 +38,15 @@ import javax.inject.Singleton
  */
 @Singleton
 class HelpContentSeeder @Inject constructor(
-    @ApplicationContext private val context: Context,
     private val dao: HelpDao,
     private val versionStore: HelpContentVersionStore,
-    private val readAsset: (String) -> String = { path ->
-        context.assets.open(path).bufferedReader().use { it.readText() }
-    }
+    private val assetReader: HelpAssetReader
 ) {
     private val mutex = Mutex()
 
     suspend fun seedIfNeeded() = mutex.withLock {
         val root = helpJson.decodeFromString(
-            HelpJsonRoot.serializer(), readAsset("help/help.json")
+            HelpJsonRoot.serializer(), assetReader.read("help/help.json")
         )
         val stored = versionStore.get()
         val populated = dao.topicCount() > 0
