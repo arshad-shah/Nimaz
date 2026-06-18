@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.core.di
 
+import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
+import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -169,6 +171,12 @@ abstract class RepositoryModule {
     abstract fun bindProphetRepository(
         prophetRepositoryImpl: ProphetRepositoryImpl
     ): ProphetRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHelpContentVersionStore(
+        impl: DataStoreHelpContentVersionStore
+    ): HelpContentVersionStore
 }
 
 @Module
