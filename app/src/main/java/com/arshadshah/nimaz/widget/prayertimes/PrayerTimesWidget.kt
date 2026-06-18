@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -51,6 +52,7 @@ class PrayerTimesWidget : GlanceAppWidget() {
 
 @Composable
 private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
+    val context = LocalContext.current
     val backgroundColor = ColorProvider(R.color.widget_background)
     val textColor = ColorProvider(R.color.widget_text)
     val textSecondary = ColorProvider(R.color.widget_text_secondary)
@@ -70,7 +72,7 @@ private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
                     CircularProgressIndicator()
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     Text(
-                        text = "Loading...",
+                        text = context.getString(R.string.widget_loading),
                         style = TextStyle(color = textSecondary, fontSize = 12.sp)
                     )
                 }
@@ -97,7 +99,7 @@ private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Tap to setup",
+                    text = context.getString(R.string.widget_tap_to_setup),
                     style = TextStyle(color = textSecondary, fontSize = 12.sp)
                 )
             }

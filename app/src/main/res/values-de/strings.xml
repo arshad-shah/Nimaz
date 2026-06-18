@@ -830,4 +830,12 @@
     <string name="ayah_copied_to_clipboard">Vers in die Zwischenablage kopiert</string>
     <string name="test_notification_title">Test-Benachrichtigung</string>
     <string name="test_notification_text">Gebetsbenachrichtigungen funktionieren korrekt</string>
+    <string name="widget_loading">Wird geladen…</string>
+    <string name="widget_tap_to_setup">Zum Einrichten tippen</string>
+    <string name="widget_next_prayer">Nächstes Gebet</string>
+    <string name="widget_error_loading">Fehler beim Laden der Daten</string>
+    <string name="widget_tap_to_retry">Zum Wiederholen tippen</string>
+    <string name="widget_tap_to_refresh">Zum Aktualisieren tippen</string>
+    <string name="widget_today">HEUTE</string>
+    <string name="widget_no_events">Keine Termine</string>
 </resources>

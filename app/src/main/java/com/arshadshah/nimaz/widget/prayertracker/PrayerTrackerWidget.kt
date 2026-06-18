@@ -78,7 +78,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
                     CircularProgressIndicator()
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     Text(
-                        text = "Loading...",
+                        text = context.getString(R.string.widget_loading),
                         style = TextStyle(
                             color = textSecondary,
                             fontSize = 12.sp
@@ -112,7 +112,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Error loading data",
+                        text = context.getString(R.string.widget_error_loading),
                         style = TextStyle(
                             color = textSecondary,
                             fontSize = 12.sp
@@ -120,7 +120,7 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
                     )
                     Spacer(modifier = GlanceModifier.height(4.dp))
                     Text(
-                        text = "Tap to retry",
+                        text = context.getString(R.string.widget_tap_to_retry),
                         style = TextStyle(
                             color = primaryColor,
                             fontSize = 10.sp

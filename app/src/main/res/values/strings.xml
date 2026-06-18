@@ -920,4 +920,12 @@
     <string name="notif_summary_title_all_complete">Masha\'Allah! All Prayers Complete</string>
     <string name="notif_summary_title_default">Daily Prayer Summary</string>
     <string name="notif_summary_count">%1$d of %2$d prayers completed</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="widget_tap_to_setup">Tap to setup</string>
+    <string name="widget_next_prayer">Next Prayer</string>
+    <string name="widget_error_loading">Error loading data</string>
+    <string name="widget_tap_to_retry">Tap to retry</string>
+    <string name="widget_tap_to_refresh">Tap to refresh</string>
+    <string name="widget_today">TODAY</string>
+    <string name="widget_no_events">No events</string>
 </resources>

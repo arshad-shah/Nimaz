@@ -831,4 +831,12 @@
     <string name="ayah_copied_to_clipboard">Ayat disalin ke papan keratan</string>
     <string name="test_notification_title">Notifikasi Ujian</string>
     <string name="test_notification_text">Notifikasi solat berfungsi dengan betul</string>
+    <string name="widget_loading">Memuatkan…</string>
+    <string name="widget_tap_to_setup">Ketik untuk menyediakan</string>
+    <string name="widget_next_prayer">Solat Seterusnya</string>
+    <string name="widget_error_loading">Ralat memuatkan data</string>
+    <string name="widget_tap_to_retry">Ketik untuk cuba lagi</string>
+    <string name="widget_tap_to_refresh">Ketik untuk menyegarkan</string>
+    <string name="widget_today">HARI INI</string>
+    <string name="widget_no_events">Tiada acara</string>
 </resources>
