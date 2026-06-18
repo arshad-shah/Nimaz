@@ -1,5 +1,7 @@
-Nouveautés de cette mise à jour :
+Nouveautés depuis la 3.0.10 :
 
-• Le calendrier islamique indique désormais le début de chaque mois hégirien par une bande colorée et le nom du mois, pour repérer les changements de mois d'un coup d'œil.
-• Les mises à jour de l'application affichent maintenant une progression claire — fini de se demander si une mise à jour a démarré, même sur les connexions lentes.
-• Améliorations de la fiabilité et des performances en arrière-plan.
+• Le jeûne dispose désormais d'un onglet « Suivi » intelligent — jeûnes du Ramadan et volontaires réunis, adaptés à la saison ; le Rattrapage reste séparé.
+• Écrans repensés : Noms d'Allah, Noms du Prophète ﷺ et les Prophètes.
+• Boussole Qibla et vue RA améliorées.
+• Nouvelle Aide et À propos consultable, avec des guides pas à pas dans votre langue.
+• Accueil rafraîchi, plus des corrections de bugs et améliorations de fiabilité.

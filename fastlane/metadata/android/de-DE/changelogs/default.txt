@@ -1,5 +1,7 @@
-Neu in diesem Update:
+Neu seit 3.0.10:
 
-• Der islamische Kalender markiert jetzt den Beginn jedes Hijri-Monats mit einem farbigen Streifen und dem Monatsnamen – so erkennst du Monatsgrenzen auf einen Blick.
-• App-Updates zeigen jetzt einen klaren Fortschritt – kein Rätselraten mehr, ob ein Update gestartet ist, auch bei langsameren Verbindungen.
-• Verbesserungen bei Zuverlässigkeit und Leistung im Hintergrund.
+• Fasten hat jetzt einen smarten Tab „Übersicht“ — Ramadan- und freiwillige Fasten zusammen, passend zur Jahreszeit; Nachholen bleibt separat.
+• Neu gestaltete Bildschirme: Namen Allahs, Namen des Propheten ﷺ und die Propheten.
+• Überarbeiteter Qibla-Kompass und AR-Ansicht.
+• Neue durchsuchbare Hilfe & Info mit Schritt-für-Schritt-Anleitungen in deiner Sprache.
+• Frischer Startbildschirm, dazu Fehlerbehebungen und Stabilitätsverbesserungen.

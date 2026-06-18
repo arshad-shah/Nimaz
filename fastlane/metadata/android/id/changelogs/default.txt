@@ -1,5 +1,7 @@
-Yang baru di pembaruan ini:
+Yang baru sejak 3.0.10:
 
-• Kalender Islam kini menandai awal setiap bulan Hijriah dengan garis berwarna dan nama bulan, sehingga batas bulan mudah dikenali sekilas.
-• Pembaruan aplikasi kini menampilkan progres yang jelas — tidak perlu lagi menebak apakah pembaruan sudah dimulai, bahkan pada koneksi lambat.
-• Peningkatan keandalan dan performa di balik layar.
+• Puasa kini punya satu tab "Pelacak" pintar — puasa Ramadan dan sunnah menjadi satu, menyesuaikan musim; Qadha tetap terpisah.
+• Layar yang didesain ulang: Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
+• Kompas Kiblat dan tampilan AR yang disegarkan.
+• Bantuan & Tentang baru yang bisa dicari, dengan panduan langkah demi langkah dalam bahasa Anda.
+• Beranda yang disegarkan, plus perbaikan bug dan peningkatan keandalan.
