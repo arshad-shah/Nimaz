@@ -164,7 +164,7 @@ fun JumuahCard(
                             )
                             Text(
                                 text = timeUntilJumuah,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White
                             )
