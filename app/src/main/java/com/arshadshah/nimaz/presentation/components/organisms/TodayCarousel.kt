@@ -1,30 +1,14 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -47,13 +31,11 @@ import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 enum class TodayCarouselPage { PROGRESS, FASTING, HADITH, DUA }
 
 /**
- * Swipeable carousel for the home screen's "Today" section. Replaces a
- * vertical stack of cards with a single card-height pager so adding more
- * widgets in the future doesn't bloat vertical space.
+ * The home screen's "Today" section: a single card-height pager combining
+ * progress, fasting, hadith and dua so adding more widgets doesn't bloat
+ * vertical space. Pages that don't apply (e.g. no hadith) are filtered out.
  *
- * Page indicator dots sit below the pager; the active dot widens into a
- * pill for a clearer affordance. Pages that don't apply (e.g. no hadith of
- * the day) are filtered out automatically rather than rendered empty.
+ * Built on the shared [NimazCarousel] (edge peek + indicator dots, swipe-only).
  */
 @Composable
 fun TodayCarousel(
@@ -62,9 +44,12 @@ fun TodayCarousel(
     dailyHadith: String?,
     modifier: Modifier = Modifier,
     dailyHadithReference: String? = null,
+    dailyHadithGrade: String? = null,
     dailyDua: DailyDua? = null,
-    pageHeight: androidx.compose.ui.unit.Dp = 200.dp,
-    horizontalPadding: androidx.compose.ui.unit.Dp = 20.dp,
+    onHadithClick: (() -> Unit)? = null,
+    prayerTimelineProgress: Float = 0f,
+    pageHeight: Dp = 160.dp,
+    horizontalPadding: Dp = 20.dp,
 ) {
     val pages = remember(dailyHadith, dailyDua) {
         buildList {
@@ -75,89 +60,39 @@ fun TodayCarousel(
         }
     }
 
-    val pagerState = rememberPagerState(pageCount = { pages.size })
-
-    Column(modifier = modifier.fillMaxWidth()) {
-        HorizontalPager(
-            state = pagerState,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(pageHeight),
-            // Edge peek so users see there's more to swipe to.
-            contentPadding = PaddingValues(horizontal = horizontalPadding),
-            pageSpacing = 12.dp,
-        ) { pageIndex ->
-            when (pages[pageIndex]) {
-                TodayCarouselPage.PROGRESS -> TodaysProgressCard(
-                    prayerTimes = prayerTimes,
-                    fillHeight = true,
-                )
-                TodayCarouselPage.FASTING -> FastingStatusCard(
-                    fastingToday = fastingToday,
-                    fillHeight = true,
-                )
-                TodayCarouselPage.HADITH -> HadithOfTheDayCard(
-                    hadith = dailyHadith.orEmpty(),
-                    reference = dailyHadithReference,
-                    fillHeight = true,
-                    // Higher cap since the page is taller now and body text
-                    // got bigger; lets longer ahadith breathe.
-                    maxLines = 7,
-                )
-                TodayCarouselPage.DUA -> DuaOfTheMomentCard(
-                    arabic = dailyDua?.arabic.orEmpty(),
-                    translation = dailyDua?.translation.orEmpty(),
-                    categoryLabel = dailyDua?.categoryLabel.orEmpty(),
-                    categoryIcon = dailyDua?.categoryIcon.orEmpty(),
-                    fillHeight = true,
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        PageIndicators(
-            count = pages.size,
-            current = pagerState.currentPage,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun PageIndicators(
-    count: Int,
-    current: Int,
-    modifier: Modifier = Modifier
-) {
-    Row(
+    NimazCarousel(
+        count = pages.size,
         modifier = modifier,
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        repeat(count) { index ->
-            val isCurrent = index == current
-            // Active dot widens into a pill — clearer "you are here" cue
-            // than a colour-only change for users with reduced colour vision.
-            val width by animateDpAsState(
-                targetValue = if (isCurrent) 20.dp else 8.dp,
-                label = "indicator_width_$index"
+        pageHeight = pageHeight,
+        horizontalPadding = horizontalPadding,
+        pageSpacing = 12.dp,
+    ) { pageIndex ->
+        when (pages[pageIndex]) {
+            TodayCarouselPage.PROGRESS -> TodaysProgressCard(
+                prayerTimes = prayerTimes,
+                timelineProgress = prayerTimelineProgress,
+                fillHeight = true,
             )
-            val color by animateColorAsState(
-                targetValue = if (isCurrent) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-                },
-                label = "indicator_color_$index"
+            TodayCarouselPage.FASTING -> FastingStatusCard(
+                fastingToday = fastingToday,
+                fillHeight = true,
             )
-
-            Box(
-                modifier = Modifier
-                    .padding(horizontal = 3.dp)
-                    .size(width = width, height = 8.dp)
-                    .clip(CircleShape)
-                    .background(color)
+            TodayCarouselPage.HADITH -> HadithOfTheDayCard(
+                hadith = dailyHadith.orEmpty(),
+                reference = dailyHadithReference,
+                grade = dailyHadithGrade,
+                onClick = onHadithClick,
+                fillHeight = true,
+                // Capped to what fits the page height without leaving the card
+                // looking empty; longer ahadith ellipsize and open in the reader.
+                maxLines = 4,
+            )
+            TodayCarouselPage.DUA -> DuaOfTheMomentCard(
+                arabic = dailyDua?.arabic.orEmpty(),
+                translation = dailyDua?.translation.orEmpty(),
+                categoryLabel = dailyDua?.categoryLabel.orEmpty(),
+                source = dailyDua?.source,
+                fillHeight = true,
             )
         }
     }
@@ -186,6 +121,7 @@ private fun TodayCarousel_Full_Preview() {
                 prayerTimes = samplePrayerTimes,
                 fastingToday = true,
                 dailyHadith = SAMPLE_HADITH,
+                prayerTimelineProgress = 0.6f,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }

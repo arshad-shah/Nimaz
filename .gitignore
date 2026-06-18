@@ -28,3 +28,6 @@ nimaz-pro-data/scripts/__pycache__/
 *.keystore
 secrets.properties
 google-services.json
+
+# Visual companion brainstorm sessions
+.superpowers/

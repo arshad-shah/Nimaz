@@ -1,40 +1,49 @@
 package com.arshadshah.nimaz.core.util
 
+import android.app.Application
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(application = Application::class, sdk = [34])
 class NotificationContentHelperTest {
+
+    private lateinit var context: Context
+
+    @Before
+    fun setUp() {
+        context = ApplicationProvider.getApplicationContext()
+    }
 
     // ── getPrayerTitle ──────────────────────────────────────────────
 
     @Test
-    fun `getPrayerTitle returns non-empty string for all prayers`() {
-        val prayers = listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
-        for (prayer in prayers) {
-            val title = NotificationContentHelper.getPrayerTitle(prayer)
-            assertThat(title).isNotEmpty()
-            // Title is randomly selected and may not always contain the prayer name literally
-            // (e.g. "The Morning Prayer Awaits" for Fajr), so just check non-empty
-        }
+    fun `getPrayerTitle returns the prayer name`() {
+        assertThat(NotificationContentHelper.getPrayerTitle("FAJR")).isEqualTo("Fajr")
+        assertThat(NotificationContentHelper.getPrayerTitle("ISHA")).isEqualTo("Isha")
+    }
+
+    @Test
+    fun `getPrayerTitle appends the time when provided`() {
+        val title = NotificationContentHelper.getPrayerTitle("FAJR", "5:30 AM")
+        assertThat(title).isEqualTo("Fajr · 5:30 AM")
     }
 
     @Test
     fun `getPrayerTitle is case insensitive`() {
-        // Titles are picked at random from a prayer-specific list, so the two
-        // calls can't be compared directly and won't necessarily contain "fajr"
-        // (e.g. "The Morning Prayer Awaits"). Case-insensitivity means "fajr" is
-        // recognised the same as "FAJR" and never falls through to the
-        // "<name> Time" fallback that getPrayerTitle returns for unknown prayers.
-        val titleUpper = NotificationContentHelper.getPrayerTitle("FAJR")
-        val titleLower = NotificationContentHelper.getPrayerTitle("fajr")
-        assertThat(titleUpper).isNotEqualTo("FAJR Time")
-        assertThat(titleLower).isNotEqualTo("fajr Time")
+        assertThat(NotificationContentHelper.getPrayerTitle("fajr")).isEqualTo("Fajr")
     }
 
     @Test
-    fun `getPrayerTitle returns fallback for unknown prayer`() {
+    fun `getPrayerTitle title-cases an unknown prayer`() {
         val title = NotificationContentHelper.getPrayerTitle("UNKNOWN")
-        assertThat(title).isEqualTo("UNKNOWN Time")
+        assertThat(title).isEqualTo("Unknown")
     }
 
     // ── getPrayerMessage ────────────────────────────────────────────
@@ -51,7 +60,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getPrayerMessage returns fallback for unknown prayer`() {
         val message = NotificationContentHelper.getPrayerMessage("TAHAJJUD")
-        assertThat(message).isEqualTo("It's time for TAHAJJUD prayer.")
+        assertThat(message).isEqualTo("It's time for Tahajjud prayer.")
     }
 
     // ── getShortMessage ─────────────────────────────────────────────
@@ -60,7 +69,7 @@ class NotificationContentHelperTest {
     fun `getShortMessage returns non-empty string for all prayers`() {
         val prayers = listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
         for (prayer in prayers) {
-            val message = NotificationContentHelper.getShortMessage(prayer)
+            val message = NotificationContentHelper.getShortMessage(context, prayer)
             assertThat(message).isNotEmpty()
         }
     }
@@ -68,46 +77,29 @@ class NotificationContentHelperTest {
     @Test
     fun `getShortMessage returns deterministic values`() {
         // Short messages are not randomized - they should be stable
-        val first = NotificationContentHelper.getShortMessage("FAJR")
-        val second = NotificationContentHelper.getShortMessage("FAJR")
+        val first = NotificationContentHelper.getShortMessage(context, "FAJR")
+        val second = NotificationContentHelper.getShortMessage(context, "FAJR")
         assertThat(first).isEqualTo(second)
     }
 
     @Test
     fun `getShortMessage returns fallback for unknown prayer`() {
-        val message = NotificationContentHelper.getShortMessage("WITR")
-        assertThat(message).isEqualTo("It's time for WITR prayer.")
+        val message = NotificationContentHelper.getShortMessage(context, "WITR")
+        assertThat(message).isEqualTo("It's time for Witr prayer.")
     }
 
     // ── getPreReminderTitle / getPreReminderMessage ─────────────────
 
     @Test
     fun `getPreReminderTitle includes prayer name and minutes`() {
-        val title = NotificationContentHelper.getPreReminderTitle("Fajr", 15)
+        val title = NotificationContentHelper.getPreReminderTitle(context, "Fajr", 15)
         assertThat(title).isEqualTo("Fajr in 15 minutes")
     }
 
     @Test
     fun `getPreReminderMessage returns non-empty string`() {
-        val message = NotificationContentHelper.getPreReminderMessage("Fajr")
+        val message = NotificationContentHelper.getPreReminderMessage(context, "Fajr")
         assertThat(message).isNotEmpty()
-    }
-
-    // ── getPrayerEmoji ──────────────────────────────────────────────
-
-    @Test
-    fun `getPrayerEmoji returns correct emoji for each prayer`() {
-        assertThat(NotificationContentHelper.getPrayerEmoji("FAJR")).isEqualTo("🌅")
-        assertThat(NotificationContentHelper.getPrayerEmoji("SUNRISE")).isEqualTo("☀️")
-        assertThat(NotificationContentHelper.getPrayerEmoji("DHUHR")).isEqualTo("🕐")
-        assertThat(NotificationContentHelper.getPrayerEmoji("ASR")).isEqualTo("🌤️")
-        assertThat(NotificationContentHelper.getPrayerEmoji("MAGHRIB")).isEqualTo("🌅")
-        assertThat(NotificationContentHelper.getPrayerEmoji("ISHA")).isEqualTo("🌙")
-    }
-
-    @Test
-    fun `getPrayerEmoji returns mosque emoji for unknown prayer`() {
-        assertThat(NotificationContentHelper.getPrayerEmoji("UNKNOWN")).isEqualTo("🕌")
     }
 
     // ── getDailySummaryContent ───────────────────────────────────────
@@ -115,6 +107,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent all prayers completed is positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 5,
             missedCount = 0,
             missedPrayers = emptyList()
@@ -126,6 +119,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent all prayers missed is not positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 0,
             missedCount = 5,
             missedPrayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib", "Isha")
@@ -136,6 +130,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent some prayers missed shows count`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 3,
             missedCount = 2,
             missedPrayers = listOf("Fajr", "Isha")
@@ -147,6 +142,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent more missed than prayed is not positive`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 1,
             missedCount = 4,
             missedPrayers = listOf("Fajr", "Dhuhr", "Asr", "Maghrib")
@@ -157,6 +153,7 @@ class NotificationContentHelperTest {
     @Test
     fun `getDailySummaryContent bigText includes missed prayer names`() {
         val summary = NotificationContentHelper.getDailySummaryContent(
+            context = context,
             prayedCount = 3,
             missedCount = 2,
             missedPrayers = listOf("Fajr", "Isha")

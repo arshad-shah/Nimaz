@@ -1,20 +1,18 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BatteryAlert
@@ -59,35 +57,35 @@ data class HomeBannerItem(
     val icon: ImageVector,
     val title: String,
     val variant: HomeBannerVariant,
+    val subtitle: String? = null,
     val actionLabel: String? = null,
     val onAction: (() -> Unit)? = null,
     val isLoading: Boolean = false,
 )
 
 /**
- * Compact horizontal carousel of banner pills. Use this in place of stacked
- * full-width banners when the count of attention items varies and you don't
- * want each one pushing the rest of the page down.
+ * Banner pills surfaced on the home screen (notifications off, location, update…).
+ * One pill per page on the shared [NimazCarousel] — peek of the next pill plus
+ * indicator dots — so multiple alerts never stack and push content down.
  *
- * The carousel renders nothing when [banners] is empty — the caller doesn't
- * need to wrap it in a conditional, just let it self-elide.
+ * Renders nothing when [banners] is empty, so the caller can drop it in
+ * unconditionally.
  */
 @Composable
 fun HomeBannerCarousel(
     banners: List<HomeBannerItem>,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 20.dp),
 ) {
     if (banners.isEmpty()) return
 
-    LazyRow(
+    NimazCarousel(
+        count = banners.size,
         modifier = modifier,
-        contentPadding = contentPadding,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        items(banners, key = { it.id }) { banner ->
-            BannerPill(banner = banner)
-        }
+        pageHeight = 56.dp,
+        horizontalPadding = 20.dp,
+        pageSpacing = 10.dp,
+    ) { page ->
+        BannerPill(banner = banners[page])
     }
 }
 
@@ -95,37 +93,62 @@ fun HomeBannerCarousel(
 private fun BannerPill(banner: HomeBannerItem) {
     val colors = pillColorsFor(banner.variant)
     val pillIsTappable = banner.actionLabel == null && banner.onAction != null
+    val hasTrailing = banner.isLoading || banner.actionLabel != null
 
     Row(
         modifier = Modifier
-            .height(48.dp)
-            .widthIn(min = 0.dp, max = 320.dp)
-            .clip(RoundedCornerShape(24.dp))
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .clip(RoundedCornerShape(26.dp))
             .background(colors.container)
+            .border(BorderStroke(1.dp, colors.border), RoundedCornerShape(26.dp))
             .then(
                 if (pillIsTappable) {
                     Modifier.clickable { banner.onAction.invoke() }
                 } else Modifier
             )
-            .padding(horizontal = 14.dp, vertical = 6.dp),
+            // Tighter trailing inset when an action chip sits at the end; roomier
+            // when the pill ends in text so it doesn't look cramped.
+            .padding(start = 8.dp, end = if (hasTrailing) 8.dp else 16.dp, top = 8.dp, bottom = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            imageVector = banner.icon,
-            contentDescription = null,
-            tint = colors.icon,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = banner.title,
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium,
-            color = colors.title,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
+        // Contained icon chip — same 12dp-radius tinted chip as the Today cards.
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(colors.chip),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = banner.icon,
+                contentDescription = null,
+                tint = colors.icon,
+                modifier = Modifier.size(17.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        // Fills the gap between the icon and the trailing action so the pill
+        // spreads across the full page width instead of bunching on the left.
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = banner.title,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                color = colors.title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (!banner.subtitle.isNullOrBlank()) {
+                Text(
+                    text = banner.subtitle,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = colors.subtitle,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
 
         when {
             banner.isLoading -> {
@@ -140,10 +163,10 @@ private fun BannerPill(banner: HomeBannerItem) {
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(18.dp))
                         .background(colors.actionContainer)
                         .clickable { banner.onAction?.invoke() }
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .padding(horizontal = 14.dp, vertical = 8.dp)
                 ) {
                     Text(
                         text = banner.actionLabel,
@@ -159,7 +182,10 @@ private fun BannerPill(banner: HomeBannerItem) {
 
 private data class PillColors(
     val container: Color,
+    val border: Color,
+    val chip: Color,
     val title: Color,
+    val subtitle: Color,
     val icon: Color,
     val actionContainer: Color,
     val actionText: Color,
@@ -168,22 +194,26 @@ private data class PillColors(
 @Composable
 private fun pillColorsFor(variant: HomeBannerVariant): PillColors {
     val scheme = MaterialTheme.colorScheme
-    return when (variant) {
-        HomeBannerVariant.WARNING -> PillColors(
-            container = scheme.errorContainer,
-            title = scheme.onErrorContainer,
-            icon = scheme.error,
-            actionContainer = scheme.error,
-            actionText = scheme.onError,
-        )
-        HomeBannerVariant.UPDATE -> PillColors(
-            container = scheme.primaryContainer,
-            title = scheme.onPrimaryContainer,
-            icon = scheme.primary,
-            actionContainer = scheme.primary,
-            actionText = scheme.onPrimary,
-        )
+    // Both variants ride on the surface (white) with a hairline border to match
+    // the card language; only the accent (chip tint, icon, action) changes.
+    val accent = when (variant) {
+        HomeBannerVariant.WARNING -> scheme.error
+        HomeBannerVariant.UPDATE -> scheme.primary
     }
+    val onAccent = when (variant) {
+        HomeBannerVariant.WARNING -> scheme.onError
+        HomeBannerVariant.UPDATE -> scheme.onPrimary
+    }
+    return PillColors(
+        container = scheme.surface,
+        border = scheme.outline.copy(alpha = 0.4f),
+        chip = accent.copy(alpha = 0.14f),
+        title = scheme.onSurface,
+        subtitle = scheme.onSurfaceVariant,
+        icon = accent,
+        actionContainer = accent,
+        actionText = onAccent,
+    )
 }
 
 // ──── Previews ───────────────────────────────────────────────────────────────

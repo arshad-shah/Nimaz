@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,17 +50,24 @@ fun HadithOfTheDayCard(
     hadith: String,
     modifier: Modifier = Modifier,
     reference: String? = null,
+    grade: String? = null,
+    onClick: (() -> Unit)? = null,
     fillHeight: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),
+            .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
+            // Tapping opens this exact hadith in the reader (issue #161). Kept on
+            // the whole card so the large surface is the tap target, not a tiny link.
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(
             modifier = Modifier
@@ -87,6 +97,27 @@ fun HadithOfTheDayCard(
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
+                if (!grade.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    GradeChip(grade)
+                }
+                if (onClick != null) {
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = stringResource(R.string.read),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = HadithAccent
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = HadithAccent,
+                        modifier = Modifier
+                            .padding(start = 2.dp)
+                            .size(14.dp)
+                    )
+                }
             }
             Spacer(modifier = Modifier.height(8.dp))
             // In fill-height mode the body expands to absorb leftover space
@@ -123,6 +154,34 @@ fun HadithOfTheDayCard(
             }
         }
     }
+}
+
+/**
+ * Small authenticity-grade pill (Sahih / Hasan / Da'if …). Colour-coded to
+ * match the grade badge in the hadith reader so the same grade reads the same
+ * everywhere. Self-contained (matches on the display string) so this card stays
+ * decoupled from the HadithGrade enum.
+ */
+@Composable
+private fun GradeChip(grade: String) {
+    val color = when (grade.trim().lowercase()) {
+        "sahih" -> Color(0xFF4CAF50)
+        "hasan" -> Color(0xFF8BC34A)
+        "da'if", "daif", "dai'f" -> Color(0xFFFF9800)
+        "mawdu", "mawdu'", "fabricated" -> Color(0xFFF44336)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Text(
+        text = grade,
+        style = MaterialTheme.typography.labelSmall,
+        fontWeight = FontWeight.SemiBold,
+        color = color,
+        maxLines = 1,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(color.copy(alpha = 0.14f))
+            .padding(horizontal = 8.dp, vertical = 2.dp)
+    )
 }
 
 private val HadithAccent = Color(0xFF3B82F6)

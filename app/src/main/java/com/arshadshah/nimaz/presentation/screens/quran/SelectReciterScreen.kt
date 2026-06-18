@@ -56,6 +56,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 data class ReciterInfo(
     val id: String,
@@ -341,14 +343,14 @@ fun SelectReciterScreen(
                                 previewingReciterId == reciter.id && audioState.isPlaying -> {
                                     Icon(
                                         imageVector = Icons.Default.Stop,
-                                        contentDescription = "Stop preview",
+                                        contentDescription = stringResource(R.string.cd_stop_preview),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 else -> {
                                     Icon(
                                         imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = "Preview",
+                                        contentDescription = stringResource(R.string.cd_preview),
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }

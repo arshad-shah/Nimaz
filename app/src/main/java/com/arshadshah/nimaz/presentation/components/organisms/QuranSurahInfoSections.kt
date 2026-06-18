@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 internal fun DetailGrid(
@@ -412,7 +414,7 @@ private fun SurahAudioControlBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Stop",
+                    contentDescription = stringResource(R.string.cd_stop),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
                 )

@@ -75,6 +75,8 @@ import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -348,7 +350,7 @@ fun QuranReaderScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -389,7 +391,7 @@ fun QuranReaderScreen(
                     IconButton(onClick = onNavigateToQuranSettings) {
                         Icon(
                             imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings"
+                            contentDescription = stringResource(R.string.cd_settings)
                         )
                     }
                 },

@@ -791,4 +791,87 @@
     <string name="fasting_sheet_edit_makeup">Edit Puasa Qadha</string>
     <string name="fasting_sheet_reason">Alasan</string>
     <string name="fasting_sheet_fidya_amount">Jumlah Fidyah</string>
+    <!-- Home redesign additions -->
+    <string name="read">Baca</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Tercatat</string>
+    <string name="fasting_not_logged">Belum tercatat</string>
+    <string name="notifications_disabled_subtitle">Pengingat salat tidak akan muncul</string>
+    <string name="location_permission_subtitle">Diperlukan untuk waktu salat akurat</string>
+    <string name="battery_optimization_subtitle">Alarm mungkin tertunda</string>
+    <string name="update_available_subtitle">Ketuk perbarui untuk versi terbaru</string>
+    <string name="update_ready_subtitle">Mulai ulang untuk menyelesaikan</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Waktunya salat. Mulailah harimu bersama Allah.</string>
+    <string name="notif_short_sunrise">Matahari telah terbit — waktu Isyraq dimulai.</string>
+    <string name="notif_short_dhuhr">Waktunya salat. Berhentilah sejenak dan menghadap Allah.</string>
+    <string name="notif_short_asr">Waktunya salat. Jangan biarkan Asar terlewat.</string>
+    <string name="notif_short_maghrib">Waktunya salat saat hari menjelang petang.</string>
+    <string name="notif_short_isha">Waktunya salat. Tutuplah harimu dengan Isya.</string>
+    <string name="notif_short_generic">Waktunya salat %s.</string>
+
+    <string name="notif_pre_reminder_title">%1$s dalam %2$d menit</string>
+    <string name="notif_pre_reminder_1">Siapkan hatimu dan berwudulah.</string>
+    <string name="notif_pre_reminder_2">Waktunya bersiap untuk salat.</string>
+    <string name="notif_pre_reminder_3">Pengingat untuk bersiap beribadah.</string>
+    <string name="notif_pre_reminder_4">Bersiaplah untuk berdiri di hadapan Tuhanmu.</string>
+
+    <string name="notif_greeting_predawn">Semoga pagimu diberkahi</string>
+    <string name="notif_greeting_morning">Selamat pagi, semoga Allah memberkahi harimu</string>
+    <string name="notif_greeting_afternoon">Selamat siang, tetaplah ingat salatmu</string>
+    <string name="notif_greeting_evening">Selamat sore, semoga ibadahmu diterima</string>
+    <string name="notif_greeting_night">Semoga malammu damai</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! Semua Salat Lengkap</string>
+    <string name="notif_summary_title_default">Ringkasan Salat Harian</string>
+    <string name="notif_summary_count">%1$d dari %2$d salat selesai</string>
+    <string name="ayah_copied_to_clipboard">Ayat disalin ke papan klip</string>
+    <string name="test_notification_title">Notifikasi Uji</string>
+    <string name="test_notification_text">Notifikasi salat berfungsi dengan benar</string>
+    <string name="widget_loading">Memuat…</string>
+    <string name="widget_tap_to_setup">Ketuk untuk menyiapkan</string>
+    <string name="widget_next_prayer">Salat Berikutnya</string>
+    <string name="widget_error_loading">Gagal memuat data</string>
+    <string name="widget_tap_to_retry">Ketuk untuk coba lagi</string>
+    <string name="widget_tap_to_refresh">Ketuk untuk menyegarkan</string>
+    <string name="widget_today">HARI INI</string>
+    <string name="widget_no_events">Tidak ada acara</string>
+    <!-- Accessibility content descriptions -->
+    <string name="cd_share">Bagikan</string>
+    <string name="cd_bookmark">Markah</string>
+    <string name="cd_back">Kembali</string>
+    <string name="cd_tafseer">Tafsir</string>
+    <string name="cd_stop">Hentikan</string>
+    <string name="cd_settings">Pengaturan</string>
+    <string name="cd_previous_month">Bulan sebelumnya</string>
+    <string name="cd_next_month">Bulan berikutnya</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_favorite">Favorit</string>
+    <string name="cd_delete">Hapus</string>
+    <string name="cd_copy">Salin</string>
+    <string name="cd_translation">Terjemahan</string>
+    <string name="cd_stop_preview">Hentikan pratinjau</string>
+    <string name="cd_stop_audio">Hentikan audio</string>
+    <string name="cd_reset">Atur ulang</string>
+    <string name="cd_previous_page">Halaman sebelumnya</string>
+    <string name="cd_preview">Pratinjau</string>
+    <string name="cd_play">Putar</string>
+    <string name="cd_notes">Catatan</string>
+    <string name="cd_next_page">Halaman berikutnya</string>
+    <string name="cd_new_calculation">Perhitungan baru</string>
+    <string name="cd_increase">Tambah</string>
+    <string name="cd_history">Riwayat</string>
+    <string name="cd_facing_qibla">Menghadap Kiblat</string>
+    <string name="cd_export_annotations">Ekspor anotasi</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_dismiss">Tutup</string>
+    <string name="cd_decrease">Kurangi</string>
+    <string name="cd_close">Tutup</string>
+    <string name="cd_clear_search">Hapus pencarian</string>
+    <string name="cd_clear">Hapus</string>
+    <string name="cd_item_selected">%1$s dipilih</string>
 </resources>

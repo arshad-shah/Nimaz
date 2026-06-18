@@ -72,6 +72,8 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import kotlin.math.abs
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 // -- Colour palette --
 private val GoldColor = Color(0xFFEAB308)
@@ -418,7 +420,7 @@ private fun FacingQiblaIndicator(
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Mosque,
-                            contentDescription = "Facing Qibla",
+                            contentDescription = stringResource(R.string.cd_facing_qibla),
                             tint = GreenColor,
                             modifier = Modifier.size(64.dp)
                         )

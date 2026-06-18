@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.action.actionStartActivity
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -77,6 +78,7 @@ private fun HijriCalendarContent(
     state: HijriCalendarWidgetState,
     openCalendarIntent: Intent,
 ) {
+    val context = LocalContext.current
     val backgroundColor = ColorProvider(R.color.widget_background)
     val textColor = ColorProvider(R.color.widget_text)
     val textSecondary = ColorProvider(R.color.widget_text_secondary)
@@ -96,7 +98,7 @@ private fun HijriCalendarContent(
                     CircularProgressIndicator()
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     Text(
-                        text = "Loading...",
+                        text = context.getString(R.string.widget_loading),
                         style = TextStyle(color = textSecondary, fontSize = 12.sp)
                     )
                 }
@@ -124,7 +126,7 @@ private fun HijriCalendarContent(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Tap to refresh",
+                    text = context.getString(R.string.widget_tap_to_refresh),
                     style = TextStyle(color = textSecondary, fontSize = 12.sp)
                 )
             }
@@ -350,6 +352,7 @@ private fun EventsPanel(
     primaryColor: ColorProvider,
     backgroundColor: ColorProvider,
 ) {
+    val context = LocalContext.current
     Column(
         modifier = GlanceModifier
             .fillMaxHeight()
@@ -357,7 +360,7 @@ private fun EventsPanel(
             .padding(start = 10.dp)
     ) {
         Text(
-            text = "TODAY",
+            text = context.getString(R.string.widget_today),
             style = TextStyle(
                 color = primaryColor,
                 fontSize = 10.sp,
@@ -387,7 +390,7 @@ private fun EventsPanel(
 
         if (data.events.isEmpty()) {
             Text(
-                text = "No events",
+                text = context.getString(R.string.widget_no_events),
                 style = TextStyle(color = textSecondary, fontSize = 10.sp)
             )
         } else {

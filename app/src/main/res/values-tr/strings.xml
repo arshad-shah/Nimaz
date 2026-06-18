@@ -791,4 +791,87 @@
     <string name="fasting_sheet_edit_makeup">Kaza Orucunu Düzenle</string>
     <string name="fasting_sheet_reason">Neden</string>
     <string name="fasting_sheet_fidya_amount">Fidye Tutarı</string>
+    <!-- Home redesign additions -->
+    <string name="read">Oku</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Kaydedildi</string>
+    <string name="fasting_not_logged">Kaydedilmedi</string>
+    <string name="notifications_disabled_subtitle">Namaz hatırlatıcıları gösterilmez</string>
+    <string name="location_permission_subtitle">Doğru namaz vakitleri için gerekli</string>
+    <string name="battery_optimization_subtitle">Uyarılar gecikebilir</string>
+    <string name="update_available_subtitle">Güncellemek için dokunun</string>
+    <string name="update_ready_subtitle">Tamamlamak için yeniden başlatın</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Namaz vakti. Gününe Allah ile başla.</string>
+    <string name="notif_short_sunrise">Güneş doğdu — İşrak vakti başlıyor.</string>
+    <string name="notif_short_dhuhr">Namaz vakti. Bir an dur ve Allah\'a yönel.</string>
+    <string name="notif_short_asr">Namaz vakti. İkindiyi kaçırma.</string>
+    <string name="notif_short_maghrib">Gün sona ererken namaz vakti.</string>
+    <string name="notif_short_isha">Namaz vakti. Gününü yatsı ile tamamla.</string>
+    <string name="notif_short_generic">%s namazının vakti geldi.</string>
+
+    <string name="notif_pre_reminder_title">%1$s %2$d dakika içinde</string>
+    <string name="notif_pre_reminder_1">Kalbini hazırla ve abdest al.</string>
+    <string name="notif_pre_reminder_2">Namaza hazırlanma vakti.</string>
+    <string name="notif_pre_reminder_3">İbadete hazırlanmak için bir hatırlatma.</string>
+    <string name="notif_pre_reminder_4">Rabbinin huzuruna çıkmaya hazırlan.</string>
+
+    <string name="notif_greeting_predawn">Sabahın mübarek olsun</string>
+    <string name="notif_greeting_morning">Günaydın, Allah gününü bereketlendirsin</string>
+    <string name="notif_greeting_afternoon">İyi günler, namazlarını ihmal etme</string>
+    <string name="notif_greeting_evening">İyi akşamlar, ibadetin kabul olsun</string>
+    <string name="notif_greeting_night">Gecen huzurlu olsun</string>
+
+    <string name="notif_summary_title_all_complete">Maşallah! Tüm Namazlar Tamamlandı</string>
+    <string name="notif_summary_title_default">Günlük Namaz Özeti</string>
+    <string name="notif_summary_count">%2$d namazdan %1$d tanesi tamamlandı</string>
+    <string name="ayah_copied_to_clipboard">Ayet panoya kopyalandı</string>
+    <string name="test_notification_title">Test Bildirimi</string>
+    <string name="test_notification_text">Namaz bildirimleri düzgün çalışıyor</string>
+    <string name="widget_loading">Yükleniyor…</string>
+    <string name="widget_tap_to_setup">Kurmak için dokunun</string>
+    <string name="widget_next_prayer">Sonraki Namaz</string>
+    <string name="widget_error_loading">Veri yüklenirken hata</string>
+    <string name="widget_tap_to_retry">Yeniden denemek için dokunun</string>
+    <string name="widget_tap_to_refresh">Yenilemek için dokunun</string>
+    <string name="widget_today">BUGÜN</string>
+    <string name="widget_no_events">Etkinlik yok</string>
+    <!-- Accessibility content descriptions -->
+    <string name="cd_share">Paylaş</string>
+    <string name="cd_bookmark">Yer işareti</string>
+    <string name="cd_back">Geri</string>
+    <string name="cd_tafseer">Tefsir</string>
+    <string name="cd_stop">Durdur</string>
+    <string name="cd_settings">Ayarlar</string>
+    <string name="cd_previous_month">Önceki ay</string>
+    <string name="cd_next_month">Sonraki ay</string>
+    <string name="cd_filter">Filtrele</string>
+    <string name="cd_favorite">Favori</string>
+    <string name="cd_delete">Sil</string>
+    <string name="cd_copy">Kopyala</string>
+    <string name="cd_translation">Çeviri</string>
+    <string name="cd_stop_preview">Önizlemeyi durdur</string>
+    <string name="cd_stop_audio">Sesi durdur</string>
+    <string name="cd_reset">Sıfırla</string>
+    <string name="cd_previous_page">Önceki sayfa</string>
+    <string name="cd_preview">Önizleme</string>
+    <string name="cd_play">Oynat</string>
+    <string name="cd_notes">Notlar</string>
+    <string name="cd_next_page">Sonraki sayfa</string>
+    <string name="cd_new_calculation">Yeni hesaplama</string>
+    <string name="cd_increase">Artır</string>
+    <string name="cd_history">Geçmiş</string>
+    <string name="cd_facing_qibla">Kıbleye dönük</string>
+    <string name="cd_export_annotations">Ek açıklamaları dışa aktar</string>
+    <string name="cd_edit">Düzenle</string>
+    <string name="cd_dismiss">Kapat</string>
+    <string name="cd_decrease">Azalt</string>
+    <string name="cd_close">Kapat</string>
+    <string name="cd_clear_search">Aramayı temizle</string>
+    <string name="cd_clear">Temizle</string>
+    <string name="cd_item_selected">%1$s seçildi</string>
 </resources>

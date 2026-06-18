@@ -54,8 +54,8 @@ class QuranMushafPageBarTest {
         composeRule.onNodeWithText("Page 15").assertExists()
         composeRule.onNodeWithText("  •  Juz 1").assertExists()
         composeRule.onNodeWithText("  •  Hizb 2").assertExists()
-        composeRule.onNodeWithContentDescription("Next Page").assertExists()
-        composeRule.onNodeWithContentDescription("Previous Page").assertExists()
+        composeRule.onNodeWithContentDescription("Next page").assertExists()
+        composeRule.onNodeWithContentDescription("Previous page").assertExists()
     }
 
     @Test
@@ -112,8 +112,8 @@ class QuranMushafPageBarTest {
             )
         }
         // page 1 -> previous disabled, next enabled (1 < 604)
-        composeRule.onNodeWithContentDescription("Previous Page").assertIsNotEnabled()
-        composeRule.onNodeWithContentDescription("Next Page").assertIsEnabled()
+        composeRule.onNodeWithContentDescription("Previous page").assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription("Next page").assertIsEnabled()
     }
 
     @Test
@@ -130,8 +130,8 @@ class QuranMushafPageBarTest {
                 onNavigateNext = {}
             )
         }
-        composeRule.onNodeWithContentDescription("Next Page").assertIsNotEnabled()
-        composeRule.onNodeWithContentDescription("Previous Page").assertIsEnabled()
+        composeRule.onNodeWithContentDescription("Next page").assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription("Previous page").assertIsEnabled()
     }
 
     @Test
@@ -150,8 +150,8 @@ class QuranMushafPageBarTest {
                 onNavigateNext = { next = true }
             )
         }
-        composeRule.onNodeWithContentDescription("Previous Page").performClick()
-        composeRule.onNodeWithContentDescription("Next Page").performClick()
+        composeRule.onNodeWithContentDescription("Previous page").performClick()
+        composeRule.onNodeWithContentDescription("Next page").performClick()
         assertThat(prev).isTrue()
         assertThat(next).isTrue()
     }

@@ -47,6 +47,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
@@ -318,7 +319,7 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     }
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("Quran Ayah", textToCopy))
-    Toast.makeText(context, "Ayah copied to clipboard", Toast.LENGTH_SHORT).show()
+    Toast.makeText(context, context.getString(R.string.ayah_copied_to_clipboard), Toast.LENGTH_SHORT).show()
 }
 
 private fun shareAyah(context: Context, ayah: Ayah) {

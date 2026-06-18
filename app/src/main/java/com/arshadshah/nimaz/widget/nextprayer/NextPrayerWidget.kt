@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -51,6 +52,7 @@ class NextPrayerWidget : GlanceAppWidget() {
 
 @Composable
 private fun NextPrayerContent(state: NextPrayerWidgetState) {
+    val context = LocalContext.current
     val backgroundColor = ColorProvider(R.color.widget_background)
     val textColor = ColorProvider(R.color.widget_text)
     val textSecondary = ColorProvider(R.color.widget_text_secondary)
@@ -70,7 +72,7 @@ private fun NextPrayerContent(state: NextPrayerWidgetState) {
                     CircularProgressIndicator()
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     Text(
-                        text = "Loading...",
+                        text = context.getString(R.string.widget_loading),
                         style = TextStyle(color = textSecondary, fontSize = 12.sp)
                     )
                 }
@@ -98,7 +100,7 @@ private fun NextPrayerContent(state: NextPrayerWidgetState) {
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
-                        text = "Tap to setup",
+                        text = context.getString(R.string.widget_tap_to_setup),
                         style = TextStyle(color = textSecondary, fontSize = 12.sp)
                     )
                 }
@@ -115,6 +117,7 @@ private fun NextPrayerSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
+    val context = LocalContext.current
     Box(
         modifier = GlanceModifier
             .fillMaxSize()
@@ -129,7 +132,7 @@ private fun NextPrayerSuccessContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Next Prayer",
+                text = context.getString(R.string.widget_next_prayer),
                 style = TextStyle(
                     color = textSecondary,
                     fontSize = 11.sp,

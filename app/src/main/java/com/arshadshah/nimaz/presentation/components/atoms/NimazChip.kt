@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * Chip style variants
@@ -237,7 +239,7 @@ fun NimazInputChip(
             {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Dismiss",
+                    contentDescription = stringResource(R.string.cd_dismiss),
                     modifier = Modifier.size(18.dp)
                 )
             }

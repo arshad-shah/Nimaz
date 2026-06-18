@@ -43,6 +43,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.StatItem
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @Composable
 internal fun HeroHeader(
@@ -78,7 +80,7 @@ internal fun HeroHeader(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = "Back",
+                        contentDescription = stringResource(R.string.cd_back),
                         tint = Color.White.copy(alpha = 0.7f),
                         modifier = Modifier.size(20.dp)
                     )
@@ -327,7 +329,7 @@ internal fun SurahAudioControlBar(
             ) {
                 Icon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Stop",
+                    contentDescription = stringResource(R.string.cd_stop),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.size(20.dp)
                 )

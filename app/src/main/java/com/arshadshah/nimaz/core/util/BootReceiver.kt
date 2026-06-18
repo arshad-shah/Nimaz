@@ -186,8 +186,8 @@ class BootReceiver : BroadcastReceiver() {
                 val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
 
                 // Get notification content for merging into adhan service notification
-                val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType)
-                val notifMessage = NotificationContentHelper.getPrayerMessage(prayerType, prayerTime)
+                val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
+                val notifMessage = NotificationContentHelper.getShortMessage(context, prayerType)
                 val notifColor = getPrayerColor(prayerType)
 
                 var adhanPlayed = false
@@ -334,9 +334,9 @@ class BootReceiver : BroadcastReceiver() {
             )
         }
 
-        val title = NotificationContentHelper.getPreReminderTitle(prayerName, minutesBefore)
-        val message = NotificationContentHelper.getPreReminderMessage(prayerName)
-        val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting()}"
+        val title = NotificationContentHelper.getPreReminderTitle(context, prayerName, minutesBefore)
+        val message = NotificationContentHelper.getPreReminderMessage(context, prayerName)
+        val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting(context)}"
 
         val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
             .setSmallIcon(R.drawable.ic_stat_nimaz)
@@ -395,18 +395,12 @@ class BootReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        // Get enhanced content
-        val title = NotificationContentHelper.getPrayerTitle(prayerType)
-        val shortMessage = NotificationContentHelper.getShortMessage(prayerType)
-        val fullMessage = NotificationContentHelper.getPrayerMessage(prayerType, prayerTime)
-
-        // Build the big text with formatted time if available
-        // Don't say "Prayer time" for sunrise since it's not a prayer
-        val isSunrise = prayerType.equals("SUNRISE", ignoreCase = true)
-        val timeDisplay = if (prayerTime.isNotEmpty()) {
-            if (isSunrise) "\n\nSunrise: $prayerTime" else "\n\nPrayer time: $prayerTime"
-        } else ""
-        val bigText = "$fullMessage$timeDisplay"
+        // Get enhanced content. The time now lives in the title, so the body is
+        // just the calm reminder plus a short reflection when expanded.
+        val title = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
+        val shortMessage = NotificationContentHelper.getShortMessage(context, prayerType)
+        val reflection = NotificationContentHelper.getPrayerMessage(prayerType)
+        val bigText = "$shortMessage\n\n$reflection"
 
         val channelId = if (adhanEnabled) {
             PrayerNotificationScheduler.CHANNEL_ID_ADHAN
@@ -468,6 +462,7 @@ class BootReceiver : BroadcastReceiver() {
 
                 // Get notification content
                 val summaryContent = NotificationContentHelper.getDailySummaryContent(
+                    context = context,
                     prayedCount = prayedCount,
                     missedCount = missedCount,
                     missedPrayers = missedPrayers

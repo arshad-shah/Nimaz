@@ -71,6 +71,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * Search result data.
@@ -266,7 +268,7 @@ fun NimazSearchBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear search",
+                        contentDescription = stringResource(R.string.cd_clear_search),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
@@ -382,7 +384,7 @@ fun ExpandableSearchBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear",
+                            contentDescription = stringResource(R.string.cd_clear),
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -705,7 +707,7 @@ private fun NimazSearchBar_Showcase_Preview() {
                         IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                                contentDescription = "Filter",
+                                contentDescription = stringResource(R.string.cd_filter),
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp)
                             )
@@ -798,7 +800,7 @@ private fun NimazSearchBar_Trailing_Preview() {
                 IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.TrendingUp,
-                        contentDescription = "Filter",
+                        contentDescription = stringResource(R.string.cd_filter),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )

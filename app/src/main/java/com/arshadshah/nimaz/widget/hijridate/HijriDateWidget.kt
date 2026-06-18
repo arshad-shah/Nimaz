@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
+import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.CircularProgressIndicator
@@ -49,6 +50,7 @@ class HijriDateWidget : GlanceAppWidget() {
 
 @Composable
 private fun HijriDateContent(state: HijriDateWidgetState) {
+    val context = LocalContext.current
     val backgroundColor = ColorProvider(R.color.widget_background)
     val textColor = ColorProvider(R.color.widget_text)
     val textSecondary = ColorProvider(R.color.widget_text_secondary)
@@ -68,7 +70,7 @@ private fun HijriDateContent(state: HijriDateWidgetState) {
                     CircularProgressIndicator()
                     Spacer(modifier = GlanceModifier.height(8.dp))
                     Text(
-                        text = "Loading...",
+                        text = context.getString(R.string.widget_loading),
                         style = TextStyle(color = textSecondary, fontSize = 12.sp)
                     )
                 }
@@ -95,7 +97,7 @@ private fun HijriDateContent(state: HijriDateWidgetState) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Tap to refresh",
+                    text = context.getString(R.string.widget_tap_to_refresh),
                     style = TextStyle(color = textSecondary, fontSize = 12.sp)
                 )
             }

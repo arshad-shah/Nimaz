@@ -55,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.roundToInt
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * A slim tooltip with a triangular beak/arrow that anchors near the tapped ayah.
@@ -281,42 +283,42 @@ private fun TooltipCard(
         ) {
             TooltipIconButton(
                 icon = Icons.Default.PlayArrow,
-                contentDescription = "Play",
+                contentDescription = stringResource(R.string.cd_play),
                 tint = contentColor,
                 onClick = onPlayClick
             )
 
             TooltipIconButton(
                 icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                contentDescription = "Bookmark",
+                contentDescription = stringResource(R.string.cd_bookmark),
                 tint = if (isBookmarked) NimazColors.QuranColors.BookmarkPrimary else contentColor,
                 onClick = onBookmarkClick
             )
 
             TooltipIconButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                contentDescription = "Favorite",
+                contentDescription = stringResource(R.string.cd_favorite),
                 tint = if (isFavorite) Color(0xFFEF4444) else contentColor,
                 onClick = onFavoriteClick
             )
 
             TooltipIconButton(
                 icon = Icons.Default.ContentCopy,
-                contentDescription = "Copy",
+                contentDescription = stringResource(R.string.cd_copy),
                 tint = contentColor,
                 onClick = onCopyClick
             )
 
             TooltipIconButton(
                 icon = Icons.Default.Share,
-                contentDescription = "Share",
+                contentDescription = stringResource(R.string.cd_share),
                 tint = contentColor,
                 onClick = onShareClick
             )
 
             TooltipIconButton(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                contentDescription = "Tafseer",
+                contentDescription = stringResource(R.string.cd_tafseer),
                 tint = contentColor,
                 onClick = onTafseerClick
             )
@@ -342,7 +344,7 @@ private fun TooltipCard(
 
                 TooltipIconButton(
                     icon = Icons.Default.Translate,
-                    contentDescription = "Translation",
+                    contentDescription = stringResource(R.string.cd_translation),
                     tint = contentColor,
                     onClick = onTranslationClick
                 )

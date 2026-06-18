@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -49,49 +52,127 @@ fun FastingStatusCard(
             .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+        val statusText = if (fastingToday) {
+            stringResource(R.string.today_fasting)
+        } else {
+            stringResource(R.string.no_fast_today)
+        }
+
+        if (fillHeight) {
+            // Carousel page (design B): "Fasting" header at the top, the state
+            // big in the middle, and a logged/not-logged badge anchored at the
+            // bottom — spread so the fixed-height card fills cleanly.
+            Column(
                 modifier = Modifier
-                    .size(44.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = Icons.Default.LightMode,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(22.dp)
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    FastingIconChip()
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = stringResource(R.string.fasting),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Text(
+                    text = statusText,
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                FastingStateBadge(fastingToday = fastingToday)
             }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column {
-                Text(
-                    text = stringResource(R.string.fasting),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = if (fastingToday) {
-                        stringResource(R.string.today_fasting)
-                    } else {
-                        stringResource(R.string.no_fast_today)
-                    },
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                )
+        } else {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                FastingIconChip()
+                Spacer(modifier = Modifier.width(14.dp))
+                Column {
+                    Text(
+                        text = stringResource(R.string.fasting),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = statusText,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun FastingStateBadge(fastingToday: Boolean) {
+    val bg = if (fastingToday) {
+        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f)
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+    val fg = if (fastingToday) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Row(
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(bg)
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (fastingToday) {
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = null,
+                tint = fg,
+                modifier = Modifier.size(14.dp)
+            )
+            Spacer(modifier = Modifier.width(5.dp))
+        }
+        Text(
+            text = stringResource(
+                if (fastingToday) R.string.fasting_logged else R.string.fasting_not_logged
+            ),
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = fg
+        )
+    }
+}
+
+@Composable
+private fun FastingIconChip() {
+    Box(
+        modifier = Modifier
+            .size(44.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = Icons.Default.LightMode,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.size(22.dp)
+        )
     }
 }
 

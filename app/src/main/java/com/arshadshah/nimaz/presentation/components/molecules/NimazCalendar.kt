@@ -58,6 +58,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * Position of the status indicator dot within a day cell.
@@ -312,7 +314,7 @@ private fun CalendarNavigationHeader(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Previous month",
+                    contentDescription = stringResource(R.string.cd_previous_month),
                     modifier = Modifier.size(20.dp)
                 )
             }
@@ -325,7 +327,7 @@ private fun CalendarNavigationHeader(
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = "Next month",
+                    contentDescription = stringResource(R.string.cd_next_month),
                     modifier = Modifier.size(20.dp)
                 )
             }

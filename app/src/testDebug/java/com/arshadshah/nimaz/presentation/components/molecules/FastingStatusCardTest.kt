@@ -19,7 +19,7 @@ class FastingStatusCardTest {
         }
 
         composeRule.onNodeWithText("Fasting").assertExists()
-        composeRule.onNodeWithText("Today: Fasting").assertExists()
+        composeRule.onNodeWithText("Fasting today").assertExists()
     }
 
     @Test

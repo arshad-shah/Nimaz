@@ -54,6 +54,8 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -81,7 +83,7 @@ fun ZakatHistoryScreen(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "New Calculation"
+                    contentDescription = stringResource(R.string.cd_new_calculation)
                 )
             }
         }
@@ -345,7 +347,7 @@ private fun HistoryEntryCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.cd_delete),
                         tint = MaterialTheme.colorScheme.error
                     )
                 }

@@ -789,4 +789,87 @@
     <string name="fasting_sheet_edit_makeup">Nachholfasten bearbeiten</string>
     <string name="fasting_sheet_reason">Grund</string>
     <string name="fasting_sheet_fidya_amount">Fidya-Betrag</string>
+    <!-- Home redesign additions -->
+    <string name="read">Lesen</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Erfasst</string>
+    <string name="fasting_not_logged">Nicht erfasst</string>
+    <string name="notifications_disabled_subtitle">Gebetserinnerungen werden nicht angezeigt</string>
+    <string name="location_permission_subtitle">Für genaue Gebetszeiten erforderlich</string>
+    <string name="battery_optimization_subtitle">Erinnerungen könnten verzögert werden</string>
+    <string name="update_available_subtitle">Zum Aktualisieren tippen</string>
+    <string name="update_ready_subtitle">Zum Abschließen neu starten</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">Es ist Zeit zu beten. Beginne deinen Tag mit Allah.</string>
+    <string name="notif_short_sunrise">Die Sonne ist aufgegangen — die Ischraq-Zeit beginnt.</string>
+    <string name="notif_short_dhuhr">Es ist Zeit zu beten. Halte inne und wende dich Allah zu.</string>
+    <string name="notif_short_asr">Es ist Zeit zu beten. Lass das Asr-Gebet nicht vorübergehen.</string>
+    <string name="notif_short_maghrib">Es ist Zeit zu beten, da der Tag zu Ende geht.</string>
+    <string name="notif_short_isha">Es ist Zeit zu beten. Beschließe deinen Tag mit dem Ischa-Gebet.</string>
+    <string name="notif_short_generic">Es ist Zeit für das %s-Gebet.</string>
+
+    <string name="notif_pre_reminder_title">%1$s in %2$d Minuten</string>
+    <string name="notif_pre_reminder_1">Bereite dein Herz vor und vollziehe die Wudu.</string>
+    <string name="notif_pre_reminder_2">Zeit, sich für das Gebet bereitzumachen.</string>
+    <string name="notif_pre_reminder_3">Eine Erinnerung, sich auf den Gottesdienst vorzubereiten.</string>
+    <string name="notif_pre_reminder_4">Mach dich bereit, vor deinen Herrn zu treten.</string>
+
+    <string name="notif_greeting_predawn">Möge dein Morgen gesegnet sein</string>
+    <string name="notif_greeting_morning">Guten Morgen, möge Allah deinen Tag segnen</string>
+    <string name="notif_greeting_afternoon">Guten Tag, denke an deine Gebete</string>
+    <string name="notif_greeting_evening">Guten Abend, möge dein Gottesdienst angenommen werden</string>
+    <string name="notif_greeting_night">Möge deine Nacht friedlich sein</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! Alle Gebete vollständig</string>
+    <string name="notif_summary_title_default">Tägliche Gebetsübersicht</string>
+    <string name="notif_summary_count">%1$d von %2$d Gebeten abgeschlossen</string>
+    <string name="ayah_copied_to_clipboard">Vers in die Zwischenablage kopiert</string>
+    <string name="test_notification_title">Test-Benachrichtigung</string>
+    <string name="test_notification_text">Gebetsbenachrichtigungen funktionieren korrekt</string>
+    <string name="widget_loading">Wird geladen…</string>
+    <string name="widget_tap_to_setup">Zum Einrichten tippen</string>
+    <string name="widget_next_prayer">Nächstes Gebet</string>
+    <string name="widget_error_loading">Fehler beim Laden der Daten</string>
+    <string name="widget_tap_to_retry">Zum Wiederholen tippen</string>
+    <string name="widget_tap_to_refresh">Zum Aktualisieren tippen</string>
+    <string name="widget_today">HEUTE</string>
+    <string name="widget_no_events">Keine Termine</string>
+    <!-- Accessibility content descriptions -->
+    <string name="cd_share">Teilen</string>
+    <string name="cd_bookmark">Lesezeichen</string>
+    <string name="cd_back">Zurück</string>
+    <string name="cd_tafseer">Tafseer</string>
+    <string name="cd_stop">Stopp</string>
+    <string name="cd_settings">Einstellungen</string>
+    <string name="cd_previous_month">Voriger Monat</string>
+    <string name="cd_next_month">Nächster Monat</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_favorite">Favorit</string>
+    <string name="cd_delete">Löschen</string>
+    <string name="cd_copy">Kopieren</string>
+    <string name="cd_translation">Übersetzung</string>
+    <string name="cd_stop_preview">Vorschau stoppen</string>
+    <string name="cd_stop_audio">Audio stoppen</string>
+    <string name="cd_reset">Zurücksetzen</string>
+    <string name="cd_previous_page">Vorherige Seite</string>
+    <string name="cd_preview">Vorschau</string>
+    <string name="cd_play">Abspielen</string>
+    <string name="cd_notes">Notizen</string>
+    <string name="cd_next_page">Nächste Seite</string>
+    <string name="cd_new_calculation">Neue Berechnung</string>
+    <string name="cd_increase">Erhöhen</string>
+    <string name="cd_history">Verlauf</string>
+    <string name="cd_facing_qibla">Richtung Qibla</string>
+    <string name="cd_export_annotations">Anmerkungen exportieren</string>
+    <string name="cd_edit">Bearbeiten</string>
+    <string name="cd_dismiss">Verwerfen</string>
+    <string name="cd_decrease">Verringern</string>
+    <string name="cd_close">Schließen</string>
+    <string name="cd_clear_search">Suche löschen</string>
+    <string name="cd_clear">Löschen</string>
+    <string name="cd_item_selected">%1$s ausgewählt</string>
 </resources>

@@ -1,11 +1,14 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -35,11 +37,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
+private val JumuahGreen = Color(0xFF2E7D32)
+
 /**
- * Friday-only highlight card for Jumu'ah: prayer name in English/Arabic,
- * khutbah time, and either a countdown to khutbah or a "Jumu'ah passed"
- * acknowledgement. Rendered in a green gradient to stand out from the
- * weekday cards.
+ * Friday-only highlight card for Jumu'ah, shown above the home "Today" section.
+ * A white surface with a green left accent and tinted chip (matching the rest of
+ * the redesigned cards) carrying the prayer name in English/Arabic, khutbah time,
+ * a countdown-to-khutbah (or a "Jumu'ah passed" acknowledgement), and a hadith.
  */
 @Composable
 fun JumuahCard(
@@ -48,26 +52,29 @@ fun JumuahCard(
     isJumuahPassed: Boolean,
     modifier: Modifier = Modifier
 ) {
-    val jumuahGreen = Color(0xFF2E7D32)
-    val jumuahGreenLight = Color(0xFF43A047)
-
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.horizontalGradient(colors = listOf(jumuahGreen, jumuahGreenLight)),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .padding(20.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.height(IntrinsicSize.Min)) {
+            // Green left accent marking the Friday highlight.
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight()
+                    .background(JumuahGreen)
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(15.dp)
+            ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -75,20 +82,20 @@ fun JumuahCard(
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        horizontalArrangement = Arrangement.spacedBy(11.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(44.dp)
+                                .size(38.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(Color.White.copy(alpha = 0.2f)),
+                                .background(JumuahGreen.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Mosque,
                                 contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
+                                tint = JumuahGreen,
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                         Column {
@@ -96,12 +103,12 @@ fun JumuahCard(
                                 text = stringResource(R.string.jumuah_mubarak),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             ArabicText(
                                 text = stringResource(R.string.jumuah_arabic),
                                 size = ArabicTextSize.SMALL,
-                                color = Color.White.copy(alpha = 0.8f)
+                                color = JumuahGreen
                             )
                         }
                     }
@@ -112,25 +119,25 @@ fun JumuahCard(
                                 text = jumuahTime,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = stringResource(R.string.khutbah_time),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.7f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.15f))
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(JumuahGreen.copy(alpha = 0.08f))
+                        .padding(horizontal = 13.dp, vertical = 11.dp)
                 ) {
                     if (isJumuahPassed) {
                         Row(
@@ -141,14 +148,15 @@ fun JumuahCard(
                             Icon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                                tint = JumuahGreen,
+                                modifier = Modifier.size(16.dp)
                             )
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.width(7.dp))
                             Text(
                                 text = stringResource(R.string.jumuah_passed),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                fontWeight = FontWeight.SemiBold,
+                                color = JumuahGreen
                             )
                         }
                     } else if (timeUntilJumuah.isNotEmpty()) {
@@ -160,24 +168,33 @@ fun JumuahCard(
                             Text(
                                 text = stringResource(R.string.time_until_jumuah),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.9f)
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                             Text(
                                 text = timeUntilJumuah,
-                                style = MaterialTheme.typography.titleMedium,
+                                style = MaterialTheme.typography.headlineSmall,
                                 fontWeight = FontWeight.Bold,
-                                color = Color.White
+                                color = JumuahGreen
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(11.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
+                )
+
+                Spacer(modifier = Modifier.height(11.dp))
 
                 Text(
                     text = stringResource(R.string.jumuah_hadith_quote),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.7f),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontWeight = FontWeight.Medium
                 )
             }

@@ -57,6 +57,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 internal const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
@@ -177,7 +179,7 @@ internal fun AyahItem(
                 ) {
                     Icon(
                         imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = "Favorite",
+                        contentDescription = stringResource(R.string.cd_favorite),
                         tint = if (isFavorite) Color(0xFFEF4444)
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
@@ -189,7 +191,7 @@ internal fun AyahItem(
                 ) {
                     Icon(
                         imageVector = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = "Bookmark",
+                        contentDescription = stringResource(R.string.cd_bookmark),
                         tint = if (ayah.isBookmarked) NimazColors.QuranColors.BookmarkPrimary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
@@ -209,7 +211,7 @@ internal fun AyahItem(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Share,
-                        contentDescription = "Share",
+                        contentDescription = stringResource(R.string.cd_share),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
@@ -232,7 +234,7 @@ internal fun AyahItem(
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = "Tafseer",
+                        contentDescription = stringResource(R.string.cd_tafseer),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(20.dp)
                     )

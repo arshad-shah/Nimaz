@@ -18,6 +18,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 /**
  * Standard top app bar for Nimaz app.
@@ -83,7 +85,7 @@ fun NimazBackTopAppBar(
             IconButton(onClick = onBackClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Navigate back"
+                    contentDescription = stringResource(R.string.cd_back)
                 )
             }
         },

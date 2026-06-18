@@ -80,9 +80,20 @@
     <string name="todays_progress">Today\'s Progress</string>
     <string name="prayers_count_format">%1$d of %2$d prayers</string>
     <string name="fasting">Fasting</string>
-    <string name="today_fasting">Today: Fasting</string>
+    <string name="today_fasting">Fasting today</string>
     <string name="no_fast_today">No fast today</string>
+    <string name="fasting_logged">Logged</string>
+    <string name="fasting_not_logged">Not logged</string>
     <string name="hadith_of_the_day">Hadith of the Day</string>
+    <string name="read">Read</string>
+    <string name="ayah_copied_to_clipboard">Ayah copied to clipboard</string>
+    <string name="test_notification_title">Test Notification</string>
+    <string name="test_notification_text">Prayer notifications are working correctly</string>
+    <!-- Hadith authenticity grades (transliterated Arabic terms) -->
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
     <string name="hours">Hours</string>
@@ -105,6 +116,12 @@
     <string name="battery_optimization_title">Battery Optimization Active</string>
     <string name="battery_optimization_message">Battery optimization may prevent timely prayer notifications.</string>
     <string name="fix">Fix</string>
+    <!-- Home banner one-line subtitles -->
+    <string name="notifications_disabled_subtitle">Prayer reminders won\'t show</string>
+    <string name="location_permission_subtitle">Needed for accurate prayer times</string>
+    <string name="battery_optimization_subtitle">Alarms may be delayed</string>
+    <string name="update_available_subtitle">Tap update to get the latest</string>
+    <string name="update_ready_subtitle">Restart to finish installing</string>
 
     <!-- Home Screen - Jumu'ah -->
     <string name="jumuah_mubarak">Jumu\'ah Mubarak</string>
@@ -878,4 +895,71 @@
     <string name="notification_settings_stop">Stop</string>
     <string name="notification_settings_download_play">Download and Play</string>
     <string name="notification_settings_preview">Preview</string>
+
+    <!-- Prayer notification copy (non-scripture UI strings) -->
+    <string name="notif_short_fajr">It\'s time to pray. Begin your day with Allah.</string>
+    <string name="notif_short_sunrise">The sun has risen — Ishraq time begins.</string>
+    <string name="notif_short_dhuhr">It\'s time to pray. Pause and turn to Allah.</string>
+    <string name="notif_short_asr">It\'s time to pray. Don\'t let Asr pass by.</string>
+    <string name="notif_short_maghrib">It\'s time to pray as the day draws to a close.</string>
+    <string name="notif_short_isha">It\'s time to pray. Seal your day with Isha.</string>
+    <string name="notif_short_generic">It\'s time for %s prayer.</string>
+
+    <string name="notif_pre_reminder_title">%1$s in %2$d minutes</string>
+    <string name="notif_pre_reminder_1">Prepare your heart and make wudu.</string>
+    <string name="notif_pre_reminder_2">Time to get ready for prayer.</string>
+    <string name="notif_pre_reminder_3">A reminder to prepare for worship.</string>
+    <string name="notif_pre_reminder_4">Get ready to stand before your Lord.</string>
+
+    <string name="notif_greeting_predawn">May your morning be blessed</string>
+    <string name="notif_greeting_morning">Good morning, may Allah bless your day</string>
+    <string name="notif_greeting_afternoon">Good afternoon, stay mindful of your prayers</string>
+    <string name="notif_greeting_evening">Good evening, may your worship be accepted</string>
+    <string name="notif_greeting_night">May your night be peaceful</string>
+
+    <string name="notif_summary_title_all_complete">Masha\'Allah! All Prayers Complete</string>
+    <string name="notif_summary_title_default">Daily Prayer Summary</string>
+    <string name="notif_summary_count">%1$d of %2$d prayers completed</string>
+    <string name="widget_loading">Loading…</string>
+    <string name="widget_tap_to_setup">Tap to setup</string>
+    <string name="widget_next_prayer">Next Prayer</string>
+    <string name="widget_error_loading">Error loading data</string>
+    <string name="widget_tap_to_retry">Tap to retry</string>
+    <string name="widget_tap_to_refresh">Tap to refresh</string>
+    <string name="widget_today">TODAY</string>
+    <string name="widget_no_events">No events</string>
+    <!-- Accessibility content descriptions -->
+    <string name="cd_share">Share</string>
+    <string name="cd_bookmark">Bookmark</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_tafseer">Tafseer</string>
+    <string name="cd_stop">Stop</string>
+    <string name="cd_settings">Settings</string>
+    <string name="cd_previous_month">Previous month</string>
+    <string name="cd_next_month">Next month</string>
+    <string name="cd_filter">Filter</string>
+    <string name="cd_favorite">Favorite</string>
+    <string name="cd_delete">Delete</string>
+    <string name="cd_copy">Copy</string>
+    <string name="cd_translation">Translation</string>
+    <string name="cd_stop_preview">Stop preview</string>
+    <string name="cd_stop_audio">Stop audio</string>
+    <string name="cd_reset">Reset</string>
+    <string name="cd_previous_page">Previous page</string>
+    <string name="cd_preview">Preview</string>
+    <string name="cd_play">Play</string>
+    <string name="cd_notes">Notes</string>
+    <string name="cd_next_page">Next page</string>
+    <string name="cd_new_calculation">New Calculation</string>
+    <string name="cd_increase">Increase</string>
+    <string name="cd_history">History</string>
+    <string name="cd_facing_qibla">Facing Qibla</string>
+    <string name="cd_export_annotations">Export Annotations</string>
+    <string name="cd_edit">Edit</string>
+    <string name="cd_dismiss">Dismiss</string>
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_close">Close</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_clear">Clear</string>
+    <string name="cd_item_selected">%1$s selected</string>
 </resources>

@@ -34,8 +34,8 @@ class TodayInfoCardsTest {
             )
         }
 
-        // R.string.today_fasting = "Today: Fasting"
-        composeRule.onNodeWithText("Today: Fasting").assertExists()
+        // R.string.today_fasting = "Fasting today"
+        composeRule.onNodeWithText("Fasting today").assertExists()
     }
 
     @Test

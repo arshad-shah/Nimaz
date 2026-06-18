@@ -33,6 +33,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerViewModel
+import com.arshadshah.nimaz.R
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +80,7 @@ fun TafseerScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.cd_back)
                         )
                     }
                 },
@@ -86,7 +88,7 @@ fun TafseerScreen(
                     IconButton(onClick = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }) {
                         Icon(
                             imageVector = Icons.Default.Share,
-                            contentDescription = "Export Annotations"
+                            contentDescription = stringResource(R.string.cd_export_annotations)
                         )
                     }
                 },
