@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.text.font.FontFamily
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,11 +34,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -77,8 +75,7 @@ import kotlinx.coroutines.launch
 private data class InfoPage(
     val title: String,
     val description: String,
-    val icon: ImageVector,
-    val color: Color,
+    val emblem: OnboardingEmblem,
     val features: List<String>
 )
 
@@ -124,8 +121,7 @@ fun OnboardingScreen(
         InfoPage(
             title = stringResource(R.string.onboarding_welcome_title),
             description = stringResource(R.string.onboarding_welcome_description),
-            icon = Icons.Default.Mosque,
-            color = MaterialTheme.colorScheme.primary,
+            emblem = OnboardingEmblem.MOSQUE,
             features = listOf(
                 stringResource(R.string.onboarding_feature_prayer_times),
                 stringResource(R.string.onboarding_feature_quran),
@@ -136,8 +132,7 @@ fun OnboardingScreen(
         InfoPage(
             title = stringResource(R.string.onboarding_prayer_title),
             description = stringResource(R.string.onboarding_prayer_description),
-            icon = Icons.Default.Schedule,
-            color = MaterialTheme.colorScheme.primary,
+            emblem = OnboardingEmblem.PRAYER_TIMES,
             features = listOf(
                 stringResource(R.string.onboarding_feature_calc_methods),
                 stringResource(R.string.onboarding_feature_custom_adjustments),
@@ -148,8 +143,7 @@ fun OnboardingScreen(
         InfoPage(
             title = stringResource(R.string.onboarding_quran_title),
             description = stringResource(R.string.onboarding_quran_description),
-            icon = Icons.AutoMirrored.Filled.MenuBook,
-            color = NimazColors.QuranColors.Meccan,
+            emblem = OnboardingEmblem.QURAN,
             features = listOf(
                 stringResource(R.string.onboarding_feature_translations),
                 stringResource(R.string.onboarding_feature_audio),
@@ -161,17 +155,24 @@ fun OnboardingScreen(
 
     val totalPages = infoPages.size + 1 // +1 for permissions page
     val pagerState = rememberPagerState(pageCount = { totalPages })
-    val pageColors = infoPages.map { it.color } + MaterialTheme.colorScheme.secondary
 
     Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+        containerColor = Color(0xFF061A1C),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .background(illuminatedBackground)
         ) {
+            KhatamBand(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(96.dp)
+                    .align(Alignment.TopCenter)
+            )
+            Column(modifier = Modifier.fillMaxSize()) {
             // Skip Button
             Box(
                 modifier = Modifier
@@ -186,7 +187,7 @@ fun OnboardingScreen(
                     }) {
                         Text(
                             stringResource(R.string.onboarding_skip),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = IllumTextSoft
                         )
                     }
                 }
@@ -252,8 +253,8 @@ fun OnboardingScreen(
                                 .scale(scale)
                                 .clip(CircleShape)
                                 .background(
-                                    if (isSelected) pageColors[index]
-                                    else MaterialTheme.colorScheme.surfaceVariant
+                                    if (isSelected) IllumGold
+                                    else Color.White.copy(alpha = 0.28f)
                                 )
                         )
                     }
@@ -277,8 +278,9 @@ fun OnboardingScreen(
                                     pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                 }
                             },
+                            border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.6f)),
                             colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = MaterialTheme.colorScheme.onBackground
+                                contentColor = IllumGold
                             )
                         ) {
                             Text(stringResource(R.string.onboarding_back))
@@ -301,7 +303,8 @@ fun OnboardingScreen(
                             }
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = pageColors[pagerState.currentPage]
+                            containerColor = IllumGold,
+                            contentColor = Color(0xFF0A2A2A)
                         )
                     ) {
                         Text(
@@ -321,6 +324,7 @@ fun OnboardingScreen(
                     }
                 }
             }
+            }
         }
     }
 }
@@ -334,33 +338,22 @@ private fun InfoPageContent(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isCompact = maxHeight < 500.dp
-        val iconSize = if (isCompact) 80.dp else 120.dp
-        val iconInnerSize = if (isCompact) 40.dp else 60.dp
         val sectionSpacing = if (isCompact) 16.dp else 32.dp
         val smallSpacing = if (isCompact) 6.dp else 12.dp
+        val emblemHeight = if (isCompact) 150.dp else 196.dp
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = if (isCompact) 8.dp else 16.dp),
+                .padding(horizontal = 28.dp, vertical = if (isCompact) 8.dp else 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(iconSize)
-                    .clip(CircleShape)
-                    .background(page.color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = page.icon,
-                    contentDescription = null,
-                    tint = page.color,
-                    modifier = Modifier.size(iconInnerSize)
-                )
-            }
+            OnboardingEmblem(
+                kind = page.emblem,
+                modifier = Modifier.size(width = emblemHeight * 0.8f, height = emblemHeight)
+            )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
 
@@ -369,8 +362,9 @@ private fun InfoPageContent(
                 style = if (isCompact) MaterialTheme.typography.titleLarge
                 else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground
+                color = IllumCream
             )
 
             Spacer(modifier = Modifier.height(smallSpacing))
@@ -379,26 +373,27 @@ private fun InfoPageContent(
                 text = page.description,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = IllumTextSoft
             )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainer
-                )
+                    containerColor = Color.White.copy(alpha = 0.05f)
+                ),
+                border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.18f))
             ) {
                 Column(
                     modifier = Modifier.padding(
-                        horizontal = 16.dp,
+                        horizontal = 18.dp,
                         vertical = if (isCompact) 10.dp else 16.dp
                     )
                 ) {
                     page.features.forEach { feature ->
-                        FeatureRow(text = feature, color = page.color, compact = isCompact)
+                        FeatureRow(text = feature, compact = isCompact)
                     }
                 }
             }
@@ -421,9 +416,8 @@ private fun PermissionsPageContent(
 ) {
     BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val isCompact = maxHeight < 500.dp
-        val iconSize = if (isCompact) 64.dp else 88.dp
-        val iconInnerSize = if (isCompact) 32.dp else 44.dp
         val sectionSpacing = if (isCompact) 12.dp else 20.dp
+        val emblemHeight = if (isCompact) 110.dp else 140.dp
 
         Column(
             modifier = Modifier
@@ -433,21 +427,11 @@ private fun PermissionsPageContent(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Header icon
-            Box(
-                modifier = Modifier
-                    .size(iconSize)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Security,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(iconInnerSize)
-                )
-            }
+            // Header emblem — shield enclosing a khatam star
+            OnboardingEmblem(
+                kind = OnboardingEmblem.SHIELD,
+                modifier = Modifier.size(width = emblemHeight * 0.78f, height = emblemHeight)
+            )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
 
@@ -456,8 +440,9 @@ private fun PermissionsPageContent(
                 style = if (isCompact) MaterialTheme.typography.titleLarge
                 else MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onBackground
+                color = IllumCream
             )
 
             Spacer(modifier = Modifier.height(if (isCompact) 4.dp else 8.dp))
@@ -466,7 +451,7 @@ private fun PermissionsPageContent(
                 text = stringResource(R.string.onboarding_permissions_description),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = IllumTextSoft
             )
 
             Spacer(modifier = Modifier.height(sectionSpacing))
@@ -479,7 +464,6 @@ private fun PermissionsPageContent(
                 isGranted = locationGranted,
                 grantedLabel = locationName ?: stringResource(R.string.onboarding_location_granted),
                 buttonLabel = stringResource(R.string.onboarding_grant_location),
-                color = MaterialTheme.colorScheme.secondary,
                 onRequest = onRequestLocation,
                 compact = isCompact
             )
@@ -493,7 +477,6 @@ private fun PermissionsPageContent(
                 isGranted = notificationGranted,
                 grantedLabel = stringResource(R.string.onboarding_notification_granted),
                 buttonLabel = stringResource(R.string.onboarding_enable_notifications),
-                color = NimazColors.StatusColors.Late,
                 onRequest = onRequestNotification,
                 compact = isCompact
             )
@@ -507,7 +490,6 @@ private fun PermissionsPageContent(
                 isGranted = batteryOptDisabled,
                 grantedLabel = stringResource(R.string.onboarding_battery_granted),
                 buttonLabel = stringResource(R.string.onboarding_disable_battery_opt),
-                color = NimazColors.StatusColors.Active,
                 onRequest = onRequestBattery,
                 compact = isCompact
             )
@@ -523,18 +505,21 @@ private fun PermissionCard(
     isGranted: Boolean,
     grantedLabel: String,
     buttonLabel: String,
-    color: Color,
     onRequest: () -> Unit,
     compact: Boolean,
     modifier: Modifier = Modifier
 ) {
+    val green = NimazColors.StatusColors.Active
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isGranted)
-                NimazColors.StatusColors.Active.copy(alpha = 0.08f)
-            else MaterialTheme.colorScheme.surfaceContainer
+            containerColor = if (isGranted) green.copy(alpha = 0.12f)
+            else Color.White.copy(alpha = 0.05f)
+        ),
+        border = BorderStroke(
+            1.dp,
+            if (isGranted) green.copy(alpha = 0.45f) else IllumGold.copy(alpha = 0.22f)
         )
     ) {
         Row(
@@ -549,15 +534,15 @@ private fun PermissionCard(
                     .size(if (compact) 40.dp else 48.dp)
                     .clip(CircleShape)
                     .background(
-                        if (isGranted) NimazColors.StatusColors.Active.copy(alpha = 0.15f)
-                        else color.copy(alpha = 0.15f)
+                        if (isGranted) green.copy(alpha = 0.2f)
+                        else IllumGold.copy(alpha = 0.16f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = if (isGranted) Icons.Default.Check else icon,
                     contentDescription = null,
-                    tint = if (isGranted) NimazColors.StatusColors.Active else color,
+                    tint = if (isGranted) green else IllumGold,
                     modifier = Modifier.size(if (compact) 20.dp else 24.dp)
                 )
             }
@@ -571,13 +556,12 @@ private fun PermissionCard(
                     style = if (compact) MaterialTheme.typography.bodyMedium
                     else MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.White
                 )
                 Text(
                     text = if (isGranted) grantedLabel else description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isGranted) NimazColors.StatusColors.Active
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = if (isGranted) green else IllumTextSoft,
                     maxLines = 2
                 )
             }
@@ -587,7 +571,10 @@ private fun PermissionCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Button(
                     onClick = onRequest,
-                    colors = ButtonDefaults.buttonColors(containerColor = color),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = IllumGold,
+                        contentColor = Color(0xFF0A2A2A)
+                    ),
                     modifier = Modifier.height(if (compact) 36.dp else 40.dp),
                     contentPadding = ButtonDefaults.ContentPadding
                 ) {
@@ -604,30 +591,20 @@ private fun PermissionCard(
 @Composable
 private fun FeatureRow(
     text: String,
-    color: Color,
     compact: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = if (compact) 4.dp else 6.dp),
+            .padding(vertical = if (compact) 5.dp else 7.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Box(
-            modifier = Modifier
-                .size(if (compact) 20.dp else 24.dp)
-                .clip(CircleShape)
-                .background(color.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(if (compact) 12.dp else 14.dp)
-            )
-        }
+        Text(
+            text = "✦", // ✦ gold star bullet
+            color = IllumGold,
+            style = MaterialTheme.typography.titleMedium
+        )
 
         Spacer(modifier = Modifier.width(12.dp))
 
@@ -635,44 +612,47 @@ private fun FeatureRow(
             text = text,
             style = if (compact) MaterialTheme.typography.bodySmall
             else MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White.copy(alpha = 0.92f)
         )
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Info Page")
+@Preview(showBackground = true, widthDp = 400, heightDp = 740, name = "Info Page")
 @Composable
 private fun InfoPagePreview() {
     NimazTheme {
-        InfoPageContent(
-            page = InfoPage(
-                title = "Welcome to Nimaz",
-                description = "Your complete Islamic companion app",
-                icon = Icons.Default.Mosque,
-                color = Color(0xFF6750A4),
-                features = listOf(
-                    "Accurate prayer times",
-                    "Complete Quran with audio",
-                    "Authentic Hadith collections",
-                    "Daily duas and supplications"
+        Box(modifier = Modifier.fillMaxSize().background(illuminatedBackground)) {
+            InfoPageContent(
+                page = InfoPage(
+                    title = "Welcome to Nimaz",
+                    description = "Your complete Islamic companion app",
+                    emblem = OnboardingEmblem.MOSQUE,
+                    features = listOf(
+                        "Accurate prayer times",
+                        "Complete Quran with audio",
+                        "Authentic Hadith collections",
+                        "Daily duas and supplications"
+                    )
                 )
             )
-        )
+        }
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, name = "Permissions Page")
+@Preview(showBackground = true, widthDp = 400, heightDp = 740, name = "Permissions Page")
 @Composable
 private fun PermissionsPagePreview() {
     NimazTheme {
-        PermissionsPageContent(
-            locationGranted = true,
-            notificationGranted = false,
-            batteryOptDisabled = false,
-            locationName = "Dublin, Ireland",
-            onRequestLocation = {},
-            onRequestNotification = {},
-            onRequestBattery = {}
-        )
+        Box(modifier = Modifier.fillMaxSize().background(illuminatedBackground)) {
+            PermissionsPageContent(
+                locationGranted = true,
+                notificationGranted = false,
+                batteryOptDisabled = false,
+                locationName = "Dublin, Ireland",
+                onRequestLocation = {},
+                onRequestNotification = {},
+                onRequestBattery = {}
+            )
+        }
     }
 }
