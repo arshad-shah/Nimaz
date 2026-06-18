@@ -4,7 +4,8 @@ This documents the four Qaida JSON files in `json/` and the script that
 generates them. It covers sub-issue **A** of the
 [Qaida Reader epic (#171)](https://github.com/arshad-shah/Nimaz/issues/171) —
 **content & data authoring only**. Loading this data into the prepopulated
-Room database is sub-issue **C**; audio production is sub-issue **B**.
+Room database is sub-issue **C**; audio production is sub-issue **B**
+(see [`QAIDA_AUDIO.md`](QAIDA_AUDIO.md)).
 
 ## Files
 
