@@ -791,4 +791,17 @@
     <string name="fasting_sheet_edit_makeup">Edit Puasa Qadha</string>
     <string name="fasting_sheet_reason">Alasan</string>
     <string name="fasting_sheet_fidya_amount">Jumlah Fidyah</string>
+    <!-- Home redesign additions -->
+    <string name="read">Baca</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Tercatat</string>
+    <string name="fasting_not_logged">Belum tercatat</string>
+    <string name="notifications_disabled_subtitle">Pengingat salat tidak akan muncul</string>
+    <string name="location_permission_subtitle">Diperlukan untuk waktu salat akurat</string>
+    <string name="battery_optimization_subtitle">Alarm mungkin tertunda</string>
+    <string name="update_available_subtitle">Ketuk perbarui untuk versi terbaru</string>
+    <string name="update_ready_subtitle">Mulai ulang untuk menyelesaikan</string>
 </resources>

@@ -790,4 +790,17 @@
     <string name="fasting_sheet_edit_makeup">Modifier le jeûne de rattrapage</string>
     <string name="fasting_sheet_reason">Motif</string>
     <string name="fasting_sheet_fidya_amount">Montant de la Fidya</string>
+    <!-- Home redesign additions -->
+    <string name="read">Lire</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Enregistré</string>
+    <string name="fasting_not_logged">Non enregistré</string>
+    <string name="notifications_disabled_subtitle">Les rappels de prière ne s\'afficheront pas</string>
+    <string name="location_permission_subtitle">Nécessaire pour des horaires précis</string>
+    <string name="battery_optimization_subtitle">Les alarmes peuvent être retardées</string>
+    <string name="update_available_subtitle">Appuyez pour mettre à jour</string>
+    <string name="update_ready_subtitle">Redémarrez pour terminer l\'installation</string>
 </resources>

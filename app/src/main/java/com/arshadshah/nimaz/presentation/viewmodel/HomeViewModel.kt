@@ -11,6 +11,7 @@ import android.provider.Settings
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
@@ -200,10 +201,10 @@ class HomeViewModel @Inject constructor(
      */
     private fun shortGradeLabel(rawGrade: String?): String? =
         when (HadithGrade.fromString(rawGrade)) {
-            HadithGrade.SAHIH -> "Sahih"
-            HadithGrade.HASAN -> "Hasan"
-            HadithGrade.DAIF -> "Da'if"
-            HadithGrade.MAWDU -> "Mawdu'"
+            HadithGrade.SAHIH -> context.getString(R.string.grade_sahih)
+            HadithGrade.HASAN -> context.getString(R.string.grade_hasan)
+            HadithGrade.DAIF -> context.getString(R.string.grade_daif)
+            HadithGrade.MAWDU -> context.getString(R.string.grade_mawdu)
             else -> null
         }
 

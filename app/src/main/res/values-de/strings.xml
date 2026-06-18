@@ -789,4 +789,17 @@
     <string name="fasting_sheet_edit_makeup">Nachholfasten bearbeiten</string>
     <string name="fasting_sheet_reason">Grund</string>
     <string name="fasting_sheet_fidya_amount">Fidya-Betrag</string>
+    <!-- Home redesign additions -->
+    <string name="read">Lesen</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Erfasst</string>
+    <string name="fasting_not_logged">Nicht erfasst</string>
+    <string name="notifications_disabled_subtitle">Gebetserinnerungen werden nicht angezeigt</string>
+    <string name="location_permission_subtitle">Für genaue Gebetszeiten erforderlich</string>
+    <string name="battery_optimization_subtitle">Erinnerungen könnten verzögert werden</string>
+    <string name="update_available_subtitle">Zum Aktualisieren tippen</string>
+    <string name="update_ready_subtitle">Zum Abschließen neu starten</string>
 </resources>

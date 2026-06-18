@@ -791,4 +791,17 @@
     <string name="fasting_sheet_edit_makeup">Kaza Orucunu Düzenle</string>
     <string name="fasting_sheet_reason">Neden</string>
     <string name="fasting_sheet_fidya_amount">Fidye Tutarı</string>
+    <!-- Home redesign additions -->
+    <string name="read">Oku</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Kaydedildi</string>
+    <string name="fasting_not_logged">Kaydedilmedi</string>
+    <string name="notifications_disabled_subtitle">Namaz hatırlatıcıları gösterilmez</string>
+    <string name="location_permission_subtitle">Doğru namaz vakitleri için gerekli</string>
+    <string name="battery_optimization_subtitle">Uyarılar gecikebilir</string>
+    <string name="update_available_subtitle">Güncellemek için dokunun</string>
+    <string name="update_ready_subtitle">Tamamlamak için yeniden başlatın</string>
 </resources>

@@ -86,6 +86,11 @@
     <string name="fasting_not_logged">Not logged</string>
     <string name="hadith_of_the_day">Hadith of the Day</string>
     <string name="read">Read</string>
+    <!-- Hadith authenticity grades (transliterated Arabic terms) -->
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
     <string name="dua_of_the_moment">Dua of the Moment</string>
     <string name="prayer_times">Prayer Times</string>
     <string name="hours">Hours</string>

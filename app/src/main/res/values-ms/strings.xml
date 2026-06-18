@@ -790,4 +790,17 @@
     <string name="fasting_sheet_edit_makeup">Edit Puasa Ganti</string>
     <string name="fasting_sheet_reason">Sebab</string>
     <string name="fasting_sheet_fidya_amount">Jumlah Fidyah</string>
+    <!-- Home redesign additions -->
+    <string name="read">Baca</string>
+    <string name="grade_sahih">Sahih</string>
+    <string name="grade_hasan">Hasan</string>
+    <string name="grade_daif">Da\'if</string>
+    <string name="grade_mawdu">Mawdu\'</string>
+    <string name="fasting_logged">Direkod</string>
+    <string name="fasting_not_logged">Belum direkod</string>
+    <string name="notifications_disabled_subtitle">Peringatan solat tidak akan dipaparkan</string>
+    <string name="location_permission_subtitle">Diperlukan untuk waktu solat tepat</string>
+    <string name="battery_optimization_subtitle">Penggera mungkin tertangguh</string>
+    <string name="update_available_subtitle">Ketik kemas kini untuk versi terkini</string>
+    <string name="update_ready_subtitle">Mula semula untuk menyelesaikan pemasangan</string>
 </resources>
