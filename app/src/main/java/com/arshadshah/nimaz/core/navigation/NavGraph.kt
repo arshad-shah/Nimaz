@@ -876,8 +876,41 @@ fun NavGraph(
             }
 
             composable<Route.SettingsHelp> {
-                com.arshadshah.nimaz.presentation.screens.help.HelpSupportScreen(
-                    onNavigateBack = { navController.popBackStack() }
+                val context = androidx.compose.ui.platform.LocalContext.current
+                com.arshadshah.nimaz.presentation.screens.help.HelpScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToTopic = { topicId -> navController.navigate(Route.HelpTopicDetail(topicId)) },
+                    onContact = {
+                        val email = context.getString(com.arshadshah.nimaz.R.string.support_email)
+                        val subject = context.getString(com.arshadshah.nimaz.R.string.nimaz_support_request)
+                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                            data = android.net.Uri.parse("mailto:$email")
+                            putExtra(android.content.Intent.EXTRA_SUBJECT, subject)
+                        }
+                        context.startActivity(android.content.Intent.createChooser(intent, email))
+                    }
+                )
+            }
+
+            composable<Route.HelpTopicDetail> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HelpTopicDetail>()
+                com.arshadshah.nimaz.presentation.screens.help.HelpTopicDetailScreen(
+                    topicId = args.topicId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenGuide = { guideId -> navController.navigate(Route.HelpGuide(guideId)) }
+                )
+            }
+
+            composable<Route.HelpGuide> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.HelpGuide>()
+                com.arshadshah.nimaz.presentation.screens.help.HelpGuideScreen(
+                    guideId = args.guideId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onDeepLink = { key ->
+                        com.arshadshah.nimaz.core.navigation.helpDeepLinkRoute(key)?.let { route ->
+                            navController.navigate(route)
+                        }
+                    }
                 )
             }
 
