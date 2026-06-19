@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -18,16 +19,22 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -37,6 +44,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,10 +55,17 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 
-private data class DhikrTab(val label: String, val category: TasbihCategory?, val mine: Boolean = false)
+private data class DhikrTab(
+    val label: String,
+    val category: TasbihCategory? = null,
+    val mine: Boolean = false,
+    val favorites: Boolean = false,
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -64,22 +79,27 @@ fun ChooseDhikrScreen(
 
     var query by remember { mutableStateOf("") }
     var tabIndex by remember { mutableIntStateOf(0) }
+    var presetToDelete by remember { mutableStateOf<TasbihPreset?>(null) }
 
     val tabs = remember {
         listOf(
-            DhikrTab("All", null),
+            DhikrTab("All"),
+            DhikrTab("★", favorites = true),
             DhikrTab(TasbihCategory.AFTER_PRAYER.displayName(), TasbihCategory.AFTER_PRAYER),
             DhikrTab(TasbihCategory.MORNING.displayName(), TasbihCategory.MORNING),
             DhikrTab(TasbihCategory.EVENING.displayName(), TasbihCategory.EVENING),
-            DhikrTab("Mine", null, mine = true),
+            DhikrTab("Mine", mine = true),
         )
     }
 
+    val customIds = presetsState.customPresets.map { it.id }.toSet()
+    val favorites = presetsState.favorites
     val all = presetsState.defaultPresets + presetsState.customPresets
     val tab = tabs[tabIndex]
     val filtered = all.filter { preset ->
         val byTab = when {
-            tab.mine -> presetsState.customPresets.any { it.id == preset.id }
+            tab.favorites -> preset.id in favorites
+            tab.mine -> preset.id in customIds
             tab.category != null -> preset.category == tab.category
             else -> true
         }
@@ -88,6 +108,22 @@ fun ChooseDhikrScreen(
             preset.name, preset.translation, preset.transliteration, preset.arabicText
         ).any { it.contains(q, ignoreCase = true) }
         byTab && byQuery
+    }
+
+    presetToDelete?.let { preset ->
+        NimazConfirmDialog(
+            title = stringResource(R.string.tasbih_delete_preset_title),
+            message = stringResource(R.string.tasbih_delete_preset_message),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = {
+                viewModel.onEvent(TasbihEvent.DeleteCustomPreset(preset.id))
+                presetToDelete = null
+            },
+            onDismiss = { presetToDelete = null }
+        )
     }
 
     Scaffold(
@@ -133,13 +169,18 @@ fun ChooseDhikrScreen(
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 items(filtered, key = { it.id }) { preset ->
-                    DhikrRow(
+                    val isCustom = preset.id in customIds
+                    SwipeableDhikrRow(
                         preset = preset,
                         selected = counterState.selectedPreset?.id == preset.id,
+                        isFavorite = preset.id in favorites,
+                        isCustom = isCustom,
                         onClick = {
                             viewModel.onEvent(TasbihEvent.SelectPreset(preset))
                             onBack()
-                        }
+                        },
+                        onToggleFavorite = { viewModel.onEvent(TasbihEvent.ToggleFavorite(preset.id)) },
+                        onRequestDelete = { presetToDelete = preset }
                     )
                 }
             }
@@ -168,6 +209,54 @@ fun ChooseDhikrScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeableDhikrRow(
+    preset: TasbihPreset,
+    selected: Boolean,
+    isFavorite: Boolean,
+    isCustom: Boolean,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+    onRequestDelete: () -> Unit,
+) {
+    if (!isCustom) {
+        DhikrRow(preset, selected, isFavorite, onClick, onToggleFavorite)
+        return
+    }
+    // Custom presets: swipe end→start to delete (with confirmation).
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onRequestDelete()
+            }
+            false // never auto-dismiss; the confirm dialog drives the actual delete
+        }
+    )
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(12.dp))
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
+    ) {
+        DhikrRow(preset, selected, isFavorite, onClick, onToggleFavorite)
+    }
+}
+
 @Composable
 private fun CategoryTab(label: String, selected: Boolean, onClick: () -> Unit) {
     Surface(
@@ -190,7 +279,13 @@ private fun CategoryTab(label: String, selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun DhikrRow(preset: TasbihPreset, selected: Boolean, onClick: () -> Unit) {
+private fun DhikrRow(
+    preset: TasbihPreset,
+    selected: Boolean,
+    isFavorite: Boolean,
+    onClick: () -> Unit,
+    onToggleFavorite: () -> Unit,
+) {
     Surface(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
@@ -198,9 +293,9 @@ private fun DhikrRow(preset: TasbihPreset, selected: Boolean, onClick: () -> Uni
         border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            modifier = Modifier.padding(start = 12.dp, end = 6.dp).padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -221,6 +316,15 @@ private fun DhikrRow(preset: TasbihPreset, selected: Boolean, onClick: () -> Uni
                         modifier = Modifier.padding(top = 2.dp)
                     )
                 }
+            }
+            IconButton(onClick = onToggleFavorite, modifier = Modifier.size(36.dp)) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+                    contentDescription = stringResource(R.string.add_to_favorites),
+                    tint = if (isFavorite) NimazColors.TasbihColors.Milestone
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
             }
             Box(
                 modifier = Modifier

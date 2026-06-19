@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -24,6 +25,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -71,6 +74,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignP
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
+import com.arshadshah.nimaz.presentation.theme.isExpandedWidth
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterStyle
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
@@ -116,101 +121,187 @@ fun TasbihScreen(
         )
     }
 
+    val expandedWidth = currentWindowSizeClass().isExpandedWidth
+
+    // Shared callbacks/builders so both layouts reuse identical logic.
+    val topBar: @Composable (Modifier) -> Unit = { mod ->
+        TasbihTopBar(
+            modifier = mod,
+            beadsMode = beadsMode,
+            onSelectStyle = { style -> viewModel.onEvent(TasbihEvent.SetCounterStyle(style)) },
+            onOpenDesign = { showDesignSheet = true },
+            onNavigateToHistory = onNavigateToHistory
+        )
+    }
+    val capsule: @Composable () -> Unit = {
+        TasbihCountCapsule(
+            count = counterState.count,
+            target = counterState.targetCount,
+            laps = counterState.laps,
+            autoLap = counterState.autoLap
+        )
+    }
+    val counter: @Composable (Modifier) -> Unit = { mod ->
+        TasbihCounterArea(
+            modifier = mod,
+            beadsMode = beadsMode,
+            counterState = counterState,
+            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) }
+        )
+    }
+    val controls: @Composable () -> Unit = {
+        ControlButtons(
+            soundEnabled = counterState.soundEnabled,
+            vibrationEnabled = counterState.vibrationEnabled,
+            onReset = { viewModel.onEvent(TasbihEvent.Reset) },
+            onToggleSound = { viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled)) },
+            onToggleVibration = { viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled)) }
+        )
+    }
+
     Scaffold(contentWindowInsets = WindowInsets(0)) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .statusBarsPadding()
-                .background(MaterialTheme.colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Top bar: mode toggle + actions
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+        val rootModifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .statusBarsPadding()
+            .background(MaterialTheme.colorScheme.background)
+
+        if (expandedWidth) {
+            // Tablet / expanded-width two-pane layout.
+            Column(modifier = rootModifier) {
+                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // LEFT pane (~40%): current-tasbih info + count capsule.
+                    Column(
+                        modifier = Modifier
+                            .weight(0.4f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        CurrentTasbihInfoCard(
+                            arabic = counterState.selectedPreset?.arabicText,
+                            name = counterState.selectedPreset?.name
+                                ?: stringResource(R.string.free_count_label),
+                            translation = counterState.selectedPreset?.translation,
+                            target = counterState.targetCount,
+                            onClick = { showCurrentSheet = true }
+                        )
+                        capsule()
+                    }
+
+                    // RIGHT pane (~60%): the counter + controls.
+                    Column(
+                        modifier = Modifier
+                            .weight(0.6f)
+                            .fillMaxHeight()
+                            .padding(horizontal = 12.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        counter(Modifier.weight(1f).fillMaxWidth())
+                        controls()
+                        Spacer(Modifier.height(12.dp))
+                    }
+                }
+            }
+        } else {
+            // Phone / compact single-column layout (unchanged).
+            Column(
+                modifier = rootModifier,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                NimazPillTabs(
-                    tabs = listOf(
-                        stringResource(R.string.tasbih_mode_beads),
-                        stringResource(R.string.tasbih_mode_classic)
-                    ),
-                    selectedIndex = if (beadsMode) 0 else 1,
-                    onTabSelect = { index ->
-                        viewModel.onEvent(
-                            TasbihEvent.SetCounterStyle(
-                                if (index == 0) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC
-                            )
-                        )
-                    }
+                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+
+                Spacer(Modifier.height(4.dp))
+
+                capsule()
+
+                counter(Modifier.weight(1f).fillMaxWidth())
+
+                controls()
+
+                Spacer(Modifier.height(12.dp))
+
+                // Current-tasbih peek card → opens the detail sheet
+                CurrentTasbihPeek(
+                    arabic = counterState.selectedPreset?.arabicText,
+                    name = counterState.selectedPreset?.name ?: stringResource(R.string.free_count_label),
+                    translation = counterState.selectedPreset?.translation,
+                    target = counterState.targetCount,
+                    onClick = { showCurrentSheet = true }
                 )
-                Spacer(Modifier.weight(1f))
-                if (beadsMode) {
-                    IconButton(onClick = { showDesignSheet = true }) {
-                        Icon(Icons.Default.Palette, stringResource(R.string.tasbih_bead_design))
-                    }
-                }
-                IconButton(onClick = onNavigateToHistory) {
-                    Icon(Icons.Default.History, stringResource(R.string.history))
-                }
             }
+        }
+    }
+}
 
-            Spacer(Modifier.height(4.dp))
-
-            // Pill count capsule
-            TasbihCountCapsule(
-                count = counterState.count,
-                target = counterState.targetCount,
-                laps = counterState.laps,
-                autoLap = counterState.autoLap
-            )
-
-            // Counter — beads strand (wide band) or classic ring, crossfaded
-            Box(modifier = Modifier.weight(1f).fillMaxWidth(), contentAlignment = Alignment.Center) {
-                Crossfade(targetState = beadsMode, animationSpec = tween(400), label = "counter_mode") { beads ->
-                    if (beads) {
-                        TasbihBeads(
-                            count = counterState.count + counterState.laps * counterState.targetCount,
-                            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                            targetCount = counterState.targetCount,
-                            design = BeadDesigns.byKey(counterState.beadDesignKey),
-                            leftHanded = counterState.leftHanded,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(260.dp)
-                        )
-                    } else {
-                        CounterCircle(
-                            count = counterState.count,
-                            targetCount = counterState.targetCount,
-                            laps = counterState.laps,
-                            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) }
-                        )
-                    }
-                }
+@Composable
+private fun TasbihTopBar(
+    beadsMode: Boolean,
+    onSelectStyle: (TasbihCounterStyle) -> Unit,
+    onOpenDesign: () -> Unit,
+    onNavigateToHistory: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        NimazPillTabs(
+            tabs = listOf(
+                stringResource(R.string.tasbih_mode_beads),
+                stringResource(R.string.tasbih_mode_classic)
+            ),
+            selectedIndex = if (beadsMode) 0 else 1,
+            onTabSelect = { index ->
+                onSelectStyle(
+                    if (index == 0) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC
+                )
             }
+        )
+        Spacer(Modifier.weight(1f))
+        if (beadsMode) {
+            IconButton(onClick = onOpenDesign) {
+                Icon(Icons.Default.Palette, stringResource(R.string.tasbih_bead_design))
+            }
+        }
+        IconButton(onClick = onNavigateToHistory) {
+            Icon(Icons.Default.History, stringResource(R.string.history))
+        }
+    }
+}
 
-            // Controls
-            ControlButtons(
-                soundEnabled = counterState.soundEnabled,
-                vibrationEnabled = counterState.vibrationEnabled,
-                onReset = { viewModel.onEvent(TasbihEvent.Reset) },
-                onToggleSound = { viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled)) },
-                onToggleVibration = { viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled)) }
-            )
-
-            Spacer(Modifier.height(12.dp))
-
-            // Current-tasbih peek card → opens the detail sheet
-            CurrentTasbihPeek(
-                arabic = counterState.selectedPreset?.arabicText,
-                name = counterState.selectedPreset?.name ?: stringResource(R.string.free_count_label),
-                translation = counterState.selectedPreset?.translation,
-                target = counterState.targetCount,
-                onClick = { showCurrentSheet = true }
-            )
+@Composable
+private fun TasbihCounterArea(
+    beadsMode: Boolean,
+    counterState: com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState,
+    onIncrement: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Crossfade(targetState = beadsMode, animationSpec = tween(400), label = "counter_mode") { beads ->
+            if (beads) {
+                TasbihBeads(
+                    count = counterState.count + counterState.laps * counterState.targetCount,
+                    onIncrement = onIncrement,
+                    targetCount = counterState.targetCount,
+                    design = BeadDesigns.byKey(counterState.beadDesignKey),
+                    leftHanded = counterState.leftHanded,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
+                )
+            } else {
+                CounterCircle(
+                    count = counterState.count,
+                    targetCount = counterState.targetCount,
+                    laps = counterState.laps,
+                    onIncrement = onIncrement
+                )
+            }
         }
     }
 }
@@ -312,6 +403,61 @@ private fun CurrentTasbihPeek(
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun CurrentTasbihInfoCard(
+    arabic: String?,
+    name: String,
+    translation: String?,
+    target: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        border = BorderStroke(1.dp, NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f))
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (!arabic.isNullOrEmpty()) {
+                ArabicText(
+                    text = arabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = NimazColors.TasbihColors.Milestone,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            if (!translation.isNullOrEmpty()) {
+                Text(
+                    text = translation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Text(
+                text = stringResource(R.string.target_format, target),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = NimazColors.TasbihColors.Milestone
+            )
         }
     }
 }

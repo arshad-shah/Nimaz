@@ -24,6 +24,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
@@ -56,20 +57,26 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
+import com.arshadshah.nimaz.domain.model.TasbihCategory
+import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DuaReaderScreen(
     duaId: String,
     onNavigateBack: () -> Unit,
-    viewModel: DuaViewModel = hiltViewModel()
+    viewModel: DuaViewModel = hiltViewModel(),
+    tasbihViewModel: TasbihViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsState()
     val context = LocalContext.current
+    val addedToTasbihMsg = stringResource(R.string.dua_reader_added_tasbih)
 
     LaunchedEffect(duaId) {
         viewModel.onEvent(DuaEvent.LoadDua(duaId))
@@ -82,6 +89,22 @@ fun DuaReaderScreen(
                 onBackClick = onNavigateBack,
                 subtitle = state.dua?.occasion?.displayName(),
                 actions = {
+                    IconButton(
+                        onClick = {
+                            state.dua?.let { dua ->
+                                tasbihViewModel.onEvent(
+                                    TasbihEvent.CreateCustomPreset(dua.toTasbihPreset())
+                                )
+                                Toast.makeText(context, addedToTasbihMsg, Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = stringResource(R.string.dua_reader_add_tasbih),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                     IconButton(
                         onClick = {
                             state.dua?.let {
@@ -215,6 +238,27 @@ fun DuaReaderScreen(
             }
         }
     }
+}
+
+private fun Dua.toTasbihPreset(): TasbihPreset {
+    val now = System.currentTimeMillis()
+    val presetName = titleEnglish.trim().let {
+        if (it.length > 40) it.take(40).trimEnd() + "…" else it
+    }
+    return TasbihPreset(
+        id = 0,
+        name = presetName.ifBlank { titleArabic.trim() },
+        arabicText = textArabic.ifBlank { null },
+        transliteration = textTransliteration?.ifBlank { null },
+        translation = textEnglish.ifBlank { null },
+        targetCount = repeatCount?.takeIf { it > 0 } ?: 33,
+        category = TasbihCategory.CUSTOM,
+        reference = reference?.ifBlank { null },
+        isDefault = false,
+        displayOrder = 0,
+        createdAt = now,
+        updatedAt = now
+    )
 }
 
 @Composable

@@ -532,6 +532,8 @@
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Yükleniyor…</string>
     <string name="dua_reader_favorite">Favori</string>
+    <string name="dua_reader_add_tasbih">Tesbih olarak ekle</string>
+    <string name="dua_reader_added_tasbih">Tesbih\'e eklendi</string>
     <string name="dua_reader_prev">Önceki</string>
     <string name="dua_reader_next">Sonraki</string>
     <string name="dua_reader_index_format">%1$d / …</string>

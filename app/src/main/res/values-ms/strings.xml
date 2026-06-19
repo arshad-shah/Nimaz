@@ -532,6 +532,8 @@
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Memuatkan…</string>
     <string name="dua_reader_favorite">Kegemaran</string>
+    <string name="dua_reader_add_tasbih">Tambah sebagai Tasbih</string>
+    <string name="dua_reader_added_tasbih">Ditambah ke Tasbih</string>
     <string name="dua_reader_prev">Sblm</string>
     <string name="dua_reader_next">Strs</string>
     <string name="dua_reader_index_format">%1$d daripada …</string>

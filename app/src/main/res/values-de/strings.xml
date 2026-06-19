@@ -531,6 +531,8 @@
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Wird geladen…</string>
     <string name="dua_reader_favorite">Favorit</string>
+    <string name="dua_reader_add_tasbih">Als Tasbih hinzufügen</string>
+    <string name="dua_reader_added_tasbih">Zu Tasbih hinzugefügt</string>
     <string name="dua_reader_prev">Zurück</string>
     <string name="dua_reader_next">Weiter</string>
     <string name="dua_reader_index_format">%1$d von …</string>

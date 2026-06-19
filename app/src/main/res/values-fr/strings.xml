@@ -532,6 +532,8 @@
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Chargement…</string>
     <string name="dua_reader_favorite">Favori</string>
+    <string name="dua_reader_add_tasbih">Ajouter comme Tasbih</string>
+    <string name="dua_reader_added_tasbih">Ajouté au Tasbih</string>
     <string name="dua_reader_prev">Préc</string>
     <string name="dua_reader_next">Suiv</string>
     <string name="dua_reader_index_format">%1$d sur …</string>
