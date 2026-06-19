@@ -811,4 +811,15 @@
     <string name="cd_clear_search">Suche löschen</string>
     <string name="cd_clear">Löschen</string>
     <string name="cd_item_selected">%1$s ausgewählt</string>
+    <!-- Tasbih redesign -->
+    <string name="tasbih_mode_beads">Perlen</string>
+    <string name="tasbih_mode_classic">Klassisch</string>
+    <string name="tasbih_bead_design">Perlen-Design</string>
+    <string name="tasbih_choose_dhikr">Dhikr wählen</string>
+    <string name="tasbih_search_dhikr">Dhikr suchen…</string>
+    <string name="tasbih_delete_preset_title">Vorlage löschen?</string>
+    <string name="tasbih_delete_preset_message">Diese benutzerdefinierte Dhikr-Vorlage wird entfernt. Ihre erfassten Zählungen bleiben erhalten.</string>
+    <string name="new_tasbih">Neue Tasbih</string>
+    <string name="create_tasbih">Tasbih erstellen</string>
+    <string name="all_time">Gesamt</string>
 </resources>

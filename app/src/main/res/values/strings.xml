@@ -462,15 +462,11 @@
     <!-- Tasbih Screen -->
     <string name="tasbih">Tasbih</string>
     <string name="tasbih_title">Tasbih</string>
-    <string name="tasbih_counter_style">Switch counter style</string>
     <string name="tasbih_mode_beads">Beads</string>
     <string name="tasbih_mode_classic">Classic</string>
     <string name="tasbih_bead_design">Bead design</string>
     <string name="tasbih_choose_dhikr">Choose Dhikr</string>
     <string name="tasbih_search_dhikr">Search dhikr…</string>
-    <string name="tasbih_new_tasbih">New Tasbih</string>
-    <string name="tasbih_category_all">All</string>
-    <string name="tasbih_category_mine">Mine</string>
     <string name="tasbih_delete_preset_title">Delete preset?</string>
     <string name="tasbih_delete_preset_message">This custom dhikr preset will be removed. Your logged counts are kept.</string>
     <string name="history">History</string>

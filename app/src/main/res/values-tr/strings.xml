@@ -813,4 +813,15 @@
     <string name="cd_clear_search">Aramayı temizle</string>
     <string name="cd_clear">Temizle</string>
     <string name="cd_item_selected">%1$s seçildi</string>
+    <!-- Tasbih redesign -->
+    <string name="tasbih_mode_beads">Boncuk</string>
+    <string name="tasbih_mode_classic">Klasik</string>
+    <string name="tasbih_bead_design">Boncuk tasarımı</string>
+    <string name="tasbih_choose_dhikr">Zikir seç</string>
+    <string name="tasbih_search_dhikr">Zikir ara…</string>
+    <string name="tasbih_delete_preset_title">Ön ayar silinsin mi?</string>
+    <string name="tasbih_delete_preset_message">Bu özel zikir ön ayarı kaldırılacak. Kaydedilen sayımlarınız korunur.</string>
+    <string name="new_tasbih">Yeni Tesbih</string>
+    <string name="create_tasbih">Tesbih oluştur</string>
+    <string name="all_time">Tüm zamanlar</string>
 </resources>

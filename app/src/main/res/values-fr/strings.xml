@@ -812,4 +812,15 @@
     <string name="cd_clear_search">Effacer la recherche</string>
     <string name="cd_clear">Effacer</string>
     <string name="cd_item_selected">%1$s sélectionné</string>
+    <!-- Tasbih redesign -->
+    <string name="tasbih_mode_beads">Perles</string>
+    <string name="tasbih_mode_classic">Classique</string>
+    <string name="tasbih_bead_design">Style des perles</string>
+    <string name="tasbih_choose_dhikr">Choisir le dhikr</string>
+    <string name="tasbih_search_dhikr">Rechercher un dhikr…</string>
+    <string name="tasbih_delete_preset_title">Supprimer le préréglage ?</string>
+    <string name="tasbih_delete_preset_message">Ce préréglage de dhikr personnalisé sera supprimé. Vos comptages enregistrés sont conservés.</string>
+    <string name="new_tasbih">Nouveau tasbih</string>
+    <string name="create_tasbih">Créer un tasbih</string>
+    <string name="all_time">Tout le temps</string>
 </resources>

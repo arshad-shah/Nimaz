@@ -101,7 +101,7 @@ fun ChooseDhikrScreen(
                 },
                 actions = {
                     IconButton(onClick = onNavigateToAddPreset) {
-                        Icon(Icons.Default.Add, stringResource(R.string.tasbih_new_tasbih))
+                        Icon(Icons.Default.Add, stringResource(R.string.new_tasbih))
                     }
                 }
             )
@@ -156,7 +156,7 @@ fun ChooseDhikrScreen(
                 ) {
                     Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                     Text(
-                        text = stringResource(R.string.tasbih_new_tasbih),
+                        text = stringResource(R.string.new_tasbih),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,

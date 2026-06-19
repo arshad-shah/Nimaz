@@ -812,4 +812,15 @@
     <string name="cd_clear_search">Kosongkan carian</string>
     <string name="cd_clear">Kosongkan</string>
     <string name="cd_item_selected">%1$s dipilih</string>
+    <!-- Tasbih redesign -->
+    <string name="tasbih_mode_beads">Manik</string>
+    <string name="tasbih_mode_classic">Klasik</string>
+    <string name="tasbih_bead_design">Reka bentuk manik</string>
+    <string name="tasbih_choose_dhikr">Pilih Zikir</string>
+    <string name="tasbih_search_dhikr">Cari zikir…</string>
+    <string name="tasbih_delete_preset_title">Padam pratetap?</string>
+    <string name="tasbih_delete_preset_message">Pratetap zikir tersuai ini akan dialih keluar. Kiraan yang direkod akan disimpan.</string>
+    <string name="new_tasbih">Tasbih baharu</string>
+    <string name="create_tasbih">Cipta Tasbih</string>
+    <string name="all_time">Sepanjang masa</string>
 </resources>
