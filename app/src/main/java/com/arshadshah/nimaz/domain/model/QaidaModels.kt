@@ -112,6 +112,52 @@ data class QaidaLessonProgress(
 )
 
 /**
+ * Fine-grained per-cell practice tracking. A cell becomes [isCompleted] (i.e.
+ * "heard") the first time its audio is played; [heardCount] counts replays.
+ */
+data class QaidaCellProgress(
+    val lessonId: Int,
+    val cellId: Int,
+    val heardCount: Int,
+    val isCompleted: Boolean,
+    val lastPracticedAt: Long
+)
+
+/**
+ * Derived display state for a single lesson: the seeded [QaidaLesson] combined
+ * with the learner's stored progress and the data-driven unlock rules. Unlike
+ * [QaidaLessonProgress] (raw persisted data), [status] here is always the
+ * authoritative value derived from gating + completion.
+ */
+data class QaidaLessonState(
+    val lesson: QaidaLesson,
+    val status: LessonStatus,
+    val stars: Int,
+    val completedCells: Int,
+    val totalCells: Int,
+    val completionFraction: Float,
+    val lastCellId: Int?
+)
+
+/**
+ * Whole-course rollup for a progress dashboard: every lesson's derived state
+ * plus aggregate stats and the "continue where you left off" pointer.
+ *
+ * [nextLessonId] is the first unlocked-but-incomplete lesson (the global
+ * resume pointer); null once every lesson is completed.
+ */
+data class QaidaCourseProgress(
+    val lessons: List<QaidaLessonState>,
+    val completedLessons: Int,
+    val totalLessons: Int,
+    val totalStars: Int,
+    val maxStars: Int,
+    val totalCellsHeard: Int,
+    val overallFraction: Float,
+    val nextLessonId: Int?
+)
+
+/**
  * The kind of token a [QaidaCell] represents.
  */
 enum class TokenType {
