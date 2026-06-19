@@ -53,7 +53,7 @@ fun CompassQiblaView(
                 qiblaBearing = qiblaBearing,
                 isFacingQibla = isFacingQibla,
                 animatedAzimuth = animatedAzimuth,
-                compassSize = 300.dp
+                compassSize = 360.dp
             )
             Spacer(modifier = Modifier.height(20.dp))
             if (hasQiblaInfo) {

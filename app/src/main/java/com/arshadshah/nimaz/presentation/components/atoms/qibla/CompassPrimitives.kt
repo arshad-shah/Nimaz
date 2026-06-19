@@ -7,6 +7,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -19,13 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -129,12 +130,17 @@ fun CompassRings(modifier: Modifier = Modifier) {
     }
 }
 
-/** Cardinal direction labels (N/E/S/W) drawn around the dial. */
+/**
+ * Cardinal direction labels (N/E/S/W) drawn around the fixed dial face. All
+ * labels share the neutral on-surface tone — "north is red" now belongs to the
+ * compass needle, like a real compass whose printed letters are plain and only
+ * the needle's north tip is coloured. North stays a touch larger/bolder purely
+ * for orientation.
+ */
 @Composable
 fun DirectionMarkers(modifier: Modifier = Modifier) {
     val textMeasurer = rememberTextMeasurer()
-    val northColor = CompassNorthColor
-    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
+    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2, size.height / 2)
@@ -143,11 +149,10 @@ fun DirectionMarkers(modifier: Modifier = Modifier) {
         val directions = listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f)
         directions.forEach { (label, angleDeg) ->
             val isNorth = label == "N"
-            val textColor = if (isNorth) northColor else onSurfaceVariantColor
             val style = TextStyle(
                 fontSize = if (isNorth) 16.sp else 14.sp,
                 fontWeight = if (isNorth) FontWeight.Bold else FontWeight.SemiBold,
-                color = textColor
+                color = labelColor
             )
             val textResult = textMeasurer.measure(label, style)
             val angle = Math.toRadians(angleDeg.toDouble())
@@ -160,27 +165,24 @@ fun DirectionMarkers(modifier: Modifier = Modifier) {
     }
 }
 
-/** Dial face with tick marks and the Qibla arrow + Kaaba marker at its tip. */
+/**
+ * Static dial face: the radial background + the ring of degree ticks (every 5°,
+ * major every 30°). This layer never rotates — it is the fixed compass card that
+ * gives the eye a stable frame of reference. The needles ([CompassNeedles]) and
+ * the Kaaba marker are drawn on top as separate, rotating layers.
+ */
 @Composable
-fun CompassDial(
-    qiblaBearing: Float,
-    isFacingQibla: Boolean,
-    modifier: Modifier = Modifier,
-    goldColor: Color = QiblaGold,
-) {
+fun CompassDialFace(modifier: Modifier = Modifier) {
     val dialBackground = Brush.radialGradient(
         colors = listOf(
             MaterialTheme.colorScheme.surfaceContainerHigh,
             MaterialTheme.colorScheme.surfaceContainer
         )
     )
-    val tickColorMajor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-    val tickColorMinor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-    val arrowColor = if (isFacingQibla) QiblaGreen else goldColor
-    // Needle tail + pivot pin colors (read here; can't touch MaterialTheme inside DrawScope)
-    val tailColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
-    val pinColor = MaterialTheme.colorScheme.outline
-    val pinHighlightColor = MaterialTheme.colorScheme.surfaceContainerHighest
+    // Bright majors + clearly-visible medium-grey minors, so the full ring of
+    // 5° notches reads against the dark dial (matches the agreed prototype).
+    val tickColorMajor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f)
+    val tickColorMinor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.40f)
 
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2, size.height / 2)
@@ -209,80 +211,171 @@ fun CompassDial(
                 strokeWidth = tickWidth
             )
         }
+    }
+}
 
-        // Qibla needle — a real compass hand: a long front blade toward the
-        // Qibla and a shorter tail behind, both meeting at the center where a
-        // pivot pin passes through (drawn last so it sits on top of the blades).
-        val qiblaAngleRad = Math.toRadians(qiblaBearing.toDouble())
-        val perpAngle = qiblaAngleRad + Math.PI / 2
+/**
+ * Draws a single compass hand pointing at [angleDeg] (0° = straight up, growing
+ * clockwise): a long [frontLength] blade in [frontColor] and a shorter
+ * [backLength] counterweight tail in [backColor], meeting at [halfWidth]-wide
+ * shoulders over [center]. Used for both the red north needle and the gold
+ * Qibla needle.
+ */
+private fun DrawScope.drawNeedle(
+    center: Offset,
+    angleDeg: Float,
+    frontLength: Float,
+    backLength: Float,
+    halfWidth: Float,
+    frontColor: Color,
+    backColor: Color,
+) {
+    val angleRad = Math.toRadians(angleDeg.toDouble())
+    val perpAngle = angleRad + Math.PI / 2
 
+    val shoulderLeftX = center.x + (halfWidth * sin(perpAngle)).toFloat()
+    val shoulderLeftY = center.y - (halfWidth * cos(perpAngle)).toFloat()
+    val shoulderRightX = center.x - (halfWidth * sin(perpAngle)).toFloat()
+    val shoulderRightY = center.y + (halfWidth * cos(perpAngle)).toFloat()
+
+    val frontTipX = center.x + (frontLength * sin(angleRad)).toFloat()
+    val frontTipY = center.y - (frontLength * cos(angleRad)).toFloat()
+    val backTipX = center.x - (backLength * sin(angleRad)).toFloat()
+    val backTipY = center.y + (backLength * cos(angleRad)).toFloat()
+
+    drawPath(
+        path = Path().apply {
+            moveTo(frontTipX, frontTipY)
+            lineTo(shoulderLeftX, shoulderLeftY)
+            lineTo(shoulderRightX, shoulderRightY)
+            close()
+        },
+        color = frontColor
+    )
+    drawPath(
+        path = Path().apply {
+            moveTo(backTipX, backTipY)
+            lineTo(shoulderLeftX, shoulderLeftY)
+            lineTo(shoulderRightX, shoulderRightY)
+            close()
+        },
+        color = backColor
+    )
+}
+
+/**
+ * The two spinning needles that pivot on the center pin over the fixed dial,
+ * like a real compass. [qiblaScreenAngle] and [northScreenAngle] are already in
+ * screen space (0° = the top "AIM" notch, growing clockwise) — the caller bakes
+ * in the device heading, so this layer itself never needs the parent to rotate.
+ *
+ * - **Gold Qibla needle** (the hero): a long blade toward the Qibla carrying the
+ *   Kaaba glyph at its tip; turns green when [isFacingQibla].
+ * - **Red north needle** (secondary): a thinner, quieter hand pointing at real
+ *   north, drawn first so the gold needle sits on top.
+ *
+ * The pivot pin is drawn last so it caps where both needles cross the center.
+ */
+@Composable
+fun CompassNeedles(
+    qiblaScreenAngle: Float,
+    northScreenAngle: Float,
+    isFacingQibla: Boolean,
+    modifier: Modifier = Modifier,
+    goldColor: Color = QiblaGold,
+) {
+    val arrowColor = if (isFacingQibla) QiblaGreen else goldColor
+    // Colors read here; MaterialTheme can't be touched inside DrawScope.
+    val qiblaTailColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f)
+    val northTailColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+    val pinColor = MaterialTheme.colorScheme.outline
+    val pinHighlightColor = MaterialTheme.colorScheme.surfaceContainerHighest
+
+    Canvas(modifier = modifier) {
+        val center = Offset(size.width / 2, size.height / 2)
+        val radius = size.minDimension / 2
+
+        // Red north needle — secondary, thinner; drawn under the gold needle.
+        drawNeedle(
+            center = center,
+            angleDeg = northScreenAngle,
+            frontLength = radius * 0.72f,
+            backLength = radius * 0.56f,
+            halfWidth = 4.dp.toPx(),
+            frontColor = CompassNorthColor,
+            backColor = northTailColor
+        )
+
+        // Gold Qibla needle — the hero hand.
         val frontLength = radius - 34.dp.toPx()
         val backLength = radius * 0.40f
         val halfWidth = 9.dp.toPx()
-
-        // Blade shoulder points (the widest part of the needle, at the center)
-        val shoulderLeftX = center.x + (halfWidth * sin(perpAngle)).toFloat()
-        val shoulderLeftY = center.y - (halfWidth * cos(perpAngle)).toFloat()
-        val shoulderRightX = center.x - (halfWidth * sin(perpAngle)).toFloat()
-        val shoulderRightY = center.y + (halfWidth * cos(perpAngle)).toFloat()
-
-        val frontTipX = center.x + (frontLength * sin(qiblaAngleRad)).toFloat()
-        val frontTipY = center.y - (frontLength * cos(qiblaAngleRad)).toFloat()
-        val backTipX = center.x - (backLength * sin(qiblaAngleRad)).toFloat()
-        val backTipY = center.y + (backLength * cos(qiblaAngleRad)).toFloat()
-
-        // Front blade (points at the Qibla)
-        drawPath(
-            path = Path().apply {
-                moveTo(frontTipX, frontTipY)
-                lineTo(shoulderLeftX, shoulderLeftY)
-                lineTo(shoulderRightX, shoulderRightY)
-                close()
-            },
-            color = arrowColor
-        )
-        // Back blade (counterweight tail)
-        drawPath(
-            path = Path().apply {
-                moveTo(backTipX, backTipY)
-                lineTo(shoulderLeftX, shoulderLeftY)
-                lineTo(shoulderRightX, shoulderRightY)
-                close()
-            },
-            color = tailColor
+        drawNeedle(
+            center = center,
+            angleDeg = qiblaScreenAngle,
+            frontLength = frontLength,
+            backLength = backLength,
+            halfWidth = halfWidth,
+            frontColor = arrowColor,
+            backColor = qiblaTailColor
         )
 
-        // Kaaba glyph at the needle's front tip (shared with the AR view)
-        val kaabaSize = 24.dp.toPx()
+        // Kaaba glyph at the Qibla needle's front tip (shared with the AR view).
+        val qiblaAngleRad = Math.toRadians(qiblaScreenAngle.toDouble())
+        val kaabaSize = 32.dp.toPx()
         val kaabaOffset = 13.dp.toPx()
         val kaabaCenterX = center.x + ((frontLength + kaabaOffset) * sin(qiblaAngleRad)).toFloat()
         val kaabaCenterY = center.y - ((frontLength + kaabaOffset) * cos(qiblaAngleRad)).toFloat()
-        drawKaabaGlyph(
-            center = Offset(kaabaCenterX, kaabaCenterY),
-            size = kaabaSize,
-            color = arrowColor,
-            glow = isFacingQibla
-        )
+        // Orient the glyph along the needle so it stays "square" to the arrow at
+        // any heading instead of staying axis-aligned to the screen frame.
+        rotate(degrees = qiblaScreenAngle, pivot = Offset(kaabaCenterX, kaabaCenterY)) {
+            drawKaabaGlyph(
+                center = Offset(kaabaCenterX, kaabaCenterY),
+                size = kaabaSize,
+                color = arrowColor,
+                glow = isFacingQibla
+            )
+        }
 
-        // Pivot pin — the needle pivots through this, like a real compass
+        // Pivot pin — both needles turn through this, like a real compass.
         drawCircle(color = pinColor, radius = halfWidth * 1.5f, center = center)
         drawCircle(color = pinHighlightColor, radius = halfWidth * 0.65f, center = center)
     }
 }
 
-/** Static red triangle pinned to the top of the compass marking device North. */
+/**
+ * Static "lubber line" notch pinned to the top of the compass — the neutral
+ * reference that marks where the phone is aimed. You're facing the Qibla when
+ * the gold Kaaba needle swings up under this notch. Neutral on purpose: red now
+ * belongs to the north needle, and the top no longer means "north."
+ */
 @Composable
-fun CompassNorthIndicator(modifier: Modifier = Modifier) {
+fun CompassLubberNotch(modifier: Modifier = Modifier) {
+    val textMeasurer = rememberTextMeasurer()
+    val notchColor = MaterialTheme.colorScheme.onSurfaceVariant
+
     Canvas(modifier = modifier) {
-        val center = Offset(size.width / 2, 0f)
+        val cx = size.width / 2
         val triSize = 16.dp.toPx()
         val path = Path().apply {
-            moveTo(center.x, triSize + 2.dp.toPx())
-            lineTo(center.x - triSize / 2, 2.dp.toPx())
-            lineTo(center.x + triSize / 2, 2.dp.toPx())
+            moveTo(cx, triSize + 2.dp.toPx())
+            lineTo(cx - triSize / 2, 2.dp.toPx())
+            lineTo(cx + triSize / 2, 2.dp.toPx())
             close()
         }
-        drawPath(path = path, color = CompassNorthColor)
+        drawPath(path = path, color = notchColor)
+
+        val style = TextStyle(
+            fontSize = 9.sp,
+            fontWeight = FontWeight.SemiBold,
+            letterSpacing = 1.sp,
+            color = notchColor
+        )
+        val textResult = textMeasurer.measure("AIM", style)
+        drawText(
+            textLayoutResult = textResult,
+            topLeft = Offset(cx - textResult.size.width / 2, triSize + 5.dp.toPx())
+        )
     }
 }
 
@@ -297,6 +390,7 @@ fun CompassCenterDot(
         modifier = modifier
             .size(if (isFacingQibla) 28.dp else 20.dp)
             .clip(CircleShape)
+            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
             .background(
                 if (isFacingQibla) greenColor
                 else MaterialTheme.colorScheme.outline
@@ -345,24 +439,34 @@ private fun CompassRingsPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Dial")
+@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Dial Face")
 @Composable
-private fun CompassDialPreview() {
+private fun CompassDialFacePreview() {
     NimazTheme {
-        CompassDial(
-            qiblaBearing = 45f,
+        CompassDialFace(modifier = Modifier.size(280.dp))
+    }
+}
+
+@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Needles")
+@Composable
+private fun CompassNeedlesPreview() {
+    NimazTheme {
+        CompassNeedles(
+            qiblaScreenAngle = 45f,
+            northScreenAngle = -30f,
             isFacingQibla = false,
             modifier = Modifier.size(280.dp)
         )
     }
 }
 
-@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Dial - Facing")
+@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Needles - Facing")
 @Composable
-private fun CompassDialFacingPreview() {
+private fun CompassNeedlesFacingPreview() {
     NimazTheme {
-        CompassDial(
-            qiblaBearing = 0f,
+        CompassNeedles(
+            qiblaScreenAngle = 0f,
+            northScreenAngle = -119f,
             isFacingQibla = true,
             modifier = Modifier.size(280.dp)
         )
@@ -377,11 +481,11 @@ private fun DirectionMarkersPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "North Indicator")
+@Preview(showBackground = true, name = "Lubber Notch")
 @Composable
-private fun CompassNorthIndicatorPreview() {
+private fun CompassLubberNotchPreview() {
     NimazTheme {
-        CompassNorthIndicator(modifier = Modifier.size(280.dp))
+        CompassLubberNotch(modifier = Modifier.size(280.dp))
     }
 }
 
@@ -414,26 +518,21 @@ private fun AssembledCompassDial(
 ) {
     Box(modifier = Modifier.size(size), contentAlignment = Alignment.Center) {
         CompassRings(modifier = Modifier.fillMaxSize())
+        CompassDialFace(modifier = Modifier.size(size - 50.dp))
+        DirectionMarkers(modifier = Modifier.size(size - 20.dp))
 
-        Box(
-            modifier = Modifier
-                .size(size - 20.dp)
-                .rotate(-azimuth),
-            contentAlignment = Alignment.Center
-        ) {
-            CompassDial(
-                qiblaBearing = qiblaBearing,
-                isFacingQibla = isFacingQibla,
-                modifier = Modifier.size(size - 50.dp)
-            )
-            DirectionMarkers(modifier = Modifier.fillMaxSize())
-        }
+        CompassNeedles(
+            qiblaScreenAngle = qiblaBearing - azimuth,
+            northScreenAngle = -azimuth,
+            isFacingQibla = isFacingQibla,
+            modifier = Modifier.size(size - 50.dp)
+        )
 
         CompassCenterDot(isFacingQibla = isFacingQibla)
 
         CompassFacingGlow(visible = isFacingQibla, modifier = Modifier.size(size - 20.dp))
 
-        CompassNorthIndicator(modifier = Modifier.fillMaxSize())
+        CompassLubberNotch(modifier = Modifier.fillMaxSize())
     }
 }
 
