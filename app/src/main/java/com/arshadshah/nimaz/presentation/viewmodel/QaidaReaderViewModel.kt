@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
+import com.arshadshah.nimaz.data.local.qaida.QaidaContentSeeder
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.QaidaCell
 import com.arshadshah.nimaz.domain.model.QaidaCourseProgress
@@ -41,10 +42,23 @@ import javax.inject.Inject
 @HiltViewModel
 class QaidaReaderViewModel @Inject constructor(
     private val qaidaUseCases: QaidaUseCases,
-    private val audioManager: QaidaAudioManager
+    private val audioManager: QaidaAudioManager,
+    private val contentSeeder: QaidaContentSeeder
 ) : ViewModel() {
 
     private val sharing = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MS)
+
+    init {
+        // The Qaida content tables are only filled from the prepopulated DB on a
+        // fresh install. On an app update that DB is never re-copied, so without
+        // this runtime seed an upgrading user sees an empty Qaida. Seeding here
+        // (idempotent + content-version aware) means the reactive lesson/letter
+        // flows below light up as soon as the content lands. See
+        // QaidaContentSeeder.
+        viewModelScope.launch {
+            runCatching { contentSeeder.seedIfNeeded() }
+        }
+    }
 
     private val _selectedLessonId = MutableStateFlow<Int?>(null)
     /** The lesson currently open in the reader, or null before one is chosen. */

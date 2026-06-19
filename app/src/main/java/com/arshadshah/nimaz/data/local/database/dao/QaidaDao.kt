@@ -24,6 +24,9 @@ interface QaidaDao {
     @Query("SELECT * FROM qaida_lessons WHERE id = :lessonId")
     suspend fun getLesson(lessonId: Int): QaidaLessonEntity?
 
+    @Query("SELECT COUNT(*) FROM qaida_lessons")
+    suspend fun lessonCount(): Int
+
     /**
      * The full lesson page: lesson → lines → cells. Use @Transaction so the
      * three reads stay consistent. Reactive so the UI updates if content or
@@ -68,6 +71,45 @@ interface QaidaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCells(cells: List<QaidaCellEntity>)
+
+    // ── Content seeding ───────────────────────────────────────────────────
+    @Query("DELETE FROM qaida_cells")
+    suspend fun deleteAllCells()
+
+    @Query("DELETE FROM qaida_lines")
+    suspend fun deleteAllLines()
+
+    @Query("DELETE FROM qaida_letters")
+    suspend fun deleteAllLetters()
+
+    @Query("DELETE FROM qaida_lessons")
+    suspend fun deleteAllLessons()
+
+    /**
+     * Atomically replaces the four Qaida content tables. Used by the content
+     * seeder so an interrupted refresh never leaves the content half-populated.
+     *
+     * Rows are deleted children-first and inserted parents-first to respect the
+     * foreign keys (cells → lines → lessons, cells → letters). The progress
+     * tables have no foreign key into the content tables, so this never touches
+     * the user's learning progress.
+     */
+    @Transaction
+    suspend fun replaceAllContent(
+        lessons: List<QaidaLessonEntity>,
+        letters: List<QaidaLetterEntity>,
+        lines: List<QaidaLineEntity>,
+        cells: List<QaidaCellEntity>
+    ) {
+        deleteAllCells()
+        deleteAllLines()
+        deleteAllLetters()
+        deleteAllLessons()
+        insertLessons(lessons)
+        insertLetters(letters)
+        insertLines(lines)
+        insertCells(cells)
+    }
 
     // ── Lesson progress (user data) ───────────────────────────────────────
     @Query("SELECT * FROM qaida_lesson_progress WHERE lesson_id = :lessonId")

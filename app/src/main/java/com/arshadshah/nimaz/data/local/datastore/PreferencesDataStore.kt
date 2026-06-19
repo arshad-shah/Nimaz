@@ -62,6 +62,9 @@ class PreferencesDataStore @Inject constructor(
         // Dua content (data-driven; bumped when duas.json content changes)
         val DUA_CONTENT_VERSION = intPreferencesKey("dua_content_version")
 
+        // Qaida content (data-driven; bumped when qaida_content.json changes)
+        val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
+
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
         val ASR_CALCULATION = stringPreferencesKey("asr_calculation")
@@ -315,6 +318,17 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setDuaContentVersion(version: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DUA_CONTENT_VERSION] = version
+        }
+    }
+
+    // Qaida content version (0 = never seeded)
+    val qaidaContentVersion: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.QAIDA_CONTENT_VERSION] ?: 0
+    }
+
+    suspend fun setQaidaContentVersion(version: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.QAIDA_CONTENT_VERSION] = version
         }
     }
 
