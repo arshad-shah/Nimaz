@@ -22,21 +22,42 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Celebration
+import androidx.compose.material.icons.filled.CreditCard
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.DoorFront
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Flight
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalHospital
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.NightsStay
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Restaurant
+import androidx.compose.material.icons.filled.Savings
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolunteerActivism
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -79,6 +100,7 @@ fun DuasCollectionScreen(
     onNavigateBack: () -> Unit,
     onNavigateToCategory: (String) -> Unit,
     onNavigateToBookmarks: () -> Unit,
+    onNavigateToSearch: () -> Unit = {},
     viewModel: DuaViewModel = hiltViewModel()
 ) {
     val state by viewModel.collectionState.collectAsState()
@@ -98,6 +120,12 @@ fun DuasCollectionScreen(
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    IconButton(onClick = onNavigateToSearch) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = stringResource(R.string.search_title)
+                        )
+                    }
                     IconButton(onClick = onNavigateToBookmarks) {
                         Icon(
                             imageVector = Icons.Default.Bookmark,
@@ -384,6 +412,33 @@ private fun getCategoryIcon(iconName: String?): ImageVector {
         "🌧️" -> Icons.Default.WaterDrop
         "💚" -> Icons.Default.Favorite
         "🙏" -> Icons.Default.VolunteerActivism
+        "🚿" -> Icons.Default.WaterDrop
+        "🚻" -> Icons.Default.DoorFront
+        "📣" -> Icons.Default.VolumeUp
+        "👕" -> Icons.Default.Person
+        "🌟" -> Icons.Default.Star
+        "🤧" -> Icons.Default.AutoAwesome
+        "📖" -> Icons.Default.MenuBook
+        "💰" -> Icons.Default.Savings
+        "💊" -> Icons.Default.LocalHospital
+        "🕊️" -> Icons.Default.Warning
+        "😤" -> Icons.Default.LocalFireDepartment
+        "💳" -> Icons.Default.CreditCard
+        "📜" -> Icons.Default.AutoStories
+        "🌿" -> Icons.Default.Lightbulb
+        "👨‍👩‍👧" -> Icons.Default.Groups
+        "🐫" -> Icons.Default.Explore
+        "🌹" -> Icons.Default.FavoriteBorder
+        "🛡️" -> Icons.Default.Shield
+        "🧎" -> Icons.Default.Mosque
+        "🌃" -> Icons.Default.NightsStay
+        "🪦" -> Icons.Default.Bedtime
+        "🌛" -> Icons.Default.Nightlight
+        "⚔️" -> Icons.Default.Security
+        "🌬️" -> Icons.Default.WbTwilight
+        "🤍" -> Icons.Default.Celebration
+        "📿" -> Icons.Default.AutoAwesome
+        "🤝" -> Icons.Default.Public
         else -> Icons.Default.Mosque
     }
 }

@@ -22,6 +22,7 @@ fun AdaptiveDuaScreen(
     navController: NavController,
     onNavigateBack: () -> Unit,
     onNavigateToBookmarks: () -> Unit,
+    onNavigateToSearch: () -> Unit,
 ) {
     val windowSizeClass = currentWindowSizeClass()
 
@@ -32,6 +33,7 @@ fun AdaptiveDuaScreen(
                 navController.navigate(Route.DuaCategory(categoryId))
             },
             onNavigateToBookmarks = onNavigateToBookmarks,
+            onNavigateToSearch = onNavigateToSearch,
         )
     } else {
         val navigator = rememberListDetailPaneScaffoldNavigator<DuaDetailArgs>()
@@ -52,6 +54,7 @@ fun AdaptiveDuaScreen(
                             }
                         },
                         onNavigateToBookmarks = onNavigateToBookmarks,
+                        onNavigateToSearch = onNavigateToSearch,
                     )
                 }
             },

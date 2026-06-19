@@ -5,7 +5,7 @@
     "name_arabic": "أذكار الصباح",
     "icon": "🌅",
     "display_order": 1,
-    "dua_count": 15
+    "dua_count": 39
   },
   {
     "id": 2,
@@ -13,7 +13,7 @@
     "name_arabic": "أذكار المساء",
     "icon": "🌙",
     "display_order": 2,
-    "dua_count": 5
+    "dua_count": 11
   },
   {
     "id": 3,
@@ -21,7 +21,7 @@
     "name_arabic": "أذكار بعد الصلاة",
     "icon": "🤲",
     "display_order": 3,
-    "dua_count": 8
+    "dua_count": 18
   },
   {
     "id": 4,
@@ -29,7 +29,7 @@
     "name_arabic": "دعاء الاستيقاظ",
     "icon": "☀️",
     "display_order": 4,
-    "dua_count": 3
+    "dua_count": 6
   },
   {
     "id": 5,
@@ -37,7 +37,7 @@
     "name_arabic": "دعاء النوم",
     "icon": "😴",
     "display_order": 5,
-    "dua_count": 5
+    "dua_count": 21
   },
   {
     "id": 6,
@@ -45,7 +45,7 @@
     "name_arabic": "دعاء دخول المنزل",
     "icon": "🏠",
     "display_order": 6,
-    "dua_count": 2
+    "dua_count": 3
   },
   {
     "id": 7,
@@ -61,7 +61,7 @@
     "name_arabic": "دعاء دخول المسجد",
     "icon": "🕌",
     "display_order": 8,
-    "dua_count": 1
+    "dua_count": 2
   },
   {
     "id": 9,
@@ -69,7 +69,7 @@
     "name_arabic": "دعاء الخروج من المسجد",
     "icon": "🕋",
     "display_order": 9,
-    "dua_count": 1
+    "dua_count": 2
   },
   {
     "id": 10,
@@ -77,7 +77,7 @@
     "name_arabic": "دعاء قبل الطعام",
     "icon": "🍽️",
     "display_order": 10,
-    "dua_count": 3
+    "dua_count": 5
   },
   {
     "id": 11,
@@ -85,7 +85,7 @@
     "name_arabic": "دعاء بعد الطعام",
     "icon": "✨",
     "display_order": 11,
-    "dua_count": 2
+    "dua_count": 3
   },
   {
     "id": 12,
@@ -93,7 +93,7 @@
     "name_arabic": "دعاء السفر",
     "icon": "✈️",
     "display_order": 12,
-    "dua_count": 4
+    "dua_count": 11
   },
   {
     "id": 13,
@@ -101,7 +101,7 @@
     "name_arabic": "دعاء المطر",
     "icon": "🌧️",
     "display_order": 13,
-    "dua_count": 4
+    "dua_count": 7
   },
   {
     "id": 14,
@@ -109,7 +109,7 @@
     "name_arabic": "دعاء الكرب والهم",
     "icon": "💚",
     "display_order": 14,
-    "dua_count": 5
+    "dua_count": 11
   },
   {
     "id": 15,
@@ -117,6 +117,222 @@
     "name_arabic": "الاستغفار",
     "icon": "🙏",
     "display_order": 15,
+    "dua_count": 6
+  },
+  {
+    "id": 16,
+    "name_english": "Ablution (Wudu)",
+    "name_arabic": "أذكار الوضوء",
+    "icon": "🚿",
+    "display_order": 16,
+    "dua_count": 5
+  },
+  {
+    "id": 17,
+    "name_english": "Toilet",
+    "name_arabic": "أذكار الخلاء",
+    "icon": "🚻",
+    "display_order": 17,
+    "dua_count": 2
+  },
+  {
+    "id": 18,
+    "name_english": "Adhan",
+    "name_arabic": "أذكار الأذان",
+    "icon": "📣",
+    "display_order": 18,
+    "dua_count": 6
+  },
+  {
+    "id": 19,
+    "name_english": "Clothing",
+    "name_arabic": "دعاء اللباس",
+    "icon": "👕",
+    "display_order": 19,
+    "dua_count": 5
+  },
+  {
+    "id": 20,
+    "name_english": "Istikharah",
+    "name_arabic": "دعاء الاستخارة",
+    "icon": "🌟",
+    "display_order": 20,
+    "dua_count": 1
+  },
+  {
+    "id": 21,
+    "name_english": "Sneezing",
+    "name_arabic": "أذكار العطاس",
+    "icon": "🤧",
+    "display_order": 21,
+    "dua_count": 3
+  },
+  {
+    "id": 22,
+    "name_english": "Knowledge & Guidance",
+    "name_arabic": "دعاء العلم والهداية",
+    "icon": "📖",
+    "display_order": 22,
     "dua_count": 4
+  },
+  {
+    "id": 23,
+    "name_english": "Provision & Sustenance",
+    "name_arabic": "دعاء الرزق",
+    "icon": "💰",
+    "display_order": 23,
+    "dua_count": 2
+  },
+  {
+    "id": 24,
+    "name_english": "Sickness & Healing",
+    "name_arabic": "دعاء الشفاء",
+    "icon": "💊",
+    "display_order": 24,
+    "dua_count": 8
+  },
+  {
+    "id": 25,
+    "name_english": "Hardship & Calamity",
+    "name_arabic": "دعاء المصيبة",
+    "icon": "🕊️",
+    "display_order": 25,
+    "dua_count": 3
+  },
+  {
+    "id": 26,
+    "name_english": "Anger",
+    "name_arabic": "دعاء الغضب",
+    "icon": "😤",
+    "display_order": 26,
+    "dua_count": 1
+  },
+  {
+    "id": 27,
+    "name_english": "Debt",
+    "name_arabic": "دعاء قضاء الدين",
+    "icon": "💳",
+    "display_order": 27,
+    "dua_count": 3
+  },
+  {
+    "id": 28,
+    "name_english": "Quranic Supplications",
+    "name_arabic": "أدعية قرآنية",
+    "icon": "📜",
+    "display_order": 28,
+    "dua_count": 8
+  },
+  {
+    "id": 29,
+    "name_english": "Comprehensive Duas",
+    "name_arabic": "أدعية جامعة",
+    "icon": "🌿",
+    "display_order": 29,
+    "dua_count": 6
+  },
+  {
+    "id": 30,
+    "name_english": "Marriage & Children",
+    "name_arabic": "دعاء الزواج والذرية",
+    "icon": "👨‍👩‍👧",
+    "display_order": 30,
+    "dua_count": 6
+  },
+  {
+    "id": 31,
+    "name_english": "Hajj & Umrah",
+    "name_arabic": "دعاء الحج والعمرة",
+    "icon": "🐫",
+    "display_order": 31,
+    "dua_count": 4
+  },
+  {
+    "id": 32,
+    "name_english": "Salawat on the Prophet ﷺ",
+    "name_arabic": "الصلاة على النبي ﷺ",
+    "icon": "🌹",
+    "display_order": 32,
+    "dua_count": 2
+  },
+  {
+    "id": 33,
+    "name_english": "Protection & Refuge",
+    "name_arabic": "التحصين والاستعاذة",
+    "icon": "🛡️",
+    "display_order": 33,
+    "dua_count": 16
+  },
+  {
+    "id": 34,
+    "name_english": "During Prayer (Salah)",
+    "name_arabic": "في الصلاة",
+    "icon": "🧎",
+    "display_order": 34,
+    "dua_count": 31
+  },
+  {
+    "id": 35,
+    "name_english": "Witr & Night Prayer",
+    "name_arabic": "الوتر وقيام الليل",
+    "icon": "🌃",
+    "display_order": 35,
+    "dua_count": 3
+  },
+  {
+    "id": 36,
+    "name_english": "Funeral & Death",
+    "name_arabic": "الجنازة والموت",
+    "icon": "🪦",
+    "display_order": 36,
+    "dua_count": 12
+  },
+  {
+    "id": 37,
+    "name_english": "Fasting & Ramadan",
+    "name_arabic": "الصيام ورمضان",
+    "icon": "🌛",
+    "display_order": 37,
+    "dua_count": 4
+  },
+  {
+    "id": 38,
+    "name_english": "Enemy & Fear",
+    "name_arabic": "لقاء العدو والخوف",
+    "icon": "⚔️",
+    "display_order": 38,
+    "dua_count": 6
+  },
+  {
+    "id": 39,
+    "name_english": "Nature & Weather",
+    "name_arabic": "الطبيعة والطقس",
+    "icon": "🌬️",
+    "display_order": 39,
+    "dua_count": 3
+  },
+  {
+    "id": 40,
+    "name_english": "Gratitude & Praise",
+    "name_arabic": "الحمد والشكر",
+    "icon": "🤍",
+    "display_order": 40,
+    "dua_count": 1
+  },
+  {
+    "id": 41,
+    "name_english": "Dhikr & Remembrance",
+    "name_arabic": "الذكر والتسبيح",
+    "icon": "📿",
+    "display_order": 41,
+    "dua_count": 2
+  },
+  {
+    "id": 42,
+    "name_english": "Social & Daily Life",
+    "name_arabic": "آداب وحياة يومية",
+    "icon": "🤝",
+    "display_order": 42,
+    "dua_count": 8
   }
 ]

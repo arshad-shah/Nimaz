@@ -79,6 +79,7 @@ import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
+import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
@@ -480,6 +481,7 @@ fun NavGraph(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
+                    onNavigateToSearch = { navController.navigate(Route.DuaSearch) },
                 )
             }
 
@@ -508,7 +510,8 @@ fun NavGraph(
                     onNavigateToCategory = { categoryId ->
                         navController.navigate(Route.DuaCategory(categoryId))
                     },
-                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) }
+                    onNavigateToBookmarks = { navController.navigate(Route.AllBookmarks) },
+                    onNavigateToSearch = { navController.navigate(Route.DuaSearch) }
                 )
             }
 
@@ -526,7 +529,8 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
+                    initialFilter = SearchFilter.DUA
                 )
             }
 
