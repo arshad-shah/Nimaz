@@ -60,6 +60,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import androidx.compose.runtime.LaunchedEffect
 import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.SearchViewModel
@@ -73,11 +74,19 @@ fun SearchScreen(
     onNavigateToSurah: (Int) -> Unit,
     onNavigateToHadith: (String, String) -> Unit,
     onNavigateToDua: (String) -> Unit,
+    initialFilter: SearchFilter? = null,
     viewModel: SearchViewModel = hiltViewModel()
 ) {
     val state by viewModel.searchState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    // Scope the search (e.g. to duas) when launched from a section screen.
+    LaunchedEffect(initialFilter) {
+        if (initialFilter != null) {
+            viewModel.onEvent(SearchEvent.SetFilter(initialFilter))
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),

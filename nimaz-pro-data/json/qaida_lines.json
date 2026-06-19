@@ -1,0 +1,1235 @@
+[
+  {
+    "id": 101,
+    "lesson_id": 1,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 102,
+    "lesson_id": 1,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 103,
+    "lesson_id": 1,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 104,
+    "lesson_id": 1,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 105,
+    "lesson_id": 1,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 106,
+    "lesson_id": 2,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Letters change shape when they join together.",
+    "instruction_arabic": "تَتَغَيَّرُ صُوَرُ الحُرُوفِ عِنْدَ الوَصْل",
+    "display_order": 1
+  },
+  {
+    "id": 107,
+    "lesson_id": 2,
+    "line_number": 2,
+    "line_type": "EXAMPLE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 108,
+    "lesson_id": 2,
+    "line_number": 3,
+    "line_type": "EXAMPLE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 109,
+    "lesson_id": 2,
+    "line_number": 4,
+    "line_type": "EXAMPLE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 110,
+    "lesson_id": 2,
+    "line_number": 5,
+    "line_type": "EXAMPLE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 111,
+    "lesson_id": 3,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Disjoined letters are read by their names, with elongation.",
+    "instruction_arabic": "الحُرُوفُ المُقَطَّعَةُ تُقْرَأُ بِأَسْمَائِهَا مَعَ المَدّ",
+    "display_order": 1
+  },
+  {
+    "id": 112,
+    "lesson_id": 3,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 113,
+    "lesson_id": 3,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 114,
+    "lesson_id": 3,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 115,
+    "lesson_id": 3,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 116,
+    "lesson_id": 4,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 117,
+    "lesson_id": 4,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 118,
+    "lesson_id": 4,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 119,
+    "lesson_id": 4,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 120,
+    "lesson_id": 4,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 121,
+    "lesson_id": 4,
+    "line_number": 6,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 6
+  },
+  {
+    "id": 122,
+    "lesson_id": 4,
+    "line_number": 7,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 7
+  },
+  {
+    "id": 123,
+    "lesson_id": 4,
+    "line_number": 8,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 8
+  },
+  {
+    "id": 124,
+    "lesson_id": 4,
+    "line_number": 9,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 9
+  },
+  {
+    "id": 125,
+    "lesson_id": 4,
+    "line_number": 10,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 10
+  },
+  {
+    "id": 126,
+    "lesson_id": 4,
+    "line_number": 11,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 11
+  },
+  {
+    "id": 127,
+    "lesson_id": 4,
+    "line_number": 12,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 12
+  },
+  {
+    "id": 128,
+    "lesson_id": 4,
+    "line_number": 13,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 13
+  },
+  {
+    "id": 129,
+    "lesson_id": 4,
+    "line_number": 14,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 14
+  },
+  {
+    "id": 130,
+    "lesson_id": 4,
+    "line_number": 15,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 15
+  },
+  {
+    "id": 131,
+    "lesson_id": 4,
+    "line_number": 16,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 16
+  },
+  {
+    "id": 132,
+    "lesson_id": 4,
+    "line_number": 17,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 17
+  },
+  {
+    "id": 133,
+    "lesson_id": 4,
+    "line_number": 18,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 18
+  },
+  {
+    "id": 134,
+    "lesson_id": 4,
+    "line_number": 19,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 19
+  },
+  {
+    "id": 135,
+    "lesson_id": 4,
+    "line_number": 20,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 20
+  },
+  {
+    "id": 136,
+    "lesson_id": 4,
+    "line_number": 21,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 21
+  },
+  {
+    "id": 137,
+    "lesson_id": 4,
+    "line_number": 22,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 22
+  },
+  {
+    "id": 138,
+    "lesson_id": 4,
+    "line_number": 23,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 23
+  },
+  {
+    "id": 139,
+    "lesson_id": 4,
+    "line_number": 24,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 24
+  },
+  {
+    "id": 140,
+    "lesson_id": 4,
+    "line_number": 25,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 25
+  },
+  {
+    "id": 141,
+    "lesson_id": 4,
+    "line_number": 26,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 26
+  },
+  {
+    "id": 142,
+    "lesson_id": 4,
+    "line_number": 27,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 27
+  },
+  {
+    "id": 143,
+    "lesson_id": 4,
+    "line_number": 28,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 28
+  },
+  {
+    "id": 144,
+    "lesson_id": 4,
+    "line_number": 29,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 29
+  },
+  {
+    "id": 145,
+    "lesson_id": 5,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 146,
+    "lesson_id": 5,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 147,
+    "lesson_id": 5,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 148,
+    "lesson_id": 5,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 149,
+    "lesson_id": 5,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 150,
+    "lesson_id": 5,
+    "line_number": 6,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 6
+  },
+  {
+    "id": 151,
+    "lesson_id": 5,
+    "line_number": 7,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 7
+  },
+  {
+    "id": 152,
+    "lesson_id": 5,
+    "line_number": 8,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 8
+  },
+  {
+    "id": 153,
+    "lesson_id": 5,
+    "line_number": 9,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 9
+  },
+  {
+    "id": 154,
+    "lesson_id": 5,
+    "line_number": 10,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 10
+  },
+  {
+    "id": 155,
+    "lesson_id": 5,
+    "line_number": 11,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 11
+  },
+  {
+    "id": 156,
+    "lesson_id": 5,
+    "line_number": 12,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 12
+  },
+  {
+    "id": 157,
+    "lesson_id": 5,
+    "line_number": 13,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 13
+  },
+  {
+    "id": 158,
+    "lesson_id": 5,
+    "line_number": 14,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 14
+  },
+  {
+    "id": 159,
+    "lesson_id": 5,
+    "line_number": 15,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 15
+  },
+  {
+    "id": 160,
+    "lesson_id": 5,
+    "line_number": 16,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 16
+  },
+  {
+    "id": 161,
+    "lesson_id": 5,
+    "line_number": 17,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 17
+  },
+  {
+    "id": 162,
+    "lesson_id": 5,
+    "line_number": 18,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 18
+  },
+  {
+    "id": 163,
+    "lesson_id": 5,
+    "line_number": 19,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 19
+  },
+  {
+    "id": 164,
+    "lesson_id": 5,
+    "line_number": 20,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 20
+  },
+  {
+    "id": 165,
+    "lesson_id": 5,
+    "line_number": 21,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 21
+  },
+  {
+    "id": 166,
+    "lesson_id": 5,
+    "line_number": 22,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 22
+  },
+  {
+    "id": 167,
+    "lesson_id": 5,
+    "line_number": 23,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 23
+  },
+  {
+    "id": 168,
+    "lesson_id": 5,
+    "line_number": 24,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 24
+  },
+  {
+    "id": 169,
+    "lesson_id": 5,
+    "line_number": 25,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 25
+  },
+  {
+    "id": 170,
+    "lesson_id": 5,
+    "line_number": 26,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 26
+  },
+  {
+    "id": 171,
+    "lesson_id": 5,
+    "line_number": 27,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 27
+  },
+  {
+    "id": 172,
+    "lesson_id": 5,
+    "line_number": 28,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 28
+  },
+  {
+    "id": 173,
+    "lesson_id": 5,
+    "line_number": 29,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 29
+  },
+  {
+    "id": 174,
+    "lesson_id": 6,
+    "line_number": 1,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 175,
+    "lesson_id": 6,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 176,
+    "lesson_id": 6,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 177,
+    "lesson_id": 6,
+    "line_number": 4,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 178,
+    "lesson_id": 7,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 179,
+    "lesson_id": 7,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 180,
+    "lesson_id": 7,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 181,
+    "lesson_id": 7,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 182,
+    "lesson_id": 7,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 183,
+    "lesson_id": 7,
+    "line_number": 6,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 6
+  },
+  {
+    "id": 184,
+    "lesson_id": 7,
+    "line_number": 7,
+    "line_type": "EXAMPLE",
+    "instruction_english": "Real words that use the standing fatha (dagger alif).",
+    "instruction_arabic": "كَلِمَاتٌ فِيهَا أَلِفٌ خَنْجَرِيَّة",
+    "display_order": 7
+  },
+  {
+    "id": 185,
+    "lesson_id": 8,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 186,
+    "lesson_id": 8,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 187,
+    "lesson_id": 8,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 188,
+    "lesson_id": 8,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 189,
+    "lesson_id": 8,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 190,
+    "lesson_id": 8,
+    "line_number": 6,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 6
+  },
+  {
+    "id": 191,
+    "lesson_id": 8,
+    "line_number": 7,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 7
+  },
+  {
+    "id": 192,
+    "lesson_id": 8,
+    "line_number": 8,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 8
+  },
+  {
+    "id": 193,
+    "lesson_id": 8,
+    "line_number": 9,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 9
+  },
+  {
+    "id": 194,
+    "lesson_id": 8,
+    "line_number": 10,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 10
+  },
+  {
+    "id": 195,
+    "lesson_id": 8,
+    "line_number": 11,
+    "line_type": "EXAMPLE",
+    "instruction_english": "Soft (leen) letters: waw or yaa with sukoon after a fatha.",
+    "instruction_arabic": "حَرْفَا اللِّين: الوَاوُ وَاليَاءُ السَّاكِنَتَانِ بَعْدَ فَتْحَة",
+    "display_order": 11
+  },
+  {
+    "id": 196,
+    "lesson_id": 9,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Mixed words combining madd, leen and tanween.",
+    "instruction_arabic": "كَلِمَاتٌ تَجْمَعُ المَدَّ وَاللِّينَ وَالتَّنْوِين",
+    "display_order": 1
+  },
+  {
+    "id": 197,
+    "lesson_id": 9,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 198,
+    "lesson_id": 9,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 199,
+    "lesson_id": 9,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 200,
+    "lesson_id": 10,
+    "line_number": 1,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 201,
+    "lesson_id": 10,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 202,
+    "lesson_id": 10,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 203,
+    "lesson_id": 10,
+    "line_number": 4,
+    "line_type": "EXAMPLE",
+    "instruction_english": "Real words with a saakin (vowel-less) letter.",
+    "instruction_arabic": "كَلِمَاتٌ فِيهَا حَرْفٌ سَاكِن",
+    "display_order": 4
+  },
+  {
+    "id": 204,
+    "lesson_id": 11,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Read these words, watching the saakin letters carefully.",
+    "instruction_arabic": "اِقْرَأْ هٰذِهِ الكَلِمَاتِ مُرَاعِيًا الحُرُوفَ السَّاكِنَة",
+    "display_order": 1
+  },
+  {
+    "id": 205,
+    "lesson_id": 11,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 206,
+    "lesson_id": 11,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 207,
+    "lesson_id": 11,
+    "line_number": 4,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 208,
+    "lesson_id": 12,
+    "line_number": 1,
+    "line_type": "EXAMPLE",
+    "instruction_english": "A shadda doubles a letter — compare these two words.",
+    "instruction_arabic": "الشَّدَّةُ تُضَعِّفُ الحَرْف — قَارِنْ بَيْنَ الكَلِمَتَيْن",
+    "display_order": 1
+  },
+  {
+    "id": 209,
+    "lesson_id": 12,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 210,
+    "lesson_id": 12,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 211,
+    "lesson_id": 13,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Read these words, giving each shadda its full doubling.",
+    "instruction_arabic": "اِقْرَأْ هٰذِهِ الكَلِمَاتِ مُشَدِّدًا الحُرُوف",
+    "display_order": 1
+  },
+  {
+    "id": 212,
+    "lesson_id": 13,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 213,
+    "lesson_id": 13,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 214,
+    "lesson_id": 14,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Words that combine a shadda and a sukoon.",
+    "instruction_arabic": "كَلِمَاتٌ تَجْمَعُ الشَّدَّةَ وَالسُّكُون",
+    "display_order": 1
+  },
+  {
+    "id": 215,
+    "lesson_id": 14,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 216,
+    "lesson_id": 14,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 217,
+    "lesson_id": 15,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Words that carry two shaddas.",
+    "instruction_arabic": "كَلِمَاتٌ فِيهَا شَدَّتَان",
+    "display_order": 1
+  },
+  {
+    "id": 218,
+    "lesson_id": 15,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 219,
+    "lesson_id": 15,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 220,
+    "lesson_id": 16,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Integrated words: madd, shadda and sukoon together (mind the timing).",
+    "instruction_arabic": "كَلِمَاتٌ مُتَكَامِلَة: المَدُّ وَالشَّدَّةُ وَالسُّكُونُ مَعًا",
+    "display_order": 1
+  },
+  {
+    "id": 221,
+    "lesson_id": 16,
+    "line_number": 2,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 222,
+    "lesson_id": 16,
+    "line_number": 3,
+    "line_type": "EXERCISE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 223,
+    "lesson_id": 17,
+    "line_number": 1,
+    "line_type": "HEADING",
+    "instruction_english": "Surah Al-Fatihah",
+    "instruction_arabic": null,
+    "display_order": 1
+  },
+  {
+    "id": 224,
+    "lesson_id": 17,
+    "line_number": 2,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 2
+  },
+  {
+    "id": 225,
+    "lesson_id": 17,
+    "line_number": 3,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 3
+  },
+  {
+    "id": 226,
+    "lesson_id": 17,
+    "line_number": 4,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 4
+  },
+  {
+    "id": 227,
+    "lesson_id": 17,
+    "line_number": 5,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 5
+  },
+  {
+    "id": 228,
+    "lesson_id": 17,
+    "line_number": 6,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 6
+  },
+  {
+    "id": 229,
+    "lesson_id": 17,
+    "line_number": 7,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 7
+  },
+  {
+    "id": 230,
+    "lesson_id": 17,
+    "line_number": 8,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 8
+  },
+  {
+    "id": 231,
+    "lesson_id": 17,
+    "line_number": 9,
+    "line_type": "HEADING",
+    "instruction_english": "Surah An-Nas",
+    "instruction_arabic": null,
+    "display_order": 9
+  },
+  {
+    "id": 232,
+    "lesson_id": 17,
+    "line_number": 10,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 10
+  },
+  {
+    "id": 233,
+    "lesson_id": 17,
+    "line_number": 11,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 11
+  },
+  {
+    "id": 234,
+    "lesson_id": 17,
+    "line_number": 12,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 12
+  },
+  {
+    "id": 235,
+    "lesson_id": 17,
+    "line_number": 13,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 13
+  },
+  {
+    "id": 236,
+    "lesson_id": 17,
+    "line_number": 14,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 14
+  },
+  {
+    "id": 237,
+    "lesson_id": 17,
+    "line_number": 15,
+    "line_type": "PRACTICE",
+    "instruction_english": null,
+    "instruction_arabic": null,
+    "display_order": 15
+  }
+]

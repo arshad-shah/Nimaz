@@ -548,6 +548,80 @@ def create_tables(conn):
     ''')
     cursor.execute('CREATE UNIQUE INDEX IF NOT EXISTS index_prophet_bookmarks_prophet_id ON prophet_bookmarks(prophet_id)')
 
+    # Qaida (Noorani Qaida reader) — content tables only. The two progress
+    # tables (qaida_lesson_progress / qaida_cell_progress) are user data and
+    # are NOT seeded here; Room's MIGRATION_14_15 creates them empty on device.
+    # Column order / types / nullability / FKs mirror the Room entities so
+    # Room's schema validation passes against the pre-packaged DB.
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS qaida_lessons (
+            id INTEGER NOT NULL,
+            lesson_number INTEGER NOT NULL,
+            title_english TEXT NOT NULL,
+            title_arabic TEXT NOT NULL,
+            title_transliteration TEXT NOT NULL,
+            description TEXT NOT NULL,
+            concept_tags TEXT NOT NULL,
+            icon TEXT NOT NULL,
+            display_order INTEGER NOT NULL,
+            PRIMARY KEY(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS qaida_letters (
+            id INTEGER NOT NULL,
+            letter_arabic TEXT NOT NULL,
+            name_arabic TEXT NOT NULL,
+            name_transliteration TEXT NOT NULL,
+            isolated_form TEXT NOT NULL,
+            initial_form TEXT,
+            medial_form TEXT,
+            final_form TEXT,
+            is_connecting INTEGER NOT NULL,
+            makhraj_area TEXT NOT NULL,
+            makhraj_detail TEXT NOT NULL,
+            phonetic_hint TEXT,
+            audio_key TEXT NOT NULL,
+            display_order INTEGER NOT NULL,
+            PRIMARY KEY(id)
+        )
+    ''')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS qaida_lines (
+            id INTEGER NOT NULL,
+            lesson_id INTEGER NOT NULL,
+            line_number INTEGER NOT NULL,
+            line_type TEXT NOT NULL,
+            instruction_english TEXT,
+            instruction_arabic TEXT,
+            display_order INTEGER NOT NULL,
+            PRIMARY KEY(id),
+            FOREIGN KEY(lesson_id) REFERENCES qaida_lessons(id) ON UPDATE NO ACTION ON DELETE CASCADE
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_lines_lesson_id ON qaida_lines(lesson_id)')
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS qaida_cells (
+            id INTEGER NOT NULL,
+            line_id INTEGER NOT NULL,
+            lesson_id INTEGER NOT NULL,
+            position INTEGER NOT NULL,
+            text_arabic TEXT NOT NULL,
+            transliteration TEXT NOT NULL,
+            token_type TEXT NOT NULL,
+            audio_key TEXT NOT NULL,
+            highlight_group TEXT,
+            letter_id INTEGER,
+            notes TEXT,
+            PRIMARY KEY(id),
+            FOREIGN KEY(line_id) REFERENCES qaida_lines(id) ON UPDATE NO ACTION ON DELETE CASCADE,
+            FOREIGN KEY(letter_id) REFERENCES qaida_letters(id) ON UPDATE NO ACTION ON DELETE SET NULL
+        )
+    ''')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_line_id ON qaida_cells(line_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_lesson_id ON qaida_cells(lesson_id)')
+    cursor.execute('CREATE INDEX IF NOT EXISTS index_qaida_cells_letter_id ON qaida_cells(letter_id)')
+
     # Create indices
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_surah_id ON ayahs(surah_id)')
     cursor.execute('CREATE INDEX IF NOT EXISTS index_ayahs_juz ON ayahs(juz)')
@@ -769,6 +843,47 @@ def populate_database(conn):
         print(f"Inserted {len(prophets)} prophet entries")
     else:
         print("Warning: No prophets data found")
+
+    # Qaida — content tables (lessons / letters / lines / cells). Progress
+    # tables are user data and intentionally not seeded.
+    qaida_lessons = load_json('qaida_lessons.json')
+    for l in qaida_lessons:
+        concept_tags = json.dumps(l.get('concept_tags', []), ensure_ascii=False)
+        cursor.execute('''
+            INSERT OR REPLACE INTO qaida_lessons VALUES (?,?,?,?,?,?,?,?,?)
+        ''', (l['id'], l['lesson_number'], l['title_english'], l['title_arabic'],
+              l['title_transliteration'], l['description'], concept_tags,
+              l['icon'], l['display_order']))
+    print(f"Inserted {len(qaida_lessons)} qaida lessons")
+
+    qaida_letters = load_json('qaida_letters.json')
+    for l in qaida_letters:
+        cursor.execute('''
+            INSERT OR REPLACE INTO qaida_letters VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        ''', (l['id'], l['letter_arabic'], l['name_arabic'], l['name_transliteration'],
+              l['isolated_form'], l.get('initial_form'), l.get('medial_form'),
+              l.get('final_form'), 1 if l.get('is_connecting') else 0,
+              l['makhraj_area'], l['makhraj_detail'], l.get('phonetic_hint'),
+              l['audio_key'], l['display_order']))
+    print(f"Inserted {len(qaida_letters)} qaida letters")
+
+    qaida_lines = load_json('qaida_lines.json')
+    for l in qaida_lines:
+        cursor.execute('''
+            INSERT OR REPLACE INTO qaida_lines VALUES (?,?,?,?,?,?,?)
+        ''', (l['id'], l['lesson_id'], l['line_number'], l['line_type'],
+              l.get('instruction_english'), l.get('instruction_arabic'),
+              l['display_order']))
+    print(f"Inserted {len(qaida_lines)} qaida lines")
+
+    qaida_cells = load_json('qaida_cells.json')
+    for c in qaida_cells:
+        cursor.execute('''
+            INSERT OR REPLACE INTO qaida_cells VALUES (?,?,?,?,?,?,?,?,?,?,?)
+        ''', (c['id'], c['line_id'], c['lesson_id'], c['position'], c['text_arabic'],
+              c['transliteration'], c['token_type'], c['audio_key'],
+              c.get('highlight_group'), c.get('letter_id'), c.get('notes')))
+    print(f"Inserted {len(qaida_cells)} qaida cells")
 
     conn.commit()
 

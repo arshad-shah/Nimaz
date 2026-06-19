@@ -53,6 +53,9 @@ class PreferencesDataStore @Inject constructor(
         // Help content (data-driven; bumped when help.json content changes)
         val HELP_CONTENT_VERSION = intPreferencesKey("help_content_version")
 
+        // Dua content (data-driven; bumped when duas.json content changes)
+        val DUA_CONTENT_VERSION = intPreferencesKey("dua_content_version")
+
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
         val ASR_CALCULATION = stringPreferencesKey("asr_calculation")
@@ -237,6 +240,17 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setTasbihBeadMode(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TASBIH_BEAD_MODE] = enabled
+        }
+    }
+
+    // Dua content version (0 = never seeded)
+    val duaContentVersion: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_CONTENT_VERSION] ?: 0
+    }
+
+    suspend fun setDuaContentVersion(version: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DUA_CONTENT_VERSION] = version
         }
     }
 
