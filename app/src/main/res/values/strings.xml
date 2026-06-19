@@ -496,6 +496,7 @@
     <string name="custom">Custom</string>
     <string name="laps_format">%d laps</string>
     <string name="done">Done</string>
+    <string name="all_time">All Time</string>
 
     <!-- Add Preset Screen -->
     <string name="add_preset_title">Add Preset</string>
@@ -511,6 +512,8 @@
     <string name="target_count">Target Count</string>
     <string name="category">Category</string>
     <string name="save_preset">Save Preset</string>
+    <string name="new_tasbih">New Tasbih</string>
+    <string name="create_tasbih">Create Tasbih</string>
 
     <!-- Duas Collection Screen -->
     <string name="duas_adhkar">Duas &amp; Adhkar</string>
