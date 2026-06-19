@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
+import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
@@ -115,7 +116,8 @@ class HomeViewModel @Inject constructor(
     private val preferencesDataStore: PreferencesDataStore,
     private val fastingDao: FastingDao,
     private val hadithDao: HadithDao,
-    private val duaDao: DuaDao
+    private val duaDao: DuaDao,
+    private val duaContentSeeder: DuaContentSeeder
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -215,6 +217,10 @@ class HomeViewModel @Inject constructor(
     private fun loadDailyDua() {
         viewModelScope.launch {
             try {
+                // Ensure newly shipped duas are seeded before reading directly
+                // from the DAO; on an app update the prepopulated DB is not
+                // re-copied, so the seeder is what brings in the new content.
+                duaContentSeeder.seedIfNeeded()
                 val categoryId = duaCategoryForHour(LocalTime.now().hour)
                 val category = duaDao.getCategoryById(categoryId) ?: return@launch
                 val duas = duaDao.getDuasByCategoryOnce(categoryId)

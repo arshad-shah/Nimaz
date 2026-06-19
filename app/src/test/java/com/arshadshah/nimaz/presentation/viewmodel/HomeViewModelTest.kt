@@ -5,6 +5,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
+import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
@@ -45,6 +46,7 @@ class HomeViewModelTest {
     private lateinit var fastingDao: FastingDao
     private lateinit var hadithDao: HadithDao
     private lateinit var duaDao: DuaDao
+    private lateinit var duaContentSeeder: DuaContentSeeder
 
     @Before
     fun setUp() {
@@ -57,6 +59,7 @@ class HomeViewModelTest {
         fastingDao = mockk(relaxed = true)
         hadithDao = mockk(relaxed = true)
         duaDao = mockk(relaxed = true)
+        duaContentSeeder = mockk(relaxed = true)
 
         // The today's-records Flow emits synchronously, mirroring Room emitting an
         // initial value during ViewModel init before the rest of the constructor
@@ -76,7 +79,8 @@ class HomeViewModelTest {
         preferencesDataStore = preferencesDataStore,
         fastingDao = fastingDao,
         hadithDao = hadithDao,
-        duaDao = duaDao
+        duaDao = duaDao,
+        duaContentSeeder = duaContentSeeder
     )
 
     /**
