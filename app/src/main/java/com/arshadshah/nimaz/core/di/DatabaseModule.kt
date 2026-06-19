@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
+import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
@@ -47,7 +48,8 @@ object DatabaseModule {
                 NimazDatabase.MIGRATION_10_11,
                 NimazDatabase.MIGRATION_11_12,
                 NimazDatabase.MIGRATION_12_13,
-                NimazDatabase.MIGRATION_13_14
+                NimazDatabase.MIGRATION_13_14,
+                NimazDatabase.MIGRATION_14_15
             )
             .build()
     }
@@ -111,4 +113,8 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideHelpDao(database: NimazDatabase): HelpDao = database.helpDao()
+
+    @Provides
+    @Singleton
+    fun provideQaidaDao(database: NimazDatabase): QaidaDao = database.qaidaDao()
 }

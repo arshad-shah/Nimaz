@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
+import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
@@ -45,6 +46,12 @@ import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLetterEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLineEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QuranFavoriteEntity
 import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
@@ -108,11 +115,19 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         HelpItemEntity::class,
         HelpStepEntity::class,
         HelpStringEntity::class,
+        // Qaida (Noorani Qaida reader; content seeded from prepopulated DB,
+        // progress tables created empty and written at runtime)
+        QaidaLessonEntity::class,
+        QaidaLetterEntity::class,
+        QaidaLineEntity::class,
+        QaidaCellEntity::class,
+        QaidaLessonProgressEntity::class,
+        QaidaCellProgressEntity::class,
         // Other
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 14,
+    version = 15,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -131,6 +146,7 @@ abstract class NimazDatabase : RoomDatabase() {
     abstract fun asmaUnNabiDao(): AsmaUnNabiDao
     abstract fun prophetDao(): ProphetDao
     abstract fun helpDao(): HelpDao
+    abstract fun qaidaDao(): QaidaDao
 
     companion object {
         const val DATABASE_NAME = "nimaz_database"
@@ -138,7 +154,7 @@ abstract class NimazDatabase : RoomDatabase() {
         // Current Room schema version. Keep in sync with @Database(version = ...)
         // above. Exposed so crash reports can be tagged with the schema version,
         // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 14
+        const val SCHEMA_VERSION = 15
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(
@@ -257,6 +273,120 @@ abstract class NimazDatabase : RoomDatabase() {
                 """.trimIndent())
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_owner_type_owner_id_lang_code` ON `help_string` (`owner_type`, `owner_id`, `lang_code`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_lang_code` ON `help_string` (`lang_code`)")
+            }
+        }
+
+        // Adds the Qaida (Noorani Qaida reader) tables. Room runs migrations
+        // even after createFromAsset, so this runs for both fresh installs and
+        // existing users. On a fresh install the four content tables
+        // (lessons/letters/lines/cells) already exist with data in the
+        // pre-packaged DB, so `CREATE TABLE IF NOT EXISTS` is a no-op there;
+        // on an upgrade they are created empty. The two progress tables are
+        // user data and are always created empty. Every statement is
+        // idempotent so running it through either path is safe.
+        val MIGRATION_14_15 = object : Migration(14, 15) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Content: lessons
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_lessons` (
+                        `id` INTEGER NOT NULL,
+                        `lesson_number` INTEGER NOT NULL,
+                        `title_english` TEXT NOT NULL,
+                        `title_arabic` TEXT NOT NULL,
+                        `title_transliteration` TEXT NOT NULL,
+                        `description` TEXT NOT NULL,
+                        `concept_tags` TEXT NOT NULL,
+                        `icon` TEXT NOT NULL,
+                        `display_order` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+
+                // Content: letters (reference table)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_letters` (
+                        `id` INTEGER NOT NULL,
+                        `letter_arabic` TEXT NOT NULL,
+                        `name_arabic` TEXT NOT NULL,
+                        `name_transliteration` TEXT NOT NULL,
+                        `isolated_form` TEXT NOT NULL,
+                        `initial_form` TEXT,
+                        `medial_form` TEXT,
+                        `final_form` TEXT,
+                        `is_connecting` INTEGER NOT NULL,
+                        `makhraj_area` TEXT NOT NULL,
+                        `makhraj_detail` TEXT NOT NULL,
+                        `phonetic_hint` TEXT,
+                        `audio_key` TEXT NOT NULL,
+                        `display_order` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`)
+                    )
+                """.trimIndent())
+
+                // Content: lines (FK → lessons)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_lines` (
+                        `id` INTEGER NOT NULL,
+                        `lesson_id` INTEGER NOT NULL,
+                        `line_number` INTEGER NOT NULL,
+                        `line_type` TEXT NOT NULL,
+                        `instruction_english` TEXT,
+                        `instruction_arabic` TEXT,
+                        `display_order` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`lesson_id`) REFERENCES `qaida_lessons`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_lines_lesson_id` ON `qaida_lines` (`lesson_id`)")
+
+                // Content: cells (FK → lines CASCADE, FK → letters SET NULL)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_cells` (
+                        `id` INTEGER NOT NULL,
+                        `line_id` INTEGER NOT NULL,
+                        `lesson_id` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        `text_arabic` TEXT NOT NULL,
+                        `transliteration` TEXT NOT NULL,
+                        `token_type` TEXT NOT NULL,
+                        `audio_key` TEXT NOT NULL,
+                        `highlight_group` TEXT,
+                        `letter_id` INTEGER,
+                        `notes` TEXT,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`line_id`) REFERENCES `qaida_lines`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
+                        FOREIGN KEY(`letter_id`) REFERENCES `qaida_letters`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_line_id` ON `qaida_cells` (`line_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_lesson_id` ON `qaida_cells` (`lesson_id`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_letter_id` ON `qaida_cells` (`letter_id`)")
+
+                // User progress: per-lesson (created empty)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_lesson_progress` (
+                        `lesson_id` INTEGER NOT NULL,
+                        `status` TEXT NOT NULL,
+                        `stars` INTEGER NOT NULL,
+                        `last_cell_id` INTEGER,
+                        `completed_cells` INTEGER NOT NULL,
+                        `total_cells` INTEGER NOT NULL,
+                        `updated_at` INTEGER NOT NULL,
+                        PRIMARY KEY(`lesson_id`)
+                    )
+                """.trimIndent())
+
+                // User progress: per-cell, optional fine-grained (created empty)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `qaida_cell_progress` (
+                        `lesson_id` INTEGER NOT NULL,
+                        `cell_id` INTEGER NOT NULL,
+                        `heard_count` INTEGER NOT NULL,
+                        `is_completed` INTEGER NOT NULL,
+                        `last_practiced_at` INTEGER NOT NULL,
+                        PRIMARY KEY(`lesson_id`, `cell_id`)
+                    )
+                """.trimIndent())
             }
         }
 
