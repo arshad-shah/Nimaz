@@ -36,6 +36,9 @@ import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.History
@@ -86,6 +89,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
@@ -109,6 +113,23 @@ fun TasbihScreen(
     val counterState by viewModel.counterState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+
+    var presetToDelete by remember { mutableStateOf<TasbihPreset?>(null) }
+    presetToDelete?.let { preset ->
+        NimazConfirmDialog(
+            title = stringResource(R.string.tasbih_delete_preset_title),
+            message = stringResource(R.string.tasbih_delete_preset_message),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = {
+                viewModel.onEvent(TasbihEvent.DeleteCustomPreset(preset.id))
+                presetToDelete = null
+            },
+            onDismiss = { presetToDelete = null }
+        )
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -160,6 +181,7 @@ fun TasbihScreen(
                 counterState = counterState,
                 statsState = statsState,
                 viewModel = viewModel,
+                onDeletePreset = { presetToDelete = it },
             )
         } else {
             // Tablet layout: presets sidebar left, enlarged counter right
@@ -214,6 +236,7 @@ fun TasbihScreen(
                                 preset = preset,
                                 isSelected = counterState.selectedPreset?.id == preset.id,
                                 onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
+                                onLongClick = { presetToDelete = preset },
                                 modifier = Modifier.fillMaxWidth()
                             )
                         }
@@ -305,6 +328,7 @@ private fun TasbihCompactContent(
     counterState: TasbihCounterUiState,
     statsState: TasbihStatsUiState,
     viewModel: TasbihViewModel,
+    onDeletePreset: (TasbihPreset) -> Unit = {},
 ) {
     BoxWithConstraints(modifier = modifier) {
         val isSmallHeight = maxHeight < 600.dp
@@ -347,7 +371,8 @@ private fun TasbihCompactContent(
                     PresetChip(
                         preset = preset,
                         isSelected = counterState.selectedPreset?.id == preset.id,
-                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
+                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
+                        onLongClick = { onDeletePreset(preset) }
                     )
                 }
             }
@@ -718,17 +743,17 @@ private fun FreeCountChip(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 private fun PresetChip(
     preset: TasbihPreset,
     isSelected: Boolean,
     onClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null
 ) {
     Surface(
-        onClick = onClick,
-        modifier = modifier,
+        modifier = modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(20.dp),
         color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),

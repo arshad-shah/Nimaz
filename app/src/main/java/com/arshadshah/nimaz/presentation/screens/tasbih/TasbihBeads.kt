@@ -53,7 +53,7 @@ fun TasbihBeads(
     design: BeadDesign = BeadDesigns.Default,
 ) {
     val scope = rememberCoroutineScope()
-    val beadCount = if (targetCount in 5..99) targetCount else 33
+    val beadCount = targetCount.coerceAtLeast(1) // imame marks each full target
 
     // Visual position; follows [count] except while a drag is controlling it.
     val pos = remember { Animatable(count.toFloat()) }

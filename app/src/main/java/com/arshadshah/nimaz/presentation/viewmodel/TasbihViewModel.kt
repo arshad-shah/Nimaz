@@ -256,8 +256,8 @@ class TasbihViewModel @Inject constructor(
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
                 val state = _counterState.value
-                val totalCount = state.count + (state.laps * state.targetCount)
-                tasbihRepository.updateSessionCount(session.id, totalCount, state.laps)
+                // Store the within-lap count; the DB sums currentCount + laps*target.
+                tasbihRepository.updateSessionCount(session.id, state.count, state.laps)
             }
         }
     }
@@ -351,10 +351,10 @@ class TasbihViewModel @Inject constructor(
         // Update session if active
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
-                val totalCount = _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
+                // Store the within-lap count; the DB sums currentCount + laps*target.
                 tasbihRepository.updateSessionCount(
                     session.id,
-                    totalCount,
+                    _counterState.value.count,
                     _counterState.value.laps
                 )
 

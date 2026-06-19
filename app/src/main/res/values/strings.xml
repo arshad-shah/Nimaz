@@ -463,6 +463,8 @@
     <string name="tasbih">Tasbih</string>
     <string name="tasbih_title">Tasbih</string>
     <string name="tasbih_counter_style">Switch counter style</string>
+    <string name="tasbih_delete_preset_title">Delete preset?</string>
+    <string name="tasbih_delete_preset_message">This custom dhikr preset will be removed. Your logged counts are kept.</string>
     <string name="history">History</string>
     <string name="add_preset">Add Preset</string>
     <string name="today_upper">TODAY</string>
