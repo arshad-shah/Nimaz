@@ -40,7 +40,7 @@ fun QiblaCompassWidget(
         contentAlignment = Alignment.Center
     ) {
         CompassRings(modifier = Modifier.fillMaxSize())
-        CompassDialFace(modifier = Modifier.size(compassSize - 30.dp))
+        CompassDialFace(modifier = Modifier.size(compassSize - 35.dp))
         DirectionMarkers(modifier = Modifier.size(compassSize - 20.dp))
 
         CompassNeedles(

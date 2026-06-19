@@ -150,7 +150,7 @@ fun DirectionMarkers(modifier: Modifier = Modifier) {
         directions.forEach { (label, angleDeg) ->
             val isNorth = label == "N"
             val style = TextStyle(
-                fontSize = if (isNorth) 16.sp else 14.sp,
+                fontSize = if (isNorth) 18.sp else 16.sp,
                 fontWeight = if (isNorth) FontWeight.Bold else FontWeight.SemiBold,
                 color = labelColor
             )
@@ -322,7 +322,7 @@ fun CompassNeedles(
 
         // Kaaba glyph at the Qibla needle's front tip (shared with the AR view).
         val qiblaAngleRad = Math.toRadians(qiblaScreenAngle.toDouble())
-        val kaabaSize = 32.dp.toPx()
+        val kaabaSize = 36.dp.toPx()
         val kaabaOffset = 13.dp.toPx()
         val kaabaCenterX = center.x + ((frontLength + kaabaOffset) * sin(qiblaAngleRad)).toFloat()
         val kaabaCenterY = center.y - ((frontLength + kaabaOffset) * cos(qiblaAngleRad)).toFloat()
