@@ -925,4 +925,18 @@
     <string name="cd_clear_search">Clear search</string>
     <string name="cd_clear">Clear</string>
     <string name="cd_item_selected">%1$s selected</string>
+
+    <!-- Qaida journey reset -->
+    <string name="qaida_reset_journey">Reset journey</string>
+    <string name="qaida_reset_title">Start over?</string>
+    <string name="qaida_reset_message">This clears all stars and progress and starts the Qaida journey again from Lesson 1. This can\'t be undone.</string>
+
+    <!-- Qaida lesson-complete celebration -->
+    <string name="qaida_mashaallah" translatable="false">ما شاء الله</string>
+    <string name="qaida_lesson_complete">Lesson complete!</string>
+    <string name="qaida_lesson_learned">You learned %1$s.</string>
+    <string name="qaida_new_lesson_unlocked">New lesson: %1$s</string>
+    <string name="qaida_map">Map</string>
+    <string name="qaida_next_lesson">Next lesson</string>
+    <string name="qaida_play_line">Play line</string>
 </resources>

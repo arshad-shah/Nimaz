@@ -1,5 +1,5 @@
 {
-  "contentVersion": 5,
+  "contentVersion": 6,
   "topics": [
     {
       "id": "getting_started", "order": 0, "icon": "rocket_launch", "color": "sky",
@@ -1166,6 +1166,100 @@
             "ms": "Audio dimuat turun pada main pertama, jadi semak sambungan dan ruang storan anda. Biarkan qari atau muazin selesai dimuat turun; tukar rangkaian atau pilih Bip Mudah jika muat turun tersekat.",
             "fr": "L'audio se télécharge à la première lecture ; vérifiez votre connexion et l'espace libre. Laissez le récitant ou le muezzin finir de se télécharger ; changez de réseau ou choisissez Bip simple si le téléchargement bloque.",
             "de": "Audio wird beim ersten Abspielen heruntergeladen — prüfe Verbindung und freien Speicher. Lasse den Rezitator oder Muezzin fertig laden; wechsle das Netzwerk oder wähle Einfacher Piepton, wenn ein Download hängt."
+          } }
+      ]
+    },
+    {
+      "id": "qaida", "order": 8, "icon": "menu_book", "color": "gold",
+      "title": {
+        "en": "Qaida — Learn to Read", "tr": "Kaide — Okumayı Öğren", "id": "Qaida — Belajar Membaca",
+        "ms": "Qaida — Belajar Membaca", "fr": "Qaida — Apprendre à lire", "de": "Qaida — Lesen lernen"
+      },
+      "subtitle": {
+        "en": "The Arabic letters, sound by sound", "tr": "Arap harfleri, ses ses",
+        "id": "Huruf Arab, suara demi suara", "ms": "Huruf Arab, bunyi demi bunyi",
+        "fr": "Les lettres arabes, son par son", "de": "Die arabischen Buchstaben, Laut für Laut"
+      },
+      "items": [
+        { "id": "qaida_q_what", "type": "question", "order": 1,
+          "question": {
+            "en": "What is the Qaida reader?", "tr": "Kaide okuyucu nedir?", "id": "Apa itu pembaca Qaida?",
+            "ms": "Apakah pembaca Qaida?", "fr": "Qu'est-ce que le lecteur Qaida ?", "de": "Was ist der Qaida-Leser?"
+          },
+          "answer": {
+            "en": "A gentle, child-friendly course that teaches reading the Qur'an letter by letter. Tap any tile to hear its sound, follow a journey of 17 lessons, and earn stars as you go.",
+            "tr": "Kur'an'ı harf harf okumayı öğreten, çocuklara uygun nazik bir kurs. Sesini duymak için herhangi bir kareye dokun, 17 derslik bir yolculuğu takip et ve ilerledikçe yıldız kazan.",
+            "id": "Kursus lembut yang ramah anak untuk belajar membaca Al-Qur'an huruf demi huruf. Ketuk ubin mana pun untuk mendengar bunyinya, ikuti perjalanan 17 pelajaran, dan kumpulkan bintang.",
+            "ms": "Kursus lembut mesra kanak-kanak yang mengajar membaca Al-Quran huruf demi huruf. Ketik mana-mana jubin untuk mendengar bunyinya, ikuti perjalanan 17 pelajaran, dan kumpul bintang.",
+            "fr": "Un cours doux et adapté aux enfants pour apprendre à lire le Coran lettre par lettre. Touchez une case pour entendre son son, suivez un parcours de 17 leçons et gagnez des étoiles.",
+            "de": "Ein sanfter, kindergerechter Kurs, der das Lesen des Korans Buchstabe für Buchstabe lehrt. Tippe auf eine Kachel, um ihren Laut zu hören, folge einer Reise aus 17 Lektionen und sammle Sterne."
+          } },
+        { "id": "qaida_g_start", "type": "guide", "order": 2, "icon": "menu_book", "estimatedMinutes": 2,
+          "title": {
+            "en": "Start your Qaida journey", "tr": "Kaide yolculuğuna başla", "id": "Mulai perjalanan Qaida Anda",
+            "ms": "Mulakan perjalanan Qaida anda", "fr": "Commencer votre parcours Qaida", "de": "Deine Qaida-Reise beginnen"
+          },
+          "steps": [
+            { "id": "qaida_g_start_s1", "order": 1,
+              "pathLabels": ["More", "Qaida"],
+              "title": {
+                "en": "Open Qaida from the More menu", "tr": "Daha Fazla menüsünden Kaide'yi aç", "id": "Buka Qaida dari menu Lainnya",
+                "ms": "Buka Qaida dari menu Lagi", "fr": "Ouvrir Qaida depuis le menu Plus", "de": "Qaida im Menü Mehr öffnen"
+              } },
+            { "id": "qaida_g_start_s2", "order": 2,
+              "title": {
+                "en": "Tap Continue, or pick a lesson on the journey map", "tr": "Devam'a dokun veya yolculuk haritasından bir ders seç", "id": "Ketuk Lanjutkan, atau pilih pelajaran di peta perjalanan",
+                "ms": "Ketik Teruskan, atau pilih pelajaran pada peta perjalanan", "fr": "Touchez Continuer ou choisissez une leçon sur la carte", "de": "Tippe auf Weiter oder wähle eine Lektion auf der Reisekarte"
+              } },
+            { "id": "qaida_g_start_s3", "order": 3,
+              "title": {
+                "en": "Tap any tile to hear its sound; use Play line to hear a whole row", "tr": "Sesini duymak için bir kareye dokun; bir satırın tamamını duymak için Satırı oynat'ı kullan", "id": "Ketuk ubin untuk mendengar bunyinya; gunakan Putar baris untuk mendengar satu baris penuh",
+                "ms": "Ketik jubin untuk mendengar bunyinya; guna Main baris untuk mendengar satu baris penuh", "fr": "Touchez une case pour entendre son son ; utilisez Lire la ligne pour toute une rangée", "de": "Tippe auf eine Kachel für ihren Laut; nutze Zeile abspielen für eine ganze Reihe"
+              } },
+            { "id": "qaida_g_start_s4", "order": 4,
+              "title": {
+                "en": "Hear every tile to complete the lesson and unlock the next", "tr": "Dersi tamamlamak ve bir sonrakini açmak için her kareyi dinle", "id": "Dengarkan setiap ubin untuk menyelesaikan pelajaran dan membuka yang berikutnya",
+                "ms": "Dengar setiap jubin untuk menyelesaikan pelajaran dan membuka yang seterusnya", "fr": "Écoutez chaque case pour terminer la leçon et débloquer la suivante", "de": "Höre jede Kachel, um die Lektion abzuschließen und die nächste freizuschalten"
+              } }
+          ] },
+        { "id": "qaida_q_stars", "type": "question", "order": 3,
+          "question": {
+            "en": "How do stars and unlocking work?", "tr": "Yıldızlar ve kilit açma nasıl çalışır?", "id": "Bagaimana bintang dan pembukaan bekerja?",
+            "ms": "Bagaimana bintang dan pembukaan berfungsi?", "fr": "Comment fonctionnent les étoiles et le déblocage ?", "de": "Wie funktionieren Sterne und Freischalten?"
+          },
+          "answer": {
+            "en": "Hearing the sounds in a lesson earns up to three stars, and finishing a lesson unlocks the next one on the map. A short celebration appears the first time you complete a lesson.",
+            "tr": "Bir dersteki sesleri dinlemek üç yıldıza kadar kazandırır ve bir dersi bitirmek haritadaki sonrakini açar. Bir dersi ilk kez tamamladığında kısa bir kutlama görünür.",
+            "id": "Mendengar bunyi dalam pelajaran menghasilkan hingga tiga bintang, dan menyelesaikan pelajaran membuka yang berikutnya di peta. Perayaan singkat muncul saat pertama kali Anda menyelesaikan pelajaran.",
+            "ms": "Mendengar bunyi dalam pelajaran memperoleh sehingga tiga bintang, dan menyelesaikan pelajaran membuka yang seterusnya pada peta. Sambutan ringkas muncul kali pertama anda menyelesaikan pelajaran.",
+            "fr": "Écouter les sons d'une leçon rapporte jusqu'à trois étoiles, et terminer une leçon débloque la suivante sur la carte. Une courte célébration apparaît la première fois que vous terminez une leçon.",
+            "de": "Das Hören der Laute einer Lektion bringt bis zu drei Sterne, und das Abschließen einer Lektion schaltet die nächste auf der Karte frei. Beim ersten Abschluss erscheint eine kurze Feier."
+          } },
+        { "id": "qaida_q_resume", "type": "question", "order": 4,
+          "question": {
+            "en": "How do I see where I left off?", "tr": "Nerede kaldığımı nasıl görürüm?", "id": "Bagaimana melihat di mana saya berhenti?",
+            "ms": "Bagaimana saya lihat di mana saya berhenti?", "fr": "Comment voir où je me suis arrêté ?", "de": "Wie sehe ich, wo ich aufgehört habe?"
+          },
+          "answer": {
+            "en": "Sounds you have already heard show a small check mark and a teal outline, so you can pick up exactly where you stopped. You can reopen any finished lesson at any time to practise it again.",
+            "tr": "Daha önce duyduğun sesler küçük bir onay işareti ve turkuaz bir çerçeve gösterir, böylece tam kaldığın yerden devam edebilirsin. Bitmiş bir dersi tekrar çalışmak için istediğin zaman yeniden açabilirsin.",
+            "id": "Bunyi yang sudah Anda dengar menampilkan tanda centang kecil dan garis tepi tosca, sehingga Anda bisa melanjutkan tepat dari tempat berhenti. Anda dapat membuka kembali pelajaran yang selesai kapan saja untuk berlatih lagi.",
+            "ms": "Bunyi yang sudah anda dengar menunjukkan tanda semak kecil dan garis luar tosca, jadi anda boleh sambung tepat di tempat anda berhenti. Anda boleh buka semula pelajaran yang selesai bila-bila masa untuk berlatih lagi.",
+            "fr": "Les sons déjà écoutés affichent une petite coche et un contour turquoise, pour reprendre exactement où vous vous êtes arrêté. Vous pouvez rouvrir une leçon terminée à tout moment pour la repratiquer.",
+            "de": "Bereits gehörte Laute zeigen ein kleines Häkchen und einen türkisen Rahmen, sodass du genau dort weitermachst, wo du aufgehört hast. Du kannst jede abgeschlossene Lektion jederzeit erneut öffnen, um sie zu üben."
+          } },
+        { "id": "qaida_q_reset", "type": "question", "order": 5,
+          "question": {
+            "en": "Can another child use it? How do I reset progress?", "tr": "Başka bir çocuk kullanabilir mi? İlerlemeyi nasıl sıfırlarım?", "id": "Bisakah anak lain memakainya? Bagaimana mereset progres?",
+            "ms": "Bolehkah anak lain menggunakannya? Bagaimana menetapkan semula kemajuan?", "fr": "Un autre enfant peut-il l'utiliser ? Comment réinitialiser la progression ?", "de": "Kann ein anderes Kind es nutzen? Wie setze ich den Fortschritt zurück?"
+          },
+          "answer": {
+            "en": "Open the menu (⋮) on the Qaida screen and choose Reset journey. This clears all stars and progress and starts again from Lesson 1, so another child in the family can begin fresh.",
+            "tr": "Kaide ekranındaki menüyü (⋮) aç ve Yolculuğu sıfırla'yı seç. Bu, tüm yıldızları ve ilerlemeyi siler ve 1. Dersten yeniden başlar; böylece ailedeki başka bir çocuk sıfırdan başlayabilir.",
+            "id": "Buka menu (⋮) di layar Qaida dan pilih Atur ulang perjalanan. Ini menghapus semua bintang dan progres serta memulai lagi dari Pelajaran 1, sehingga anak lain di keluarga bisa mulai dari awal.",
+            "ms": "Buka menu (⋮) pada skrin Qaida dan pilih Tetapkan semula perjalanan. Ini memadamkan semua bintang dan kemajuan serta bermula semula dari Pelajaran 1, supaya anak lain dalam keluarga boleh mula dari awal.",
+            "fr": "Ouvrez le menu (⋮) sur l'écran Qaida et choisissez Réinitialiser le parcours. Cela efface toutes les étoiles et la progression et recommence à la leçon 1, pour qu'un autre enfant puisse repartir de zéro.",
+            "de": "Öffne das Menü (⋮) im Qaida-Bildschirm und wähle Reise zurücksetzen. Das löscht alle Sterne und den Fortschritt und beginnt wieder bei Lektion 1, sodass ein anderes Kind neu starten kann."
           } }
       ]
     }

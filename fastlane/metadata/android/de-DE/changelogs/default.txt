@@ -1,7 +1,6 @@
 Neu seit 3.0.10:
 
-• Fasten hat jetzt einen smarten Tab „Übersicht“ — Ramadan- und freiwillige Fasten zusammen, passend zur Jahreszeit; Nachholen bleibt separat.
-• Neu gestaltete Bildschirme: Namen Allahs, Namen des Propheten ﷺ und die Propheten.
-• Überarbeiteter Qibla-Kompass und AR-Ansicht.
-• Neue durchsuchbare Hilfe & Info mit Schritt-für-Schritt-Anleitungen in deiner Sprache.
-• Frischer Startbildschirm, dazu Fehlerbehebungen und Stabilitätsverbesserungen.
+• Neuer Qaida-Leser: Kinder lernen das Koranlesen Buchstabe für Buchstabe — antippen und hören, Lektionsreise, Sterne sammeln und Fortschritt für ein anderes Kind zurücksetzen.
+• Fasten in einem smarten Tab „Übersicht“ — Ramadan und freiwillige Fasten zusammen; Nachholen bleibt separat.
+• Überarbeiteter Qibla-Kompass und AR-Ansicht, plus neu gestaltete Namen Allahs, Namen des Propheten ﷺ und Propheten.
+• Neue durchsuchbare Hilfe & Info und ein frischer Start.

@@ -43,5 +43,7 @@ data class QaidaUseCases(
     val markCellHeard: MarkCellHeardUseCase,
     val unlockNextLesson: UnlockNextLessonUseCase,
     val getLessonProgress: GetLessonProgressUseCase,
-    val getCourseProgress: GetCourseProgressUseCase
+    val getCourseProgress: GetCourseProgressUseCase,
+    val resetProgress: ResetQaidaProgressUseCase,
+    val observeCompletedCells: ObserveCompletedCellsUseCase
 )

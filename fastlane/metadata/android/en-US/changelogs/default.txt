@@ -1,7 +1,6 @@
 What's new since 3.0.10:
 
-• Fasting now has one smart Tracker tab — Ramadan and voluntary fasts together, adapting to the season, with Makeup kept separate.
-• Redesigned Names of Allah, Names of the Prophet ﷺ and the Prophets screens, each with its own theme and calligraphy.
-• Refreshed Qibla compass and AR view.
-• New searchable Help & About with step-by-step guides in your language.
-• A refreshed Home, plus bug fixes and reliability improvements.
+• New Qaida reader: kids learn to read the Qur'an letter by letter — tap to hear sounds, follow a lesson journey, earn stars, and reset for another child.
+• Fasting now has one smart Tracker tab — Ramadan and voluntary fasts together; Makeup kept separate.
+• Refreshed Qibla compass and AR view, plus redesigned Names of Allah, Names of the Prophet ﷺ and Prophets screens.
+• New searchable Help & About, a refreshed Home, and reliability fixes.

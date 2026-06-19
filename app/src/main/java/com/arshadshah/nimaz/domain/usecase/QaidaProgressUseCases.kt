@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -107,6 +108,31 @@ class UnlockNextLessonUseCase @Inject constructor(
         )
         return next.id
     }
+}
+
+/**
+ * Observes the set of cell ids the learner has already heard/completed in a
+ * lesson, so the reader can mark done tiles and a returning child can see where
+ * they left off.
+ */
+class ObserveCompletedCellsUseCase @Inject constructor(
+    private val repository: QaidaRepository
+) {
+    operator fun invoke(lessonId: Int): Flow<Set<Int>> =
+        repository.observeCellProgressForLesson(lessonId)
+            .map { progress -> progress.filter { it.isCompleted }.map { it.cellId }.toSet() }
+}
+
+/**
+ * Clears all Qaida progress — every lesson's status, stars and resume pointer,
+ * plus the fine-grained cell history — returning the course to a fresh start
+ * (Lesson 1 unlocked, everything else locked, zero stars). Used by the "reset
+ * journey" action so a family can hand the course to another child.
+ */
+class ResetQaidaProgressUseCase @Inject constructor(
+    private val repository: QaidaRepository
+) {
+    suspend operator fun invoke() = repository.resetProgress()
 }
 
 /**

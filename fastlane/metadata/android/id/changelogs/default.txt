@@ -1,7 +1,6 @@
 Yang baru sejak 3.0.10:
 
-• Puasa kini punya satu tab "Pelacak" pintar — puasa Ramadan dan sunnah menjadi satu, menyesuaikan musim; Qadha tetap terpisah.
-• Layar yang didesain ulang: Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
-• Kompas Kiblat dan tampilan AR yang disegarkan.
-• Bantuan & Tentang baru yang bisa dicari, dengan panduan langkah demi langkah dalam bahasa Anda.
-• Beranda yang disegarkan, plus perbaikan bug dan peningkatan keandalan.
+• Pembaca Qaida baru: anak belajar membaca Al-Qur'an huruf demi huruf — ketuk untuk mendengar, perjalanan pelajaran, kumpulkan bintang, dan reset untuk anak lain.
+• Puasa kini dalam satu tab "Pelacak" pintar — puasa Ramadan dan sunnah menjadi satu; Qadha tetap terpisah.
+• Kompas Kiblat dan tampilan AR disegarkan, plus desain ulang Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
+• Bantuan & Tentang baru yang bisa dicari dan Beranda disegarkan.

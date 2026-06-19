@@ -84,6 +84,8 @@ import com.arshadshah.nimaz.domain.usecase.MarkCellHeardUseCase
 import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetCourseProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveCompletedCellsUseCase
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
@@ -367,7 +369,9 @@ object UseCaseModule {
             markCellHeard = MarkCellHeardUseCase(repository, unlockNextLesson),
             unlockNextLesson = unlockNextLesson,
             getLessonProgress = GetLessonProgressUseCase(repository),
-            getCourseProgress = GetCourseProgressUseCase(repository)
+            getCourseProgress = GetCourseProgressUseCase(repository),
+            resetProgress = ResetQaidaProgressUseCase(repository),
+            observeCompletedCells = ObserveCompletedCellsUseCase(repository)
         )
     }
 }

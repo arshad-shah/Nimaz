@@ -1,7 +1,6 @@
 3.0.10 sürümünden bu yana yenilikler:
 
-• Oruç artık tek bir akıllı "Takip" sekmesine sahip — Ramazan ve nafile oruçlar bir arada, mevsime uyum sağlar; Kaza ayrı kalır.
-• Yeniden tasarlanan ekranlar: Allah'ın İsimleri, Peygamber'in İsimleri ﷺ ve Peygamberler, her biri kendi teması ve hat sanatıyla.
-• Yenilenen Kıble pusulası ve AR görünümü.
-• Adım adım kılavuzlar içeren, aranabilir yeni Yardım ve Hakkında bölümü.
-• Yenilenen Ana ekran, ayrıca hata düzeltmeleri ve kararlılık iyileştirmeleri.
+• Yeni Kaide okuyucu: çocuklar Kur'an'ı harf harf okumayı öğrenir — dokun-dinle, ders yolculuğu, yıldız topla ve başka bir çocuk için ilerlemeyi sıfırla.
+• Oruç tek bir akıllı "Takip" sekmesinde — Ramazan ve nafile oruçlar bir arada; Kaza ayrı kalır.
+• Yenilenen Kıble pusulası ve AR görünümü, ayrıca yeniden tasarlanan Allah'ın İsimleri, Peygamber'in İsimleri ﷺ ve Peygamberler.
+• Aranabilir yeni Yardım ve Hakkında, yenilenen Ana ekran ve iyileştirmeler.

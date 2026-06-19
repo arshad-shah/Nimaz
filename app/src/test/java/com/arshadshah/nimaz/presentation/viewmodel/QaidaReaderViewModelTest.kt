@@ -22,7 +22,9 @@ import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonContentUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaLettersUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkCellHeardUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveCompletedCellsUseCase
 import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
+import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coVerify
@@ -74,7 +76,9 @@ class QaidaReaderViewModelTest {
             markCellHeard = markCellHeard,
             unlockNextLesson = mockk<UnlockNextLessonUseCase>(relaxed = true),
             getLessonProgress = getLessonProgress,
-            getCourseProgress = getCourseProgress
+            getCourseProgress = getCourseProgress,
+            resetProgress = mockk<ResetQaidaProgressUseCase>(relaxed = true),
+            observeCompletedCells = mockk<ObserveCompletedCellsUseCase>(relaxed = true)
         )
 
         audioManager = mockk(relaxed = true)

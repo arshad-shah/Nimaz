@@ -849,4 +849,17 @@
     <string name="tasbih_bead_onyx">Oniks</string>
     <string name="tasbih_bead_pearl">Mutiara</string>
     <string name="tasbih_bead_jade">Giok</string>
+
+    <!-- Qaida journey reset -->
+    <string name="qaida_reset_journey">Atur ulang perjalanan</string>
+    <string name="qaida_reset_title">Mulai dari awal?</string>
+    <string name="qaida_reset_message">Ini menghapus semua bintang dan progres serta memulai perjalanan Qaida lagi dari Pelajaran 1. Tindakan ini tidak dapat dibatalkan.</string>
+
+    <!-- Qaida lesson-complete celebration -->
+    <string name="qaida_lesson_complete">Pelajaran selesai!</string>
+    <string name="qaida_lesson_learned">Kamu belajar %1$s.</string>
+    <string name="qaida_new_lesson_unlocked">Pelajaran baru: %1$s</string>
+    <string name="qaida_map">Peta</string>
+    <string name="qaida_next_lesson">Pelajaran berikutnya</string>
+    <string name="qaida_play_line">Putar baris</string>
 </resources>

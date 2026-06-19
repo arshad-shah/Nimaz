@@ -82,6 +82,7 @@ fun MoreMenuScreen(
     onNavigateToAsmaUlHusna: () -> Unit,
     onNavigateToAsmaUnNabi: () -> Unit,
     onNavigateToProphets: () -> Unit,
+    onNavigateToQaida: () -> Unit,
     onDeleteAllData: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
@@ -133,6 +134,13 @@ fun MoreMenuScreen(
             }
             item {
                 NimazMenuGroup {
+                    NimazMenuItem(
+                        title = "Qaida",
+                        subtitle = "Learn to read the Qur'an, letter by letter",
+                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        onClick = onNavigateToQaida
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.allahs_99_names),
                         subtitle = stringResource(R.string.allahs_99_names_subtitle),

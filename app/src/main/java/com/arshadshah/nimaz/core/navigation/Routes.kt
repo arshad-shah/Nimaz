@@ -129,6 +129,16 @@ sealed interface Route {
     @Serializable
     data object Qibla : Route
 
+    // Qaida (children's Arabic reader) screens
+    @Serializable
+    data object QaidaHome : Route
+
+    @Serializable
+    data class QaidaReader(val lessonId: Int) : Route
+
+    @Serializable
+    data object QaidaLetters : Route
+
     // Islamic Calendar screens
     @Serializable
     data object IslamicCalendar : Route
