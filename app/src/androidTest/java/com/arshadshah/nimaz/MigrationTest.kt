@@ -50,4 +50,17 @@ class MigrationTest {
         assertThat(cursor.count).isEqualTo(6)
         cursor.close()
     }
+
+    @Test
+    fun migrate15To16_addsCategoryColumn() {
+        helper.createDatabase(dbName, 15).close()
+        val db = helper.runMigrationsAndValidate(
+            dbName, 16, true, NimazDatabase.MIGRATION_15_16
+        )
+        val cursor = db.query("PRAGMA table_info(`tasbih_presets`)")
+        val nameIndex = cursor.getColumnIndex("name")
+        val columns = generateSequence { if (cursor.moveToNext()) cursor.getString(nameIndex) else null }.toList()
+        cursor.close()
+        assertThat(columns).contains("category")
+    }
 }

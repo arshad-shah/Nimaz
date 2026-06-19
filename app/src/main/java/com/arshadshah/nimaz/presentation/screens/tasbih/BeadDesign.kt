@@ -33,16 +33,41 @@ class BeadDesign(
     val drawBead: DrawScope.(center: Offset, r: Float, colors: List<Color>) -> Unit = DrawScope::roundBead,
 )
 
-/** Default bead painter: a softly lit round bead with a faint rim. */
+/**
+ * Default bead painter. The body is filled with the design's **signature** colour
+ * (colors[1]) so the material reads clearly, then shaded toward colors[2] at the
+ * rim and lit with a small colors[0] specular highlight — so switching designs is
+ * unmistakable, not just a faint highlight change.
+ */
 fun DrawScope.roundBead(center: Offset, r: Float, colors: List<Color>) {
-    val highlight = center + Offset(-r * 0.32f, -r * 0.32f)
+    // Body = signature colour.
+    drawCircle(color = colors[1], radius = r, center = center)
+    // Edge shading toward the darkest stop.
     drawCircle(
-        brush = Brush.radialGradient(colors, center = highlight, radius = r * 1.35f),
+        brush = Brush.radialGradient(
+            0.45f to Color.Transparent,
+            1f to colors[2].copy(alpha = 0.6f),
+            center = center,
+            radius = r
+        ),
         radius = r,
         center = center
     )
+    // Specular highlight (lightest stop), upper-left.
+    val highlight = center + Offset(-r * 0.30f, -r * 0.30f)
     drawCircle(
-        color = Color.White.copy(alpha = 0.10f),
+        brush = Brush.radialGradient(
+            0f to colors[0],
+            1f to Color.Transparent,
+            center = highlight,
+            radius = r * 0.85f
+        ),
+        radius = r,
+        center = center
+    )
+    // Faint rim.
+    drawCircle(
+        color = Color.White.copy(alpha = 0.08f),
         radius = r,
         center = center,
         style = Stroke(width = r * 0.05f)
@@ -81,8 +106,8 @@ object BeadDesigns {
     val Onyx = BeadDesign(
         key = "onyx",
         label = "Onyx",
-        cord = Color(0xFF2A2A30),
-        resting = listOf(Color(0xFF5A5A62), Color(0xFF26262C), Color(0xFF101014)),
+        cord = Color(0xFF3A3A44),
+        resting = listOf(Color(0xFF9A9AA6), Color(0xFF4C4C58), Color(0xFF1C1C24)),
     )
 
     val Pearl = BeadDesign(
