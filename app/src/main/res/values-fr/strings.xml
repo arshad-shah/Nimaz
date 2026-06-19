@@ -825,4 +825,27 @@
     <string name="new_tasbih">Nouveau tasbih</string>
     <string name="create_tasbih">Créer un tasbih</string>
     <string name="all_time">Tout le temps</string>
+    <string name="tasbih_category_mine">Les miens</string>
+    <string name="tasbih_category_daily">Quotidien</string>
+    <string name="tasbih_category_custom">Personnalisé</string>
+    <string name="tasbih_category_after_prayer">Après la prière</string>
+    <string name="tasbih_category_morning">Matin</string>
+    <string name="tasbih_category_evening">Soir</string>
+    <string name="tasbih_free_count_subtitle">Comptez tout · définissez votre objectif</string>
+    <string name="tasbih_left_handed">Gaucher</string>
+    <string name="tasbih_beads_advance_ltr">Les perles avancent de gauche à droite</string>
+    <string name="tasbih_beads_advance_rtl">Les perles avancent de droite à gauche</string>
+    <string name="tasbih_stat_target">OBJECTIF</string>
+    <string name="tasbih_stat_today">AUJOURD\'HUI</string>
+    <string name="tasbih_stat_laps">TOURS</string>
+    <string name="tasbih_change_dhikr">Changer de dhikr</string>
+    <string name="tasbih_target_value">Objectif  %d</string>
+    <string name="tasbih_decrease_target">Diminuer l\'objectif</string>
+    <string name="tasbih_increase_target">Augmenter l\'objectif</string>
+    <string name="tasbih_bead_wood">Bois</string>
+    <string name="tasbih_bead_marble">Marbre</string>
+    <string name="tasbih_bead_amethyst">Améthyste</string>
+    <string name="tasbih_bead_onyx">Onyx</string>
+    <string name="tasbih_bead_pearl">Perle</string>
+    <string name="tasbih_bead_jade">Jade</string>
 </resources>

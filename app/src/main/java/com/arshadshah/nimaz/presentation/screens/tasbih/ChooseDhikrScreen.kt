@@ -62,11 +62,20 @@ import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 
 private data class DhikrTab(
-    val label: String,
     val category: TasbihCategory? = null,
     val mine: Boolean = false,
     val favorites: Boolean = false,
 )
+
+@Composable
+private fun tabLabel(tab: DhikrTab): String = when {
+    tab.favorites -> "★"
+    tab.mine -> stringResource(R.string.tasbih_category_mine)
+    tab.category == TasbihCategory.AFTER_PRAYER -> stringResource(R.string.tasbih_category_after_prayer)
+    tab.category == TasbihCategory.MORNING -> stringResource(R.string.tasbih_category_morning)
+    tab.category == TasbihCategory.EVENING -> stringResource(R.string.tasbih_category_evening)
+    else -> stringResource(R.string.all)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -84,12 +93,12 @@ fun ChooseDhikrScreen(
 
     val tabs = remember {
         listOf(
-            DhikrTab("All"),
-            DhikrTab("★", favorites = true),
-            DhikrTab(TasbihCategory.AFTER_PRAYER.displayName(), TasbihCategory.AFTER_PRAYER),
-            DhikrTab(TasbihCategory.MORNING.displayName(), TasbihCategory.MORNING),
-            DhikrTab(TasbihCategory.EVENING.displayName(), TasbihCategory.EVENING),
-            DhikrTab("Mine", mine = true),
+            DhikrTab(),
+            DhikrTab(favorites = true),
+            DhikrTab(TasbihCategory.AFTER_PRAYER),
+            DhikrTab(TasbihCategory.MORNING),
+            DhikrTab(TasbihCategory.EVENING),
+            DhikrTab(mine = true),
         )
     }
 
@@ -155,7 +164,7 @@ fun ChooseDhikrScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(tabs.size) { i ->
-                    CategoryTab(label = tabs[i].label, selected = i == tabIndex, onClick = { tabIndex = i })
+                    CategoryTab(label = tabLabel(tabs[i]), selected = i == tabIndex, onClick = { tabIndex = i })
                 }
             }
 
@@ -289,7 +298,7 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Count anything · set your own target",
+                    text = stringResource(R.string.tasbih_free_count_subtitle),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

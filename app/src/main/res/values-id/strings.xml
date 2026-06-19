@@ -826,4 +826,27 @@
     <string name="new_tasbih">Tasbih baru</string>
     <string name="create_tasbih">Buat Tasbih</string>
     <string name="all_time">Sepanjang masa</string>
+    <string name="tasbih_category_mine">Milikku</string>
+    <string name="tasbih_category_daily">Harian</string>
+    <string name="tasbih_category_custom">Khusus</string>
+    <string name="tasbih_category_after_prayer">Setelah Salat</string>
+    <string name="tasbih_category_morning">Pagi</string>
+    <string name="tasbih_category_evening">Petang</string>
+    <string name="tasbih_free_count_subtitle">Hitung apa saja · tetapkan target Anda</string>
+    <string name="tasbih_left_handed">Kidal</string>
+    <string name="tasbih_beads_advance_ltr">Manik bergerak kiri → kanan</string>
+    <string name="tasbih_beads_advance_rtl">Manik bergerak kanan → kiri</string>
+    <string name="tasbih_stat_target">TARGET</string>
+    <string name="tasbih_stat_today">HARI INI</string>
+    <string name="tasbih_stat_laps">PUTARAN</string>
+    <string name="tasbih_change_dhikr">Ganti Zikir</string>
+    <string name="tasbih_target_value">Target  %d</string>
+    <string name="tasbih_decrease_target">Kurangi target</string>
+    <string name="tasbih_increase_target">Tambah target</string>
+    <string name="tasbih_bead_wood">Kayu</string>
+    <string name="tasbih_bead_marble">Marmer</string>
+    <string name="tasbih_bead_amethyst">Kecubung</string>
+    <string name="tasbih_bead_onyx">Oniks</string>
+    <string name="tasbih_bead_pearl">Mutiara</string>
+    <string name="tasbih_bead_jade">Giok</string>
 </resources>

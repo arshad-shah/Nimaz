@@ -188,7 +188,7 @@ fun AddPresetScreen(
             ) {
                 TasbihCategory.entries.forEach { category ->
                     CategoryPill(
-                        label = category.displayName(),
+                        label = categoryLabel(category),
                         selected = selectedCategory == category,
                         onClick = { selectedCategory = category }
                     )
@@ -255,7 +255,7 @@ private fun TargetCountStepper(
             ) {
                 Icon(
                     imageVector = Icons.Default.Remove,
-                    contentDescription = "Decrease",
+                    contentDescription = stringResource(R.string.tasbih_decrease_target),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
@@ -275,12 +275,21 @@ private fun TargetCountStepper(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Increase",
+                    contentDescription = stringResource(R.string.tasbih_increase_target),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
             }
         }
     }
+}
+
+@Composable
+private fun categoryLabel(category: TasbihCategory): String = when (category) {
+    TasbihCategory.DAILY -> stringResource(R.string.tasbih_category_daily)
+    TasbihCategory.AFTER_PRAYER -> stringResource(R.string.tasbih_category_after_prayer)
+    TasbihCategory.MORNING -> stringResource(R.string.tasbih_category_morning)
+    TasbihCategory.EVENING -> stringResource(R.string.tasbih_category_evening)
+    TasbihCategory.CUSTOM -> stringResource(R.string.tasbih_category_custom)
 }
 
 @Composable

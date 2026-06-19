@@ -826,4 +826,27 @@
     <string name="new_tasbih">Yeni Tesbih</string>
     <string name="create_tasbih">Tesbih oluştur</string>
     <string name="all_time">Tüm zamanlar</string>
+    <string name="tasbih_category_mine">Benimkiler</string>
+    <string name="tasbih_category_daily">Günlük</string>
+    <string name="tasbih_category_custom">Özel</string>
+    <string name="tasbih_category_after_prayer">Namazdan sonra</string>
+    <string name="tasbih_category_morning">Sabah</string>
+    <string name="tasbih_category_evening">Akşam</string>
+    <string name="tasbih_free_count_subtitle">Her şeyi say · kendi hedefini belirle</string>
+    <string name="tasbih_left_handed">Solak</string>
+    <string name="tasbih_beads_advance_ltr">Boncuklar sol → sağ ilerler</string>
+    <string name="tasbih_beads_advance_rtl">Boncuklar sağ → sol ilerler</string>
+    <string name="tasbih_stat_target">HEDEF</string>
+    <string name="tasbih_stat_today">BUGÜN</string>
+    <string name="tasbih_stat_laps">TUR</string>
+    <string name="tasbih_change_dhikr">Zikri değiştir</string>
+    <string name="tasbih_target_value">Hedef  %d</string>
+    <string name="tasbih_decrease_target">Hedefi azalt</string>
+    <string name="tasbih_increase_target">Hedefi artır</string>
+    <string name="tasbih_bead_wood">Ahşap</string>
+    <string name="tasbih_bead_marble">Mermer</string>
+    <string name="tasbih_bead_amethyst">Ametist</string>
+    <string name="tasbih_bead_onyx">Oniks</string>
+    <string name="tasbih_bead_pearl">İnci</string>
+    <string name="tasbih_bead_jade">Yeşim</string>
 </resources>

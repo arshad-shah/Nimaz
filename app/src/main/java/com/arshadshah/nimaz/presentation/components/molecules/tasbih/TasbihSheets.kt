@@ -37,9 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -63,7 +65,7 @@ fun BeadDesignPickerSheet(
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
             Text(
-                text = "Bead Design",
+                text = stringResource(R.string.tasbih_bead_design),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
@@ -94,7 +96,7 @@ fun BeadDesignPickerSheet(
                         )
                         Spacer(Modifier.height(6.dp))
                         Text(
-                            text = design.label,
+                            text = beadDesignLabel(design.key),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                             color = if (selected) MaterialTheme.colorScheme.primary
@@ -112,12 +114,15 @@ fun BeadDesignPickerSheet(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Left-handed",
+                        text = stringResource(R.string.tasbih_left_handed),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (leftHanded) "Beads advance left → right" else "Beads advance right → left",
+                        text = stringResource(
+                            if (leftHanded) R.string.tasbih_beads_advance_ltr
+                            else R.string.tasbih_beads_advance_rtl
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -179,9 +184,9 @@ fun CurrentTasbihSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                StatTile("TARGET", targetCount.toString(), Modifier.weight(1f))
-                StatTile("TODAY", totalToday.toString(), Modifier.weight(1f))
-                StatTile("LAPS", laps.toString(), Modifier.weight(1f))
+                StatTile(stringResource(R.string.tasbih_stat_target), targetCount.toString(), Modifier.weight(1f))
+                StatTile(stringResource(R.string.tasbih_stat_today), totalToday.toString(), Modifier.weight(1f))
+                StatTile(stringResource(R.string.tasbih_stat_laps), laps.toString(), Modifier.weight(1f))
             }
 
             // Free count: let the user dial in any target.
@@ -224,7 +229,7 @@ fun CurrentTasbihSheet(
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "Change Dhikr",
+                        text = stringResource(R.string.tasbih_change_dhikr),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -233,6 +238,17 @@ fun CurrentTasbihSheet(
             }
         }
     }
+}
+
+@Composable
+private fun beadDesignLabel(key: String): String = when (key) {
+    "wood" -> stringResource(R.string.tasbih_bead_wood)
+    "marble" -> stringResource(R.string.tasbih_bead_marble)
+    "amethyst" -> stringResource(R.string.tasbih_bead_amethyst)
+    "onyx" -> stringResource(R.string.tasbih_bead_onyx)
+    "pearl" -> stringResource(R.string.tasbih_bead_pearl)
+    "jade" -> stringResource(R.string.tasbih_bead_jade)
+    else -> key
 }
 
 @Composable
@@ -248,16 +264,16 @@ private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { onChange((target - 1).coerceAtLeast(1)) }) {
-                Icon(Icons.Default.Remove, contentDescription = "Decrease target")
+                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.tasbih_decrease_target))
             }
             Text(
-                text = "Target  $target",
+                text = stringResource(R.string.tasbih_target_value, target),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = { onChange((target + 1).coerceAtMost(9999)) }) {
-                Icon(Icons.Default.Add, contentDescription = "Increase target")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.tasbih_increase_target))
             }
         }
     }
