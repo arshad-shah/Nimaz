@@ -17,6 +17,7 @@ import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
+import com.arshadshah.nimaz.data.repository.QaidaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.QuranRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
@@ -30,6 +31,7 @@ import com.arshadshah.nimaz.domain.repository.HelpRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
+import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
@@ -73,6 +75,11 @@ import com.arshadshah.nimaz.domain.usecase.GetProphetByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleProphetFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteProphetsUseCase
+import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
+import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonContentUseCase
+import com.arshadshah.nimaz.domain.usecase.GetQaidaLettersUseCase
+import com.arshadshah.nimaz.domain.usecase.GetQaidaCellUseCase
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
@@ -214,6 +221,12 @@ abstract class RepositoryModule {
     abstract fun bindHelpRepository(
         helpRepositoryImpl: HelpRepositoryImpl
     ): HelpRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindQaidaRepository(
+        qaidaRepositoryImpl: QaidaRepositoryImpl
+    ): QaidaRepository
 }
 
 @Module
@@ -333,6 +346,19 @@ object UseCaseModule {
             getTopicDetail = GetHelpTopicDetailUseCase(repository),
             getGuide = GetHelpGuideUseCase(repository),
             search = SearchHelpUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideQaidaUseCases(
+        repository: QaidaRepository
+    ): QaidaUseCases {
+        return QaidaUseCases(
+            getLessons = GetQaidaLessonsUseCase(repository),
+            getLessonContent = GetQaidaLessonContentUseCase(repository),
+            getLetters = GetQaidaLettersUseCase(repository),
+            getCell = GetQaidaCellUseCase(repository)
         )
     }
 }
