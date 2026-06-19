@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.audio
 
+import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -42,13 +43,16 @@ class AdhanDownloadService : Service() {
         const val ACTION_DOWNLOAD_SELECTED = "com.arshadshah.nimaz.DOWNLOAD_SELECTED_ADHAN"
 
         fun downloadDefault(context: Context) {
-            val intent = Intent(context, AdhanDownloadService::class.java).apply {
-                action = ACTION_DOWNLOAD_DEFAULT
-            }
-            startServiceWithFallback(
-                start = { startForegroundCompat(context, intent) },
-                fallback = { AdhanDownloadWorker.enqueue(context, null) }
-            )
+            // Automatic, non-interactive maintenance download triggered during
+            // app initialization. No user is watching for progress, and on a
+            // cold start the main thread can be too busy to deliver
+            // onStartCommand() — and therefore call startForeground() — within
+            // the system's foreground-service start deadline, crashing with
+            // ForegroundServiceDidNotStartInTimeException. That exception is
+            // delivered asynchronously and cannot be caught at the call site, so
+            // we skip the foreground service entirely and use WorkManager, the
+            // supported mechanism for background work.
+            AdhanDownloadWorker.enqueue(context, null)
         }
 
         fun downloadSelected(context: Context, adhanSound: AdhanSound) {
@@ -57,6 +61,7 @@ class AdhanDownloadService : Service() {
                 putExtra(EXTRA_ADHAN_SOUND, adhanSound.name)
             }
             startServiceWithFallback(
+                canStartForeground = isAppInForeground(),
                 start = { startForegroundCompat(context, intent) },
                 fallback = { AdhanDownloadWorker.enqueue(context, adhanSound) }
             )
@@ -71,20 +76,42 @@ class AdhanDownloadService : Service() {
         }
 
         /**
-         * Runs [start] to launch the foreground download service, degrading to
-         * [fallback] when the foreground service cannot be started.
+         * Whether the app process is currently in the foreground and may
+         * therefore reliably start a foreground service.
          *
-         * Both download triggers (app initialization and prayer-notification
-         * broadcasts) can run while the app is in the background. On Android 12+
-         * starting a foreground service from the background throws
-         * [android.app.ForegroundServiceStartNotAllowedException]. Letting that
-         * propagate aborts the download (and was being reported as a non-fatal
-         * crash), so we catch it and enqueue a background WorkManager job
-         * instead, which is allowed to run from the background.
+         * Foreground starts from the background are the source of two distinct
+         * Android 12+ crashes: [android.app.ForegroundServiceStartNotAllowedException]
+         * (thrown synchronously at the call site) and
+         * [android.app.ForegroundServiceDidNotStartInTimeException] (thrown
+         * asynchronously on the main thread when startForeground() is not reached
+         * within the system deadline, and therefore impossible to catch). Gating
+         * the start on foreground importance avoids both, sending background
+         * triggers (e.g. boot) to the WorkManager fallback instead.
+         */
+        private fun isAppInForeground(): Boolean {
+            val state = ActivityManager.RunningAppProcessInfo()
+            ActivityManager.getMyMemoryState(state)
+            return state.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
+        }
+
+        /**
+         * Launches the foreground download service via [start] when
+         * [canStartForeground] is true, degrading to [fallback] (a background
+         * WorkManager job) when the app is not in the foreground or when the
+         * foreground start is rejected at the call site.
          *
          * Visible for testing.
          */
-        internal fun startServiceWithFallback(start: () -> Unit, fallback: () -> Unit) {
+        internal fun startServiceWithFallback(
+            canStartForeground: Boolean,
+            start: () -> Unit,
+            fallback: () -> Unit
+        ) {
+            if (!canStartForeground) {
+                Log.d(TAG, "App not in foreground; using background download")
+                fallback()
+                return
+            }
             try {
                 start()
             } catch (e: Exception) {

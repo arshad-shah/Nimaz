@@ -1,10 +1,6 @@
 package com.arshadshah.nimaz.data.audio
 
 import android.app.ForegroundServiceStartNotAllowedException
-import android.content.ComponentName
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
 import io.mockk.mockkObject
@@ -17,37 +13,21 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.RuntimeEnvironment
 
 /**
- * Reproduces and guards against the production crash:
+ * Reproduces and guards against two distinct Android 12+ production crashes from
+ * starting the adhan download foreground service from the background:
  *
- *   android.app.ForegroundServiceStartNotAllowedException: startForegroundService()
- *   not allowed due to mAllowStartForeground false
+ *   android.app.ForegroundServiceStartNotAllowedException
+ *   android.app.ForegroundServiceDidNotStartInTimeException
  *
- * The app initializer (and the boot receiver) trigger adhan downloads from a
- * background context. On Android 12+ starting a foreground service from the
- * background is forbidden and throws, which previously aborted the download and
- * was reported as a non-fatal crash. The start helpers must instead fall back to
+ * The first is thrown synchronously at the call site; the second is delivered
+ * asynchronously on the main thread (when startForeground() is not reached
+ * within the system deadline during a congested cold start) and cannot be
+ * caught. The start helpers therefore (a) only start the foreground service when
+ * the app is in the foreground, and (b) route automatic/background downloads to
  * a WorkManager job that can run in the background.
  */
 @RunWith(RobolectricTestRunner::class)
 class AdhanDownloadServiceStartTest {
-
-    /**
-     * A context that always refuses to start a (foreground) service, exactly as
-     * the framework does when the process is in the background on Android 12+.
-     */
-    private class BackgroundRestrictedContext(base: Context) : ContextWrapper(base) {
-        override fun startForegroundService(service: Intent): ComponentName? {
-            throw ForegroundServiceStartNotAllowedException(
-                "startForegroundService() not allowed due to mAllowStartForeground false"
-            )
-        }
-
-        override fun startService(service: Intent): ComponentName? {
-            throw ForegroundServiceStartNotAllowedException(
-                "startService() not allowed due to mAllowStartForeground false"
-            )
-        }
-    }
 
     @After
     fun tearDown() {
@@ -62,6 +42,7 @@ class AdhanDownloadServiceStartTest {
 
         // Must not propagate ForegroundServiceStartNotAllowedException.
         AdhanDownloadService.startServiceWithFallback(
+            canStartForeground = true,
             start = {
                 throw ForegroundServiceStartNotAllowedException(
                     "not allowed due to mAllowStartForeground false"
@@ -79,6 +60,7 @@ class AdhanDownloadServiceStartTest {
         var fallbackInvoked = false
 
         AdhanDownloadService.startServiceWithFallback(
+            canStartForeground = true,
             start = { started = true },
             fallback = { fallbackInvoked = true }
         )
@@ -87,31 +69,37 @@ class AdhanDownloadServiceStartTest {
         assertThat(fallbackInvoked).isFalse()
     }
 
+    @Test
+    fun `falls back without starting foreground service when app is not in foreground`() {
+        var started = false
+        var fallbackInvoked = false
+
+        // Guards against ForegroundServiceDidNotStartInTimeException: when the
+        // app is not in the foreground we must not even attempt the foreground
+        // start, since that exception is async and cannot be caught.
+        AdhanDownloadService.startServiceWithFallback(
+            canStartForeground = false,
+            start = { started = true },
+            fallback = { fallbackInvoked = true }
+        )
+
+        assertThat(started).isFalse()
+        assertThat(fallbackInvoked).isTrue()
+    }
+
     // ── End-to-end through the public entry points ──────────────────────
 
     @Test
-    fun `downloadDefault enqueues background work when foreground start is disallowed`() {
+    fun `downloadDefault always enqueues background work`() {
         mockkObject(AdhanDownloadWorker.Companion)
         every { AdhanDownloadWorker.enqueue(any(), any()) } returns Unit
 
-        val context = BackgroundRestrictedContext(RuntimeEnvironment.getApplication())
+        val context = RuntimeEnvironment.getApplication()
 
-        // Must not crash.
+        // The automatic default download never uses a foreground service.
         AdhanDownloadService.downloadDefault(context)
 
         // Default download => null sound.
         verify { AdhanDownloadWorker.enqueue(context, null) }
-    }
-
-    @Test
-    fun `downloadSelected enqueues background work for the chosen sound when foreground start is disallowed`() {
-        mockkObject(AdhanDownloadWorker.Companion)
-        every { AdhanDownloadWorker.enqueue(any(), any()) } returns Unit
-
-        val context = BackgroundRestrictedContext(RuntimeEnvironment.getApplication())
-
-        AdhanDownloadService.downloadSelected(context, AdhanSound.MAKKAH)
-
-        verify { AdhanDownloadWorker.enqueue(context, AdhanSound.MAKKAH) }
     }
 }

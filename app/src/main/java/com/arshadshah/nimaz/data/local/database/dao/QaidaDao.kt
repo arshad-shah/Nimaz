@@ -63,6 +63,9 @@ interface QaidaDao {
     @Query("SELECT * FROM qaida_cells WHERE line_id = :lineId ORDER BY position ASC")
     suspend fun getCellsForLine(lineId: Int): List<QaidaCellEntity>
 
+    @Query("SELECT COUNT(*) FROM qaida_cells WHERE lesson_id = :lessonId")
+    suspend fun countCellsForLesson(lessonId: Int): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCells(cells: List<QaidaCellEntity>)
 
@@ -91,6 +94,9 @@ interface QaidaDao {
 
     @Query("SELECT * FROM qaida_cell_progress WHERE lesson_id = :lessonId")
     fun getCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgressEntity>>
+
+    @Query("SELECT COUNT(*) FROM qaida_cell_progress WHERE lesson_id = :lessonId AND is_completed = 1")
+    suspend fun countCompletedCells(lessonId: Int): Int
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertCellProgress(progress: QaidaCellProgressEntity)

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.domain.repository
 
 import com.arshadshah.nimaz.domain.model.QaidaCell
+import com.arshadshah.nimaz.domain.model.QaidaCellProgress
 import com.arshadshah.nimaz.domain.model.QaidaLesson
 import com.arshadshah.nimaz.domain.model.QaidaLessonContent
 import com.arshadshah.nimaz.domain.model.QaidaLessonProgress
@@ -28,9 +29,18 @@ interface QaidaRepository {
     suspend fun getCell(cellId: Int): QaidaCell?
     fun getCellsForLesson(lessonId: Int): Flow<List<QaidaCell>>
 
-    // ── Progress (write logic delegated to sub-issue E, surfaced here) ─────
+    /** Total number of seeded cells in a lesson (the denominator for progress). */
+    suspend fun getCellCountForLesson(lessonId: Int): Int
+
+    // ── Lesson progress ───────────────────────────────────────────────────
     fun getAllProgress(): Flow<List<QaidaLessonProgress>>
     fun observeLessonProgress(lessonId: Int): Flow<QaidaLessonProgress?>
     suspend fun getLessonProgress(lessonId: Int): QaidaLessonProgress?
     suspend fun upsertLessonProgress(progress: QaidaLessonProgress)
+
+    // ── Cell progress ─────────────────────────────────────────────────────
+    suspend fun getCellProgress(lessonId: Int, cellId: Int): QaidaCellProgress?
+    fun observeCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgress>>
+    suspend fun getCompletedCellCount(lessonId: Int): Int
+    suspend fun upsertCellProgress(progress: QaidaCellProgress)
 }

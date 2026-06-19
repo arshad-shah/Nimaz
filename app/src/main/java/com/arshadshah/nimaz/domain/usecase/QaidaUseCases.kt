@@ -38,5 +38,10 @@ data class QaidaUseCases(
     val getLessons: GetQaidaLessonsUseCase,
     val getLessonContent: GetQaidaLessonContentUseCase,
     val getLetters: GetQaidaLettersUseCase,
-    val getCell: GetQaidaCellUseCase
+    val getCell: GetQaidaCellUseCase,
+    // Progress / gamification (sub-issue E, #176)
+    val markCellHeard: MarkCellHeardUseCase,
+    val unlockNextLesson: UnlockNextLessonUseCase,
+    val getLessonProgress: GetLessonProgressUseCase,
+    val getCourseProgress: GetCourseProgressUseCase
 )
