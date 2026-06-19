@@ -24,6 +24,12 @@ interface DuaDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertCategories(categories: List<DuaCategoryEntity>)
 
+    @Query("SELECT COUNT(*) FROM dua_categories")
+    suspend fun categoryCount(): Int
+
+    @Query("DELETE FROM dua_categories")
+    suspend fun deleteAllCategories()
+
     // Dua operations
     @Query("SELECT * FROM duas WHERE category_id = :categoryId ORDER BY display_order ASC")
     fun getDuasByCategory(categoryId: Int): Flow<List<DuaEntity>>
@@ -40,6 +46,28 @@ interface DuaDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDuas(duas: List<DuaEntity>)
+
+    @Query("DELETE FROM duas")
+    suspend fun deleteAllDuas()
+
+    /**
+     * Atomically replaces the dua content tables with [categories] and [duas].
+     * Used by the content seeder so an interrupted refresh never leaves the
+     * collection half-populated. Duas are deleted before categories to respect
+     * the duas → dua_categories foreign key, then categories are inserted before
+     * duas for the same reason. dua_bookmarks and dua_progress have no foreign
+     * key to duas, so this never touches the user's saved data.
+     */
+    @Transaction
+    suspend fun replaceAllContent(
+        categories: List<DuaCategoryEntity>,
+        duas: List<DuaEntity>
+    ) {
+        deleteAllDuas()
+        deleteAllCategories()
+        insertCategories(categories)
+        insertDuas(duas)
+    }
 
     // Bookmark operations
     @Query("SELECT * FROM dua_bookmarks ORDER BY createdAt DESC")

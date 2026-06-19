@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
+import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
@@ -14,45 +15,54 @@ import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class DuaRepositoryImpl @Inject constructor(
-    private val duaDao: DuaDao
+    private val duaDao: DuaDao,
+    private val seeder: DuaContentSeeder
 ) : DuaRepository {
 
-    override fun getAllCategories(): Flow<List<DuaCategory>> {
-        return duaDao.getAllCategories().map { entities ->
+    /** Seed (if the bundled content is new/missing) once, then emit DB-backed flows. */
+    private fun <T> seededFlow(block: () -> Flow<T>): Flow<T> =
+        flow { seeder.seedIfNeeded(); emitAll(block()) }
+
+    override fun getAllCategories(): Flow<List<DuaCategory>> = seededFlow {
+        duaDao.getAllCategories().map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
     override suspend fun getCategoryById(categoryId: String): DuaCategory? {
+        seeder.seedIfNeeded()
         return duaDao.getCategoryById(categoryId.toIntOrNull() ?: return null)?.toDomain()
     }
 
-    override fun getDuasByCategory(categoryId: String): Flow<List<Dua>> {
-        return duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).map { entities ->
+    override fun getDuasByCategory(categoryId: String): Flow<List<Dua>> = seededFlow {
+        duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
     override suspend fun getDuaById(duaId: String): Dua? {
+        seeder.seedIfNeeded()
         return duaDao.getDuaById(duaId.toIntOrNull() ?: return null)?.toDomain()
     }
 
-    override fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>> {
+    override fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>> = seededFlow {
         // Since there's no occasion column in the database, return empty list
-        return duaDao.searchDuas(occasion.name.lowercase()).map { entities ->
+        duaDao.searchDuas(occasion.name.lowercase()).map { entities ->
             entities.map { it.toDomain() }
         }
     }
 
-    override fun searchDuas(query: String): Flow<List<DuaSearchResult>> {
-        return combine(
+    override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = seededFlow {
+        combine(
             duaDao.getAllCategories(),
             duaDao.searchDuas(query)
         ) { categories, entities ->
@@ -133,10 +143,14 @@ class DuaRepositoryImpl @Inject constructor(
     }
 
     override suspend fun initializeDuaData() {
-        // Data is pre-populated in the database
+        // Content ships in the prepopulated DB for fresh installs and is
+        // (re)seeded from the bundled assets/duas/duas.json so existing users
+        // also receive newly added duas on update.
+        seeder.seedIfNeeded()
     }
 
     override suspend fun isDataInitialized(): Boolean {
+        seeder.seedIfNeeded()
         return duaDao.getAllCategories().first().isNotEmpty()
     }
 
