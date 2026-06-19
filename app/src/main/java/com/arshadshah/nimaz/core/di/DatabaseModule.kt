@@ -49,7 +49,8 @@ object DatabaseModule {
                 NimazDatabase.MIGRATION_11_12,
                 NimazDatabase.MIGRATION_12_13,
                 NimazDatabase.MIGRATION_13_14,
-                NimazDatabase.MIGRATION_14_15
+                NimazDatabase.MIGRATION_14_15,
+                NimazDatabase.MIGRATION_15_16
             )
             .build()
     }

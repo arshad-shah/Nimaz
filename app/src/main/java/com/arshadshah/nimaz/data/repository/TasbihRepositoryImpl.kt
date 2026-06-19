@@ -147,6 +147,15 @@ class TasbihRepositoryImpl @Inject constructor(
         tasbihDao.insertPresets(entities)
     }
 
+    override suspend fun seedMissingDefaults() {
+        val existingNames = tasbihDao.getAllPresetNames().toSet()
+        val missing = DefaultTasbihPresets.allDefaults.filter { it.name !in existingNames }
+        if (missing.isNotEmpty()) {
+            // id = 0 so Room assigns fresh ids and never replaces an existing row.
+            tasbihDao.insertPresets(missing.map { it.toEntity().copy(id = 0) })
+        }
+    }
+
     override suspend fun hasDefaultPresets(): Boolean {
         return tasbihDao.getDefaultPresets().first().isNotEmpty()
     }
@@ -160,7 +169,7 @@ class TasbihRepositoryImpl @Inject constructor(
             transliteration = transliteration,
             translation = translation,
             targetCount = targetCount,
-            category = null, // No category in database
+            category = TasbihCategory.fromString(category),
             reference = null,
             isDefault = isCustom == 0,
             displayOrder = displayOrder,
@@ -178,7 +187,8 @@ class TasbihRepositoryImpl @Inject constructor(
             translation = translation ?: "",
             targetCount = targetCount,
             isCustom = if (isDefault) 0 else 1,
-            displayOrder = displayOrder
+            displayOrder = displayOrder,
+            category = category?.name?.lowercase()
         )
     }
 

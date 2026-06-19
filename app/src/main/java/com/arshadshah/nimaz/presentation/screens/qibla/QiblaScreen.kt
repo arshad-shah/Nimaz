@@ -4,50 +4,25 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.RotateLeft
-import androidx.compose.material.icons.automirrored.filled.RotateRight
 import androidx.compose.material.icons.filled.CameraAlt
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
@@ -57,43 +32,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.drawText
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogConfirmButton
-import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
-import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationDialog
+import com.arshadshah.nimaz.presentation.components.organisms.qibla.ArQiblaView
+import com.arshadshah.nimaz.presentation.components.organisms.qibla.CompassQiblaView
+import com.arshadshah.nimaz.presentation.components.organisms.qibla.QiblaTopBar
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QiblaViewModel
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Qibla screen — screen-level logic only. It owns the compass lifecycle, the
+ * azimuth animation, the camera-permission flow and the Compass/AR mode switch.
+ * All UI is delegated to the shared [QiblaTopBar], [CompassQiblaView] and
+ * [ArQiblaView] components.
+ */
 @Composable
 fun QiblaScreen(
     onNavigateBack: () -> Unit,
@@ -114,11 +74,6 @@ fun QiblaScreen(
         animationSpec = tween(150),
         label = "compass_rotation"
     )
-
-    val goldColor = Color(0xFFEAB308)
-    val greenColor = Color(0xFF22C55E)
-
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Camera permission state
     var cameraPermissionGranted by remember {
@@ -141,8 +96,16 @@ fun QiblaScreen(
         }
     }
 
+    fun requestArMode() {
+        if (cameraPermissionGranted) {
+            viewModel.onEvent(QiblaEvent.SetArMode(true))
+        } else {
+            cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+        }
+    }
+
     if (state.showCalibrationDialog) {
-        CalibrationDialog(
+        QiblaCalibrationDialog(
             accuracy = state.compassData.accuracy,
             onDismiss = { viewModel.onEvent(QiblaEvent.DismissCalibrationDialog) }
         )
@@ -160,18 +123,32 @@ fun QiblaScreen(
         )
     }
 
+    val isArMode = state.isArMode && cameraPermissionGranted
+
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            QiblaTopBar(
+                locationName = state.qiblaInfo?.locationName,
+                latitude = state.qiblaInfo?.latitude,
+                longitude = state.qiblaInfo?.longitude,
+                fallbackTitle = stringResource(R.string.guide_qibla_title),
+                tabs = listOf(stringResource(R.string.compass), stringResource(R.string.ar)),
+                selectedIndex = if (isArMode) 1 else 0,
+                onTabSelect = { index ->
+                    if (index == 1) requestArMode()
+                    else viewModel.onEvent(QiblaEvent.SetArMode(false))
+                }
+            )
+        }
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
                 .background(
-                    if (state.isArMode) Color.Black
+                    if (isArMode) Color.Black
                     else MaterialTheme.colorScheme.background
-                ),
-            contentAlignment = Alignment.TopCenter
+                )
         ) {
             // Error state
             if (state.error != null && state.qiblaInfo == null) {
@@ -199,14 +176,12 @@ fun QiblaScreen(
                 return@Box
             }
 
-            // Main content with Crossfade
             Crossfade(
-                targetState = state.isArMode,
+                targetState = isArMode,
                 animationSpec = tween(400),
                 label = "qibla_mode_crossfade"
-            ) { isArMode ->
-                if (isArMode && cameraPermissionGranted) {
-                    // AR View
+            ) { arMode ->
+                if (arMode) {
                     ArQiblaView(
                         azimuth = state.compassData.azimuth,
                         qiblaInfo = state.qiblaInfo,
@@ -217,931 +192,19 @@ fun QiblaScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 } else {
-                    // Compass View
                     CompassQiblaView(
-                        qiblaState = state,
+                        qiblaBearing = (state.qiblaInfo?.direction?.bearing
+                            ?: state.qiblaDirection?.bearing ?: 0.0).toFloat(),
                         animatedAzimuth = animatedAzimuth,
-                        goldColor = goldColor,
-                        greenColor = greenColor,
+                        isFacingQibla = state.isFacingQibla,
+                        rotationToQibla = state.rotationToQibla,
+                        isCompassReady = state.isCompassReady,
+                        accuracy = state.compassData.accuracy,
+                        hasQiblaInfo = state.qiblaInfo != null,
                         onCalibrate = { viewModel.onEvent(QiblaEvent.ShowCalibrationDialog) }
                     )
                 }
             }
-
-            // Mode toggle - floating at top
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .padding(top = if (state.isArMode) 64.dp else 8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                NimazPillTabs(
-                    tabs = listOf(stringResource(R.string.compass), stringResource(R.string.ar)),
-                    selectedIndex = if (state.isArMode) 1 else 0,
-                    onTabSelect = { index ->
-                        if (index == 1) {
-                            // Switching to AR mode
-                            if (cameraPermissionGranted) {
-                                viewModel.onEvent(QiblaEvent.SetArMode(true))
-                            } else {
-                                cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                            }
-                        } else {
-                            viewModel.onEvent(QiblaEvent.SetArMode(false))
-                        }
-                    }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun CompassQiblaView(
-    qiblaState: com.arshadshah.nimaz.presentation.viewmodel.QiblaUiState,
-    animatedAzimuth: Float,
-    goldColor: Color,
-    greenColor: Color,
-    onCalibrate: () -> Unit,
-) {
-    val windowSizeClass = currentWindowSizeClass()
-
-    if (windowSizeClass.isCompact) {
-        CompassQiblaCompact(
-            state = qiblaState,
-            animatedAzimuth = animatedAzimuth,
-            goldColor = goldColor,
-            greenColor = greenColor,
-            onCalibrate = onCalibrate,
-        )
-    } else {
-        // Tablet: compass left, info right
-        Row(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 56.dp, bottom = 20.dp),
-            horizontalArrangement = Arrangement.spacedBy(24.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Left: Compass (larger on tablet)
-            Column(
-                modifier = Modifier.weight(1f),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Location Info
-                qiblaState.qiblaInfo?.let { info ->
-                    Text(
-                        text = info.locationName,
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "${String.format("%.4f", info.latitude)}\u00B0 ${if (info.latitude >= 0) "N" else "S"}, ${
-                            String.format("%.4f", abs(info.longitude))
-                        }\u00B0 ${if (info.longitude >= 0) "E" else "W"}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                CompassWidget(
-                    state = qiblaState,
-                    animatedAzimuth = animatedAzimuth,
-                    goldColor = goldColor,
-                    greenColor = greenColor,
-                    compassSize = 360.dp
-                )
-            }
-
-            // Right: Info cards
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .verticalScroll(rememberScrollState()),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Facing Qibla banner
-                AnimatedVisibility(
-                    visible = qiblaState.isFacingQibla,
-                    enter = fadeIn() + scaleIn(),
-                    exit = fadeOut() + scaleOut()
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(16.dp),
-                        color = greenColor.copy(alpha = 0.15f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Mosque,
-                                contentDescription = null,
-                                tint = greenColor,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(modifier = Modifier.width(10.dp))
-                            Text(
-                                text = stringResource(R.string.facing_qibla),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = greenColor
-                            )
-                        }
-                    }
-                }
-
-                // Turn direction hint
-                AnimatedVisibility(
-                    visible = !qiblaState.isFacingQibla && qiblaState.isCompassReady,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-                    val turnRight = qiblaState.rotationToQibla > 0
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = if (turnRight)
-                                Icons.AutoMirrored.Filled.RotateRight
-                            else
-                                Icons.AutoMirrored.Filled.RotateLeft,
-                            contentDescription = null,
-                            tint = goldColor,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = if (turnRight) stringResource(R.string.turn_right_format, abs(qiblaState.rotationToQibla).toInt()) else stringResource(R.string.turn_left_format, abs(qiblaState.rotationToQibla).toInt()),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                // Qibla Direction Info
-                qiblaState.qiblaInfo?.let { info ->
-                    Text(
-                        text = "${info.direction.bearing.toInt()}\u00B0",
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 56.sp),
-                        fontWeight = FontWeight.Bold,
-                        color = if (qiblaState.isFacingQibla) greenColor else goldColor
-                    )
-                    Text(
-                        text = stringResource(R.string.qibla_direction_format, getCompassDirection(info.direction.bearing)),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Distance pill
-                    Surface(
-                        shape = RoundedCornerShape(25.dp),
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.LocationOn,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = stringResource(R.string.km_to_mecca_format, String.format("%,d", (info.distanceToMecca / 1000).toInt())),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Accuracy Bar
-                AccuracyBar(
-                    accuracy = qiblaState.compassData.accuracy,
-                    greenColor = greenColor,
-                    onCalibrate = onCalibrate,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
-    }
-}
-
-/** Compass widget extracted for reuse in both compact and tablet layouts */
-@Composable
-private fun CompassWidget(
-    state: com.arshadshah.nimaz.presentation.viewmodel.QiblaUiState,
-    animatedAzimuth: Float,
-    goldColor: Color,
-    greenColor: Color,
-    compassSize: Dp = 300.dp,
-) {
-    Box(
-        modifier = Modifier.size(compassSize),
-        contentAlignment = Alignment.Center
-    ) {
-        CompassRings(modifier = Modifier.fillMaxSize())
-
-        Box(
-            modifier = Modifier
-                .size(compassSize - 20.dp)
-                .rotate(-animatedAzimuth),
-            contentAlignment = Alignment.Center
-        ) {
-            CompassDial(
-                qiblaBearing = state.qiblaDirection?.bearing?.toFloat() ?: 0f,
-                isFacingQibla = state.isFacingQibla,
-                goldColor = goldColor,
-                modifier = Modifier.size(compassSize - 50.dp)
-            )
-            DirectionMarkers(modifier = Modifier.fillMaxSize())
-        }
-
-        // Center dot
-        Box(
-            modifier = Modifier
-                .size(if (state.isFacingQibla) 28.dp else 20.dp)
-                .clip(CircleShape)
-                .background(
-                    if (state.isFacingQibla) greenColor
-                    else MaterialTheme.colorScheme.outline
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (state.isFacingQibla) {
-                Icon(
-                    imageVector = Icons.Default.Mosque,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
-        }
-
-        // Facing Qibla glow overlay
-        AnimatedVisibility(
-            visible = state.isFacingQibla,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
-        ) {
-            Canvas(modifier = Modifier.size(compassSize - 20.dp)) {
-                drawCircle(
-                    color = greenColor.copy(alpha = 0.15f),
-                    radius = size.minDimension / 2
-                )
-            }
-        }
-
-        // Static north indicator
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(size.width / 2, 0f)
-            val triSize = 8.dp.toPx()
-            val path = Path().apply {
-                moveTo(center.x, triSize + 2.dp.toPx())
-                lineTo(center.x - triSize / 2, 2.dp.toPx())
-                lineTo(center.x + triSize / 2, 2.dp.toPx())
-                close()
-            }
-            drawPath(path = path, color = Color(0xFFEF4444))
-        }
-    }
-}
-
-/** Compact (phone) compass view — original single-column layout */
-@Composable
-private fun CompassQiblaCompact(
-    state: com.arshadshah.nimaz.presentation.viewmodel.QiblaUiState,
-    animatedAzimuth: Float,
-    goldColor: Color,
-    greenColor: Color,
-    onCalibrate: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
-            .padding(top = 56.dp, bottom = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        // Location Info
-        state.qiblaInfo?.let { info ->
-            Text(
-                text = info.locationName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onBackground
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "${String.format("%.4f", info.latitude)}\u00B0 ${if (info.latitude >= 0) "N" else "S"}, ${
-                    String.format("%.4f", abs(info.longitude))
-                }\u00B0 ${if (info.longitude >= 0) "E" else "W"}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Compass
-        CompassWidget(
-            state = state,
-            animatedAzimuth = animatedAzimuth,
-            goldColor = goldColor,
-            greenColor = greenColor,
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Facing Qibla banner
-        AnimatedVisibility(
-            visible = state.isFacingQibla,
-            enter = fadeIn() + scaleIn(),
-            exit = fadeOut() + scaleOut()
-        ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = greenColor.copy(alpha = 0.15f)
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Mosque,
-                        contentDescription = null,
-                        tint = greenColor,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.width(10.dp))
-                    Text(
-                        text = stringResource(R.string.facing_qibla),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = greenColor
-                    )
-                }
-            }
-        }
-
-        // Turn direction hint
-        AnimatedVisibility(
-            visible = !state.isFacingQibla && state.isCompassReady,
-            enter = fadeIn(),
-            exit = fadeOut()
-        ) {
-            val turnRight = state.rotationToQibla > 0
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    imageVector = if (turnRight)
-                        Icons.AutoMirrored.Filled.RotateRight
-                    else
-                        Icons.AutoMirrored.Filled.RotateLeft,
-                    contentDescription = null,
-                    tint = goldColor,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = if (turnRight) stringResource(R.string.turn_right_format, abs(state.rotationToQibla).toInt()) else stringResource(R.string.turn_left_format, abs(state.rotationToQibla).toInt()),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Qibla Direction Info
-        state.qiblaInfo?.let { info ->
-            Text(
-                text = "${info.direction.bearing.toInt()}\u00B0",
-                style = MaterialTheme.typography.displayLarge.copy(fontSize = 48.sp),
-                fontWeight = FontWeight.Bold,
-                color = if (state.isFacingQibla) greenColor else goldColor
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = stringResource(R.string.qibla_direction_format, getCompassDirection(info.direction.bearing)),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-
-            // Distance pill
-            Surface(
-                shape = RoundedCornerShape(25.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Row(
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.LocationOn,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = stringResource(R.string.km_to_mecca_format, String.format("%,d", (info.distanceToMecca / 1000).toInt())),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Accuracy Bar
-        AccuracyBar(
-            accuracy = state.compassData.accuracy,
-            greenColor = greenColor,
-            onCalibrate = onCalibrate,
-            modifier = Modifier.fillMaxWidth()
-        )
-    }
-}
-
-@Composable
-private fun CalibrationDialog(
-    accuracy: CompassAccuracy,
-    onDismiss: () -> Unit
-) {
-    // Custom-content dialog: steps + tip are structured manually, so we
-    // opt out of the auto content-card wrap and provide our own card.
-    NimazDialog(
-        title = stringResource(R.string.calibrate_compass),
-        onDismiss = onDismiss,
-        titleIcon = Icons.Default.Warning,
-        accentColor = MaterialTheme.colorScheme.error,
-        showCloseButton = false,
-        wrapContent = false,
-        content = {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = stringResource(
-                    R.string.current_accuracy_format,
-                    accuracy.name.lowercase().replaceFirstChar { it.uppercase() }
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.improve_accuracy),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                CalibrationStep("1", stringResource(R.string.calibration_step_1))
-                CalibrationStep("2", stringResource(R.string.calibration_step_2))
-                CalibrationStep("3", stringResource(R.string.calibration_step_3))
-                CalibrationStep("4", stringResource(R.string.calibration_step_4))
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                text = stringResource(R.string.calibration_tip),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-        },
-        actions = {
-            NimazDialogConfirmButton(text = stringResource(R.string.got_it), onClick = onDismiss)
-        }
-    )
-}
-
-@Composable
-private fun CalibrationStep(
-    number: String,
-    text: String
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(10.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Box(
-            modifier = Modifier
-                .size(24.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = number,
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-    }
-}
-
-@Composable
-private fun CompassRings(modifier: Modifier = Modifier) {
-    val outerRingColor = MaterialTheme.colorScheme.outlineVariant
-    val innerRingColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
-
-    Canvas(modifier = modifier) {
-        val center = Offset(size.width / 2, size.height / 2)
-        val outerRadius = size.minDimension / 2
-
-        drawCircle(
-            color = outerRingColor,
-            radius = outerRadius,
-            center = center,
-            style = Stroke(width = 3.dp.toPx())
-        )
-        drawCircle(
-            color = innerRingColor,
-            radius = outerRadius - 10.dp.toPx(),
-            center = center,
-            style = Stroke(width = 1.dp.toPx())
-        )
-    }
-}
-
-@Composable
-private fun DirectionMarkers(modifier: Modifier = Modifier) {
-    val textMeasurer = rememberTextMeasurer()
-    val northColor = Color(0xFFEF4444) // Red for North
-    val onSurfaceVariantColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Canvas(modifier = modifier) {
-        val center = Offset(size.width / 2, size.height / 2)
-        val radius = size.minDimension / 2
-
-        val directions = listOf("N" to 0f, "E" to 90f, "S" to 180f, "W" to 270f)
-        directions.forEach { (label, angleDeg) ->
-            val isNorth = label == "N"
-            val textColor = if (isNorth) northColor else onSurfaceVariantColor
-            val style = TextStyle(
-                fontSize = if (isNorth) 16.sp else 14.sp,
-                fontWeight = if (isNorth) FontWeight.Bold else FontWeight.SemiBold,
-                color = textColor
-            )
-            val textResult = textMeasurer.measure(label, style)
-            val angle = Math.toRadians(angleDeg.toDouble())
-            val markerRadius = radius - 30.dp.toPx()
-            val x = center.x + (markerRadius * sin(angle)).toFloat() - textResult.size.width / 2
-            val y = center.y - (markerRadius * cos(angle)).toFloat() - textResult.size.height / 2
-
-            drawText(textLayoutResult = textResult, topLeft = Offset(x, y))
-        }
-    }
-}
-
-@Composable
-private fun CompassDial(
-    qiblaBearing: Float,
-    isFacingQibla: Boolean,
-    goldColor: Color,
-    modifier: Modifier = Modifier
-) {
-    val dialBackground = Brush.radialGradient(
-        colors = listOf(
-            MaterialTheme.colorScheme.surfaceContainerHigh,
-            MaterialTheme.colorScheme.surfaceContainer
-        )
-    )
-    val tickColorMajor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-    val tickColorMinor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
-    val arrowColor = if (isFacingQibla) Color(0xFF22C55E) else goldColor
-
-    Canvas(modifier = modifier) {
-        val center = Offset(size.width / 2, size.height / 2)
-        val radius = size.minDimension / 2
-
-        drawCircle(brush = dialBackground, radius = radius, center = center)
-
-        for (i in 0 until 360 step 5) {
-            val isMajor = i % 30 == 0
-            val tickLength = if (isMajor) 15.dp.toPx() else 8.dp.toPx()
-            val tickWidth = if (isMajor) 2.dp.toPx() else 1.dp.toPx()
-            val tickColor = if (isMajor) tickColorMajor else tickColorMinor
-            val angle = Math.toRadians(i.toDouble())
-            val startR = radius - tickLength
-            val endR = radius
-
-            drawLine(
-                color = tickColor,
-                start = Offset(
-                    center.x + (startR * sin(angle)).toFloat(),
-                    center.y - (startR * cos(angle)).toFloat()
-                ),
-                end = Offset(
-                    center.x + (endR * sin(angle)).toFloat(),
-                    center.y - (endR * cos(angle)).toFloat()
-                ),
-                strokeWidth = tickWidth
-            )
-        }
-
-        // Qibla arrow
-        val qiblaAngleRad = Math.toRadians(qiblaBearing.toDouble())
-        val arrowLength = radius - 30.dp.toPx()
-        val arrowBaseWidth = 15.dp.toPx()
-
-        val tipX = center.x + (arrowLength * sin(qiblaAngleRad)).toFloat()
-        val tipY = center.y - (arrowLength * cos(qiblaAngleRad)).toFloat()
-
-        val perpAngle = qiblaAngleRad + Math.PI / 2
-        val baseLeftX = center.x + (arrowBaseWidth * sin(perpAngle)).toFloat()
-        val baseLeftY = center.y - (arrowBaseWidth * cos(perpAngle)).toFloat()
-        val baseRightX = center.x - (arrowBaseWidth * sin(perpAngle)).toFloat()
-        val baseRightY = center.y + (arrowBaseWidth * cos(perpAngle)).toFloat()
-
-        val arrowPath = Path().apply {
-            moveTo(tipX, tipY)
-            lineTo(baseLeftX, baseLeftY)
-            lineTo(baseRightX, baseRightY)
-            close()
-        }
-
-        drawPath(path = arrowPath, color = arrowColor)
-
-        // Kaaba icon at tip
-        val kaabaSize = 16.dp.toPx()
-        val kaabaOffset = 10.dp.toPx()
-        val kaabaCenterX = center.x + ((arrowLength + kaabaOffset) * sin(qiblaAngleRad)).toFloat()
-        val kaabaCenterY = center.y - ((arrowLength + kaabaOffset) * cos(qiblaAngleRad)).toFloat()
-
-        drawRect(
-            color = arrowColor,
-            topLeft = Offset(kaabaCenterX - kaabaSize / 2, kaabaCenterY - kaabaSize / 2),
-            size = androidx.compose.ui.geometry.Size(kaabaSize, kaabaSize),
-            style = Stroke(width = 1.5f.dp.toPx())
-        )
-    }
-}
-
-@Composable
-private fun AccuracyBar(
-    accuracy: CompassAccuracy,
-    greenColor: Color,
-    onCalibrate: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val levels = listOf(
-        CompassAccuracy.UNRELIABLE,
-        CompassAccuracy.LOW,
-        CompassAccuracy.MEDIUM,
-        CompassAccuracy.HIGH
-    )
-    val activeIndex = levels.indexOf(accuracy)
-
-    val (label, color, hint) = when (accuracy) {
-        CompassAccuracy.HIGH -> Triple(stringResource(R.string.accuracy_high), greenColor, stringResource(R.string.accuracy_high_hint))
-        CompassAccuracy.MEDIUM -> Triple(stringResource(R.string.accuracy_medium), Color(0xFFFACC15), stringResource(R.string.accuracy_medium_hint))
-        CompassAccuracy.LOW -> Triple(stringResource(R.string.accuracy_low), MaterialTheme.colorScheme.error, stringResource(R.string.accuracy_low_hint))
-        CompassAccuracy.UNRELIABLE -> Triple(
-            stringResource(R.string.accuracy_unreliable),
-            MaterialTheme.colorScheme.error,
-            stringResource(R.string.accuracy_unreliable_hint)
-        )
-    }
-
-    val needsCalibration = accuracy == CompassAccuracy.LOW || accuracy == CompassAccuracy.UNRELIABLE
-
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = if (needsCalibration) color.copy(alpha = 0.08f)
-        else MaterialTheme.colorScheme.surfaceVariant
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.compass_accuracy),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = color
-                )
-            }
-
-            // Segmented accuracy indicator
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                levels.forEachIndexed { index, _ ->
-                    val segmentColor = if (index <= activeIndex) color else
-                        MaterialTheme.colorScheme.outlineVariant
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(6.dp)
-                            .clip(RoundedCornerShape(3.dp))
-                            .background(segmentColor)
-                    )
-                }
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = if (needsCalibration) Icons.Default.Warning
-                    else Icons.Default.CheckCircle,
-                    contentDescription = null,
-                    tint = color,
-                    modifier = Modifier.size(14.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text(
-                    text = hint,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f)
-                )
-                if (needsCalibration) {
-                    Button(
-                        onClick = onCalibrate,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = color,
-                            contentColor = Color.White
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.calibrate),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun getCompassDirection(bearing: Double): String {
-    return when {
-        bearing < 22.5 || bearing >= 337.5 -> stringResource(R.string.direction_north)
-        bearing < 67.5 -> stringResource(R.string.direction_northeast)
-        bearing < 112.5 -> stringResource(R.string.direction_east)
-        bearing < 157.5 -> stringResource(R.string.direction_southeast)
-        bearing < 202.5 -> stringResource(R.string.direction_south)
-        bearing < 247.5 -> stringResource(R.string.direction_southwest)
-        bearing < 292.5 -> stringResource(R.string.direction_west)
-        else -> stringResource(R.string.direction_northwest)
-    }
-}
-
-// Previews
-
-@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - High")
-@Composable
-private fun AccuracyBarHighPreview() {
-    NimazTheme {
-        AccuracyBar(
-            accuracy = CompassAccuracy.HIGH,
-            greenColor = Color(0xFF22C55E),
-            onCalibrate = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Medium")
-@Composable
-private fun AccuracyBarMediumPreview() {
-    NimazTheme {
-        AccuracyBar(
-            accuracy = CompassAccuracy.MEDIUM,
-            greenColor = Color(0xFF22C55E),
-            onCalibrate = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Low")
-@Composable
-private fun AccuracyBarLowPreview() {
-    NimazTheme {
-        AccuracyBar(
-            accuracy = CompassAccuracy.LOW,
-            greenColor = Color(0xFF22C55E),
-            onCalibrate = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Accuracy Bar - Unreliable")
-@Composable
-private fun AccuracyBarUnreliablePreview() {
-    NimazTheme {
-        AccuracyBar(
-            accuracy = CompassAccuracy.UNRELIABLE,
-            greenColor = Color(0xFF22C55E),
-            onCalibrate = {},
-            modifier = Modifier.padding(16.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Calibration Dialog")
-@Composable
-private fun CalibrationDialogPreview() {
-    NimazTheme {
-        CalibrationDialog(
-            accuracy = CompassAccuracy.LOW,
-            onDismiss = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Rings")
-@Composable
-private fun CompassRingsPreview() {
-    NimazTheme {
-        CompassRings(modifier = Modifier.size(280.dp))
-    }
-}
-
-@Preview(showBackground = true, widthDp = 300, heightDp = 300, name = "Compass Dial")
-@Composable
-private fun CompassDialPreview() {
-    NimazTheme {
-        CompassDial(
-            qiblaBearing = 45f,
-            isFacingQibla = false,
-            goldColor = Color(0xFFD4A853),
-            modifier = Modifier.size(280.dp)
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Calibration Step")
-@Composable
-private fun CalibrationStepPreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            CalibrationStep("1", "Hold your phone away from metal objects and magnets")
-            CalibrationStep("2", "Slowly move your phone in a figure-8 pattern")
         }
     }
 }

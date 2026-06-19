@@ -127,7 +127,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 15,
+    version = 16,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -154,7 +154,7 @@ abstract class NimazDatabase : RoomDatabase() {
         // Current Room schema version. Keep in sync with @Database(version = ...)
         // above. Exposed so crash reports can be tagged with the schema version,
         // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 15
+        const val SCHEMA_VERSION = 16
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(
@@ -217,6 +217,34 @@ abstract class NimazDatabase : RoomDatabase() {
         // crashes on launch with "Pre-packaged database has an invalid schema"
         // (most visibly on quran_favorites, the first affected table). Re-apply
         // the same idempotent repairs here so those installs heal on upgrade.
+        // Adds a `category` column to tasbih_presets and backfills the known
+        // default adhkar (the prepackaged DB and any already-seeded extras had no
+        // category, so the category tabs showed nothing). Idempotent.
+        val MIGRATION_15_16 = object : Migration(15, 16) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.addColumnIfMissing("tasbih_presets", "category", "TEXT")
+                db.execSQL(
+                    "UPDATE tasbih_presets SET category = 'after_prayer' WHERE name IN " +
+                        "('SubhanAllah','Alhamdulillah','Allahu Akbar'," +
+                        "'La ilaha illallahu wahdah','SubhanAllahi wa bihamdih')"
+                )
+                db.execSQL(
+                    "UPDATE tasbih_presets SET category = 'daily' WHERE name IN " +
+                        "('La ilaha illallah','Astaghfirullah')"
+                )
+                db.execSQL(
+                    "UPDATE tasbih_presets SET category = 'morning' WHERE name IN " +
+                        "('Asbahna wa asbahal-mulku lillah','Bismillahilladhi la yadurr'," +
+                        "'Radeetu billahi Rabba')"
+                )
+                db.execSQL(
+                    "UPDATE tasbih_presets SET category = 'evening' WHERE name IN " +
+                        "('Amsayna wa amsal-mulku lillah','A''udhu bikalimatillahit-tammat'," +
+                        "'Allahumma bika amsayna')"
+                )
+            }
+        }
+
         val MIGRATION_12_13 = object : Migration(12, 13) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 repairLegacyAssetSchema(db)

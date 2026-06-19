@@ -1,5 +1,7 @@
-What's new in this update:
+What's new since 3.0.10:
 
-• Islamic calendar now marks the start of each Hijri month with a colored stripe and the month name, so you can spot month boundaries at a glance.
-• App updates now show clear progress — no more guessing whether an update started, even on slower connections.
-• Behind-the-scenes reliability and performance improvements.
+• Fasting now has one smart Tracker tab — Ramadan and voluntary fasts together, adapting to the season, with Makeup kept separate.
+• Redesigned Names of Allah, Names of the Prophet ﷺ and the Prophets screens, each with its own theme and calligraphy.
+• Refreshed Qibla compass and AR view.
+• New searchable Help & About with step-by-step guides in your language.
+• A refreshed Home, plus bug fixes and reliability improvements.

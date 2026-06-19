@@ -10,6 +10,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
@@ -22,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -33,9 +35,13 @@ data class TasbihPresetsUiState(
     val customPresets: List<TasbihPreset> = emptyList(),
     val selectedCategory: TasbihCategory? = null,
     val filteredPresets: List<TasbihPreset> = emptyList(),
+    val favorites: Set<Long> = emptySet(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
+
+/** How the counter is presented: the classic tap-circle or the tasbih beads. */
+enum class TasbihCounterStyle { CLASSIC, BEADS }
 
 data class TasbihCounterUiState(
     val selectedPreset: TasbihPreset? = null,
@@ -47,7 +53,10 @@ data class TasbihCounterUiState(
     val elapsedTimeMs: Long = 0,
     val vibrationEnabled: Boolean = true,
     val soundEnabled: Boolean = false,
-    val autoLap: Boolean = true
+    val autoLap: Boolean = true,
+    val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC,
+    val beadDesignKey: String = "wood",
+    val leftHanded: Boolean = false
 )
 
 data class TasbihHistoryUiState(
@@ -75,6 +84,10 @@ sealed interface TasbihEvent {
     data class ToggleVibration(val enabled: Boolean) : TasbihEvent
     data class ToggleSound(val enabled: Boolean) : TasbihEvent
     data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
+    data class SetCounterStyle(val style: TasbihCounterStyle) : TasbihEvent
+    data class SetBeadDesign(val key: String) : TasbihEvent
+    data class ToggleFavorite(val presetId: Long) : TasbihEvent
+    data class SetLeftHanded(val enabled: Boolean) : TasbihEvent
     data object ClearPreset : TasbihEvent
     data object Increment : TasbihEvent
     data object Reset : TasbihEvent
@@ -90,6 +103,7 @@ sealed interface TasbihEvent {
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
     private val tasbihRepository: TasbihRepository,
+    private val preferences: PreferencesDataStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -126,6 +140,42 @@ class TasbihViewModel @Inject constructor(
         loadHistory()
         loadStats()
         checkForActiveSession()
+        viewModelScope.launch {
+            preferences.tasbihBeadMode.collect { beads ->
+                _counterState.update {
+                    it.copy(counterStyle = if (beads) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC)
+                }
+            }
+        }
+        viewModelScope.launch {
+            preferences.tasbihBeadDesign.collect { key ->
+                _counterState.update { it.copy(beadDesignKey = key) }
+            }
+        }
+        // Selection can be driven from the Choose-Dhikr screen (a separate VM
+        // instance) via DataStore; keep this counter in sync with it.
+        viewModelScope.launch {
+            preferences.tasbihSelectedPresetId.collect { id ->
+                applyPersistedSelection(id)
+            }
+        }
+        viewModelScope.launch {
+            preferences.tasbihFavorites.collect { ids ->
+                _presetsState.update { it.copy(favorites = ids.mapNotNull { s -> s.toLongOrNull() }.toSet()) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.tasbihLeftHanded.collect { left ->
+                _counterState.update { it.copy(leftHanded = left) }
+            }
+        }
+        // Seed default adhkar added after the prepackaged DB shipped (one-time per version).
+        viewModelScope.launch {
+            if (preferences.tasbihPresetSeedVersion.first() < LATEST_PRESET_SEED_VERSION) {
+                tasbihRepository.seedMissingDefaults()
+                preferences.setTasbihPresetSeedVersion(LATEST_PRESET_SEED_VERSION)
+            }
+        }
     }
 
     fun onEvent(event: TasbihEvent) {
@@ -147,6 +197,21 @@ class TasbihViewModel @Inject constructor(
             is TasbihEvent.DeleteCustomPreset -> deleteCustomPreset(event.presetId)
             is TasbihEvent.ToggleVibration -> _counterState.update { it.copy(vibrationEnabled = event.enabled) }
             is TasbihEvent.ToggleSound -> _counterState.update { it.copy(soundEnabled = event.enabled) }
+            is TasbihEvent.SetCounterStyle -> {
+                _counterState.update { it.copy(counterStyle = event.style) }
+                viewModelScope.launch {
+                    preferences.setTasbihBeadMode(event.style == TasbihCounterStyle.BEADS)
+                }
+            }
+            is TasbihEvent.SetBeadDesign -> {
+                _counterState.update { it.copy(beadDesignKey = event.key) }
+                viewModelScope.launch { preferences.setTasbihBeadDesign(event.key) }
+            }
+            is TasbihEvent.ToggleFavorite -> toggleFavorite(event.presetId)
+            is TasbihEvent.SetLeftHanded -> {
+                _counterState.update { it.copy(leftHanded = event.enabled) }
+                viewModelScope.launch { preferences.setTasbihLeftHanded(event.enabled) }
+            }
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
             TasbihEvent.Reset -> reset()
@@ -208,6 +273,29 @@ class TasbihViewModel @Inject constructor(
                 elapsedTimeMs = 0
             )
         }
+        viewModelScope.launch { preferences.setTasbihSelectedPresetId(-1L) }
+    }
+
+    private fun toggleFavorite(id: Long) {
+        viewModelScope.launch {
+            val current = preferences.tasbihFavorites.first().toMutableSet()
+            val key = id.toString()
+            if (!current.add(key)) current.remove(key)
+            preferences.setTasbihFavorites(current)
+        }
+    }
+
+    /** Apply a selection persisted by another screen (idempotent — guarded by id). */
+    private fun applyPersistedSelection(id: Long) {
+        val current = _counterState.value.selectedPreset?.id
+        if (id <= 0L) {
+            if (current != null) clearPreset()
+            return
+        }
+        if (current == id) return
+        viewModelScope.launch {
+            tasbihRepository.getPresetById(id)?.let { selectPreset(it) }
+        }
     }
 
     private fun setTargetCount(newTarget: Int) {
@@ -236,8 +324,8 @@ class TasbihViewModel @Inject constructor(
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
                 val state = _counterState.value
-                val totalCount = state.count + (state.laps * state.targetCount)
-                tasbihRepository.updateSessionCount(session.id, totalCount, state.laps)
+                // Store the within-lap count; the DB sums currentCount + laps*target.
+                tasbihRepository.updateSessionCount(session.id, state.count, state.laps)
             }
         }
     }
@@ -271,6 +359,7 @@ class TasbihViewModel @Inject constructor(
                 elapsedTimeMs = 0
             )
         }
+        viewModelScope.launch { preferences.setTasbihSelectedPresetId(preset.id) }
     }
 
     private fun filterByCategory(category: TasbihCategory?) {
@@ -331,10 +420,10 @@ class TasbihViewModel @Inject constructor(
         // Update session if active
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
-                val totalCount = _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
+                // Store the within-lap count; the DB sums currentCount + laps*target.
                 tasbihRepository.updateSessionCount(
                     session.id,
-                    totalCount,
+                    _counterState.value.count,
                     _counterState.value.laps
                 )
 
@@ -567,6 +656,11 @@ class TasbihViewModel @Inject constructor(
 
     private fun getTodayEpoch(): Long {
         return LocalDate.now().atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+    }
+
+    companion object {
+        /** Bump when new default presets are added to DefaultTasbihPresets. */
+        private const val LATEST_PRESET_SEED_VERSION = 1
     }
 
     override fun onCleared() {

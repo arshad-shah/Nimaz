@@ -1,5 +1,7 @@
-Bu güncellemede yenilikler:
+3.0.10 sürümünden bu yana yenilikler:
 
-• İslami takvim artık her Hicri ayın başlangıcını renkli bir şerit ve ay adıyla işaretliyor; böylece ay geçişlerini bir bakışta görebilirsiniz.
-• Uygulama güncellemeleri artık net bir ilerleme gösteriyor — yavaş bağlantılarda bile güncellemenin başlayıp başlamadığını merak etmenize gerek kalmıyor.
-• Arka planda güvenilirlik ve performans iyileştirmeleri.
+• Oruç artık tek bir akıllı "Takip" sekmesine sahip — Ramazan ve nafile oruçlar bir arada, mevsime uyum sağlar; Kaza ayrı kalır.
+• Yeniden tasarlanan ekranlar: Allah'ın İsimleri, Peygamber'in İsimleri ﷺ ve Peygamberler, her biri kendi teması ve hat sanatıyla.
+• Yenilenen Kıble pusulası ve AR görünümü.
+• Adım adım kılavuzlar içeren, aranabilir yeni Yardım ve Hakkında bölümü.
+• Yenilenen Ana ekran, ayrıca hata düzeltmeleri ve kararlılık iyileştirmeleri.

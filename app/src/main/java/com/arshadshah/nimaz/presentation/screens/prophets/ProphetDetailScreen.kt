@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.prophets
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Favorite
@@ -36,19 +34,18 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NamesAccent
+import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.ProphetEvent
@@ -66,6 +63,7 @@ fun ProphetDetailScreen(
     }
 
     val state by viewModel.detailState.collectAsState()
+    val accent = NamesAccents.prophets()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -81,8 +79,8 @@ fun ProphetDetailScreen(
                     onClick = {
                         viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id))
                     },
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = accent.chipContainer,
+                    contentColor = accent.onChipContainer
                 ) {
                     Icon(
                         imageVector = if (prophet.isFavorite) {
@@ -98,7 +96,7 @@ fun ProphetDetailScreen(
                         tint = if (prophet.isFavorite) {
                             MaterialTheme.colorScheme.error
                         } else {
-                            MaterialTheme.colorScheme.onPrimaryContainer
+                            accent.onChipContainer
                         }
                     )
                 }
@@ -126,110 +124,34 @@ fun ProphetDetailScreen(
                 ),
                 verticalArrangement = Arrangement.spacedBy(NimazSpacing.Medium)
             ) {
-                // Gradient Header
+                // Calligraphic header (no number medallion for prophets)
                 item {
-                    NimazCard(
-                        modifier = Modifier.fillMaxWidth(),
-                        style = NimazCardStyle.FILLED,
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color.Transparent
-                        )
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(
-                                    brush = Brush.linearGradient(
-                                        colors = listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.secondary
-                                        )
-                                    ),
-                                    shape = RoundedCornerShape(NimazSpacing.Large)
-                                )
-                                .padding(NimazSpacing.ExtraLarge),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-                            ) {
-                                ArabicText(
-                                    text = prophet.nameArabic,
-                                    size = ArabicTextSize.LARGE,
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold
-                                )
-
-                                Text(
-                                    text = prophet.nameEnglish,
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = Color.White.copy(alpha = 0.9f),
-                                    textAlign = TextAlign.Center
-                                )
-
-                                Text(
-                                    text = prophet.titleEnglish,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    color = Color.White.copy(alpha = 0.8f),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
-                        }
-                    }
+                    NameDetailHeader(
+                        arabicName = prophet.nameArabic,
+                        accent = accent,
+                        number = null,
+                        primaryLabel = prophet.nameEnglish,
+                        secondaryLabel = prophet.titleEnglish,
+                    )
                 }
 
                 // Story Section
                 item {
                     DetailSectionCard(
                         title = stringResource(R.string.prophets_story),
-                        content = prophet.storySummary
+                        content = prophet.storySummary,
+                        titleColor = accent.contentTint
                     )
                 }
 
                 // Key Lessons Section
                 if (prophet.keyLessons.isNotEmpty()) {
                     item {
-                        NimazCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            style = NimazCardStyle.FILLED,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(NimazSpacing.Large),
-                                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.prophets_key_lessons),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                prophet.keyLessons.forEach { lesson ->
-                                    Row(
-                                        verticalAlignment = Alignment.Top,
-                                        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Circle,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .padding(top = 6.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            text = lesson,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            lineHeight = 22.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        BulletListCard(
+                            title = stringResource(R.string.prophets_key_lessons),
+                            items = prophet.keyLessons,
+                            accent = accent
+                        )
                     }
                 }
 
@@ -251,7 +173,7 @@ fun ProphetDetailScreen(
                                     text = stringResource(R.string.prophets_quran_mentions),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = accent.contentTint
                                 )
                                 FlowRow(
                                     horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
@@ -267,8 +189,8 @@ fun ProphetDetailScreen(
                                                 )
                                             },
                                             colors = AssistChipDefaults.assistChipColors(
-                                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                                labelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                                containerColor = accent.chipContainer,
+                                                labelColor = accent.onChipContainer
                                             )
                                         )
                                     }
@@ -295,7 +217,7 @@ fun ProphetDetailScreen(
                                 text = stringResource(R.string.prophets_timeline),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = accent.contentTint
                             )
 
                             Row(
@@ -335,52 +257,65 @@ fun ProphetDetailScreen(
                 // Miracles Section
                 if (prophet.miracles.isNotEmpty()) {
                     item {
-                        NimazCard(
-                            modifier = Modifier.fillMaxWidth(),
-                            style = NimazCardStyle.FILLED,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(NimazSpacing.Large),
-                                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.prophets_miracles),
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                prophet.miracles.forEach { miracle ->
-                                    Row(
-                                        verticalAlignment = Alignment.Top,
-                                        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.Circle,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .size(8.dp)
-                                                .padding(top = 6.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                        Text(
-                                            text = miracle,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            lineHeight = 22.sp
-                                        )
-                                    }
-                                }
-                            }
-                        }
+                        BulletListCard(
+                            title = stringResource(R.string.prophets_miracles),
+                            items = prophet.miracles,
+                            accent = accent
+                        )
                     }
                 }
 
                 // Bottom spacer for FAB
                 item {
                     Spacer(modifier = Modifier.height(72.dp))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun BulletListCard(
+    title: String,
+    items: List<String>,
+    accent: NamesAccent
+) {
+    NimazCard(
+        modifier = Modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
+        Column(
+            modifier = Modifier.padding(NimazSpacing.Large),
+            verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = accent.contentTint
+            )
+            items.forEach { entry ->
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Circle,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(8.dp)
+                            .padding(top = 6.dp),
+                        tint = accent.contentTint
+                    )
+                    Text(
+                        text = entry,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 22.sp
+                    )
                 }
             }
         }
@@ -415,7 +350,8 @@ private fun TimelineItem(
 @Composable
 private fun DetailSectionCard(
     title: String,
-    content: String
+    content: String,
+    titleColor: Color
 ) {
     if (content.isNotBlank()) {
         NimazCard(
@@ -433,7 +369,7 @@ private fun DetailSectionCard(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = titleColor
                 )
                 Text(
                     text = content,

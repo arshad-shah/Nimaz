@@ -26,6 +26,9 @@ interface TasbihDao {
     @Query("SELECT * FROM tasbih_presets WHERE id = :id")
     suspend fun getPresetById(id: Long): TasbihPresetEntity?
 
+    @Query("SELECT name FROM tasbih_presets")
+    suspend fun getAllPresetNames(): List<String>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertPreset(preset: TasbihPresetEntity): Long
 

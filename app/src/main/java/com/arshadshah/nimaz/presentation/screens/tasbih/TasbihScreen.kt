@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.tasbih
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -12,45 +13,38 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.VolumeOff
-import androidx.compose.material.icons.filled.VolumeUp
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -67,424 +61,405 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
+import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
-import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState
+import com.arshadshah.nimaz.presentation.theme.isExpandedWidth
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterStyle
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihPresetsUiState
-import com.arshadshah.nimaz.presentation.viewmodel.TasbihStatsUiState
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TasbihScreen(
     onNavigateToHistory: () -> Unit,
+    onNavigateToChooseDhikr: () -> Unit = {},
     onNavigateToAddPreset: () -> Unit = {},
-    onNavigateToSettings: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     viewModel: TasbihViewModel = hiltViewModel()
 ) {
-    val presetsState by viewModel.presetsState.collectAsState()
     val counterState by viewModel.counterState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-        topBar = {
-            NimazTopAppBar(
-                title = stringResource(R.string.tasbih_title),
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = onNavigateToHistory) {
-                        Icon(
-                            imageVector = Icons.Default.History,
-                            contentDescription = stringResource(R.string.history)
-                        )
-                    }
-                    IconButton(onClick = onNavigateToAddPreset) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = stringResource(R.string.add_preset)
-                        )
-                    }
-                }
-            )
-        }
-    ) { paddingValues ->
-        val windowSizeClass = currentWindowSizeClass()
+    var showDesignSheet by remember { mutableStateOf(false) }
+    var showCurrentSheet by remember { mutableStateOf(false) }
 
-        if (windowSizeClass.isCompact) {
-            // Phone layout: horizontal preset row + counter below
-            TasbihCompactContent(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background),
-                presetsState = presetsState,
-                counterState = counterState,
-                statsState = statsState,
-                viewModel = viewModel,
-            )
-        } else {
-            // Tablet layout: presets sidebar left, enlarged counter right
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-                    .background(MaterialTheme.colorScheme.background)
-            ) {
-                // Left sidebar: presets list (vertical)
-                Column(
-                    modifier = Modifier
-                        .weight(0.35f)
-                        .fillMaxHeight()
-                        .padding(start = 16.dp, top = 8.dp, bottom = 8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.tasbih_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp)
-                    )
+    val beadsMode = counterState.counterStyle == TasbihCounterStyle.BEADS
+    val liveTotalToday = statsState.baseTotalToday +
+        (counterState.count + counterState.laps * counterState.targetCount)
 
-                    LazyColumn(
-                        verticalArrangement = Arrangement.spacedBy(6.dp),
-                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        item(key = "free_count") {
-                            FreeCountChip(
-                                isSelected = counterState.selectedPreset == null,
-                                onClick = { viewModel.onEvent(TasbihEvent.ClearPreset) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        items(
-                            items = presetsState.defaultPresets,
-                            key = { it.id }
-                        ) { preset ->
-                            PresetChip(
-                                preset = preset,
-                                isSelected = counterState.selectedPreset?.id == preset.id,
-                                onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                        items(
-                            items = presetsState.customPresets,
-                            key = { it.id }
-                        ) { preset ->
-                            PresetChip(
-                                preset = preset,
-                                isSelected = counterState.selectedPreset?.id == preset.id,
-                                onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
-                    }
-                }
+    if (showDesignSheet) {
+        BeadDesignPickerSheet(
+            selectedKey = counterState.beadDesignKey,
+            onSelect = { viewModel.onEvent(TasbihEvent.SetBeadDesign(it)) },
+            leftHanded = counterState.leftHanded,
+            onToggleHanded = { viewModel.onEvent(TasbihEvent.SetLeftHanded(it)) },
+            onDismiss = { showDesignSheet = false }
+        )
+    }
+    if (showCurrentSheet) {
+        CurrentTasbihSheet(
+            preset = counterState.selectedPreset,
+            targetCount = counterState.targetCount,
+            totalToday = liveTotalToday,
+            laps = counterState.laps,
+            onChangeDhikr = {
+                showCurrentSheet = false
+                onNavigateToChooseDhikr()
+            },
+            onTargetChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
+            onDismiss = { showCurrentSheet = false }
+        )
+    }
 
-                // Right side: enlarged counter
-                BoxWithConstraints(
-                    modifier = Modifier
-                        .weight(0.65f)
-                        .fillMaxHeight()
-                ) {
-                    val availableForCircle = maxHeight - 200.dp
-                    val circleSize = availableForCircle.coerceIn(220.dp, 380.dp)
-                    val counterFontSize = if (circleSize < 280.dp) 64.sp
-                        else if (circleSize < 340.dp) 76.sp
-                        else 88.sp
+    val expandedWidth = currentWindowSizeClass().isExpandedWidth
 
+    // Shared callbacks/builders so both layouts reuse identical logic.
+    val topBar: @Composable (Modifier) -> Unit = { mod ->
+        TasbihTopBar(
+            modifier = mod,
+            beadsMode = beadsMode,
+            onSelectStyle = { style -> viewModel.onEvent(TasbihEvent.SetCounterStyle(style)) },
+            onOpenDesign = { showDesignSheet = true },
+            onNavigateToHistory = onNavigateToHistory
+        )
+    }
+    val capsule: @Composable () -> Unit = {
+        TasbihCountCapsule(
+            count = counterState.count,
+            target = counterState.targetCount,
+            laps = counterState.laps,
+            autoLap = counterState.autoLap
+        )
+    }
+    val counter: @Composable (Modifier) -> Unit = { mod ->
+        TasbihCounterArea(
+            modifier = mod,
+            beadsMode = beadsMode,
+            counterState = counterState,
+            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) }
+        )
+    }
+    val controls: @Composable () -> Unit = {
+        ControlButtons(
+            soundEnabled = counterState.soundEnabled,
+            vibrationEnabled = counterState.vibrationEnabled,
+            onReset = { viewModel.onEvent(TasbihEvent.Reset) },
+            onToggleSound = { viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled)) },
+            onToggleVibration = { viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled)) }
+        )
+    }
+
+    Scaffold(contentWindowInsets = WindowInsets(0)) { padding ->
+        val rootModifier = Modifier
+            .fillMaxSize()
+            .padding(padding)
+            .statusBarsPadding()
+            .background(MaterialTheme.colorScheme.background)
+
+        if (expandedWidth) {
+            // Tablet / expanded-width two-pane layout.
+            Column(modifier = rootModifier) {
+                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+
+                Row(modifier = Modifier.fillMaxSize()) {
+                    // LEFT pane (~40%): current-tasbih info + count capsule.
                     Column(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .weight(0.4f)
+                            .fillMaxHeight()
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        // Dhikr context
-                        DhikrDisplay(
-                            selectedPreset = counterState.selectedPreset,
-                            targetCount = counterState.targetCount,
-                            onTargetCountChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
-                            modifier = Modifier.padding(bottom = 16.dp)
+                        CurrentTasbihInfoCard(
+                            arabic = counterState.selectedPreset?.arabicText,
+                            name = counterState.selectedPreset?.name
+                                ?: stringResource(R.string.free_count_label),
+                            translation = counterState.selectedPreset?.translation,
+                            target = counterState.targetCount,
+                            onClick = { showCurrentSheet = true }
                         )
+                        capsule()
+                    }
 
-                        // Counter circle — enlarged on tablet
-                        CounterCircle(
-                            count = counterState.count,
-                            targetCount = counterState.targetCount,
-                            laps = counterState.laps,
-                            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                            circleSize = circleSize,
-                            counterFontSize = counterFontSize
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Inline stats
-                        val currentSessionCount =
-                            counterState.count + (counterState.laps * counterState.targetCount)
-                        val liveTotalToday = statsState.baseTotalToday + currentSessionCount
-
-                        InlineStats(
-                            totalToday = liveTotalToday,
-                            laps = counterState.laps,
-                            sessions = statsState.completedSessions
-                        )
-
-                        Spacer(modifier = Modifier.height(20.dp))
-
-                        // Control buttons
-                        ControlButtons(
-                            soundEnabled = counterState.soundEnabled,
-                            vibrationEnabled = counterState.vibrationEnabled,
-                            onReset = { viewModel.onEvent(TasbihEvent.Reset) },
-                            onToggleSound = {
-                                viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled))
-                            },
-                            onToggleVibration = {
-                                viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled))
-                            }
-                        )
+                    // RIGHT pane (~60%): the counter + controls.
+                    Column(
+                        modifier = Modifier
+                            .weight(0.6f)
+                            .fillMaxHeight()
+                            .padding(horizontal = 12.dp, vertical = 16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        counter(Modifier.weight(1f).fillMaxWidth())
+                        controls()
+                        Spacer(Modifier.height(12.dp))
                     }
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun TasbihCompactContent(
-    modifier: Modifier = Modifier,
-    presetsState: TasbihPresetsUiState,
-    counterState: TasbihCounterUiState,
-    statsState: TasbihStatsUiState,
-    viewModel: TasbihViewModel,
-) {
-    BoxWithConstraints(modifier = modifier) {
-        val isSmallHeight = maxHeight < 600.dp
-        val availableForCircle = maxHeight - 240.dp
-        val circleSize = availableForCircle.coerceIn(180.dp, 300.dp)
-        val counterFontSize = if (circleSize < 220.dp) 52.sp
-            else if (circleSize < 270.dp) 64.sp
-            else 76.sp
-
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Presets row — compact, no label
-            LazyRow(
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.padding(top = if (isSmallHeight) 4.dp else 8.dp)
+        } else {
+            // Phone / compact single-column layout (unchanged).
+            Column(
+                modifier = rootModifier,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                item(key = "free_count") {
-                    FreeCountChip(
-                        isSelected = counterState.selectedPreset == null,
-                        onClick = { viewModel.onEvent(TasbihEvent.ClearPreset) }
-                    )
-                }
-                items(
-                    items = presetsState.defaultPresets,
-                    key = { it.id }
-                ) { preset ->
-                    PresetChip(
-                        preset = preset,
-                        isSelected = counterState.selectedPreset?.id == preset.id,
-                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
-                    )
-                }
-                items(
-                    items = presetsState.customPresets,
-                    key = { it.id }
-                ) { preset ->
-                    PresetChip(
-                        preset = preset,
-                        isSelected = counterState.selectedPreset?.id == preset.id,
-                        onClick = { viewModel.onEvent(TasbihEvent.SelectPreset(preset)) }
-                    )
-                }
+                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+
+                Spacer(Modifier.height(4.dp))
+
+                capsule()
+
+                counter(Modifier.weight(1f).fillMaxWidth())
+
+                controls()
+
+                Spacer(Modifier.height(12.dp))
+
+                // Current-tasbih peek card → opens the detail sheet
+                CurrentTasbihPeek(
+                    arabic = counterState.selectedPreset?.arabicText,
+                    name = counterState.selectedPreset?.name ?: stringResource(R.string.free_count_label),
+                    translation = counterState.selectedPreset?.translation,
+                    target = counterState.targetCount,
+                    onClick = { showCurrentSheet = true }
+                )
             }
-
-            // Push everything below to center/bottom
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Dhikr context — sits just above the counter
-            DhikrDisplay(
-                selectedPreset = counterState.selectedPreset,
-                targetCount = counterState.targetCount,
-                onTargetCountChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
-                modifier = Modifier.padding(bottom = if (isSmallHeight) 8.dp else 12.dp)
-            )
-
-            // Counter circle — the hero
-            CounterCircle(
-                count = counterState.count,
-                targetCount = counterState.targetCount,
-                laps = counterState.laps,
-                onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                circleSize = circleSize,
-                counterFontSize = counterFontSize
-            )
-
-            Spacer(modifier = Modifier.height(if (isSmallHeight) 10.dp else 16.dp))
-
-            // Inline stats — minimal text row
-            val currentSessionCount =
-                counterState.count + (counterState.laps * counterState.targetCount)
-            val liveTotalToday = statsState.baseTotalToday + currentSessionCount
-
-            InlineStats(
-                totalToday = liveTotalToday,
-                laps = counterState.laps,
-                sessions = statsState.completedSessions
-            )
-
-            Spacer(modifier = Modifier.height(if (isSmallHeight) 10.dp else 16.dp))
-
-            // Control buttons
-            ControlButtons(
-                soundEnabled = counterState.soundEnabled,
-                vibrationEnabled = counterState.vibrationEnabled,
-                onReset = { viewModel.onEvent(TasbihEvent.Reset) },
-                onToggleSound = {
-                    viewModel.onEvent(TasbihEvent.ToggleSound(!counterState.soundEnabled))
-                },
-                onToggleVibration = {
-                    viewModel.onEvent(TasbihEvent.ToggleVibration(!counterState.vibrationEnabled))
-                }
-            )
-
-            Spacer(modifier = Modifier.height(if (isSmallHeight) 8.dp else 16.dp))
         }
     }
 }
 
 @Composable
-private fun DhikrDisplay(
-    selectedPreset: TasbihPreset?,
-    targetCount: Int,
-    onTargetCountChange: (Int) -> Unit = {},
+private fun TasbihTopBar(
+    beadsMode: Boolean,
+    onSelectStyle: (TasbihCounterStyle) -> Unit,
+    onOpenDesign: () -> Unit,
+    onNavigateToHistory: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isFreeCount = selectedPreset == null
-    var isEditing by remember { mutableStateOf(false) }
-    var editText by remember(targetCount) { mutableStateOf(targetCount.toString()) }
-    val focusManager = LocalFocusManager.current
-
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        if (!selectedPreset?.arabicText.isNullOrEmpty()) {
-            ArabicText(
-                text = selectedPreset.arabicText,
-                size = ArabicTextSize.LARGE,
-                color = NimazColors.TasbihColors.Milestone,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 32.dp)
-            )
-            Spacer(modifier = Modifier.height(2.dp))
-        }
-
-        // Name / translation
-        val displayText = selectedPreset?.translation ?: selectedPreset?.name
-            ?: stringResource(R.string.free_count_label)
-        Text(
-            text = displayText,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
+        NimazPillTabs(
+            tabs = listOf(
+                stringResource(R.string.tasbih_mode_beads),
+                stringResource(R.string.tasbih_mode_classic)
+            ),
+            selectedIndex = if (beadsMode) 0 else 1,
+            onTabSelect = { index ->
+                onSelectStyle(
+                    if (index == 0) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC
+                )
+            }
         )
+        Spacer(Modifier.weight(1f))
+        if (beadsMode) {
+            IconButton(onClick = onOpenDesign) {
+                Icon(Icons.Default.Palette, stringResource(R.string.tasbih_bead_design))
+            }
+        }
+        IconButton(onClick = onNavigateToHistory) {
+            Icon(Icons.Default.History, stringResource(R.string.history))
+        }
+    }
+}
 
-        // Target — editable in free count mode
-        if (isFreeCount && isEditing) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(top = 4.dp)
-            ) {
-                OutlinedTextField(
-                    value = editText,
-                    onValueChange = { value ->
-                        if (value.length <= 4 && value.all { it.isDigit() }) {
-                            editText = value
-                        }
-                    },
-                    modifier = Modifier.width(80.dp),
-                    textStyle = MaterialTheme.typography.bodySmall.copy(textAlign = TextAlign.Center),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            val newTarget = editText.toIntOrNull()?.coerceIn(1, 9999) ?: targetCount
-                            onTargetCountChange(newTarget)
-                            isEditing = false
-                            focusManager.clearFocus()
-                        }
-                    ),
-                    shape = RoundedCornerShape(8.dp)
+@Composable
+private fun TasbihCounterArea(
+    beadsMode: Boolean,
+    counterState: com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState,
+    onIncrement: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Crossfade(targetState = beadsMode, animationSpec = tween(400), label = "counter_mode") { beads ->
+            if (beads) {
+                TasbihBeads(
+                    count = counterState.count + counterState.laps * counterState.targetCount,
+                    onIncrement = onIncrement,
+                    targetCount = counterState.targetCount,
+                    design = BeadDesigns.byKey(counterState.beadDesignKey),
+                    leftHanded = counterState.leftHanded,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(260.dp)
                 )
-                IconButton(
-                    onClick = {
-                        val newTarget = editText.toIntOrNull()?.coerceIn(1, 9999) ?: targetCount
-                        onTargetCountChange(newTarget)
-                        isEditing = false
-                        focusManager.clearFocus()
-                    },
-                    modifier = Modifier.size(28.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
+            } else {
+                CounterCircle(
+                    count = counterState.count,
+                    targetCount = counterState.targetCount,
+                    laps = counterState.laps,
+                    onIncrement = onIncrement
+                )
             }
-        } else {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = if (isFreeCount) Modifier.clickable { isEditing = true } else Modifier
-            ) {
+        }
+    }
+}
+
+@Composable
+private fun TasbihCountCapsule(
+    count: Int,
+    target: Int,
+    laps: Int,
+    autoLap: Boolean,
+    modifier: Modifier = Modifier
+) {
+    val goalReached = !autoLap && count >= target
+    val accent = if (goalReached) NimazColors.TasbihColors.Complete
+    else NimazColors.TasbihColors.Milestone
+
+    Surface(
+        modifier = modifier,
+        shape = RoundedCornerShape(percent = 50),
+        color = accent.copy(alpha = 0.12f),
+        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f))
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Box(modifier = Modifier.size(7.dp).background(accent, CircleShape))
+            Text(
+                text = "$count / $target",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = accent
+            )
+            if (laps > 0) {
                 Text(
-                    text = stringResource(R.string.target_format, targetCount),
+                    text = stringResource(R.string.laps_format, laps),
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                if (isFreeCount) {
-                    Spacer(modifier = Modifier.width(3.dp))
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
-                        modifier = Modifier.size(12.dp)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CurrentTasbihPeek(
+    arabic: String?,
+    name: String,
+    translation: String?,
+    target: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    ) {
+        Column(modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp)) {
+            Box(
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+                    .size(width = 32.dp, height = 4.dp)
+                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                    .align(Alignment.CenterHorizontally)
+            )
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                if (!arabic.isNullOrEmpty()) {
+                    ArabicText(
+                        text = arabic,
+                        size = ArabicTextSize.SMALL,
+                        color = NimazColors.TasbihColors.Milestone,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = name,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = translation?.let { "$it · ${stringResource(R.string.target_format, target)}" }
+                            ?: stringResource(R.string.target_format, target),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.KeyboardArrowUp,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
+        }
+    }
+}
+
+@Composable
+private fun CurrentTasbihInfoCard(
+    arabic: String?,
+    name: String,
+    translation: String?,
+    target: Int,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        border = BorderStroke(1.dp, NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f))
+    ) {
+        Column(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 20.dp, vertical = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            if (!arabic.isNullOrEmpty()) {
+                ArabicText(
+                    text = arabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = NimazColors.TasbihColors.Milestone,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Text(
+                text = name,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            if (!translation.isNullOrEmpty()) {
+                Text(
+                    text = translation,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+            Text(
+                text = stringResource(R.string.target_format, target),
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = NimazColors.TasbihColors.Milestone
+            )
         }
     }
 }
@@ -495,232 +470,82 @@ private fun CounterCircle(
     targetCount: Int,
     laps: Int,
     onIncrement: () -> Unit,
-    circleSize: Dp = 260.dp,
-    counterFontSize: TextUnit = 72.sp,
     modifier: Modifier = Modifier
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.93f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        ),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "press_scale"
     )
     val progress = if (targetCount > 0) count.toFloat() / targetCount.toFloat() else 0f
-    val animatedProgress by animateFloatAsState(
-        targetValue = progress.coerceIn(0f, 1f),
-        animationSpec = tween(300),
-        label = "progress"
-    )
+    val animatedProgress by animateFloatAsState(progress.coerceIn(0f, 1f), tween(300), label = "progress")
 
     val isComplete = count >= targetCount
     val progressColor by animateColorAsState(
-        targetValue = if (isComplete) NimazColors.TasbihColors.Complete
-        else MaterialTheme.colorScheme.primary,
+        targetValue = if (isComplete) NimazColors.TasbihColors.Complete else MaterialTheme.colorScheme.primary,
         label = "progress_color"
     )
-    val borderAlpha by animateFloatAsState(
-        targetValue = if (isPressed) 0.8f else 0.4f,
-        label = "border_alpha"
-    )
+    val borderAlpha by animateFloatAsState(if (isPressed) 0.8f else 0.4f, label = "border_alpha")
 
     val ringTrackColor = MaterialTheme.colorScheme.surfaceVariant
     val goldColor = NimazColors.TasbihColors.Milestone
-    val innerSize = circleSize - 36.dp
+    val circleSize = 260.dp
 
-    Box(
-        modifier = modifier
-            .size(circleSize),
-        contentAlignment = Alignment.Center
-    ) {
-        // Progress Ring — does NOT animate with press
+    Box(modifier = modifier.size(circleSize), contentAlignment = Alignment.Center) {
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .drawBehind {
-                    val strokeWidth = 6.dp.toPx()
-                    val radius = (size.minDimension - strokeWidth) / 2f
-                    val topLeft = Offset(
-                        (size.width - radius * 2) / 2f,
-                        (size.height - radius * 2) / 2f
-                    )
-                    val arcSize = Size(radius * 2, radius * 2)
-
+            modifier = Modifier.fillMaxSize().drawBehind {
+                val strokeWidth = 6.dp.toPx()
+                val radius = (size.minDimension - strokeWidth) / 2f
+                val topLeft = Offset((size.width - radius * 2) / 2f, (size.height - radius * 2) / 2f)
+                val arcSize = Size(radius * 2, radius * 2)
+                drawArc(ringTrackColor, -90f, 360f, false, topLeft, arcSize, style = Stroke(strokeWidth, cap = StrokeCap.Round))
+                if (animatedProgress > 0f) {
                     drawArc(
-                        color = ringTrackColor,
-                        startAngle = -90f,
-                        sweepAngle = 360f,
-                        useCenter = false,
-                        topLeft = topLeft,
-                        size = arcSize,
-                        style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                        brush = Brush.sweepGradient(listOf(progressColor, goldColor, progressColor)),
+                        startAngle = -90f, sweepAngle = 360f * animatedProgress, useCenter = false,
+                        topLeft = topLeft, size = arcSize, style = Stroke(strokeWidth, cap = StrokeCap.Round)
                     )
-
-                    if (animatedProgress > 0f) {
-                        drawArc(
-                            brush = Brush.sweepGradient(
-                                colors = listOf(progressColor, goldColor, progressColor)
-                            ),
-                            startAngle = -90f,
-                            sweepAngle = 360f * animatedProgress,
-                            useCenter = false,
-                            topLeft = topLeft,
-                            size = arcSize,
-                            style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
-                        )
-                    }
                 }
+            }
         )
-
-        // Tappable counter — animates on press
         Surface(
             modifier = Modifier
-                .size(innerSize)
+                .size(circleSize - 36.dp)
                 .scale(scale)
-                .clickable(
-                    interactionSource = interactionSource,
-                    indication = null,
-                    onClick = onIncrement
-                ),
+                .clickable(interactionSource = interactionSource, indication = null, onClick = onIncrement),
             shape = CircleShape,
             color = Color.Transparent,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha))
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                                MaterialTheme.colorScheme.surface.copy(alpha = 0.02f)
-                            )
-                        ),
-                        shape = CircleShape
+                modifier = Modifier.fillMaxSize().background(
+                    brush = Brush.radialGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            MaterialTheme.colorScheme.surface.copy(alpha = 0.02f)
+                        )
                     ),
+                    shape = CircleShape
+                ),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = count.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(
-                            fontSize = counterFontSize,
-                            fontWeight = FontWeight.Bold
-                        ),
+                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp, fontWeight = FontWeight.Bold),
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    if (laps > 0) {
-                        Text(
-                            text = stringResource(R.string.laps_format, laps),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
-                        )
-                    } else {
-                        Text(
-                            text = stringResource(R.string.tap_to_count),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
-                        )
-                    }
+                    Text(
+                        text = if (laps > 0) stringResource(R.string.laps_format, laps)
+                        else stringResource(R.string.tap_to_count),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = if (laps > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                    )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun InlineStats(
-    totalToday: Int,
-    laps: Int,
-    sessions: Int,
-    modifier: Modifier = Modifier
-) {
-    val separator = "  ·  "
-    val statsText = buildString {
-        append(stringResource(R.string.today_upper))
-        append(" ")
-        append(totalToday)
-        append(separator)
-        append(stringResource(R.string.sessions_upper))
-        append(" ")
-        append(sessions)
-    }
-
-    Text(
-        text = statsText,
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-        modifier = modifier
-    )
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun FreeCountChip(
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        border = if (isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-    ) {
-        Text(
-            text = stringResource(R.string.free_count),
-            style = MaterialTheme.typography.labelMedium,
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-        )
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun PresetChip(
-    preset: TasbihPreset,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        border = if (isSelected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f))
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            if (!preset.arabicText.isNullOrEmpty()) {
-                ArabicText(
-                    text = preset.arabicText,
-                    size = ArabicTextSize.SMALL,
-                    color = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-            Text(
-                text = "${preset.targetCount}x",
-                style = MaterialTheme.typography.labelSmall,
-                color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }
@@ -734,40 +559,42 @@ private fun ControlButtons(
     onToggleVibration: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Surface(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(percent = 50),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
     ) {
-        IconButton(onClick = onReset, modifier = Modifier.size(40.dp)) {
-            Icon(
-                imageVector = Icons.Default.Refresh,
-                contentDescription = stringResource(R.string.reset_action),
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f),
-                modifier = Modifier.size(20.dp)
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onReset, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    Icons.Default.Refresh, stringResource(R.string.reset_action),
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f), modifier = Modifier.size(20.dp)
+                )
+            }
+            VerticalDivider(
+                modifier = Modifier.height(20.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
-        }
-
-        IconButton(onClick = onToggleSound, modifier = Modifier.size(40.dp)) {
-            Icon(
-                imageVector = if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = stringResource(R.string.toggle_sound),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = if (soundEnabled) 0.8f else 0.3f
-                ),
-                modifier = Modifier.size(20.dp)
-            )
-        }
-
-        IconButton(onClick = onToggleVibration, modifier = Modifier.size(40.dp)) {
-            Icon(
-                imageVector = Icons.Default.PhoneAndroid,
-                contentDescription = stringResource(R.string.toggle_vibration),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(
-                    alpha = if (vibrationEnabled) 0.8f else 0.3f
-                ),
-                modifier = Modifier.size(20.dp)
-            )
+            IconButton(onClick = onToggleSound, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
+                    stringResource(R.string.toggle_sound),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (soundEnabled) 0.9f else 0.35f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            IconButton(onClick = onToggleVibration, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    Icons.Default.PhoneAndroid, stringResource(R.string.toggle_vibration),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.9f else 0.35f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }

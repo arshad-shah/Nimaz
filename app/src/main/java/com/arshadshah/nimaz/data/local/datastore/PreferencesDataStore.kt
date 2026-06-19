@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
@@ -42,6 +43,12 @@ class PreferencesDataStore @Inject constructor(
         val SHOW_COUNTDOWN = booleanPreferencesKey("show_countdown")
         val SHOW_QUICK_ACTIONS = booleanPreferencesKey("show_quick_actions")
         val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
+        val TASBIH_BEAD_MODE = booleanPreferencesKey("tasbih_bead_mode")
+        val TASBIH_BEAD_DESIGN = stringPreferencesKey("tasbih_bead_design")
+        val TASBIH_SELECTED_PRESET = longPreferencesKey("tasbih_selected_preset")
+        val TASBIH_PRESET_SEED_VERSION = intPreferencesKey("tasbih_preset_seed_version")
+        val TASBIH_FAVORITES = stringSetPreferencesKey("tasbih_favorites")
+        val TASBIH_LEFT_HANDED = booleanPreferencesKey("tasbih_left_handed")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use_24_hour_format")
         val USE_HIJRI_PRIMARY = booleanPreferencesKey("use_hijri_primary")
 
@@ -228,6 +235,75 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setHelpContentVersion(version: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HELP_CONTENT_VERSION] = version
+        }
+    }
+
+    // Tasbih counter style — true = bead strand, false = classic circle.
+    val tasbihBeadMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_BEAD_MODE] ?: false
+    }
+
+    suspend fun setTasbihBeadMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_BEAD_MODE] = enabled
+        }
+    }
+
+    // Tasbih bead design — stable key of the chosen BeadDesign (default "wood").
+    val tasbihBeadDesign: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] ?: "wood"
+    }
+
+    suspend fun setTasbihBeadDesign(key: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] = key
+        }
+    }
+
+    // Currently selected tasbih preset id (-1 = free count). Shared across screens
+    // so the Choose-Dhikr picker can drive the counter on a separate back-stack entry.
+    val tasbihSelectedPresetId: Flow<Long> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] ?: -1L
+    }
+
+    suspend fun setTasbihSelectedPresetId(id: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] = id
+        }
+    }
+
+    // Versioned runtime seed of new default presets (prepackaged DB only has the
+    // original five). Bump the latest version in the VM when new defaults are added.
+    val tasbihPresetSeedVersion: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_PRESET_SEED_VERSION] ?: 0
+    }
+
+    suspend fun setTasbihPresetSeedVersion(version: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_PRESET_SEED_VERSION] = version
+        }
+    }
+
+    // Favourite preset ids (stored as strings).
+    val tasbihFavorites: Flow<Set<String>> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_FAVORITES] ?: emptySet()
+    }
+
+    suspend fun setTasbihFavorites(ids: Set<String>) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_FAVORITES] = ids
+        }
+    }
+
+    // Bead strand handedness — false = right-handed (beads advance right→left),
+    // true = left-handed (beads advance left→right).
+    val tasbihLeftHanded: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_LEFT_HANDED] ?: false
+    }
+
+    suspend fun setTasbihLeftHanded(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_LEFT_HANDED] = enabled
         }
     }
 

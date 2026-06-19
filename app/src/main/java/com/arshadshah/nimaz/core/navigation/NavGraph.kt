@@ -288,6 +288,7 @@ fun NavGraph(
             composable<Route.Tasbih> {
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
+                    onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
                     onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
@@ -608,6 +609,7 @@ fun NavGraph(
             composable<Route.TasbihHome> {
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
+                    onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
                     onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
@@ -617,14 +619,15 @@ fun NavGraph(
                 backStackEntry.toRoute<Route.TasbihCounter>()
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
+                    onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
 
             composable<Route.TasbihPresets> {
-                TasbihScreen(
-                    onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
-                    onNavigateToSettings = { navController.navigate(Route.Settings) }
+                com.arshadshah.nimaz.presentation.screens.tasbih.ChooseDhikrScreen(
+                    onBack = { navController.popBackStack() },
+                    onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) }
                 )
             }
 
