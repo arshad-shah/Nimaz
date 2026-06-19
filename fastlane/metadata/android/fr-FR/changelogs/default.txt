@@ -1,7 +1,6 @@
 Nouveautés depuis la 3.0.10 :
 
-• Le jeûne dispose désormais d'un onglet « Suivi » intelligent — jeûnes du Ramadan et volontaires réunis, adaptés à la saison ; le Rattrapage reste séparé.
-• Écrans repensés : Noms d'Allah, Noms du Prophète ﷺ et les Prophètes.
-• Boussole Qibla et vue RA améliorées.
-• Nouvelle Aide et À propos consultable, avec des guides pas à pas dans votre langue.
-• Accueil rafraîchi, plus des corrections de bugs et améliorations de fiabilité.
+• Nouveau lecteur Qaida : les enfants apprennent à lire le Coran lettre par lettre — touchez pour entendre, parcours de leçons, étoiles, progression réinitialisable pour un autre enfant.
+• Le jeûne dans un onglet « Suivi » intelligent — Ramadan et jeûnes volontaires réunis ; Rattrapage séparé.
+• Boussole Qibla et vue RA améliorées, écrans repensés : Noms d'Allah, Noms du Prophète ﷺ et Prophètes.
+• Nouvelle Aide & À propos consultable et Accueil rafraîchi.

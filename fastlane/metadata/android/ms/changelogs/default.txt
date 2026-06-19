@@ -1,7 +1,6 @@
 Yang baharu sejak 3.0.10:
 
-• Puasa kini mempunyai satu tab "Penjejak" pintar — puasa Ramadan dan sunat bersama, menyesuaikan musim; Ganti kekal berasingan.
-• Skrin yang direka semula: Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
-• Kompas Kiblat dan paparan AR yang diperbaharui.
-• Bantuan & Perihal baharu yang boleh dicari, dengan panduan langkah demi langkah dalam bahasa anda.
-• Laman Utama yang diperbaharui, serta pembaikan pepijat dan peningkatan kebolehpercayaan.
+• Pembaca Qaida baharu: anak belajar membaca Al-Quran huruf demi huruf — ketik untuk mendengar, perjalanan pelajaran, kumpul bintang, dan tetapkan semula untuk anak lain.
+• Puasa kini dalam satu tab "Penjejak" pintar — Ramadan dan sunat bersama; Ganti kekal berasingan.
+• Kompas Kiblat dan paparan AR diperbaharui, serta reka bentuk semula Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
+• Bantuan & Perihal baharu yang boleh dicari dan Laman Utama diperbaharui.
