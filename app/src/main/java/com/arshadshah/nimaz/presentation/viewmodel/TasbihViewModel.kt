@@ -10,6 +10,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
@@ -37,6 +38,9 @@ data class TasbihPresetsUiState(
     val error: String? = null
 )
 
+/** How the counter is presented: the classic tap-circle or the tasbih beads. */
+enum class TasbihCounterStyle { CLASSIC, BEADS }
+
 data class TasbihCounterUiState(
     val selectedPreset: TasbihPreset? = null,
     val currentSession: TasbihSession? = null,
@@ -47,7 +51,8 @@ data class TasbihCounterUiState(
     val elapsedTimeMs: Long = 0,
     val vibrationEnabled: Boolean = true,
     val soundEnabled: Boolean = false,
-    val autoLap: Boolean = true
+    val autoLap: Boolean = true,
+    val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC
 )
 
 data class TasbihHistoryUiState(
@@ -75,6 +80,7 @@ sealed interface TasbihEvent {
     data class ToggleVibration(val enabled: Boolean) : TasbihEvent
     data class ToggleSound(val enabled: Boolean) : TasbihEvent
     data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
+    data class SetCounterStyle(val style: TasbihCounterStyle) : TasbihEvent
     data object ClearPreset : TasbihEvent
     data object Increment : TasbihEvent
     data object Reset : TasbihEvent
@@ -90,6 +96,7 @@ sealed interface TasbihEvent {
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
     private val tasbihRepository: TasbihRepository,
+    private val preferences: PreferencesDataStore,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -126,6 +133,13 @@ class TasbihViewModel @Inject constructor(
         loadHistory()
         loadStats()
         checkForActiveSession()
+        viewModelScope.launch {
+            preferences.tasbihBeadMode.collect { beads ->
+                _counterState.update {
+                    it.copy(counterStyle = if (beads) TasbihCounterStyle.BEADS else TasbihCounterStyle.CLASSIC)
+                }
+            }
+        }
     }
 
     fun onEvent(event: TasbihEvent) {
@@ -147,6 +161,12 @@ class TasbihViewModel @Inject constructor(
             is TasbihEvent.DeleteCustomPreset -> deleteCustomPreset(event.presetId)
             is TasbihEvent.ToggleVibration -> _counterState.update { it.copy(vibrationEnabled = event.enabled) }
             is TasbihEvent.ToggleSound -> _counterState.update { it.copy(soundEnabled = event.enabled) }
+            is TasbihEvent.SetCounterStyle -> {
+                _counterState.update { it.copy(counterStyle = event.style) }
+                viewModelScope.launch {
+                    preferences.setTasbihBeadMode(event.style == TasbihCounterStyle.BEADS)
+                }
+            }
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
             TasbihEvent.Reset -> reset()

@@ -37,7 +37,9 @@ import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Grain
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.RadioButtonChecked
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.VolumeOff
@@ -88,6 +90,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterStyle
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihCounterUiState
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihPresetsUiState
@@ -114,6 +117,20 @@ fun TasbihScreen(
                 title = stringResource(R.string.tasbih_title),
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    val beadsMode = counterState.counterStyle == TasbihCounterStyle.BEADS
+                    IconButton(onClick = {
+                        viewModel.onEvent(
+                            TasbihEvent.SetCounterStyle(
+                                if (beadsMode) TasbihCounterStyle.CLASSIC else TasbihCounterStyle.BEADS
+                            )
+                        )
+                    }) {
+                        Icon(
+                            imageVector = if (beadsMode) Icons.Default.RadioButtonChecked
+                            else Icons.Default.Grain,
+                            contentDescription = stringResource(R.string.tasbih_counter_style)
+                        )
+                    }
                     IconButton(onClick = onNavigateToHistory) {
                         Icon(
                             imageVector = Icons.Default.History,
@@ -228,15 +245,24 @@ fun TasbihScreen(
                             modifier = Modifier.padding(bottom = 16.dp)
                         )
 
-                        // Counter circle — enlarged on tablet
-                        CounterCircle(
-                            count = counterState.count,
-                            targetCount = counterState.targetCount,
-                            laps = counterState.laps,
-                            onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                            circleSize = circleSize,
-                            counterFontSize = counterFontSize
-                        )
+                        // Counter — beads strand or classic circle
+                        if (counterState.counterStyle == TasbihCounterStyle.BEADS) {
+                            TasbihBeads(
+                                count = counterState.count + counterState.laps * counterState.targetCount,
+                                onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                                targetCount = counterState.targetCount,
+                                modifier = Modifier.size(width = circleSize, height = circleSize * 1.6f)
+                            )
+                        } else {
+                            CounterCircle(
+                                count = counterState.count,
+                                targetCount = counterState.targetCount,
+                                laps = counterState.laps,
+                                onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                                circleSize = circleSize,
+                                counterFontSize = counterFontSize
+                            )
+                        }
 
                         Spacer(modifier = Modifier.height(20.dp))
 
@@ -337,15 +363,24 @@ private fun TasbihCompactContent(
                 modifier = Modifier.padding(bottom = if (isSmallHeight) 8.dp else 12.dp)
             )
 
-            // Counter circle — the hero
-            CounterCircle(
-                count = counterState.count,
-                targetCount = counterState.targetCount,
-                laps = counterState.laps,
-                onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
-                circleSize = circleSize,
-                counterFontSize = counterFontSize
-            )
+            // Counter — beads strand or classic circle
+            if (counterState.counterStyle == TasbihCounterStyle.BEADS) {
+                TasbihBeads(
+                    count = counterState.count + counterState.laps * counterState.targetCount,
+                    onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                    targetCount = counterState.targetCount,
+                    modifier = Modifier.size(width = circleSize, height = circleSize * 1.6f)
+                )
+            } else {
+                CounterCircle(
+                    count = counterState.count,
+                    targetCount = counterState.targetCount,
+                    laps = counterState.laps,
+                    onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
+                    circleSize = circleSize,
+                    counterFontSize = counterFontSize
+                )
+            }
 
             Spacer(modifier = Modifier.height(if (isSmallHeight) 10.dp else 16.dp))
 

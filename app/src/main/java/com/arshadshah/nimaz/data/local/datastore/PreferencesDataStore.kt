@@ -42,6 +42,7 @@ class PreferencesDataStore @Inject constructor(
         val SHOW_COUNTDOWN = booleanPreferencesKey("show_countdown")
         val SHOW_QUICK_ACTIONS = booleanPreferencesKey("show_quick_actions")
         val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
+        val TASBIH_BEAD_MODE = booleanPreferencesKey("tasbih_bead_mode")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use_24_hour_format")
         val USE_HIJRI_PRIMARY = booleanPreferencesKey("use_hijri_primary")
 
@@ -225,6 +226,17 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setHelpContentVersion(version: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HELP_CONTENT_VERSION] = version
+        }
+    }
+
+    // Tasbih counter style — true = bead strand, false = classic circle.
+    val tasbihBeadMode: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_BEAD_MODE] ?: false
+    }
+
+    suspend fun setTasbihBeadMode(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_BEAD_MODE] = enabled
         }
     }
 
