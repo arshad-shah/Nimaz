@@ -8,6 +8,10 @@ import com.arshadshah.nimaz.data.local.help.AndroidHelpAssetReader
 import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
 import com.arshadshah.nimaz.data.local.help.HelpAssetReader
 import com.arshadshah.nimaz.data.local.help.HelpContentVersionStore
+import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
+import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
+import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
+import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -221,6 +225,18 @@ abstract class RepositoryModule {
     abstract fun bindDuaAssetReader(
         impl: AndroidDuaAssetReader
     ): DuaAssetReader
+
+    @Binds
+    @Singleton
+    abstract fun bindQaidaContentVersionStore(
+        impl: DataStoreQaidaContentVersionStore
+    ): QaidaContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindQaidaAssetReader(
+        impl: AndroidQaidaAssetReader
+    ): QaidaAssetReader
 
     @Binds
     @Singleton

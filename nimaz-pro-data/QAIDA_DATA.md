@@ -41,6 +41,19 @@ references line→lesson and cell→line/lesson/letter, unique non-empty
 `audio_key` per cell, 29 letters / 17 lessons, null forms for non-connectors)
 and exits non-zero on any failure.
 
+After the JSON changes, also regenerate the bundled runtime seed asset and bump
+its `CONTENT_VERSION` so existing installs re-seed on update:
+
+```bash
+python3 scripts/generate_qaida_asset.py   # → app/src/main/assets/qaida/qaida_content.json
+```
+
+This asset exists because Room copies the prepopulated DB (`createFromAsset`)
+**only on a fresh install**. On an app update the on-device DB is never
+re-copied, so the app seeds the Qaida content tables at runtime from this asset
+(`QaidaContentSeeder`) — exactly like the Dua and Help content. Without it,
+upgrading users get the empty Qaida tables that `MIGRATION_14_15` creates.
+
 Lesson 17 (revision) reads real ayahs for Surah Al-Fatihah (1) and An-Nas (114)
 straight out of the existing `json/ayahs.json`.
 

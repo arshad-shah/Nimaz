@@ -4,6 +4,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
+import com.arshadshah.nimaz.data.local.qaida.QaidaContentSeeder
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.LineType
@@ -57,6 +58,7 @@ class QaidaReaderViewModelTest {
     private lateinit var useCases: QaidaUseCases
     private lateinit var audioManager: QaidaAudioManager
     private lateinit var audioStateFlow: MutableStateFlow<QaidaAudioState>
+    private lateinit var contentSeeder: QaidaContentSeeder
 
     @Before
     fun setUp() {
@@ -85,6 +87,8 @@ class QaidaReaderViewModelTest {
         audioStateFlow = MutableStateFlow(QaidaAudioState())
         every { audioManager.state } returns audioStateFlow
 
+        contentSeeder = mockk(relaxed = true)
+
         // Default stubs — individual tests override the per-lesson ones.
         every { getLetters.invoke() } returns flowOf(emptyList())
         every { getCourseProgress.invoke() } returns flowOf(courseProgress())
@@ -96,7 +100,7 @@ class QaidaReaderViewModelTest {
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun createViewModel() = QaidaReaderViewModel(useCases, audioManager)
+    private fun createViewModel() = QaidaReaderViewModel(useCases, audioManager, contentSeeder)
 
     @Test
     fun `tapping a cell plays its clip and marks it heard`() = runTest {
