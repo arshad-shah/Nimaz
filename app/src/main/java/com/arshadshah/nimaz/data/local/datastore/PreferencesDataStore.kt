@@ -43,6 +43,8 @@ class PreferencesDataStore @Inject constructor(
         val SHOW_QUICK_ACTIONS = booleanPreferencesKey("show_quick_actions")
         val HAPTIC_FEEDBACK = booleanPreferencesKey("haptic_feedback")
         val TASBIH_BEAD_MODE = booleanPreferencesKey("tasbih_bead_mode")
+        val TASBIH_BEAD_DESIGN = stringPreferencesKey("tasbih_bead_design")
+        val TASBIH_SELECTED_PRESET = longPreferencesKey("tasbih_selected_preset")
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use_24_hour_format")
         val USE_HIJRI_PRIMARY = booleanPreferencesKey("use_hijri_primary")
 
@@ -240,6 +242,29 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setTasbihBeadMode(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.TASBIH_BEAD_MODE] = enabled
+        }
+    }
+
+    // Tasbih bead design — stable key of the chosen BeadDesign (default "wood").
+    val tasbihBeadDesign: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] ?: "wood"
+    }
+
+    suspend fun setTasbihBeadDesign(key: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] = key
+        }
+    }
+
+    // Currently selected tasbih preset id (-1 = free count). Shared across screens
+    // so the Choose-Dhikr picker can drive the counter on a separate back-stack entry.
+    val tasbihSelectedPresetId: Flow<Long> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] ?: -1L
+    }
+
+    suspend fun setTasbihSelectedPresetId(id: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] = id
         }
     }
 

@@ -20,7 +20,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
@@ -33,12 +36,12 @@ import kotlin.math.hypot
 import kotlin.math.sin
 
 /**
- * Hand-drawn tasbih (misbaha) counter. The full loop is hidden — only the
- * visible diagonal **strand** is drawn: beads bunch in from the top edge and out
- * the bottom edge, with a **gap** in the middle holding one loose bead. **Tap**,
- * or **flick that bead down across the gap**, advances the count; the strand
- * rotates down by one and a fresh bead drops into the gap. One flick = one bead.
- * The **imame** (green) leader bead returns to the gap once per [targetCount].
+ * Hand-drawn tasbih (misbaha) counter. The full loop is hidden — only a visible
+ * **strand** that arches gently upward and runs **edge to edge** is drawn. Beads
+ * bunch in from one edge and out the other, with a **wide gap** at the apex
+ * holding one loose bead. **Tap**, or **flick that bead across the gap**, advances
+ * the count; the strand slides by one and a fresh bead drops into the gap. The
+ * **imame** (lap marker) returns to the gap once per [targetCount].
  *
  * Controlled: [count] is the source of truth (from the screen / view-model) and
  * each gesture calls [onIncrement]; the strand animates to follow the count.
@@ -105,29 +108,92 @@ fun TasbihBeads(
     }
 }
 
-/** Visible-strand geometry: a straight diagonal line top-right → bottom-left. */
+/**
+ * Visible-strand geometry: an upward-arching quadratic curve, sampled to an
+ * arc-length table so beads can be placed by distance along the curve (and the
+ * cord drawn as the real curve). Distances beyond the ends extrapolate along the
+ * end tangents, so beads continue off-screen and the loop reads as continuous.
+ */
 private class Strand(
-    val ax: Float, val ay: Float,
-    val dirX: Float, val dirY: Float,
+    private val xs: FloatArray,
+    private val ys: FloatArray,
+    private val cum: FloatArray,
+    private val startDir: Offset,
+    private val endDir: Offset,
     val total: Float,
     val pack: Float,
     val beadR: Float,
     val gapTop: Float,
     val gapBottom: Float,
+    val dirX: Float,
+    val dirY: Float,
 ) {
-    fun point(d: Float) = Offset(ax + dirX * d, ay + dirY * d)
+    fun point(d: Float): Offset {
+        if (d <= 0f) return Offset(xs.first() + startDir.x * d, ys.first() + startDir.y * d)
+        if (d >= total) {
+            val e = d - total
+            return Offset(xs.last() + endDir.x * e, ys.last() + endDir.y * e)
+        }
+        // locate segment whose cumulative length brackets d
+        var i = 1
+        while (i < cum.size && cum[i] < d) i++
+        val segLen = cum[i] - cum[i - 1]
+        val f = if (segLen > 0f) (d - cum[i - 1]) / segLen else 0f
+        return Offset(lerp(xs[i - 1], xs[i], f), lerp(ys[i - 1], ys[i], f))
+    }
+
+    /** The cord, drawn slightly past both ends so it disappears off-screen. */
+    fun cordPath(): Path = Path().apply {
+        val s = point(-beadR * 2f)
+        moveTo(s.x, s.y)
+        for (i in xs.indices) lineTo(xs[i], ys[i])
+        val e = point(total + beadR * 2f)
+        lineTo(e.x, e.y)
+    }
 }
 
 private fun buildStrand(w: Float, h: Float, design: BeadDesign): Strand {
-    val ax = w * 0.70f; val ay = 0f
-    val exX = w * 0.30f
-    val dx = exX - ax; val dy = h - ay
-    val total = hypot(dx, dy)
+    // Upward arch: control point sits above the chord (smaller y), edge to edge.
+    val p0 = Offset(w * 0.06f, h * 0.72f)
+    val p1 = Offset(w * 0.50f, h * 0.16f)
+    val p2 = Offset(w * 0.94f, h * 0.40f)
+
+    val n = 48
+    val xs = FloatArray(n + 1)
+    val ys = FloatArray(n + 1)
+    val cum = FloatArray(n + 1)
+    for (i in 0..n) {
+        val t = i.toFloat() / n
+        val u = 1f - t
+        xs[i] = u * u * p0.x + 2f * u * t * p1.x + t * t * p2.x
+        ys[i] = u * u * p0.y + 2f * u * t * p1.y + t * t * p2.y
+        cum[i] = if (i == 0) 0f else cum[i - 1] + hypot(xs[i] - xs[i - 1], ys[i] - ys[i - 1])
+    }
+    val total = cum[n]
+
+    fun normalize(o: Offset): Offset {
+        val m = hypot(o.x, o.y)
+        return if (m > 0f) Offset(o.x / m, o.y / m) else Offset(1f, 0f)
+    }
+    // tangents = derivative of the quadratic at the ends
+    val startDir = normalize(Offset(2f * (p1.x - p0.x), 2f * (p1.y - p0.y)))
+    val endDir = normalize(Offset(2f * (p2.x - p1.x), 2f * (p2.y - p1.y)))
+    val midDir = normalize(Offset(2f * (p2.x - p0.x), 2f * (p2.y - p0.y))) // ~tangent at apex
+
     val beadR = minOf(w, h) * design.beadFraction
     val pack = beadR * design.pack
     val gap = pack * design.gapBeads
     val center = total * 0.5f
-    return Strand(ax, ay, dx / total, dy / total, total, pack, beadR, center - gap / 2f, center + gap / 2f)
+    return Strand(
+        xs, ys, cum, startDir, endDir,
+        total = total,
+        pack = pack,
+        beadR = beadR,
+        gapTop = center - gap / 2f,
+        gapBottom = center + gap / 2f,
+        dirX = midDir.x,
+        dirY = midDir.y,
+    )
 }
 
 private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign) {
@@ -136,48 +202,58 @@ private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign)
     val frac = pos - a0
     fun imame(rank: Int) = ((rank % beadCount) + beadCount) % beadCount == 0
 
-    drawLine(design.cord, g.point(-g.beadR), g.point(g.total + g.beadR), strokeWidth = g.beadR * 0.18f)
+    drawPath(g.cordPath(), color = design.cord, style = Stroke(width = g.beadR * 0.16f, cap = StrokeCap.Round))
 
-    // Bottom bunch — counted beads, packed below the gap, drifting down with frac.
+    // Lower bunch — counted beads, packed below the gap, drifting along with frac.
     var k = 0
     while (true) {
         val d = g.gapBottom + (k + frac) * g.pack
-        if (d > g.total + g.beadR) break
-        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 - 1 - k)) design.imame else design.wood)
+        if (d > g.total + g.beadR * 2f) break
+        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 - 1 - k)) design.imame else design.resting)
         k++
     }
 
-    // Top bunch — upcoming beads, packed above the gap, drifting down with frac.
+    // Upper bunch — upcoming beads, packed above the gap, drifting along with frac.
     var m = 1
     while (true) {
         val d = g.gapTop - (m - frac) * g.pack
-        if (d < -g.beadR) break
-        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 + m)) design.imame else design.wood)
+        if (d < -g.beadR * 2f) break
+        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 + m)) design.imame else design.resting)
         m++
     }
 
-    // Loose bead crossing the gap — wood at both ends, warming gold mid-crossing.
+    // Loose bead crossing the gap — resting at both ends, warming gold mid-crossing,
+    // with a soft glow as it travels the wide gap.
     val activeD = lerp(g.gapTop, g.gapBottom, frac)
     val t = sin(frac * Math.PI).toFloat()
-    val activeColors = if (imame(a0)) design.imame else List(3) { i ->
-        blend(design.wood[i], design.gold[i], t)
+    val center = g.point(activeD)
+    if (t > 0.02f) {
+        drawCircle(
+            color = design.active[1].copy(alpha = 0.22f * t),
+            radius = g.beadR * 1.9f,
+            center = center
+        )
     }
-    design.drawBead(this, g.point(activeD), g.beadR * (1f + 0.14f * t), activeColors)
+    val activeColors = if (imame(a0)) design.imame else List(3) { i ->
+        blend(design.resting[i], design.active[i], t)
+    }
+    design.drawBead(this, center, g.beadR * (1f + 0.16f * t), activeColors)
 }
 
 private fun blend(a: Color, b: Color, t: Float) = androidx.compose.ui.graphics.lerp(a, b, t)
 
 // Preview
 
-@Preview(name = "Tasbih Beads", widthDp = 320, heightDp = 560, showBackground = true, backgroundColor = 0xFF12151D)
+@Preview(name = "Tasbih Beads", widthDp = 320, heightDp = 300, showBackground = true, backgroundColor = 0xFF0B100E)
 @Composable
 private fun TasbihBeadsPreview() {
     var count by remember { mutableIntStateOf(7) }
-    Box(modifier = Modifier.background(Color(0xFF12151D)).size(320.dp, 560.dp)) {
+    Box(modifier = Modifier.background(Color(0xFF0B100E)).size(320.dp, 300.dp)) {
         TasbihBeads(
             count = count,
             onIncrement = { count++ },
             targetCount = 33,
+            design = BeadDesigns.Wood,
             modifier = Modifier.fillMaxSize()
         )
     }

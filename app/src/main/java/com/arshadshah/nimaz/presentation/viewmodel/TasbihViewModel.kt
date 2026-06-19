@@ -52,7 +52,8 @@ data class TasbihCounterUiState(
     val vibrationEnabled: Boolean = true,
     val soundEnabled: Boolean = false,
     val autoLap: Boolean = true,
-    val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC
+    val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC,
+    val beadDesignKey: String = "wood"
 )
 
 data class TasbihHistoryUiState(
@@ -81,6 +82,7 @@ sealed interface TasbihEvent {
     data class ToggleSound(val enabled: Boolean) : TasbihEvent
     data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
     data class SetCounterStyle(val style: TasbihCounterStyle) : TasbihEvent
+    data class SetBeadDesign(val key: String) : TasbihEvent
     data object ClearPreset : TasbihEvent
     data object Increment : TasbihEvent
     data object Reset : TasbihEvent
@@ -140,6 +142,18 @@ class TasbihViewModel @Inject constructor(
                 }
             }
         }
+        viewModelScope.launch {
+            preferences.tasbihBeadDesign.collect { key ->
+                _counterState.update { it.copy(beadDesignKey = key) }
+            }
+        }
+        // Selection can be driven from the Choose-Dhikr screen (a separate VM
+        // instance) via DataStore; keep this counter in sync with it.
+        viewModelScope.launch {
+            preferences.tasbihSelectedPresetId.collect { id ->
+                applyPersistedSelection(id)
+            }
+        }
     }
 
     fun onEvent(event: TasbihEvent) {
@@ -166,6 +180,10 @@ class TasbihViewModel @Inject constructor(
                 viewModelScope.launch {
                     preferences.setTasbihBeadMode(event.style == TasbihCounterStyle.BEADS)
                 }
+            }
+            is TasbihEvent.SetBeadDesign -> {
+                _counterState.update { it.copy(beadDesignKey = event.key) }
+                viewModelScope.launch { preferences.setTasbihBeadDesign(event.key) }
             }
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
@@ -227,6 +245,20 @@ class TasbihViewModel @Inject constructor(
                 isActive = false,
                 elapsedTimeMs = 0
             )
+        }
+        viewModelScope.launch { preferences.setTasbihSelectedPresetId(-1L) }
+    }
+
+    /** Apply a selection persisted by another screen (idempotent — guarded by id). */
+    private fun applyPersistedSelection(id: Long) {
+        val current = _counterState.value.selectedPreset?.id
+        if (id <= 0L) {
+            if (current != null) clearPreset()
+            return
+        }
+        if (current == id) return
+        viewModelScope.launch {
+            tasbihRepository.getPresetById(id)?.let { selectPreset(it) }
         }
     }
 
@@ -291,6 +323,7 @@ class TasbihViewModel @Inject constructor(
                 elapsedTimeMs = 0
             )
         }
+        viewModelScope.launch { preferences.setTasbihSelectedPresetId(preset.id) }
     }
 
     private fun filterByCategory(category: TasbihCategory?) {
