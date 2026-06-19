@@ -204,7 +204,10 @@ private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign,
     val g = buildStrand(size.width, size.height, design, mirrored)
     val a0 = floor(pos).toInt()
     val frac = pos - a0
-    fun imame(rank: Int) = ((rank % beadCount) + beadCount) % beadCount == 0
+    // The imame (jade leader bead) marks each completed lap. For tiny targets every
+    // bead would be a lap-end, flooding the strand green and hiding the design — so
+    // only show it when the target is large enough to read as a sparse marker.
+    fun imame(rank: Int) = beadCount >= 7 && ((rank % beadCount) + beadCount) % beadCount == 0
 
     drawPath(g.cordPath(), color = design.cord, style = Stroke(width = g.beadR * 0.16f, cap = StrokeCap.Round))
 
