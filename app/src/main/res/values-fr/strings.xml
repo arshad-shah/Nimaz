@@ -848,4 +848,17 @@
     <string name="tasbih_bead_onyx">Onyx</string>
     <string name="tasbih_bead_pearl">Perle</string>
     <string name="tasbih_bead_jade">Jade</string>
+
+    <!-- Qaida journey reset -->
+    <string name="qaida_reset_journey">Réinitialiser le parcours</string>
+    <string name="qaida_reset_title">Recommencer ?</string>
+    <string name="qaida_reset_message">Cela efface toutes les étoiles et la progression et recommence le parcours Qaida à partir de la leçon 1. Cette action est irréversible.</string>
+
+    <!-- Qaida lesson-complete celebration -->
+    <string name="qaida_lesson_complete">Leçon terminée !</string>
+    <string name="qaida_lesson_learned">Vous avez appris %1$s.</string>
+    <string name="qaida_new_lesson_unlocked">Nouvelle leçon : %1$s</string>
+    <string name="qaida_map">Carte</string>
+    <string name="qaida_next_lesson">Leçon suivante</string>
+    <string name="qaida_play_line">Lire la ligne</string>
 </resources>

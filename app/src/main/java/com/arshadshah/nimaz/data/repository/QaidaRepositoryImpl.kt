@@ -101,6 +101,10 @@ class QaidaRepositoryImpl @Inject constructor(
         qaidaDao.upsertCellProgress(progress.toEntity())
     }
 
+    override suspend fun resetProgress() {
+        qaidaDao.deleteAllUserData()
+    }
+
     // ── Mapping ───────────────────────────────────────────────────────────
 
     /**

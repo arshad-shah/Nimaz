@@ -75,6 +75,15 @@ class QaidaReaderViewModel @Inject constructor(
             if (id == null) flowOf(null) else qaidaUseCases.getLessonProgress(id)
         }.stateIn(viewModelScope, sharing, null)
 
+    /**
+     * Cell ids already heard in the open lesson, so the reader can mark done
+     * tiles and a returning learner can see where they left off.
+     */
+    val completedCellIds: StateFlow<Set<Int>> =
+        _selectedLessonId.flatMapLatest { id ->
+            if (id == null) flowOf(emptySet()) else qaidaUseCases.observeCompletedCells(id)
+        }.stateIn(viewModelScope, sharing, emptySet())
+
     /** Raw audio engine state (loading/playing flags + current key). */
     val audioState: StateFlow<QaidaAudioState> = audioManager.state
 
@@ -147,6 +156,19 @@ class QaidaReaderViewModel @Inject constructor(
         val course = courseProgress.value ?: return
         val target = course.nextLessonId ?: course.lessons.firstOrNull()?.lesson?.id
         if (target != null) selectLesson(target)
+    }
+
+    /**
+     * Wipe all Qaida progress and start the journey over from Lesson 1. The
+     * course rollup is reactive, so the home screen refreshes itself once the
+     * rows are cleared. Stops any audio first.
+     */
+    fun resetJourney() {
+        audioManager.stop()
+        _selectedLessonId.value = null
+        viewModelScope.launch {
+            qaidaUseCases.resetProgress()
+        }
     }
 
     override fun onCleared() {

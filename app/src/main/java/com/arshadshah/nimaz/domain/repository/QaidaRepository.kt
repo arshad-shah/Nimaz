@@ -43,4 +43,8 @@ interface QaidaRepository {
     fun observeCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgress>>
     suspend fun getCompletedCellCount(lessonId: Int): Int
     suspend fun upsertCellProgress(progress: QaidaCellProgress)
+
+    // ── Reset ─────────────────────────────────────────────────────────────
+    /** Wipe all lesson + cell progress, returning the course to a fresh start. */
+    suspend fun resetProgress()
 }

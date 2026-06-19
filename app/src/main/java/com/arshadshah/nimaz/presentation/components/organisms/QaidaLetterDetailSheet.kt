@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.molecules.QAIDA_AUDIO_UI_ENABLED
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaLetterForms
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaMakhrajHelper
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
@@ -93,21 +94,24 @@ fun QaidaLetterDetailSheet(
                     )
                 }
             }
-            Box(
-                modifier = Modifier
-                    .size(52.dp)
-                    .clip(RoundedCornerShape(percent = 50))
-                    .background(MaterialTheme.colorScheme.secondary)
-                    .semantics { contentDescription = "Play letter" }
-                    .clickable { onPlay(letter) },
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSecondary,
-                    modifier = Modifier.size(28.dp),
-                )
+            // Hidden while audio is being regenerated (text-only mode).
+            if (QAIDA_AUDIO_UI_ENABLED) {
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(RoundedCornerShape(percent = 50))
+                        .background(MaterialTheme.colorScheme.secondary)
+                        .semantics { contentDescription = "Play letter" }
+                        .clickable { onPlay(letter) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.PlayArrow,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondary,
+                        modifier = Modifier.size(28.dp),
+                    )
+                }
             }
         }
 

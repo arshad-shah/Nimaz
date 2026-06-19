@@ -47,13 +47,24 @@ fun QaidaReaderScreen(
     val playing by viewModel.playingCell.collectAsStateWithLifecycle()
     val lessonProgress by viewModel.lessonProgress.collectAsStateWithLifecycle()
     val course by viewModel.courseProgress.collectAsStateWithLifecycle()
+    val completedCellIds by viewModel.completedCellIds.collectAsStateWithLifecycle()
 
     var showTransliteration by rememberSaveable { mutableStateOf(true) }
     var showCelebration by remember { mutableStateOf(false) }
 
+    // Only celebrate on a *fresh* completion during this visit — not when the
+    // child re-opens an already-finished lesson (which should just show the
+    // lesson so they can practise it again). [openedComplete] captures whether
+    // the lesson was already done on entry; it resets when the lesson changes.
     val status = lessonProgress?.status
+    var openedComplete by remember(lessonId) { mutableStateOf<Boolean?>(null) }
     LaunchedEffect(status, lessonId) {
-        showCelebration = status == LessonStatus.COMPLETED
+        if (openedComplete == null && status != null) {
+            openedComplete = status == LessonStatus.COMPLETED
+        }
+        if (openedComplete == false && status == LessonStatus.COMPLETED) {
+            showCelebration = true
+        }
     }
 
     val unlockedTitle = course?.let { c ->
@@ -90,6 +101,7 @@ fun QaidaReaderScreen(
                     showTransliteration = showTransliteration,
                     onCellTap = viewModel::onCellTapped,
                     onPlayLine = viewModel::playLine,
+                    completedCellIds = completedCellIds,
                 )
             }
 
