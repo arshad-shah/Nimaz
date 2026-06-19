@@ -23,6 +23,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -34,6 +35,7 @@ data class TasbihPresetsUiState(
     val customPresets: List<TasbihPreset> = emptyList(),
     val selectedCategory: TasbihCategory? = null,
     val filteredPresets: List<TasbihPreset> = emptyList(),
+    val favorites: Set<Long> = emptySet(),
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -53,7 +55,8 @@ data class TasbihCounterUiState(
     val soundEnabled: Boolean = false,
     val autoLap: Boolean = true,
     val counterStyle: TasbihCounterStyle = TasbihCounterStyle.CLASSIC,
-    val beadDesignKey: String = "wood"
+    val beadDesignKey: String = "wood",
+    val leftHanded: Boolean = false
 )
 
 data class TasbihHistoryUiState(
@@ -83,6 +86,8 @@ sealed interface TasbihEvent {
     data class ToggleAutoLap(val enabled: Boolean) : TasbihEvent
     data class SetCounterStyle(val style: TasbihCounterStyle) : TasbihEvent
     data class SetBeadDesign(val key: String) : TasbihEvent
+    data class ToggleFavorite(val presetId: Long) : TasbihEvent
+    data class SetLeftHanded(val enabled: Boolean) : TasbihEvent
     data object ClearPreset : TasbihEvent
     data object Increment : TasbihEvent
     data object Reset : TasbihEvent
@@ -154,6 +159,23 @@ class TasbihViewModel @Inject constructor(
                 applyPersistedSelection(id)
             }
         }
+        viewModelScope.launch {
+            preferences.tasbihFavorites.collect { ids ->
+                _presetsState.update { it.copy(favorites = ids.mapNotNull { s -> s.toLongOrNull() }.toSet()) }
+            }
+        }
+        viewModelScope.launch {
+            preferences.tasbihLeftHanded.collect { left ->
+                _counterState.update { it.copy(leftHanded = left) }
+            }
+        }
+        // Seed default adhkar added after the prepackaged DB shipped (one-time per version).
+        viewModelScope.launch {
+            if (preferences.tasbihPresetSeedVersion.first() < LATEST_PRESET_SEED_VERSION) {
+                tasbihRepository.seedMissingDefaults()
+                preferences.setTasbihPresetSeedVersion(LATEST_PRESET_SEED_VERSION)
+            }
+        }
     }
 
     fun onEvent(event: TasbihEvent) {
@@ -184,6 +206,11 @@ class TasbihViewModel @Inject constructor(
             is TasbihEvent.SetBeadDesign -> {
                 _counterState.update { it.copy(beadDesignKey = event.key) }
                 viewModelScope.launch { preferences.setTasbihBeadDesign(event.key) }
+            }
+            is TasbihEvent.ToggleFavorite -> toggleFavorite(event.presetId)
+            is TasbihEvent.SetLeftHanded -> {
+                _counterState.update { it.copy(leftHanded = event.enabled) }
+                viewModelScope.launch { preferences.setTasbihLeftHanded(event.enabled) }
             }
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
@@ -247,6 +274,15 @@ class TasbihViewModel @Inject constructor(
             )
         }
         viewModelScope.launch { preferences.setTasbihSelectedPresetId(-1L) }
+    }
+
+    private fun toggleFavorite(id: Long) {
+        viewModelScope.launch {
+            val current = preferences.tasbihFavorites.first().toMutableSet()
+            val key = id.toString()
+            if (!current.add(key)) current.remove(key)
+            preferences.setTasbihFavorites(current)
+        }
     }
 
     /** Apply a selection persisted by another screen (idempotent — guarded by id). */
@@ -620,6 +656,11 @@ class TasbihViewModel @Inject constructor(
 
     private fun getTodayEpoch(): Long {
         return LocalDate.now().atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+    }
+
+    companion object {
+        /** Bump when new default presets are added to DefaultTasbihPresets. */
+        private const val LATEST_PRESET_SEED_VERSION = 1
     }
 
     override fun onCleared() {

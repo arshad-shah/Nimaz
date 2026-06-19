@@ -97,6 +97,8 @@ fun TasbihScreen(
         BeadDesignPickerSheet(
             selectedKey = counterState.beadDesignKey,
             onSelect = { viewModel.onEvent(TasbihEvent.SetBeadDesign(it)) },
+            leftHanded = counterState.leftHanded,
+            onToggleHanded = { viewModel.onEvent(TasbihEvent.SetLeftHanded(it)) },
             onDismiss = { showDesignSheet = false }
         )
     }
@@ -174,6 +176,7 @@ fun TasbihScreen(
                             onIncrement = { viewModel.onEvent(TasbihEvent.Increment) },
                             targetCount = counterState.targetCount,
                             design = BeadDesigns.byKey(counterState.beadDesignKey),
+                            leftHanded = counterState.leftHanded,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(260.dp)

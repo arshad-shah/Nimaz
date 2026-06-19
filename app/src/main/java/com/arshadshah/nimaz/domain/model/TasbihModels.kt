@@ -154,5 +154,138 @@ object DefaultTasbihPresets {
         updatedAt = 0
     )
 
-    val allDefaults = listOf(subhanAllah, alhamdulillah, allahuAkbar, laIlahaIllallah, astaghfirullah)
+    // --- After prayer ---
+    val tahlilAfterPrayer = TasbihPreset(
+        id = 6,
+        name = "La ilaha illallahu wahdah",
+        arabicText = "لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ",
+        transliteration = "La ilaha illallahu wahdahu la sharika lah, lahul-mulku wa lahul-hamd, wa huwa 'ala kulli shay'in qadir",
+        translation = "There is no god but Allah alone, with no partner. His is the dominion and His is the praise, and He is over all things competent.",
+        targetCount = 10,
+        category = TasbihCategory.AFTER_PRAYER,
+        reference = "Sahih Muslim",
+        isDefault = true,
+        displayOrder = 6,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    val subhanAllahWaBihamdihi = TasbihPreset(
+        id = 7,
+        name = "SubhanAllahi wa bihamdih",
+        arabicText = "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+        transliteration = "SubhanAllahi wa bihamdihi",
+        translation = "Glory be to Allah and praise be to Him",
+        targetCount = 100,
+        category = TasbihCategory.AFTER_PRAYER,
+        reference = "Sahih al-Bukhari & Muslim",
+        isDefault = true,
+        displayOrder = 7,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    // --- Morning ---
+    val asbahna = TasbihPreset(
+        id = 8,
+        name = "Asbahna wa asbahal-mulku lillah",
+        arabicText = "أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
+        transliteration = "Asbahna wa asbahal-mulku lillah, wal-hamdu lillah",
+        translation = "We have entered the morning and the dominion belongs to Allah, and all praise is for Allah.",
+        targetCount = 1,
+        category = TasbihCategory.MORNING,
+        reference = "Sahih Muslim",
+        isDefault = true,
+        displayOrder = 8,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    val bismillahLaYadurr = TasbihPreset(
+        id = 9,
+        name = "Bismillahilladhi la yadurr",
+        arabicText = "بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ",
+        transliteration = "Bismillahilladhi la yadurru ma'asmihi shay'un fil-ardi wa la fis-sama', wa huwas-Sami'ul-'Alim",
+        translation = "In the name of Allah, with whose name nothing on earth or in heaven can cause harm, and He is the All-Hearing, the All-Knowing.",
+        targetCount = 3,
+        category = TasbihCategory.MORNING,
+        reference = "Abu Dawud & at-Tirmidhi",
+        isDefault = true,
+        displayOrder = 9,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    val radeetuBillah = TasbihPreset(
+        id = 10,
+        name = "Radeetu billahi Rabba",
+        arabicText = "رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا",
+        transliteration = "Radeetu billahi Rabban, wa bil-Islami dinan, wa bi-Muhammadin nabiyya",
+        translation = "I am pleased with Allah as my Lord, Islam as my religion, and Muhammad as my Prophet.",
+        targetCount = 3,
+        category = TasbihCategory.MORNING,
+        reference = "Abu Dawud & at-Tirmidhi",
+        isDefault = true,
+        displayOrder = 10,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    // --- Evening ---
+    val amsayna = TasbihPreset(
+        id = 11,
+        name = "Amsayna wa amsal-mulku lillah",
+        arabicText = "أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ",
+        transliteration = "Amsayna wa amsal-mulku lillah, wal-hamdu lillah",
+        translation = "We have entered the evening and the dominion belongs to Allah, and all praise is for Allah.",
+        targetCount = 1,
+        category = TasbihCategory.EVENING,
+        reference = "Sahih Muslim",
+        isDefault = true,
+        displayOrder = 11,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    val audhuBiKalimatillah = TasbihPreset(
+        id = 12,
+        name = "A'udhu bikalimatillahit-tammat",
+        arabicText = "أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ",
+        transliteration = "A'udhu bikalimatillahit-tammati min sharri ma khalaq",
+        translation = "I seek refuge in the perfect words of Allah from the evil of what He created.",
+        targetCount = 3,
+        category = TasbihCategory.EVENING,
+        reference = "Sahih Muslim",
+        isDefault = true,
+        displayOrder = 12,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    val allahummaBikaAmsayna = TasbihPreset(
+        id = 13,
+        name = "Allahumma bika amsayna",
+        arabicText = "اللَّهُمَّ بِكَ أَمْسَيْنَا وَبِكَ أَصْبَحْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ الْمَصِيرُ",
+        transliteration = "Allahumma bika amsayna, wa bika asbahna, wa bika nahya, wa bika namut, wa ilaykal-masir",
+        translation = "O Allah, by You we enter the evening and the morning, by You we live and die, and to You is the return.",
+        targetCount = 1,
+        category = TasbihCategory.EVENING,
+        reference = "at-Tirmidhi",
+        isDefault = true,
+        displayOrder = 13,
+        createdAt = 0,
+        updatedAt = 0
+    )
+
+    /** The original five, baked into the prepackaged DB. */
+    val baseDefaults = listOf(subhanAllah, alhamdulillah, allahuAkbar, laIlahaIllallah, astaghfirullah)
+
+    /** Adhkar added after the prepackaged DB shipped; seeded at runtime by name. */
+    val addedDefaults = listOf(
+        tahlilAfterPrayer, subhanAllahWaBihamdihi,
+        asbahna, bismillahLaYadurr, radeetuBillah,
+        amsayna, audhuBiKalimatillah, allahummaBikaAmsayna
+    )
+
+    val allDefaults = baseDefaults + addedDefaults
 }

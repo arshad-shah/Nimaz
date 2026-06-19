@@ -54,6 +54,7 @@ fun TasbihBeads(
     modifier: Modifier = Modifier,
     targetCount: Int = 33,
     design: BeadDesign = BeadDesigns.Default,
+    leftHanded: Boolean = false,
 ) {
     val scope = rememberCoroutineScope()
     val beadCount = targetCount.coerceAtLeast(1) // imame marks each full target
@@ -70,8 +71,8 @@ fun TasbihBeads(
     }
 
     Canvas(
-        modifier = modifier.pointerInput(design) {
-            val g = buildStrand(size.width.toFloat(), size.height.toFloat(), design)
+        modifier = modifier.pointerInput(design, leftHanded) {
+            val g = buildStrand(size.width.toFloat(), size.height.toFloat(), design, leftHanded)
             // One gesture = one bead. We track the crossing synchronously (dragD)
             // so even a fast flick is decided correctly, and increment exactly once.
             awaitEachGesture {
@@ -104,7 +105,7 @@ fun TasbihBeads(
             }
         }
     ) {
-        drawStrand(pos.value, beadCount, design)
+        drawStrand(pos.value, beadCount, design, leftHanded)
     }
 }
 
@@ -152,11 +153,13 @@ private class Strand(
     }
 }
 
-private fun buildStrand(w: Float, h: Float, design: BeadDesign): Strand {
+private fun buildStrand(w: Float, h: Float, design: BeadDesign, mirrored: Boolean = false): Strand {
     // Upward arch: control point sits above the chord (smaller y), edge to edge.
-    val p0 = Offset(w * 0.06f, h * 0.72f)
-    val p1 = Offset(w * 0.50f, h * 0.16f)
-    val p2 = Offset(w * 0.94f, h * 0.40f)
+    // Right-handed (default) advances right→left; mirror for left-handed.
+    fun px(x: Float) = if (mirrored) w - x else x
+    val p0 = Offset(px(w * 0.06f), h * 0.72f)
+    val p1 = Offset(px(w * 0.50f), h * 0.16f)
+    val p2 = Offset(px(w * 0.94f), h * 0.40f)
 
     val n = 48
     val xs = FloatArray(n + 1)
@@ -196,8 +199,8 @@ private fun buildStrand(w: Float, h: Float, design: BeadDesign): Strand {
     )
 }
 
-private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign) {
-    val g = buildStrand(size.width, size.height, design)
+private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign, mirrored: Boolean) {
+    val g = buildStrand(size.width, size.height, design, mirrored)
     val a0 = floor(pos).toInt()
     val frac = pos - a0
     fun imame(rank: Int) = ((rank % beadCount) + beadCount) % beadCount == 0

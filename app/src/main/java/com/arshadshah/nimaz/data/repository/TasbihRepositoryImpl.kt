@@ -147,6 +147,15 @@ class TasbihRepositoryImpl @Inject constructor(
         tasbihDao.insertPresets(entities)
     }
 
+    override suspend fun seedMissingDefaults() {
+        val existingNames = tasbihDao.getAllPresetNames().toSet()
+        val missing = DefaultTasbihPresets.allDefaults.filter { it.name !in existingNames }
+        if (missing.isNotEmpty()) {
+            // id = 0 so Room assigns fresh ids and never replaces an existing row.
+            tasbihDao.insertPresets(missing.map { it.toEntity().copy(id = 0) })
+        }
+    }
+
     override suspend fun hasDefaultPresets(): Boolean {
         return tasbihDao.getDefaultPresets().first().isNotEmpty()
     }

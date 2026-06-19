@@ -17,6 +17,9 @@ interface TasbihRepository {
     suspend fun updatePreset(preset: TasbihPreset)
     suspend fun deleteCustomPreset(id: Long)
 
+    /** Insert any default presets missing from the DB (idempotent, matched by name). */
+    suspend fun seedMissingDefaults()
+
     // Session operations
     fun getSessionsForDate(date: Long): Flow<List<TasbihSession>>
     fun getSessionsInRange(startDate: Long, endDate: Long): Flow<List<TasbihSession>>
