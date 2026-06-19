@@ -65,6 +65,9 @@ import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUlHusnaScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUnNabiScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveDuaScreen
@@ -297,6 +300,29 @@ fun NavGraph(
             composable<Route.QiblaNav> {
                 QiblaScreen(
                     onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            // Qaida (children's Arabic reader) screens
+            composable<Route.QaidaHome> {
+                QaidaHomeScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenLesson = { lessonId -> navController.navigate(Route.QaidaReader(lessonId)) },
+                    onOpenLetters = { navController.navigate(Route.QaidaLetters) },
+                )
+            }
+
+            composable<Route.QaidaReader> { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.QaidaReader>()
+                QaidaReaderScreen(
+                    lessonId = args.lessonId,
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+
+            composable<Route.QaidaLetters> {
+                QaidaLettersScreen(
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
 

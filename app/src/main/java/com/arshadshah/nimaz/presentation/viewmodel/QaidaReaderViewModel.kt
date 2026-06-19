@@ -117,6 +117,11 @@ class QaidaReaderViewModel @Inject constructor(
         }
     }
 
+    /** Play a single letter's clip from the letter explorer (no progress change). */
+    fun playLetter(letter: QaidaLetter) {
+        audioManager.play(letter.audioKey)
+    }
+
     /** Move to the next lesson in display order, if it exists and is not locked. */
     fun nextLesson() {
         val lessons = courseProgress.value?.lessons ?: return
