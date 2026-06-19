@@ -44,6 +44,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -117,6 +118,7 @@ fun TasbihScreen(
                 showCurrentSheet = false
                 onNavigateToChooseDhikr()
             },
+            onTargetChange = { viewModel.onEvent(TasbihEvent.SetTargetCount(it)) },
             onDismiss = { showCurrentSheet = false }
         )
     }
@@ -557,31 +559,42 @@ private fun ControlButtons(
     onToggleVibration: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Surface(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(24.dp),
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(percent = 50),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
     ) {
-        IconButton(onClick = onReset, modifier = Modifier.size(40.dp)) {
-            Icon(
-                Icons.Default.Refresh, stringResource(R.string.reset_action),
-                tint = MaterialTheme.colorScheme.error.copy(alpha = 0.7f), modifier = Modifier.size(20.dp)
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = onReset, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    Icons.Default.Refresh, stringResource(R.string.reset_action),
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f), modifier = Modifier.size(20.dp)
+                )
+            }
+            VerticalDivider(
+                modifier = Modifier.height(20.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
-        }
-        IconButton(onClick = onToggleSound, modifier = Modifier.size(40.dp)) {
-            Icon(
-                if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
-                stringResource(R.string.toggle_sound),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (soundEnabled) 0.8f else 0.3f),
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        IconButton(onClick = onToggleVibration, modifier = Modifier.size(40.dp)) {
-            Icon(
-                Icons.Default.PhoneAndroid, stringResource(R.string.toggle_vibration),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.8f else 0.3f),
-                modifier = Modifier.size(20.dp)
-            )
+            IconButton(onClick = onToggleSound, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
+                    stringResource(R.string.toggle_sound),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (soundEnabled) 0.9f else 0.35f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            IconButton(onClick = onToggleVibration, modifier = Modifier.size(44.dp)) {
+                Icon(
+                    Icons.Default.PhoneAndroid, stringResource(R.string.toggle_vibration),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.9f else 0.35f),
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }

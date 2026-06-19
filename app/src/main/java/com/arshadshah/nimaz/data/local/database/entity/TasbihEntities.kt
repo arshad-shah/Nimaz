@@ -19,6 +19,9 @@ data class TasbihPresetEntity(
     val isCustom: Int, // 0 = default, 1 = custom
     @ColumnInfo(name = "display_order")
     val displayOrder: Int,
+    // Lowercase category key (e.g. "after_prayer"); null = uncategorised.
+    @ColumnInfo(name = "category")
+    val category: String? = null,
     val updatedAt: Long = System.currentTimeMillis()
 )
 

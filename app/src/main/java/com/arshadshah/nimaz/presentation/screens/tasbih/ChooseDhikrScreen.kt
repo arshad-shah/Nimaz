@@ -19,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
@@ -134,11 +135,6 @@ fun ChooseDhikrScreen(
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.cd_back))
                     }
-                },
-                actions = {
-                    IconButton(onClick = onNavigateToAddPreset) {
-                        Icon(Icons.Default.Add, stringResource(R.string.new_tasbih))
-                    }
                 }
             )
         }
@@ -162,6 +158,15 @@ fun ChooseDhikrScreen(
                     CategoryTab(label = tabs[i].label, selected = i == tabIndex, onClick = { tabIndex = i })
                 }
             }
+
+            // Free count — count anything with your own target.
+            FreeCountRow(
+                selected = counterState.selectedPreset == null,
+                onClick = {
+                    viewModel.onEvent(TasbihEvent.ClearPreset)
+                    onBack()
+                }
+            )
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -254,6 +259,42 @@ private fun SwipeableDhikrRow(
         }
     ) {
         DhikrRow(preset, selected, isFavorite, onClick, onToggleFavorite)
+    }
+}
+
+@Composable
+private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Icon(
+                Icons.Default.Calculate,
+                contentDescription = null,
+                tint = NimazColors.TasbihColors.Milestone
+            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.free_count_label),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Count anything · set your own target",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
     }
 }
 

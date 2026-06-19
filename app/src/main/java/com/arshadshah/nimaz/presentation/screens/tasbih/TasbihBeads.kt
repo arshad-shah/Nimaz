@@ -154,12 +154,13 @@ private class Strand(
 }
 
 private fun buildStrand(w: Float, h: Float, design: BeadDesign, mirrored: Boolean = false): Strand {
-    // Upward arch: control point sits above the chord (smaller y), edge to edge.
-    // Right-handed (default) advances right→left; mirror for left-handed.
+    // Diagonal strand, edge to edge: beads advance TOP → BOTTOM as the count rises.
+    // Right-handed (default) runs top-right → bottom-left (down-and-left); mirror
+    // for left-handed (top-left → bottom-right). A gentle bow keeps it organic.
     fun px(x: Float) = if (mirrored) w - x else x
-    val p0 = Offset(px(w * 0.06f), h * 0.72f)
-    val p1 = Offset(px(w * 0.50f), h * 0.16f)
-    val p2 = Offset(px(w * 0.94f), h * 0.40f)
+    val p0 = Offset(px(w * 0.82f), h * 0.05f) // start: top edge
+    val p1 = Offset(px(w * 0.42f), h * 0.46f) // control: gentle bow
+    val p2 = Offset(px(w * 0.16f), h * 0.95f) // end: bottom edge
 
     val n = 48
     val xs = FloatArray(n + 1)
@@ -237,9 +238,9 @@ private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign,
             center = center
         )
     }
-    val activeColors = if (imame(a0)) design.imame else List(3) { i ->
-        blend(design.resting[i], design.active[i], t)
-    }
+    // The crossing bead always warms to gold (the active highlight) — never green,
+    // even when it is the imame; the imame still reads green at rest in the bunch.
+    val activeColors = List(3) { i -> blend(design.resting[i], design.active[i], t) }
     design.drawBead(this, center, g.beadR * (1f + 0.16f * t), activeColors)
 }
 

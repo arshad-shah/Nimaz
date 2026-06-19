@@ -169,7 +169,7 @@ class TasbihRepositoryImpl @Inject constructor(
             transliteration = transliteration,
             translation = translation,
             targetCount = targetCount,
-            category = null, // No category in database
+            category = TasbihCategory.fromString(category),
             reference = null,
             isDefault = isCustom == 0,
             displayOrder = displayOrder,
@@ -187,7 +187,8 @@ class TasbihRepositoryImpl @Inject constructor(
             translation = translation ?: "",
             targetCount = targetCount,
             isCustom = if (isDefault) 0 else 1,
-            displayOrder = displayOrder
+            displayOrder = displayOrder,
+            category = category?.name?.lowercase()
         )
     }
 

@@ -98,16 +98,8 @@ fun AddPresetScreen(
             NimazBackTopAppBar(
                 title = stringResource(R.string.new_tasbih),
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior,
-                actions = {
-                    IconButton(onClick = { submit() }) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = stringResource(R.string.save_preset),
-                            tint = NimazColors.TasbihColors.Complete
-                        )
-                    }
-                }
+                scrollBehavior = scrollBehavior
+                // No top-bar Save action — the prominent "Create Tasbih" button submits.
             )
         }
     ) { paddingValues ->

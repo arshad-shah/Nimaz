@@ -19,11 +19,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -136,6 +140,7 @@ fun CurrentTasbihSheet(
     totalToday: Int,
     laps: Int,
     onChangeDhikr: () -> Unit,
+    onTargetChange: (Int) -> Unit,
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -179,6 +184,12 @@ fun CurrentTasbihSheet(
                 StatTile("LAPS", laps.toString(), Modifier.weight(1f))
             }
 
+            // Free count: let the user dial in any target.
+            if (preset == null) {
+                Spacer(Modifier.height(12.dp))
+                TargetStepper(target = targetCount, onChange = onTargetChange)
+            }
+
             preset?.reference?.takeIf { it.isNotBlank() }?.let { ref ->
                 Spacer(Modifier.height(12.dp))
                 Box(
@@ -219,6 +230,34 @@ fun CurrentTasbihSheet(
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
+    Surface(
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { onChange((target - 1).coerceAtLeast(1)) }) {
+                Icon(Icons.Default.Remove, contentDescription = "Decrease target")
+            }
+            Text(
+                text = "Target  $target",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            IconButton(onClick = { onChange((target + 1).coerceAtMost(9999)) }) {
+                Icon(Icons.Default.Add, contentDescription = "Increase target")
             }
         }
     }
