@@ -39,8 +39,8 @@ android {
         // Source of truth for the app version. CI bumps these at build time and
         // pushes the change back to dev (with a bypass GitHub App token) after a successful
         // deploy, so the committed baseline stays in sync for the next build.
-        versionCode = 318
-        versionName = "3.0.18"
+        versionCode = 319
+        versionName = "3.0.19"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
