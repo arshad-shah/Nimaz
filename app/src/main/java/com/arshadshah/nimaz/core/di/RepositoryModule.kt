@@ -80,6 +80,10 @@ import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonContentUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaLettersUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaCellUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkCellHeardUseCase
+import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
+import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCourseProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
@@ -354,11 +358,16 @@ object UseCaseModule {
     fun provideQaidaUseCases(
         repository: QaidaRepository
     ): QaidaUseCases {
+        val unlockNextLesson = UnlockNextLessonUseCase(repository)
         return QaidaUseCases(
             getLessons = GetQaidaLessonsUseCase(repository),
             getLessonContent = GetQaidaLessonContentUseCase(repository),
             getLetters = GetQaidaLettersUseCase(repository),
-            getCell = GetQaidaCellUseCase(repository)
+            getCell = GetQaidaCellUseCase(repository),
+            markCellHeard = MarkCellHeardUseCase(repository, unlockNextLesson),
+            unlockNextLesson = unlockNextLesson,
+            getLessonProgress = GetLessonProgressUseCase(repository),
+            getCourseProgress = GetCourseProgressUseCase(repository)
         )
     }
 }

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.repository
 import app.cash.turbine.test
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonWithContent
@@ -12,6 +13,7 @@ import com.arshadshah.nimaz.data.local.database.entity.QaidaLineWithCells
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.LineType
 import com.arshadshah.nimaz.domain.model.MakhrajArea
+import com.arshadshah.nimaz.domain.model.QaidaCellProgress
 import com.arshadshah.nimaz.domain.model.QaidaLessonProgress
 import com.arshadshah.nimaz.domain.model.TokenType
 import com.google.common.truth.Truth.assertThat
@@ -301,6 +303,57 @@ class QaidaRepositoryImplTest {
 
         assertThat(repository.getLessonProgress(1)).isNotNull()
         assertThat(repository.getLessonProgress(999)).isNull()
+    }
+
+    // ── Cell progress ───────────────────────────────────────────────
+
+    @Test
+    fun `getCellProgress maps entity to domain`() = runTest {
+        coEvery { dao.getCellProgress(1, 5) } returns QaidaCellProgressEntity(
+            lessonId = 1,
+            cellId = 5,
+            heardCount = 3,
+            isCompleted = true,
+            lastPracticedAt = now
+        )
+        coEvery { dao.getCellProgress(1, 999) } returns null
+
+        val progress = repository.getCellProgress(1, 5)
+        assertThat(progress).isNotNull()
+        assertThat(progress!!.heardCount).isEqualTo(3)
+        assertThat(progress.isCompleted).isTrue()
+        assertThat(repository.getCellProgress(1, 999)).isNull()
+    }
+
+    @Test
+    fun `getCellCountForLesson and getCompletedCellCount delegate to DAO`() = runTest {
+        coEvery { dao.countCellsForLesson(1) } returns 12
+        coEvery { dao.countCompletedCells(1) } returns 5
+
+        assertThat(repository.getCellCountForLesson(1)).isEqualTo(12)
+        assertThat(repository.getCompletedCellCount(1)).isEqualTo(5)
+    }
+
+    @Test
+    fun `upsertCellProgress converts domain to entity and calls DAO`() = runTest {
+        repository.upsertCellProgress(
+            QaidaCellProgress(
+                lessonId = 2,
+                cellId = 7,
+                heardCount = 1,
+                isCompleted = true,
+                lastPracticedAt = now
+            )
+        )
+
+        coVerify {
+            dao.upsertCellProgress(match<QaidaCellProgressEntity> { entity ->
+                entity.lessonId == 2 &&
+                    entity.cellId == 7 &&
+                    entity.heardCount == 1 &&
+                    entity.isCompleted
+            })
+        }
     }
 
     @Test
