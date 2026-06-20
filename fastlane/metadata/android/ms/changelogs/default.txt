@@ -1,6 +1,7 @@
-Yang baharu sejak 3.0.10:
+Apa yang baharu sejak 3.0.25:
 
-• Pembaca Qaida baharu: anak belajar membaca Al-Quran huruf demi huruf — ketik untuk mendengar, perjalanan pelajaran, kumpul bintang, dan tetapkan semula untuk anak lain.
-• Puasa kini dalam satu tab "Penjejak" pintar — Ramadan dan sunat bersama; Ganti kekal berasingan.
-• Kompas Kiblat dan paparan AR diperbaharui, serta reka bentuk semula Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
-• Bantuan & Perihal baharu yang boleh dicari dan Laman Utama diperbaharui.
+• Langit Hidup di Laman Utama — langit masa nyata yang mengikut perjalanan matahari dan memaparkan fasa bulan pada waktu malam.
+• Skrin Waktu Solat baharu — semak mana-mana hari, dengan kalendar bulanan dan penjejakan harian.
+• Eksport jadual solat bulanan anda sebagai PDF kemas (mod Ramadan, dengan acara Islam).
+• Pilih fon Arab al-Quran — Amiri atau Scheherazade New — dengan pratonton langsung.
+• Menu Lagi yang diperbaharui, serta pembaikan.

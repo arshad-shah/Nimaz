@@ -1,5 +1,23 @@
 # Release Notes
 
+## Since 3.0.25
+
+### Living Sky — prayer times that follow the day
+- The Home hero is now a living sky that moves in real time: the sun arcs from dawn to dusk through six prayer phases, the moon shows its true phase at night (Meeus calculation), and soft clouds drift across. The top bar blends seamlessly into the sky.
+- A dedicated Prayer Times screen: page day-by-day, jump around with a month calendar, and track each prayer per day.
+
+### Monthly timetable & PDF export
+- Redesigned Monthly view with a pinned header, Gregorian + Hijri dates, Islamic-event tags and expandable rows.
+- Export your monthly prayer timetable as a polished, branded PDF — Ramadan-aware and annotated with Islamic events.
+
+### Read the Qur'an your way
+- Choose your Arabic Qur'an font — Amiri or Scheherazade New — from Quran Settings, with a live preview. More typefaces can be added easily.
+
+### Other improvements
+- Refreshed More menu with new custom icons and a Duas entry, plus fixes and polish.
+
+---
+
 ## Since 3.0.10 (current 3.0.22)
 
 ### Qaida Reader — learn to read the Qur'an

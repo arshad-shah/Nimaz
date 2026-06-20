@@ -1,6 +1,7 @@
-3.0.10 sürümünden bu yana yenilikler:
+3.0.25'ten beri yenilikler:
 
-• Yeni Kaide okuyucu: çocuklar Kur'an'ı harf harf okumayı öğrenir — dokun-dinle, ders yolculuğu, yıldız topla ve başka bir çocuk için ilerlemeyi sıfırla.
-• Oruç tek bir akıllı "Takip" sekmesinde — Ramazan ve nafile oruçlar bir arada; Kaza ayrı kalır.
-• Yenilenen Kıble pusulası ve AR görünümü, ayrıca yeniden tasarlanan Allah'ın İsimleri, Peygamber'in İsimleri ﷺ ve Peygamberler.
-• Aranabilir yeni Yardım ve Hakkında, yenilenen Ana ekran ve iyileştirmeler.
+• Ana ekranda Canlı Gökyüzü — güneşin gün boyu hareketini izleyen ve gece ayın evresini gösteren gerçek zamanlı bir gökyüzü.
+• Yeni Namaz Vakitleri ekranı — aylık takvim ve güne özel takip ile istediğiniz günü görüntüleyin.
+• Aylık namaz vakti çizelgenizi şık bir PDF olarak dışa aktarın (Ramazan moduyla, İslami günlerle).
+• Kur'an Arapça yazı tipini seçin — Amiri veya Scheherazade New — canlı önizlemeyle.
+• Yenilenen Daha Fazla menüsü ve düzeltmeler.

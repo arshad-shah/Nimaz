@@ -1,6 +1,7 @@
-Nouveautés depuis la 3.0.10 :
+Nouveautés depuis la 3.0.25 :
 
-• Nouveau lecteur Qaida : les enfants apprennent à lire le Coran lettre par lettre — touchez pour entendre, parcours de leçons, étoiles, progression réinitialisable pour un autre enfant.
-• Le jeûne dans un onglet « Suivi » intelligent — Ramadan et jeûnes volontaires réunis ; Rattrapage séparé.
-• Boussole Qibla et vue RA améliorées, écrans repensés : Noms d'Allah, Noms du Prophète ﷺ et Prophètes.
-• Nouvelle Aide & À propos consultable et Accueil rafraîchi.
+• Ciel vivant sur l'accueil — un ciel en temps réel qui suit la course du soleil et montre la phase de la lune la nuit.
+• Nouvel écran des heures de prière — parcourez n'importe quel jour, avec calendrier mensuel et suivi quotidien.
+• Exportez votre planning mensuel de prières en PDF soigné (mode Ramadan, avec événements islamiques).
+• Choisissez la police arabe du Coran — Amiri ou Scheherazade New — avec aperçu en direct.
+• Menu Plus rafraîchi et corrections.
