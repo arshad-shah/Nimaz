@@ -85,7 +85,12 @@ class HijriDateWorker @AssistedInject constructor(
             val hijriDate = HijriDateCalculator.today()
             val today = LocalDate.now()
             val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
-            val gregorianDate = "${today.dayOfMonth} ${today.month.getDisplayName(TextStyle.SHORT, Locale.getDefault())}"
+            val gregorianDate = "${today.dayOfMonth} ${
+                today.month.getDisplayName(
+                    TextStyle.SHORT,
+                    Locale.getDefault()
+                )
+            }"
 
             val data = HijriDateData(
                 hijriDay = hijriDate.day,

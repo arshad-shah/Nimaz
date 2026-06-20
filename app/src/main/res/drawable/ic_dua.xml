@@ -1,0 +1,29 @@
+<!--
+  Dua (supplication) — open cupped hands raised with a crescent above.
+  Source: HugeIcons "dua" (free icon set), converted to a vector drawable.
+  Tint is applied by the calling Icon composable, so strokeColor is a placeholder.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24"
+    android:tint="?attr/colorControlNormal">
+    <path
+        android:pathData="M19,13l-0.658,-0.658a2,2 0 0 0 -2.752,-0.073l-2.597,2.337a3,3 0 0 0 -0.993,2.23V21h2.687a3,3 0 0 0 2.204,-0.965l4.313,-4.673A3,3 0 0 0 22,13.327V6h-1a2,2 0 0 0 -2,2zm0,0l-3,3"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M5,13l0.658,-0.658a2,2 0 0 1 2.752,-0.073l2.597,2.337a3,3 0 0 1 0.993,2.23V21H9.313a3,3 0 0 1 -2.204,-0.965l-4.313,-4.673A3,3 0 0 1 2,13.327V6h1a2,2 0 0 1 2,2zm0,0l3,3"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round" />
+    <path
+        android:pathData="M15,7.434A3.23,3.23 0 1 1 10.566,3M14.25,4a0.25,0.25 0 1 1 -0.5,0a0.25,0.25 0 0 1 0.5,0z"
+        android:strokeColor="#000000"
+        android:strokeWidth="1.5"
+        android:strokeLineCap="round" />
+</vector>

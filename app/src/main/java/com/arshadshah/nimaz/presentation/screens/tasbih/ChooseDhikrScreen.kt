@@ -30,22 +30,23 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -148,11 +149,15 @@ fun ChooseDhikrScreen(
             )
         }
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 4.dp),
                 placeholder = { Text(stringResource(R.string.tasbih_search_dhikr)) },
                 leadingIcon = { Icon(Icons.Default.Search, null) },
                 singleLine = true,
@@ -164,7 +169,10 @@ fun ChooseDhikrScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(tabs.size) { i ->
-                    CategoryTab(label = tabLabel(tabs[i]), selected = i == tabIndex, onClick = { tabIndex = i })
+                    CategoryTab(
+                        label = tabLabel(tabs[i]),
+                        selected = i == tabIndex,
+                        onClick = { tabIndex = i })
                 }
             }
 
@@ -200,7 +208,10 @@ fun ChooseDhikrScreen(
             }
 
             Surface(
-                modifier = Modifier.fillMaxWidth().padding(12.dp).clickable { onNavigateToAddPreset() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .clickable { onNavigateToAddPreset() },
                 shape = RoundedCornerShape(14.dp),
                 color = MaterialTheme.colorScheme.primaryContainer
             ) {
@@ -209,7 +220,11 @@ fun ChooseDhikrScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Add, null, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Icon(
+                        Icons.Default.Add,
+                        null,
+                        tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
                     Text(
                         text = stringResource(R.string.new_tasbih),
                         style = MaterialTheme.typography.titleSmall,
@@ -239,14 +254,25 @@ private fun SwipeableDhikrRow(
         return
     }
     // Custom presets: swipe end→start to delete (with confirmation).
+    // Pass the confirmValueChange lambda into the state so we can intercept
+    // attempts to dismiss (EndToStart) and trigger the confirmation dialog
+    // without automatically completing the dismiss.
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onRequestDelete()
-            }
-            false // never auto-dismiss; the confirm dialog drives the actual delete
-        }
+        initialValue = SwipeToDismissBoxValue.Settled,
+        positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     )
+
+    // Observe state changes and intercept an EndToStart target by showing the
+    // confirmation dialog. We immediately reset the state so the item isn't
+    // automatically dismissed; the dialog's confirm action will perform deletion.
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onRequestDelete()
+            // Reset the state back to settled so the row remains visible.
+            // reset() is a suspend function on the state.
+            dismissState.reset()
+        }
+    }
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,
@@ -274,11 +300,17 @@ private fun SwipeableDhikrRow(
 @Composable
 private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
     Surface(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp).clickable(onClick = onClick),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
         else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
+        border = if (selected) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        ) else null
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -337,13 +369,20 @@ private fun DhikrRow(
     onToggleFavorite: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
         shape = RoundedCornerShape(12.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surface,
-        border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
+        border = if (selected) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        ) else null
     ) {
         Row(
-            modifier = Modifier.padding(start = 12.dp, end = 6.dp).padding(vertical = 6.dp),
+            modifier = Modifier
+                .padding(start = 12.dp, end = 6.dp)
+                .padding(vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
@@ -378,7 +417,10 @@ private fun DhikrRow(
             }
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f), RoundedCornerShape(10.dp))
+                    .background(
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f),
+                        RoundedCornerShape(10.dp)
+                    )
                     .padding(horizontal = 9.dp, vertical = 4.dp)
             ) {
                 Text(

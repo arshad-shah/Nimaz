@@ -14,12 +14,12 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Standard top app bar for Nimaz app.
@@ -77,7 +77,7 @@ fun NimazBackTopAppBar(
     actions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     colors: androidx.compose.material3.TopAppBarColors =
-        androidx.compose.material3.TopAppBarDefaults.topAppBarColors()
+        TopAppBarDefaults.topAppBarColors()
 ) {
     NimazTopAppBar(
         title = title,

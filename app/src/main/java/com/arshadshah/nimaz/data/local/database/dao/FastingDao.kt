@@ -38,7 +38,11 @@ interface FastingDao {
     suspend fun updateFastRecord(record: FastRecordEntity)
 
     @Query("UPDATE fast_records SET status = :status, updatedAt = :timestamp WHERE date = :date")
-    suspend fun updateFastStatus(date: Long, status: String, timestamp: Long = System.currentTimeMillis())
+    suspend fun updateFastStatus(
+        date: Long,
+        status: String,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
     // Makeup fast operations
     @Query("SELECT * FROM makeup_fasts WHERE status = 'pending' ORDER BY originalDate ASC")
@@ -60,10 +64,18 @@ interface FastingDao {
     suspend fun updateMakeupFast(makeupFast: MakeupFastEntity)
 
     @Query("UPDATE makeup_fasts SET status = 'completed', completedDate = :completedDate, updatedAt = :timestamp WHERE id = :id")
-    suspend fun markMakeupFastCompleted(id: Long, completedDate: Long, timestamp: Long = System.currentTimeMillis())
+    suspend fun markMakeupFastCompleted(
+        id: Long,
+        completedDate: Long,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
     @Query("UPDATE makeup_fasts SET status = 'fidya_paid', fidyaAmount = :amount, updatedAt = :timestamp WHERE id = :id")
-    suspend fun markFidyaPaid(id: Long, amount: Double, timestamp: Long = System.currentTimeMillis())
+    suspend fun markFidyaPaid(
+        id: Long,
+        amount: Double,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
     @Query("DELETE FROM fast_records WHERE date = :date")
     suspend fun deleteFastRecordByDate(date: Long)
@@ -85,12 +97,14 @@ interface FastingDao {
     suspend fun getTotalFidyaPaid(): Double?
 
     // Streak calculation - get consecutive fasted days ending today or yesterday
-    @Query("""
+    @Query(
+        """
         SELECT * FROM fast_records
         WHERE status = 'fasted'
         AND date <= :todayTimestamp
         ORDER BY date DESC
-    """)
+    """
+    )
     suspend fun getRecentFastedRecords(todayTimestamp: Long): List<FastRecordEntity>
 
     @Query("SELECT * FROM fast_records ORDER BY date ASC")

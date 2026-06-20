@@ -5,27 +5,20 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -35,16 +28,16 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -56,6 +49,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.MushafSurahHeader
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val MushafFrameColor = Color(0xFF0F766E)
@@ -79,6 +73,7 @@ fun MushafPage(
     surahMap: Map<Int, Surah>,
     modifier: Modifier = Modifier,
     arabicFontSize: Float = 28f,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
     highlightedAyahId: Int? = null,
     favoriteAyahIds: Set<Int> = emptySet(),
     showTajweed: Boolean = false,
@@ -181,6 +176,7 @@ fun MushafPage(
                             highlightedAyahId = highlightedAyahId,
                             selectedAyahId = tooltipAyah?.id,
                             arabicFontSize = arabicFontSize,
+                            arabicFontFamily = arabicFontFamily,
                             showTajweed = showTajweed,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
@@ -279,7 +275,9 @@ private fun MushafFrame(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             MushafOrnamentalLine()
-            Box(modifier = Modifier.weight(1f).fillMaxWidth()) {
+            Box(modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()) {
                 content()
             }
             MushafOrnamentalLine()
@@ -301,7 +299,9 @@ private fun MushafFrame(
 
 @Composable
 private fun MushafOrnamentalLine(modifier: Modifier = Modifier) {
-    Column(modifier = modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)) {
+    Column(modifier = modifier
+        .fillMaxWidth()
+        .padding(horizontal = 16.dp, vertical = 8.dp)) {
         HorizontalDivider(thickness = 1.dp, color = MushafGoldAccent.copy(alpha = 0.6f))
         Spacer(modifier = Modifier.height(2.dp))
         HorizontalDivider(thickness = 2.dp, color = MushafFrameColor)
@@ -313,19 +313,27 @@ private fun MushafOrnamentalLine(modifier: Modifier = Modifier) {
 private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     val textToCopy = buildString {
         appendLine(ayah.textArabic)
-        if (!ayah.translation.isNullOrBlank()) { appendLine(); appendLine(ayah.translation) }
+        if (!ayah.translation.isNullOrBlank()) {
+            appendLine(); appendLine(ayah.translation)
+        }
         appendLine()
         append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
     }
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("Quran Ayah", textToCopy))
-    Toast.makeText(context, context.getString(R.string.ayah_copied_to_clipboard), Toast.LENGTH_SHORT).show()
+    Toast.makeText(
+        context,
+        context.getString(R.string.ayah_copied_to_clipboard),
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 private fun shareAyah(context: Context, ayah: Ayah) {
     val textToShare = buildString {
         appendLine(ayah.textArabic)
-        if (!ayah.translation.isNullOrBlank()) { appendLine(); appendLine(ayah.translation) }
+        if (!ayah.translation.isNullOrBlank()) {
+            appendLine(); appendLine(ayah.translation)
+        }
         appendLine()
         append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
     }

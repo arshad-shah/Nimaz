@@ -2,8 +2,6 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.arshadshah.nimaz.domain.model.RevelationType
-import com.arshadshah.nimaz.domain.model.Surah
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -15,56 +13,6 @@ class QuranSurahInfoSectionsTest {
 
     @get:Rule
     val composeRule = createComponentComposeRule()
-
-    private fun surah(
-        revelationType: RevelationType = RevelationType.MECCAN,
-        ayahCount: Int = 7,
-        juzStart: Int = 1,
-        orderInMushaf: Int = 5
-    ) = Surah(
-        number = 1,
-        nameArabic = "الفاتحة",
-        nameEnglish = "Al-Fatihah",
-        nameTransliteration = "The Opening",
-        revelationType = revelationType,
-        ayahCount = ayahCount,
-        juzStart = juzStart,
-        orderInMushaf = orderInMushaf,
-        startPage = 1
-    )
-
-    // ── DetailGrid ──────────────────────────────────────────────────────────
-
-    @Test
-    fun `DetailGrid shows Makkah for a Meccan surah`() {
-        composeRule.setThemedContent {
-            DetailGrid(surah = surah(revelationType = RevelationType.MECCAN))
-        }
-
-        composeRule.onNodeWithText("Revelation").assertExists()
-        composeRule.onNodeWithText("Makkah").assertExists()
-    }
-
-    @Test
-    fun `DetailGrid shows Madinah for a Medinan surah`() {
-        composeRule.setThemedContent {
-            DetailGrid(surah = surah(revelationType = RevelationType.MEDINAN))
-        }
-
-        composeRule.onNodeWithText("Madinah").assertExists()
-    }
-
-    @Test
-    fun `DetailGrid shows juz order and verses values`() {
-        composeRule.setThemedContent {
-            DetailGrid(surah = surah(ayahCount = 7, juzStart = 1, orderInMushaf = 5))
-        }
-
-        composeRule.onNodeWithText("Juz").assertExists()
-        composeRule.onNodeWithText("1").assertExists()
-        composeRule.onNodeWithText("5 in Mushaf").assertExists()
-        composeRule.onNodeWithText("7 ayahs").assertExists()
-    }
 
     // ── ThemesList ──────────────────────────────────────────────────────────
 

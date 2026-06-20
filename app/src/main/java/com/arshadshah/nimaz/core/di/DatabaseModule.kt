@@ -85,7 +85,8 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideIslamicEventDao(database: NimazDatabase): IslamicEventDao = database.islamicEventDao()
+    fun provideIslamicEventDao(database: NimazDatabase): IslamicEventDao =
+        database.islamicEventDao()
 
     @Provides
     @Singleton

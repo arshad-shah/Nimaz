@@ -28,12 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
-import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -43,16 +43,27 @@ private data class AccuracyVisuals(val label: String, val color: Color, val hint
 @Composable
 private fun accuracyVisuals(accuracy: CompassAccuracy): AccuracyVisuals = when (accuracy) {
     CompassAccuracy.HIGH -> AccuracyVisuals(
-        stringResource(R.string.accuracy_high), QiblaGreen, stringResource(R.string.accuracy_high_hint)
+        stringResource(R.string.accuracy_high),
+        QiblaGreen,
+        stringResource(R.string.accuracy_high_hint)
     )
+
     CompassAccuracy.MEDIUM -> AccuracyVisuals(
-        stringResource(R.string.accuracy_medium), Color(0xFFFACC15), stringResource(R.string.accuracy_medium_hint)
+        stringResource(R.string.accuracy_medium),
+        Color(0xFFFACC15),
+        stringResource(R.string.accuracy_medium_hint)
     )
+
     CompassAccuracy.LOW -> AccuracyVisuals(
-        stringResource(R.string.accuracy_low), MaterialTheme.colorScheme.error, stringResource(R.string.accuracy_low_hint)
+        stringResource(R.string.accuracy_low),
+        MaterialTheme.colorScheme.error,
+        stringResource(R.string.accuracy_low_hint)
     )
+
     CompassAccuracy.UNRELIABLE -> AccuracyVisuals(
-        stringResource(R.string.accuracy_unreliable), MaterialTheme.colorScheme.error, stringResource(R.string.accuracy_unreliable_hint)
+        stringResource(R.string.accuracy_unreliable),
+        MaterialTheme.colorScheme.error,
+        stringResource(R.string.accuracy_unreliable_hint)
     )
 }
 
@@ -216,7 +227,11 @@ fun QiblaAccuracyPill(
 @Composable
 private fun AccuracyBarHighPreview() {
     NimazTheme {
-        QiblaAccuracyBar(accuracy = CompassAccuracy.HIGH, onCalibrate = {}, modifier = Modifier.padding(16.dp))
+        QiblaAccuracyBar(
+            accuracy = CompassAccuracy.HIGH,
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
@@ -224,7 +239,11 @@ private fun AccuracyBarHighPreview() {
 @Composable
 private fun AccuracyBarLowPreview() {
     NimazTheme {
-        QiblaAccuracyBar(accuracy = CompassAccuracy.LOW, onCalibrate = {}, modifier = Modifier.padding(16.dp))
+        QiblaAccuracyBar(
+            accuracy = CompassAccuracy.LOW,
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 
@@ -232,7 +251,11 @@ private fun AccuracyBarLowPreview() {
 @Composable
 private fun AccuracyBarUnreliablePreview() {
     NimazTheme {
-        QiblaAccuracyBar(accuracy = CompassAccuracy.UNRELIABLE, onCalibrate = {}, modifier = Modifier.padding(16.dp))
+        QiblaAccuracyBar(
+            accuracy = CompassAccuracy.UNRELIABLE,
+            onCalibrate = {},
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }
 

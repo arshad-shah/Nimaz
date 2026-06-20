@@ -73,7 +73,7 @@ fun HadithOfTheDayCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier.wrapContentHeight())
-                .padding(start = 16.dp, end= 16.dp, top = 12.dp, bottom = 4.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(

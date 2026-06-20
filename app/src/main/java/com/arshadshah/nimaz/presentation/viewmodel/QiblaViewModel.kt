@@ -118,6 +118,7 @@ class QiblaViewModel @Inject constructor(
                     gravity[2] = alpha * gravity[2] + (1 - alpha) * event.values[2]
                     hasGravity = true
                 }
+
                 Sensor.TYPE_MAGNETIC_FIELD -> {
                     geomagnetic[0] = alpha * geomagnetic[0] + (1 - alpha) * event.values[0]
                     geomagnetic[1] = alpha * geomagnetic[1] + (1 - alpha) * event.values[1]
@@ -129,10 +130,17 @@ class QiblaViewModel @Inject constructor(
             if (hasGravity && hasMagnetic) {
                 val rotationMatrix = FloatArray(9)
                 val inclinationMatrix = FloatArray(9)
-                if (SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, gravity, geomagnetic)) {
+                if (SensorManager.getRotationMatrix(
+                        rotationMatrix,
+                        inclinationMatrix,
+                        gravity,
+                        geomagnetic
+                    )
+                ) {
                     val orientation = FloatArray(3)
                     SensorManager.getOrientation(rotationMatrix, orientation)
-                    val azimuthDeg = ((Math.toDegrees(orientation[0].toDouble()).toFloat() + 360) % 360)
+                    val azimuthDeg =
+                        ((Math.toDegrees(orientation[0].toDouble()).toFloat() + 360) % 360)
                     val pitchDeg = Math.toDegrees(orientation[1].toDouble()).toFloat()
                     val rollDeg = Math.toDegrees(orientation[2].toDouble()).toFloat()
 
@@ -188,7 +196,11 @@ class QiblaViewModel @Inject constructor(
     fun onEvent(event: QiblaEvent) {
         when (event) {
             QiblaEvent.StartCompass -> AppAnalytics.logFeatureUsed("qibla", "start_compass")
-            is QiblaEvent.SetArMode -> AppAnalytics.logFeatureUsed("qibla", if (event.enabled) "ar_on" else "ar_off")
+            is QiblaEvent.SetArMode -> AppAnalytics.logFeatureUsed(
+                "qibla",
+                if (event.enabled) "ar_on" else "ar_off"
+            )
+
             else -> {}
         }
         when (event) {
@@ -198,15 +210,23 @@ class QiblaViewModel @Inject constructor(
             is QiblaEvent.SetVibrationEnabled -> _settingsState.update { it.copy(vibrationEnabled = event.enabled) }
             is QiblaEvent.SetSoundEnabled -> _settingsState.update { it.copy(soundEnabled = event.enabled) }
             is QiblaEvent.SetQiblaThreshold -> _settingsState.update { it.copy(qiblaThreshold = event.threshold) }
-            QiblaEvent.RefreshLocation -> { /* Location is observed reactively */ }
+            QiblaEvent.RefreshLocation -> { /* Location is observed reactively */
+            }
+
             QiblaEvent.ShowLocationPicker -> _qiblaState.update { it.copy(showLocationPicker = true) }
             QiblaEvent.HideLocationPicker -> _qiblaState.update { it.copy(showLocationPicker = false) }
             QiblaEvent.ShowCalibrationDialog -> _qiblaState.update { it.copy(showCalibrationDialog = true) }
-            QiblaEvent.DismissCalibrationDialog -> _qiblaState.update { it.copy(showCalibrationDialog = false) }
+            QiblaEvent.DismissCalibrationDialog -> _qiblaState.update {
+                it.copy(
+                    showCalibrationDialog = false
+                )
+            }
+
             QiblaEvent.StartCompass -> {
                 resetSensorState()
                 registerSensors()
             }
+
             QiblaEvent.StopCompass -> unregisterSensors()
             is QiblaEvent.SetArMode -> _qiblaState.update { it.copy(isArMode = event.enabled) }
         }
@@ -301,7 +321,12 @@ class QiblaViewModel @Inject constructor(
         }
     }
 
-    private fun updateCompassData(azimuth: Float, pitch: Float, roll: Float, unwrappedAzimuth: Float) {
+    private fun updateCompassData(
+        azimuth: Float,
+        pitch: Float,
+        roll: Float,
+        unwrappedAzimuth: Float
+    ) {
         val normalizedAzimuth = (azimuth + 360) % 360
 
         val compassData = CompassData(
@@ -350,7 +375,8 @@ class QiblaViewModel @Inject constructor(
     }
 
     private fun updateAccuracy(accuracy: CompassAccuracy) {
-        val needsCalibration = accuracy == CompassAccuracy.LOW || accuracy == CompassAccuracy.UNRELIABLE
+        val needsCalibration =
+            accuracy == CompassAccuracy.LOW || accuracy == CompassAccuracy.UNRELIABLE
         _qiblaState.update {
             it.copy(
                 compassData = it.compassData.copy(accuracy = accuracy),

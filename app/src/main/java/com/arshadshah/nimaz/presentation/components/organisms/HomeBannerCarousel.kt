@@ -109,7 +109,12 @@ private fun BannerPill(banner: HomeBannerItem) {
             )
             // Tighter trailing inset when an action chip sits at the end; roomier
             // when the pill ends in text so it doesn't look cramped.
-            .padding(start = 8.dp, end = if (hasTrailing) 8.dp else 16.dp, top = 8.dp, bottom = 8.dp),
+            .padding(
+                start = 8.dp,
+                end = if (hasTrailing) 8.dp else 16.dp,
+                top = 8.dp,
+                bottom = 8.dp
+            ),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Contained icon chip — same 12dp-radius tinted chip as the Today cards.
@@ -159,6 +164,7 @@ private fun BannerPill(banner: HomeBannerItem) {
                     color = colors.icon
                 )
             }
+
             banner.actionLabel != null -> {
                 Spacer(modifier = Modifier.width(10.dp))
                 Box(

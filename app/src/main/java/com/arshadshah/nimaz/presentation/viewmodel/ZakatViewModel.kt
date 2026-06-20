@@ -120,14 +120,17 @@ class ZakatViewModel @Inject constructor(
                 _calculatorState.update { it.copy(nisabType = event.nisabType) }
                 recalculate()
             }
+
             is ZakatEvent.UpdateGoldPrice -> {
                 _calculatorState.update { it.copy(goldPricePerGram = event.pricePerGram) }
                 recalculate()
             }
+
             is ZakatEvent.UpdateSilverPrice -> {
                 _calculatorState.update { it.copy(silverPricePerGram = event.pricePerGram) }
                 recalculate()
             }
+
             is ZakatEvent.SetCurrency -> _calculatorState.update { it.copy(currency = event.currency) }
             ZakatEvent.Calculate -> calculate()
             ZakatEvent.ClearAll -> clearAll()
@@ -272,7 +275,11 @@ class ZakatViewModel @Inject constructor(
                         totalLiabilities = entity.totalLiabilities,
                         netWorth = entity.netWorth,
                         zakatDue = entity.zakatDue,
-                        nisabType = try { NisabType.valueOf(entity.nisabType) } catch (_: Exception) { NisabType.GOLD },
+                        nisabType = try {
+                            NisabType.valueOf(entity.nisabType)
+                        } catch (_: Exception) {
+                            NisabType.GOLD
+                        },
                         nisabValue = entity.nisabValue,
                         isPaid = entity.isPaid,
                         paidAt = entity.paidAt,

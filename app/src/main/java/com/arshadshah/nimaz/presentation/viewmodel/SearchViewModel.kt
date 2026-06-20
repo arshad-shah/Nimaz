@@ -163,8 +163,9 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             quranRepository.searchQuran(query, "sahih_international").collect { results ->
                 _searchState.update { state ->
-                    val unified = state.allResults.filterNot { it is UnifiedSearchResult.QuranResult } +
-                            results.map { UnifiedSearchResult.QuranResult(it) }
+                    val unified =
+                        state.allResults.filterNot { it is UnifiedSearchResult.QuranResult } +
+                                results.map { UnifiedSearchResult.QuranResult(it) }
                     state.copy(
                         quranResults = results,
                         allResults = unified,
@@ -180,8 +181,9 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             quranRepository.searchSurahs(query).collect { surahs ->
                 _searchState.update { state ->
-                    val unified = state.allResults.filterNot { it is UnifiedSearchResult.SurahResult } +
-                            surahs.map { UnifiedSearchResult.SurahResult(it) }
+                    val unified =
+                        state.allResults.filterNot { it is UnifiedSearchResult.SurahResult } +
+                                surahs.map { UnifiedSearchResult.SurahResult(it) }
                     state.copy(
                         surahResults = surahs,
                         allResults = unified,
@@ -197,8 +199,9 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             hadithRepository.searchHadiths(query).collect { results ->
                 _searchState.update { state ->
-                    val unified = state.allResults.filterNot { it is UnifiedSearchResult.HadithResult } +
-                            results.map { UnifiedSearchResult.HadithResult(it) }
+                    val unified =
+                        state.allResults.filterNot { it is UnifiedSearchResult.HadithResult } +
+                                results.map { UnifiedSearchResult.HadithResult(it) }
                     state.copy(
                         hadithResults = results,
                         allResults = unified,
@@ -214,8 +217,9 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             duaRepository.searchDuas(query).collect { results ->
                 _searchState.update { state ->
-                    val unified = state.allResults.filterNot { it is UnifiedSearchResult.DuaResult } +
-                            results.map { UnifiedSearchResult.DuaResult(it) }
+                    val unified =
+                        state.allResults.filterNot { it is UnifiedSearchResult.DuaResult } +
+                                results.map { UnifiedSearchResult.DuaResult(it) }
                     state.copy(
                         duaResults = results,
                         allResults = unified,
@@ -304,7 +308,10 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun applyFilter(results: List<UnifiedSearchResult>, filter: SearchFilter): List<UnifiedSearchResult> {
+    private fun applyFilter(
+        results: List<UnifiedSearchResult>,
+        filter: SearchFilter
+    ): List<UnifiedSearchResult> {
         return when (filter) {
             SearchFilter.ALL -> results
             SearchFilter.QURAN -> results.filter { it is UnifiedSearchResult.QuranResult || it is UnifiedSearchResult.SurahResult }

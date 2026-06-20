@@ -47,17 +47,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 data class ReciterInfo(
     val id: String,
@@ -302,7 +302,10 @@ fun SelectReciterScreen(
                                         text = reciter.style,
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                                        modifier = Modifier.padding(
+                                            horizontal = 8.dp,
+                                            vertical = 3.dp
+                                        )
                                     )
                                 }
                                 Text(
@@ -323,11 +326,13 @@ fun SelectReciterScreen(
                                     // Start preview: play Al-Fatiha verse 1 with this reciter
                                     previewingReciterId = reciter.id
                                     quranViewModel.audioManager.setReciter(reciter.id)
-                                    quranViewModel.onEvent(QuranEvent.PlayAyahAudio(
-                                        ayahGlobalId = 1,
-                                        surahNumber = 1,
-                                        ayahNumber = 1
-                                    ))
+                                    quranViewModel.onEvent(
+                                        QuranEvent.PlayAyahAudio(
+                                            ayahGlobalId = 1,
+                                            surahNumber = 1,
+                                            ayahNumber = 1
+                                        )
+                                    )
                                 }
                             },
                             enabled = !(previewingReciterId != null && previewingReciterId != reciter.id && audioState.isDownloading)
@@ -340,6 +345,7 @@ fun SelectReciterScreen(
                                         color = MaterialTheme.colorScheme.primary
                                     )
                                 }
+
                                 previewingReciterId == reciter.id && audioState.isPlaying -> {
                                     Icon(
                                         imageVector = Icons.Default.Stop,
@@ -347,6 +353,7 @@ fun SelectReciterScreen(
                                         tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
+
                                 else -> {
                                     Icon(
                                         imageVector = Icons.Default.PlayArrow,

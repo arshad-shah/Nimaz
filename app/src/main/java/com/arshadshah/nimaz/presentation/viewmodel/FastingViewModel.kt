@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.ExemptionReason
@@ -13,13 +14,12 @@ import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.domain.repository.FastingRepository
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
@@ -118,6 +118,7 @@ sealed interface FastingEvent {
         val exemptionReason: ExemptionReason?,
         val note: String
     ) : FastingEvent
+
     data class DeleteFastRecord(val date: LocalDate) : FastingEvent
     data class UpdateMakeupFast(val makeupFast: MakeupFast) : FastingEvent
     data class LogRecommendedFast(val date: LocalDate, val fastType: FastType) : FastingEvent
@@ -200,8 +201,14 @@ class FastingViewModel @Inject constructor(
                 val iftarTimeStr = formatTime(maghribLocalTime.hour, maghribLocalTime.minute)
 
                 val now = LocalDateTime.now()
-                val fajrJavaTime = LocalDateTime.of(now.toLocalDate(), java.time.LocalTime.of(fajrLocalTime.hour, fajrLocalTime.minute))
-                val maghribJavaTime = LocalDateTime.of(now.toLocalDate(), java.time.LocalTime.of(maghribLocalTime.hour, maghribLocalTime.minute))
+                val fajrJavaTime = LocalDateTime.of(
+                    now.toLocalDate(),
+                    java.time.LocalTime.of(fajrLocalTime.hour, fajrLocalTime.minute)
+                )
+                val maghribJavaTime = LocalDateTime.of(
+                    now.toLocalDate(),
+                    java.time.LocalTime.of(maghribLocalTime.hour, maghribLocalTime.minute)
+                )
 
                 val (countdown, isSuhoor) = calculateCountdown(now, fajrJavaTime, maghribJavaTime)
 
@@ -241,11 +248,13 @@ class FastingViewModel @Inject constructor(
                 val duration = Duration.between(now, fajr)
                 formatDuration(duration) to true
             }
+
             now.isBefore(maghrib) -> {
                 // After Fajr, before Maghrib - count down to Iftar
                 val duration = Duration.between(now, maghrib)
                 formatDuration(duration) to false
             }
+
             else -> {
                 // After Maghrib - fasting period completed
                 "Completed" to false
@@ -265,7 +274,11 @@ class FastingViewModel @Inject constructor(
             is FastingEvent.CompleteFast -> AppAnalytics.logFastTracked("complete")
             is FastingEvent.BreakFast -> AppAnalytics.logFastTracked("break")
             is FastingEvent.MissFast -> AppAnalytics.logFastTracked("miss")
-            is FastingEvent.LogRecommendedFast -> AppAnalytics.logFastTracked("recommended", event.fastType.name)
+            is FastingEvent.LogRecommendedFast -> AppAnalytics.logFastTracked(
+                "recommended",
+                event.fastType.name
+            )
+
             is FastingEvent.PayFidya -> AppAnalytics.logFeatureUsed("fasting", "pay_fidya")
             is FastingEvent.AddMakeupFast -> AppAnalytics.logFeatureUsed("fasting", "add_makeup")
             else -> {}
@@ -289,7 +302,14 @@ class FastingViewModel @Inject constructor(
             FastingEvent.ToggleTodayFast -> toggleTodayFast()
             is FastingEvent.OpenFastSheet -> openFastSheet(event.date)
             FastingEvent.DismissFastSheet -> _sheetState.update { it.copy(isVisible = false) }
-            is FastingEvent.SaveFastForDate -> saveFastForDate(event.date, event.status, event.fastType, event.exemptionReason, event.note)
+            is FastingEvent.SaveFastForDate -> saveFastForDate(
+                event.date,
+                event.status,
+                event.fastType,
+                event.exemptionReason,
+                event.note
+            )
+
             is FastingEvent.DeleteFastRecord -> deleteFastRecord(event.date)
             is FastingEvent.UpdateMakeupFast -> updateMakeupFastRecord(event.makeupFast)
             is FastingEvent.LogRecommendedFast -> startFast(event.date, event.fastType)
@@ -413,13 +433,20 @@ class FastingViewModel @Inject constructor(
                         loadStats()
                     }
                 }
+
                 else -> {}
             }
         }
     }
 
     private fun selectMonth(month: Int, year: Int) {
-        _calendarState.update { it.copy(selectedMonth = month, selectedYear = year, isLoading = true) }
+        _calendarState.update {
+            it.copy(
+                selectedMonth = month,
+                selectedYear = year,
+                isLoading = true
+            )
+        }
         loadCalendarMonth()
     }
 
@@ -456,7 +483,8 @@ class FastingViewModel @Inject constructor(
                 val ramadanEnd = HijriDateCalculator.getLastDayOfRamadan(hijriToday.year)
 
                 val startEpoch = ramadanStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-                val endEpoch = ramadanEnd.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                val endEpoch =
+                    ramadanEnd.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
 
                 fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                     val fasted = records.count { it.status == FastStatus.FASTED }
@@ -490,7 +518,12 @@ class FastingViewModel @Inject constructor(
         makeupAllJob?.cancel()
         makeupPendingJob = viewModelScope.launch {
             fastingRepository.getPendingMakeupFasts().collect { pending ->
-                _makeupState.update { it.copy(pendingMakeupFasts = pending, pendingCount = pending.size) }
+                _makeupState.update {
+                    it.copy(
+                        pendingMakeupFasts = pending,
+                        pendingCount = pending.size
+                    )
+                }
             }
         }
         makeupAllJob = viewModelScope.launch {

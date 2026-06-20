@@ -60,7 +60,8 @@ class QaidaRepositoryImpl @Inject constructor(
     }
 
     override fun getCellsForLesson(lessonId: Int): Flow<List<QaidaCell>> {
-        return qaidaDao.getCellsForLesson(lessonId).map { entities -> entities.map { it.toDomain() } }
+        return qaidaDao.getCellsForLesson(lessonId)
+            .map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun getCellCountForLesson(lessonId: Int): Int {
@@ -90,7 +91,8 @@ class QaidaRepositoryImpl @Inject constructor(
     }
 
     override fun observeCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgress>> {
-        return qaidaDao.getCellProgressForLesson(lessonId).map { entities -> entities.map { it.toDomain() } }
+        return qaidaDao.getCellProgressForLesson(lessonId)
+            .map { entities -> entities.map { it.toDomain() } }
     }
 
     override suspend fun getCompletedCellCount(lessonId: Int): Int {

@@ -81,7 +81,10 @@ internal fun KhatamProgressCard(
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
                     ) {
                         Text(
-                            text = stringResource(R.string.quran_home_completed_count, completedCount),
+                            text = stringResource(
+                                R.string.quran_home_completed_count,
+                                completedCount
+                            ),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -151,7 +154,10 @@ internal fun KhatamProgressCard(
                 Spacer(modifier = Modifier.height(6.dp))
 
                 Text(
-                    text = stringResource(R.string.quran_home_percent_complete, (progressFraction * 100).toInt()),
+                    text = stringResource(
+                        R.string.quran_home_percent_complete,
+                        (progressFraction * 100).toInt()
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.align(Alignment.End)

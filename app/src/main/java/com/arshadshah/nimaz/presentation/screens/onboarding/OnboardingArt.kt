@@ -12,7 +12,6 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -113,8 +112,15 @@ fun OnboardingEmblem(
             }
             close()
         }
+
         fun line(ax: Float, ay: Float, bx: Float, by: Float, w: Float, color: Color = IllumGold) =
-            drawLine(color, p(ax, ay), p(bx, by), strokeWidth = sw(w), cap = androidx.compose.ui.graphics.StrokeCap.Round)
+            drawLine(
+                color,
+                p(ax, ay),
+                p(bx, by),
+                strokeWidth = sw(w),
+                cap = androidx.compose.ui.graphics.StrokeCap.Round
+            )
 
         if (kind == OnboardingEmblem.SHIELD) {
             // Shield outline
@@ -123,8 +129,10 @@ fun OnboardingEmblem(
                     val a = p(58f, 18f); moveTo(a.x, a.y)
                     p(90f, 30f).let { lineTo(it.x, it.y) }
                     p(90f, 58f).let { lineTo(it.x, it.y) }
-                    val q1 = p(90f, 90f); val e1 = p(58f, 104f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
-                    val q2 = p(26f, 90f); val e2 = p(26f, 58f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
+                    val q1 = p(90f, 90f)
+                    val e1 = p(58f, 104f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
+                    val q2 = p(26f, 90f)
+                    val e2 = p(26f, 58f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
                     p(26f, 30f).let { lineTo(it.x, it.y) }
                     close()
                 },
@@ -132,7 +140,16 @@ fun OnboardingEmblem(
             )
             // Khatam star: octagon + square
             drawPath(
-                poly(58f to 44f, 69f to 49f, 74f to 60f, 69f to 71f, 58f to 76f, 47f to 71f, 42f to 60f, 47f to 49f),
+                poly(
+                    58f to 44f,
+                    69f to 49f,
+                    74f to 60f,
+                    69f to 71f,
+                    58f to 76f,
+                    47f to 71f,
+                    42f to 60f,
+                    47f to 49f
+                ),
                 color = IllumGold, style = Stroke(width = sw(1.6f))
             )
             drawRect(
@@ -148,8 +165,10 @@ fun OnboardingEmblem(
         val nichePath = Path().apply {
             val a = p(22f, 150f); moveTo(a.x, a.y)
             p(22f, 62f).let { lineTo(it.x, it.y) }
-            val q1 = p(22f, 22f); val e1 = p(58f, 22f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
-            val q2 = p(94f, 22f); val e2 = p(94f, 62f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
+            val q1 = p(22f, 22f)
+            val e1 = p(58f, 22f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
+            val q2 = p(94f, 22f)
+            val e2 = p(94f, 62f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
             p(94f, 150f).let { lineTo(it.x, it.y) }
             close()
         }
@@ -158,8 +177,10 @@ fun OnboardingEmblem(
         val archPath = Path().apply {
             val a = p(12f, 150f); moveTo(a.x, a.y)
             p(12f, 60f).let { lineTo(it.x, it.y) }
-            val q1 = p(12f, 12f); val e1 = p(58f, 12f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
-            val q2 = p(104f, 12f); val e2 = p(104f, 60f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
+            val q1 = p(12f, 12f)
+            val e1 = p(58f, 12f); quadraticTo(q1.x, q1.y, e1.x, e1.y)
+            val q2 = p(104f, 12f)
+            val e2 = p(104f, 60f); quadraticTo(q2.x, q2.y, e2.x, e2.y)
             p(104f, 150f).let { lineTo(it.x, it.y) }
         }
         drawPath(
@@ -170,18 +191,57 @@ fun OnboardingEmblem(
 
         when (kind) {
             OnboardingEmblem.MOSQUE -> {
-                drawCircle(IllumGold, radius = sw(15f), center = p(58f, 74f))                 // dome
-                drawRect(IllumGold, topLeft = p(44f, 74f), size = Size(sw(30f), sw(34f)))      // body
-                drawPath(poly(58f to 52f, 62f to 62f, 54f to 62f), color = IllumGold)          // finial
-                drawRoundRect(IllumGold, topLeft = p(30f, 64f), size = Size(sw(6f), sw(44f)), cornerRadius = CornerRadius(sw(3f))) // minaret L
-                drawRoundRect(IllumGold, topLeft = p(80f, 64f), size = Size(sw(6f), sw(44f)), cornerRadius = CornerRadius(sw(3f))) // minaret R
+                drawCircle(
+                    IllumGold,
+                    radius = sw(15f),
+                    center = p(58f, 74f)
+                )                 // dome
+                drawRect(
+                    IllumGold,
+                    topLeft = p(44f, 74f),
+                    size = Size(sw(30f), sw(34f))
+                )      // body
+                drawPath(
+                    poly(58f to 52f, 62f to 62f, 54f to 62f),
+                    color = IllumGold
+                )          // finial
+                drawRoundRect(
+                    IllumGold,
+                    topLeft = p(30f, 64f),
+                    size = Size(sw(6f), sw(44f)),
+                    cornerRadius = CornerRadius(sw(3f))
+                ) // minaret L
+                drawRoundRect(
+                    IllumGold,
+                    topLeft = p(80f, 64f),
+                    size = Size(sw(6f), sw(44f)),
+                    cornerRadius = CornerRadius(sw(3f))
+                ) // minaret R
                 drawCircle(IllumGold, radius = sw(4f), center = p(33f, 63f))
                 drawCircle(IllumGold, radius = sw(4f), center = p(83f, 63f))
-                drawRoundRect(IllumNiche, topLeft = p(51f, 92f), size = Size(sw(14f), sw(16f)), cornerRadius = CornerRadius(sw(7f))) // door
+                drawRoundRect(
+                    IllumNiche,
+                    topLeft = p(51f, 92f),
+                    size = Size(sw(14f), sw(16f)),
+                    cornerRadius = CornerRadius(sw(7f))
+                ) // door
             }
+
             OnboardingEmblem.PRAYER_TIMES -> {
-                line(30f, 96f, 86f, 96f, 2f)                                                   // horizon
-                line(58f, 58f, 58f, 48f, 2f)                                                   // rays
+                line(
+                    30f,
+                    96f,
+                    86f,
+                    96f,
+                    2f
+                )                                                   // horizon
+                line(
+                    58f,
+                    58f,
+                    58f,
+                    48f,
+                    2f
+                )                                                   // rays
                 line(44f, 64f, 38f, 56f, 2f)
                 line(72f, 64f, 78f, 56f, 2f)
                 line(35f, 80f, 26f, 78f, 2f)
@@ -189,25 +249,55 @@ fun OnboardingEmblem(
                 drawPath(                                                                      // rising sun
                     Path().apply {
                         val a = p(44f, 96f); moveTo(a.x, a.y)
-                        arcTo(Rect(p(44f, 82f).x, p(44f, 82f).y, p(72f, 110f).x, p(72f, 110f).y), 180f, 180f, false)
+                        arcTo(
+                            Rect(p(44f, 82f).x, p(44f, 82f).y, p(72f, 110f).x, p(72f, 110f).y),
+                            180f,
+                            180f,
+                            false
+                        )
                         close()
                     },
                     color = IllumGold
                 )
-                drawCircle(IllumCream, radius = sw(9f), center = p(80f, 44f))                  // crescent
+                drawCircle(
+                    IllumCream,
+                    radius = sw(9f),
+                    center = p(80f, 44f)
+                )                  // crescent
                 drawCircle(IllumNiche, radius = sw(7f), center = p(83.5f, 44f))
             }
+
             OnboardingEmblem.QURAN -> {
-                line(58f, 40f, 58f, 30f, 1.5f)                                                 // noor rays
+                line(
+                    58f,
+                    40f,
+                    58f,
+                    30f,
+                    1.5f
+                )                                                 // noor rays
                 line(44f, 44f, 39f, 36f, 1.5f)
                 line(72f, 44f, 77f, 36f, 1.5f)
-                drawPath(poly(58f to 96f, 30f to 88f, 30f to 64f, 58f to 72f), color = IllumGold)     // left page
-                drawPath(poly(58f to 96f, 86f to 88f, 86f to 64f, 58f to 72f), color = IllumGoldDeep) // right page
-                line(36f, 74f, 52f, 78f, 1.4f, IllumNiche)                                     // text lines
+                drawPath(
+                    poly(58f to 96f, 30f to 88f, 30f to 64f, 58f to 72f),
+                    color = IllumGold
+                )     // left page
+                drawPath(
+                    poly(58f to 96f, 86f to 88f, 86f to 64f, 58f to 72f),
+                    color = IllumGoldDeep
+                ) // right page
+                line(
+                    36f,
+                    74f,
+                    52f,
+                    78f,
+                    1.4f,
+                    IllumNiche
+                )                                     // text lines
                 line(36f, 80f, 52f, 84f, 1.4f, IllumNiche)
                 line(64f, 78f, 80f, 74f, 1.4f, IllumNiche)
                 line(64f, 84f, 80f, 80f, 1.4f, IllumNiche)
             }
+
             OnboardingEmblem.SHIELD -> Unit // handled above
         }
     }

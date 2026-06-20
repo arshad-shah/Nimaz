@@ -19,11 +19,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -31,6 +35,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -77,6 +82,7 @@ fun AboutScreen(
             is UpdateState.Checking,
             is UpdateState.Starting,
             is UpdateState.Downloading -> Unit
+
             else -> updateManager?.checkForUpdate()
         }
         Unit
@@ -96,10 +102,18 @@ fun AboutScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { AppInfoHero() }
-            item { QuickActionsRow(onRateApp = onRateApp, onShareApp = onShareApp, onUpdates = onUpdateClick) }
+            item {
+                QuickActionsRow(
+                    onRateApp = onRateApp,
+                    onShareApp = onShareApp
+                )
+            }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.links), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.links),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item {
                 LinksCard(
@@ -113,12 +127,18 @@ fun AboutScreen(
             }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.developer), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.developer),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item { DeveloperCard() }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.data_sources_credits), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.data_sources_credits),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item { CreditsGrid() }
 
@@ -167,7 +187,11 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(13.dp)
             )
             Text(
-                text = stringResource(R.string.version_detail_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                text = stringResource(
+                    R.string.version_detail_format,
+                    BuildConfig.VERSION_NAME,
+                    BuildConfig.VERSION_CODE
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -189,7 +213,6 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
 private fun QuickActionsRow(
     onRateApp: () -> Unit,
     onShareApp: () -> Unit,
-    onUpdates: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -207,13 +230,6 @@ private fun QuickActionsRow(
             onClick = onShareApp,
             modifier = Modifier.weight(1f)
         )
-        QuickActionButton(
-            icon = Icons.Filled.Refresh,
-            label = stringResource(R.string.about_updates),
-            primary = false,
-            onClick = onUpdates,
-            modifier = Modifier.weight(1f)
-        )
     }
 }
 
@@ -225,8 +241,10 @@ private fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bg = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val fg = if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val bg =
+        if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val fg =
+        if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -236,8 +254,18 @@ private fun QuickActionButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = fg, modifier = Modifier.size(21.dp))
-        Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = fg)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = fg,
+            modifier = Modifier.size(21.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = fg
+        )
     }
 }
 
@@ -252,7 +280,69 @@ private fun LinksCard(
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    val updateSubtitle = when (updateState) {
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        LinkItem(
+            Icons.Default.Email,
+            stringResource(R.string.contact_support),
+            stringResource(R.string.contact_email),
+            onContactUs,
+            true
+        )
+        LinkItem(
+            Icons.Default.Language,
+            stringResource(R.string.website),
+            stringResource(R.string.website_url_display),
+            { uriHandler.openUri("https://nimaz.arshadshah.com") },
+            true
+        )
+        LinkItem(
+            Icons.Default.Shield,
+            stringResource(R.string.privacy_policy),
+            stringResource(R.string.privacy_policy_subtitle),
+            onNavigateToPrivacyPolicy,
+            true
+        )
+        LinkItem(
+            Icons.Default.Description,
+            stringResource(R.string.terms_of_service),
+            stringResource(R.string.terms_of_service_subtitle),
+            onNavigateToTerms,
+            true
+        )
+        LinkItem(
+            Icons.Default.Gavel,
+            stringResource(R.string.open_source_licenses),
+            stringResource(R.string.open_source_licenses_subtitle),
+            onNavigateToLicenses,
+            true
+        )
+        UpdateStatusItem(
+            updateState = updateState,
+            onClick = onUpdateClick
+        )
+    }
+}
+
+@Composable
+private fun UpdateStatusItem(
+    updateState: UpdateState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val busy = updateState is UpdateState.Checking ||
+            updateState is UpdateState.Starting ||
+            updateState is UpdateState.Downloading
+    val actionable = updateState is UpdateState.UpdateAvailable ||
+            updateState is UpdateState.Downloaded
+    val isError = updateState is UpdateState.Error
+
+    val subtitle = when (updateState) {
         is UpdateState.Checking -> stringResource(R.string.update_checking)
         is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
         is UpdateState.Starting -> stringResource(R.string.update_starting)
@@ -263,18 +353,78 @@ private fun LinksCard(
         else -> stringResource(R.string.update_tap_to_check)
     }
 
-    Column(
+    val accent = when {
+        isError -> MaterialTheme.colorScheme.error
+        actionable || updateState is UpdateState.NoUpdateAvailable -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable(enabled = !busy, onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        LinkItem(Icons.Default.Email, stringResource(R.string.contact_support), stringResource(R.string.contact_email), onContactUs, true)
-        LinkItem(Icons.Default.Language, stringResource(R.string.website), stringResource(R.string.website_url_display), { uriHandler.openUri("https://nimaz.arshadshah.com") }, true)
-        LinkItem(Icons.Default.Shield, stringResource(R.string.privacy_policy), stringResource(R.string.privacy_policy_subtitle), onNavigateToPrivacyPolicy, true)
-        LinkItem(Icons.Default.Description, stringResource(R.string.terms_of_service), stringResource(R.string.terms_of_service_subtitle), onNavigateToTerms, true)
-        LinkItem(Icons.Default.Gavel, stringResource(R.string.open_source_licenses), stringResource(R.string.open_source_licenses_subtitle), onNavigateToLicenses, true)
-        LinkItem(Icons.Default.Refresh, stringResource(R.string.check_for_updates), updateSubtitle, onUpdateClick, false)
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(
+                    when {
+                        actionable -> MaterialTheme.colorScheme.primary
+                        isError -> MaterialTheme.colorScheme.errorContainer
+                        else -> MaterialTheme.colorScheme.surface
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (busy) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                val icon = when (updateState) {
+                    is UpdateState.UpdateAvailable -> Icons.Default.Download
+                    is UpdateState.Downloaded -> Icons.Default.InstallMobile
+                    is UpdateState.NoUpdateAvailable -> Icons.Default.CheckCircle
+                    is UpdateState.Error -> Icons.Default.ErrorOutline
+                    else -> Icons.Default.Refresh
+                }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (actionable) MaterialTheme.colorScheme.onPrimary else accent,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.check_for_updates),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (actionable) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (actionable || isError) accent else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (!busy) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = if (actionable) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(15.dp)
+            )
+        }
     }
 }
 
@@ -302,12 +452,26 @@ private fun LinkItem(
                     .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
@@ -382,7 +546,12 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(17.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(17.dp)
+        )
     }
 }
 
@@ -439,7 +608,10 @@ private fun FooterSection(modifier: Modifier = Modifier) {
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = stringResource(R.string.made_with),
                 style = MaterialTheme.typography.bodySmall,
@@ -449,7 +621,9 @@ private fun FooterSection(modifier: Modifier = Modifier) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                modifier = Modifier.size(14.dp).padding(horizontal = 2.dp)
+                modifier = Modifier
+                    .size(14.dp)
+                    .padding(horizontal = 2.dp)
             )
             Text(
                 text = stringResource(R.string.for_the_ummah),

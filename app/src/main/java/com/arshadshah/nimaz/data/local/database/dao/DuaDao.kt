@@ -98,7 +98,12 @@ interface DuaDao {
     suspend fun toggleFavorite(duaId: Int, categoryId: Int) {
         val existing = getBookmarkByDuaId(duaId)
         if (existing != null) {
-            updateBookmark(existing.copy(isFavorite = !existing.isFavorite, updatedAt = System.currentTimeMillis()))
+            updateBookmark(
+                existing.copy(
+                    isFavorite = !existing.isFavorite,
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
         } else {
             insertBookmark(
                 DuaBookmarkEntity(

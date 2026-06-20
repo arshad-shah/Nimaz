@@ -1,11 +1,14 @@
 package com.arshadshah.nimaz.core.navigation
 
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
@@ -28,7 +31,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.theme.isTablet
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -37,37 +39,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import com.google.android.play.core.review.ReviewManagerFactory
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import kotlin.system.exitProcess
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
-import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
-import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
-import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
-import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
-import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
-import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
-import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
-import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
-import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
-import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
-import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
-import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
-import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
-import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
-import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
-import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
-import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
-import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
-import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
-import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUlHusnaScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveAsmaUnNabiScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveDuaScreen
@@ -77,12 +52,34 @@ import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveMoreScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveProphetsScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveQuranScreen
 import com.arshadshah.nimaz.presentation.screens.adaptive.AdaptiveSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.asma.AsmaUlHusnaDetailScreen
+import com.arshadshah.nimaz.presentation.screens.asmaunnabi.AsmaUnNabiDetailScreen
+import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
+import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
+import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
+import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
+import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTimesScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
+import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaLettersScreen
+import com.arshadshah.nimaz.presentation.screens.qaida.QaidaReaderScreen
+import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
-import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
+import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
-import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
@@ -93,7 +90,11 @@ import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatHistoryScreen
+import com.arshadshah.nimaz.presentation.theme.isTablet
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
+import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
+import com.google.android.play.core.review.ReviewManagerFactory
+import kotlin.system.exitProcess
 
 @Composable
 fun NavGraph(
@@ -163,10 +164,10 @@ fun NavGraph(
     // Check if we should show navigation (only on main bottom nav screens)
     val showNav = currentDestination?.hierarchy?.any { dest ->
         dest.hasRoute<Route.Home>() ||
-        dest.hasRoute<Route.Quran>() ||
-        dest.hasRoute<Route.Tasbih>() ||
-        dest.hasRoute<Route.QiblaNav>() ||
-        dest.hasRoute<Route.More>()
+                dest.hasRoute<Route.Quran>() ||
+                dest.hasRoute<Route.Tasbih>() ||
+                dest.hasRoute<Route.QiblaNav>() ||
+                dest.hasRoute<Route.More>()
     } == true
 
     // Show loading while determining start destination
@@ -268,6 +269,7 @@ fun NavGraph(
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
+                    onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
                     onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
                 )
             }
@@ -563,19 +565,9 @@ fun NavGraph(
 
             // Prayer screens
             composable<Route.PrayerTimes> {
-                HomeScreen(
-                    onNavigateToQuran = { navController.navigate(Route.Quran) },
-                    onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-                    onNavigateToDua = { navController.navigate(Route.DuaHome) },
-                    onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
-                    onNavigateToQibla = { navController.navigate(Route.Qibla) },
-                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-                    onNavigateToFasting = { navController.navigate(Route.FastingHome) },
-                    onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
-                    onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
+                PrayerTimesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
 
@@ -776,11 +768,17 @@ fun NavGraph(
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/privacy"))
+                        val intent = Intent(
+                            Intent.ACTION_VIEW,
+                            android.net.Uri.parse("https://nimaz.arshadshah.com/privacy")
+                        )
                         context.startActivity(intent)
                     },
                     onNavigateToTerms = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://nimaz.arshadshah.com/terms"))
+                        val intent = Intent(
+                            Intent.ACTION_VIEW,
+                            android.net.Uri.parse("https://nimaz.arshadshah.com/terms")
+                        )
                         context.startActivity(intent)
                     },
                     onNavigateToLicenses = {
@@ -794,24 +792,37 @@ fun NavGraph(
                                 if (task.isSuccessful) {
                                     manager.launchReviewFlow(activity, task.result)
                                 } else {
-                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"))
+                                    val intent = Intent(
+                                        Intent.ACTION_VIEW,
+                                        android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                                    )
                                     context.startActivity(intent)
                                 }
                             }
                         }
                     },
                     onShareApp = {
-                        val shareIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
-                            type = "text/plain"
-                            putExtra(android.content.Intent.EXTRA_TEXT, "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
-                        }
-                        context.startActivity(android.content.Intent.createChooser(shareIntent, "Share Nimaz"))
+                        val shareIntent =
+                            Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(
+                                    Intent.EXTRA_TEXT,
+                                    "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
+                                )
+                            }
+                        context.startActivity(
+                            Intent.createChooser(
+                                shareIntent,
+                                "Share Nimaz"
+                            )
+                        )
                     },
                     onContactUs = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:arshad@arshadshah.com")
-                            putExtra(android.content.Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
-                        }
+                        val intent =
+                            Intent(Intent.ACTION_SENDTO).apply {
+                                data = android.net.Uri.parse("mailto:arshad@arshadshah.com")
+                                putExtra(Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
+                            }
                         context.startActivity(intent)
                     }
                 )
@@ -910,17 +921,31 @@ fun NavGraph(
 
             composable<Route.SettingsHelp> {
                 val context = androidx.compose.ui.platform.LocalContext.current
-                val supportEmail = androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
-                val supportSubject = androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
+                val supportEmail =
+                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
+                val supportSubject =
+                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                 com.arshadshah.nimaz.presentation.screens.help.HelpScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToTopic = { topicId -> navController.navigate(Route.HelpTopicDetail(topicId)) },
+                    onNavigateToTopic = { topicId ->
+                        navController.navigate(
+                            Route.HelpTopicDetail(
+                                topicId
+                            )
+                        )
+                    },
                     onContact = {
-                        val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
-                            data = android.net.Uri.parse("mailto:$supportEmail")
-                            putExtra(android.content.Intent.EXTRA_SUBJECT, supportSubject)
-                        }
-                        context.startActivity(android.content.Intent.createChooser(intent, supportEmail))
+                        val intent =
+                            Intent(Intent.ACTION_SENDTO).apply {
+                                data = android.net.Uri.parse("mailto:$supportEmail")
+                                putExtra(Intent.EXTRA_SUBJECT, supportSubject)
+                            }
+                        context.startActivity(
+                            Intent.createChooser(
+                                intent,
+                                supportEmail
+                            )
+                        )
                     }
                 )
             }
@@ -940,7 +965,7 @@ fun NavGraph(
                     guideId = args.guideId,
                     onNavigateBack = { navController.popBackStack() },
                     onDeepLink = { key ->
-                        com.arshadshah.nimaz.core.navigation.helpDeepLinkRoute(key)?.let { route ->
+                        helpDeepLinkRoute(key)?.let { route ->
                             navController.navigate(route)
                         }
                     }

@@ -11,9 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Sync
@@ -64,6 +64,7 @@ fun SettingsScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     var showResetDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
     val shouldRestart by viewModel.shouldRestart.collectAsState()
 
     LaunchedEffect(shouldRestart) {
@@ -174,6 +175,14 @@ fun SettingsScreen(
                         iconTint = MaterialTheme.colorScheme.error,
                         onClick = { showResetDialog = true }
                     )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = stringResource(R.string.delete_all_data),
+                        subtitle = stringResource(R.string.delete_all_data_subtitle),
+                        icon = Icons.Default.Delete,
+                        iconTint = MaterialTheme.colorScheme.error,
+                        onClick = { showDeleteDialog = true }
+                    )
                 }
             }
 
@@ -194,6 +203,19 @@ fun SettingsScreen(
             isDestructive = true,
             onConfirm = { viewModel.onEvent(SettingsEvent.ResetToDefaults) },
             onDismiss = { showResetDialog = false },
+        )
+    }
+
+    if (showDeleteDialog) {
+        NimazConfirmDialog(
+            title = stringResource(R.string.delete_all_data_dialog_title),
+            message = stringResource(R.string.delete_all_data_dialog_message),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = { viewModel.onEvent(SettingsEvent.DeleteAllData) },
+            onDismiss = { showDeleteDialog = false },
         )
     }
 }

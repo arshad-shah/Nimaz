@@ -19,13 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 @Composable
 internal fun MushafPageBar(

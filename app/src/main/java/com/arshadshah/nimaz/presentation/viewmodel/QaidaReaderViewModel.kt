@@ -61,6 +61,7 @@ class QaidaReaderViewModel @Inject constructor(
     }
 
     private val _selectedLessonId = MutableStateFlow<Int?>(null)
+
     /** The lesson currently open in the reader, or null before one is chosen. */
     val selectedLessonId: StateFlow<Int?> = _selectedLessonId.asStateFlow()
 

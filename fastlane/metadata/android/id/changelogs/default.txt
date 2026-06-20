@@ -1,6 +1,7 @@
-Yang baru sejak 3.0.10:
+Yang baru sejak 3.0.25:
 
-• Pembaca Qaida baru: anak belajar membaca Al-Qur'an huruf demi huruf — ketuk untuk mendengar, perjalanan pelajaran, kumpulkan bintang, dan reset untuk anak lain.
-• Puasa kini dalam satu tab "Pelacak" pintar — puasa Ramadan dan sunnah menjadi satu; Qadha tetap terpisah.
-• Kompas Kiblat dan tampilan AR disegarkan, plus desain ulang Nama-nama Allah, Nama-nama Nabi ﷺ, dan para Nabi.
-• Bantuan & Tentang baru yang bisa dicari dan Beranda disegarkan.
+• Langit Hidup di Beranda — langit waktu nyata yang mengikuti perjalanan matahari dan menampilkan fase bulan di malam hari.
+• Layar Waktu Salat baru — jelajahi hari mana pun, dengan kalender bulanan dan pelacakan harian.
+• Ekspor jadwal salat bulanan Anda sebagai PDF rapi (mode Ramadan, dengan peristiwa Islam).
+• Pilih font Arab Al-Qur'an — Amiri atau Scheherazade New — dengan pratinjau langsung.
+• Menu Lainnya yang disegarkan, plus perbaikan.

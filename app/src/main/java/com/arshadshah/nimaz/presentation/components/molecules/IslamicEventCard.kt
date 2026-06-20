@@ -175,9 +175,14 @@ fun IslamicEventCard(
         com.arshadshah.nimaz.domain.model.IslamicEventType.HISTORICAL -> HijriDateCalculator.EventType.COMMEMORATION
     }
 
-    val hijriDate = "${event.hijriDay} ${com.arshadshah.nimaz.domain.model.HijriMonth.fromNumber(event.hijriMonth)?.displayName() ?: ""}"
+    val hijriDate = "${event.hijriDay} ${
+        com.arshadshah.nimaz.domain.model.HijriMonth.fromNumber(event.hijriMonth)
+            ?.displayName() ?: ""
+    }"
     val gregorianDateStr = event.gregorianDate?.let {
-        "${it.dayOfMonth} ${it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }} ${it.year}"
+        "${it.dayOfMonth} ${
+            it.month.name.lowercase().replaceFirstChar { c -> c.uppercase() }
+        } ${it.year}"
     } ?: ""
 
     IslamicEventCard(

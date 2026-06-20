@@ -1,6 +1,7 @@
-Neu seit 3.0.10:
+Neu seit 3.0.25:
 
-• Neuer Qaida-Leser: Kinder lernen das Koranlesen Buchstabe für Buchstabe — antippen und hören, Lektionsreise, Sterne sammeln und Fortschritt für ein anderes Kind zurücksetzen.
-• Fasten in einem smarten Tab „Übersicht“ — Ramadan und freiwillige Fasten zusammen; Nachholen bleibt separat.
-• Überarbeiteter Qibla-Kompass und AR-Ansicht, plus neu gestaltete Namen Allahs, Namen des Propheten ﷺ und Propheten.
-• Neue durchsuchbare Hilfe & Info und ein frischer Start.
+• Lebendiger Himmel auf der Startseite — ein ruhiger Echtzeit-Himmel, der dem Lauf der Sonne folgt und nachts die Mondphase zeigt.
+• Neuer Gebetszeiten-Bildschirm — beliebige Tage durchblättern, mit Monatskalender und Verfolgung pro Tag.
+• Exportiere deinen monatlichen Gebetsplan als PDF (Ramadan-fähig, mit islamischen Ereignissen).
+• Wähle deine arabische Koran-Schrift — Amiri oder Scheherazade New — mit Live-Vorschau.
+• Überarbeitetes „Mehr“-Menü, dazu Fehlerbehebungen.

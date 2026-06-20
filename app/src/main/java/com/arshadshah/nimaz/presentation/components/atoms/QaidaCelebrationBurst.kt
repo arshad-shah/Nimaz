@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -7,7 +8,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import android.content.res.Configuration
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -69,7 +69,10 @@ fun QaidaCelebrationBurst(
     val haloPulse by transition.animateFloat(
         initialValue = 0.92f,
         targetValue = if (play) 1.08f else 0.92f,
-        animationSpec = infiniteRepeatable(tween(1_900, easing = FastOutSlowInEasing), RepeatMode.Reverse),
+        animationSpec = infiniteRepeatable(
+            tween(1_900, easing = FastOutSlowInEasing),
+            RepeatMode.Reverse
+        ),
         label = "halo",
     )
 
@@ -81,7 +84,11 @@ fun QaidaCelebrationBurst(
         val haloR = r * haloPulse
         drawCircle(
             brush = Brush.radialGradient(
-                colors = listOf(gold.copy(alpha = 0.38f), gold.copy(alpha = 0.10f), Color.Transparent),
+                colors = listOf(
+                    gold.copy(alpha = 0.38f),
+                    gold.copy(alpha = 0.10f),
+                    Color.Transparent
+                ),
                 center = center,
                 radius = haloR,
             ),

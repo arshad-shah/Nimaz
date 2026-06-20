@@ -31,6 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -80,6 +81,7 @@ fun MushafContinuousText(
     highlightedAyahId: Int? = null,
     selectedAyahId: Int? = null,
     arabicFontSize: Float = 28f,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
     showRuledLines: Boolean = true,
     lineColor: Color = MushafLineColor,
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
@@ -112,7 +114,7 @@ fun MushafContinuousText(
             BasicText(
                 text = annotatedText,
                 style = TextStyle(
-                    fontFamily = AmiriFontFamily,
+                    fontFamily = arabicFontFamily,
                     fontSize = arabicFontSize.sp,
                     lineHeight = (arabicFontSize * 2.5).sp,
                     textDirection = TextDirection.Rtl,
@@ -172,6 +174,7 @@ fun MushafContinuousText(
     highlightedAyahId: Int? = null,
     selectedAyahId: Int? = null,
     arabicFontSize: Float = 28f,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
     showRuledLines: Boolean = true,
     lineColor: Color = MushafLineColor,
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
@@ -186,6 +189,7 @@ fun MushafContinuousText(
         highlightedAyahId = highlightedAyahId,
         selectedAyahId = selectedAyahId,
         arabicFontSize = arabicFontSize,
+        arabicFontFamily = arabicFontFamily,
         showRuledLines = showRuledLines,
         lineColor = lineColor,
         highlightColor = highlightColor,

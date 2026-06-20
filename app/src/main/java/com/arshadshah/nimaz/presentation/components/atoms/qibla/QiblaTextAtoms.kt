@@ -30,7 +30,12 @@ import kotlin.math.abs
 fun formatCoordinates(latitude: Double, longitude: Double): String {
     val ns = if (latitude >= 0) "N" else "S"
     val ew = if (longitude >= 0) "E" else "W"
-    return "${String.format("%.4f", abs(latitude))}°$ns, ${String.format("%.4f", abs(longitude))}°$ew"
+    return "${String.format("%.4f", abs(latitude))}°$ns, ${
+        String.format(
+            "%.4f",
+            abs(longitude)
+        )
+    }°$ew"
 }
 
 /**

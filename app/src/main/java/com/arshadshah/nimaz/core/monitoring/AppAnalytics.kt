@@ -6,6 +6,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.PowerManager
 import androidx.core.app.NotificationManagerCompat
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics.init
 import com.google.firebase.analytics.FirebaseAnalytics
 
 /**

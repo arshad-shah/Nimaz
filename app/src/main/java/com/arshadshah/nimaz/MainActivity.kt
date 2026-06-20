@@ -6,7 +6,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -17,6 +16,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Modifier
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.media3.common.util.UnstableApi
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.navigation.NavGraph
@@ -89,7 +89,9 @@ class MainActivity : ComponentActivity() {
             val animationsEnabled by preferencesDataStore.animationsEnabled.collectAsState(initial = true)
             val use24HourFormat by preferencesDataStore.use24HourFormat.collectAsState(initial = false)
             val useHijriPrimary by preferencesDataStore.useHijriPrimary.collectAsState(initial = false)
-            val showIslamicPatterns by preferencesDataStore.showIslamicPatterns.collectAsState(initial = true)
+            val showIslamicPatterns by preferencesDataStore.showIslamicPatterns.collectAsState(
+                initial = true
+            )
             val localeCode by preferencesDataStore.appLanguage.collectAsState(initial = "en")
 
             val themeMode = when (themeModeString) {

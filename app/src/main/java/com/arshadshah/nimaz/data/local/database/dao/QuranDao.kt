@@ -73,7 +73,10 @@ interface QuranDao {
     suspend fun getTranslation(ayahId: Int, translatorId: String): TranslationEntity?
 
     @Query("SELECT * FROM translations WHERE ayah_id IN (:ayahIds) AND translator_id = :translatorId")
-    fun getTranslationsForAyahs(ayahIds: List<Int>, translatorId: String): Flow<List<TranslationEntity>>
+    fun getTranslationsForAyahs(
+        ayahIds: List<Int>,
+        translatorId: String
+    ): Flow<List<TranslationEntity>>
 
     @Query("SELECT DISTINCT translator_id FROM translations")
     suspend fun getAvailableTranslatorIds(): List<String>
@@ -114,7 +117,13 @@ interface QuranDao {
     suspend fun insertReadingProgress(progress: ReadingProgressEntity)
 
     @Query("UPDATE reading_progress SET lastReadSurah = :surah, lastReadAyah = :ayah, lastReadPage = :page, lastReadJuz = :juz, updatedAt = :timestamp WHERE id = 1")
-    suspend fun updateReadingPosition(surah: Int, ayah: Int, page: Int, juz: Int, timestamp: Long = System.currentTimeMillis())
+    suspend fun updateReadingPosition(
+        surah: Int,
+        ayah: Int,
+        page: Int,
+        juz: Int,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
     @Query("UPDATE reading_progress SET totalAyahsRead = totalAyahsRead + :count, updatedAt = :timestamp WHERE id = 1")
     suspend fun incrementAyahsRead(count: Int, timestamp: Long = System.currentTimeMillis())

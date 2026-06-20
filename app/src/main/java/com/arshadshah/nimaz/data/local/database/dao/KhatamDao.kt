@@ -96,19 +96,28 @@ interface KhatamDao {
     }
 
     @Query("UPDATE khatams SET total_ayahs_read = :count, updated_at = :timestamp WHERE id = :khatamId")
-    suspend fun updateTotalAyahsRead(khatamId: Long, count: Int, timestamp: Long = System.currentTimeMillis())
+    suspend fun updateTotalAyahsRead(
+        khatamId: Long,
+        count: Int,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
     @Query("DELETE FROM khatam_ayahs WHERE khatam_id = :khatamId AND ayah_id = :ayahId")
     suspend fun unmarkAyahRead(khatamId: Long, ayahId: Int)
 
     @Query("UPDATE khatams SET total_ayahs_read = (SELECT COUNT(*) FROM khatam_ayahs WHERE khatam_id = :khatamId), updated_at = :timestamp WHERE id = :khatamId")
-    suspend fun recalculateTotalAyahsRead(khatamId: Long, timestamp: Long = System.currentTimeMillis())
+    suspend fun recalculateTotalAyahsRead(
+        khatamId: Long,
+        timestamp: Long = System.currentTimeMillis()
+    )
 
-    @Query("""
+    @Query(
+        """
         SELECT a.surah_id AS surahId, a.number_in_surah AS numberInSurah FROM ayahs a
         LEFT JOIN khatam_ayahs ka ON a.id = ka.ayah_id AND ka.khatam_id = :khatamId
         WHERE ka.ayah_id IS NULL ORDER BY a.id ASC LIMIT 1
-    """)
+    """
+    )
     suspend fun getNextUnreadAyah(khatamId: Long): NextUnreadResult?
 
     @Transaction
@@ -127,11 +136,13 @@ interface KhatamDao {
     // Ayah IDs are sequential 1-6236. Juz boundaries are known.
     // We compute per-juz progress in the repository layer.
 
-    @Query("""
+    @Query(
+        """
         SELECT ka.ayah_id FROM khatam_ayahs ka
         WHERE ka.khatam_id = :khatamId
         AND ka.ayah_id BETWEEN :startAyahId AND :endAyahId
-    """)
+    """
+    )
     suspend fun getReadAyahIdsInRange(khatamId: Long, startAyahId: Int, endAyahId: Int): List<Int>
 
     // ---- Daily log ----

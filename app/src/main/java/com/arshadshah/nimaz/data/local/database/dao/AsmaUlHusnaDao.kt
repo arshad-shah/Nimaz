@@ -1,6 +1,10 @@
 package com.arshadshah.nimaz.data.local.database.dao
 
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Transaction
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
 import kotlinx.coroutines.flow.Flow

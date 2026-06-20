@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.hadith
 
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -43,8 +42,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -121,7 +120,10 @@ fun HadithCollectionScreen(
                     NimazStatsGrid(
                         stats = listOf(
                             NimazStatData(value = "0", label = stringResource(R.string.read_today)),
-                            NimazStatData(value = "${bookmarksState.bookmarks.size}", label = stringResource(R.string.bookmarked)),
+                            NimazStatData(
+                                value = "${bookmarksState.bookmarks.size}",
+                                label = stringResource(R.string.bookmarked)
+                            ),
                             NimazStatData(value = "0", label = stringResource(R.string.day_streak))
                         ),
                         modifier = Modifier.padding(horizontal = 20.dp, vertical = 12.dp)
@@ -169,7 +171,12 @@ fun HadithCollectionScreen(
                                 putExtra(Intent.EXTRA_TEXT, shareText)
                                 type = "text/plain"
                             }
-                            context.startActivity(Intent.createChooser(sendIntent, shareHadithLabel))
+                            context.startActivity(
+                                Intent.createChooser(
+                                    sendIntent,
+                                    shareHadithLabel
+                                )
+                            )
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
@@ -426,7 +433,10 @@ private fun BookCard(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.hadith_count_format, formatNumber(book.totalHadiths)),
+                text = stringResource(
+                    R.string.hadith_count_format,
+                    formatNumber(book.totalHadiths)
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )

@@ -56,7 +56,10 @@ class GetSajdaAyahsUseCase @Inject constructor(
 class SearchQuranUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
-    operator fun invoke(query: String, translatorId: String? = null): Flow<List<QuranSearchResult>> =
+    operator fun invoke(
+        query: String,
+        translatorId: String? = null
+    ): Flow<List<QuranSearchResult>> =
         repository.searchQuran(query, translatorId)
 }
 

@@ -89,6 +89,7 @@ class SyncViewModel @Inject constructor(
                         is ConnectionState.Transferring -> newState.copy(
                             transferProgress = state.progress,
                         )
+
                         else -> newState
                     }
                 }
@@ -100,6 +101,7 @@ class SyncViewModel @Inject constructor(
                             it.copy(currentStep = "Waiting for partner to accept...")
                         }
                     }
+
                     is ConnectionState.Connected -> {
                         addLogEntry("Connected to ${state.endpointName}")
                         if (_uiState.value.mode == SyncMode.SEND) {
@@ -117,6 +119,7 @@ class SyncViewModel @Inject constructor(
                             }
                         }
                     }
+
                     is ConnectionState.Completed -> {
                         Log.d(TAG, "Completed state received (mode=${_uiState.value.mode})")
                         if (_uiState.value.mode == SyncMode.SEND) {
@@ -129,11 +132,13 @@ class SyncViewModel @Inject constructor(
                             }
                         }
                     }
+
                     is ConnectionState.Error -> {
                         Log.e(TAG, "Error state: ${state.message}")
                         addLogEntry("Error: ${state.message}")
                         _uiState.update { it.copy(error = state.message) }
                     }
+
                     is ConnectionState.Cancelled -> {
                         val reason = when (state.reason) {
                             CancelReason.BY_USER -> "Cancelled by you"
@@ -143,6 +148,7 @@ class SyncViewModel @Inject constructor(
                         Log.d(TAG, "Cancelled: $reason")
                         addLogEntry(reason)
                     }
+
                     else -> {}
                 }
             }
@@ -161,9 +167,11 @@ class SyncViewModel @Inject constructor(
                     )
                 }
             }
+
             is SyncSignal.Ready -> {
                 addLogEntry("Sender is ready")
             }
+
             is SyncSignal.ImportStarted -> {
                 addLogEntry("Partner started importing...")
                 _uiState.update {
@@ -173,6 +181,7 @@ class SyncViewModel @Inject constructor(
                     )
                 }
             }
+
             is SyncSignal.ImportProgress -> {
                 addLogEntry(signal.label)
                 _uiState.update {
@@ -184,6 +193,7 @@ class SyncViewModel @Inject constructor(
                     )
                 }
             }
+
             is SyncSignal.ImportComplete -> {
                 addLogEntry("Partner finished importing — sync complete!")
                 connectionsManager.sendSignal(SyncSignal.Ack)
@@ -199,6 +209,7 @@ class SyncViewModel @Inject constructor(
                 }
                 connectionsManager.disconnect()
             }
+
             is SyncSignal.Ack -> {
                 addLogEntry("Sync confirmed — disconnecting")
                 _uiState.update {
@@ -260,10 +271,17 @@ class SyncViewModel @Inject constructor(
                     updateStep("Reading received data...", 1)
                     Log.d(TAG, "Decoding JSON payload (${bytes.size} bytes)...")
                     val jsonString = String(bytes)
-                    Log.d(TAG, "JSON string length: ${jsonString.length}, first 200 chars: ${jsonString.take(200)}")
+                    Log.d(
+                        TAG,
+                        "JSON string length: ${jsonString.length}, first 200 chars: ${
+                            jsonString.take(200)
+                        }"
+                    )
                     val payload = json.decodeFromString<SyncPayload>(jsonString)
-                    Log.d(TAG, "JSON decoded successfully: bookmarks=${payload.bookmarks.size}, " +
-                            "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}")
+                    Log.d(
+                        TAG, "JSON decoded successfully: bookmarks=${payload.bookmarks.size}, " +
+                                "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}"
+                    )
                     val summary = buildSummaryFromPayload(payload, bytes.size.toLong())
                     _uiState.update { it.copy(dataSummary = summary) }
 
@@ -303,9 +321,11 @@ class SyncViewModel @Inject constructor(
                     yield()
                 }
 
-                Log.d(TAG, "Export returned: bookmarks=${payload.bookmarks.size}, " +
-                        "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}, " +
-                        "khatamAyahs=${payload.khatamAyahs.size}, prefs=${payload.preferences.size}")
+                Log.d(
+                    TAG, "Export returned: bookmarks=${payload.bookmarks.size}, " +
+                            "favorites=${payload.favorites.size}, prayers=${payload.prayerRecords.size}, " +
+                            "khatamAyahs=${payload.khatamAyahs.size}, prefs=${payload.preferences.size}"
+                )
                 val summary = buildSummaryFromPayload(payload, 0)
                 _uiState.update { it.copy(dataSummary = summary) }
 
@@ -403,7 +423,8 @@ class SyncViewModel @Inject constructor(
 
     private fun cancel() {
         val current = _uiState.value.connectionState
-        val isTerminal = current is ConnectionState.Completed || current is ConnectionState.Cancelled
+        val isTerminal =
+            current is ConnectionState.Completed || current is ConnectionState.Cancelled
         Log.d(TAG, "cancel: currentState=$current, isTerminal=$isTerminal")
 
         if (!isTerminal) {
@@ -418,7 +439,11 @@ class SyncViewModel @Inject constructor(
         }
         connectionsManager.stopAll()
         _uiState.update {
-            if (isTerminal) SyncUiState() else it.copy(connectionState = ConnectionState.Cancelled(CancelReason.BY_USER))
+            if (isTerminal) SyncUiState() else it.copy(
+                connectionState = ConnectionState.Cancelled(
+                    CancelReason.BY_USER
+                )
+            )
         }
     }
 
@@ -441,8 +466,10 @@ class SyncViewModel @Inject constructor(
 
     companion object {
         private const val TAG = "SyncVM"
+
         // 7 export callbacks + packaging + sending + complete
         private const val SEND_TOTAL_STEPS = 10
+
         // reading + 8 import categories + complete
         private const val RECEIVE_TOTAL_STEPS = 10
 

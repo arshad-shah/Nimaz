@@ -43,10 +43,9 @@ class HomeHeroTest {
             )
         }
 
-        // LocalUseHijriPrimary defaults to false, so gregorian is the primary
-        // line and hijri the secondary line; both render.
+        // LocalUseHijriPrimary defaults to false, so the sky shows the Gregorian
+        // date as its single date line.
         composeRule.onNodeWithText("Friday, January 31, 2026").assertExists()
-        composeRule.onNodeWithText("7 Rajab 1446").assertExists()
     }
 
     @Test
@@ -66,7 +65,7 @@ class HomeHeroTest {
     }
 
     @Test
-    fun `renders the countdown digits`() {
+    fun `renders the countdown`() {
         composeRule.setThemedContent {
             HomeHero(
                 hijriDate = "7 Rajab 1446",
@@ -77,9 +76,8 @@ class HomeHeroTest {
             )
         }
 
-        // CountdownTimer pads each unit to two digits: 2h -> "02", 15m -> "15".
-        composeRule.onNodeWithText("02").assertExists()
-        composeRule.onNodeWithText("15").assertExists()
+        // The next-prayer card shows the time-until string verbatim.
+        composeRule.onNodeWithText("2h 15m 30s").assertExists()
     }
 
     @Test

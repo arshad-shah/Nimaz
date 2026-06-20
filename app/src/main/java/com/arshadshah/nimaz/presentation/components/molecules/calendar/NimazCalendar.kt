@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
@@ -51,14 +52,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 /**
  * A reusable month calendar grid with navigation, day selection, status indicators, and legend.
@@ -255,13 +255,21 @@ private fun CalendarNavigationHeader(
                     textAlign = TextAlign.Start,
                     modifier = Modifier.weight(1f)
                 )
-                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                NavButton(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    R.string.cd_previous_month,
+                    onPrevious
+                )
                 NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
             }
 
             CalendarHeaderAlignment.CENTER -> {
                 // Arrows flank a centered title.
-                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                NavButton(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    R.string.cd_previous_month,
+                    onPrevious
+                )
                 HeaderTitleBlock(
                     title = title,
                     subtitle = subtitle,
@@ -274,7 +282,11 @@ private fun CalendarNavigationHeader(
 
             CalendarHeaderAlignment.END -> {
                 // Both arrows left, title right-aligned.
-                NavButton(Icons.AutoMirrored.Filled.ArrowBack, R.string.cd_previous_month, onPrevious)
+                NavButton(
+                    Icons.AutoMirrored.Filled.ArrowBack,
+                    R.string.cd_previous_month,
+                    onPrevious
+                )
                 NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
                 HeaderTitleBlock(
                     title = title,
@@ -345,7 +357,11 @@ private fun WeekdayHeaderRow(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(10.dp))
-            .border(1.dp,MaterialTheme.colorScheme.surfaceContainerLowest, RoundedCornerShape(10.dp))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.surfaceContainerLowest,
+                RoundedCornerShape(10.dp)
+            )
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
             .padding(vertical = 8.dp)
     ) {
@@ -497,6 +513,7 @@ private fun CalendarDayCell(
                         .clip(CircleShape)
                         .background(resolvedDot)
                 )
+
                 IndicatorPosition.TOP_END -> Box(
                     modifier = Modifier
                         .align(Alignment.TopEnd)

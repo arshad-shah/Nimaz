@@ -45,7 +45,8 @@ fun HarakatArabicText(
         highlightGroup == null -> baseColor
         highlightGroup.contains("kasra", ignoreCase = true) -> kasraColor
         highlightGroup.contains("fatha", ignoreCase = true) ||
-            highlightGroup.contains("damma", ignoreCase = true) -> fathaColor
+                highlightGroup.contains("damma", ignoreCase = true) -> fathaColor
+
         else -> baseColor
     }
     val letterColor = if (playing) playingColor else baseColor

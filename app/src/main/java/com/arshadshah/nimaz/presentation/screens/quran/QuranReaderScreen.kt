@@ -21,19 +21,15 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoStories
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,7 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,12 +56,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.JuzPageBanner
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
@@ -75,8 +76,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
 import kotlinx.coroutines.launch
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -357,9 +356,10 @@ fun QuranReaderScreen(
                 actions = {
                     // Khatam progress indicator
                     if (state.activeKhatamId != null) {
-                        val khatamProgress = if (com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS > 0)
-                            state.khatamReadAyahIds.size.toFloat() / com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS
-                        else 0f
+                        val khatamProgress =
+                            if (com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS > 0)
+                                state.khatamReadAyahIds.size.toFloat() / com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS
+                            else 0f
                         Box(
                             modifier = Modifier
                                 .padding(end = 4.dp)
@@ -431,6 +431,7 @@ fun QuranReaderScreen(
                         .coerceIn(0, displayAyahs.lastIndex)
                     displayAyahs[idx]
                 }
+
                 else -> null
             }
 
@@ -550,14 +551,16 @@ fun QuranReaderScreen(
                         ) { pageIndex ->
                             // Restore LTR for page content
                             CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-                                val highlightedAyahId = if (audioState.isActive) audioState.currentAyahId else null
+                                val highlightedAyahId =
+                                    if (audioState.isActive) audioState.currentAyahId else null
 
                                 if (isDualPageMode) {
                                     // Dual-page spread: right page (lower number) + left page (higher number)
                                     val rightPageNum = pageIndex * 2 + 1
                                     val leftPageNum = (pageIndex * 2 + 2).coerceAtMost(totalPages)
 
-                                    val rightPageAyahs = state.pageCache[rightPageNum] ?: emptyList()
+                                    val rightPageAyahs =
+                                        state.pageCache[rightPageNum] ?: emptyList()
                                     val leftPageAyahs = state.pageCache[leftPageNum] ?: emptyList()
 
                                     LaunchedEffect(rightPageNum) {
@@ -579,26 +582,54 @@ fun QuranReaderScreen(
                                                 ayahs = leftPageAyahs,
                                                 surahMap = surahMap,
                                                 arabicFontSize = state.arabicFontSize,
+                                                arabicFontFamily = state.arabicFontFamily,
                                                 highlightedAyahId = highlightedAyahId,
                                                 favoriteAyahIds = favoriteAyahIds,
                                                 showTajweed = state.showTajweed,
                                                 showTranslation = state.showTranslation,
                                                 showTransliteration = state.showTransliteration,
                                                 onBookmarkClick = { ayah ->
-                                                    viewModel.onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                    viewModel.onEvent(
+                                                        QuranEvent.ToggleBookmark(
+                                                            ayah.id,
+                                                            ayah.surahNumber,
+                                                            ayah.numberInSurah
+                                                        )
+                                                    )
                                                 },
                                                 onFavoriteClick = { ayah ->
-                                                    viewModel.onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                    viewModel.onEvent(
+                                                        QuranEvent.ToggleFavorite(
+                                                            ayah.id,
+                                                            ayah.surahNumber,
+                                                            ayah.numberInSurah
+                                                        )
+                                                    )
                                                 },
                                                 onPlayClick = { ayah ->
-                                                    viewModel.onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                    viewModel.onEvent(
+                                                        QuranEvent.PlayAyahAudio(
+                                                            ayah.id,
+                                                            ayah.surahNumber,
+                                                            ayah.numberInSurah
+                                                        )
+                                                    )
                                                 },
                                                 onShareClick = { },
                                                 onCopyClick = { },
-                                                onTafseerClick = { ayah -> onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah) },
+                                                onTafseerClick = { ayah ->
+                                                    onNavigateToTafseer(
+                                                        ayah.surahNumber,
+                                                        ayah.numberInSurah
+                                                    )
+                                                },
                                                 isKhatamActive = state.activeKhatamId != null,
                                                 khatamReadAyahIds = state.khatamReadAyahIds,
-                                                onKhatamToggle = { ayah -> viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                                                onKhatamToggle = { ayah ->
+                                                    viewModel.onEvent(
+                                                        QuranEvent.ToggleKhatamAyah(ayah.id)
+                                                    )
+                                                },
                                                 modifier = Modifier
                                                     .weight(1f)
                                                     .fillMaxHeight()
@@ -619,26 +650,56 @@ fun QuranReaderScreen(
                                             ayahs = rightPageAyahs,
                                             surahMap = surahMap,
                                             arabicFontSize = state.arabicFontSize,
+                                            arabicFontFamily = state.arabicFontFamily,
                                             highlightedAyahId = highlightedAyahId,
                                             favoriteAyahIds = favoriteAyahIds,
                                             showTajweed = state.showTajweed,
                                             showTranslation = state.showTranslation,
                                             showTransliteration = state.showTransliteration,
                                             onBookmarkClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                viewModel.onEvent(
+                                                    QuranEvent.ToggleBookmark(
+                                                        ayah.id,
+                                                        ayah.surahNumber,
+                                                        ayah.numberInSurah
+                                                    )
+                                                )
                                             },
                                             onFavoriteClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                viewModel.onEvent(
+                                                    QuranEvent.ToggleFavorite(
+                                                        ayah.id,
+                                                        ayah.surahNumber,
+                                                        ayah.numberInSurah
+                                                    )
+                                                )
                                             },
                                             onPlayClick = { ayah ->
-                                                viewModel.onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                                viewModel.onEvent(
+                                                    QuranEvent.PlayAyahAudio(
+                                                        ayah.id,
+                                                        ayah.surahNumber,
+                                                        ayah.numberInSurah
+                                                    )
+                                                )
                                             },
                                             onShareClick = { },
                                             onCopyClick = { },
-                                            onTafseerClick = { ayah -> onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah) },
+                                            onTafseerClick = { ayah ->
+                                                onNavigateToTafseer(
+                                                    ayah.surahNumber,
+                                                    ayah.numberInSurah
+                                                )
+                                            },
                                             isKhatamActive = state.activeKhatamId != null,
                                             khatamReadAyahIds = state.khatamReadAyahIds,
-                                            onKhatamToggle = { ayah -> viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                                            onKhatamToggle = { ayah ->
+                                                viewModel.onEvent(
+                                                    QuranEvent.ToggleKhatamAyah(
+                                                        ayah.id
+                                                    )
+                                                )
+                                            },
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .fillMaxHeight()
@@ -649,9 +710,10 @@ fun QuranReaderScreen(
                                     // Single-page mode
                                     val pageNum = pageIndex + 1
 
-                                    val pageAyahs = state.pageCache[pageNum] ?: displayAyahs.takeIf {
-                                        displayAyahs.firstOrNull()?.page == pageNum
-                                    } ?: emptyList()
+                                    val pageAyahs =
+                                        state.pageCache[pageNum] ?: displayAyahs.takeIf {
+                                            displayAyahs.firstOrNull()?.page == pageNum
+                                        } ?: emptyList()
 
                                     LaunchedEffect(pageNum) {
                                         if (pageNum !in state.pageCache.keys) {
@@ -664,26 +726,56 @@ fun QuranReaderScreen(
                                         ayahs = pageAyahs,
                                         surahMap = surahMap,
                                         arabicFontSize = state.arabicFontSize,
+                                        arabicFontFamily = state.arabicFontFamily,
                                         highlightedAyahId = highlightedAyahId,
                                         favoriteAyahIds = favoriteAyahIds,
                                         showTajweed = state.showTajweed,
                                         showTranslation = state.showTranslation,
                                         showTransliteration = state.showTransliteration,
                                         onBookmarkClick = { ayah ->
-                                            viewModel.onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            viewModel.onEvent(
+                                                QuranEvent.ToggleBookmark(
+                                                    ayah.id,
+                                                    ayah.surahNumber,
+                                                    ayah.numberInSurah
+                                                )
+                                            )
                                         },
                                         onFavoriteClick = { ayah ->
-                                            viewModel.onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            viewModel.onEvent(
+                                                QuranEvent.ToggleFavorite(
+                                                    ayah.id,
+                                                    ayah.surahNumber,
+                                                    ayah.numberInSurah
+                                                )
+                                            )
                                         },
                                         onPlayClick = { ayah ->
-                                            viewModel.onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+                                            viewModel.onEvent(
+                                                QuranEvent.PlayAyahAudio(
+                                                    ayah.id,
+                                                    ayah.surahNumber,
+                                                    ayah.numberInSurah
+                                                )
+                                            )
                                         },
                                         onShareClick = { },
                                         onCopyClick = { },
-                                        onTafseerClick = { ayah -> onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah) },
+                                        onTafseerClick = { ayah ->
+                                            onNavigateToTafseer(
+                                                ayah.surahNumber,
+                                                ayah.numberInSurah
+                                            )
+                                        },
                                         isKhatamActive = state.activeKhatamId != null,
                                         khatamReadAyahIds = state.khatamReadAyahIds,
-                                        onKhatamToggle = { ayah -> viewModel.onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                                        onKhatamToggle = { ayah ->
+                                            viewModel.onEvent(
+                                                QuranEvent.ToggleKhatamAyah(
+                                                    ayah.id
+                                                )
+                                            )
+                                        },
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .background(MaterialTheme.colorScheme.background)
@@ -725,7 +817,8 @@ fun QuranReaderScreen(
                                     surahMeaning = surahWithAyahs.surah.nameTransliteration,
                                     revelationType = surahWithAyahs.surah.revelationType,
                                     ayahCount = surahWithAyahs.surah.numberOfAyahs,
-                                    showBismillah = (surahNumber ?: 0) != 9 && (surahNumber ?: 0) != 1
+                                    showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
+                                        ?: 0) != 1
                                 )
                             }
 
@@ -733,7 +826,8 @@ fun QuranReaderScreen(
                             if (state.activeKhatamId != null) {
                                 item(key = "khatam_mark_surah") {
                                     val surahAyahIds = surahWithAyahs.ayahs.map { it.id }.toSet()
-                                    val allRead = surahAyahIds.isNotEmpty() && surahAyahIds.all { it in state.khatamReadAyahIds }
+                                    val allRead =
+                                        surahAyahIds.isNotEmpty() && surahAyahIds.all { it in state.khatamReadAyahIds }
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -760,7 +854,9 @@ fun QuranReaderScreen(
                                             TextButton(
                                                 onClick = {
                                                     viewModel.onEvent(
-                                                        QuranEvent.MarkSurahAsReadForKhatam(surahWithAyahs.surah.number)
+                                                        QuranEvent.MarkSurahAsReadForKhatam(
+                                                            surahWithAyahs.surah.number
+                                                        )
                                                     )
                                                 }
                                             ) {
@@ -796,12 +892,14 @@ fun QuranReaderScreen(
                             PageSurahSeparator(
                                 surahNumber = ayah.surahNumber,
                                 surahNameArabic = surah?.nameArabic ?: "",
-                                surahNameEnglish = surah?.nameEnglish ?: "Surah ${ayah.surahNumber}",
+                                surahNameEnglish = surah?.nameEnglish
+                                    ?: "Surah ${ayah.surahNumber}",
                                 showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
                             )
                         }
 
-                        val isHighlighted = audioState.currentAyahId == ayah.id && audioState.isActive
+                        val isHighlighted =
+                            audioState.currentAyahId == ayah.id && audioState.isActive
                         val isAudioPlaying = isHighlighted && audioState.isPlaying
 
                         AyahItem(
@@ -809,6 +907,7 @@ fun QuranReaderScreen(
                             showTranslation = state.showTranslation,
                             showTransliteration = state.showTransliteration,
                             arabicFontSize = state.arabicFontSize,
+                            arabicFontFamily = state.arabicFontFamily,
                             fontSize = state.fontSize,
                             isHighlighted = isHighlighted,
                             isAudioPlaying = isAudioPlaying,

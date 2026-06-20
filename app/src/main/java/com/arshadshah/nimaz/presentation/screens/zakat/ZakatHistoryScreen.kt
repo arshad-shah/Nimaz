@@ -41,9 +41,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -54,8 +56,6 @@ import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -294,7 +294,9 @@ private fun HistoryEntryCard(
 
             // Nisab info
             Text(
-                text = "Nisab: ${entry.nisabType.name.lowercase().replaceFirstChar { it.uppercase() }} (${formatCurrency(entry.nisabValue)})",
+                text = "Nisab: ${
+                    entry.nisabType.name.lowercase().replaceFirstChar { it.uppercase() }
+                } (${formatCurrency(entry.nisabValue)})",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -1,6 +1,7 @@
-What's new since 3.0.10:
+What's new since 3.0.25:
 
-• New Qaida reader: kids learn to read the Qur'an letter by letter — tap to hear sounds, follow a lesson journey, earn stars, and reset for another child.
-• Fasting now has one smart Tracker tab — Ramadan and voluntary fasts together; Makeup kept separate.
-• Refreshed Qibla compass and AR view, plus redesigned Names of Allah, Names of the Prophet ﷺ and Prophets screens.
-• New searchable Help & About, a refreshed Home, and reliability fixes.
+• Living Sky on Home — a calm, real-time sky that follows the sun through the day and shows the moon's phase at night.
+• New Prayer Times screen — browse any day, with a month calendar and per-day tracking.
+• Export your monthly prayer timetable as a polished PDF (Ramadan-aware, with Islamic events).
+• Choose your Qur'an Arabic font — Amiri or Scheherazade New — with a live preview.
+• Refreshed More menu, plus fixes and polish.

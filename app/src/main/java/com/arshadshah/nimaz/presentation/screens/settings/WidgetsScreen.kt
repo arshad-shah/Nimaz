@@ -17,9 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -792,8 +792,9 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
 
         val latitude = userPrefs.latitude.takeIf { it != 0.0 } ?: 53.3498
         val longitude = userPrefs.longitude.takeIf { it != 0.0 } ?: -6.2603
-        val locationName = userPrefs.locationName.takeIf { it.isNotBlank() }?.split(",")?.firstOrNull()?.trim()
-            ?: "Dublin"
+        val locationName =
+            userPrefs.locationName.takeIf { it.isNotBlank() }?.split(",")?.firstOrNull()?.trim()
+                ?: "Dublin"
 
         val calculator = PrayerTimeCalculator()
         val prayerTimes = calculator.getPrayerTimes(latitude, longitude)
@@ -854,7 +855,9 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
         // Get dates
         val hijriDate = HijriDateCalculator.today()
         val today = LocalDate.now()
-        val gregorianDate = "${today.dayOfMonth} ${today.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }}"
+        val gregorianDate = "${today.dayOfMonth} ${
+            today.month.name.take(3).lowercase().replaceFirstChar { it.uppercase() }
+        }"
         val dayOfWeek = today.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
 
         // Calendar grid data
@@ -867,7 +870,10 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
         val allEvents = HijriDateCalculator.getIslamicEvents(hijriDate.year)
         val todayEvents = allEvents
             .filter { it.day == hijriDate.day && it.month == hijriDate.month }
-            .map { it.name to it.type.name.replace("_", " ").lowercase().replaceFirstChar { c -> c.uppercase() } }
+            .map {
+                it.name to it.type.name.replace("_", " ").lowercase()
+                    .replaceFirstChar { c -> c.uppercase() }
+            }
 
         WidgetPreviewData(
             nextPrayerName = nextPrayerName,

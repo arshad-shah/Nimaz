@@ -25,9 +25,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
@@ -66,7 +66,10 @@ fun QaidaHomeScreen(
                         Icon(Icons.Filled.Translate, contentDescription = "Letter explorer")
                     }
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.more))
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.more)
+                        )
                     }
                     DropdownMenu(
                         expanded = menuExpanded,
@@ -87,7 +90,9 @@ fun QaidaHomeScreen(
             )
         },
     ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .padding(padding)) {
             QaidaCourseHeader(
                 titleArabic = "رِحْلَتِي مَعَ القاعدة",
                 titleEnglish = "My Qaida Journey",

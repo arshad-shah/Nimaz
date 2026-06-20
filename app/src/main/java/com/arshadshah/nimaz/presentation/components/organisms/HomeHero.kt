@@ -1,20 +1,33 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -25,17 +38,22 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
-import com.arshadshah.nimaz.presentation.components.molecules.CountdownTimer
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlinx.coroutines.delay
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneOffset
 
 /**
- * Centred prayer-info hero shown at the top of the compact (phone) home
- * screen. Composes the date pair, the next-prayer label/name (English &
- * Arabic), the [CountdownTimer], and the prayer's actual clock time.
+ * Home hero: a living-sky banner (current time + date) at the original hero
+ * height and corners (square top, rounded bottom), with the next-prayer card
+ * overlapping its curved bottom.
  *
- * Background gradient blends into the screen background as the user scrolls
- * past, while the dynamic top bar takes over above.
+ * Location + settings live in the dynamic top bar above, so the sky stays
+ * content-light and the sun arc has room to read. The card carries the prayer
+ * focus — name, time and the live countdown — and overlaps the sky so the two
+ * read as one unit that flows into the list below.
  */
 @Composable
 fun HomeHero(
@@ -46,96 +64,154 @@ fun HomeHero(
     timeUntilNextPrayer: String,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            // Clip BEFORE the gradient background so the gradient is painted
-            // within the rounded bounds — produces clean, anti-aliased curves
-            // at any density. The LazyColumn's background shows through the
-            // corner "cut-outs", making the hero read as a distinct container.
-            .clip(RoundedCornerShape(bottomStart = HERO_BOTTOM_RADIUS, bottomEnd = HERO_BOTTOM_RADIUS))
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.surface
-                    )
-                )
-            )
-    ) {
-        val useHijriPrimary = LocalUseHijriPrimary.current
-        Column(
+    var timeOfDay by remember { mutableFloatStateOf(minuteFractionNow()) }
+    var clock by remember { mutableStateOf(clockLabelNow()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            val now = LocalTime.now()
+            timeOfDay = (now.hour * 60 + now.minute) / 1440f
+            clock = formatClock12(now.hour, now.minute)
+            delay(30_000)
+        }
+    }
+    val moonFraction = remember {
+        MoonPhase.fractionForEpochMillis(
+            LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
+        )
+    }
+    val useHijriPrimary = LocalUseHijriPrimary.current
+    val shadow =
+        Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 6f)
+
+    // The screen is edge-to-edge, so grow the sky by the status-bar inset to
+    // leave a clean band of empty sky behind the status bar at the top.
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    Column(modifier = modifier.fillMaxWidth()) {
+        // Living-sky banner — original hero height plus the status-bar band.
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp, bottom = 30.dp, start = 8.dp, end = 8.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .height(HERO_SKY_HEIGHT + statusBarTop)
         ) {
-            Text(
-                text = if (useHijriPrimary) hijriDate.ifEmpty { "" } else gregorianDate,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Medium
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            Text(
-                text = if (useHijriPrimary) gregorianDate else hijriDate.ifEmpty { "" },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = stringResource(R.string.next_prayer),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                letterSpacing = 2.sp
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = nextPrayer?.displayName ?: "—",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold
+            SkyBackground(
+                timeOfDay = timeOfDay,
+                moonFraction = moonFraction,
+                modifier = Modifier.matchParentSize(),
+                shape = RoundedCornerShape(
+                    bottomStart = HERO_BOTTOM_RADIUS,
+                    bottomEnd = HERO_BOTTOM_RADIUS
                 ),
-                color = MaterialTheme.colorScheme.onSurface
             )
+            Column(
+                // Centre within the *visible* sky (below the status-bar band),
+                // not the full box — otherwise the content reads as too high.
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = statusBarTop),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = clock,
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = shadow
+                    ),
+                    color = Color.White,
+                )
+                Text(
+                    text = if (useHijriPrimary) hijriDate.ifEmpty { gregorianDate } else gregorianDate,
+                    style = MaterialTheme.typography.bodyMedium.copy(shadow = shadow),
+                    color = Color.White.copy(alpha = 0.9f),
+                )
+                if (useHijriPrimary && gregorianDate.isNotEmpty()) {
+                    Text(
+                        text = gregorianDate,
+                        style = MaterialTheme.typography.bodySmall.copy(shadow = shadow),
+                        color = Color.White.copy(alpha = 0.8f),
+                    )
+                }
+            }
+        }
 
-            ArabicText(
-                text = getArabicPrayerName(nextPrayer),
-                size = ArabicTextSize.MEDIUM,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            CountdownTimer(timeUntilNextPrayer = timeUntilNextPrayer)
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(
-                text = stringResource(R.string.at_time, nextPrayerTime),
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.secondary
-            )
+        // Next-prayer card overlapping the sky's curved bottom.
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .offset(y = (-28).dp),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 18.dp, vertical = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column {
+                    Text(
+                        text = stringResource(R.string.next_prayer),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        letterSpacing = 2.sp,
+                    )
+                    Row(verticalAlignment = Alignment.Bottom) {
+                        Text(
+                            text = nextPrayer?.displayName ?: "—",
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        ArabicText(
+                            text = getArabicPrayerName(nextPrayer),
+                            size = ArabicTextSize.SMALL,
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.at_time, nextPrayerTime),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Text(
+                    text = timeUntilNextPrayer,
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
         }
     }
 }
 
-/**
- * Bottom corner radius applied to the hero, exported so the screen layout can
- * mirror it if it ever needs to overlap the hero with another container.
- * 32.dp is wide enough to read as a deliberate "scoop" without dominating the
- * silhouette, and matches the rounded corners on the cards beneath
- * ([TodaysProgressCard] uses 20.dp; the hero gets a slightly larger radius to
- * read as the parent container of the layout).
- */
+private fun minuteFractionNow(): Float {
+    val now = LocalTime.now()
+    return (now.hour * 60 + now.minute) / 1440f
+}
+
+private fun clockLabelNow(): String {
+    val now = LocalTime.now()
+    return formatClock12(now.hour, now.minute)
+}
+
+private fun formatClock12(hour: Int, minute: Int): String {
+    val h = if (hour % 12 == 0) 12 else hour % 12
+    val amPm = if (hour >= 12) "PM" else "AM"
+    return String.format("%d:%02d %s", h, minute, amPm)
+}
+
+/** Sky-banner height — matches the original hero's height. */
+val HERO_SKY_HEIGHT = 280.dp
+
+/** Bottom corner radius applied to the hero. */
 val HERO_BOTTOM_RADIUS = 32.dp
 
-@Preview(showBackground = true, widthDp = 412)
+@Preview(showBackground = true, widthDp = 412, heightDp = 380)
 @Composable
 private fun HomeHero_Preview() {
     NimazTheme {
@@ -144,40 +220,7 @@ private fun HomeHero_Preview() {
             gregorianDate = "Friday, January 31, 2026",
             nextPrayer = PrayerType.ASR,
             nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "2h 15m 30s"
+            timeUntilNextPrayer = "1h 12m"
         )
-    }
-}
-
-/**
- * Preview showing the hero on top of a tinted background so you can see the
- * curved bottom cutting against content that scrolls beneath it.
- */
-@Preview(showBackground = true, widthDp = 412, heightDp = 560, name = "Hero on background")
-@Composable
-private fun HomeHero_WithSpacingBelow_Preview() {
-    NimazTheme {
-        androidx.compose.foundation.layout.Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
-        ) {
-            HomeHero(
-                hijriDate = "7 Rajab 1446",
-                gregorianDate = "Friday, January 31, 2026",
-                nextPrayer = PrayerType.ASR,
-                nextPrayerTime = "4:30 PM",
-                timeUntilNextPrayer = "2h 15m 30s"
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            androidx.compose.foundation.layout.Box(
-                modifier = Modifier
-                    .padding(horizontal = 20.dp)
-                    .fillMaxWidth()
-                    .height(120.dp)
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-            )
-        }
     }
 }

@@ -114,8 +114,8 @@ class InAppUpdateManager(private val activity: Activity) {
                 }
 
                 info.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE &&
-                    info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) &&
-                    launcher != null -> {
+                        info.isUpdateTypeAllowed(AppUpdateType.FLEXIBLE) &&
+                        launcher != null -> {
                     val launched = appUpdateManager.startUpdateFlowForResult(
                         info,
                         launcher,

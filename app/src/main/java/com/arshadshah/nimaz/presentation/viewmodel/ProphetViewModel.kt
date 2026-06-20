@@ -140,7 +140,10 @@ class ProphetViewModel @Inject constructor(
             source.filter { prophet ->
                 prophet.nameArabic.contains(state.searchQuery, ignoreCase = true) ||
                         prophet.nameEnglish.contains(state.searchQuery, ignoreCase = true) ||
-                        prophet.nameTransliteration.contains(state.searchQuery, ignoreCase = true) ||
+                        prophet.nameTransliteration.contains(
+                            state.searchQuery,
+                            ignoreCase = true
+                        ) ||
                         prophet.titleEnglish.contains(state.searchQuery, ignoreCase = true) ||
                         prophet.era.contains(state.searchQuery, ignoreCase = true)
             }

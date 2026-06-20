@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
 import android.Manifest
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.ui.text.font.FontFamily
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -10,6 +8,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -60,6 +59,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -173,157 +173,161 @@ fun OnboardingScreen(
                     .align(Alignment.TopCenter)
             )
             Column(modifier = Modifier.fillMaxSize()) {
-            // Skip Button
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                if (pagerState.currentPage < totalPages - 1) {
-                    TextButton(onClick = {
-                        viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
-                        onComplete()
-                    }) {
-                        Text(
-                            stringResource(R.string.onboarding_skip),
-                            color = IllumTextSoft
-                        )
-                    }
-                }
-            }
-
-            // Pager
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.weight(1f)
-            ) { page ->
-                if (page < infoPages.size) {
-                    InfoPageContent(page = infoPages[page])
-                } else {
-                    PermissionsPageContent(
-                        locationGranted = state.locationPermissionGranted,
-                        notificationGranted = state.notificationPermissionGranted,
-                        batteryOptDisabled = state.batteryOptimizationDisabled,
-                        locationName = if (state.locationDetected) state.locationName else null,
-                        onRequestLocation = {
-                            locationPermissionLauncher.launch(
-                                arrayOf(
-                                    Manifest.permission.ACCESS_FINE_LOCATION,
-                                    Manifest.permission.ACCESS_COARSE_LOCATION
-                                )
+                // Skip Button
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    if (pagerState.currentPage < totalPages - 1) {
+                        TextButton(onClick = {
+                            viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
+                            onComplete()
+                        }) {
+                            Text(
+                                stringResource(R.string.onboarding_skip),
+                                color = IllumTextSoft
                             )
-                        },
-                        onRequestNotification = {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            } else {
-                                viewModel.onEvent(OnboardingEvent.UpdatePermissionStatus(notification = true))
-                            }
-                        },
-                        onRequestBattery = {
-                            batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
                         }
-                    )
-                }
-            }
-
-            // Bottom Section
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Page Indicators
-                Row(
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(totalPages) { index ->
-                        val isSelected = index == pagerState.currentPage
-                        val scale by animateFloatAsState(
-                            targetValue = if (isSelected) 1f else 0.8f,
-                            label = "indicator_scale"
-                        )
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp)
-                                .size(if (isSelected) 10.dp else 8.dp)
-                                .scale(scale)
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) IllumGold
-                                    else Color.White.copy(alpha = 0.28f)
-                                )
-                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Navigation Buttons
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    AnimatedVisibility(
-                        visible = pagerState.currentPage > 0,
-                        enter = fadeIn(),
-                        exit = fadeOut()
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                // Pager
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.weight(1f)
+                ) { page ->
+                    if (page < infoPages.size) {
+                        InfoPageContent(page = infoPages[page])
+                    } else {
+                        PermissionsPageContent(
+                            locationGranted = state.locationPermissionGranted,
+                            notificationGranted = state.notificationPermissionGranted,
+                            batteryOptDisabled = state.batteryOptimizationDisabled,
+                            locationName = if (state.locationDetected) state.locationName else null,
+                            onRequestLocation = {
+                                locationPermissionLauncher.launch(
+                                    arrayOf(
+                                        Manifest.permission.ACCESS_FINE_LOCATION,
+                                        Manifest.permission.ACCESS_COARSE_LOCATION
+                                    )
+                                )
+                            },
+                            onRequestNotification = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                } else {
+                                    viewModel.onEvent(
+                                        OnboardingEvent.UpdatePermissionStatus(
+                                            notification = true
+                                        )
+                                    )
                                 }
                             },
-                            border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.6f)),
-                            colors = ButtonDefaults.outlinedButtonColors(
-                                contentColor = IllumGold
-                            )
-                        ) {
-                            Text(stringResource(R.string.onboarding_back))
-                        }
-                    }
-
-                    if (pagerState.currentPage == 0) {
-                        Spacer(modifier = Modifier.width(1.dp))
-                    }
-
-                    Button(
-                        onClick = {
-                            if (pagerState.currentPage == totalPages - 1) {
-                                viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
-                                onComplete()
-                            } else {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                                }
+                            onRequestBattery = {
+                                batteryOptimizationLauncher.launch(viewModel.getBatteryOptimizationIntent())
                             }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = IllumGold,
-                            contentColor = Color(0xFF0A2A2A)
-                        )
-                    ) {
-                        Text(
-                            if (pagerState.currentPage == totalPages - 1)
-                                stringResource(R.string.onboarding_get_started)
-                            else
-                                stringResource(R.string.onboarding_next)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = if (pagerState.currentPage == totalPages - 1)
-                                Icons.Default.Check
-                            else Icons.AutoMirrored.Filled.ArrowForward,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
-            }
+
+                // Bottom Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    // Page Indicators
+                    Row(
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        repeat(totalPages) { index ->
+                            val isSelected = index == pagerState.currentPage
+                            val scale by animateFloatAsState(
+                                targetValue = if (isSelected) 1f else 0.8f,
+                                label = "indicator_scale"
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 4.dp)
+                                    .size(if (isSelected) 10.dp else 8.dp)
+                                    .scale(scale)
+                                    .clip(CircleShape)
+                                    .background(
+                                        if (isSelected) IllumGold
+                                        else Color.White.copy(alpha = 0.28f)
+                                    )
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Navigation Buttons
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        AnimatedVisibility(
+                            visible = pagerState.currentPage > 0,
+                            enter = fadeIn(),
+                            exit = fadeOut()
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage - 1)
+                                    }
+                                },
+                                border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.6f)),
+                                colors = ButtonDefaults.outlinedButtonColors(
+                                    contentColor = IllumGold
+                                )
+                            ) {
+                                Text(stringResource(R.string.onboarding_back))
+                            }
+                        }
+
+                        if (pagerState.currentPage == 0) {
+                            Spacer(modifier = Modifier.width(1.dp))
+                        }
+
+                        Button(
+                            onClick = {
+                                if (pagerState.currentPage == totalPages - 1) {
+                                    viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
+                                    onComplete()
+                                } else {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+                                    }
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = IllumGold,
+                                contentColor = Color(0xFF0A2A2A)
+                            )
+                        ) {
+                            Text(
+                                if (pagerState.currentPage == totalPages - 1)
+                                    stringResource(R.string.onboarding_get_started)
+                                else
+                                    stringResource(R.string.onboarding_next)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Icon(
+                                imageVector = if (pagerState.currentPage == totalPages - 1)
+                                    Icons.Default.Check
+                                else Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -621,7 +625,9 @@ private fun FeatureRow(
 @Composable
 private fun InfoPagePreview() {
     NimazTheme {
-        Box(modifier = Modifier.fillMaxSize().background(illuminatedBackground)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(illuminatedBackground)) {
             InfoPageContent(
                 page = InfoPage(
                     title = "Welcome to Nimaz",
@@ -643,7 +649,9 @@ private fun InfoPagePreview() {
 @Composable
 private fun PermissionsPagePreview() {
     NimazTheme {
-        Box(modifier = Modifier.fillMaxSize().background(illuminatedBackground)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .background(illuminatedBackground)) {
             PermissionsPageContent(
                 locationGranted = true,
                 notificationGranted = false,

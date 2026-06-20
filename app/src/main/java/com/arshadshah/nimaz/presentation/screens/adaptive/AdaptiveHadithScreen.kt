@@ -8,13 +8,13 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable

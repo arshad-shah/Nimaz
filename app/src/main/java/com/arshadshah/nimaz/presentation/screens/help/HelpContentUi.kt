@@ -23,11 +23,11 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.RocketLaunch
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.NotificationsActive
+import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Tune
@@ -102,7 +102,10 @@ fun HelpIconBox(iconKey: String?, tint: Color, boxSize: Dp = 38.dp) {
 fun HelpTopicTile(topic: HelpTopic, modifier: Modifier = Modifier, onClick: () -> Unit) {
     val tint = helpColor(topic.colorKey)
     NimazCard(modifier = modifier, style = NimazCardStyle.OUTLINED, onClick = onClick) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            modifier = Modifier.padding(14.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             HelpIconBox(topic.iconKey, tint)
             Text(
                 text = topic.title,

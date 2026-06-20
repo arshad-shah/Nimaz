@@ -64,7 +64,8 @@ fun NimazSettingsItem(
                 tintIcon -> iconTint.copy(alpha = 0.15f)
                 else -> MaterialTheme.colorScheme.surfaceContainerHighest
             }
-            val resolvedTint = if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
+            val resolvedTint =
+                if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
 
             Box(
                 modifier = Modifier
@@ -108,6 +109,7 @@ fun NimazSettingsItem(
                     onCheckedChange = onCheckedChange
                 )
             }
+
             showArrow || (onClick != null && checked == null) -> {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,

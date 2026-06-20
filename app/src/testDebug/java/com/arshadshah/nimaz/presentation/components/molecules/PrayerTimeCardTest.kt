@@ -52,7 +52,7 @@ class PrayerTimeCardTest {
     }
 
     @Test
-    fun `active prayer shows NEXT pill`() {
+    fun `active prayer renders its name and time`() {
         composeRule.setThemedContent {
             PrayerTimeCard(
                 prayer = display(isCurrent = true, isNext = true),
@@ -62,15 +62,18 @@ class PrayerTimeCardTest {
             )
         }
 
-        composeRule.onNodeWithText("NEXT").assertExists()
+        // The active card is conveyed by its container/accent (not a textual
+        // pill); its name and time still render.
+        composeRule.onNodeWithText("Asr").assertExists()
+        composeRule.onNodeWithText("4:30 PM").assertExists()
     }
 
     @Test
-    fun `inactive prayer does not show NEXT pill`() {
+    fun `card shows no textual NEXT pill`() {
         composeRule.setThemedContent {
             PrayerTimeCard(
-                prayer = display(),
-                isActive = false,
+                prayer = display(isCurrent = true, isNext = true),
+                isActive = true,
                 onClick = {},
                 onToggle = {}
             )

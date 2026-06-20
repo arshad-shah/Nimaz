@@ -200,23 +200,38 @@ private fun buildStrand(w: Float, h: Float, design: BeadDesign, mirrored: Boolea
     )
 }
 
-private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign, mirrored: Boolean) {
+private fun DrawScope.drawStrand(
+    pos: Float,
+    beadCount: Int,
+    design: BeadDesign,
+    mirrored: Boolean
+) {
     val g = buildStrand(size.width, size.height, design, mirrored)
     val a0 = floor(pos).toInt()
     val frac = pos - a0
+
     // The imame (jade leader bead) marks each completed lap. For tiny targets every
     // bead would be a lap-end, flooding the strand green and hiding the design — so
     // only show it when the target is large enough to read as a sparse marker.
     fun imame(rank: Int) = beadCount >= 7 && ((rank % beadCount) + beadCount) % beadCount == 0
 
-    drawPath(g.cordPath(), color = design.cord, style = Stroke(width = g.beadR * 0.16f, cap = StrokeCap.Round))
+    drawPath(
+        g.cordPath(),
+        color = design.cord,
+        style = Stroke(width = g.beadR * 0.16f, cap = StrokeCap.Round)
+    )
 
     // Lower bunch — counted beads, packed below the gap, drifting along with frac.
     var k = 0
     while (true) {
         val d = g.gapBottom + (k + frac) * g.pack
         if (d > g.total + g.beadR * 2f) break
-        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 - 1 - k)) design.imame else design.resting)
+        design.drawBead(
+            this,
+            g.point(d),
+            g.beadR,
+            if (imame(a0 - 1 - k)) design.imame else design.resting
+        )
         k++
     }
 
@@ -225,7 +240,12 @@ private fun DrawScope.drawStrand(pos: Float, beadCount: Int, design: BeadDesign,
     while (true) {
         val d = g.gapTop - (m - frac) * g.pack
         if (d < -g.beadR * 2f) break
-        design.drawBead(this, g.point(d), g.beadR, if (imame(a0 + m)) design.imame else design.resting)
+        design.drawBead(
+            this,
+            g.point(d),
+            g.beadR,
+            if (imame(a0 + m)) design.imame else design.resting
+        )
         m++
     }
 
@@ -251,11 +271,19 @@ private fun blend(a: Color, b: Color, t: Float) = androidx.compose.ui.graphics.l
 
 // Preview
 
-@Preview(name = "Tasbih Beads", widthDp = 320, heightDp = 300, showBackground = true, backgroundColor = 0xFF0B100E)
+@Preview(
+    name = "Tasbih Beads",
+    widthDp = 320,
+    heightDp = 300,
+    showBackground = true,
+    backgroundColor = 0xFF0B100E
+)
 @Composable
 private fun TasbihBeadsPreview() {
     var count by remember { mutableIntStateOf(7) }
-    Box(modifier = Modifier.background(Color(0xFF0B100E)).size(320.dp, 300.dp)) {
+    Box(modifier = Modifier
+        .background(Color(0xFF0B100E))
+        .size(320.dp, 300.dp)) {
         TasbihBeads(
             count = count,
             onIncrement = { count++ },

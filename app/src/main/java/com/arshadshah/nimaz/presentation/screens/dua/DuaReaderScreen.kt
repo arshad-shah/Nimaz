@@ -11,21 +11,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
+import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -48,12 +48,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
@@ -145,7 +145,10 @@ fun DuaReaderScreen(
             state.dua?.let { dua ->
                 val repeatCount = dua.repeatCount ?: 0
                 val firstDuaMsg = stringResource(R.string.dua_reader_first_dua)
-                val sourceLabel = if (!dua.reference.isNullOrEmpty()) stringResource(R.string.dua_reader_source_label, dua.reference) else ""
+                val sourceLabel = if (!dua.reference.isNullOrEmpty()) stringResource(
+                    R.string.dua_reader_source_label,
+                    dua.reference
+                ) else ""
                 val shareLabel = stringResource(R.string.dua_reader_share)
 
                 Column(
@@ -183,7 +186,11 @@ fun DuaReaderScreen(
                         verticalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         // Dua Card
-                        DuaCard(dua = dua, arabicFontSize = state.arabicFontSize, fontSize = state.fontSize)
+                        DuaCard(
+                            dua = dua,
+                            arabicFontSize = state.arabicFontSize,
+                            fontSize = state.fontSize
+                        )
 
                         // Repeat Counter
                         if (repeatCount > 0) {
@@ -436,7 +443,10 @@ private fun DuaCard(
                                 MetaItem(
                                     icon = Icons.Default.Refresh,
                                     label = stringResource(R.string.dua_reader_recommended),
-                                    value = if (count > 1) stringResource(R.string.dua_reader_recite_times, count) else stringResource(R.string.dua_reader_recite_once, count)
+                                    value = if (count > 1) stringResource(
+                                        R.string.dua_reader_recite_times,
+                                        count
+                                    ) else stringResource(R.string.dua_reader_recite_once, count)
                                 )
                             }
                         }

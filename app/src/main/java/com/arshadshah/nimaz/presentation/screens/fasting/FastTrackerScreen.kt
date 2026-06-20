@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +35,6 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -51,10 +49,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
@@ -68,16 +66,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
-import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.presentation.viewmodel.FastManagementSheetState
 import com.arshadshah.nimaz.presentation.viewmodel.FastingEvent
 import com.arshadshah.nimaz.presentation.viewmodel.FastingViewModel
 import java.time.DayOfWeek
@@ -107,7 +104,10 @@ fun FastTrackerScreen(
     val sheetState by viewModel.sheetState.collectAsState()
 
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf(stringResource(R.string.fasting_tab_tracker), stringResource(R.string.fasting_tab_makeup))
+    val tabs = listOf(
+        stringResource(R.string.fasting_tab_tracker),
+        stringResource(R.string.fasting_tab_makeup)
+    )
 
     // Fast management bottom sheet
     FastManagementBottomSheet(
@@ -120,7 +120,13 @@ fun FastTrackerScreen(
         initialNote = sheetState.note,
         onSave = { status, fastType, exemptionReason, note ->
             viewModel.onEvent(
-                FastingEvent.SaveFastForDate(sheetState.date, status, fastType, exemptionReason, note)
+                FastingEvent.SaveFastForDate(
+                    sheetState.date,
+                    status,
+                    fastType,
+                    exemptionReason,
+                    note
+                )
             )
         },
         onDelete = { viewModel.onEvent(FastingEvent.DeleteFastRecord(sheetState.date)) },
@@ -190,9 +196,18 @@ fun FastTrackerScreen(
                         item {
                             NimazStatsGrid(
                                 stats = listOf(
-                                    NimazStatData(ramadanState.fastedDays.toString(), stringResource(R.string.fasting_fasted)),
-                                    NimazStatData(ramadanState.missedDays.toString(), stringResource(R.string.fasting_missed)),
-                                    NimazStatData(ramadanState.remainingDays.toString(), stringResource(R.string.fasting_remaining))
+                                    NimazStatData(
+                                        ramadanState.fastedDays.toString(),
+                                        stringResource(R.string.fasting_fasted)
+                                    ),
+                                    NimazStatData(
+                                        ramadanState.missedDays.toString(),
+                                        stringResource(R.string.fasting_missed)
+                                    ),
+                                    NimazStatData(
+                                        ramadanState.remainingDays.toString(),
+                                        stringResource(R.string.fasting_remaining)
+                                    )
                                 )
                             )
                         }
@@ -236,13 +251,17 @@ fun FastTrackerScreen(
                             selectedMonth = calendarState.selectedMonth,
                             selectedYear = calendarState.selectedYear,
                             onPreviousMonth = {
-                                val newMonth = if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
-                                val newYear = if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
+                                val newMonth =
+                                    if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
+                                val newYear =
+                                    if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
                                 viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
                             },
                             onNextMonth = {
-                                val newMonth = if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
-                                val newYear = if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
+                                val newMonth =
+                                    if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
+                                val newYear =
+                                    if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
                                 viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
                             },
                             onSelectDate = { date ->
@@ -273,6 +292,7 @@ fun FastTrackerScreen(
                         )
                     }
                 }
+
                 1 -> {
                     // Makeup Tab - Show makeup fasts inline
                     item {
@@ -405,7 +425,9 @@ private fun RamadanCountdownCard(
                 color = Color.White
             )
             Text(
-                text = if (daysUntilRamadan == 1) stringResource(R.string.fasting_day) else stringResource(R.string.fasting_days),
+                text = if (daysUntilRamadan == 1) stringResource(R.string.fasting_day) else stringResource(
+                    R.string.fasting_days
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = Color.White.copy(alpha = 0.9f)
             )
@@ -469,7 +491,9 @@ private fun RamadanMissedFastsTracker(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = if (unloggedDays == 1) stringResource(R.string.fasting_unlogged_day) else stringResource(R.string.fasting_unlogged_days),
+                        text = if (unloggedDays == 1) stringResource(R.string.fasting_unlogged_day) else stringResource(
+                            R.string.fasting_unlogged_days
+                        ),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface
@@ -551,16 +575,19 @@ private fun TodayFastSection(
                             NimazColors.FastingColors.Fasted,
                             fastingStatusText
                         )
+
                         FastStatus.NOT_FASTED -> Triple(
                             MaterialTheme.colorScheme.surfaceVariant,
                             MaterialTheme.colorScheme.onSurfaceVariant,
                             notFastingStatusText
                         )
+
                         FastStatus.EXEMPTED -> Triple(
                             NimazColors.FastingColors.Exempted.copy(alpha = 0.2f),
                             NimazColors.FastingColors.Exempted,
                             exemptedStatusText
                         )
+
                         FastStatus.MAKEUP_DUE -> Triple(
                             NimazColors.FastingColors.Makeup.copy(alpha = 0.2f),
                             NimazColors.FastingColors.Makeup,
@@ -598,7 +625,10 @@ private fun TodayFastSection(
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(15.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(
                                 text = stringResource(R.string.fasting_suhoor_ends),
                                 style = MaterialTheme.typography.labelSmall,
@@ -613,7 +643,9 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else stringResource(R.string.fasting_completed),
+                                text = if (isSuhoorTime && timeUntilSuhoor.isNotEmpty()) timeUntilSuhoor else stringResource(
+                                    R.string.fasting_completed
+                                ),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -628,7 +660,10 @@ private fun TodayFastSection(
                             .background(MaterialTheme.colorScheme.surface)
                             .padding(15.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
                             Text(
                                 text = stringResource(R.string.fasting_iftar),
                                 style = MaterialTheme.typography.labelSmall,
@@ -643,7 +678,9 @@ private fun TodayFastSection(
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
-                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) stringResource(R.string.fasting_waiting) else stringResource(R.string.fasting_completed),
+                                text = if (!isSuhoorTime && timeUntilIftar.isNotEmpty()) timeUntilIftar else if (isSuhoorTime) stringResource(
+                                    R.string.fasting_waiting
+                                ) else stringResource(R.string.fasting_completed),
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -754,11 +791,17 @@ private fun RecommendedFastsSection(
 
     // Calculate next Monday
     val nextMonday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY))
-    val mondayText = if (nextMonday == today) todayText else stringResource(R.string.fasting_next_format, nextMonday.format(dateFormatter))
+    val mondayText = if (nextMonday == today) todayText else stringResource(
+        R.string.fasting_next_format,
+        nextMonday.format(dateFormatter)
+    )
 
     // Calculate next Thursday
     val nextThursday = today.with(TemporalAdjusters.nextOrSame(DayOfWeek.THURSDAY))
-    val thursdayText = if (nextThursday == today) todayText else stringResource(R.string.fasting_next_format, nextThursday.format(dateFormatter))
+    val thursdayText = if (nextThursday == today) todayText else stringResource(
+        R.string.fasting_next_format,
+        nextThursday.format(dateFormatter)
+    )
 
     // Calculate Ayyam al-Beed status (13th, 14th, 15th of lunar month)
     val ayyamDays = calculateAyyamAlBeedDays(today)
@@ -785,46 +828,56 @@ private fun RecommendedFastsSection(
             events.filter { it.name == "Day of Ashura" }.forEach { event ->
                 val date = event.toGregorianDate()
                 if (!date.isBefore(today)) {
-                    add(RecommendedIslamicFast(
-                        name = "Day of Ashura",
-                        date = date,
-                        description = "10th Muharram - highly recommended fast"
-                    ))
+                    add(
+                        RecommendedIslamicFast(
+                            name = "Day of Ashura",
+                            date = date,
+                            description = "10th Muharram - highly recommended fast"
+                        )
+                    )
                 }
             }
             // Day of Arafah (9 Dhul Hijjah)
             events.filter { it.name == "Day of Arafah" }.forEach { event ->
                 val date = event.toGregorianDate()
                 if (!date.isBefore(today)) {
-                    add(RecommendedIslamicFast(
-                        name = "Day of Arafah",
-                        date = date,
-                        description = "9th Dhul Hijjah - expiates two years"
-                    ))
+                    add(
+                        RecommendedIslamicFast(
+                            name = "Day of Arafah",
+                            date = date,
+                            description = "9th Dhul Hijjah - expiates two years"
+                        )
+                    )
                 }
             }
             // 6 Days of Shawwal
             try {
                 val shawwalStart = HijriDateCalculator.toGregorian(2, 10, hijriToday.year)
                 if (!shawwalStart.isBefore(today)) {
-                    add(RecommendedIslamicFast(
-                        name = "6 Days of Shawwal",
-                        date = shawwalStart,
-                        description = "Fasting 6 days after Eid al-Fitr"
-                    ))
+                    add(
+                        RecommendedIslamicFast(
+                            name = "6 Days of Shawwal",
+                            date = shawwalStart,
+                            description = "Fasting 6 days after Eid al-Fitr"
+                        )
+                    )
                 }
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
             // Mid-Sha'ban (15 Sha'ban)
             try {
                 val midShaban = HijriDateCalculator.toGregorian(15, 8, hijriToday.year)
                 if (!midShaban.isBefore(today)) {
-                    add(RecommendedIslamicFast(
-                        name = "Mid-Sha'ban",
-                        date = midShaban,
-                        description = "15th Sha'ban - recommended fast"
-                    ))
+                    add(
+                        RecommendedIslamicFast(
+                            name = "Mid-Sha'ban",
+                            date = midShaban,
+                            description = "15th Sha'ban - recommended fast"
+                        )
+                    )
                 }
-            } catch (_: Exception) { }
+            } catch (_: Exception) {
+            }
         }.take(3) // Show at most 3 upcoming
     }
 
@@ -873,8 +926,10 @@ private fun RecommendedFastsSection(
                         val nextMonth = if (hijri.day > 15) {
                             if (hijri.month == 12) 1 else hijri.month + 1
                         } else hijri.month
-                        val nextYear = if (hijri.day > 15 && hijri.month == 12) hijri.year + 1 else hijri.year
-                        val ayyamDate = HijriDateCalculator.toGregorian(targetDay, nextMonth, nextYear)
+                        val nextYear =
+                            if (hijri.day > 15 && hijri.month == 12) hijri.year + 1 else hijri.year
+                        val ayyamDate =
+                            HijriDateCalculator.toGregorian(targetDay, nextMonth, nextYear)
                         onLogFast(ayyamDate)
                     } catch (_: Exception) {
                         onLogFast(today)
@@ -889,7 +944,10 @@ private fun RecommendedFastsSection(
                 val dateText = when {
                     daysUntil == 0 -> todayText
                     daysUntil == 1 -> stringResource(R.string.fasting_tomorrow)
-                    else -> stringResource(R.string.fasting_next_format, fastDate.format(dateFormatter))
+                    else -> stringResource(
+                        R.string.fasting_next_format,
+                        fastDate.format(dateFormatter)
+                    )
                 }
                 RecommendedFastCard(
                     icon = Icons.Default.NightsStay,
@@ -911,7 +969,8 @@ private fun calculateAyyamAlBeedDays(today: LocalDate): Int {
         13, 14, 15 -> 0 // Currently Ayyam al-Beed
         in 1..12 -> 13 - hijriDay
         else -> {
-            val daysInMonth = HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
+            val daysInMonth =
+                HijriDateCalculator.getDaysInHijriMonth(hijriDate.year, hijriDate.month)
             val daysUntilNextMonth = daysInMonth - hijriDay
             daysUntilNextMonth + 13
         }
@@ -1078,8 +1137,16 @@ private fun MakeupFastsContent(
             // Stats Grid
             NimazStatsGrid(
                 stats = listOf(
-                    NimazStatData("$completedCount", stringResource(R.string.fasting_completed_label), GreenAccent),
-                    NimazStatData("${makeupState.pendingCount}", stringResource(R.string.fasting_pending_label), OrangeAccent),
+                    NimazStatData(
+                        "$completedCount",
+                        stringResource(R.string.fasting_completed_label),
+                        GreenAccent
+                    ),
+                    NimazStatData(
+                        "${makeupState.pendingCount}",
+                        stringResource(R.string.fasting_pending_label),
+                        OrangeAccent
+                    ),
                     NimazStatData("$totalCount", stringResource(R.string.fasting_total_label))
                 )
             )
@@ -1096,7 +1163,10 @@ private fun MakeupFastsContent(
             if (makeupState.pendingMakeupFasts.isNotEmpty()) {
                 NimazSectionHeader(
                     title = stringResource(R.string.fasting_pending),
-                    trailingText = stringResource(R.string.fasting_pending_count, makeupState.pendingCount),
+                    trailingText = stringResource(
+                        R.string.fasting_pending_count,
+                        makeupState.pendingCount
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -1114,7 +1184,10 @@ private fun MakeupFastsContent(
                 Spacer(modifier = Modifier.height(4.dp))
                 NimazSectionHeader(
                     title = stringResource(R.string.fasting_completed_label),
-                    trailingText = stringResource(R.string.fasting_fasts_count, completedFasts.size),
+                    trailingText = stringResource(
+                        R.string.fasting_fasts_count,
+                        completedFasts.size
+                    ),
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -1313,7 +1386,10 @@ private fun MakeupCompletedFastItem(
             stringResource(R.string.fasting_fidya_paid_on, date)
         else
             stringResource(R.string.fasting_made_up_on, date)
-    } ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) stringResource(R.string.fasting_fidya_paid) else stringResource(R.string.fasting_completed)
+    }
+        ?: if (makeupFast.status == MakeupFastStatus.FIDYA_PAID) stringResource(R.string.fasting_fidya_paid) else stringResource(
+            R.string.fasting_completed
+        )
 
     val originalLabel = makeupFast.originalHijriDate?.let {
         stringResource(R.string.fasting_originally, it)

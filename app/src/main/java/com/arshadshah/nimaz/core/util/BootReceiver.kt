@@ -137,10 +137,12 @@ class BootReceiver : BroadcastReceiver() {
     }
 
     private fun handlePrayerNotification(context: Context, intent: Intent) {
-        val prayerName = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_NAME) ?: "Prayer"
+        val prayerName =
+            intent.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_NAME) ?: "Prayer"
         val prayerTime = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_TIME) ?: ""
         val prayerType = intent.getStringExtra(PrayerNotificationScheduler.EXTRA_PRAYER_TYPE) ?: ""
-        val isPreReminder = intent.getBooleanExtra(PrayerNotificationScheduler.EXTRA_IS_PRE_REMINDER, false)
+        val isPreReminder =
+            intent.getBooleanExtra(PrayerNotificationScheduler.EXTRA_IS_PRE_REMINDER, false)
 
         val isFajr = prayerType.equals("FAJR", ignoreCase = true)
         val isSunrise = prayerType.equals("SUNRISE", ignoreCase = true)
@@ -162,7 +164,13 @@ class BootReceiver : BroadcastReceiver() {
 
                 if (isPreReminder) {
                     val reminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
-                    showEnhancedPreReminderNotification(context, prayerName, prayerType, reminderMinutes, vibrationEnabled)
+                    showEnhancedPreReminderNotification(
+                        context,
+                        prayerName,
+                        prayerType,
+                        reminderMinutes,
+                        vibrationEnabled
+                    )
                     AppAnalytics.logNotificationDisplayed(
                         prayerType = prayerType,
                         isPreReminder = true,
@@ -174,15 +182,19 @@ class BootReceiver : BroadcastReceiver() {
                 }
 
                 val globalAdhanEnabled = preferencesDataStore.adhanEnabled.first()
-                val prayerAdhanEnabled = preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
+                val prayerAdhanEnabled =
+                    preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
                 val respectDnd = preferencesDataStore.adhanRespectDnd.first()
-                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-                val isDndActive = notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                val isDndActive =
+                    notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
                 val dndBlocksAdhan = respectDnd && isDndActive
 
-                val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
+                val shouldPlayAdhan =
+                    globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
                 val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
 
                 // Get notification content for merging into adhan service notification
@@ -196,14 +208,21 @@ class BootReceiver : BroadcastReceiver() {
                     val adhanSound = AdhanSound.fromName(selectedAdhan)
                     // Check for the specific variant needed, or accept beep as fallback
                     val hasCorrectVariant = adhanAudioManager.isDownloaded(adhanSound, isFajr)
-                    val hasBeepFallback = adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
+                    val hasBeepFallback =
+                        adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
                     val hasAdhan = hasCorrectVariant || hasBeepFallback
 
                     // If the correct variant is missing, schedule a re-download for next time
                     if (!hasCorrectVariant) {
-                        android.util.Log.w("BootReceiver", "Missing ${adhanSound.name} variant (isFajr=$isFajr), triggering re-download")
+                        android.util.Log.w(
+                            "BootReceiver",
+                            "Missing ${adhanSound.name} variant (isFajr=$isFajr), triggering re-download"
+                        )
                         AdhanDownloadService.downloadSelected(context, adhanSound)
-                        AppAnalytics.logAdhanFileMissing(adhanSound = adhanSound.name, isFajr = isFajr)
+                        AppAnalytics.logAdhanFileMissing(
+                            adhanSound = adhanSound.name,
+                            isFajr = isFajr
+                        )
                     }
 
                     if (hasAdhan) {
@@ -277,7 +296,14 @@ class BootReceiver : BroadcastReceiver() {
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
-                showEnhancedPrayerNotification(context, prayerName, prayerType, prayerTime, false, true)
+                showEnhancedPrayerNotification(
+                    context,
+                    prayerName,
+                    prayerType,
+                    prayerTime,
+                    false,
+                    true
+                )
                 AppAnalytics.logError("notification_display", e.javaClass.simpleName, e.message)
                 AppAnalytics.logNotificationDisplayed(
                     prayerType = prayerType,
@@ -322,7 +348,8 @@ class BootReceiver : BroadcastReceiver() {
         minutesBefore: Int,
         vibrationEnabled: Boolean
     ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val openPendingIntent = mainIntent?.let {
@@ -334,26 +361,28 @@ class BootReceiver : BroadcastReceiver() {
             )
         }
 
-        val title = NotificationContentHelper.getPreReminderTitle(context, prayerName, minutesBefore)
+        val title =
+            NotificationContentHelper.getPreReminderTitle(context, prayerName, minutesBefore)
         val message = NotificationContentHelper.getPreReminderMessage(context, prayerName)
         val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting(context)}"
 
-        val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
-            .setSmallIcon(R.drawable.ic_stat_nimaz)
-            .setContentTitle(title)
-            .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
-            .setAutoCancel(true)
-            .setContentIntent(openPendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_REMINDER)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .apply {
-                if (!vibrationEnabled) {
-                    setVibrate(longArrayOf(0L))
+        val notification =
+            NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
+                .setSmallIcon(R.drawable.ic_stat_nimaz)
+                .setContentTitle(title)
+                .setContentText(message)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(bigText))
+                .setAutoCancel(true)
+                .setContentIntent(openPendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .apply {
+                    if (!vibrationEnabled) {
+                        setVibrate(longArrayOf(0L))
+                    }
                 }
-            }
-            .build()
+                .build()
 
         notificationManager.notify((prayerName + "_reminder").hashCode(), notification)
     }
@@ -369,12 +398,14 @@ class BootReceiver : BroadcastReceiver() {
         adhanEnabled: Boolean = false,
         vibrationEnabled: Boolean = true
     ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         // Create intent to open app and stop adhan
-        val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
-            putExtra(EXTRA_STOP_ADHAN, true)
-        }
+        val mainIntent =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.apply {
+                putExtra(EXTRA_STOP_ADHAN, true)
+            }
         val openPendingIntent = mainIntent?.let {
             PendingIntent.getActivity(
                 context,
@@ -412,9 +443,11 @@ class BootReceiver : BroadcastReceiver() {
             .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(title)
             .setContentText(shortMessage)
-            .setStyle(NotificationCompat.BigTextStyle()
-                .bigText(bigText)
-                .setBigContentTitle(title))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(bigText)
+                    .setBigContentTitle(title)
+            )
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
             .setDeleteIntent(dismissPendingIntent)
@@ -454,8 +487,10 @@ class BootReceiver : BroadcastReceiver() {
 
                 // Count prayed and missed (excluding Sunrise)
                 val mainPrayers = prayerRecords.filter { it.prayerName != PrayerName.SUNRISE }
-                val prayedCount = mainPrayers.count { it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE }
-                val missedCount = mainPrayers.count { it.status == PrayerStatus.MISSED || it.status == PrayerStatus.NOT_PRAYED }
+                val prayedCount =
+                    mainPrayers.count { it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE }
+                val missedCount =
+                    mainPrayers.count { it.status == PrayerStatus.MISSED || it.status == PrayerStatus.NOT_PRAYED }
                 val missedPrayers = mainPrayers
                     .filter { it.status == PrayerStatus.MISSED || it.status == PrayerStatus.NOT_PRAYED }
                     .map { it.prayerName.displayName() }
@@ -469,7 +504,10 @@ class BootReceiver : BroadcastReceiver() {
                 )
 
                 showDailySummaryNotification(context, summaryContent)
-                AppAnalytics.logDailySummaryShown(prayedCount = prayedCount, missedCount = missedCount)
+                AppAnalytics.logDailySummaryShown(
+                    prayedCount = prayedCount,
+                    missedCount = missedCount
+                )
 
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -485,7 +523,8 @@ class BootReceiver : BroadcastReceiver() {
         context: Context,
         content: NotificationContentHelper.DailySummaryContent
     ) {
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
 
         val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
         val openPendingIntent = mainIntent?.let {
@@ -504,13 +543,18 @@ class BootReceiver : BroadcastReceiver() {
             0xFFFF9800.toInt() // Orange for needs improvement
         }
 
-        val notification = NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY)
+        val notification = NotificationCompat.Builder(
+            context,
+            PrayerNotificationScheduler.CHANNEL_ID_DAILY_SUMMARY
+        )
             .setSmallIcon(R.drawable.ic_stat_nimaz)
             .setContentTitle(content.title)
             .setContentText(content.message)
-            .setStyle(NotificationCompat.BigTextStyle()
-                .bigText(content.bigText)
-                .setBigContentTitle(content.title))
+            .setStyle(
+                NotificationCompat.BigTextStyle()
+                    .bigText(content.bigText)
+                    .setBigContentTitle(content.title)
+            )
             .setAutoCancel(true)
             .setContentIntent(openPendingIntent)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)

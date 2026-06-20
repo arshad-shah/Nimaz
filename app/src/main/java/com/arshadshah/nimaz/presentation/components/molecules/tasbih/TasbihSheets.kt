@@ -36,7 +36,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -63,7 +62,9 @@ fun BeadDesignPickerSheet(
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp).padding(bottom = 24.dp)) {
+        Column(modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 24.dp)) {
             Text(
                 text = stringResource(R.string.tasbih_bead_design),
                 style = MaterialTheme.typography.titleMedium,
@@ -109,7 +110,9 @@ fun BeadDesignPickerSheet(
             Spacer(Modifier.height(20.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -151,7 +154,10 @@ fun CurrentTasbihSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp).padding(bottom = 24.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .padding(bottom = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (!preset?.arabicText.isNullOrEmpty()) {
@@ -184,9 +190,21 @@ fun CurrentTasbihSheet(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                StatTile(stringResource(R.string.tasbih_stat_target), targetCount.toString(), Modifier.weight(1f))
-                StatTile(stringResource(R.string.tasbih_stat_today), totalToday.toString(), Modifier.weight(1f))
-                StatTile(stringResource(R.string.tasbih_stat_laps), laps.toString(), Modifier.weight(1f))
+                StatTile(
+                    stringResource(R.string.tasbih_stat_target),
+                    targetCount.toString(),
+                    Modifier.weight(1f)
+                )
+                StatTile(
+                    stringResource(R.string.tasbih_stat_today),
+                    totalToday.toString(),
+                    Modifier.weight(1f)
+                )
+                StatTile(
+                    stringResource(R.string.tasbih_stat_laps),
+                    laps.toString(),
+                    Modifier.weight(1f)
+                )
             }
 
             // Free count: let the user dial in any target.
@@ -222,7 +240,10 @@ fun CurrentTasbihSheet(
                     .padding(vertical = 14.dp),
                 contentAlignment = Alignment.Center
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.CompareArrows,
                         contentDescription = null,
@@ -264,7 +285,10 @@ private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { onChange((target - 1).coerceAtLeast(1)) }) {
-                Icon(Icons.Default.Remove, contentDescription = stringResource(R.string.tasbih_decrease_target))
+                Icon(
+                    Icons.Default.Remove,
+                    contentDescription = stringResource(R.string.tasbih_decrease_target)
+                )
             }
             Text(
                 text = stringResource(R.string.tasbih_target_value, target),
@@ -273,7 +297,10 @@ private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = { onChange((target + 1).coerceAtMost(9999)) }) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.tasbih_increase_target))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.tasbih_increase_target)
+                )
             }
         }
     }

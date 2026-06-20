@@ -62,7 +62,10 @@ sealed interface PrayerTrackerEvent {
         val status: PrayerStatus,
         val isJamaah: Boolean = false
     ) : PrayerTrackerEvent
-    data class MarkPrayerPrayed(val prayerName: PrayerName, val isJamaah: Boolean = false) : PrayerTrackerEvent
+
+    data class MarkPrayerPrayed(val prayerName: PrayerName, val isJamaah: Boolean = false) :
+        PrayerTrackerEvent
+
     data class MarkPrayerMissed(val prayerName: PrayerName) : PrayerTrackerEvent
     data class MarkQadaCompleted(val record: PrayerRecord) : PrayerTrackerEvent
     data class SetStatsPeriod(val period: StatsPeriod) : PrayerTrackerEvent
@@ -105,12 +108,20 @@ class PrayerTrackerViewModel @Inject constructor(
         when (event) {
             is PrayerTrackerEvent.MarkPrayerPrayed ->
                 AppAnalytics.logPrayerTracked(event.prayerName.name, "prayed", event.isJamaah)
+
             is PrayerTrackerEvent.MarkPrayerMissed ->
                 AppAnalytics.logPrayerTracked(event.prayerName.name, "missed")
+
             is PrayerTrackerEvent.UpdatePrayerStatus ->
-                AppAnalytics.logPrayerTracked(event.prayerName.name, event.status.name, event.isJamaah)
+                AppAnalytics.logPrayerTracked(
+                    event.prayerName.name,
+                    event.status.name,
+                    event.isJamaah
+                )
+
             is PrayerTrackerEvent.MarkQadaCompleted ->
                 AppAnalytics.logFeatureUsed("prayer_tracker", "qada_completed")
+
             else -> {}
         }
         when (event) {
@@ -120,7 +131,12 @@ class PrayerTrackerViewModel @Inject constructor(
                 event.status,
                 event.isJamaah
             )
-            is PrayerTrackerEvent.MarkPrayerPrayed -> markPrayerPrayed(event.prayerName, event.isJamaah)
+
+            is PrayerTrackerEvent.MarkPrayerPrayed -> markPrayerPrayed(
+                event.prayerName,
+                event.isJamaah
+            )
+
             is PrayerTrackerEvent.MarkPrayerMissed -> markPrayerMissed(event.prayerName)
             is PrayerTrackerEvent.MarkQadaCompleted -> markQadaCompleted(event.record)
             is PrayerTrackerEvent.SetStatsPeriod -> setStatsPeriod(event.period)
@@ -178,7 +194,11 @@ class PrayerTrackerViewModel @Inject constructor(
         _trackerState.update { it.copy(prayerTimes = prayerTimes) }
     }
 
-    private fun updatePrayerStatus(prayerName: PrayerName, status: PrayerStatus, isJamaah: Boolean) {
+    private fun updatePrayerStatus(
+        prayerName: PrayerName,
+        status: PrayerStatus,
+        isJamaah: Boolean
+    ) {
         val date = _trackerState.value.selectedDate
         val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
         val prayedAt = if (status == PrayerStatus.PRAYED || status == PrayerStatus.LATE) {

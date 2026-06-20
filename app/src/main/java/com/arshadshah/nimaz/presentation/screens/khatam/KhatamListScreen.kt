@@ -23,16 +23,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DoNotDisturb
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timeline
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -57,8 +57,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -100,7 +100,10 @@ fun KhatamListScreen(
                 onClick = onNavigateToCreate,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.khatam_start_new))
+                Icon(
+                    Icons.Default.Add,
+                    contentDescription = stringResource(R.string.khatam_start_new)
+                )
             }
         }
     ) { paddingValues ->
@@ -536,7 +539,11 @@ private fun ActiveKhatamCard(
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = stringResource(R.string.khatam_ayahs_format, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
+                    text = stringResource(
+                        R.string.khatam_ayahs_format,
+                        khatam.totalAyahsRead,
+                        Khatam.TOTAL_QURAN_AYAHS
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                 )
@@ -686,12 +693,19 @@ private fun KhatamCard(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = stringResource(R.string.khatam_ayahs_format, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
+                    text = stringResource(
+                        R.string.khatam_ayahs_format,
+                        khatam.totalAyahsRead,
+                        Khatam.TOTAL_QURAN_AYAHS
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = stringResource(R.string.khatam_created_format, formatDate(khatam.createdAt)),
+                    text = stringResource(
+                        R.string.khatam_created_format,
+                        formatDate(khatam.createdAt)
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                 )

@@ -228,6 +228,7 @@ class QuranAudioManager @Inject constructor(
                             }
                             startPositionTracking()
                         }
+
                         Player.STATE_ENDED -> {
                             // Playlist has fully ended
                             if (!newPlayer.hasNextMediaItem()) {
@@ -241,9 +242,11 @@ class QuranAudioManager @Inject constructor(
                                 }
                             }
                         }
+
                         Player.STATE_BUFFERING -> {
                             // Could show buffering indicator if needed
                         }
+
                         Player.STATE_IDLE -> {
                             // Player went idle, possibly due to an error - reset for recovery
                             if (newPlayer.playerError != null) {
@@ -255,6 +258,7 @@ class QuranAudioManager @Inject constructor(
                                 }
                             }
                         }
+
                         else -> {}
                     }
                 }
@@ -350,7 +354,8 @@ class QuranAudioManager @Inject constructor(
                 ensureActive() // Bail out if user cancelled
                 val jobs = chunk.map { (ayah, file) ->
                     scope.launch(Dispatchers.IO) {
-                        val url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
+                        val url =
+                            "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayah.ayahGlobalId}.mp3"
                         downloadFileSilent(url, file)
                         val count = downloadedCount.incrementAndGet()
                         _audioState.update {
@@ -534,7 +539,8 @@ class QuranAudioManager @Inject constructor(
             val audioFile = getCachedFile("ayah_${ayahGlobalNumber}.mp3")
             if (!audioFile.exists()) {
                 _audioState.update { it.copy(isDownloading = true) }
-                val url = "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayahGlobalNumber}.mp3"
+                val url =
+                    "https://cdn.islamic.network/quran/audio/$reciterBitrate/$reciterCdnId/${ayahGlobalNumber}.mp3"
                 downloadFileSilent(url, audioFile)
                 _audioState.update { it.copy(isDownloading = false) }
             }
@@ -613,9 +619,11 @@ class QuranAudioManager @Inject constructor(
                         p.play()
                     }
                 }
+
                 Player.STATE_IDLE -> {
                     // Player is idle with no media — nothing to do
                 }
+
                 else -> {
                     p.play()
                 }
@@ -673,7 +681,8 @@ class QuranAudioManager @Inject constructor(
             }
 
             override fun getContentDuration(): Long {
-                return manager.computeTotalDuration().takeIf { it > 0 } ?: super.getContentDuration()
+                return manager.computeTotalDuration().takeIf { it > 0 }
+                    ?: super.getContentDuration()
             }
 
             override fun getBufferedPosition(): Long {

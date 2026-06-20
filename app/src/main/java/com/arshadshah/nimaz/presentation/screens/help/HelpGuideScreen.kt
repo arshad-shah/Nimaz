@@ -58,12 +58,17 @@ fun HelpGuideScreen(
     ) { padding ->
         when {
             state.isLoading && guide == null -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(Modifier
+                    .fillMaxSize()
+                    .padding(padding), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
+
             guide == null -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(Modifier
+                    .fillMaxSize()
+                    .padding(padding), contentAlignment = Alignment.Center) {
                     Text(
                         text = "This guide is unavailable.",
                         style = MaterialTheme.typography.bodyMedium,
@@ -71,9 +76,12 @@ fun HelpGuideScreen(
                     )
                 }
             }
+
             else -> {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {

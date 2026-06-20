@@ -52,10 +52,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerSource
@@ -67,8 +69,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightab
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 /**
  * Represents a page of tafseer content with its character range in the full text.
@@ -115,7 +115,13 @@ private fun splitTafseerIntoPages(fullText: String): List<TafseerPage> {
         }
 
         val pageEnd = currentStart + splitPoint
-        pages.add(TafseerPage(fullText.substring(currentStart, pageEnd).trimEnd(), currentStart, pageEnd))
+        pages.add(
+            TafseerPage(
+                fullText.substring(currentStart, pageEnd).trimEnd(),
+                currentStart,
+                pageEnd
+            )
+        )
         currentStart = pageEnd
         while (currentStart < fullText.length && fullText[currentStart].isWhitespace()) currentStart++
     }
@@ -168,7 +174,8 @@ fun TafseerPageContent(
 
     remember(tafseer?.id) { currentContentPage = 0; true }
 
-    val highlightsWithNotes = remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
+    val highlightsWithNotes =
+        remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
 
     Column(modifier = modifier.fillMaxSize()) {
         // ── Static Navigation Bar (always visible at top) ──
@@ -242,7 +249,8 @@ fun TafseerPageContent(
                                 },
                                 label = "tafseer_page"
                             ) { pageIndex ->
-                                val animPage = tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
+                                val animPage =
+                                    tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
                                 val animHighlights = highlightsForPage(highlights, animPage)
 
                                 TafseerHighlightableText(
@@ -745,7 +753,10 @@ private fun TafseerHighlightControls(
                             if (isSelected) {
                                 Icon(
                                     imageVector = Icons.Default.Check,
-                                    contentDescription = stringResource(R.string.cd_item_selected, name),
+                                    contentDescription = stringResource(
+                                        R.string.cd_item_selected,
+                                        name
+                                    ),
                                     tint = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.size(16.dp)
                                 )
@@ -784,6 +795,6 @@ private fun TafseerHighlightControls(
                     }
                 }
             }
-    }
+        }
     }
 }

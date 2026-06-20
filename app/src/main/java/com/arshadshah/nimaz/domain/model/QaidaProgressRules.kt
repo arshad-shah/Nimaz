@@ -1,5 +1,12 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.QaidaProgressRules.COMPLETION_THRESHOLD
+import com.arshadshah.nimaz.domain.model.QaidaProgressRules.MAX_STARS
+import com.arshadshah.nimaz.domain.model.QaidaProgressRules.MIN_STARS
+import com.arshadshah.nimaz.domain.model.QaidaProgressRules.deriveCourseProgress
+import com.arshadshah.nimaz.domain.model.QaidaProgressRules.unlocksNext
+
+
 /**
  * Single source of truth for every Qaida "learning loop" threshold (epic #171,
  * sub-issue E of #176): completion gating, star awards, unlock rules and the
@@ -89,8 +96,8 @@ object QaidaProgressRules {
     fun unlocksNext(previous: QaidaLessonProgress?): Boolean {
         if (previous == null) return false
         return previous.status == LessonStatus.COMPLETED ||
-            isComplete(previous.completedCells, previous.totalCells) ||
-            previous.stars >= UNLOCK_MIN_STARS
+                isComplete(previous.completedCells, previous.totalCells) ||
+                previous.stars >= UNLOCK_MIN_STARS
     }
 
     /**

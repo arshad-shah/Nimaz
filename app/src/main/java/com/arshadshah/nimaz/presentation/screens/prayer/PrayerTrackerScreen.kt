@@ -34,9 +34,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -53,8 +53,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -62,11 +62,11 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.IndicatorPosition
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
-import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -501,7 +501,11 @@ private fun SelectedDayDetail(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = stringResource(R.string.prayers_completed_format, prayedCount, prayers.size),
+                    text = stringResource(
+                        R.string.prayers_completed_format,
+                        prayedCount,
+                        prayers.size
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -529,7 +533,8 @@ private fun SelectedDayDetail(
                         }
                     }
 
-                    val prayerTimeFormatted = prayerDateTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
+                    val prayerTimeFormatted =
+                        prayerDateTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
 
                     // Determine if prayer should show as missed based on time
                     val isPrayerTimePassed = when {

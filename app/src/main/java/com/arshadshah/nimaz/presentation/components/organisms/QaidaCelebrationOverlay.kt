@@ -43,7 +43,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaCelebrationBurst
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaStarRow
-import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
@@ -155,7 +154,10 @@ fun QaidaCelebrationOverlay(
                                     modifier = Modifier.height(16.dp),
                                 )
                                 Text(
-                                    text = stringResource(R.string.qaida_new_lesson_unlocked, unlockedTitle),
+                                    text = stringResource(
+                                        R.string.qaida_new_lesson_unlocked,
+                                        unlockedTitle
+                                    ),
                                     style = MaterialTheme.typography.labelLarge,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -184,7 +186,12 @@ fun QaidaCelebrationOverlay(
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 720, name = "Celebration — 2 stars + unlock")
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 720,
+    name = "Celebration — 2 stars + unlock"
+)
 @Composable
 private fun QaidaCelebrationOverlayPreview() {
     NimazTheme {
@@ -199,7 +206,12 @@ private fun QaidaCelebrationOverlayPreview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 720, name = "Celebration — 3 stars, no unlock")
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 720,
+    name = "Celebration — 3 stars, no unlock"
+)
 @Composable
 private fun QaidaCelebrationOverlayFullPreview() {
     NimazTheme {

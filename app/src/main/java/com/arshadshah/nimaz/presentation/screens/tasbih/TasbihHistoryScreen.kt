@@ -41,9 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -346,7 +346,10 @@ private fun SessionCard(
                 Surface(
                     shape = RoundedCornerShape(percent = 50),
                     color = NimazColors.TasbihColors.Complete.copy(alpha = 0.14f),
-                    border = BorderStroke(1.dp, NimazColors.TasbihColors.Complete.copy(alpha = 0.5f))
+                    border = BorderStroke(
+                        1.dp,
+                        NimazColors.TasbihColors.Complete.copy(alpha = 0.5f)
+                    )
                 ) {
                     Text(
                         text = stringResource(R.string.done).uppercase(),

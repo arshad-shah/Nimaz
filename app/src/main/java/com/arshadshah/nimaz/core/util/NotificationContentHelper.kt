@@ -205,6 +205,7 @@ object NotificationContentHelper {
                     isPositive = true
                 )
             }
+
             missedCount == totalPrayers -> {
                 DailySummaryContent(
                     title = context.getString(R.string.notif_summary_title_default),
@@ -216,11 +217,16 @@ object NotificationContentHelper {
                     isPositive = false
                 )
             }
+
             else -> {
                 val missedList = missedPrayers.joinToString(", ")
                 DailySummaryContent(
                     title = context.getString(R.string.notif_summary_title_default),
-                    message = context.getString(R.string.notif_summary_count, prayedCount, totalPrayers),
+                    message = context.getString(
+                        R.string.notif_summary_count,
+                        prayedCount,
+                        totalPrayers
+                    ),
                     bigText = "Today's Progress: $prayedCount/$totalPrayers prayers\n\n" +
                             (if (missedPrayers.isNotEmpty()) "Missed: $missedList\n\n" else "") +
                             somePrayersMissedMessages.random() + "\n\n" +

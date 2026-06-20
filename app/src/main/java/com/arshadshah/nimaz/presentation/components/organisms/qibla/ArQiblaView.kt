@@ -76,7 +76,7 @@ fun ArQiblaView(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     val lowAccuracy = compassAccuracy == CompassAccuracy.LOW ||
-        compassAccuracy == CompassAccuracy.UNRELIABLE
+            compassAccuracy == CompassAccuracy.UNRELIABLE
     val qiblaOffScreen = qiblaInfo != null && abs(rotationToQibla) > HALF_FOV
     val turnRight = rotationToQibla > 0
 

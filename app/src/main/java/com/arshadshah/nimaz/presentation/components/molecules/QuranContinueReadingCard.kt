@@ -30,9 +30,9 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -92,7 +92,8 @@ internal fun ContinueReadingCard(
                 Spacer(modifier = Modifier.height(10.dp))
 
                 Text(
-                    text = surahName?.nameEnglish ?: stringResource(R.string.quran_home_surah_fallback, surahNumber),
+                    text = surahName?.nameEnglish
+                        ?: stringResource(R.string.quran_home_surah_fallback, surahNumber),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     color = Color.White

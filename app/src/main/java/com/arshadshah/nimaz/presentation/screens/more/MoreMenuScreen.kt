@@ -3,68 +3,52 @@ package com.arshadshah.nimaz.presentation.screens.more
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Abc
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.CalendarViewMonth
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Mosque
-import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Widgets
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreMenuScreen(
+    onNavigateToSettings: () -> Unit,
     onNavigateToCalendar: () -> Unit,
-    onNavigateToNotifications: () -> Unit,
-    onNavigateToAppearance: () -> Unit,
-    onNavigateToLanguage: () -> Unit,
-    onNavigateToWidgets: () -> Unit,
     onNavigateToAbout: () -> Unit,
     onNavigateToHelp: () -> Unit,
     onShareApp: () -> Unit,
@@ -74,21 +58,33 @@ fun MoreMenuScreen(
     onNavigateToZakat: () -> Unit,
     onNavigateToDuas: () -> Unit,
     onNavigateToTafseer: () -> Unit,
-    onNavigateToLocation: () -> Unit,
-    onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToPrayerTimes: () -> Unit,
     onNavigateToMonthlyPrayerTimes: () -> Unit,
     onNavigateToKhatam: () -> Unit,
     onNavigateToAsmaUlHusna: () -> Unit,
     onNavigateToAsmaUnNabi: () -> Unit,
     onNavigateToProphets: () -> Unit,
-    onNavigateToQaida: () -> Unit,
-    onDeleteAllData: () -> Unit
+    onNavigateToQaida: () -> Unit
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        topBar = {
+            NimazTopAppBar(
+                title = stringResource(R.string.more),
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.settings)
+                        )
+                    }
+                },
+                scrollBehavior = scrollBehavior
+            )
+        }
     ) { paddingValues ->
         LazyColumn(
             modifier = Modifier
@@ -135,16 +131,16 @@ fun MoreMenuScreen(
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Qaida",
-                        subtitle = "Learn to read the Qur'an, letter by letter",
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        title = stringResource(R.string.qaida),
+                        subtitle = stringResource(R.string.qaida_subtitle),
+                        icon = Icons.Default.Abc,
                         onClick = onNavigateToQaida
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.allahs_99_names),
                         subtitle = stringResource(R.string.allahs_99_names_subtitle),
-                        icon = Icons.Default.Star,
+                        icon = Icons.Default.AutoAwesome,
                         onClick = onNavigateToAsmaUlHusna
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
@@ -165,21 +161,21 @@ fun MoreMenuScreen(
                     NimazMenuItem(
                         title = stringResource(R.string.hadith),
                         subtitle = stringResource(R.string.hadith_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        icon = Icons.Default.FormatQuote,
                         onClick = onNavigateToHadith
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.duas),
                         subtitle = stringResource(R.string.duas_subtitle),
-                        icon = Icons.Default.Mosque,
+                        icon = ImageVector.vectorResource(R.drawable.ic_dua),
                         onClick = onNavigateToDuas
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.tafseer),
                         subtitle = stringResource(R.string.tafseer_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        icon = Icons.AutoMirrored.Filled.Article,
                         onClick = onNavigateToTafseer
                     )
                 }
@@ -199,9 +195,16 @@ fun MoreMenuScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
+                        title = stringResource(R.string.prayer_times),
+                        subtitle = stringResource(R.string.prayer_times_menu_subtitle),
+                        icon = Icons.Default.Mosque,
+                        onClick = onNavigateToPrayerTimes
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
                         title = stringResource(R.string.monthly_prayer_times),
                         subtitle = stringResource(R.string.monthly_prayer_times_subtitle),
-                        icon = Icons.Default.CalendarMonth,
+                        icon = Icons.Default.CalendarViewMonth,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
@@ -210,64 +213,6 @@ fun MoreMenuScreen(
                         subtitle = stringResource(R.string.zakat_subtitle),
                         icon = Icons.Default.Calculate,
                         onClick = onNavigateToZakat
-                    )
-                }
-            }
-
-            // Prayer Settings Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.prayer_settings))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.calculation_method),
-                        subtitle = stringResource(R.string.calculation_method_menu_subtitle),
-                        icon = Icons.Default.Settings,
-                        onClick = onNavigateToCalculationMethod
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.notifications),
-                        subtitle = stringResource(R.string.notifications_menu_subtitle),
-                        icon = Icons.Default.Notifications,
-                        onClick = onNavigateToNotifications
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.location),
-                        subtitle = stringResource(R.string.location_menu_subtitle),
-                        icon = Icons.Default.LocationOn,
-                        onClick = onNavigateToLocation
-                    )
-                }
-            }
-
-            // App Settings Section
-            item {
-                NimazSectionHeader(title = stringResource(R.string.app_settings))
-            }
-            item {
-                NimazMenuGroup {
-                    NimazMenuItem(
-                        title = stringResource(R.string.appearance),
-                        subtitle = stringResource(R.string.appearance_menu_subtitle),
-                        icon = Icons.Default.DarkMode,
-                        onClick = onNavigateToAppearance
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.language),
-                        subtitle = stringResource(R.string.language_menu_subtitle),
-                        icon = Icons.Default.Language,
-                        onClick = onNavigateToLanguage
-                    )
-                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
-                    NimazMenuItem(
-                        title = stringResource(R.string.widgets),
-                        subtitle = stringResource(R.string.widgets_menu_subtitle),
-                        icon = Icons.Default.Widgets,
-                        onClick = onNavigateToWidgets
                     )
                 }
             }
@@ -308,80 +253,7 @@ fun MoreMenuScreen(
                 }
             }
 
-            // App Info Section
-            item {
-                AppVersionCard()
-            }
-
-            item {
-                DeleteAllDataCard(onDeleteAllData = onDeleteAllData)
-            }
-
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
-    }
-}
-
-@Composable
-private fun AppVersionCard() {
-    val context = LocalContext.current
-    val versionName = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "Unknown"
-    } catch (e: Exception) {
-        "Unknown"
-    }
-
-    Text(
-        text = stringResource(R.string.version_format, versionName),
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        textAlign = TextAlign.Center,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    )
-}
-
-@Composable
-private fun DeleteAllDataCard(onDeleteAllData: () -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
-
-    OutlinedButton(
-        onClick = { showDialog = true },
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.outlinedButtonColors(
-            contentColor = MaterialTheme.colorScheme.error
-        )
-    ) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = null,
-            modifier = Modifier.size(18.dp)
-        )
-        Spacer(modifier = Modifier.width(8.dp))
-        Text(stringResource(R.string.delete_all_data))
-    }
-
-    if (showDialog) {
-        NimazConfirmDialog(
-            title = stringResource(R.string.delete_all_data_dialog_title),
-            message = stringResource(R.string.delete_all_data_dialog_message),
-            confirmText = stringResource(R.string.delete),
-            cancelText = stringResource(R.string.cancel),
-            titleIcon = Icons.Default.Delete,
-            isDestructive = true,
-            onConfirm = onDeleteAllData,
-            onDismiss = { showDialog = false },
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "DeleteAllDataCard")
-@Composable
-private fun DeleteAllDataCardPreview() {
-    NimazTheme {
-        DeleteAllDataCard(
-            onDeleteAllData = {}
-        )
     }
 }

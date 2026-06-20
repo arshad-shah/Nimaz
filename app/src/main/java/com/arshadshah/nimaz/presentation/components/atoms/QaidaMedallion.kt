@@ -58,7 +58,7 @@ fun QaidaMedallion(
             .clip(CircleShape)
             .background(fill)
             .then(if (ring != null) Modifier.border(ring, CircleShape) else Modifier)
-            .then(if (isClickable) Modifier.clickable { onClick!!() } else Modifier)
+            .then(if (isClickable) Modifier.clickable { onClick() } else Modifier)
             .clearAndSetSemantics { this.contentDescription = contentDescription },
         contentAlignment = Alignment.Center,
     ) {

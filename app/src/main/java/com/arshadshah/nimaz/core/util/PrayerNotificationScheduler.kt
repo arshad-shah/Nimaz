@@ -32,7 +32,8 @@ class PrayerNotificationScheduler @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator
 ) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    private val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     companion object {
         const val CHANNEL_ID_PRAYER = "prayer_notifications"
@@ -95,7 +96,13 @@ class PrayerNotificationScheduler @Inject constructor(
                 enableLights(true)
             }
 
-            notificationManager.createNotificationChannels(listOf(prayerChannel, adhanChannel, dailySummaryChannel))
+            notificationManager.createNotificationChannels(
+                listOf(
+                    prayerChannel,
+                    adhanChannel,
+                    dailySummaryChannel
+                )
+            )
         }
     }
 
@@ -167,7 +174,8 @@ class PrayerNotificationScheduler @Inject constructor(
 
                 // Schedule pre-reminder if enabled (not for sunrise)
                 if (preReminderEnabled && prayerTime.type != PrayerType.SUNRISE) {
-                    val preReminderTime = prayerLocalDateTime.minusMinutes(preReminderMinutes.toLong())
+                    val preReminderTime =
+                        prayerLocalDateTime.minusMinutes(preReminderMinutes.toLong())
                     if (preReminderTime.isAfter(now)) {
                         schedulePreReminderNotification(prayerTime.type, preReminderTime)
                     }

@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -113,11 +112,11 @@ fun QaidaCoursePath(
                     else -> QaidaMedallionState.CURRENT
                 }
                 val desc = "Lesson ${ls.lesson.lessonNumber}, ${ls.lesson.titleEnglish}, " +
-                    when (state) {
-                        QaidaMedallionState.DONE -> "complete, ${ls.stars} of 3 stars"
-                        QaidaMedallionState.CURRENT -> "current"
-                        QaidaMedallionState.LOCKED -> "locked"
-                    }
+                        when (state) {
+                            QaidaMedallionState.DONE -> "complete, ${ls.stars} of 3 stars"
+                            QaidaMedallionState.CURRENT -> "current"
+                            QaidaMedallionState.LOCKED -> "locked"
+                        }
                 val centerX = widthPx * frac(i)
                 val centerY = rowPx * i + rowPx / 2f
                 Box(

@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaStatusCapsule
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaAccuracyBar

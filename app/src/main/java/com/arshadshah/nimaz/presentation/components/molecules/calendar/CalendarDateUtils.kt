@@ -19,7 +19,7 @@ import java.time.YearMonth
 internal fun buildCalendarDays(yearMonth: YearMonth): List<LocalDate> {
     val firstOfMonth = yearMonth.atDay(1)
     val offset = if (firstOfMonth.dayOfWeek == DayOfWeek.SUNDAY) 0
-        else firstOfMonth.dayOfWeek.value
+    else firstOfMonth.dayOfWeek.value
     val startDate = firstOfMonth.minusDays(offset.toLong())
     val totalDays = offset + yearMonth.lengthOfMonth()
     val weeks = ((totalDays + 6) / 7).coerceIn(5, 6)

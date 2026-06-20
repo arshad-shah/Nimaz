@@ -73,6 +73,7 @@ fun NimazIconButton(
                 )
             }
         }
+
         NimazIconButtonStyle.FILLED -> {
             FilledIconButton(
                 onClick = onClick,
@@ -87,6 +88,7 @@ fun NimazIconButton(
                 )
             }
         }
+
         NimazIconButtonStyle.FILLED_TONAL -> {
             FilledTonalIconButton(
                 onClick = onClick,
@@ -101,6 +103,7 @@ fun NimazIconButton(
                 )
             }
         }
+
         NimazIconButtonStyle.OUTLINED -> {
             OutlinedIconButton(
                 onClick = onClick,
@@ -131,7 +134,11 @@ private fun IconButtonStylesPreview() {
         ) {
             NimazIconButton(Icons.Default.Star, onClick = {}, style = NimazIconButtonStyle.STANDARD)
             NimazIconButton(Icons.Default.Star, onClick = {}, style = NimazIconButtonStyle.FILLED)
-            NimazIconButton(Icons.Default.Star, onClick = {}, style = NimazIconButtonStyle.FILLED_TONAL)
+            NimazIconButton(
+                Icons.Default.Star,
+                onClick = {},
+                style = NimazIconButtonStyle.FILLED_TONAL
+            )
             NimazIconButton(Icons.Default.Star, onClick = {}, style = NimazIconButtonStyle.OUTLINED)
         }
     }
@@ -146,10 +153,30 @@ private fun IconButtonSizesPreview() {
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NimazIconButton(Icons.Default.Star, onClick = {}, size = NimazIconButtonSize.SMALL, style = NimazIconButtonStyle.FILLED)
-            NimazIconButton(Icons.Default.Star, onClick = {}, size = NimazIconButtonSize.MEDIUM, style = NimazIconButtonStyle.FILLED)
-            NimazIconButton(Icons.Default.Star, onClick = {}, size = NimazIconButtonSize.LARGE, style = NimazIconButtonStyle.FILLED)
-            NimazIconButton(Icons.Default.Star, onClick = {}, size = NimazIconButtonSize.EXTRA_LARGE, style = NimazIconButtonStyle.FILLED)
+            NimazIconButton(
+                Icons.Default.Star,
+                onClick = {},
+                size = NimazIconButtonSize.SMALL,
+                style = NimazIconButtonStyle.FILLED
+            )
+            NimazIconButton(
+                Icons.Default.Star,
+                onClick = {},
+                size = NimazIconButtonSize.MEDIUM,
+                style = NimazIconButtonStyle.FILLED
+            )
+            NimazIconButton(
+                Icons.Default.Star,
+                onClick = {},
+                size = NimazIconButtonSize.LARGE,
+                style = NimazIconButtonStyle.FILLED
+            )
+            NimazIconButton(
+                Icons.Default.Star,
+                onClick = {},
+                size = NimazIconButtonSize.EXTRA_LARGE,
+                style = NimazIconButtonStyle.FILLED
+            )
         }
     }
 }

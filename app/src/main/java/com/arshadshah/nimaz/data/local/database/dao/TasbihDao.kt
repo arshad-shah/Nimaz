@@ -85,7 +85,8 @@ interface TasbihDao {
     @Query("SELECT presetId, SUM(currentCount + (totalLaps * targetCount)) as totalCount FROM tasbih_sessions WHERE presetId IS NOT NULL GROUP BY presetId ORDER BY totalCount DESC LIMIT :limit")
     suspend fun getMostUsedPresets(limit: Int): List<PresetUsageStat>
 
-    @Query("""
+    @Query(
+        """
         SELECT presetId,
                SUM(currentCount + (totalLaps * targetCount)) as totalCount,
                COUNT(*) as sessionsCount
@@ -94,7 +95,8 @@ interface TasbihDao {
         GROUP BY presetId
         ORDER BY totalCount DESC
         LIMIT :limit
-    """)
+    """
+    )
     suspend fun getMostUsedPresetsWithSessions(limit: Int): List<PresetUsageWithSessions>
 
     @Query("SELECT COUNT(*) FROM tasbih_sessions WHERE presetId = :presetId")

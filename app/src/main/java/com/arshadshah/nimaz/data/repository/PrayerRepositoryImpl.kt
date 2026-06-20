@@ -39,7 +39,11 @@ class PrayerRepositoryImpl @Inject constructor(
         return prayerTimeCalculator.calculatePrayerTimes(date, location)
     }
 
-    override fun getPrayerTimesForRange(startDate: LocalDate, endDate: LocalDate, location: Location): List<PrayerTimes> {
+    override fun getPrayerTimesForRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        location: Location
+    ): List<PrayerTimes> {
         return prayerTimeCalculator.calculatePrayerTimesForRange(startDate, endDate, location)
     }
 
@@ -173,7 +177,8 @@ class PrayerRepositoryImpl @Inject constructor(
 
         val today = LocalDate.now()
         val todayEpoch = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
-        val yesterdayEpoch = today.minusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
+        val yesterdayEpoch =
+            today.minusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
         val oneDayMillis = 24 * 60 * 60 * 1000L
 
         // Convert to sorted set for efficient lookup (ascending order)

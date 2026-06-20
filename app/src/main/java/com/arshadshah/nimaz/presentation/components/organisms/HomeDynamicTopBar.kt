@@ -10,52 +10,57 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 /**
- * Top bar for the home screen that smoothly morphs from a location label at
- * rest into a compact "next prayer" summary as the user scrolls. Drive it with
- * [transitionProgress]: 0f = fully at-rest (location); 1f = fully compact
- * (prayer name · time / countdown). Intermediate values render the in-between
- * state, so the bar feels like it rearranges itself in lockstep with the
- * user's drag rather than snapping.
+ * Home top bar that overlays the living-sky hero and morphs with scroll.
  *
- * - Container color lerps from the hero gradient's top color
- *   (primaryContainer) to surface as content scrolls past.
- * - The location title slides up & fades out; the compact title slides up
- *   from below & fades in. They share the title slot, so at progress=0.5
- *   you see both half-overlapped — that's the morph the user feels.
+ * Drive it with [transitionProgress]: 0f = at rest, 1f = fully scrolled.
+ *
+ * - At rest it is *transparent* and blends into the sky: a translucent
+ *   location pill on the left and a scrim-backed settings button on the right,
+ *   floating over the sky. A soft top gradient keeps the status-bar icons and
+ *   pill legible over a bright midday sky.
+ * - As the user scrolls, the bar fills in with [MaterialTheme.colorScheme.surface],
+ *   the scrim fades out, a hairline divider fades in, and the location cross-fades
+ *   into a compact "next prayer · time / countdown" summary.
+ *
+ * This is meant to be placed as an OVERLAY (a sibling in a Box on top of the
+ * scrolling content), not in a Scaffold's topBar slot — so the hero renders
+ * behind it (including behind the status bar) and the list scrolls underneath.
+ * It carries its own statusBarsPadding.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeDynamicTopBar(
     transitionProgress: Float,
@@ -67,75 +72,116 @@ fun HomeDynamicTopBar(
     modifier: Modifier = Modifier,
 ) {
     val progress = transitionProgress.coerceIn(0f, 1f)
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val dividerColor = MaterialTheme.colorScheme.outlineVariant
 
-    val containerColor = lerp(
-        MaterialTheme.colorScheme.primaryContainer,
-        MaterialTheme.colorScheme.surface,
-        progress
-    )
-
-    TopAppBar(
-        modifier = modifier,
-        colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = containerColor,
-            scrolledContainerColor = containerColor,
-        ),
-        title = {
-            Box {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(surfaceColor.copy(alpha = progress))
+            .drawBehind {
+                // At-rest scrim keeps the status-bar icons + pill legible over a
+                // bright sky; fades out as the bar solidifies.
+                if (progress < 1f) {
+                    drawRect(
+                        brush = Brush.verticalGradient(
+                            0f to Color.Black.copy(alpha = 0.22f),
+                            1f to Color.Transparent,
+                        ),
+                        alpha = 1f - progress,
+                    )
+                }
+                // Hairline divider once the bar is solid.
+                if (progress > 0f) {
+                    drawLine(
+                        color = dividerColor,
+                        start = Offset(0f, size.height),
+                        end = Offset(size.width, size.height),
+                        strokeWidth = 1f,
+                        alpha = progress,
+                    )
+                }
+            },
+    ) {
+        Row(
+            modifier = Modifier
+                .statusBarsPadding()
+                .fillMaxWidth()
+                .height(56.dp)
+                .padding(horizontal = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // Title slot — pill and prayer summary share it, cross-fading.
+            Box(modifier = Modifier.weight(1f)) {
                 Box(
                     modifier = Modifier
                         .alpha(1f - progress)
-                        .graphicsLayer {
-                            translationY = -SLIDE_DISTANCE_DP.toPx() * progress
-                        }
+                        .graphicsLayer { translationY = -SLIDE_DISTANCE_DP.toPx() * progress }
                 ) {
-                    LocationTitle(locationName = locationName)
+                    LocationPill(locationName = locationName)
                 }
-
                 Box(
                     modifier = Modifier
                         .alpha(progress)
-                        .graphicsLayer {
-                            translationY = SLIDE_DISTANCE_DP.toPx() * (1f - progress)
-                        }
+                        .graphicsLayer { translationY = SLIDE_DISTANCE_DP.toPx() * (1f - progress) }
                 ) {
                     CompactPrayerTitle(
                         nextPrayer = nextPrayer,
                         nextPrayerTime = nextPrayerTime,
-                        timeUntilNextPrayer = timeUntilNextPrayer
+                        timeUntilNextPrayer = timeUntilNextPrayer,
                     )
                 }
             }
-        },
-        actions = {
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    imageVector = Icons.Default.Settings,
-                    contentDescription = stringResource(R.string.cd_settings),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+
+            SettingsButton(progress = progress, onClick = onSettingsClick)
         }
-    )
+    }
 }
 
 private val SLIDE_DISTANCE_DP = 12.dp
 
 @Composable
-private fun LocationTitle(locationName: String) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+private fun LocationPill(locationName: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.28f))
+            .padding(horizontal = 12.dp, vertical = 6.dp),
+    ) {
         Icon(
             imageVector = Icons.Default.LocationOn,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(18.dp)
+            tint = Color.White,
+            modifier = Modifier.size(16.dp),
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(6.dp))
         Text(
             text = locationName.ifEmpty { "Set location" },
-            style = MaterialTheme.typography.titleMedium,
+            style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
+            color = Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+    }
+}
+
+@Composable
+private fun SettingsButton(progress: Float, onClick: () -> Unit) {
+    // Scrim circle backs the icon while over the sky, fading as the bar solidifies.
+    val scrim = Color.Black.copy(alpha = 0.28f * (1f - progress))
+    val iconTint = lerp(Color.White, MaterialTheme.colorScheme.onSurfaceVariant, progress)
+    IconButton(
+        onClick = onClick,
+        modifier = Modifier
+            .clip(CircleShape)
+            .background(scrim),
+    ) {
+        Icon(
+            imageVector = Icons.Default.Settings,
+            contentDescription = stringResource(R.string.cd_settings),
+            tint = iconTint,
         )
     }
 }
@@ -187,17 +233,14 @@ private fun PrayerColorDot(color: Color) {
 
 // ──── Previews ───────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, widthDp = 412, name = "1. At rest (progress = 0)")
+@Preview(showBackground = true, widthDp = 412, name = "1. At rest (over sky)")
 @Composable
 private fun TopBar_AtRest_Preview() {
     NimazTheme {
         Box(
             modifier = Modifier.background(
                 Brush.verticalGradient(
-                    colors = listOf(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        MaterialTheme.colorScheme.surface
-                    )
+                    colors = listOf(Color(0xFF3E86C9), Color(0xFFBFE0F2))
                 )
             )
         ) {
@@ -228,7 +271,7 @@ private fun TopBar_FullyCompact_Preview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 480, name = "3. Transition snapshots")
+@Preview(showBackground = true, widthDp = 412, heightDp = 520, name = "3. Transition snapshots")
 @Composable
 private fun TopBar_TransitionSnapshots_Preview() {
     NimazTheme {
@@ -252,93 +295,7 @@ private fun TopBar_TransitionSnapshots_Preview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 480, name = "4. Each prayer (compact)")
-@Composable
-private fun TopBar_EachPrayer_Preview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            listOf(
-                PrayerType.FAJR to ("5:23 AM" to "30m"),
-                PrayerType.SUNRISE to ("6:45 AM" to "1h 52m"),
-                PrayerType.DHUHR to ("1:15 PM" to "5h 14m"),
-                PrayerType.ASR to ("4:30 PM" to "2h 15m"),
-                PrayerType.MAGHRIB to ("6:12 PM" to "1h 04m"),
-                PrayerType.ISHA to ("7:45 PM" to "3h 30m"),
-            ).forEach { (prayer, info) ->
-                HomeDynamicTopBar(
-                    transitionProgress = 1f,
-                    locationName = "",
-                    nextPrayer = prayer,
-                    nextPrayerTime = info.first,
-                    timeUntilNextPrayer = info.second,
-                    onSettingsClick = {},
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 412, heightDp = 320, name = "5. Countdown durations")
-@Composable
-private fun TopBar_CountdownDurations_Preview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            LabeledTopBar("Far away (8h 45m)") {
-                HomeDynamicTopBar(
-                    transitionProgress = 1f,
-                    locationName = "",
-                    nextPrayer = PrayerType.FAJR,
-                    nextPrayerTime = "5:23 AM",
-                    timeUntilNextPrayer = "8h 45m",
-                    onSettingsClick = {},
-                )
-            }
-            LabeledTopBar("Close (12m 30s)") {
-                HomeDynamicTopBar(
-                    transitionProgress = 1f,
-                    locationName = "",
-                    nextPrayer = PrayerType.MAGHRIB,
-                    nextPrayerTime = "6:12 PM",
-                    timeUntilNextPrayer = "12m 30s",
-                    onSettingsClick = {},
-                )
-            }
-            LabeledTopBar("Imminent (45s)") {
-                HomeDynamicTopBar(
-                    transitionProgress = 1f,
-                    locationName = "",
-                    nextPrayer = PrayerType.ASR,
-                    nextPrayerTime = "4:30 PM",
-                    timeUntilNextPrayer = "45s",
-                    onSettingsClick = {},
-                )
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 412, name = "6. Empty state — no location")
-@Composable
-private fun TopBar_NoLocation_Preview() {
-    NimazTheme {
-        HomeDynamicTopBar(
-            transitionProgress = 0f,
-            locationName = "",
-            nextPrayer = null,
-            nextPrayerTime = "",
-            timeUntilNextPrayer = "—",
-            onSettingsClick = {},
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 412, name = "7. Long location name")
+@Preview(showBackground = true, widthDp = 412, name = "4. Long location name")
 @Composable
 private fun TopBar_LongLocation_Preview() {
     NimazTheme {

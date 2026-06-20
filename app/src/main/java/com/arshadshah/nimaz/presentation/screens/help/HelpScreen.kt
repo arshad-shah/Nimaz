@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
-import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
@@ -82,12 +81,17 @@ fun HelpScreen(
                     }
                 } else {
                     items(state.results) { result ->
-                        HelpResultRow(result = result, onClick = { onNavigateToTopic(result.topicId) })
+                        HelpResultRow(
+                            result = result,
+                            onClick = { onNavigateToTopic(result.topicId) })
                     }
                 }
             } else {
                 item {
-                    NimazSectionTitle(text = "Browse topics", modifier = Modifier.padding(top = 4.dp))
+                    NimazSectionTitle(
+                        text = "Browse topics",
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
                 }
                 items(state.topics.chunked(2)) { row ->
                     Row(horizontalArrangement = Arrangement.spacedBy(11.dp)) {

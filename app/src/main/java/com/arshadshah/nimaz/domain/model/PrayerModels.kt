@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.domain.model
 
-import kotlin.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.time.Instant
 
 enum class PrayerType(val displayName: String) {
     FAJR("Fajr"),

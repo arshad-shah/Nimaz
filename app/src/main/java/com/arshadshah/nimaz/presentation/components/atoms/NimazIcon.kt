@@ -124,7 +124,10 @@ private fun ContainerShapesPreview() {
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             ContainedIcon(Icons.Default.Star, containerShape = NimazIconContainerShape.CIRCLE)
-            ContainedIcon(Icons.Default.Star, containerShape = NimazIconContainerShape.ROUNDED_SQUARE)
+            ContainedIcon(
+                Icons.Default.Star,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE
+            )
             ContainedIcon(Icons.Default.Star, containerShape = NimazIconContainerShape.SQUARE)
         }
     }

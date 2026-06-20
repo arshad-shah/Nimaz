@@ -37,9 +37,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val SurahNumberSlotWidth = 40.dp
 private val SurahNumberSlotSpacing = 12.dp
@@ -169,12 +169,18 @@ internal fun SurahListItem(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = SurahNumberSlotWidth + SurahNumberSlotSpacing, end = 14.dp, bottom = 14.dp),
+                    .padding(
+                        start = SurahNumberSlotWidth + SurahNumberSlotSpacing,
+                        end = 14.dp,
+                        bottom = 14.dp
+                    ),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
                 val isMeccan = surah.revelationType == RevelationType.MECCAN
                 MetadataBadge(
-                    text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(R.string.quran_home_madinah),
+                    text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(
+                        R.string.quran_home_madinah
+                    ),
                     modifier = Modifier.weight(1f)
                 )
                 MetadataBadge(
@@ -183,11 +189,18 @@ internal fun SurahListItem(
                 )
                 if (startPage > 0) {
                     MetadataBadge(
-                        text = stringResource(R.string.quran_home_page_range_format, startPage, endPage),
+                        text = stringResource(
+                            R.string.quran_home_page_range_format,
+                            startPage,
+                            endPage
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                     MetadataBadge(
-                        text = stringResource(R.string.quran_home_juz_indicator, getJuzForPage(startPage)),
+                        text = stringResource(
+                            R.string.quran_home_juz_indicator,
+                            getJuzForPage(startPage)
+                        ),
                         modifier = Modifier.weight(1f)
                     )
                 }
@@ -202,7 +215,7 @@ internal fun SurahListItem(
                         .height(3.dp)
                         .padding(horizontal = 14.dp),
                     color = if (isComplete) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.tertiary,
+                    else MaterialTheme.colorScheme.tertiary,
                     trackColor = MaterialTheme.colorScheme.surfaceVariant,
                 )
                 Spacer(modifier = Modifier.height(4.dp))

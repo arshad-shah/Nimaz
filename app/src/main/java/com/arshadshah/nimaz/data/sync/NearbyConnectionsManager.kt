@@ -34,11 +34,17 @@ sealed class ConnectionState {
     data object Idle : ConnectionState()
     data object Advertising : ConnectionState()
     data object Discovering : ConnectionState()
-    data class Connecting(val endpointId: String, val endpointName: String, val authToken: String) : ConnectionState()
-    data class WaitingForPartnerAccept(val endpointId: String, val endpointName: String) : ConnectionState()
+    data class Connecting(val endpointId: String, val endpointName: String, val authToken: String) :
+        ConnectionState()
+
+    data class WaitingForPartnerAccept(val endpointId: String, val endpointName: String) :
+        ConnectionState()
+
     data class Connected(val endpointId: String, val endpointName: String) : ConnectionState()
     data class Transferring(val progress: Float) : ConnectionState()
-    data class PartnerImporting(val step: Int, val total: Int, val label: String) : ConnectionState()
+    data class PartnerImporting(val step: Int, val total: Int, val label: String) :
+        ConnectionState()
+
     data class Completed(val bytesReceived: Long) : ConnectionState()
     data class Cancelled(val reason: CancelReason) : ConnectionState()
     data class Error(val message: String) : ConnectionState()
@@ -51,8 +57,10 @@ class NearbyConnectionsManager @Inject constructor(
     companion object {
         private const val TAG = "NearbySync"
         private const val SERVICE_ID = "com.arshadshah.nimaz.sync"
+
         // Max safe size for BYTES payload (leaving margin below 32768)
         private const val MAX_BYTES_PAYLOAD_SIZE = 31_000
+
         // Prefix byte to distinguish compressed data from signal JSON
         private const val DATA_PREFIX: Byte = 0x1F // same as GZIP magic byte
     }
@@ -91,12 +99,14 @@ class NearbyConnectionsManager @Inject constructor(
         }
 
         override fun onConnectionResult(endpointId: String, result: ConnectionResolution) {
-            Log.d(TAG, "onConnectionResult: endpoint=$endpointId, status=${result.status.statusCode}, msg=${result.status.statusMessage}")
+            Log.d(
+                TAG,
+                "onConnectionResult: endpoint=$endpointId, status=${result.status.statusCode}, msg=${result.status.statusMessage}"
+            )
             when (result.status.statusCode) {
                 ConnectionsStatusCodes.STATUS_OK -> {
                     connectedEndpointId = endpointId
-                    val current = _connectionState.value
-                    val name = when (current) {
+                    val name = when (val current = _connectionState.value) {
                         is ConnectionState.Connecting -> current.endpointName
                         is ConnectionState.WaitingForPartnerAccept -> current.endpointName
                         else -> ""
@@ -104,19 +114,25 @@ class NearbyConnectionsManager @Inject constructor(
                     Log.d(TAG, "Connected successfully to $name ($endpointId)")
                     _connectionState.value = ConnectionState.Connected(endpointId, name)
                 }
+
                 ConnectionsStatusCodes.STATUS_CONNECTION_REJECTED -> {
                     Log.d(TAG, "Connection rejected by $endpointId")
                     _connectionState.value = ConnectionState.Error("Connection rejected")
                 }
+
                 else -> {
                     Log.d(TAG, "Connection failed: ${result.status.statusMessage}")
-                    _connectionState.value = ConnectionState.Error("Connection failed: ${result.status.statusMessage}")
+                    _connectionState.value =
+                        ConnectionState.Error("Connection failed: ${result.status.statusMessage}")
                 }
             }
         }
 
         override fun onDisconnected(endpointId: String) {
-            Log.d(TAG, "onDisconnected: endpoint=$endpointId, currentState=${_connectionState.value}")
+            Log.d(
+                TAG,
+                "onDisconnected: endpoint=$endpointId, currentState=${_connectionState.value}"
+            )
             connectedEndpointId = null
             val current = _connectionState.value
             if (current !is ConnectionState.Completed &&
@@ -131,14 +147,25 @@ class NearbyConnectionsManager @Inject constructor(
 
     private val payloadCallback = object : PayloadCallback() {
         override fun onPayloadReceived(endpointId: String, payload: Payload) {
-            Log.d(TAG, "onPayloadReceived: id=${payload.id}, type=${payload.type}, endpoint=$endpointId")
+            Log.d(
+                TAG,
+                "onPayloadReceived: id=${payload.id}, type=${payload.type}, endpoint=$endpointId"
+            )
             when (payload.type) {
                 Payload.Type.BYTES -> {
                     val bytes = payload.asBytes() ?: run {
                         Log.d(TAG, "BYTES payload ${payload.id}: asBytes() returned null")
                         return
                     }
-                    Log.d(TAG, "BYTES payload ${payload.id}: ${bytes.size} bytes, first byte=0x${String.format("%02X", bytes[0])}")
+                    Log.d(
+                        TAG,
+                        "BYTES payload ${payload.id}: ${bytes.size} bytes, first byte=0x${
+                            String.format(
+                                "%02X",
+                                bytes[0]
+                            )
+                        }"
+                    )
 
                     // Check for compressed data (prefix byte 0x1F = GZIP magic)
                     if (bytes.isNotEmpty() && bytes[0] == DATA_PREFIX) {
@@ -148,15 +175,20 @@ class NearbyConnectionsManager @Inject constructor(
                         try {
                             val compressed = bytes.copyOfRange(1, bytes.size)
                             val decompressed = gzipDecompress(compressed)
-                            Log.d(TAG, "BYTES payload ${payload.id}: decompressed ${compressed.size} → ${decompressed.size} bytes")
+                            Log.d(
+                                TAG,
+                                "BYTES payload ${payload.id}: decompressed ${compressed.size} → ${decompressed.size} bytes"
+                            )
                             onDataReceived?.invoke(decompressed)
                                 ?: run {
                                     Log.e(TAG, "BYTES data payload: onDataReceived is null!")
-                                    _connectionState.value = ConnectionState.Error("No data handler registered")
+                                    _connectionState.value =
+                                        ConnectionState.Error("No data handler registered")
                                 }
                         } catch (e: Exception) {
                             Log.e(TAG, "BYTES data payload: decompression failed", e)
-                            _connectionState.value = ConnectionState.Error("Failed to decompress: ${e.message}")
+                            _connectionState.value =
+                                ConnectionState.Error("Failed to decompress: ${e.message}")
                         }
                         return
                     }
@@ -169,9 +201,13 @@ class NearbyConnectionsManager @Inject constructor(
                         onSignalReceived?.invoke(signal)
                             ?: Log.d(TAG, "WARNING: onSignalReceived is null!")
                     } else {
-                        Log.d(TAG, "BYTES payload is not a signal or data, raw: ${String(bytes).take(100)}")
+                        Log.d(
+                            TAG,
+                            "BYTES payload is not a signal or data, raw: ${String(bytes).take(100)}"
+                        )
                     }
                 }
+
                 Payload.Type.STREAM -> {
                     Log.d(TAG, "STREAM payload ${payload.id}: starting background read thread")
                     streamPayloadIds.add(payload.id)
@@ -190,10 +226,16 @@ class NearbyConnectionsManager @Inject constructor(
                                     ConnectionState.Error("Received empty data stream")
                                 return@Thread
                             }
-                            Log.d(TAG, "STREAM ${payload.id}: invoking onDataReceived (null=${onDataReceived == null})")
+                            Log.d(
+                                TAG,
+                                "STREAM ${payload.id}: invoking onDataReceived (null=${onDataReceived == null})"
+                            )
                             onDataReceived?.invoke(data)
                                 ?: run {
-                                    Log.d(TAG, "STREAM ${payload.id}: ERROR - onDataReceived is null!")
+                                    Log.d(
+                                        TAG,
+                                        "STREAM ${payload.id}: ERROR - onDataReceived is null!"
+                                    )
                                     _connectionState.value =
                                         ConnectionState.Error("No data handler registered")
                                 }
@@ -204,10 +246,12 @@ class NearbyConnectionsManager @Inject constructor(
                         }
                     }.start()
                 }
+
                 Payload.Type.FILE -> {
                     Log.d(TAG, "FILE payload ${payload.id}: storing as pending")
                     pendingPayloads[payload.id] = payload
                 }
+
                 else -> {
                     Log.d(TAG, "Unknown payload type: ${payload.type}")
                 }
@@ -222,8 +266,10 @@ class NearbyConnectionsManager @Inject constructor(
                 PayloadTransferUpdate.Status.CANCELED -> "CANCELED"
                 else -> "UNKNOWN(${update.status})"
             }
-            Log.d(TAG, "onPayloadTransferUpdate: id=${update.payloadId}, status=$statusName, " +
-                    "bytes=${update.bytesTransferred}/${update.totalBytes}")
+            Log.d(
+                TAG, "onPayloadTransferUpdate: id=${update.payloadId}, status=$statusName, " +
+                        "bytes=${update.bytesTransferred}/${update.totalBytes}"
+            )
 
             // Skip ALL transfer updates for signal payloads.
             // Only remove the ID on terminal states so that subsequent
@@ -245,18 +291,25 @@ class NearbyConnectionsManager @Inject constructor(
                         streamPayloadIds.remove(update.payloadId)
                         _connectionState.value = ConnectionState.Error("Transfer failed")
                     }
+
                     PayloadTransferUpdate.Status.SUCCESS -> {
                         streamPayloadIds.remove(update.payloadId)
-                        Log.d(TAG, "Stream payload ${update.payloadId}: transfer SUCCESS (reading thread handles data)")
+                        Log.d(
+                            TAG,
+                            "Stream payload ${update.payloadId}: transfer SUCCESS (reading thread handles data)"
+                        )
                     }
-                    else -> { }
+
+                    else -> {}
                 }
                 return
             }
 
             // FILE / sender-side handling
-            Log.d(TAG, "FILE/sender payload ${update.payloadId}: status=$statusName, " +
-                    "inPendingPayloads=${pendingPayloads.containsKey(update.payloadId)}")
+            Log.d(
+                TAG, "FILE/sender payload ${update.payloadId}: status=$statusName, " +
+                        "inPendingPayloads=${pendingPayloads.containsKey(update.payloadId)}"
+            )
 
             val progress = if (update.totalBytes > 0) {
                 update.bytesTransferred.toFloat() / update.totalBytes
@@ -266,23 +319,34 @@ class NearbyConnectionsManager @Inject constructor(
                 PayloadTransferUpdate.Status.IN_PROGRESS -> {
                     _connectionState.value = ConnectionState.Transferring(progress)
                 }
+
                 PayloadTransferUpdate.Status.SUCCESS -> {
                     val payload = pendingPayloads.remove(update.payloadId)
                     if (payload != null) {
                         // Receiver: read FILE payload and deliver to callback.
                         // Don't set Completed — the ViewModel sets it after import.
-                        Log.d(TAG, "Receiver FILE payload ${update.payloadId}: reading via ContentResolver")
+                        Log.d(
+                            TAG,
+                            "Receiver FILE payload ${update.payloadId}: reading via ContentResolver"
+                        )
                         val data = readFilePayload(payload)
-                        Log.d(TAG, "Receiver FILE payload ${update.payloadId}: read ${data.size} bytes")
+                        Log.d(
+                            TAG,
+                            "Receiver FILE payload ${update.payloadId}: read ${data.size} bytes"
+                        )
                         if (data.isEmpty()) {
                             Log.e(TAG, "Receiver FILE payload: read 0 bytes!")
                             _connectionState.value = ConnectionState.Error("Received empty file")
                         } else {
-                            Log.d(TAG, "Receiver FILE payload: invoking onDataReceived (null=${onDataReceived == null})")
+                            Log.d(
+                                TAG,
+                                "Receiver FILE payload: invoking onDataReceived (null=${onDataReceived == null})"
+                            )
                             onDataReceived?.invoke(data)
                                 ?: run {
                                     Log.e(TAG, "Receiver FILE payload: onDataReceived is null!")
-                                    _connectionState.value = ConnectionState.Error("No data handler registered")
+                                    _connectionState.value =
+                                        ConnectionState.Error("No data handler registered")
                                 }
                         }
                     } else {
@@ -292,11 +356,13 @@ class NearbyConnectionsManager @Inject constructor(
                         _connectionState.value = ConnectionState.Completed(update.bytesTransferred)
                     }
                 }
+
                 PayloadTransferUpdate.Status.FAILURE -> {
                     Log.d(TAG, "Transfer FAILURE for payload ${update.payloadId}")
                     pendingPayloads.remove(update.payloadId)
                     _connectionState.value = ConnectionState.Error("Transfer failed")
                 }
+
                 PayloadTransferUpdate.Status.CANCELED -> {
                     Log.d(TAG, "Transfer CANCELED for payload ${update.payloadId}")
                     pendingPayloads.remove(update.payloadId)
@@ -323,7 +389,10 @@ class NearbyConnectionsManager @Inject constructor(
             it.readBytes()
         } ?: byteArrayOf()
         Log.d(TAG, "readFilePayload: read ${data.size} bytes from ContentResolver")
-        try { context.contentResolver.delete(uri, null, null) } catch (_: Exception) { }
+        try {
+            context.contentResolver.delete(uri, null, null)
+        } catch (_: Exception) {
+        }
         return data
     }
 
@@ -358,7 +427,10 @@ class NearbyConnectionsManager @Inject constructor(
             SERVICE_ID,
             object : EndpointDiscoveryCallback() {
                 override fun onEndpointFound(endpointId: String, info: DiscoveredEndpointInfo) {
-                    Log.d(TAG, "onEndpointFound: id=$endpointId, name=${info.endpointName}, serviceId=${info.serviceId}")
+                    Log.d(
+                        TAG,
+                        "onEndpointFound: id=$endpointId, name=${info.endpointName}, serviceId=${info.serviceId}"
+                    )
                     connectionsClient.requestConnection(
                         deviceName,
                         endpointId,
@@ -403,14 +475,19 @@ class NearbyConnectionsManager @Inject constructor(
 
         // GZIP compress the data — JSON typically compresses 5-10x
         val compressed = gzipCompress(data)
-        Log.d(TAG, "sendData: compressed ${data.size} → ${compressed.size} bytes " +
-                "(${100 * compressed.size / data.size}%)")
+        Log.d(
+            TAG, "sendData: compressed ${data.size} → ${compressed.size} bytes " +
+                    "(${100 * compressed.size / data.size}%)"
+        )
 
         if (compressed.size <= MAX_BYTES_PAYLOAD_SIZE) {
             // Small enough for BYTES payload (most reliable transport).
             // Prefix with DATA_PREFIX byte to distinguish from signal payloads.
             val payload = Payload.fromBytes(byteArrayOf(DATA_PREFIX) + compressed)
-            Log.d(TAG, "sendData: using BYTES payload id=${payload.id}, size=${compressed.size + 1}")
+            Log.d(
+                TAG,
+                "sendData: using BYTES payload id=${payload.id}, size=${compressed.size + 1}"
+            )
             connectionsClient.sendPayload(endpointId, payload)
                 .addOnFailureListener { e ->
                     Log.e(TAG, "sendData: BYTES sendPayload FAILED", e)

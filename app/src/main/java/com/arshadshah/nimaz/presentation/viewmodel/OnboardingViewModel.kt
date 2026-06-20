@@ -88,6 +88,7 @@ class OnboardingViewModel @Inject constructor(
                 _state.update { it.copy(currentPage = event.page) }
                 AppAnalytics.logOnboardingStep(event.page)
             }
+
             OnboardingEvent.CheckLocationPermission -> checkLocationPermission()
             OnboardingEvent.CheckNotificationPermission -> checkNotificationPermission()
             OnboardingEvent.CheckBatteryOptimization -> checkBatteryOptimization()
@@ -96,9 +97,12 @@ class OnboardingViewModel @Inject constructor(
             is OnboardingEvent.UpdatePermissionStatus -> {
                 _state.update { state ->
                     state.copy(
-                        locationPermissionGranted = event.location ?: state.locationPermissionGranted,
-                        notificationPermissionGranted = event.notification ?: state.notificationPermissionGranted,
-                        batteryOptimizationDisabled = event.battery ?: state.batteryOptimizationDisabled
+                        locationPermissionGranted = event.location
+                            ?: state.locationPermissionGranted,
+                        notificationPermissionGranted = event.notification
+                            ?: state.notificationPermissionGranted,
+                        batteryOptimizationDisabled = event.battery
+                            ?: state.batteryOptimizationDisabled
                     )
                 }
                 // If location was just granted, try to detect location
@@ -159,10 +163,10 @@ class OnboardingViewModel @Inject constructor(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
         _state.update { it.copy(locationPermissionGranted = hasPermission) }
     }
@@ -182,7 +186,8 @@ class OnboardingViewModel @Inject constructor(
 
     private fun checkBatteryOptimization() {
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
-        val isIgnoringBatteryOptimizations = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        val isIgnoringBatteryOptimizations =
+            powerManager.isIgnoringBatteryOptimizations(context.packageName)
         _state.update { it.copy(batteryOptimizationDisabled = isIgnoringBatteryOptimizations) }
     }
 
@@ -191,10 +196,10 @@ class OnboardingViewModel @Inject constructor(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
     }
 
     fun hasNotificationPermission(): Boolean {

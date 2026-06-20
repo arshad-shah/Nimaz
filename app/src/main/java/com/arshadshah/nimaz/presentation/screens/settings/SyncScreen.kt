@@ -127,6 +127,7 @@ fun SyncScreen(
                         }
                     )
                 }
+
                 state.connectionState is ConnectionState.Cancelled -> {
                     val cancelled = state.connectionState as ConnectionState.Cancelled
                     CancelledContent(
@@ -139,6 +140,7 @@ fun SyncScreen(
                         }
                     )
                 }
+
                 state.connectionState is ConnectionState.Connecting -> {
                     val connecting = state.connectionState as ConnectionState.Connecting
                     AuthTokenContent(
@@ -149,11 +151,13 @@ fun SyncScreen(
                         onReject = { viewModel.onEvent(SyncEvent.RejectConnection(connecting.endpointId)) }
                     )
                 }
+
                 state.connectionState is ConnectionState.WaitingForPartnerAccept -> {
                     WaitingForPartnerContent(
                         onCancel = { viewModel.onEvent(SyncEvent.Cancel) }
                     )
                 }
+
                 state.error != null -> {
                     ErrorContent(
                         error = state.error!!,
@@ -165,6 +169,7 @@ fun SyncScreen(
                         }
                     )
                 }
+
                 state.connectionState is ConnectionState.Completed -> {
                     CompletedContent(
                         state = state,
@@ -174,6 +179,7 @@ fun SyncScreen(
                         }
                     )
                 }
+
                 else -> {
                     ProgressContent(
                         state = state,
@@ -193,11 +199,13 @@ private fun RoleBadge(mode: SyncMode) {
             MaterialTheme.colorScheme.primaryContainer,
             MaterialTheme.colorScheme.onPrimaryContainer
         )
+
         SyncMode.RECEIVE -> Triple(
             "Receiving",
             MaterialTheme.colorScheme.tertiaryContainer,
             MaterialTheme.colorScheme.onTertiaryContainer
         )
+
         SyncMode.NONE -> return
     }
     val icon = if (mode == SyncMode.SEND) Icons.AutoMirrored.Filled.Send else Icons.Default.Download
@@ -273,7 +281,11 @@ private fun ModeSelectionContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.AutoMirrored.Filled.Send,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Send Data")
             }
@@ -293,7 +305,11 @@ private fun ModeSelectionContent(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(Icons.Default.Download, contentDescription = null, modifier = Modifier.size(20.dp))
+                Icon(
+                    Icons.Default.Download,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp)
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Receive Data")
             }
@@ -472,11 +488,13 @@ private fun CancelledContent(
             "Sync Cancelled",
             "You cancelled the sync"
         )
+
         CancelReason.BY_PARTNER -> Triple(
             Icons.Default.PersonOff,
             "Sync Cancelled",
             "The other device cancelled the sync"
         )
+
         CancelReason.CONNECTION_LOST -> Triple(
             Icons.Default.LinkOff,
             "Connection Lost",
@@ -636,7 +654,8 @@ private fun ProgressContent(
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        val transferProgress = (state.connectionState as? ConnectionState.Transferring)?.progress ?: 0f
+        val transferProgress =
+            (state.connectionState as? ConnectionState.Transferring)?.progress ?: 0f
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxWidth()

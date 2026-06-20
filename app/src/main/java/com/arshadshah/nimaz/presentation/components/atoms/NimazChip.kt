@@ -27,11 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Chip style variants
@@ -75,6 +75,7 @@ fun NimazChip(
             enabled = enabled,
             leadingIcon = leadingIcon
         )
+
         NimazChipVariant.SUGGESTION -> NimazSuggestionChip(
             onClick = onClick,
             label = text,
@@ -82,6 +83,7 @@ fun NimazChip(
             enabled = enabled,
             icon = leadingIcon
         )
+
         NimazChipVariant.ASSIST -> NimazAssistChip(
             onClick = onClick,
             label = text,
@@ -89,6 +91,7 @@ fun NimazChip(
             enabled = enabled,
             leadingIcon = leadingIcon
         )
+
         NimazChipVariant.INPUT -> NimazInputChip(
             selected = selected,
             onClick = onClick,
@@ -125,6 +128,7 @@ fun NimazFilterChip(
                 )
             }
         }
+
         leadingIcon != null -> {
             {
                 Icon(
@@ -134,6 +138,7 @@ fun NimazFilterChip(
                 )
             }
         }
+
         else -> null
     }
 
@@ -347,7 +352,12 @@ private fun FilterChipPreview() {
         ) {
             NimazFilterChip(selected = false, onClick = {}, label = "Unselected")
             NimazFilterChip(selected = true, onClick = {}, label = "Selected")
-            NimazFilterChip(selected = true, onClick = {}, label = "With Icon", leadingIcon = Icons.Default.Star)
+            NimazFilterChip(
+                selected = true,
+                onClick = {},
+                label = "With Icon",
+                leadingIcon = Icons.Default.Star
+            )
             NimazFilterChip(selected = false, onClick = {}, label = "Elevated", elevated = true)
         }
     }
