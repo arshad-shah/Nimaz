@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.more
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,10 +11,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Abc
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.CalendarViewMonth
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Fastfood
@@ -43,9 +49,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -138,14 +146,14 @@ fun MoreMenuScreen(
                     NimazMenuItem(
                         title = "Qaida",
                         subtitle = "Learn to read the Qur'an, letter by letter",
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        icon = Icons.Default.Abc,
                         onClick = onNavigateToQaida
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.allahs_99_names),
                         subtitle = stringResource(R.string.allahs_99_names_subtitle),
-                        icon = Icons.Default.Star,
+                        icon = Icons.Default.AutoAwesome,
                         onClick = onNavigateToAsmaUlHusna
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
@@ -166,21 +174,21 @@ fun MoreMenuScreen(
                     NimazMenuItem(
                         title = stringResource(R.string.hadith),
                         subtitle = stringResource(R.string.hadith_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        icon = Icons.Default.FormatQuote,
                         onClick = onNavigateToHadith
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.duas),
                         subtitle = stringResource(R.string.duas_subtitle),
-                        icon = Icons.Default.Mosque,
+                        icon = ImageVector.vectorResource(R.drawable.ic_dua),
                         onClick = onNavigateToDuas
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(
                         title = stringResource(R.string.tafseer),
                         subtitle = stringResource(R.string.tafseer_subtitle),
-                        icon = Icons.AutoMirrored.Filled.MenuBook,
+                        icon = Icons.AutoMirrored.Filled.Article,
                         onClick = onNavigateToTafseer
                     )
                 }
@@ -209,7 +217,7 @@ fun MoreMenuScreen(
                     NimazMenuItem(
                         title = stringResource(R.string.monthly_prayer_times),
                         subtitle = stringResource(R.string.monthly_prayer_times_subtitle),
-                        icon = Icons.Default.CalendarMonth,
+                        icon = Icons.Default.CalendarViewMonth,
                         onClick = onNavigateToMonthlyPrayerTimes
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
@@ -336,6 +344,7 @@ private fun AppVersionCard() {
     val versionName = try {
         context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "Unknown"
     } catch (e: Exception) {
+        Log.e("AppVersionCard", "Failed to get version name", e)
         "Unknown"
     }
 
