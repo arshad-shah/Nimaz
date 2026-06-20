@@ -35,6 +35,8 @@ data class MonthlyPrayerTimesUiState(
     val dayPrayerTimes: List<DayPrayerTimes> = emptyList(),
     val locationName: String = "Location not set",
     val methodLabel: String = "",
+    val latitude: Double = 0.0,
+    val longitude: Double = 0.0,
     val isLoading: Boolean = true,
     val expandedDay: LocalDate? = null
 )
@@ -145,6 +147,8 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                         it.copy(
                             locationName = if (name.isNotBlank()) name else "Dublin, Ireland",
                             methodLabel = "${prettyMethod(calcMethod)} · ${prettyAsr(asrCalc)}",
+                            latitude = latitude,
+                            longitude = longitude,
                         )
                     }
                     calculateMonth()

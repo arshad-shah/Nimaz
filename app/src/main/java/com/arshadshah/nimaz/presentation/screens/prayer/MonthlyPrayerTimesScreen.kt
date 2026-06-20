@@ -103,6 +103,8 @@ fun MonthlyPrayerTimesScreen(
                                     locationName = s.locationName,
                                     methodLabel = s.methodLabel,
                                     rows = rows,
+                                    latitude = s.latitude,
+                                    longitude = s.longitude,
                                 )
                                 context.startActivity(
                                     Intent.createChooser(
