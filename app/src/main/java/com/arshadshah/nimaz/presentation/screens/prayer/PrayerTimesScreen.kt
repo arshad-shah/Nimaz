@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -51,6 +50,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -138,11 +138,20 @@ fun PrayerTimesScreen(
             }
 
             // Day navigation, in a card overlapping the sky's curved bottom.
+            // A custom layout pulls the card up by `overlap` AND shrinks the
+            // space it reserves by the same amount, so its bottom is flush with
+            // the day list (offset alone would leave an equal-sized empty gap).
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
-                    .offset(y = (-28).dp),
+                    .layout { measurable, constraints ->
+                        val placeable = measurable.measure(constraints)
+                        val overlap = 28.dp.roundToPx()
+                        layout(placeable.width, (placeable.height - overlap).coerceAtLeast(0)) {
+                            placeable.place(0, -overlap)
+                        }
+                    },
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
