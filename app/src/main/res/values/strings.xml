@@ -965,4 +965,51 @@
     <string name="quran_settings_preview_transliteration">Bismillahir-Rahmanir-Rahim</string>
     <string name="quran_settings_preview_translation">In the name of Allah, the Most Gracious, the Most Merciful</string>
     <string name="quran_settings_preview_location">Juz 1 • Page 1</string>
+
+    <!-- Common reusable labels -->
+    <string name="active">Active</string>
+    <string name="al_quran">Al Quran</string>
+
+    <!-- Appearance Settings Screen -->
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_display">Display</string>
+    <string name="appearance_home_screen">Home Screen</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
+    <string name="appearance_islamic_patterns">Islamic Patterns</string>
+    <string name="appearance_islamic_patterns_subtitle">Show decorative patterns</string>
+    <string name="appearance_animations">Animations</string>
+    <string name="appearance_animations_subtitle">Enable smooth transitions</string>
+    <string name="appearance_haptic">Haptic Feedback</string>
+    <string name="appearance_haptic_subtitle">Vibration on interactions</string>
+    <string name="appearance_24hour">24-Hour Time</string>
+    <string name="appearance_24hour_subtitle">Use 24-hour format</string>
+    <string name="appearance_show_islamic_date">Show Islamic Date</string>
+    <string name="appearance_show_islamic_date_subtitle">Display Hijri calendar</string>
+
+    <!-- Select Reciter Screen -->
+    <string name="select_reciter_title">Select Reciter</string>
+    <string name="select_reciter_search_hint">Search reciters…</string>
+    <string name="select_reciter_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_reciter_popular">POPULAR RECITERS</string>
+
+    <!-- Surah Info Screen -->
+    <string name="surah_info_about">About This Surah</string>
+    <string name="surah_info_main_themes">Main Themes</string>
+    <string name="surah_info_description_fallback">This surah contains divine guidance and wisdom for believers.</string>
+    <string name="surah_info_theme_guidance">Divine Guidance</string>
+    <string name="surah_info_theme_worship">Worship</string>
+    <string name="surah_info_theme_morality">Morality</string>
+    <string name="surah_info_theme_remembrance">Remembrance</string>
+
+    <!-- Quran Reader Screen -->
+    <string name="cd_switch_to_list_view">Switch to list view</string>
+    <string name="cd_switch_to_page_view">Switch to page view</string>
+    <string name="quran_continue_next_surah">Continue to next surah</string>
+    <string name="quran_mark_all_read">Mark all ayahs in this surah as read</string>
+
+    <!-- Empty states -->
+    <string name="no_ayahs_found">No ayahs found.</string>
+    <string name="no_chapters_found">No chapters found</string>
 </resources>

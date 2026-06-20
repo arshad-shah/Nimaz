@@ -164,7 +164,7 @@ fun TafseerScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = "No ayahs found.",
+                        text = stringResource(R.string.no_ayahs_found),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
