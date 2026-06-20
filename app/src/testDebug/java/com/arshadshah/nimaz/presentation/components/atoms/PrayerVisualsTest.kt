@@ -1,9 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.ui.graphics.Color
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.google.common.truth.Truth.assertThat
@@ -31,13 +27,15 @@ class PrayerVisualsTest {
 
     @Test
     fun `getPrayerIcon maps every prayer type`() {
-        assertThat(getPrayerIcon(PrayerType.FAJR).name).isEqualTo(Icons.Default.DarkMode.name)
-        assertThat(getPrayerIcon(PrayerType.SUNRISE).name).isEqualTo(Icons.Default.WbSunny.name)
-        assertThat(getPrayerIcon(PrayerType.DHUHR).name).isEqualTo(Icons.Default.WbSunny.name)
-        assertThat(getPrayerIcon(PrayerType.ASR).name).isEqualTo(Icons.Default.LightMode.name)
-        assertThat(getPrayerIcon(PrayerType.MAGHRIB).name).isEqualTo(Icons.Default.WbSunny.name)
-        assertThat(getPrayerIcon(PrayerType.ISHA).name).isEqualTo(Icons.Default.DarkMode.name)
-        assertThat(getPrayerIcon(null).name).isEqualTo(Icons.Default.LightMode.name)
+        // Each prayer maps to its custom sun-stage icon (see PrayerStageIcons);
+        // null falls back to the Dhuhr (apex) icon.
+        assertThat(getPrayerIcon(PrayerType.FAJR).name).isEqualTo("PrayerFajr")
+        assertThat(getPrayerIcon(PrayerType.SUNRISE).name).isEqualTo("PrayerSunrise")
+        assertThat(getPrayerIcon(PrayerType.DHUHR).name).isEqualTo("PrayerDhuhr")
+        assertThat(getPrayerIcon(PrayerType.ASR).name).isEqualTo("PrayerAsr")
+        assertThat(getPrayerIcon(PrayerType.MAGHRIB).name).isEqualTo("PrayerMaghrib")
+        assertThat(getPrayerIcon(PrayerType.ISHA).name).isEqualTo("PrayerIsha")
+        assertThat(getPrayerIcon(null).name).isEqualTo("PrayerDhuhr")
     }
 
     @Test

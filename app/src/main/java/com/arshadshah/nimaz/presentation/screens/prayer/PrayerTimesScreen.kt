@@ -24,9 +24,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -54,7 +54,7 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
@@ -190,13 +190,17 @@ fun PrayerTimesScreen(
                     transitionSpec = {
                         val dir = if (targetState.isAfter(initialState)) 1 else -1
                         (slideInHorizontally(tween(260)) { w -> dir * w } + fadeIn(tween(260))) togetherWith
-                            (slideOutHorizontally(tween(260)) { w -> -dir * w } + fadeOut(tween(260)))
+                                (slideOutHorizontally(tween(260)) { w -> -dir * w } + fadeOut(
+                                    tween(
+                                        260
+                                    )
+                                ))
                     },
                     label = "day",
-                ) { _ ->
+                ) { date ->
                     DayList(
                         prayers = state.prayers,
-                        isFuture = state.selectedDate.isAfter(today),
+                        isFuture = date.isAfter(today),
                         sunrise = state.sunrise,
                         sunset = state.sunset,
                         daylight = state.daylight,
@@ -249,7 +253,7 @@ private fun DayNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilledTonalIconButton(onClick = onPrev) {
-            Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous day")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous day")
         }
         Row(
             modifier = Modifier
@@ -287,7 +291,7 @@ private fun DayNavBar(
             }
         }
         FilledTonalIconButton(onClick = onNext) {
-            Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next day")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next day")
         }
     }
 }
