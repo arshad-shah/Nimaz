@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
@@ -85,6 +86,7 @@ fun QuranVerseText(
     verseNumber: Int? = null,
     size: ArabicTextSize = ArabicTextSize.QURAN,
     customFontSize: Float? = null,
+    fontFamily: FontFamily = AmiriFontFamily,
     color: Color = MaterialTheme.colorScheme.onSurface,
     showVerseNumber: Boolean = true
 ) {
@@ -105,6 +107,7 @@ fun QuranVerseText(
         color = color,
         textAlign = TextAlign.Center,
         style = ArabicTextStyles.quranLarge.copy(
+            fontFamily = fontFamily,
             fontSize = actualFontSize,
             lineHeight = actualLineHeight
         )

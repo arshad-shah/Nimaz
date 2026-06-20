@@ -110,6 +110,7 @@ class PreferencesDataStore @Inject constructor(
         val SHOW_TRANSLATION = booleanPreferencesKey("show_translation")
         val SHOW_TRANSLITERATION = booleanPreferencesKey("show_transliteration")
         val SELECTED_RECITER_ID = stringPreferencesKey("selected_reciter_id")
+        val QURAN_ARABIC_FONT = stringPreferencesKey("quran_arabic_font")
         val QURAN_ARABIC_FONT_SIZE = floatPreferencesKey("quran_arabic_font_size")
         val QURAN_TRANSLATION_FONT_SIZE = floatPreferencesKey("quran_translation_font_size")
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
@@ -587,6 +588,14 @@ class PreferencesDataStore @Inject constructor(
             if (reciterId != null) it[PreferencesKeys.SELECTED_RECITER_ID] = reciterId
             else it.remove(PreferencesKeys.SELECTED_RECITER_ID)
         }
+    }
+
+    val quranArabicFont: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.QURAN_ARABIC_FONT] ?: "amiri"
+    }
+
+    suspend fun setQuranArabicFont(fontId: String) {
+        dataStore.edit { it[PreferencesKeys.QURAN_ARABIC_FONT] = fontId }
     }
 
     val quranArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->

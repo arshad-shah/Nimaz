@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
@@ -101,6 +102,7 @@ internal fun AyahItem(
     showTranslation: Boolean,
     showTransliteration: Boolean = false,
     arabicFontSize: Float,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
     fontSize: Float,
     isHighlighted: Boolean = false,
     isAudioPlaying: Boolean = false,
@@ -268,7 +270,7 @@ internal fun AyahItem(
                 text = tajweedAnnotated,
                 modifier = Modifier.fillMaxWidth(),
                 style = TextStyle(
-                    fontFamily = AmiriFontFamily,
+                    fontFamily = arabicFontFamily,
                     fontSize = arabicFontSize.sp,
                     lineHeight = (arabicFontSize * 2).sp,
                     textDirection = TextDirection.Rtl,
@@ -279,7 +281,8 @@ internal fun AyahItem(
             QuranVerseText(
                 arabicText = displayText,
                 verseNumber = ayah.numberInSurah,
-                customFontSize = arabicFontSize.sp.value
+                customFontSize = arabicFontSize.sp.value,
+                fontFamily = arabicFontFamily
             )
         }
 

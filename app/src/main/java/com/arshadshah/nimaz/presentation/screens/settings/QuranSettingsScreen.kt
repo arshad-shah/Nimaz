@@ -19,9 +19,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MenuAnchorType
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -31,10 +36,14 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +55,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -78,16 +88,15 @@ fun QuranSettingsScreen(
     )
 
     // === ADDING NEW ARABIC FONTS ===
-    // 1. Add the font file (.ttf/.otf) to app/src/main/res/font/
-    // 2. In presentation/theme/Type.kt, create a new FontFamily:
-    //    val NewFontFamily = FontFamily(Font(R.font.new_font_regular, FontWeight.Normal))
-    // 3. In presentation/components/atoms/ArabicText.kt, add the font to fontFamilyOptions map
-    // 4. Add a new entry to the arabicFontOptions list below
-    // 5. Add a SettingsEvent.SetArabicFontFamily(id) event and wire it through
-    //    SettingsViewModel -> PreferencesDataStore -> QuranViewModel -> ArabicText
-    //
-    // Currently using: Amiri (AmiriFontFamily from Type.kt)
-    // Font files: res/font/amiri_regular.ttf, res/font/amiri_bold.ttf
+    // The font picker is driven entirely by the QuranArabicFont enum in
+    // presentation/theme/Type.kt — it is the single source of truth. To add one:
+    // 1. Add the font file(s) (.ttf/.otf) to app/src/main/res/font/
+    // 2. In Type.kt, declare a FontFamily and add a QuranArabicFont entry
+    //    (id + displayName + fontFamily)
+    // That's it — this screen, the preview, and the reader all derive from the
+    // enum, and the selected id persists via PreferencesDataStore.quranArabicFont.
+
+    val selectedFont = QuranArabicFont.fromId(quranState.selectedArabicFontId)
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -112,6 +121,7 @@ fun QuranSettingsScreen(
             item {
                 PreviewCard(
                     arabicFontSize = quranState.arabicFontSize,
+                    arabicFontFamily = selectedFont.fontFamily,
                     showTransliteration = quranState.showTransliteration,
                     showTranslation = quranState.showTranslation
                 )
@@ -158,12 +168,18 @@ fun QuranSettingsScreen(
 
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                    // Font: Amiri (see comments above for adding new fonts)
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    // Arabic Font selector — exposed dropdown menu. The list of
+                    // options comes straight from QuranArabicFont.entries, so adding
+                    // a font (see comment above) automatically adds a menu item. The
+                    // live preview lives in the PREVIEW card at the top of the screen.
+                    var fontMenuExpanded by remember { mutableStateOf(false) }
+                    Column(
+                        modifier = Modifier.padding(
+                            start = 16.dp,
+                            end = 16.dp,
+                            top = 12.dp,
+                            bottom = 14.dp
+                        )
                     ) {
                         Text(
                             text = "Arabic Font",
@@ -171,12 +187,59 @@ fun QuranSettingsScreen(
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = "Amiri",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        ExposedDropdownMenuBox(
+                            expanded = fontMenuExpanded,
+                            onExpandedChange = { fontMenuExpanded = it }
+                        ) {
+                            OutlinedTextField(
+                                value = selectedFont.displayName,
+                                onValueChange = {},
+                                readOnly = true,
+                                singleLine = true,
+                                trailingIcon = {
+                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = fontMenuExpanded)
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                            )
+                            ExposedDropdownMenu(
+                                expanded = fontMenuExpanded,
+                                onDismissRequest = { fontMenuExpanded = false }
+                            ) {
+                                QuranArabicFont.entries.forEach { font ->
+                                    val isSelected = font.id == quranState.selectedArabicFontId
+                                    DropdownMenuItem(
+                                        text = {
+                                            Text(
+                                                text = font.displayName,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                                color = if (isSelected) MaterialTheme.colorScheme.primary
+                                                else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        },
+                                        onClick = {
+                                            viewModel.onEvent(SettingsEvent.SetArabicFont(font.id))
+                                            fontMenuExpanded = false
+                                        },
+                                        trailingIcon = {
+                                            if (isSelected) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Check,
+                                                    contentDescription = null,
+                                                    tint = MaterialTheme.colorScheme.primary,
+                                                    modifier = Modifier.size(18.dp)
+                                                )
+                                            }
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -302,6 +365,7 @@ fun QuranSettingsScreen(
 @Composable
 private fun PreviewCard(
     arabicFontSize: Float,
+    arabicFontFamily: FontFamily,
     showTransliteration: Boolean,
     showTranslation: Boolean
 ) {
@@ -343,6 +407,7 @@ private fun PreviewCard(
             Text(
                 text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0627\u0644\u0644\u064E\u0651\u0647\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0627\u0644\u0631\u064E\u0651\u062D\u0650\u064A\u0645\u0650",
                 style = MaterialTheme.typography.headlineLarge,
+                fontFamily = arabicFontFamily,
                 fontSize = arabicFontSize.sp,
                 lineHeight = (arabicFontSize * 2.4f).sp,
                 textAlign = TextAlign.End,

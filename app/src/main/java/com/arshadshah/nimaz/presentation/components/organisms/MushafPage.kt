@@ -35,6 +35,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,6 +49,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.MushafSurahHeader
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val MushafFrameColor = Color(0xFF0F766E)
@@ -71,6 +73,7 @@ fun MushafPage(
     surahMap: Map<Int, Surah>,
     modifier: Modifier = Modifier,
     arabicFontSize: Float = 28f,
+    arabicFontFamily: FontFamily = AmiriFontFamily,
     highlightedAyahId: Int? = null,
     favoriteAyahIds: Set<Int> = emptySet(),
     showTajweed: Boolean = false,
@@ -173,6 +176,7 @@ fun MushafPage(
                             highlightedAyahId = highlightedAyahId,
                             selectedAyahId = tooltipAyah?.id,
                             arabicFontSize = arabicFontSize,
+                            arabicFontFamily = arabicFontFamily,
                             showTajweed = showTajweed,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )

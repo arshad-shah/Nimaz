@@ -109,6 +109,7 @@ data class NotificationSettingsUiState(
 
 data class QuranSettingsUiState(
     val selectedTranslatorId: String = "sahih_international",
+    val selectedArabicFontId: String = "amiri",
     val showTranslation: Boolean = true,
     val showTransliteration: Boolean = false,
     val arabicFontSize: Float = 28f,
@@ -171,6 +172,7 @@ sealed interface SettingsEvent {
 
     // Quran
     data class SetTranslator(val translatorId: String) : SettingsEvent
+    data class SetArabicFont(val fontId: String) : SettingsEvent
     data class SetShowTranslation(val enabled: Boolean) : SettingsEvent
     data class SetShowTransliteration(val enabled: Boolean) : SettingsEvent
     data class SetArabicFontSize(val size: Float) : SettingsEvent
@@ -522,6 +524,11 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { preferencesDataStore.setQuranTranslatorId(event.translatorId) }
             }
 
+            is SettingsEvent.SetArabicFont -> {
+                _quranState.update { it.copy(selectedArabicFontId = event.fontId) }
+                viewModelScope.launch { preferencesDataStore.setQuranArabicFont(event.fontId) }
+            }
+
             is SettingsEvent.SetShowTranslation -> {
                 _quranState.update { it.copy(showTranslation = event.enabled) }
                 viewModelScope.launch { preferencesDataStore.setShowTranslation(event.enabled) }
@@ -738,6 +745,7 @@ class SettingsViewModel @Inject constructor(
 
             // Quran settings
             val translatorId = preferencesDataStore.quranTranslatorId.first()
+            val arabicFontId = preferencesDataStore.quranArabicFont.first()
             val showTranslation = preferencesDataStore.showTranslation.first()
             val showTransliteration = preferencesDataStore.showTransliteration.first()
             val arabicFontSize = preferencesDataStore.quranArabicFontSize.first()
@@ -750,6 +758,7 @@ class SettingsViewModel @Inject constructor(
             _quranState.update {
                 it.copy(
                     selectedTranslatorId = translatorId,
+                    selectedArabicFontId = arabicFontId,
                     showTranslation = showTranslation,
                     showTransliteration = showTransliteration,
                     arabicFontSize = arabicFontSize,

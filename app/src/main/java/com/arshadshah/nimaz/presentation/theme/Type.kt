@@ -33,6 +33,34 @@ val AmiriFontFamily = FontFamily(
     Font(R.font.amiri_bold, weight = FontWeight.Bold)
 )
 
+val ScheherazadeFontFamily = FontFamily(
+    Font(R.font.scheherazade_new_regular, weight = FontWeight.Normal),
+    Font(R.font.scheherazade_new_bold, weight = FontWeight.Bold)
+)
+
+/**
+ * Selectable Arabic fonts for Quran text.
+ *
+ * Single source of truth for the font picker: the [id] is what gets persisted
+ * in DataStore, [displayName] is shown in the settings list, and [fontFamily]
+ * is what the renderer actually draws with. To add another font, drop the
+ * .ttf into res/font/, declare a FontFamily above, and add an entry here —
+ * the settings screen, preview, and reader all derive from this enum.
+ */
+enum class QuranArabicFont(
+    val id: String,
+    val displayName: String,
+    val fontFamily: FontFamily
+) {
+    AMIRI("amiri", "Amiri", AmiriFontFamily),
+    SCHEHERAZADE("scheherazade", "Scheherazade New", ScheherazadeFontFamily);
+
+    companion object {
+        val DEFAULT = AMIRI
+        fun fromId(id: String?): QuranArabicFont = entries.find { it.id == id } ?: DEFAULT
+    }
+}
+
 
 // Typography
 val NimazTypography = Typography(

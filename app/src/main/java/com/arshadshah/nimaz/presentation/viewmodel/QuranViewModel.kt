@@ -20,6 +20,9 @@ import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import androidx.compose.ui.text.font.FontFamily
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
@@ -70,6 +73,7 @@ data class QuranReaderUiState(
     val selectedTranslatorId: String = "sahih_international",
     val fontSize: Float = 16f,
     val arabicFontSize: Float = 28f,
+    val arabicFontFamily: FontFamily = AmiriFontFamily,
     val keepScreenOn: Boolean = true,
     val continuousReading: Boolean = true,
     val favoriteAyahIds: Set<Int> = emptySet(),
@@ -251,9 +255,10 @@ class QuranViewModel @Inject constructor(
                 preferencesDataStore.quranTranslatorId,
                 preferencesDataStore.showTranslation,
                 preferencesDataStore.showTransliteration,
-                preferencesDataStore.quranArabicFontSize
-            ) { translatorId: String, showTrans: Boolean, showTranslit: Boolean, arabicSize: Float ->
-                QuranDisplaySettings(translatorId, showTrans, showTranslit, arabicSize)
+                preferencesDataStore.quranArabicFontSize,
+                preferencesDataStore.quranArabicFont
+            ) { translatorId: String, showTrans: Boolean, showTranslit: Boolean, arabicSize: Float, fontId: String ->
+                QuranDisplaySettings(translatorId, showTrans, showTranslit, arabicSize, fontId)
             }
 
             val behaviorFlow = combine(
@@ -282,6 +287,7 @@ class QuranViewModel @Inject constructor(
                         showTranslation = display.showTranslation,
                         showTransliteration = display.showTransliteration,
                         arabicFontSize = display.arabicFontSize,
+                        arabicFontFamily = QuranArabicFont.fromId(display.arabicFontId).fontFamily,
                         fontSize = behavior.translationFontSize,
                         continuousReading = behavior.continuousReading,
                         keepScreenOn = behavior.keepScreenOn,
@@ -296,7 +302,8 @@ class QuranViewModel @Inject constructor(
         val translatorId: String,
         val showTranslation: Boolean,
         val showTransliteration: Boolean,
-        val arabicFontSize: Float
+        val arabicFontSize: Float,
+        val arabicFontId: String
     )
 
     private data class QuranBehaviorSettings(
