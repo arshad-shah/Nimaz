@@ -52,10 +52,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatHistoryEntry
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
-import java.text.NumberFormat
+import com.arshadshah.nimaz.core.util.formatCurrency
 import java.text.SimpleDateFormat
 import java.util.Date
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -358,7 +357,3 @@ private fun HistoryEntryCard(
     }
 }
 
-private fun formatCurrency(amount: Double): String {
-    val formatter = NumberFormat.getCurrencyInstance(Locale.US)
-    return formatter.format(amount)
-}

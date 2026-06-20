@@ -943,4 +943,26 @@
     <string name="qaida_map">Map</string>
     <string name="qaida_next_lesson">Next lesson</string>
     <string name="qaida_play_line">Play line</string>
+
+    <!-- Quran Settings Screen -->
+    <string name="arabic_font_size">Arabic Font Size</string>
+    <string name="arabic_font_size_value">%1$dpx</string>
+    <string name="arabic_font">Arabic Font</string>
+    <string name="display_options">Display Options</string>
+    <string name="show_transliteration">Show Transliteration</string>
+    <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="show_translation_subtitle">Meaning in your language</string>
+    <string name="continuous_reading">Continuous Reading</string>
+    <string name="continuous_reading_subtitle">Continue reading between surahs and auto-play next verse</string>
+    <string name="keep_screen_on">Keep Screen On</string>
+    <string name="keep_screen_on_subtitle">Prevent screen from turning off</string>
+    <string name="show_tajweed_colors">Show Tajweed Colors</string>
+    <string name="show_tajweed_colors_subtitle">Color-coded pronunciation rules</string>
+    <string name="audio">Audio</string>
+    <string name="reciter">Reciter</string>
+    <string name="quran_settings_preview">PREVIEW</string>
+    <string name="quran_settings_preview_transliteration">Bismillahir-Rahmanir-Rahim</string>
+    <string name="quran_settings_preview_translation">In the name of Allah, the Most Gracious, the Most Merciful</string>
+    <string name="quran_settings_preview_location">Juz 1 • Page 1</string>
 </resources>

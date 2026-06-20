@@ -56,45 +56,11 @@ import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
-import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-internal const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-
-/**
- * Strip bismillah from first ayah's Arabic text for all surahs EXCEPT:
- * - Surah 1 (Al-Fatiha) - bismillah IS ayah 1
- * - Surah 9 (At-Tawbah) - has no bismillah
- */
-internal fun Ayah.getDisplayArabicText(): String {
-    return if (numberInSurah == 1 && surahNumber != 1 && surahNumber != 9) {
-        textArabic
-            .removePrefix("$BISMILLAH_TEXT ")
-            .removePrefix(BISMILLAH_TEXT)
-            .trim()
-    } else {
-        textArabic
-    }
-}
-
-/**
- * Process ayah text to append Arabic numeral with ornamental brackets at the end
- */
-internal fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
-    return "$arabicText ${formatAyahEndMarker(ayahNumber)}"
-}
-
-/**
- * Format just the ayah end marker with ornamental brackets
- */
-internal fun formatAyahEndMarker(ayahNumber: Int): String {
-    val unicodeAyaEndStart = "\uFD3F" // ﴿
-    val unicodeAyaEndEnd = "\uFD3E"   // ﴾
-    val arabicNumber = toArabicNumber(ayahNumber)
-    return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
-}
 
 @Composable
 internal fun AyahItem(

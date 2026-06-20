@@ -68,8 +68,7 @@ import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import com.arshadshah.nimaz.core.util.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -901,9 +900,3 @@ private fun BreakdownRow(
     }
 }
 
-// --- Utilities ---
-
-private fun formatCurrency(amount: Double, currency: String): String {
-    val formatter = NumberFormat.getCurrencyInstance(Locale.US)
-    return formatter.format(amount)
-}

@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
@@ -50,8 +49,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -102,7 +104,7 @@ fun QuranSettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Quran Settings",
+                title = stringResource(R.string.quran_settings),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -129,7 +131,7 @@ fun QuranSettingsScreen(
 
             // Arabic Text Section
             item {
-                NimazSectionHeader(title = "Arabic Text")
+                NimazSectionHeader(title = stringResource(R.string.arabic_text))
             }
             item {
                 NimazMenuGroup {
@@ -141,13 +143,13 @@ fun QuranSettingsScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Arabic Font Size",
+                                text = stringResource(R.string.arabic_font_size),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "${quranState.arabicFontSize.toInt()}px",
+                                text = stringResource(R.string.arabic_font_size_value, quranState.arabicFontSize.toInt()),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
@@ -182,7 +184,7 @@ fun QuranSettingsScreen(
                         )
                     ) {
                         Text(
-                            text = "Arabic Font",
+                            text = stringResource(R.string.arabic_font),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -212,29 +214,13 @@ fun QuranSettingsScreen(
                             ) {
                                 QuranArabicFont.entries.forEach { font ->
                                     val isSelected = font.id == quranState.selectedArabicFontId
-                                    DropdownMenuItem(
-                                        text = {
-                                            Text(
-                                                text = font.displayName,
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                                color = if (isSelected) MaterialTheme.colorScheme.primary
-                                                else MaterialTheme.colorScheme.onSurface
-                                            )
-                                        },
+                                    NimazDropdownMenuItem(
+                                        text = font.displayName,
+                                        selected = isSelected,
+                                        textFontFamily = font.fontFamily,
                                         onClick = {
                                             viewModel.onEvent(SettingsEvent.SetArabicFont(font.id))
                                             fontMenuExpanded = false
-                                        },
-                                        trailingIcon = {
-                                            if (isSelected) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Check,
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.primary,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                            }
                                         }
                                     )
                                 }
@@ -246,41 +232,41 @@ fun QuranSettingsScreen(
 
             // Display Options Section
             item {
-                NimazSectionHeader(title = "Display Options")
+                NimazSectionHeader(title = stringResource(R.string.display_options))
             }
             item {
                 NimazMenuGroup {
                     NimazSettingsItem(
-                        title = "Show Transliteration",
-                        subtitle = "Roman letters pronunciation",
+                        title = stringResource(R.string.show_transliteration),
+                        subtitle = stringResource(R.string.show_transliteration_subtitle),
                         checked = quranState.showTransliteration,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTransliteration(!quranState.showTransliteration)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
-                        title = "Show Translation",
-                        subtitle = "Meaning in your language",
+                        title = stringResource(R.string.show_translation),
+                        subtitle = stringResource(R.string.show_translation_subtitle),
                         checked = quranState.showTranslation,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTranslation(!quranState.showTranslation)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
-                        title = "Continuous Reading",
-                        subtitle = "Continue reading between surahs and auto-play next verse",
+                        title = stringResource(R.string.continuous_reading),
+                        subtitle = stringResource(R.string.continuous_reading_subtitle),
                         checked = quranState.continuousReading,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetContinuousReading(!quranState.continuousReading)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
-                        title = "Keep Screen On",
-                        subtitle = "Prevent screen from turning off",
+                        title = stringResource(R.string.keep_screen_on),
+                        subtitle = stringResource(R.string.keep_screen_on_subtitle),
                         checked = quranState.keepScreenOn,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
-                        title = "Show Tajweed Colors",
-                        subtitle = "Color-coded pronunciation rules",
+                        title = stringResource(R.string.show_tajweed_colors),
+                        subtitle = stringResource(R.string.show_tajweed_colors_subtitle),
                         checked = quranState.showTajweed,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
@@ -289,7 +275,7 @@ fun QuranSettingsScreen(
 
             // Translation Section
             item {
-                NimazSectionHeader(title = "Translation")
+                NimazSectionHeader(title = stringResource(R.string.translation))
             }
             item {
                 NimazMenuGroup {
@@ -310,7 +296,7 @@ fun QuranSettingsScreen(
 
             // Audio Section
             item {
-                NimazSectionHeader(title = "Audio")
+                NimazSectionHeader(title = stringResource(R.string.audio))
             }
             item {
                 NimazMenuGroup {
@@ -324,7 +310,7 @@ fun QuranSettingsScreen(
                     ) {
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
-                                text = "Reciter",
+                                text = stringResource(R.string.reciter),
                                 style = MaterialTheme.typography.bodyLarge,
                                 fontWeight = FontWeight.Medium,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -378,7 +364,7 @@ private fun PreviewCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "PREVIEW",
+                    text = stringResource(R.string.quran_settings_preview),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = 1.sp,
@@ -423,7 +409,7 @@ private fun PreviewCard(
                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
                 ) {
                     Text(
-                        text = "Bismillahir-Rahmanir-Rahim",
+                        text = stringResource(R.string.quran_settings_preview_transliteration),
                         style = MaterialTheme.typography.bodyMedium,
                         fontStyle = FontStyle.Italic,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
@@ -440,7 +426,7 @@ private fun PreviewCard(
                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
                 ) {
                     Text(
-                        text = "In the name of Allah, the Most Gracious, the Most Merciful",
+                        text = stringResource(R.string.quran_settings_preview_translation),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         lineHeight = 22.sp,
@@ -452,7 +438,7 @@ private fun PreviewCard(
             // Juz/Page info like in reader
             Spacer(modifier = Modifier.height(10.dp))
             Text(
-                text = "Juz 1 \u2022 Page 1",
+                text = stringResource(R.string.quran_settings_preview_location),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                 modifier = Modifier.fillMaxWidth(),

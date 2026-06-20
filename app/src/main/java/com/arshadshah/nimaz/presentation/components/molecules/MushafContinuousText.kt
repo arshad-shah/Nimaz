@@ -30,32 +30,13 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val MushafLineColor = Color(0xFF0F766E).copy(alpha = 0.5f)
-
-private const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-
-private fun Ayah.getDisplayArabicText(): String {
-    return if (ayahNumber == 1 && surahNumber != 1 && surahNumber != 9) {
-        textArabic
-            .removePrefix("$BISMILLAH_TEXT ")
-            .removePrefix(BISMILLAH_TEXT)
-            .trim()
-    } else {
-        textArabic
-    }
-}
-
-private fun formatAyahEndMarker(ayahNumber: Int): String {
-    val unicodeAyaEndStart = "\uFD3F"
-    val unicodeAyaEndEnd = "\uFD3E"
-    val arabicNumber = toArabicNumber(ayahNumber)
-    return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
-}
 
 /**
  * Core component that renders continuous Arabic text with clickable ayah spans.
