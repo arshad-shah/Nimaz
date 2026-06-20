@@ -104,7 +104,11 @@ fun HomeHero(
                 ),
             )
             Column(
-                modifier = Modifier.align(Alignment.Center),
+                // Centre within the *visible* sky (below the status-bar band),
+                // not the full box — otherwise the content reads as too high.
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(top = statusBarTop),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
