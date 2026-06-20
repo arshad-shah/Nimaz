@@ -9,14 +9,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -127,21 +127,11 @@ fun HomeScreen(
 
     val nextPrayerTimeText = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
+    // Draw edge-to-edge: the compact hero's living sky extends behind the
+    // status bar and the dynamic top bar is an overlay (below) that manages its
+    // own status-bar padding. The tablet path adds statusBarsPadding itself.
     Scaffold(
-        topBar = {
-            // Dynamic top bar only on the compact (phone) layout. Tablet keeps
-            // its own full-width HomeHeader as part of the column structure.
-            if (windowSizeClass.isCompact && !state.isLoading) {
-                HomeDynamicTopBar(
-                    transitionProgress = topBarProgress,
-                    locationName = state.locationName,
-                    nextPrayer = state.nextPrayer,
-                    nextPrayerTime = nextPrayerTimeText,
-                    timeUntilNextPrayer = state.timeUntilNextPrayer,
-                    onSettingsClick = onNavigateToSettings,
-                )
-            }
-        }
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { innerPadding ->
         Box(
             modifier = Modifier
@@ -156,23 +146,38 @@ fun HomeScreen(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+
                 windowSizeClass.isCompact -> {
-                    HomeCompactContent(
-                        state = state,
-                        listState = compactListState,
-                        updateState = updateState,
-                        updateManager = updateManager,
-                        onNavigateToPrayerSettings = onNavigateToPrayerSettings,
-                        onNavigateToPrayerTracker = onNavigateToPrayerTracker,
-                        onNavigateToPrayerTimes = onNavigateToPrayerTimes,
-                        onOpenHadith = onOpenHadith,
-                        onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
-                        notificationPermissionLauncher = notificationPermissionLauncher,
-                        locationPermissionLauncher = locationPermissionLauncher,
-                        batteryOptimizationLauncher = batteryOptimizationLauncher,
-                        viewModel = viewModel,
-                    )
+                    // List draws under the bar; the bar overlays the sky and
+                    // morphs from a blended location pill into a prayer summary.
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        HomeCompactContent(
+                            state = state,
+                            listState = compactListState,
+                            updateState = updateState,
+                            updateManager = updateManager,
+                            onNavigateToPrayerSettings = onNavigateToPrayerSettings,
+                            onNavigateToPrayerTracker = onNavigateToPrayerTracker,
+                            onNavigateToPrayerTimes = onNavigateToPrayerTimes,
+                            onOpenHadith = onOpenHadith,
+                            onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
+                            notificationPermissionLauncher = notificationPermissionLauncher,
+                            locationPermissionLauncher = locationPermissionLauncher,
+                            batteryOptimizationLauncher = batteryOptimizationLauncher,
+                            viewModel = viewModel,
+                        )
+                        HomeDynamicTopBar(
+                            transitionProgress = topBarProgress,
+                            locationName = state.locationName,
+                            nextPrayer = state.nextPrayer,
+                            nextPrayerTime = nextPrayerTimeText,
+                            timeUntilNextPrayer = state.timeUntilNextPrayer,
+                            onSettingsClick = onNavigateToSettings,
+                            modifier = Modifier.align(Alignment.TopCenter),
+                        )
+                    }
                 }
+
                 else -> {
                     HomeTabletContent(
                         state = state,
@@ -345,7 +350,11 @@ private fun HomeTabletContent(
         getBatteryIntent = { viewModel.getBatteryOptimizationIntent() },
     )
 
-    Column(modifier = Modifier.fillMaxSize()) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .statusBarsPadding()
+    ) {
         HomeHeader(
             locationName = state.locationName,
             hijriDate = state.hijriDate,
@@ -546,6 +555,7 @@ private fun buildHomeBannerItems(
                     onAction = { updateManager?.startUpdate() },
                 )
             )
+
             is UpdateState.Starting -> add(
                 HomeBannerItem(
                     id = "starting_update",
@@ -555,6 +565,7 @@ private fun buildHomeBannerItems(
                     isLoading = true,
                 )
             )
+
             is UpdateState.Downloading -> add(
                 HomeBannerItem(
                     id = "downloading",
@@ -564,6 +575,7 @@ private fun buildHomeBannerItems(
                     isLoading = true,
                 )
             )
+
             is UpdateState.Downloaded -> add(
                 HomeBannerItem(
                     id = "update_ready",
@@ -575,6 +587,7 @@ private fun buildHomeBannerItems(
                     onAction = { updateState.completeUpdate() },
                 )
             )
+
             else -> Unit
         }
     }

@@ -4,10 +4,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,20 +80,28 @@ fun HomeHero(
         )
     }
     val useHijriPrimary = LocalUseHijriPrimary.current
-    val shadow = Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 6f)
+    val shadow =
+        Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 6f)
+
+    // The screen is edge-to-edge, so grow the sky by the status-bar inset to
+    // leave a clean band of empty sky behind the status bar at the top.
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Living-sky banner — same height & corners as the original hero.
+        // Living-sky banner — original hero height plus the status-bar band.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(HERO_SKY_HEIGHT)
+                .height(HERO_SKY_HEIGHT + statusBarTop)
         ) {
             SkyBackground(
                 timeOfDay = timeOfDay,
                 moonFraction = moonFraction,
                 modifier = Modifier.matchParentSize(),
-                shape = RoundedCornerShape(bottomStart = HERO_BOTTOM_RADIUS, bottomEnd = HERO_BOTTOM_RADIUS),
+                shape = RoundedCornerShape(
+                    bottomStart = HERO_BOTTOM_RADIUS,
+                    bottomEnd = HERO_BOTTOM_RADIUS
+                ),
             )
             Column(
                 modifier = Modifier.align(Alignment.Center),
@@ -98,7 +109,10 @@ fun HomeHero(
             ) {
                 Text(
                     text = clock,
-                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold, shadow = shadow),
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        shadow = shadow
+                    ),
                     color = Color.White,
                 )
                 Text(
