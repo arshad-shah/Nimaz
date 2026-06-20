@@ -77,6 +77,7 @@ fun MoreMenuScreen(
     onNavigateToLocation: () -> Unit,
     onNavigateToCalculationMethod: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToPrayerTimes: () -> Unit,
     onNavigateToMonthlyPrayerTimes: () -> Unit,
     onNavigateToKhatam: () -> Unit,
     onNavigateToAsmaUlHusna: () -> Unit,
@@ -196,6 +197,13 @@ fun MoreMenuScreen(
                         subtitle = stringResource(R.string.calendar_subtitle),
                         icon = Icons.Default.CalendarMonth,
                         onClick = onNavigateToCalendar
+                    )
+                    NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
+                    NimazMenuItem(
+                        title = "Prayer Times",
+                        subtitle = "Daily prayer times with a month view",
+                        icon = Icons.Default.Mosque,
+                        onClick = onNavigateToPrayerTimes
                     )
                     NimazDivider(modifier = Modifier.padding(start = 56.dp), alpha = 0.5f)
                     NimazMenuItem(

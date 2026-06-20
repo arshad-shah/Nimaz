@@ -34,6 +34,7 @@ data class MonthlyPrayerTimesUiState(
     val currentMonth: YearMonth = YearMonth.now(),
     val dayPrayerTimes: List<DayPrayerTimes> = emptyList(),
     val locationName: String = "Location not set",
+    val methodLabel: String = "",
     val isLoading: Boolean = true,
     val expandedDay: LocalDate? = null
 )
@@ -141,7 +142,10 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                     adjustments = adj
 
                     _state.update {
-                        it.copy(locationName = if (name.isNotBlank()) name else "Dublin, Ireland")
+                        it.copy(
+                            locationName = if (name.isNotBlank()) name else "Dublin, Ireland",
+                            methodLabel = "${prettyMethod(calcMethod)} · ${prettyAsr(asrCalc)}",
+                        )
                     }
                     calculateMonth()
                 }
@@ -193,5 +197,24 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
 
             _state.update { it.copy(dayPrayerTimes = days, isLoading = false) }
         }
+    }
+
+    private fun prettyMethod(m: CalculationMethod): String = when (m) {
+        CalculationMethod.MUSLIM_WORLD_LEAGUE -> "MWL"
+        CalculationMethod.EGYPTIAN -> "Egyptian"
+        CalculationMethod.KARACHI -> "Karachi"
+        CalculationMethod.UMM_AL_QURA -> "Umm al-Qura"
+        CalculationMethod.DUBAI -> "Dubai"
+        CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Moonsighting"
+        CalculationMethod.NORTH_AMERICA -> "ISNA"
+        CalculationMethod.KUWAIT -> "Kuwait"
+        CalculationMethod.QATAR -> "Qatar"
+        CalculationMethod.SINGAPORE -> "Singapore"
+        CalculationMethod.TURKEY -> "Turkey"
+    }
+
+    private fun prettyAsr(a: AsrCalculation): String = when (a) {
+        AsrCalculation.HANAFI -> "Hanafi"
+        AsrCalculation.STANDARD -> "Standard"
     }
 }

@@ -7,7 +7,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -15,23 +14,25 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -51,11 +52,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
+import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerSkyScene
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
@@ -66,7 +68,6 @@ import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMMM")
-private val MONTH_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("MMMM yyyy")
 
 /**
  * Dedicated Prayer Times screen: a day pager with a living-sky hero. The top
@@ -103,16 +104,18 @@ fun PrayerTimesScreen(
                 .padding(padding)
                 .fillMaxSize(),
         ) {
-            // Living sky hero (pinned) with a "Today" shortcut when browsing.
+            // Living sky banner (pinned) — square top, rounded bottom, with a
+            // "Today" shortcut when browsing.
             Box(modifier = Modifier.fillMaxWidth()) {
                 PrayerSkyScene(
                     timeOfDay = state.timeOfDay,
                     timeLabel = state.skyTimeLabel,
                     statusLabel = state.skyStatusLabel,
                     moonFraction = state.moonFraction,
+                    shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(170.dp),
+                        .height(240.dp),
                 )
                 if (!state.isToday) {
                     Surface(
@@ -134,14 +137,24 @@ fun PrayerTimesScreen(
                 }
             }
 
-            // Day navigation row (pinned).
-            DayNavBar(
-                selectedDate = state.selectedDate,
-                isToday = state.isToday,
-                onPrev = { viewModel.onEvent(PrayerTimesEvent.PreviousDay) },
-                onNext = { viewModel.onEvent(PrayerTimesEvent.NextDay) },
-                onPickDate = { showMonthSheet = true },
-            )
+            // Day navigation, in a card overlapping the sky's curved bottom.
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp)
+                    .offset(y = (-28).dp),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+            ) {
+                DayNavBar(
+                    selectedDate = state.selectedDate,
+                    isToday = state.isToday,
+                    onPrev = { viewModel.onEvent(PrayerTimesEvent.PreviousDay) },
+                    onNext = { viewModel.onEvent(PrayerTimesEvent.NextDay) },
+                    onPickDate = { showMonthSheet = true },
+                )
+            }
 
             // Day content: swipe horizontally to change day; list scrolls within.
             Box(
@@ -188,16 +201,24 @@ fun PrayerTimesScreen(
 
     if (showMonthSheet) {
         val sheetState = rememberModalBottomSheetState()
+        var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
         ModalBottomSheet(
             onDismissRequest = { showMonthSheet = false },
             sheetState = sheetState,
         ) {
-            MonthPicker(
-                selected = state.selectedDate,
-                onPick = {
+            NimazCalendar(
+                displayedMonth = displayedMonth,
+                selectedDate = state.selectedDate,
+                onDateSelected = {
                     viewModel.onEvent(PrayerTimesEvent.SelectDate(it))
                     showMonthSheet = false
                 },
+                onPreviousMonth = { displayedMonth = displayedMonth.minusMonths(1) },
+                onNextMonth = { displayedMonth = displayedMonth.plusMonths(1) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp)
+                    .navigationBarsPadding(),
             )
         }
     }
@@ -214,30 +235,49 @@ private fun DayNavBar(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 10.dp, vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        IconButton(onClick = onPrev) {
+        FilledTonalIconButton(onClick = onPrev) {
             Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous day")
         }
-        Column(
-            modifier = Modifier.clickable(onClick = onPickDate),
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Row(
+            modifier = Modifier
+                .weight(1f)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable(onClick = onPickDate)
+                .padding(vertical = 4.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(
-                text = if (isToday) "Today" else relativeLabel(selectedDate),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-            Text(
-                text = selectedDate.format(DATE_FMT),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = if (isToday) "TODAY" else relativeLabel(selectedDate).uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = selectedDate.format(DATE_FMT),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    Icon(
+                        imageVector = Icons.Default.CalendarMonth,
+                        contentDescription = "Pick a date",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(start = 6.dp)
+                            .size(16.dp),
+                    )
+                }
+            }
         }
-        IconButton(onClick = onNext) {
+        FilledTonalIconButton(onClick = onNext) {
             Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next day")
         }
     }
@@ -309,109 +349,6 @@ private fun InfoRow(label: String, value: String) {
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
         )
-    }
-}
-
-@Composable
-private fun MonthPicker(selected: LocalDate, onPick: (LocalDate) -> Unit) {
-    var month by remember(selected) { mutableStateOf(YearMonth.from(selected)) }
-    val today = remember { LocalDate.now() }
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp),
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            IconButton(onClick = { month = month.minusMonths(1) }) {
-                Icon(Icons.Default.KeyboardArrowLeft, contentDescription = "Previous month")
-            }
-            Text(
-                text = month.atDay(1).format(MONTH_FMT),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            IconButton(onClick = { month = month.plusMonths(1) }) {
-                Icon(Icons.Default.KeyboardArrowRight, contentDescription = "Next month")
-            }
-        }
-
-        Row(modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)) {
-            listOf("M", "T", "W", "T", "F", "S", "S").forEach { d ->
-                Text(
-                    text = d,
-                    modifier = Modifier.weight(1f),
-                    textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        }
-
-        // Cells: leading blanks (Monday-based) then the month's days.
-        val leading = month.atDay(1).dayOfWeek.value - 1
-        val cells = buildList<LocalDate?> {
-            repeat(leading) { add(null) }
-            for (d in 1..month.lengthOfMonth()) add(month.atDay(d))
-        }
-        cells.chunked(7).forEach { week ->
-            Row(modifier = Modifier.fillMaxWidth()) {
-                week.forEach { date ->
-                    DayCell(
-                        date = date,
-                        isSelected = date == selected,
-                        isToday = date == today,
-                        onClick = { date?.let(onPick) },
-                        modifier = Modifier.weight(1f),
-                    )
-                }
-                repeat(7 - week.size) { Spacer(Modifier.weight(1f)) }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DayCell(
-    date: LocalDate?,
-    isSelected: Boolean,
-    isToday: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    Box(
-        modifier = modifier
-            .padding(3.dp)
-            .size(38.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .then(
-                if (isSelected) {
-                    Modifier.background(MaterialTheme.colorScheme.primary)
-                } else {
-                    Modifier
-                },
-            )
-            .clickable(enabled = date != null, onClick = onClick),
-        contentAlignment = Alignment.Center,
-    ) {
-        if (date != null) {
-            Text(
-                text = date.dayOfMonth.toString(),
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected || isToday) FontWeight.Bold else FontWeight.Normal,
-                color = when {
-                    isSelected -> MaterialTheme.colorScheme.onPrimary
-                    isToday -> MaterialTheme.colorScheme.primary
-                    else -> MaterialTheme.colorScheme.onSurface
-                },
-            )
-        }
     }
 }
 

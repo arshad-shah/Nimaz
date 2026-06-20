@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -80,12 +81,11 @@ import kotlin.math.sin
  * @param cloudsEnabled set false to freeze cloud motion (e.g. battery saver).
  */
 @Composable
-fun PrayerSkyScene(
+fun SkyBackground(
     timeOfDay: Float,
-    timeLabel: String,
-    statusLabel: String,
+    moonFraction: Float,
     modifier: Modifier = Modifier,
-    moonFraction: Float = 0.5f,
+    shape: Shape = RoundedCornerShape(20.dp),
     cloudsEnabled: Boolean = true,
 ) {
     val drift = rememberInfiniteTransition(label = "sky")
@@ -98,7 +98,7 @@ fun PrayerSkyScene(
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(20.dp))
+            .clip(shape)
             .drawWithCache {
                 val w = size.width.roundToInt().coerceAtLeast(1)
                 val h = size.height.roundToInt().coerceAtLeast(1)
@@ -118,7 +118,31 @@ fun PrayerSkyScene(
                     drawImage(clouds, dstOffset = IntOffset(off - w, 0), dstSize = full, colorFilter = cloudTint)
                 }
             },
-    ) {
+    )
+}
+
+/**
+ * The [SkyBackground] with a time + status label overlaid (top-left). Used by
+ * the dedicated Prayer Times screen.
+ */
+@Composable
+fun PrayerSkyScene(
+    timeOfDay: Float,
+    timeLabel: String,
+    statusLabel: String,
+    modifier: Modifier = Modifier,
+    moonFraction: Float = 0.5f,
+    shape: Shape = RoundedCornerShape(20.dp),
+    cloudsEnabled: Boolean = true,
+) {
+    Box(modifier = modifier) {
+        SkyBackground(
+            timeOfDay = timeOfDay,
+            moonFraction = moonFraction,
+            modifier = Modifier.matchParentSize(),
+            shape = shape,
+            cloudsEnabled = cloudsEnabled,
+        )
         Column(modifier = Modifier.padding(16.dp)) {
             val shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 4f)
             Text(

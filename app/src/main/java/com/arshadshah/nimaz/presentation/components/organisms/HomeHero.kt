@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +35,7 @@ import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
 import java.time.LocalDate
@@ -38,14 +43,14 @@ import java.time.LocalTime
 import java.time.ZoneOffset
 
 /**
- * Home hero: the living sky as a banner (current time + date), with the
- * next-prayer info card overlapping its curved bottom.
+ * Home hero: a living-sky banner (current time + date) at the original hero
+ * height and corners (square top, rounded bottom), with the next-prayer card
+ * overlapping its curved bottom.
  *
- * The sky is driven by the clock: [timeOfDay] is recomputed each minute (the
- * sky bakes once per minute, so this is cheap) and the moon phase is derived
- * from today's date. The info card carries the prayer focus — name, time and
- * the live countdown — overlapping the sky so the two read as one unit that
- * flows into the list below.
+ * Location + settings live in the dynamic top bar above, so the sky stays
+ * content-light and the sun arc has room to read. The card carries the prayer
+ * focus — name, time and the live countdown — and overlaps the sky so the two
+ * read as one unit that flows into the list below.
  */
 @Composable
 fun HomeHero(
@@ -71,19 +76,45 @@ fun HomeHero(
             LocalDate.now().atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli()
         )
     }
-    val dateLine = hijriDate.ifBlank { gregorianDate }
+    val useHijriPrimary = LocalUseHijriPrimary.current
+    val shadow = Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 6f)
 
     Column(modifier = modifier.fillMaxWidth()) {
-        // Living sky banner — current time + date overlaid (top-left).
-        PrayerSkyScene(
-            timeOfDay = timeOfDay,
-            timeLabel = clock,
-            statusLabel = dateLine,
-            moonFraction = moonFraction,
+        // Living-sky banner — same height & corners as the original hero.
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(160.dp)
-        )
+                .height(HERO_SKY_HEIGHT)
+        ) {
+            SkyBackground(
+                timeOfDay = timeOfDay,
+                moonFraction = moonFraction,
+                modifier = Modifier.matchParentSize(),
+                shape = RoundedCornerShape(bottomStart = HERO_BOTTOM_RADIUS, bottomEnd = HERO_BOTTOM_RADIUS),
+            )
+            Column(
+                modifier = Modifier.align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Text(
+                    text = clock,
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Bold, shadow = shadow),
+                    color = Color.White,
+                )
+                Text(
+                    text = if (useHijriPrimary) hijriDate.ifEmpty { gregorianDate } else gregorianDate,
+                    style = MaterialTheme.typography.bodyMedium.copy(shadow = shadow),
+                    color = Color.White.copy(alpha = 0.9f),
+                )
+                if (useHijriPrimary && gregorianDate.isNotEmpty()) {
+                    Text(
+                        text = gregorianDate,
+                        style = MaterialTheme.typography.bodySmall.copy(shadow = shadow),
+                        color = Color.White.copy(alpha = 0.8f),
+                    )
+                }
+            }
+        }
 
         // Next-prayer card overlapping the sky's curved bottom.
         Card(
@@ -132,7 +163,7 @@ fun HomeHero(
                 Text(
                     text = timeUntilNextPrayer,
                     style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
+                    fontWeight = FontWeight.ExtraBold,
                     color = MaterialTheme.colorScheme.primary,
                 )
             }
@@ -156,12 +187,13 @@ private fun formatClock12(hour: Int, minute: Int): String {
     return String.format("%d:%02d %s", h, minute, amPm)
 }
 
-/**
- * Bottom corner radius kept for layouts that mirror the hero's rounding.
- */
+/** Sky-banner height — matches the original hero's height. */
+val HERO_SKY_HEIGHT = 280.dp
+
+/** Bottom corner radius applied to the hero. */
 val HERO_BOTTOM_RADIUS = 32.dp
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 320)
+@Preview(showBackground = true, widthDp = 412, heightDp = 380)
 @Composable
 private fun HomeHero_Preview() {
     NimazTheme {

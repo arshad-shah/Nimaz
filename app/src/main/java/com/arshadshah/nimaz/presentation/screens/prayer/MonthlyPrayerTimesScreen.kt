@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -26,6 +27,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,12 +53,14 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import java.time.LocalDate
@@ -77,9 +81,42 @@ fun MonthlyPrayerTimesScreen(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
+            val context = LocalContext.current
+            val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
             NimazBackTopAppBar(
                 title = "Monthly Prayer Times",
                 onBackClick = onNavigateBack,
+                actions = {
+                    IconButton(
+                        onClick = {
+                            val s = state
+                            runCatching {
+                                val rows = s.dayPrayerTimes.map {
+                                    PrayerTimesPdfExporter.Row(
+                                        it.date,
+                                        listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
+                                    )
+                                }
+                                val file = PrayerTimesPdfExporter.export(
+                                    context = context,
+                                    month = s.currentMonth,
+                                    locationName = s.locationName,
+                                    methodLabel = s.methodLabel,
+                                    rows = rows,
+                                )
+                                context.startActivity(
+                                    Intent.createChooser(
+                                        PrayerTimesPdfExporter.buildShareIntent(context, file),
+                                        "Share prayer times",
+                                    )
+                                )
+                            }
+                        },
+                        enabled = canExport,
+                    ) {
+                        Icon(Icons.Default.Share, contentDescription = "Export as PDF")
+                    }
+                },
                 scrollBehavior = scrollBehavior
             )
         }
