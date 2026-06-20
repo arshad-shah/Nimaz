@@ -18,14 +18,14 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -375,7 +375,11 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     val clip = ClipData.newPlainText("Quran Ayah", textToCopy)
     clipboard.setPrimaryClip(clip)
 
-    Toast.makeText(context, context.getString(R.string.ayah_copied_to_clipboard), Toast.LENGTH_SHORT).show()
+    Toast.makeText(
+        context,
+        context.getString(R.string.ayah_copied_to_clipboard),
+        Toast.LENGTH_SHORT
+    ).show()
 }
 
 /**

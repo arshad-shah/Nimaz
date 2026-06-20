@@ -18,10 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -37,6 +37,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -45,22 +46,21 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import androidx.compose.runtime.LaunchedEffect
 import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.SearchViewModel
@@ -195,7 +195,10 @@ fun SearchScreen(
             if (state.query.isNotEmpty() && !state.isSearching && state.filteredResults.isNotEmpty()) {
                 item {
                     Text(
-                        text = stringResource(R.string.results_found_format, statsState.totalResults),
+                        text = stringResource(
+                            R.string.results_found_format,
+                            statsState.totalResults
+                        ),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -208,17 +211,30 @@ fun SearchScreen(
                     is UnifiedSearchResult.QuranResult -> QuranSearchResultCard(
                         result = result.result,
                         query = state.query,
-                        onClick = { onNavigateToQuranAyah(result.result.ayah.surahNumber, result.result.ayah.ayahNumber) }
+                        onClick = {
+                            onNavigateToQuranAyah(
+                                result.result.ayah.surahNumber,
+                                result.result.ayah.ayahNumber
+                            )
+                        }
                     )
+
                     is UnifiedSearchResult.SurahResult -> SurahSearchResultCard(
                         surah = result.surah,
                         onClick = { onNavigateToSurah(result.surah.number) }
                     )
+
                     is UnifiedSearchResult.HadithResult -> HadithSearchResultCard(
                         result = result.result,
                         query = state.query,
-                        onClick = { onNavigateToHadith(result.result.hadith.bookId, result.result.hadith.id) }
+                        onClick = {
+                            onNavigateToHadith(
+                                result.result.hadith.bookId,
+                                result.result.hadith.id
+                            )
+                        }
                     )
+
                     is UnifiedSearchResult.DuaResult -> DuaSearchResultCard(
                         result = result.result,
                         query = state.query,
@@ -302,7 +318,11 @@ private fun QuranSearchResultCard(
         icon = Icons.AutoMirrored.Filled.MenuBook,
         iconColor = NimazColors.QuranColors.Meccan,
         type = stringResource(R.string.quran_type),
-        title = stringResource(R.string.surah_result_format, result.ayah.surahNumber, result.ayah.ayahNumber),
+        title = stringResource(
+            R.string.surah_result_format,
+            result.ayah.surahNumber,
+            result.ayah.ayahNumber
+        ),
         subtitle = result.surahName,
         highlightedText = result.matchedText,
         query = query,
@@ -357,7 +377,11 @@ private fun SurahSearchResultCard(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = stringResource(R.string.surah_ayahs_format, surah.nameTransliteration, surah.numberOfAyahs),
+                    text = stringResource(
+                        R.string.surah_ayahs_format,
+                        surah.nameTransliteration,
+                        surah.numberOfAyahs
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

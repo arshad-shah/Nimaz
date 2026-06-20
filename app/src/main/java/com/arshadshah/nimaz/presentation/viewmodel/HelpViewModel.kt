@@ -78,7 +78,14 @@ class HelpViewModel @Inject constructor(
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopics(lang) }
                 .catch { e -> _homeState.update { it.copy(isLoading = false, error = e.message) } }
-                .collect { topics -> _homeState.update { it.copy(topics = topics, isLoading = false) } }
+                .collect { topics ->
+                    _homeState.update {
+                        it.copy(
+                            topics = topics,
+                            isLoading = false
+                        )
+                    }
+                }
         }
         // Search results, debounced.
         viewModelScope.launch {
@@ -88,7 +95,12 @@ class HelpViewModel @Inject constructor(
                 }
                 .catch { /* keep last results on error */ }
                 .collect { results ->
-                    _homeState.update { it.copy(results = results, isSearching = query.value.isNotBlank()) }
+                    _homeState.update {
+                        it.copy(
+                            results = results,
+                            isSearching = query.value.isNotBlank()
+                        )
+                    }
                 }
         }
     }
@@ -99,6 +111,7 @@ class HelpViewModel @Inject constructor(
                 query.value = event.query
                 _homeState.update { it.copy(query = event.query) }
             }
+
             is HelpEvent.LoadTopic -> loadTopic(event.topicId)
             is HelpEvent.LoadGuide -> loadGuide(event.guideId)
         }
@@ -109,7 +122,14 @@ class HelpViewModel @Inject constructor(
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
                 .catch { e -> _topicState.update { it.copy(isLoading = false, error = e.message) } }
-                .collect { detail -> _topicState.update { it.copy(detail = detail, isLoading = false) } }
+                .collect { detail ->
+                    _topicState.update {
+                        it.copy(
+                            detail = detail,
+                            isLoading = false
+                        )
+                    }
+                }
         }
     }
 
@@ -118,7 +138,14 @@ class HelpViewModel @Inject constructor(
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
                 .catch { e -> _guideState.update { it.copy(isLoading = false, error = e.message) } }
-                .collect { guide -> _guideState.update { it.copy(guide = guide, isLoading = false) } }
+                .collect { guide ->
+                    _guideState.update {
+                        it.copy(
+                            guide = guide,
+                            isLoading = false
+                        )
+                    }
+                }
         }
     }
 }

@@ -76,10 +76,12 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                 _state.update { it.copy(currentMonth = it.currentMonth.plusMonths(1)) }
                 calculateMonth()
             }
+
             MonthlyPrayerTimesEvent.PreviousMonth -> {
                 _state.update { it.copy(currentMonth = it.currentMonth.minusMonths(1)) }
                 calculateMonth()
             }
+
             is MonthlyPrayerTimesEvent.ToggleDayExpanded -> {
                 _state.update {
                     it.copy(
@@ -137,12 +139,20 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
 
                     latitude = if (lat != 0.0) lat else 53.3498
                     longitude = if (lng != 0.0) lng else -6.2603
-                    calcMethod = try { CalculationMethod.valueOf(calcStr) } catch (_: Exception) { CalculationMethod.MUSLIM_WORLD_LEAGUE }
+                    calcMethod = try {
+                        CalculationMethod.valueOf(calcStr)
+                    } catch (_: Exception) {
+                        CalculationMethod.MUSLIM_WORLD_LEAGUE
+                    }
                     asrCalc = when (asrStr.lowercase()) {
                         "hanafi" -> AsrCalculation.HANAFI
                         else -> AsrCalculation.STANDARD
                     }
-                    highLatRule = try { HighLatitudeRule.valueOf(highStr) } catch (_: Exception) { null }
+                    highLatRule = try {
+                        HighLatitudeRule.valueOf(highStr)
+                    } catch (_: Exception) {
+                        null
+                    }
                     adjustments = adj
 
                     _state.update {
@@ -202,7 +212,8 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         fun fmt(type: PrayerType): String {
             val instant = timesMap[type] ?: return "--:--"
             val local = instant.toLocalDateTime(tz)
-            val h = if (local.hour > 12) local.hour - 12 else if (local.hour == 0) 12 else local.hour
+            val h =
+                if (local.hour > 12) local.hour - 12 else if (local.hour == 0) 12 else local.hour
             val amPm = if (local.hour >= 12) "PM" else "AM"
             return String.format("%d:%02d %s", h, local.minute, amPm)
         }

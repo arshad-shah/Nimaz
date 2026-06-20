@@ -13,7 +13,6 @@ import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Sync

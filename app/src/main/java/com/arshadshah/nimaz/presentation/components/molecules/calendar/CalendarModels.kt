@@ -25,6 +25,7 @@ enum class IndicatorPosition {
 enum class SelectionStyle {
     /** Fills the cell background (used by Islamic calendar, fasting tracker). */
     BACKGROUND,
+
     /** Draws a border around the cell (used by prayer tracker). */
     BORDER
 }

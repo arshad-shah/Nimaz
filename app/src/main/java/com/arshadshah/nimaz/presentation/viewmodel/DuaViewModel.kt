@@ -132,8 +132,14 @@ class DuaViewModel @Inject constructor(
             DuaEvent.ToggleTranslation -> _readerState.update { it.copy(showTranslation = !it.showTranslation) }
             DuaEvent.ClearSearch -> {
                 _searchState.update { DuaSearchUiState() }
-                _collectionState.update { it.copy(searchQuery = "", filteredCategories = it.categories) }
+                _collectionState.update {
+                    it.copy(
+                        searchQuery = "",
+                        filteredCategories = it.categories
+                    )
+                }
             }
+
             DuaEvent.LoadAllCategories -> loadAllCategories()
             DuaEvent.LoadFavorites -> loadFavorites()
             DuaEvent.LoadTodayProgress -> loadTodayProgress()
@@ -226,8 +232,8 @@ class DuaViewModel @Inject constructor(
             } else {
                 state.categories.filter { category ->
                     category.nameEnglish.contains(query, ignoreCase = true) ||
-                    category.nameArabic.contains(query) ||
-                    category.description?.contains(query, ignoreCase = true) == true
+                            category.nameArabic.contains(query) ||
+                            category.description?.contains(query, ignoreCase = true) == true
                 }
             }
             state.copy(searchQuery = query, filteredCategories = filtered)

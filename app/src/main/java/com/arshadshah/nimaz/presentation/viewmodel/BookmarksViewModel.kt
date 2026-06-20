@@ -124,7 +124,12 @@ class BookmarksViewModel @Inject constructor(
                     state.copy(
                         quranBookmarks = bookmarks,
                         allBookmarks = unified,
-                        filteredBookmarks = applyFilters(unified, state.selectedFilter, state.searchQuery, state.sortOrder),
+                        filteredBookmarks = applyFilters(
+                            unified,
+                            state.selectedFilter,
+                            state.searchQuery,
+                            state.sortOrder
+                        ),
                         isLoading = false
                     )
                 }
@@ -142,7 +147,12 @@ class BookmarksViewModel @Inject constructor(
                     state.copy(
                         hadithBookmarks = bookmarks,
                         allBookmarks = unified,
-                        filteredBookmarks = applyFilters(unified, state.selectedFilter, state.searchQuery, state.sortOrder),
+                        filteredBookmarks = applyFilters(
+                            unified,
+                            state.selectedFilter,
+                            state.searchQuery,
+                            state.sortOrder
+                        ),
                         isLoading = false
                     )
                 }
@@ -160,7 +170,12 @@ class BookmarksViewModel @Inject constructor(
                     state.copy(
                         duaBookmarks = bookmarks,
                         allBookmarks = unified,
-                        filteredBookmarks = applyFilters(unified, state.selectedFilter, state.searchQuery, state.sortOrder),
+                        filteredBookmarks = applyFilters(
+                            unified,
+                            state.selectedFilter,
+                            state.searchQuery,
+                            state.sortOrder
+                        ),
                         isLoading = false
                     )
                 }
@@ -173,7 +188,12 @@ class BookmarksViewModel @Inject constructor(
         _bookmarksState.update { state ->
             state.copy(
                 selectedFilter = type,
-                filteredBookmarks = applyFilters(state.allBookmarks, type, state.searchQuery, state.sortOrder)
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    type,
+                    state.searchQuery,
+                    state.sortOrder
+                )
             )
         }
     }
@@ -182,7 +202,12 @@ class BookmarksViewModel @Inject constructor(
         _bookmarksState.update { state ->
             state.copy(
                 sortOrder = order,
-                filteredBookmarks = applyFilters(state.allBookmarks, state.selectedFilter, state.searchQuery, order)
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    state.searchQuery,
+                    order
+                )
             )
         }
     }
@@ -191,7 +216,12 @@ class BookmarksViewModel @Inject constructor(
         _bookmarksState.update { state ->
             state.copy(
                 searchQuery = query,
-                filteredBookmarks = applyFilters(state.allBookmarks, state.selectedFilter, query, state.sortOrder)
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    query,
+                    state.sortOrder
+                )
             )
         }
     }
@@ -200,7 +230,12 @@ class BookmarksViewModel @Inject constructor(
         _bookmarksState.update { state ->
             state.copy(
                 searchQuery = "",
-                filteredBookmarks = applyFilters(state.allBookmarks, state.selectedFilter, "", state.sortOrder)
+                filteredBookmarks = applyFilters(
+                    state.allBookmarks,
+                    state.selectedFilter,
+                    "",
+                    state.sortOrder
+                )
             )
         }
     }
@@ -222,9 +257,9 @@ class BookmarksViewModel @Inject constructor(
         if (searchQuery.isNotBlank()) {
             result = result.filter { bookmark ->
                 bookmark.title.contains(searchQuery, ignoreCase = true) ||
-                bookmark.subtitle.contains(searchQuery, ignoreCase = true) ||
-                bookmark.arabicText?.contains(searchQuery) == true ||
-                bookmark.note?.contains(searchQuery, ignoreCase = true) == true
+                        bookmark.subtitle.contains(searchQuery, ignoreCase = true) ||
+                        bookmark.arabicText?.contains(searchQuery) == true ||
+                        bookmark.note?.contains(searchQuery, ignoreCase = true) == true
             }
         }
 

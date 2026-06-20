@@ -150,17 +150,22 @@ object NimazColors {
 
         // Ikhfa (concealment of noon sakinah)
         val IkhfaLight = Color(0xFF0D9488)            // Teal
+
         // Ikhfa Shafawi (labial concealment of meem sakinah)
         val IkhfaShafawiLight = Color(0xFF0E7490)     // Cyan-700
 
         // Idgham with Ghunnah
         val IdghamGhunnahLight = Color(0xFFD97706)    // Amber
+
         // Idgham without Ghunnah
         val IdghamNoGhunnahLight = Color(0xFF92400E)  // Brown / Amber-800
+
         // Idgham Shafawi (labial merging)
         val IdghamShafawiLight = Color(0xFFB45309)    // Amber-700
+
         // Idgham Mutajanisayn (homorganic)
         val IdghamMutajanisaynLight = Color(0xFFC2410C) // Orange-700
+
         // Idgham Mutaqaribayn (close articulation)
         val IdghamMutaqaribayLight = Color(0xFFEA580C)  // Orange-600
 
@@ -169,10 +174,13 @@ object NimazColors {
 
         // Madd Normal / Tabee'i (2 beats)
         val MaddNormalLight = Color(0xFFE11D48)       // Rose-600
+
         // Madd Jaiz / Permissible (2-4-5 beats)
         val MaddPermissibleLight = Color(0xFFDB2777)  // Pink-600
+
         // Madd Wajib / Obligatory (4-5 beats)
         val MaddObligatoryLight = Color(0xFFDC2626)   // Red-600
+
         // Madd Lazim / Necessary (6 beats)
         val MaddNecessaryLight = Color(0xFF9F1239)    // Rose-800
 
@@ -184,6 +192,7 @@ object NimazColors {
 
         // Silent letters
         val SilentLight = Color(0xFF64748B)           // Slate
+
         // Hamza Al-Wasl
         val HamzaWaslLight = Color(0xFF94A3B8)        // Slate-400
 

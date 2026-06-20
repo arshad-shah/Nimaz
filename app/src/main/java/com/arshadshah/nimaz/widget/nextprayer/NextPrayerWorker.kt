@@ -125,7 +125,8 @@ class NextPrayerWorker @AssistedInject constructor(
             } else {
                 // All prayers passed, show Fajr for tomorrow
                 val tomorrowDate = java.time.LocalDate.now().plusDays(1)
-                val tomorrowPrayers = prayerTimeCalculator.getPrayerTimes(latitude, longitude, tomorrowDate)
+                val tomorrowPrayers =
+                    prayerTimeCalculator.getPrayerTimes(latitude, longitude, tomorrowDate)
                 val tomorrowFajr = tomorrowPrayers.firstOrNull()
 
                 if (tomorrowFajr != null) {

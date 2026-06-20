@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.atoms.qibla
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -23,12 +22,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
-import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -115,9 +114,15 @@ fun QiblaStatusCapsule(
                     Spacer(Modifier.width(6.dp))
                     Text(
                         text = if (turnRight)
-                            stringResource(R.string.turn_right_format, abs(rotationToQibla).roundToInt())
+                            stringResource(
+                                R.string.turn_right_format,
+                                abs(rotationToQibla).roundToInt()
+                            )
                         else
-                            stringResource(R.string.turn_left_format, abs(rotationToQibla).roundToInt()),
+                            stringResource(
+                                R.string.turn_left_format,
+                                abs(rotationToQibla).roundToInt()
+                            ),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = hintColor
@@ -188,7 +193,11 @@ private fun CapsuleNotReadyPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF222222, name = "Capsule - On camera (seeking)")
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF222222,
+    name = "Capsule - On camera (seeking)"
+)
 @Composable
 private fun CapsuleOnCameraPreview() {
     NimazTheme {

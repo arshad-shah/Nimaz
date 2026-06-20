@@ -71,6 +71,7 @@ fun NimazCard(
                 )
             }
         }
+
         NimazCardStyle.ELEVATED -> {
             if (onClick != null) {
                 ElevatedCard(
@@ -91,6 +92,7 @@ fun NimazCard(
                 )
             }
         }
+
         NimazCardStyle.OUTLINED -> {
             if (onClick != null) {
                 OutlinedCard(
@@ -111,6 +113,7 @@ fun NimazCard(
                 )
             }
         }
+
         NimazCardStyle.GRADIENT -> {
             // Use FILLED as base, gradient should be applied in content
             if (onClick != null) {

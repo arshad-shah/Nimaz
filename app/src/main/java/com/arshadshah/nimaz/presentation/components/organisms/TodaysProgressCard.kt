@@ -26,13 +26,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -205,6 +205,7 @@ private fun TimelineNode(
                         modifier = Modifier.size(14.dp)
                     )
                 }
+
                 isCurrent -> Box(
                     modifier = Modifier
                         .size(18.dp)
@@ -219,6 +220,7 @@ private fun TimelineNode(
                             .background(MaterialTheme.colorScheme.secondary)
                     )
                 }
+
                 else -> Box(
                     modifier = Modifier
                         .size(12.dp)
@@ -251,12 +253,57 @@ private fun TimelineNode(
 }
 
 private val samplePrayerTimes = listOf(
-    PrayerTimeDisplay(PrayerType.FAJR, "Fajr", "5:23 AM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
-    PrayerTimeDisplay(PrayerType.SUNRISE, "Sunrise", "6:45 AM", isPassed = true, isCurrent = false, isNext = false),
-    PrayerTimeDisplay(PrayerType.DHUHR, "Dhuhr", "1:15 PM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
-    PrayerTimeDisplay(PrayerType.ASR, "Asr", "4:30 PM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
-    PrayerTimeDisplay(PrayerType.MAGHRIB, "Maghrib", "6:12 PM", isPassed = false, isCurrent = true, isNext = true),
-    PrayerTimeDisplay(PrayerType.ISHA, "Isha", "7:45 PM", isPassed = false, isCurrent = false, isNext = false),
+    PrayerTimeDisplay(
+        PrayerType.FAJR,
+        "Fajr",
+        "5:23 AM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = PrayerStatus.PRAYED
+    ),
+    PrayerTimeDisplay(
+        PrayerType.SUNRISE,
+        "Sunrise",
+        "6:45 AM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false
+    ),
+    PrayerTimeDisplay(
+        PrayerType.DHUHR,
+        "Dhuhr",
+        "1:15 PM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = PrayerStatus.PRAYED
+    ),
+    PrayerTimeDisplay(
+        PrayerType.ASR,
+        "Asr",
+        "4:30 PM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = PrayerStatus.PRAYED
+    ),
+    PrayerTimeDisplay(
+        PrayerType.MAGHRIB,
+        "Maghrib",
+        "6:12 PM",
+        isPassed = false,
+        isCurrent = true,
+        isNext = true
+    ),
+    PrayerTimeDisplay(
+        PrayerType.ISHA,
+        "Isha",
+        "7:45 PM",
+        isPassed = false,
+        isCurrent = false,
+        isNext = false
+    ),
 )
 
 @Preview(showBackground = true, widthDp = 400)

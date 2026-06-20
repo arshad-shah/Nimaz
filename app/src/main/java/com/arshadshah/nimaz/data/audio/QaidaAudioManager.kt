@@ -85,6 +85,7 @@ class QaidaAudioManager @Inject constructor(
                                 }
                             }
                         }
+
                         Player.STATE_IDLE -> {
                             newPlayer.playerError?.let { err ->
                                 _state.update {
@@ -96,6 +97,7 @@ class QaidaAudioManager @Inject constructor(
                                 }
                             }
                         }
+
                         else -> {}
                     }
                 }

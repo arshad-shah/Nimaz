@@ -39,14 +39,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * The single dialog primitive for this app. Every dialog — confirmations,
@@ -372,7 +372,7 @@ private fun NimazDialog_Info_Preview() {
         NimazInfoDialog(
             title = "Location updated",
             message = "Prayer times have been recalculated for your new location. " +
-                "Notifications will fire at the updated times starting from the next prayer.",
+                    "Notifications will fire at the updated times starting from the next prayer.",
             onDismiss = {}
         )
     }
@@ -385,7 +385,7 @@ private fun NimazDialog_Confirm_Preview() {
         NimazConfirmDialog(
             title = "Mark all as prayed?",
             message = "This will mark all remaining prayers for today as completed. " +
-                "You can still uncheck individual prayers afterwards.",
+                    "You can still uncheck individual prayers afterwards.",
             confirmText = "Mark all",
             onConfirm = {},
             onDismiss = {}
@@ -400,7 +400,7 @@ private fun NimazDialog_Destructive_Preview() {
         NimazConfirmDialog(
             title = "Reset all settings?",
             message = "Calculation method, reciter, themes, and notification preferences " +
-                "will all return to defaults. Your prayer history will not be affected.",
+                    "will all return to defaults. Your prayer history will not be affected.",
             confirmText = "Reset",
             isDestructive = true,
             titleIcon = Icons.Default.Delete,
@@ -417,7 +417,7 @@ private fun NimazDialog_WithIcon_Preview() {
         NimazConfirmDialog(
             title = "Enable location",
             message = "Nimaz needs your location to calculate accurate prayer times. " +
-                "Your location is never sent to any server — calculations happen on-device.",
+                    "Your location is never sent to any server — calculations happen on-device.",
             confirmText = "Allow",
             titleIcon = Icons.Default.LocationOn,
             onConfirm = {},
@@ -444,7 +444,7 @@ private fun NimazDialog_PrayerAccent_Preview() {
             content = {
                 Text(
                     text = "You'll get a notification at 4:20 PM today. You can change " +
-                        "the timing or disable the reminder in Prayer Settings.",
+                            "the timing or disable the reminder in Prayer Settings.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -468,8 +468,8 @@ private fun NimazDialog_Subtitle_Preview() {
             content = {
                 Text(
                     text = "Backs up prayer tracking, bookmarks, and reading progress " +
-                        "to your Google Drive. Restores automatically when you sign in on " +
-                        "a new device.",
+                            "to your Google Drive. Restores automatically when you sign in on " +
+                            "a new device.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -566,7 +566,12 @@ private fun NimazDialog_CustomContent_Preview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 280, name = "9. No icon, no accent (minimal)")
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 280,
+    name = "9. No icon, no accent (minimal)"
+)
 @Composable
 private fun NimazDialog_Minimal_Preview() {
     NimazTheme {

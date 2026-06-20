@@ -77,6 +77,7 @@ fun AboutScreen(
             is UpdateState.Checking,
             is UpdateState.Starting,
             is UpdateState.Downloading -> Unit
+
             else -> updateManager?.checkForUpdate()
         }
         Unit
@@ -96,10 +97,19 @@ fun AboutScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             item { AppInfoHero() }
-            item { QuickActionsRow(onRateApp = onRateApp, onShareApp = onShareApp, onUpdates = onUpdateClick) }
+            item {
+                QuickActionsRow(
+                    onRateApp = onRateApp,
+                    onShareApp = onShareApp,
+                    onUpdates = onUpdateClick
+                )
+            }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.links), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.links),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item {
                 LinksCard(
@@ -113,12 +123,18 @@ fun AboutScreen(
             }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.developer), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.developer),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item { DeveloperCard() }
 
             item {
-                NimazSectionTitle(text = stringResource(R.string.data_sources_credits), modifier = Modifier.padding(start = 5.dp))
+                NimazSectionTitle(
+                    text = stringResource(R.string.data_sources_credits),
+                    modifier = Modifier.padding(start = 5.dp)
+                )
             }
             item { CreditsGrid() }
 
@@ -167,7 +183,11 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
                 modifier = Modifier.size(13.dp)
             )
             Text(
-                text = stringResource(R.string.version_detail_format, BuildConfig.VERSION_NAME, BuildConfig.VERSION_CODE),
+                text = stringResource(
+                    R.string.version_detail_format,
+                    BuildConfig.VERSION_NAME,
+                    BuildConfig.VERSION_CODE
+                ),
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary
@@ -225,8 +245,10 @@ private fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bg = if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-    val fg = if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+    val bg =
+        if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+    val fg =
+        if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
     Column(
         modifier = modifier
             .clip(RoundedCornerShape(14.dp))
@@ -236,8 +258,18 @@ private fun QuickActionButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = fg, modifier = Modifier.size(21.dp))
-        Text(text = label, style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.SemiBold, color = fg)
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = fg,
+            modifier = Modifier.size(21.dp)
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = fg
+        )
     }
 }
 
@@ -269,12 +301,48 @@ private fun LinksCard(
             .clip(RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        LinkItem(Icons.Default.Email, stringResource(R.string.contact_support), stringResource(R.string.contact_email), onContactUs, true)
-        LinkItem(Icons.Default.Language, stringResource(R.string.website), stringResource(R.string.website_url_display), { uriHandler.openUri("https://nimaz.arshadshah.com") }, true)
-        LinkItem(Icons.Default.Shield, stringResource(R.string.privacy_policy), stringResource(R.string.privacy_policy_subtitle), onNavigateToPrivacyPolicy, true)
-        LinkItem(Icons.Default.Description, stringResource(R.string.terms_of_service), stringResource(R.string.terms_of_service_subtitle), onNavigateToTerms, true)
-        LinkItem(Icons.Default.Gavel, stringResource(R.string.open_source_licenses), stringResource(R.string.open_source_licenses_subtitle), onNavigateToLicenses, true)
-        LinkItem(Icons.Default.Refresh, stringResource(R.string.check_for_updates), updateSubtitle, onUpdateClick, false)
+        LinkItem(
+            Icons.Default.Email,
+            stringResource(R.string.contact_support),
+            stringResource(R.string.contact_email),
+            onContactUs,
+            true
+        )
+        LinkItem(
+            Icons.Default.Language,
+            stringResource(R.string.website),
+            stringResource(R.string.website_url_display),
+            { uriHandler.openUri("https://nimaz.arshadshah.com") },
+            true
+        )
+        LinkItem(
+            Icons.Default.Shield,
+            stringResource(R.string.privacy_policy),
+            stringResource(R.string.privacy_policy_subtitle),
+            onNavigateToPrivacyPolicy,
+            true
+        )
+        LinkItem(
+            Icons.Default.Description,
+            stringResource(R.string.terms_of_service),
+            stringResource(R.string.terms_of_service_subtitle),
+            onNavigateToTerms,
+            true
+        )
+        LinkItem(
+            Icons.Default.Gavel,
+            stringResource(R.string.open_source_licenses),
+            stringResource(R.string.open_source_licenses_subtitle),
+            onNavigateToLicenses,
+            true
+        )
+        LinkItem(
+            Icons.Default.Refresh,
+            stringResource(R.string.check_for_updates),
+            updateSubtitle,
+            onUpdateClick,
+            false
+        )
     }
 }
 
@@ -302,12 +370,26 @@ private fun LinkItem(
                     .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface)
-                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
@@ -382,7 +464,12 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(17.dp))
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.size(17.dp)
+        )
     }
 }
 
@@ -439,7 +526,10 @@ private fun FooterSection(modifier: Modifier = Modifier) {
             .padding(vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
             Text(
                 text = stringResource(R.string.made_with),
                 style = MaterialTheme.typography.bodySmall,
@@ -449,7 +539,9 @@ private fun FooterSection(modifier: Modifier = Modifier) {
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                modifier = Modifier.size(14.dp).padding(horizontal = 2.dp)
+                modifier = Modifier
+                    .size(14.dp)
+                    .padding(horizontal = 2.dp)
             )
             Text(
                 text = stringResource(R.string.for_the_ummah),

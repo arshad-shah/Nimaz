@@ -82,7 +82,9 @@ class AppInitializer @Inject constructor(
     private suspend fun applySavedLocale() {
         try {
             val langCode = preferencesDataStore.appLanguage.first()
-            AppAnalytics.setUserProperty(AppAnalytics.UserProperty.APP_LANGUAGE, langCode.ifEmpty { "en" })
+            AppAnalytics.setUserProperty(
+                AppAnalytics.UserProperty.APP_LANGUAGE,
+                langCode.ifEmpty { "en" })
             if (langCode.isNotEmpty() && langCode != "en") {
                 LocaleHelper.setLocale(context, langCode)
             }

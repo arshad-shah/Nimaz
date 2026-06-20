@@ -15,11 +15,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -59,11 +59,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
@@ -72,8 +74,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -377,21 +377,25 @@ private fun GradeBadge(
             NimazColors.StatusColors.Prayed,
             Icons.Default.CheckCircle
         )
+
         HadithGrade.HASAN -> Triple(
             grade.displayName(),
             NimazColors.StatusColors.Late,
             Icons.Default.CheckCircle
         )
+
         HadithGrade.DAIF -> Triple(
             grade.displayName(),
             NimazColors.StatusColors.Missed,
             Icons.Default.Warning
         )
+
         HadithGrade.MAWDU -> Triple(
             grade.displayName(),
             Color.Gray,
             Icons.Default.Warning
         )
+
         HadithGrade.UNKNOWN -> Triple(
             grade.displayName(),
             Color.Gray,

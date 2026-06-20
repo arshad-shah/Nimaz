@@ -19,8 +19,8 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.Button
@@ -39,13 +39,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.R
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
@@ -198,7 +198,10 @@ private fun ProgressOverview(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = stringResource(R.string.khatam_ayahs_count_format, khatam.totalAyahsRead),
+                    text = stringResource(
+                        R.string.khatam_ayahs_count_format,
+                        khatam.totalAyahsRead
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -206,7 +209,11 @@ private fun ProgressOverview(
         }
 
         Text(
-            text = stringResource(R.string.khatam_of_ayahs_read, khatam.totalAyahsRead, Khatam.TOTAL_QURAN_AYAHS),
+            text = stringResource(
+                R.string.khatam_of_ayahs_read,
+                khatam.totalAyahsRead,
+                Khatam.TOTAL_QURAN_AYAHS
+            ),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -313,6 +320,7 @@ private fun JuzCell(
         juz.progressPercent > 0f -> MaterialTheme.colorScheme.primary.copy(
             alpha = 0.2f + (juz.progressPercent * 0.6f)
         )
+
         else -> MaterialTheme.colorScheme.surfaceVariant
     }
     val textColor = when {

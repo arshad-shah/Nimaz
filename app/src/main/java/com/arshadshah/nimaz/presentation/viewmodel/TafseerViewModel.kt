@@ -43,6 +43,7 @@ sealed interface TafseerEvent {
         val endOffset: Int,
         val color: String
     ) : TafseerEvent
+
     data class DeleteHighlight(val highlightId: Long) : TafseerEvent
     data class UpdateHighlightNote(val highlightId: Long, val note: String?) : TafseerEvent
     data class AddNote(val text: String) : TafseerEvent
@@ -66,9 +67,18 @@ class TafseerViewModel @Inject constructor(
             is TafseerEvent.LoadSurah -> loadSurah(event.surahNumber, event.ayahNumber)
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
             is TafseerEvent.SwitchSource -> switchSource(event.source)
-            is TafseerEvent.AddHighlight -> addHighlight(event.startOffset, event.endOffset, event.color)
+            is TafseerEvent.AddHighlight -> addHighlight(
+                event.startOffset,
+                event.endOffset,
+                event.color
+            )
+
             is TafseerEvent.DeleteHighlight -> deleteHighlight(event.highlightId)
-            is TafseerEvent.UpdateHighlightNote -> updateHighlightNote(event.highlightId, event.note)
+            is TafseerEvent.UpdateHighlightNote -> updateHighlightNote(
+                event.highlightId,
+                event.note
+            )
+
             is TafseerEvent.AddNote -> addNote(event.text)
             is TafseerEvent.UpdateNote -> updateNote(event.note)
             is TafseerEvent.DeleteNote -> deleteNote(event.noteId)
@@ -171,7 +181,12 @@ class TafseerViewModel @Inject constructor(
     private fun updateHighlightNote(highlightId: Long, note: String?) {
         val highlight = _state.value.highlights.find { it.id == highlightId } ?: return
         viewModelScope.launch {
-            tafseerRepository.updateHighlight(highlight.copy(note = note, updatedAt = System.currentTimeMillis()))
+            tafseerRepository.updateHighlight(
+                highlight.copy(
+                    note = note,
+                    updatedAt = System.currentTimeMillis()
+                )
+            )
         }
     }
 

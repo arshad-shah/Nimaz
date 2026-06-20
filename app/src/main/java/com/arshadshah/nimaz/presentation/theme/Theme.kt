@@ -104,6 +104,7 @@ fun NimazTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
@@ -115,7 +116,8 @@ fun NimazTheme(
             // System bar colors are handled by edge-to-edge (enableEdgeToEdge in
             // MainActivity); we only control the status/navigation icon contrast here.
             WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
-            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightNavigationBars =
+                !darkTheme
         }
     }
 

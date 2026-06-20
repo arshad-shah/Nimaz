@@ -73,10 +73,12 @@ fun TodayCarousel(
                 timelineProgress = prayerTimelineProgress,
                 fillHeight = true,
             )
+
             TodayCarouselPage.FASTING -> FastingStatusCard(
                 fastingToday = fastingToday,
                 fillHeight = true,
             )
+
             TodayCarouselPage.HADITH -> HadithOfTheDayCard(
                 hadith = dailyHadith.orEmpty(),
                 reference = dailyHadithReference,
@@ -87,6 +89,7 @@ fun TodayCarousel(
                 // looking empty; longer ahadith ellipsize and open in the reader.
                 maxLines = 4,
             )
+
             TodayCarouselPage.DUA -> DuaOfTheMomentCard(
                 arabic = dailyDua?.arabic.orEmpty(),
                 translation = dailyDua?.translation.orEmpty(),
@@ -101,12 +104,56 @@ fun TodayCarousel(
 // ──── Previews ───────────────────────────────────────────────────────────────
 
 private val samplePrayerTimes = listOf(
-    PrayerTimeDisplay(PrayerType.FAJR, "Fajr", "5:23 AM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
-    PrayerTimeDisplay(PrayerType.SUNRISE, "Sunrise", "6:45 AM", isPassed = true, isCurrent = false, isNext = false),
-    PrayerTimeDisplay(PrayerType.DHUHR, "Dhuhr", "1:15 PM", isPassed = true, isCurrent = false, isNext = false, prayerStatus = PrayerStatus.PRAYED),
-    PrayerTimeDisplay(PrayerType.ASR, "Asr", "4:30 PM", isPassed = false, isCurrent = true, isNext = true),
-    PrayerTimeDisplay(PrayerType.MAGHRIB, "Maghrib", "6:12 PM", isPassed = false, isCurrent = false, isNext = false),
-    PrayerTimeDisplay(PrayerType.ISHA, "Isha", "7:45 PM", isPassed = false, isCurrent = false, isNext = false),
+    PrayerTimeDisplay(
+        PrayerType.FAJR,
+        "Fajr",
+        "5:23 AM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = PrayerStatus.PRAYED
+    ),
+    PrayerTimeDisplay(
+        PrayerType.SUNRISE,
+        "Sunrise",
+        "6:45 AM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false
+    ),
+    PrayerTimeDisplay(
+        PrayerType.DHUHR,
+        "Dhuhr",
+        "1:15 PM",
+        isPassed = true,
+        isCurrent = false,
+        isNext = false,
+        prayerStatus = PrayerStatus.PRAYED
+    ),
+    PrayerTimeDisplay(
+        PrayerType.ASR,
+        "Asr",
+        "4:30 PM",
+        isPassed = false,
+        isCurrent = true,
+        isNext = true
+    ),
+    PrayerTimeDisplay(
+        PrayerType.MAGHRIB,
+        "Maghrib",
+        "6:12 PM",
+        isPassed = false,
+        isCurrent = false,
+        isNext = false
+    ),
+    PrayerTimeDisplay(
+        PrayerType.ISHA,
+        "Isha",
+        "7:45 PM",
+        isPassed = false,
+        isCurrent = false,
+        isNext = false
+    ),
 )
 
 private const val SAMPLE_HADITH =

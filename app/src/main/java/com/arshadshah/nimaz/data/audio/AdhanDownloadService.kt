@@ -135,7 +135,11 @@ class AdhanDownloadService : Service() {
         )
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-            startForeground(NOTIFICATION_ID, initialNotification, ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
+            startForeground(
+                NOTIFICATION_ID,
+                initialNotification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
         } else {
             startForeground(NOTIFICATION_ID, initialNotification)
         }
@@ -150,6 +154,7 @@ class AdhanDownloadService : Service() {
                     stopSelf()
                 }
             }
+
             else -> stopSelf()
         }
 
@@ -282,10 +287,12 @@ class AdhanDownloadService : Service() {
                 getString(R.string.adhan_download_complete),
                 getString(R.string.adhan_download_complete_subtitle, muezzinName)
             )
+
             results.regularSuccess || results.fajrSuccess -> Pair(
                 getString(R.string.adhan_download_partial),
                 getString(R.string.adhan_download_partial_subtitle, muezzinName)
             )
+
             else -> Pair(
                 getString(R.string.adhan_download_failed),
                 getString(R.string.adhan_download_failed_subtitle)
@@ -336,10 +343,12 @@ class AdhanDownloadService : Service() {
                 // Indeterminate
                 builder.setProgress(100, 0, true)
             }
+
             progress < 100 -> {
                 // Determinate progress bar
                 builder.setProgress(100, progress, false)
             }
+
             else -> {
                 // Complete — no progress bar
                 builder.setProgress(0, 0, false)

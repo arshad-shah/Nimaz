@@ -15,7 +15,11 @@ interface PrayerRepository {
 
     // Prayer times calculation
     fun getPrayerTimesForDate(date: LocalDate, location: Location): PrayerTimes
-    fun getPrayerTimesForRange(startDate: LocalDate, endDate: LocalDate, location: Location): List<PrayerTimes>
+    fun getPrayerTimesForRange(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        location: Location
+    ): List<PrayerTimes>
 
     // Prayer records
     fun getPrayerRecordsForDate(date: Long): Flow<List<PrayerRecord>>

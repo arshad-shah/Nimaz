@@ -21,13 +21,13 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -75,7 +75,11 @@ fun FastManagementBottomSheet(
     // Local state managed within the sheet
     var selectedStatus by remember(date, existingRecord?.id) { mutableStateOf(initialStatus) }
     var selectedFastType by remember(date, existingRecord?.id) { mutableStateOf(initialFastType) }
-    var selectedExemptionReason by remember(date, existingRecord?.id) { mutableStateOf(initialExemptionReason) }
+    var selectedExemptionReason by remember(date, existingRecord?.id) {
+        mutableStateOf(
+            initialExemptionReason
+        )
+    }
     var note by remember(date, existingRecord?.id) { mutableStateOf(initialNote) }
 
     val hijriDate = remember(date) { HijriDateCalculator.toHijri(date) }
@@ -116,7 +120,11 @@ fun FastManagementBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                listOf(FastStatus.FASTED, FastStatus.NOT_FASTED, FastStatus.EXEMPTED).forEach { status ->
+                listOf(
+                    FastStatus.FASTED,
+                    FastStatus.NOT_FASTED,
+                    FastStatus.EXEMPTED
+                ).forEach { status ->
                     FilterChip(
                         selected = selectedStatus == status,
                         onClick = { selectedStatus = status },
@@ -240,7 +248,8 @@ private fun ExemptionReasonSelector(
             onExpandedChange = { expanded = it }
         ) {
             OutlinedTextField(
-                value = selectedReason?.displayName() ?: stringResource(R.string.fasting_sheet_select_reason),
+                value = selectedReason?.displayName()
+                    ?: stringResource(R.string.fasting_sheet_select_reason),
                 onValueChange = {},
                 readOnly = true,
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
@@ -280,7 +289,11 @@ fun MakeupFastEditBottomSheet(
     var reason by remember(makeupFast.id) { mutableStateOf(makeupFast.reason) }
     var note by remember(makeupFast.id) { mutableStateOf(makeupFast.note ?: "") }
     var selectedStatus by remember(makeupFast.id) { mutableStateOf(makeupFast.status) }
-    var fidyaAmount by remember(makeupFast.id) { mutableStateOf(makeupFast.fidyaAmount?.toString() ?: "") }
+    var fidyaAmount by remember(makeupFast.id) {
+        mutableStateOf(
+            makeupFast.fidyaAmount?.toString() ?: ""
+        )
+    }
 
     val originalDate = remember(makeupFast.originalDate) {
         Instant.ofEpochMilli(makeupFast.originalDate)

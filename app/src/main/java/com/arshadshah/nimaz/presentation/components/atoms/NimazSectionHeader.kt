@@ -42,6 +42,7 @@ fun NimazSectionHeader(
                 color = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.clickable(onClick = onSeeAllClick)
             )
+
             trailingText != null -> Text(
                 text = trailingText,
                 style = MaterialTheme.typography.bodySmall,

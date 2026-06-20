@@ -35,6 +35,7 @@ class AdhanAudioManager @Inject constructor(
 ) {
     companion object {
         private const val TAG = "AdhanAudioManager"
+
         /**
          * Bump this when adhan download URLs change to force re-download of existing files.
          * v1 = initial archive.org URLs
@@ -71,7 +72,10 @@ class AdhanAudioManager @Inject constructor(
         }
 
         if (currentVersion < ADHAN_URL_VERSION) {
-            Log.i(TAG, "Adhan URL version changed ($currentVersion -> $ADHAN_URL_VERSION), deleting stale files")
+            Log.i(
+                TAG,
+                "Adhan URL version changed ($currentVersion -> $ADHAN_URL_VERSION), deleting stale files"
+            )
             // Delete all non-beep adhan files so they get re-downloaded from new URLs
             adhanDir.listFiles()?.forEach { file ->
                 if (!file.name.startsWith("adhan_beep") && file.name != VERSION_FILE) {
@@ -96,7 +100,12 @@ class AdhanAudioManager @Inject constructor(
 
         // Delete files that are too small or not valid audio
         if (file.length() < 10_000 || !isValidAudioFile(file)) {
-            Log.w(TAG, "Invalid file detected: $fileName (size=${file.length()}, valid=${isValidAudioFile(file)}), deleting")
+            Log.w(
+                TAG,
+                "Invalid file detected: $fileName (size=${file.length()}, valid=${
+                    isValidAudioFile(file)
+                }), deleting"
+            )
             file.delete()
             return false
         }
@@ -115,7 +124,8 @@ class AdhanAudioManager @Inject constructor(
                 if (stream.read(header) < 4) return false
 
                 // MP3: starts with ID3 tag or MPEG sync word (0xFF 0xFB/0xF3/0xF2)
-                val isId3 = header[0] == 'I'.code.toByte() && header[1] == 'D'.code.toByte() && header[2] == '3'.code.toByte()
+                val isId3 =
+                    header[0] == 'I'.code.toByte() && header[1] == 'D'.code.toByte() && header[2] == '3'.code.toByte()
                 val isMpegSync = header[0] == 0xFF.toByte() && (header[1].toInt() and 0xE0) == 0xE0
 
                 // WAV: starts with RIFF
@@ -282,7 +292,10 @@ class AdhanAudioManager @Inject constructor(
 
                     // Move temp to final
                     if (tempFile.renameTo(outputFile)) {
-                        Log.d(TAG, "Successfully downloaded $fileName (${outputFile.length()} bytes)")
+                        Log.d(
+                            TAG,
+                            "Successfully downloaded $fileName (${outputFile.length()} bytes)"
+                        )
                         updateDownloadState(sound, DownloadState.Completed)
                         return@withContext true
                     } else {
@@ -290,7 +303,10 @@ class AdhanAudioManager @Inject constructor(
                         try {
                             tempFile.copyTo(outputFile, overwrite = true)
                             tempFile.delete()
-                            Log.d(TAG, "Successfully downloaded $fileName via copy (${outputFile.length()} bytes)")
+                            Log.d(
+                                TAG,
+                                "Successfully downloaded $fileName via copy (${outputFile.length()} bytes)"
+                            )
                             updateDownloadState(sound, DownloadState.Completed)
                             return@withContext true
                         } catch (e: Exception) {
@@ -408,13 +424,22 @@ class AdhanAudioManager @Inject constructor(
             // Create a gentle 3-note chime pattern
             // Using pentatonic scale frequencies for a pleasant, harmonious sound
             val chimeNotes = listOf(
-                ChimeNote(frequency = 523.25, durationMs = 400, delayMs = 0),      // C5 - soft start
+                ChimeNote(
+                    frequency = 523.25,
+                    durationMs = 400,
+                    delayMs = 0
+                ),      // C5 - soft start
                 ChimeNote(frequency = 659.25, durationMs = 400, delayMs = 350),    // E5 - rising
-                ChimeNote(frequency = 783.99, durationMs = 600, delayMs = 700)     // G5 - gentle end
+                ChimeNote(
+                    frequency = 783.99,
+                    durationMs = 600,
+                    delayMs = 700
+                )     // G5 - gentle end
             )
 
             // Calculate total duration
-            val totalDurationMs = chimeNotes.maxOf { it.delayMs + it.durationMs } + 200 // Extra 200ms for tail
+            val totalDurationMs =
+                chimeNotes.maxOf { it.delayMs + it.durationMs } + 200 // Extra 200ms for tail
             val numSamples = (sampleRate * totalDurationMs) / 1000
 
             val samples = ShortArray(numSamples)
@@ -448,11 +473,13 @@ class AdhanAudioManager @Inject constructor(
                             val t = i.toDouble() / fadeInLength
                             (1 - kotlin.math.cos(t * Math.PI)) / 2
                         }
+
                         i > noteSamples - fadeOutLength -> {
                             // Exponential fade out for natural decay
                             val t = (noteSamples - i).toDouble() / fadeOutLength
                             t * t  // Quadratic decay
                         }
+
                         else -> 1.0
                     }
 
@@ -460,7 +487,10 @@ class AdhanAudioManager @Inject constructor(
 
                     // Mix with existing sample (additive)
                     val existingValue = samples[sampleIndex].toInt()
-                    val newValue = (existingValue + amplitude.toInt()).coerceIn(Short.MIN_VALUE.toInt(), Short.MAX_VALUE.toInt())
+                    val newValue = (existingValue + amplitude.toInt()).coerceIn(
+                        Short.MIN_VALUE.toInt(),
+                        Short.MAX_VALUE.toInt()
+                    )
                     samples[sampleIndex] = newValue.toShort()
                 }
             }
@@ -474,7 +504,10 @@ class AdhanAudioManager @Inject constructor(
             true
         } catch (e: Exception) {
             e.printStackTrace()
-            updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Failed(e.message ?: "Generation failed"))
+            updateDownloadState(
+                AdhanSound.SIMPLE_BEEP,
+                DownloadState.Failed(e.message ?: "Generation failed")
+            )
             false
         }
     }
@@ -593,7 +626,11 @@ class AdhanAudioManager @Inject constructor(
      * @param isFajr If true, plays the Fajr variant (includes "prayer is better than sleep").
      * @param prayerName The name of the prayer for the notification.
      */
-    fun playAdhanForNotification(sound: AdhanSound, isFajr: Boolean = false, prayerName: String = "Prayer") {
+    fun playAdhanForNotification(
+        sound: AdhanSound,
+        isFajr: Boolean = false,
+        prayerName: String = "Prayer"
+    ) {
         AdhanPlaybackService.playAdhan(
             context = context,
             adhanSound = sound,

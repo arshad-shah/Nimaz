@@ -181,7 +181,10 @@ class QuranRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getTranslationsForAyahs(ayahIds: List<Int>, translatorId: String): Flow<Map<Int, String>> {
+    override fun getTranslationsForAyahs(
+        ayahIds: List<Int>,
+        translatorId: String
+    ): Flow<Map<Int, String>> {
         return quranDao.getTranslationsForAyahs(ayahIds, translatorId).map { translations ->
             translations.associate { it.ayahId to it.text }
         }
@@ -239,7 +242,13 @@ class QuranRepositoryImpl @Inject constructor(
         quranDao.toggleBookmark(ayahId, surahNumber, ayahNumber)
     }
 
-    override suspend fun addBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int, note: String?, color: String?) {
+    override suspend fun addBookmark(
+        ayahId: Int,
+        surahNumber: Int,
+        ayahNumber: Int,
+        note: String?,
+        color: String?
+    ) {
         quranDao.insertBookmark(
             QuranBookmarkEntity(
                 ayahId = ayahId,

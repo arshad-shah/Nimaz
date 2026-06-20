@@ -71,41 +71,42 @@ class HelpRepositoryImpl @Inject constructor(
             }
     }
 
-    override fun getTopicDetail(topicId: String, lang: String): Flow<HelpTopicDetail?> = seededFlow {
-        combine(
-            dao.getTopics(),
-            dao.getItemsForTopic(topicId),
-            dao.getStringsFor("TOPIC", listOf(topicId))
-        ) { topics, items, topicStrings -> Triple(topics, items, topicStrings) }
-            .flatMapLatest { (topics, items, topicStrings) ->
-                val topicEntity = topics.firstOrNull { it.id == topicId }
-                    ?: return@flatMapLatest flowOf(null)
-                dao.getStringsFor("ITEM", items.map { it.id }).map { itemStrings ->
-                    val topic = HelpTopic(
-                        id = topicEntity.id, iconKey = topicEntity.iconKey,
-                        colorKey = topicEntity.colorKey,
-                        title = topicStrings.resolve(topicId, "title", lang),
-                        subtitle = topicStrings.resolve(topicId, "subtitle", lang),
-                        order = topicEntity.displayOrder, itemCount = items.size
-                    )
-                    val questions = items.filter { it.type == "QUESTION" }.map {
-                        HelpItem.HelpQuestion(
-                            id = it.id, order = it.displayOrder,
-                            question = itemStrings.resolve(it.id, "question", lang),
-                            answer = itemStrings.resolve(it.id, "answer", lang)
+    override fun getTopicDetail(topicId: String, lang: String): Flow<HelpTopicDetail?> =
+        seededFlow {
+            combine(
+                dao.getTopics(),
+                dao.getItemsForTopic(topicId),
+                dao.getStringsFor("TOPIC", listOf(topicId))
+            ) { topics, items, topicStrings -> Triple(topics, items, topicStrings) }
+                .flatMapLatest { (topics, items, topicStrings) ->
+                    val topicEntity = topics.firstOrNull { it.id == topicId }
+                        ?: return@flatMapLatest flowOf(null)
+                    dao.getStringsFor("ITEM", items.map { it.id }).map { itemStrings ->
+                        val topic = HelpTopic(
+                            id = topicEntity.id, iconKey = topicEntity.iconKey,
+                            colorKey = topicEntity.colorKey,
+                            title = topicStrings.resolve(topicId, "title", lang),
+                            subtitle = topicStrings.resolve(topicId, "subtitle", lang),
+                            order = topicEntity.displayOrder, itemCount = items.size
                         )
+                        val questions = items.filter { it.type == "QUESTION" }.map {
+                            HelpItem.HelpQuestion(
+                                id = it.id, order = it.displayOrder,
+                                question = itemStrings.resolve(it.id, "question", lang),
+                                answer = itemStrings.resolve(it.id, "answer", lang)
+                            )
+                        }
+                        val guides = items.filter { it.type == "GUIDE" }.map {
+                            HelpItem.HelpGuide(
+                                id = it.id, order = it.displayOrder, iconKey = it.iconKey,
+                                title = itemStrings.resolve(it.id, "title", lang),
+                                estimatedMinutes = it.estimatedMinutes, stepCount = 0
+                            )
+                        }
+                        HelpTopicDetail(topic, questions, guides)
                     }
-                    val guides = items.filter { it.type == "GUIDE" }.map {
-                        HelpItem.HelpGuide(
-                            id = it.id, order = it.displayOrder, iconKey = it.iconKey,
-                            title = itemStrings.resolve(it.id, "title", lang),
-                            estimatedMinutes = it.estimatedMinutes, stepCount = 0
-                        )
-                    }
-                    HelpTopicDetail(topic, questions, guides)
                 }
-            }
-    }
+        }
 
     override fun getGuide(guideId: String, lang: String): Flow<HelpGuideDetail?> = seededFlow {
         combine(

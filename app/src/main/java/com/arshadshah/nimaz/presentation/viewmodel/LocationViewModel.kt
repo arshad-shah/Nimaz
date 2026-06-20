@@ -112,10 +112,12 @@ class LocationViewModel @Inject constructor(
                     _state.update { it.copy(searchResults = emptyList()) }
                 }
             }
+
             LocationEvent.Search -> searchLocations(_state.value.searchQuery)
             LocationEvent.ClearSearch -> _state.update {
                 it.copy(searchQuery = "", searchResults = emptyList())
             }
+
             is LocationEvent.SelectLocation -> selectLocation(event.location)
             LocationEvent.UseCurrentGpsLocation -> detectCurrentLocation()
             LocationEvent.LoadCurrentLocation -> loadCurrentLocation()
@@ -340,10 +342,10 @@ class LocationViewModel @Inject constructor(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
     }
 
     @SuppressLint("MissingPermission")

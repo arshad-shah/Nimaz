@@ -53,9 +53,17 @@ fun TafseerHighlightableText(
     var selectionEnd by remember { mutableIntStateOf(-1) }
 
     // Build annotated string with highlights, Arabic font detection, and selection preview
-    val annotatedString = remember(text, highlights, selectionStart, selectionEnd, selectedColor, isHighlightMode) {
-        buildStyledText(text, highlights, selectionStart, selectionEnd, selectedColor, isHighlightMode)
-    }
+    val annotatedString =
+        remember(text, highlights, selectionStart, selectionEnd, selectedColor, isHighlightMode) {
+            buildStyledText(
+                text,
+                highlights,
+                selectionStart,
+                selectionEnd,
+                selectedColor,
+                isHighlightMode
+            )
+        }
 
     Box(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -188,7 +196,10 @@ private fun AnnotatedString.Builder.applyArabicStyling(text: String) {
     while (i < text.length) {
         if (isArabicChar(text[i])) {
             val start = i
-            while (i < text.length && (isArabicChar(text[i]) || text[i].isWhitespace() || isPunctuation(text[i]))) {
+            while (i < text.length && (isArabicChar(text[i]) || text[i].isWhitespace() || isPunctuation(
+                    text[i]
+                ))
+            ) {
                 // Look ahead: if it's whitespace/punctuation, only include if followed by Arabic
                 if (!isArabicChar(text[i])) {
                     val lookahead = (i + 1 until text.length).firstOrNull { isArabicChar(text[it]) }
@@ -264,7 +275,10 @@ private fun handleHighlightModeTap(
  * Snap a character offset to the nearest word boundary.
  */
 private fun snapToWordBoundary(offset: Int, text: String, isStart: Boolean): Int {
-    if (text.isEmpty() || offset < 0 || offset >= text.length) return offset.coerceIn(0, text.length)
+    if (text.isEmpty() || offset < 0 || offset >= text.length) return offset.coerceIn(
+        0,
+        text.length
+    )
 
     return if (isStart) {
         // Snap to start of word

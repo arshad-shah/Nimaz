@@ -1,9 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.adaptive
 
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
 import androidx.compose.material3.adaptive.layout.PaneScaffoldDirective
+import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
@@ -12,16 +14,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
-import androidx.compose.material3.adaptive.layout.calculatePaneScaffoldDirective
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.quran.QuranHomeScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import kotlinx.coroutines.launch
 
 /**
  * Adaptive Quran screen that shows:

@@ -17,6 +17,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -31,7 +32,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.HelpEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HelpViewModel
-import androidx.compose.runtime.LaunchedEffect
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,12 +57,17 @@ fun HelpTopicDetailScreen(
     ) { padding ->
         when {
             state.isLoading && detail == null -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(Modifier
+                    .fillMaxSize()
+                    .padding(padding), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             }
+
             detail == null -> {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
+                Box(Modifier
+                    .fillMaxSize()
+                    .padding(padding), contentAlignment = Alignment.Center) {
                     Text(
                         text = "This topic is unavailable.",
                         style = MaterialTheme.typography.bodyMedium,
@@ -70,9 +75,12 @@ fun HelpTopicDetailScreen(
                     )
                 }
             }
+
             else -> {
                 LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(11.dp)
                 ) {

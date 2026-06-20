@@ -117,7 +117,7 @@ class PrayerTimesWorker @AssistedInject constructor(
 
             val nextPrayer = prayerTimes.firstOrNull { prayerTime ->
                 prayerTime.type != PrayerType.SUNRISE &&
-                prayerTime.time.toLocalDateTime(timeZone).time > localTime.time
+                        prayerTime.time.toLocalDateTime(timeZone).time > localTime.time
             }
 
             val nextPrayerEpochMillis = nextPrayer?.time?.toEpochMilliseconds() ?: 0L
@@ -139,11 +139,36 @@ class PrayerTimesWorker @AssistedInject constructor(
                 hijriDate = "${hijriDate.day} ${hijriDate.monthName}",
                 nextPrayerName = nextPrayer?.type?.displayName ?: "—",
                 timeUntilNext = timeUntilNext,
-                fajrTime = fajr?.let { formatTime(it.time.toLocalDateTime(timeZone).hour, it.time.toLocalDateTime(timeZone).minute) } ?: "—",
-                dhuhrTime = dhuhr?.let { formatTime(it.time.toLocalDateTime(timeZone).hour, it.time.toLocalDateTime(timeZone).minute) } ?: "—",
-                asrTime = asr?.let { formatTime(it.time.toLocalDateTime(timeZone).hour, it.time.toLocalDateTime(timeZone).minute) } ?: "—",
-                maghribTime = maghrib?.let { formatTime(it.time.toLocalDateTime(timeZone).hour, it.time.toLocalDateTime(timeZone).minute) } ?: "—",
-                ishaTime = isha?.let { formatTime(it.time.toLocalDateTime(timeZone).hour, it.time.toLocalDateTime(timeZone).minute) } ?: "—",
+                fajrTime = fajr?.let {
+                    formatTime(
+                        it.time.toLocalDateTime(timeZone).hour,
+                        it.time.toLocalDateTime(timeZone).minute
+                    )
+                } ?: "—",
+                dhuhrTime = dhuhr?.let {
+                    formatTime(
+                        it.time.toLocalDateTime(timeZone).hour,
+                        it.time.toLocalDateTime(timeZone).minute
+                    )
+                } ?: "—",
+                asrTime = asr?.let {
+                    formatTime(
+                        it.time.toLocalDateTime(timeZone).hour,
+                        it.time.toLocalDateTime(timeZone).minute
+                    )
+                } ?: "—",
+                maghribTime = maghrib?.let {
+                    formatTime(
+                        it.time.toLocalDateTime(timeZone).hour,
+                        it.time.toLocalDateTime(timeZone).minute
+                    )
+                } ?: "—",
+                ishaTime = isha?.let {
+                    formatTime(
+                        it.time.toLocalDateTime(timeZone).hour,
+                        it.time.toLocalDateTime(timeZone).minute
+                    )
+                } ?: "—",
                 fajrPassed = isPassed(fajr),
                 dhuhrPassed = isPassed(dhuhr),
                 asrPassed = isPassed(asr),

@@ -34,10 +34,10 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,6 +60,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -68,11 +69,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 /**
  * Search result data.
@@ -302,11 +302,12 @@ fun ExpandableSearchBar(
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
 
-    val expandableMaxWidth = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
+    val expandableMaxWidth =
+        com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxSearchBarWidth()
     Column(
         modifier = modifier
             .then(
-                if (expandableMaxWidth != androidx.compose.ui.unit.Dp.Unspecified)
+                if (expandableMaxWidth != Dp.Unspecified)
                     Modifier.widthIn(max = expandableMaxWidth)
                 else Modifier
             )
@@ -519,32 +520,33 @@ fun ExpandableSearchBar(
                 shape = RoundedCornerShape(16.dp)
             ) {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    suggestions.filter { it.contains(query, ignoreCase = true) }.take(5).forEach { suggestion ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    onQueryChange(suggestion)
-                                    onSearch(suggestion)
-                                    isExpanded = false
-                                    focusManager.clearFocus()
-                                }
-                                .padding(16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Search,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Text(
-                                text = suggestion,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                    suggestions.filter { it.contains(query, ignoreCase = true) }.take(5)
+                        .forEach { suggestion ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable {
+                                        onQueryChange(suggestion)
+                                        onSearch(suggestion)
+                                        isExpanded = false
+                                        focusManager.clearFocus()
+                                    }
+                                    .padding(16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(12.dp))
+                                Text(
+                                    text = suggestion,
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
-                    }
                 }
             }
         }

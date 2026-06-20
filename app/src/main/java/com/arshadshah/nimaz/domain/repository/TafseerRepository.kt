@@ -12,7 +12,15 @@ interface TafseerRepository {
 
     // Highlights
     fun getHighlightsForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerHighlight>>
-    suspend fun addHighlight(ayahId: Int, tafseerId: String, startOffset: Int, endOffset: Int, color: String, note: String? = null): Long
+    suspend fun addHighlight(
+        ayahId: Int,
+        tafseerId: String,
+        startOffset: Int,
+        endOffset: Int,
+        color: String,
+        note: String? = null
+    ): Long
+
     suspend fun updateHighlight(highlight: TafseerHighlight)
     suspend fun deleteHighlight(highlightId: Long)
 

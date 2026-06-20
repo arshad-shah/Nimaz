@@ -161,7 +161,9 @@ class TasbihViewModel @Inject constructor(
         }
         viewModelScope.launch {
             preferences.tasbihFavorites.collect { ids ->
-                _presetsState.update { it.copy(favorites = ids.mapNotNull { s -> s.toLongOrNull() }.toSet()) }
+                _presetsState.update {
+                    it.copy(favorites = ids.mapNotNull { s -> s.toLongOrNull() }.toSet())
+                }
             }
         }
         viewModelScope.launch {
@@ -183,8 +185,16 @@ class TasbihViewModel @Inject constructor(
             TasbihEvent.StartSession -> AppAnalytics.logFeatureUsed("tasbih", "session_start")
             TasbihEvent.CompleteSession -> AppAnalytics.logFeatureUsed("tasbih", "session_complete")
             TasbihEvent.Reset -> AppAnalytics.logFeatureUsed("tasbih", "reset")
-            is TasbihEvent.CreateCustomPreset -> AppAnalytics.logFeatureUsed("tasbih", "preset_created")
-            is TasbihEvent.DeleteCustomPreset -> AppAnalytics.logFeatureUsed("tasbih", "preset_deleted")
+            is TasbihEvent.CreateCustomPreset -> AppAnalytics.logFeatureUsed(
+                "tasbih",
+                "preset_created"
+            )
+
+            is TasbihEvent.DeleteCustomPreset -> AppAnalytics.logFeatureUsed(
+                "tasbih",
+                "preset_deleted"
+            )
+
             else -> {}
         }
         when (event) {
@@ -203,15 +213,18 @@ class TasbihViewModel @Inject constructor(
                     preferences.setTasbihBeadMode(event.style == TasbihCounterStyle.BEADS)
                 }
             }
+
             is TasbihEvent.SetBeadDesign -> {
                 _counterState.update { it.copy(beadDesignKey = event.key) }
                 viewModelScope.launch { preferences.setTasbihBeadDesign(event.key) }
             }
+
             is TasbihEvent.ToggleFavorite -> toggleFavorite(event.presetId)
             is TasbihEvent.SetLeftHanded -> {
                 _counterState.update { it.copy(leftHanded = event.enabled) }
                 viewModelScope.launch { preferences.setTasbihLeftHanded(event.enabled) }
             }
+
             is TasbihEvent.ToggleAutoLap -> _counterState.update { it.copy(autoLap = event.enabled) }
             TasbihEvent.Increment -> increment()
             TasbihEvent.Reset -> reset()
@@ -229,7 +242,10 @@ class TasbihViewModel @Inject constructor(
         viewModelScope.launch {
             tasbihRepository.getDefaultPresets().collect { defaults ->
                 _presetsState.update {
-                    it.copy(defaultPresets = defaults, filteredPresets = defaults + it.customPresets)
+                    it.copy(
+                        defaultPresets = defaults,
+                        filteredPresets = defaults + it.customPresets
+                    )
                 }
             }
         }
@@ -248,7 +264,8 @@ class TasbihViewModel @Inject constructor(
 
     private fun clearPreset() {
         val currentSession = _counterState.value.currentSession
-        val currentCount = _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
+        val currentCount =
+            _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
 
         if (currentSession != null && currentCount > 0) {
             timerJob?.cancel()
@@ -333,7 +350,8 @@ class TasbihViewModel @Inject constructor(
     private fun selectPreset(preset: TasbihPreset) {
         // Auto-complete the current session if switching to a different preset with some count
         val currentSession = _counterState.value.currentSession
-        val currentCount = _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
+        val currentCount =
+            _counterState.value.count + (_counterState.value.laps * _counterState.value.targetCount)
 
         if (currentSession != null && currentCount > 0 && currentSession.presetId != preset.id) {
             // Complete the current session before switching
@@ -618,9 +636,10 @@ class TasbihViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            tasbihRepository.getSessionsInRange(weekAgo, today + (24 * 60 * 60 * 1000)).collect { weekSessions ->
-                _historyState.update { it.copy(weekSessions = weekSessions, isLoading = false) }
-            }
+            tasbihRepository.getSessionsInRange(weekAgo, today + (24 * 60 * 60 * 1000))
+                .collect { weekSessions ->
+                    _historyState.update { it.copy(weekSessions = weekSessions, isLoading = false) }
+                }
         }
     }
 
@@ -633,7 +652,8 @@ class TasbihViewModel @Inject constructor(
             val stats = tasbihRepository.getTasbihStats(weekAgo, endOfToday)
             val totalToday = tasbihRepository.getTotalCountInRange(today, endOfToday)
             val totalWeek = tasbihRepository.getTotalCountInRange(weekAgo, endOfToday)
-            val completedSessions = tasbihRepository.getCompletedSessionsInRange(weekAgo, endOfToday)
+            val completedSessions =
+                tasbihRepository.getCompletedSessionsInRange(weekAgo, endOfToday)
 
             // Calculate base total (excluding current session's count) for real-time display
             val currentSessionCount = _counterState.value.currentSession?.let {

@@ -92,7 +92,10 @@ fun SkyBackground(
     val cloudPhase by drift.animateFloat(
         initialValue = 0f,
         targetValue = if (cloudsEnabled) 1f else 0f,
-        animationSpec = infiniteRepeatable(tween(120_000, easing = LinearEasing), RepeatMode.Restart),
+        animationSpec = infiniteRepeatable(
+            tween(120_000, easing = LinearEasing),
+            RepeatMode.Restart
+        ),
         label = "clouds",
     )
 
@@ -106,7 +109,8 @@ fun SkyBackground(
                 val sh = (size.height * SPRITE_SCALE).roundToInt().coerceAtLeast(1)
 
                 // Baked once per (timeOfDay, moonFraction, size) change — not per frame.
-                val scene = bakeLayer(sw, sh, this, layoutDirection) { drawScene(timeOfDay, moonFraction) }
+                val scene =
+                    bakeLayer(sw, sh, this, layoutDirection) { drawScene(timeOfDay, moonFraction) }
                 val clouds = bakeLayer(sw, sh, this, layoutDirection) { drawCloudLayer() }
                 val cloudTint = ColorFilter.tint(sampleCloud(timeOfDay), BlendMode.Modulate)
                 val full = IntSize(w, h)
@@ -114,8 +118,18 @@ fun SkyBackground(
                 onDrawBehind {
                     val off = (cloudPhase * w).roundToInt()
                     drawImage(scene, dstOffset = IntOffset.Zero, dstSize = full)
-                    drawImage(clouds, dstOffset = IntOffset(off, 0), dstSize = full, colorFilter = cloudTint)
-                    drawImage(clouds, dstOffset = IntOffset(off - w, 0), dstSize = full, colorFilter = cloudTint)
+                    drawImage(
+                        clouds,
+                        dstOffset = IntOffset(off, 0),
+                        dstSize = full,
+                        colorFilter = cloudTint
+                    )
+                    drawImage(
+                        clouds,
+                        dstOffset = IntOffset(off - w, 0),
+                        dstSize = full,
+                        colorFilter = cloudTint
+                    )
                 }
             },
     )
@@ -144,7 +158,11 @@ fun PrayerSkyScene(
             cloudsEnabled = cloudsEnabled,
         )
         Column(modifier = Modifier.padding(16.dp)) {
-            val shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 4f)
+            val shadow = Shadow(
+                color = Color.Black.copy(alpha = 0.5f),
+                offset = Offset(0f, 1f),
+                blurRadius = 4f
+            )
             Text(
                 text = timeLabel,
                 style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
@@ -195,7 +213,12 @@ private fun DrawScope.drawScene(t: Float, moonFraction: Float) {
     val night = nightFactor(t)
     if (night > 0f) {
         drawNight(night)
-        drawMoon(Offset(size.width * 0.72f, size.height * 0.32f), size.minDimension * 0.16f, moonFraction, alpha = night)
+        drawMoon(
+            Offset(size.width * 0.72f, size.height * 0.32f),
+            size.minDimension * 0.16f,
+            moonFraction,
+            alpha = night
+        )
     }
 
     // Continuous sun: altitude is sin() of the day-fraction, so it rises from
@@ -235,13 +258,21 @@ private fun DrawScope.drawSunAt(td: Float, alt: Float, sunAlpha: Float) {
     drawSun(
         center = Offset(sunX, sunY),
         radius = radius,
-        disk = listOf(0f to Color.White, 0.7f to diskMid, 0.95f to diskRim, 1f to diskRim.copy(alpha = 0f)),
+        disk = listOf(
+            0f to Color.White,
+            0.7f to diskMid,
+            0.95f to diskRim,
+            1f to diskRim.copy(alpha = 0f)
+        ),
         corona = listOf(
             0f to coronaIn.copy(alpha = 0.85f), 0.34f to coronaIn.copy(alpha = 0.32f),
             0.7f to coronaIn.copy(alpha = 0.1f), 1f to coronaIn.copy(alpha = 0f),
         ),
         coronaScale = 2.7f,
-        rayColor = coronaIn, rayCount = 5, rayLengthFr = 0.5f + 0.15f * alt.coerceAtLeast(0f), rayAlpha = 0.15f,
+        rayColor = coronaIn,
+        rayCount = 5,
+        rayLengthFr = 0.5f + 0.15f * alt.coerceAtLeast(0f),
+        rayAlpha = 0.15f,
         alpha = sunAlpha,
     )
 }
@@ -257,7 +288,14 @@ private fun DrawScope.drawNight(nf: Float) {
         }
         c.nativeCanvas.save()
         c.nativeCanvas.rotate(-18f, w * 0.42f, h * 0.5f)
-        c.nativeCanvas.drawOval(RectF(w * 0.42f - w * 0.6f, h * 0.5f - h * 0.13f, w * 0.42f + w * 0.6f, h * 0.5f + h * 0.13f), paint)
+        c.nativeCanvas.drawOval(
+            RectF(
+                w * 0.42f - w * 0.6f,
+                h * 0.5f - h * 0.13f,
+                w * 0.42f + w * 0.6f,
+                h * 0.5f + h * 0.13f
+            ), paint
+        )
         c.nativeCanvas.restore()
     }
     val stars = listOf(
@@ -293,14 +331,94 @@ private fun DrawScope.drawCloudLayer() {
 private class SkyKey(val t: Float, val sky: List<Color>, val cloud: Color)
 
 private val SKY_KEYS = listOf(
-    SkyKey(0.00f, listOf(Color(0xFF03060F), Color(0xFF0A0F26), Color(0xFF141A38), Color(0xFF1B1F4A), Color(0xFF33285E)), Color(0xFF2A2F52)),
-    SkyKey(0.20f, listOf(Color(0xFF060A1C), Color(0xFF16204A), Color(0xFF3B3270), Color(0xFF8A4F6E), Color(0xFFD08A5E)), Color(0xFF7A5A72)),
-    SkyKey(0.28f, listOf(Color(0xFF2B3A8C), Color(0xFF7C6AB0), Color(0xFFE59AB0), Color(0xFFFBB778), Color(0xFFFFE0A3)), Color(0xFFFCE0CE)),
-    SkyKey(0.50f, listOf(Color(0xFF0A2E7A), Color(0xFF1E62D6), Color(0xFF4F9BF5), Color(0xFFBFE0FB), Color(0xFFEAF6FF)), Color(0xFFF2F7FF)),
-    SkyKey(0.67f, listOf(Color(0xFF15407F), Color(0xFF3E78C9), Color(0xFF8FB6E8), Color(0xFFF2D9A8), Color(0xFFFBE3B0)), Color(0xFFFBEBCF)),
-    SkyKey(0.80f, listOf(Color(0xFF241056), Color(0xFF7A1E83), Color(0xFFD6356B), Color(0xFFF9733A), Color(0xFFFBD34D)), Color(0xFFF2B488)),
-    SkyKey(0.87f, listOf(Color(0xFF04060F), Color(0xFF0E1330), Color(0xFF241A45), Color(0xFF33285E), Color(0xFF3A2A55)), Color(0xFF3A3F66)),
-    SkyKey(1.00f, listOf(Color(0xFF03060F), Color(0xFF0A0F26), Color(0xFF141A38), Color(0xFF1B1F4A), Color(0xFF33285E)), Color(0xFF2A2F52)),
+    SkyKey(
+        0.00f,
+        listOf(
+            Color(0xFF03060F),
+            Color(0xFF0A0F26),
+            Color(0xFF141A38),
+            Color(0xFF1B1F4A),
+            Color(0xFF33285E)
+        ),
+        Color(0xFF2A2F52)
+    ),
+    SkyKey(
+        0.20f,
+        listOf(
+            Color(0xFF060A1C),
+            Color(0xFF16204A),
+            Color(0xFF3B3270),
+            Color(0xFF8A4F6E),
+            Color(0xFFD08A5E)
+        ),
+        Color(0xFF7A5A72)
+    ),
+    SkyKey(
+        0.28f,
+        listOf(
+            Color(0xFF2B3A8C),
+            Color(0xFF7C6AB0),
+            Color(0xFFE59AB0),
+            Color(0xFFFBB778),
+            Color(0xFFFFE0A3)
+        ),
+        Color(0xFFFCE0CE)
+    ),
+    SkyKey(
+        0.50f,
+        listOf(
+            Color(0xFF0A2E7A),
+            Color(0xFF1E62D6),
+            Color(0xFF4F9BF5),
+            Color(0xFFBFE0FB),
+            Color(0xFFEAF6FF)
+        ),
+        Color(0xFFF2F7FF)
+    ),
+    SkyKey(
+        0.67f,
+        listOf(
+            Color(0xFF15407F),
+            Color(0xFF3E78C9),
+            Color(0xFF8FB6E8),
+            Color(0xFFF2D9A8),
+            Color(0xFFFBE3B0)
+        ),
+        Color(0xFFFBEBCF)
+    ),
+    SkyKey(
+        0.80f,
+        listOf(
+            Color(0xFF241056),
+            Color(0xFF7A1E83),
+            Color(0xFFD6356B),
+            Color(0xFFF9733A),
+            Color(0xFFFBD34D)
+        ),
+        Color(0xFFF2B488)
+    ),
+    SkyKey(
+        0.87f,
+        listOf(
+            Color(0xFF04060F),
+            Color(0xFF0E1330),
+            Color(0xFF241A45),
+            Color(0xFF33285E),
+            Color(0xFF3A2A55)
+        ),
+        Color(0xFF3A3F66)
+    ),
+    SkyKey(
+        1.00f,
+        listOf(
+            Color(0xFF03060F),
+            Color(0xFF0A0F26),
+            Color(0xFF141A38),
+            Color(0xFF1B1F4A),
+            Color(0xFF33285E)
+        ),
+        Color(0xFF2A2F52)
+    ),
 )
 
 private fun bracket(t: Float): Triple<SkyKey, SkyKey, Float> {
@@ -334,7 +452,13 @@ private fun lerpF(a: Float, b: Float, f: Float): Float = a + (b - a) * f
 // ─────────────────────────────────────────────────────────────────────────
 
 /** Renders [block] into a fresh [ImageBitmap] of the given pixel size. */
-private fun bakeLayer(wPx: Int, hPx: Int, density: Density, ld: LayoutDirection, block: DrawScope.() -> Unit): ImageBitmap {
+private fun bakeLayer(
+    wPx: Int,
+    hPx: Int,
+    density: Density,
+    ld: LayoutDirection,
+    block: DrawScope.() -> Unit
+): ImageBitmap {
     val image = ImageBitmap(wPx, hPx)
     CanvasDrawScope().draw(density, ld, Canvas(image), Size(wPx.toFloat(), hPx.toFloat()), block)
     return image
@@ -379,18 +503,43 @@ private fun DrawScope.drawSun(
             }
         }
     }
-    drawCircle(Brush.radialGradient(*fade(corona, alpha), center = center, radius = radius * coronaScale), radius = radius * coronaScale, center = center)
-    drawCircle(Brush.radialGradient(*fade(disk, alpha), center = center, radius = radius), radius = radius, center = center)
+    drawCircle(
+        Brush.radialGradient(
+            *fade(corona, alpha),
+            center = center,
+            radius = radius * coronaScale
+        ), radius = radius * coronaScale, center = center
+    )
+    drawCircle(
+        Brush.radialGradient(*fade(disk, alpha), center = center, radius = radius),
+        radius = radius,
+        center = center
+    )
 }
 
 private fun fade(stops: List<Pair<Float, Color>>, alpha: Float): Array<Pair<Float, Color>> =
     stops.map { it.first to it.second.copy(alpha = it.second.alpha * alpha) }.toTypedArray()
 
-private fun DrawScope.drawCloud(cx: Float, cy: Float, s: Float, top: Color, bottom: Color, alpha: Float) {
+private fun DrawScope.drawCloud(
+    cx: Float,
+    cy: Float,
+    s: Float,
+    top: Color,
+    bottom: Color,
+    alpha: Float
+) {
     drawIntoCanvas { c ->
         val paint = Paint().apply {
             isAntiAlias = true
-            shader = LinearGradient(0f, cy - 18f * s, 0f, cy + 16f * s, top.toArgb(), bottom.toArgb(), Shader.TileMode.CLAMP)
+            shader = LinearGradient(
+                0f,
+                cy - 18f * s,
+                0f,
+                cy + 16f * s,
+                top.toArgb(),
+                bottom.toArgb(),
+                Shader.TileMode.CLAMP
+            )
             maskFilter = BlurMaskFilter(2f * s + 1f, BlurMaskFilter.Blur.NORMAL)
             this.alpha = (alpha * 255).toInt()
         }
@@ -412,8 +561,22 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
     val cy = center.y
     val r = radius
 
-    drawCircle(Brush.radialGradient(0f to Color(0xFFC7D2FE).copy(alpha = 0.38f * alpha), 1f to Color(0x00C7D2FE), center = center, radius = r * 1.5f), radius = r * 1.5f, center = center)
-    drawCircle(Brush.radialGradient(0f to Color(0xFF262C4C), 1f to Color(0xFF10142C), center = Offset(cx, cy - r * 0.05f), radius = r), radius = r, center = center)
+    drawCircle(
+        Brush.radialGradient(
+            0f to Color(0xFFC7D2FE).copy(alpha = 0.38f * alpha),
+            1f to Color(0x00C7D2FE),
+            center = center,
+            radius = r * 1.5f
+        ), radius = r * 1.5f, center = center
+    )
+    drawCircle(
+        Brush.radialGradient(
+            0f to Color(0xFF262C4C),
+            1f to Color(0xFF10142C),
+            center = Offset(cx, cy - r * 0.05f),
+            radius = r
+        ), radius = r, center = center
+    )
 
     val rg = r * 1.06f
     val cosv = cos(2 * PI * fraction).toFloat()
@@ -428,7 +591,12 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
                 isAntiAlias = true
                 shader = RadialGradient(
                     cx - r * 0.3f, cy - r * 0.34f, r * 1.4f,
-                    intArrayOf(Color(0xFFFFFFFF).toArgb(), Color(0xFFE9EDF6).toArgb(), Color(0xFFC5CCDE).toArgb(), Color(0xFFAAB2CC).toArgb()),
+                    intArrayOf(
+                        Color(0xFFFFFFFF).toArgb(),
+                        Color(0xFFE9EDF6).toArgb(),
+                        Color(0xFFC5CCDE).toArgb(),
+                        Color(0xFFAAB2CC).toArgb()
+                    ),
                     floatArrayOf(0f, 0.55f, 0.85f, 1f),
                     Shader.TileMode.CLAMP,
                 )
@@ -455,7 +623,14 @@ private fun rectPath(rect: Rect): Path = Path().apply { addRect(rect) }
 private fun combine(a: Path, b: Path, op: PathOperation): Path =
     Path().apply { this.op(a, b, op) }
 
-private fun litRegion(cx: Float, cy: Float, r: Float, rx: Float, waxing: Boolean, crescent: Boolean): Path {
+private fun litRegion(
+    cx: Float,
+    cy: Float,
+    r: Float,
+    rx: Float,
+    waxing: Boolean,
+    crescent: Boolean
+): Path {
     val rightRect = rectPath(Rect(cx, cy - r, cx + r, cy + r))
     val leftRect = rectPath(Rect(cx - r, cy - r, cx, cy + r))
     val disc = circlePath(cx, cy, r)
@@ -481,13 +656,28 @@ private fun litRegion(cx: Float, cy: Float, r: Float, rx: Float, waxing: Boolean
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Fajr")
 @Composable
 private fun PrayerSkyScene_Fajr_Preview() {
-    NimazTheme { PrayerSkyScene(0.22f, "5:23 AM", "First light · Sunrise in 1h 22m", scenePreviewModifier(), moonFraction = 0.92f) }
+    NimazTheme {
+        PrayerSkyScene(
+            0.22f,
+            "5:23 AM",
+            "First light · Sunrise in 1h 22m",
+            scenePreviewModifier(),
+            moonFraction = 0.92f
+        )
+    }
 }
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Sunrise")
 @Composable
 private fun PrayerSkyScene_Sunrise_Preview() {
-    NimazTheme { PrayerSkyScene(0.29f, "6:45 AM", "Sunrise · Dhuhr in 6h 30m", scenePreviewModifier()) }
+    NimazTheme {
+        PrayerSkyScene(
+            0.29f,
+            "6:45 AM",
+            "Sunrise · Dhuhr in 6h 30m",
+            scenePreviewModifier()
+        )
+    }
 }
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Mid-morning")
@@ -505,20 +695,45 @@ private fun PrayerSkyScene_Dhuhr_Preview() {
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Asr")
 @Composable
 private fun PrayerSkyScene_Asr_Preview() {
-    NimazTheme { PrayerSkyScene(0.67f, "4:30 PM", "Asr · Maghrib in 3h 41m", scenePreviewModifier()) }
+    NimazTheme {
+        PrayerSkyScene(
+            0.67f,
+            "4:30 PM",
+            "Asr · Maghrib in 3h 41m",
+            scenePreviewModifier()
+        )
+    }
 }
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Maghrib")
 @Composable
 private fun PrayerSkyScene_Maghrib_Preview() {
-    NimazTheme { PrayerSkyScene(0.8f, "8:11 PM", "Maghrib · Isha in 1h 28m", scenePreviewModifier()) }
+    NimazTheme {
+        PrayerSkyScene(
+            0.8f,
+            "8:11 PM",
+            "Maghrib · Isha in 1h 28m",
+            scenePreviewModifier()
+        )
+    }
 }
 
 @Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Isha")
 @Composable
 private fun PrayerSkyScene_Isha_Preview() {
-    NimazTheme { PrayerSkyScene(0.92f, "9:39 PM", "Isha · Fajr in 6h 04m", scenePreviewModifier(), moonFraction = 0.62f) }
+    NimazTheme {
+        PrayerSkyScene(
+            0.92f,
+            "9:39 PM",
+            "Isha · Fajr in 6h 04m",
+            scenePreviewModifier(),
+            moonFraction = 0.62f
+        )
+    }
 }
 
 private fun scenePreviewModifier(): Modifier =
-    Modifier.fillMaxWidth().height(200.dp).padding(16.dp)
+    Modifier
+        .fillMaxWidth()
+        .height(200.dp)
+        .padding(16.dp)

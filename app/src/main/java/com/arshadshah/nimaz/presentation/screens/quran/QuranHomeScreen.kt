@@ -22,7 +22,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
@@ -37,7 +40,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -56,18 +62,13 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.SecondaryTabRow
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -86,7 +87,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
-import androidx.compose.ui.tooling.preview.Preview
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -165,13 +165,17 @@ fun QuranHomeScreen(
             PrimaryTabRow(
                 selectedTabIndex = state.topTab.coerceIn(0, 2),
                 tabs = {
-                    listOf(stringResource(R.string.quran_home_tab_home), stringResource(R.string.quran_home_tab_browse), stringResource(R.string.quran_home_tab_favorites)).forEachIndexed { index, title ->
-                            Tab(
-                                selected = state.selectedTab == index,
-                                onClick = { viewModel.onEvent(QuranEvent.SetTopTab(index)) },
-                                text = { Text(title) }
-                            )
-                        }
+                    listOf(
+                        stringResource(R.string.quran_home_tab_home),
+                        stringResource(R.string.quran_home_tab_browse),
+                        stringResource(R.string.quran_home_tab_favorites)
+                    ).forEachIndexed { index, title ->
+                        Tab(
+                            selected = state.selectedTab == index,
+                            onClick = { viewModel.onEvent(QuranEvent.SetTopTab(index)) },
+                            text = { Text(title) }
+                        )
+                    }
                 }
             )
 
@@ -193,6 +197,7 @@ fun QuranHomeScreen(
                         onNavigateToKhatam = onNavigateToKhatam,
                         onNavigateToKhatamDetail = onNavigateToKhatamDetail
                     )
+
                     1 -> BrowseTabContent(
                         state = state,
                         onNavigateToSurah = onNavigateToSurah,
@@ -204,6 +209,7 @@ fun QuranHomeScreen(
                         selectedJuzNumber = selectedJuzNumber,
                         selectedPageNumber = selectedPageNumber
                     )
+
                     2 -> FavoritesTabContent(
                         favorites = state.favorites,
                         surahs = state.surahs,
@@ -409,7 +415,11 @@ private fun BrowseTabContent(
             selectedTabIndex = state.selectedTab,
             modifier = Modifier.padding(vertical = 4.dp)
         ) {
-            listOf(stringResource(R.string.quran_home_tab_surah), stringResource(R.string.quran_home_tab_juz), stringResource(R.string.quran_home_tab_page)).forEachIndexed { index, title ->
+            listOf(
+                stringResource(R.string.quran_home_tab_surah),
+                stringResource(R.string.quran_home_tab_juz),
+                stringResource(R.string.quran_home_tab_page)
+            ).forEachIndexed { index, title ->
                 Tab(
                     selected = state.selectedTab == index,
                     onClick = { onTabSelect(index) },
@@ -511,7 +521,8 @@ private fun BrowseTabContent(
                             val surahRange = surahAyahRanges[surah.number]
                             val readCount = if (isKhatamActive && surahRange != null)
                                 khatamReadAyahIds.count { it in surahRange } else 0
-                            val (startPage, endPage) = surahPageRanges[surah.number] ?: (surah.startPage to surah.startPage)
+                            val (startPage, endPage) = surahPageRanges[surah.number]
+                                ?: (surah.startPage to surah.startPage)
                             SurahListItem(
                                 surah = surah,
                                 onClick = { onNavigateToSurah(surah.number) },
@@ -525,6 +536,7 @@ private fun BrowseTabContent(
                             )
                         }
                     }
+
                     1 -> {
                         item(key = "juz_grid") {
                             JuzGrid(
@@ -535,6 +547,7 @@ private fun BrowseTabContent(
                             )
                         }
                     }
+
                     2 -> {
                         // Page grid items added directly to avoid nested LazyColumn
                         pageGridItems(
@@ -672,7 +685,7 @@ private fun BookmarksTabContent(
                 BookmarkListItem(
                     bookmark = bookmark,
                     onClick = { onNavigateToSurah(bookmark.surahNumber) }
-            )
+                )
             }
         }
     }

@@ -278,7 +278,8 @@ object DefaultTasbihPresets {
     )
 
     /** The original five, baked into the prepackaged DB. */
-    val baseDefaults = listOf(subhanAllah, alhamdulillah, allahuAkbar, laIlahaIllallah, astaghfirullah)
+    val baseDefaults =
+        listOf(subhanAllah, alhamdulillah, allahuAkbar, laIlahaIllallah, astaghfirullah)
 
     /** Adhkar added after the prepackaged DB shipped; seeded at runtime by name. */
     val addedDefaults = listOf(

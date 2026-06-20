@@ -23,8 +23,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -166,7 +166,9 @@ fun KhatamCreateScreen(
                     enabled = state.name.isNotBlank() && !state.isCreating
                 ) {
                     Text(
-                        text = if (state.isCreating) stringResource(R.string.khatam_creating) else stringResource(R.string.khatam_start),
+                        text = if (state.isCreating) stringResource(R.string.khatam_creating) else stringResource(
+                            R.string.khatam_start
+                        ),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )

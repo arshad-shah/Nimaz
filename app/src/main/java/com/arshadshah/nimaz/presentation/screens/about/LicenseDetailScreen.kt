@@ -29,12 +29,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.arshadshah.nimaz.R
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.mikepenz.aboutlibraries.Libs
 import com.mikepenz.aboutlibraries.entity.Library
 import com.mikepenz.aboutlibraries.util.withContext
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext as kotlinWithContext
 
@@ -81,6 +81,7 @@ fun LicenseDetailScreen(
                     CircularProgressIndicator()
                 }
             }
+
             error != null -> {
                 Box(
                     modifier = Modifier
@@ -95,6 +96,7 @@ fun LicenseDetailScreen(
                     )
                 }
             }
+
             library != null -> {
                 LibraryDetailContent(
                     library = library!!,

@@ -100,7 +100,12 @@ class CalendarViewModel @Inject constructor(
                 loadToday()
                 loadUpcomingEvents()
             } catch (e: Exception) {
-                _calendarState.update { it.copy(error = "Failed to load events: ${e.message}", isLoading = false) }
+                _calendarState.update {
+                    it.copy(
+                        error = "Failed to load events: ${e.message}",
+                        isLoading = false
+                    )
+                }
             }
         }
     }
@@ -331,7 +336,9 @@ class CalendarViewModel @Inject constructor(
 
         return cachedEvents.filter { event ->
             val eventGregorian = getApproximateGregorianDate(event, hijriYear)
-            eventGregorian != null && !eventGregorian.isBefore(firstDay) && !eventGregorian.isAfter(lastDay)
+            eventGregorian != null && !eventGregorian.isBefore(firstDay) && !eventGregorian.isAfter(
+                lastDay
+            )
         }
     }
 
@@ -343,7 +350,10 @@ class CalendarViewModel @Inject constructor(
 
         return cachedEvents.mapNotNull { event ->
             val eventDate = getApproximateGregorianDate(event, currentHijriYear)
-            if (eventDate != null && !eventDate.isBefore(today) && !eventDate.isAfter(threeMonthsLater)) {
+            if (eventDate != null && !eventDate.isBefore(today) && !eventDate.isAfter(
+                    threeMonthsLater
+                )
+            ) {
                 event.copy(gregorianDate = eventDate)
             } else null
         }.sortedBy { getApproximateGregorianDate(it, currentHijriYear) }

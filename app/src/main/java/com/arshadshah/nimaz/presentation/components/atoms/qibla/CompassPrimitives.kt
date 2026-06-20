@@ -75,6 +75,7 @@ fun DrawScope.drawKaabaGlyph(
     glow: Boolean = true,
 ) {
     val s = size / 64f
+
     // glyph art lives in a 64-unit box; its visual centre is ~(36, 32)
     fun p(x: Float, y: Float) = Offset(center.x + (x - 36f) * s, center.y + (y - 32f) * s)
     fun quad(a: Offset, b: Offset, c: Offset, d: Offset) = Path().apply {
@@ -100,8 +101,14 @@ fun DrawScope.drawKaabaGlyph(
     drawPath(quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)), Color(0xFF101115)) // side
     drawPath(quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)), Color(0xFF181A1F)) // front
     // hizam band (front + side) + door, in the accent colour
-    drawPath(quad(p(20f, 26f), p(38f, 31f), p(38f, 38f), p(20f, 33f)), color)             // band front
-    drawPath(quad(p(38f, 31f), p(52f, 24f), p(52f, 31f), p(38f, 38f)), bandDark)          // band side
+    drawPath(
+        quad(p(20f, 26f), p(38f, 31f), p(38f, 38f), p(20f, 33f)),
+        color
+    )             // band front
+    drawPath(
+        quad(p(38f, 31f), p(52f, 24f), p(52f, 31f), p(38f, 38f)),
+        bandDark
+    )          // band side
     drawPath(quad(p(26f, 38f), p(33f, 40f), p(33f, 50f), p(26f, 48f)), color)             // door
 }
 

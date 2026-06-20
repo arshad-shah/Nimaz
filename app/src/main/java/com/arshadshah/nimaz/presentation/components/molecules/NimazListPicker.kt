@@ -111,7 +111,7 @@ fun <T> NimazListPicker(
             if (query.isBlank()) items
             else items.filter { item ->
                 item.title.contains(query, ignoreCase = true) ||
-                    (item.description?.contains(query, ignoreCase = true) ?: false)
+                        (item.description?.contains(query, ignoreCase = true) ?: false)
             }
         }
     }
@@ -357,14 +357,27 @@ private fun EmptyState(text: String, modifier: Modifier = Modifier) {
 
 private enum class CalcSample { MWL, EGYPT, KARACHI, UMM_AL_QURA, DUBAI, ISNA, KUWAIT, QATAR, SINGAPORE, TURKEY, MOON_SIGHTING }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 700, name = "1. Searchable, with description")
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 700,
+    name = "1. Searchable, with description"
+)
 @Composable
 private fun NimazListPicker_Searchable_Preview() {
     NimazTheme {
         val items = listOf(
-            NimazPickerItem(CalcSample.MWL, "Muslim World League", "Europe, Far East, parts of the US"),
+            NimazPickerItem(
+                CalcSample.MWL,
+                "Muslim World League",
+                "Europe, Far East, parts of the US"
+            ),
             NimazPickerItem(CalcSample.EGYPT, "Egyptian", "Africa, Syria, Lebanon, Malaysia"),
-            NimazPickerItem(CalcSample.KARACHI, "Karachi", "Pakistan, Bangladesh, India, Afghanistan"),
+            NimazPickerItem(
+                CalcSample.KARACHI,
+                "Karachi",
+                "Pakistan, Bangladesh, India, Afghanistan"
+            ),
             NimazPickerItem(CalcSample.UMM_AL_QURA, "Umm al-Qura", "Arabian Peninsula"),
             NimazPickerItem(CalcSample.DUBAI, "Dubai", "UAE"),
             NimazPickerItem(CalcSample.ISNA, "ISNA (North America)", "US and Canada"),
@@ -372,7 +385,11 @@ private fun NimazListPicker_Searchable_Preview() {
             NimazPickerItem(CalcSample.QATAR, "Qatar", "Qatar"),
             NimazPickerItem(CalcSample.SINGAPORE, "Singapore", "Singapore, Malaysia, Indonesia"),
             NimazPickerItem(CalcSample.TURKEY, "Turkey", "Turkey and Central Asia"),
-            NimazPickerItem(CalcSample.MOON_SIGHTING, "Moon Sighting Committee", "UK, parts of Europe"),
+            NimazPickerItem(
+                CalcSample.MOON_SIGHTING,
+                "Moon Sighting Committee",
+                "UK, parts of Europe"
+            ),
         )
         NimazListPicker(
             title = "Calculation Method",
@@ -417,17 +434,47 @@ private fun NimazListPicker_WithIcons_Preview() {
 private fun NimazListPicker_Grouped_Preview() {
     NimazTheme {
         val items = listOf(
-            NimazPickerItem(CalcSample.EGYPT, "Egyptian", "General Authority of Survey", group = "Africa & Middle East"),
-            NimazPickerItem(CalcSample.UMM_AL_QURA, "Umm al-Qura", "Saudi Arabia", group = "Africa & Middle East"),
+            NimazPickerItem(
+                CalcSample.EGYPT,
+                "Egyptian",
+                "General Authority of Survey",
+                group = "Africa & Middle East"
+            ),
+            NimazPickerItem(
+                CalcSample.UMM_AL_QURA,
+                "Umm al-Qura",
+                "Saudi Arabia",
+                group = "Africa & Middle East"
+            ),
             NimazPickerItem(CalcSample.DUBAI, "Dubai", "UAE", group = "Africa & Middle East"),
             NimazPickerItem(CalcSample.KUWAIT, "Kuwait", "Kuwait", group = "Africa & Middle East"),
             NimazPickerItem(CalcSample.QATAR, "Qatar", "Qatar", group = "Africa & Middle East"),
-            NimazPickerItem(CalcSample.KARACHI, "Karachi", "Pakistan, Bangladesh", group = "South Asia"),
-            NimazPickerItem(CalcSample.SINGAPORE, "Singapore", "Malaysia, Indonesia", group = "South Asia"),
-            NimazPickerItem(CalcSample.MWL, "Muslim World League", "Europe, parts of the US", group = "Other"),
+            NimazPickerItem(
+                CalcSample.KARACHI,
+                "Karachi",
+                "Pakistan, Bangladesh",
+                group = "South Asia"
+            ),
+            NimazPickerItem(
+                CalcSample.SINGAPORE,
+                "Singapore",
+                "Malaysia, Indonesia",
+                group = "South Asia"
+            ),
+            NimazPickerItem(
+                CalcSample.MWL,
+                "Muslim World League",
+                "Europe, parts of the US",
+                group = "Other"
+            ),
             NimazPickerItem(CalcSample.ISNA, "ISNA", "North America", group = "Other"),
             NimazPickerItem(CalcSample.TURKEY, "Turkey", "Turkey, Central Asia", group = "Other"),
-            NimazPickerItem(CalcSample.MOON_SIGHTING, "Moon Sighting Committee", "UK", group = "Other"),
+            NimazPickerItem(
+                CalcSample.MOON_SIGHTING,
+                "Moon Sighting Committee",
+                "UK",
+                group = "Other"
+            ),
         )
         NimazListPicker(
             title = "Calculation Method",

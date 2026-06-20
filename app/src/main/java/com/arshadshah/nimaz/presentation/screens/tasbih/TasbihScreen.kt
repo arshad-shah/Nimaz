@@ -24,15 +24,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeOff
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Palette
@@ -97,7 +95,7 @@ fun TasbihScreen(
 
     val beadsMode = counterState.counterStyle == TasbihCounterStyle.BEADS
     val liveTotalToday = statsState.baseTotalToday +
-        (counterState.count + counterState.laps * counterState.targetCount)
+            (counterState.count + counterState.laps * counterState.targetCount)
 
     if (showDesignSheet) {
         BeadDesignPickerSheet(
@@ -171,7 +169,9 @@ fun TasbihScreen(
         if (expandedWidth) {
             // Tablet / expanded-width two-pane layout.
             Column(modifier = rootModifier) {
-                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+                topBar(Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp))
 
                 Row(modifier = Modifier.fillMaxSize()) {
                     // LEFT pane (~40%): current-tasbih info + count capsule.
@@ -203,7 +203,9 @@ fun TasbihScreen(
                             .padding(horizontal = 12.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        counter(Modifier.weight(1f).fillMaxWidth())
+                        counter(Modifier
+                            .weight(1f)
+                            .fillMaxWidth())
                         controls()
                         Spacer(Modifier.height(12.dp))
                     }
@@ -215,13 +217,17 @@ fun TasbihScreen(
                 modifier = rootModifier,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                topBar(Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 8.dp))
+                topBar(Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp))
 
                 Spacer(Modifier.height(4.dp))
 
                 capsule()
 
-                counter(Modifier.weight(1f).fillMaxWidth())
+                counter(Modifier
+                    .weight(1f)
+                    .fillMaxWidth())
 
                 controls()
 
@@ -230,7 +236,8 @@ fun TasbihScreen(
                 // Current-tasbih peek card → opens the detail sheet
                 CurrentTasbihPeek(
                     arabic = counterState.selectedPreset?.arabicText,
-                    name = counterState.selectedPreset?.name ?: stringResource(R.string.free_count_label),
+                    name = counterState.selectedPreset?.name
+                        ?: stringResource(R.string.free_count_label),
                     translation = counterState.selectedPreset?.translation,
                     target = counterState.targetCount,
                     onClick = { showCurrentSheet = true }
@@ -284,7 +291,11 @@ private fun TasbihCounterArea(
     modifier: Modifier = Modifier
 ) {
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Crossfade(targetState = beadsMode, animationSpec = tween(400), label = "counter_mode") { beads ->
+        Crossfade(
+            targetState = beadsMode,
+            animationSpec = tween(400),
+            label = "counter_mode"
+        ) { beads ->
             if (beads) {
                 TasbihBeads(
                     count = counterState.count + counterState.laps * counterState.targetCount,
@@ -331,7 +342,9 @@ private fun TasbihCountCapsule(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(modifier = Modifier.size(7.dp).background(accent, CircleShape))
+            Box(modifier = Modifier
+                .size(7.dp)
+                .background(accent, CircleShape))
             Text(
                 text = "$count / $target",
                 style = MaterialTheme.typography.labelLarge,
@@ -363,15 +376,25 @@ private fun CurrentTasbihPeek(
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
     ) {
-        Column(modifier = Modifier.clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp)) {
+        Column(
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 10.dp)
+        ) {
             Box(
                 modifier = Modifier
                     .padding(bottom = 8.dp)
                     .size(width = 32.dp, height = 4.dp)
-                    .background(MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(2.dp))
+                    .background(
+                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
+                        RoundedCornerShape(2.dp)
+                    )
                     .align(Alignment.CenterHorizontally)
             )
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 if (!arabic.isNullOrEmpty()) {
                     ArabicText(
                         text = arabic,
@@ -391,7 +414,14 @@ private fun CurrentTasbihPeek(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = translation?.let { "$it · ${stringResource(R.string.target_format, target)}" }
+                        text = translation?.let {
+                            "$it · ${
+                                stringResource(
+                                    R.string.target_format,
+                                    target
+                                )
+                            }"
+                        }
                             ?: stringResource(R.string.target_format, target),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -476,11 +506,18 @@ private fun CounterCircle(
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.93f else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
         label = "press_scale"
     )
     val progress = if (targetCount > 0) count.toFloat() / targetCount.toFloat() else 0f
-    val animatedProgress by animateFloatAsState(progress.coerceIn(0f, 1f), tween(300), label = "progress")
+    val animatedProgress by animateFloatAsState(
+        progress.coerceIn(0f, 1f),
+        tween(300),
+        label = "progress"
+    )
 
     val isComplete = count >= targetCount
     val progressColor by animateColorAsState(
@@ -495,46 +532,76 @@ private fun CounterCircle(
 
     Box(modifier = modifier.size(circleSize), contentAlignment = Alignment.Center) {
         Box(
-            modifier = Modifier.fillMaxSize().drawBehind {
-                val strokeWidth = 6.dp.toPx()
-                val radius = (size.minDimension - strokeWidth) / 2f
-                val topLeft = Offset((size.width - radius * 2) / 2f, (size.height - radius * 2) / 2f)
-                val arcSize = Size(radius * 2, radius * 2)
-                drawArc(ringTrackColor, -90f, 360f, false, topLeft, arcSize, style = Stroke(strokeWidth, cap = StrokeCap.Round))
-                if (animatedProgress > 0f) {
+            modifier = Modifier
+                .fillMaxSize()
+                .drawBehind {
+                    val strokeWidth = 6.dp.toPx()
+                    val radius = (size.minDimension - strokeWidth) / 2f
+                    val topLeft =
+                        Offset((size.width - radius * 2) / 2f, (size.height - radius * 2) / 2f)
+                    val arcSize = Size(radius * 2, radius * 2)
                     drawArc(
-                        brush = Brush.sweepGradient(listOf(progressColor, goldColor, progressColor)),
-                        startAngle = -90f, sweepAngle = 360f * animatedProgress, useCenter = false,
-                        topLeft = topLeft, size = arcSize, style = Stroke(strokeWidth, cap = StrokeCap.Round)
+                        ringTrackColor,
+                        -90f,
+                        360f,
+                        false,
+                        topLeft,
+                        arcSize,
+                        style = Stroke(strokeWidth, cap = StrokeCap.Round)
                     )
+                    if (animatedProgress > 0f) {
+                        drawArc(
+                            brush = Brush.sweepGradient(
+                                listOf(
+                                    progressColor,
+                                    goldColor,
+                                    progressColor
+                                )
+                            ),
+                            startAngle = -90f,
+                            sweepAngle = 360f * animatedProgress,
+                            useCenter = false,
+                            topLeft = topLeft,
+                            size = arcSize,
+                            style = Stroke(strokeWidth, cap = StrokeCap.Round)
+                        )
+                    }
                 }
-            }
         )
         Surface(
             modifier = Modifier
                 .size(circleSize - 36.dp)
                 .scale(scale)
-                .clickable(interactionSource = interactionSource, indication = null, onClick = onIncrement),
+                .clickable(
+                    interactionSource = interactionSource,
+                    indication = null,
+                    onClick = onIncrement
+                ),
             shape = CircleShape,
             color = Color.Transparent,
             border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha))
         ) {
             Box(
-                modifier = Modifier.fillMaxSize().background(
-                    brush = Brush.radialGradient(
-                        listOf(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                            MaterialTheme.colorScheme.surface.copy(alpha = 0.02f)
-                        )
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        brush = Brush.radialGradient(
+                            listOf(
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                                MaterialTheme.colorScheme.surface.copy(alpha = 0.02f)
+                            )
+                        ),
+                        shape = CircleShape
                     ),
-                    shape = CircleShape
-                ),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = count.toString(),
-                        style = MaterialTheme.typography.displayLarge.copy(fontSize = 72.sp, fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontSize = 72.sp,
+                            fontWeight = FontWeight.Bold
+                        ),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
@@ -572,8 +639,10 @@ private fun ControlButtons(
         ) {
             IconButton(onClick = onReset, modifier = Modifier.size(44.dp)) {
                 Icon(
-                    Icons.Default.Refresh, stringResource(R.string.reset_action),
-                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f), modifier = Modifier.size(20.dp)
+                    Icons.Default.Refresh,
+                    stringResource(R.string.reset_action),
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
             VerticalDivider(

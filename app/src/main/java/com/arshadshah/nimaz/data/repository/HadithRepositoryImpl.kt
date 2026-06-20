@@ -94,7 +94,8 @@ class HadithRepositoryImpl @Inject constructor(
     override fun getHadithsByChapter(chapterId: String): Flow<List<Hadith>> {
         // Parse chapter ID (format: "{bookId}_{chapterNumber}")
         val parts = chapterId.split("_")
-        val chapterNum = if (parts.size == 2) parts[1].toIntOrNull() ?: 0 else chapterId.toIntOrNull() ?: 0
+        val chapterNum =
+            if (parts.size == 2) parts[1].toIntOrNull() ?: 0 else chapterId.toIntOrNull() ?: 0
         return hadithDao.getHadithsByChapter(chapterNum).map { entities ->
             entities.map { it.toDomain() }
         }
@@ -111,7 +112,8 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getHadithByNumber(bookId: String, hadithNumber: Int): Hadith? {
-        return hadithDao.getHadithByNumber(bookId.toIntOrNull() ?: return null, hadithNumber)?.toDomain()
+        return hadithDao.getHadithByNumber(bookId.toIntOrNull() ?: return null, hadithNumber)
+            ?.toDomain()
     }
 
     override fun getHadithsByGrade(grade: HadithGrade): Flow<List<Hadith>> {
@@ -146,7 +148,10 @@ class HadithRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun searchHadithsInBook(bookId: String, query: String): Flow<List<HadithSearchResult>> {
+    override fun searchHadithsInBook(
+        bookId: String,
+        query: String
+    ): Flow<List<HadithSearchResult>> {
         return combine(
             hadithDao.getAllBooks(),
             hadithDao.searchHadithsInBook(bookId.toIntOrNull() ?: 0, query)

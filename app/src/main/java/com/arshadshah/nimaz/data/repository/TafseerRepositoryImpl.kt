@@ -31,7 +31,10 @@ class TafseerRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getHighlightsForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerHighlight>> {
+    override fun getHighlightsForAyah(
+        ayahId: Int,
+        tafseerId: String
+    ): Flow<List<TafseerHighlight>> {
         return tafseerDao.getHighlightsForAyah(ayahId, tafseerId).map { entities ->
             entities.map { it.toDomain() }
         }

@@ -42,13 +42,13 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -301,7 +301,11 @@ private fun ExportOption(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -467,7 +471,9 @@ private fun DayPrayerCard(
             Modifier
         }
 
-        Column(modifier = Modifier.then(background).fillMaxWidth()) {
+        Column(modifier = Modifier
+            .then(background)
+            .fillMaxWidth()) {
             DayMetaRow(
                 date = dayTimes.date,
                 hijriDay = hijri.day,
@@ -508,7 +514,8 @@ private fun DayMetaRow(
     val monthName = date.month.getDisplayName(TextStyle.FULL, locale)
     val hijriShort = "$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth).take(3)}"
 
-    val titleLine = (if (isToday) "Today · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
+    val titleLine =
+        (if (isToday) "Today · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
     val subLine = buildString {
         append("$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth)} $hijriYear")
         if (fast != null) append(" · $fast fast")
@@ -612,7 +619,8 @@ private fun DayBadge(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
-    val hijriColor = if (isToday) textColor.copy(alpha = 0.85f) else MaterialTheme.colorScheme.primary
+    val hijriColor =
+        if (isToday) textColor.copy(alpha = 0.85f) else MaterialTheme.colorScheme.primary
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,

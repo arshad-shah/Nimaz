@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,11 +15,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.AccountBalance
 import androidx.compose.material.icons.filled.Business
 import androidx.compose.material.icons.filled.CreditCard
@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
-import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,6 +51,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -59,18 +59,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
+import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
 import java.text.NumberFormat
 import java.util.Locale
-import com.arshadshah.nimaz.R
-import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -509,9 +508,19 @@ private fun ZakatResultSummaryCard(
 
                 Text(
                     text = if (isAboveNisab) {
-                        "Your wealth exceeds the ${nisabType.displayName()} nisab threshold of ${formatCurrency(nisabValue, currency)}"
+                        "Your wealth exceeds the ${nisabType.displayName()} nisab threshold of ${
+                            formatCurrency(
+                                nisabValue,
+                                currency
+                            )
+                        }"
                     } else {
-                        "Nisab threshold (${nisabType.displayName()}): ${formatCurrency(nisabValue, currency)}"
+                        "Nisab threshold (${nisabType.displayName()}): ${
+                            formatCurrency(
+                                nisabValue,
+                                currency
+                            )
+                        }"
                     },
                     style = MaterialTheme.typography.labelSmall,
                     color = Color(0xFF1C1917).copy(alpha = 0.8f),

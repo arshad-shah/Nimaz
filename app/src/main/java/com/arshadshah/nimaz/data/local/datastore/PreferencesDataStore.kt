@@ -101,6 +101,7 @@ class PreferencesDataStore @Inject constructor(
         val ASR_ADHAN_ENABLED = booleanPreferencesKey("asr_adhan_enabled")
         val MAGHRIB_ADHAN_ENABLED = booleanPreferencesKey("maghrib_adhan_enabled")
         val ISHA_ADHAN_ENABLED = booleanPreferencesKey("isha_adhan_enabled")
+
         // Note: Sunrise always uses beep only, no full adhan option
         val ADHAN_RESPECT_DND = booleanPreferencesKey("adhan_respect_dnd")
 
@@ -383,10 +384,13 @@ class PreferencesDataStore @Inject constructor(
 
     // Prayer Adjustments
     val fajrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.FAJR_ADJUSTMENT] ?: 0 }
-    val sunriseAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.SUNRISE_ADJUSTMENT] ?: 0 }
-    val dhuhrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.DHUHR_ADJUSTMENT] ?: 0 }
+    val sunriseAdjustment: Flow<Int> =
+        dataStore.data.map { it[PreferencesKeys.SUNRISE_ADJUSTMENT] ?: 0 }
+    val dhuhrAdjustment: Flow<Int> =
+        dataStore.data.map { it[PreferencesKeys.DHUHR_ADJUSTMENT] ?: 0 }
     val asrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ASR_ADJUSTMENT] ?: 0 }
-    val maghribAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADJUSTMENT] ?: 0 }
+    val maghribAdjustment: Flow<Int> =
+        dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADJUSTMENT] ?: 0 }
     val ishaAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ISHA_ADJUSTMENT] ?: 0 }
 
     suspend fun setPrayerAdjustment(prayer: String, minutes: Int) {
@@ -433,12 +437,18 @@ class PreferencesDataStore @Inject constructor(
         dataStore.edit { it[PreferencesKeys.SELECTED_ADHAN_SOUND] = sound }
     }
 
-    val fajrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.FAJR_NOTIFICATION_ENABLED] ?: true }
-    val sunriseNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED] ?: false }
-    val dhuhrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.DHUHR_NOTIFICATION_ENABLED] ?: true }
-    val asrNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ASR_NOTIFICATION_ENABLED] ?: true }
-    val maghribNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED] ?: true }
-    val ishaNotificationEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ISHA_NOTIFICATION_ENABLED] ?: true }
+    val fajrNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.FAJR_NOTIFICATION_ENABLED] ?: true }
+    val sunriseNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED] ?: false }
+    val dhuhrNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.DHUHR_NOTIFICATION_ENABLED] ?: true }
+    val asrNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.ASR_NOTIFICATION_ENABLED] ?: true }
+    val maghribNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED] ?: true }
+    val ishaNotificationEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.ISHA_NOTIFICATION_ENABLED] ?: true }
 
     suspend fun setPrayerNotificationEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
@@ -456,11 +466,16 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Per-prayer adhan enabled
-    val fajrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.FAJR_ADHAN_ENABLED] ?: true }
-    val dhuhrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.DHUHR_ADHAN_ENABLED] ?: true }
-    val asrAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ASR_ADHAN_ENABLED] ?: true }
-    val maghribAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADHAN_ENABLED] ?: true }
-    val ishaAdhanEnabled: Flow<Boolean> = dataStore.data.map { it[PreferencesKeys.ISHA_ADHAN_ENABLED] ?: true }
+    val fajrAdhanEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.FAJR_ADHAN_ENABLED] ?: true }
+    val dhuhrAdhanEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.DHUHR_ADHAN_ENABLED] ?: true }
+    val asrAdhanEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.ASR_ADHAN_ENABLED] ?: true }
+    val maghribAdhanEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADHAN_ENABLED] ?: true }
+    val ishaAdhanEnabled: Flow<Boolean> =
+        dataStore.data.map { it[PreferencesKeys.ISHA_ADHAN_ENABLED] ?: true }
 
     suspend fun setPrayerAdhanEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
@@ -675,10 +690,15 @@ class PreferencesDataStore @Inject constructor(
                         preferences[booleanPreferencesKey(key)] = value.toBoolean()
                     }
                     // Try numeric types
-                    value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains("location_id")) -> {
+                    value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains(
+                        "location_id"
+                    )) -> {
                         preferences[intPreferencesKey(key)] = value.toInt()
                     }
-                    value.toDoubleOrNull() != null && (key.contains("latitude") || key.contains("longitude") || key.contains("font_size")) -> {
+
+                    value.toDoubleOrNull() != null && (key.contains("latitude") || key.contains("longitude") || key.contains(
+                        "font_size"
+                    )) -> {
                         if (key.contains("font_size") && !key.contains("arabic_font_size_string")) {
                             preferences[floatPreferencesKey(key)] = value.toFloat()
                         } else {
@@ -701,13 +721,16 @@ class PreferencesDataStore @Inject constructor(
             themeMode = preferences[PreferencesKeys.THEME_MODE] ?: "system",
             dynamicColor = preferences[PreferencesKeys.DYNAMIC_COLOR] ?: false,
             appLanguage = preferences[PreferencesKeys.APP_LANGUAGE] ?: "en",
-            calculationMethod = preferences[PreferencesKeys.CALCULATION_METHOD] ?: "MUSLIM_WORLD_LEAGUE",
+            calculationMethod = preferences[PreferencesKeys.CALCULATION_METHOD]
+                ?: "MUSLIM_WORLD_LEAGUE",
             asrCalculation = preferences[PreferencesKeys.ASR_CALCULATION] ?: "standard",
             latitude = preferences[PreferencesKeys.LATITUDE] ?: 0.0,
             longitude = preferences[PreferencesKeys.LONGITUDE] ?: 0.0,
             locationName = preferences[PreferencesKeys.LOCATION_NAME] ?: "",
-            prayerNotificationsEnabled = preferences[PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED] ?: true,
-            quranTranslatorId = preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "sahih_international",
+            prayerNotificationsEnabled = preferences[PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED]
+                ?: true,
+            quranTranslatorId = preferences[PreferencesKeys.QURAN_TRANSLATOR_ID]
+                ?: "sahih_international",
             showTranslation = preferences[PreferencesKeys.SHOW_TRANSLATION] ?: true
         )
     }

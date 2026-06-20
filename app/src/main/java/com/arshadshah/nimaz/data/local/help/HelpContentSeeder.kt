@@ -11,7 +11,6 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.encodeToString
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,7 +60,12 @@ class HelpContentSeeder @Inject constructor(
         val steps = mutableListOf<HelpStepEntity>()
         val strings = mutableListOf<HelpStringEntity>()
 
-        fun addStrings(ownerType: String, ownerId: String, field: String, map: Map<String, String>) {
+        fun addStrings(
+            ownerType: String,
+            ownerId: String,
+            field: String,
+            map: Map<String, String>
+        ) {
             map.forEach { (lang, value) ->
                 strings += HelpStringEntity(ownerType, ownerId, field, lang, value)
             }
@@ -73,13 +77,20 @@ class HelpContentSeeder @Inject constructor(
             addStrings("TOPIC", t.id, "subtitle", t.subtitle)
             t.items.forEach { item ->
                 val type = if (item.type.equals("guide", true)) "GUIDE" else "QUESTION"
-                items += HelpItemEntity(item.id, t.id, type, item.order, item.icon, item.estimatedMinutes)
+                items += HelpItemEntity(
+                    item.id,
+                    t.id,
+                    type,
+                    item.order,
+                    item.icon,
+                    item.estimatedMinutes
+                )
                 addStrings("ITEM", item.id, "question", item.question)
                 addStrings("ITEM", item.id, "answer", item.answer)
                 addStrings("ITEM", item.id, "title", item.title)
                 item.steps.forEach { s ->
                     val pathLabels = if (s.pathLabels.isEmpty()) null
-                        else helpJson.encodeToString(s.pathLabels)
+                    else helpJson.encodeToString(s.pathLabels)
                     steps += HelpStepEntity(s.id, item.id, s.order, s.deeplink, pathLabels)
                     addStrings("STEP", s.id, "title", s.title)
                     addStrings("STEP", s.id, "body", s.body)

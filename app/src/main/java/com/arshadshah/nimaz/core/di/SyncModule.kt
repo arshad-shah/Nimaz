@@ -42,7 +42,14 @@ object SyncModule {
         zakatDao: ZakatDao,
         preferencesDataStore: PreferencesDataStore
     ): SyncDataExporter = SyncDataExporter(
-        quranDao, prayerDao, fastingDao, tasbihDao, khatamDao, tafseerDao, zakatDao, preferencesDataStore
+        quranDao,
+        prayerDao,
+        fastingDao,
+        tasbihDao,
+        khatamDao,
+        tafseerDao,
+        zakatDao,
+        preferencesDataStore
     )
 
     @Provides
@@ -58,6 +65,14 @@ object SyncModule {
         zakatDao: ZakatDao,
         preferencesDataStore: PreferencesDataStore
     ): SyncDataImporter = SyncDataImporter(
-        database, quranDao, prayerDao, fastingDao, tasbihDao, khatamDao, tafseerDao, zakatDao, preferencesDataStore
+        database,
+        quranDao,
+        prayerDao,
+        fastingDao,
+        tasbihDao,
+        khatamDao,
+        tafseerDao,
+        zakatDao,
+        preferencesDataStore
     )
 }

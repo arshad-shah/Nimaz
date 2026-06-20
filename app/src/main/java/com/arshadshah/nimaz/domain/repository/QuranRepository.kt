@@ -43,7 +43,14 @@ interface QuranRepository {
     suspend fun getBookmarkByAyahId(ayahId: Int): QuranBookmark?
     fun isAyahBookmarked(ayahId: Int): Flow<Boolean>
     suspend fun toggleBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int)
-    suspend fun addBookmark(ayahId: Int, surahNumber: Int, ayahNumber: Int, note: String?, color: String?)
+    suspend fun addBookmark(
+        ayahId: Int,
+        surahNumber: Int,
+        ayahNumber: Int,
+        note: String?,
+        color: String?
+    )
+
     suspend fun updateBookmark(bookmark: QuranBookmark)
     suspend fun deleteBookmark(ayahId: Int)
 

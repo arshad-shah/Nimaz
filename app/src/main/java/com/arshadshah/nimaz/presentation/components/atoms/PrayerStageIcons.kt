@@ -30,7 +30,11 @@ private fun ImageVector.Builder.fillPath(pathData: String) {
     addPath(pathData = addPathNodes(pathData), fill = ink)
 }
 
-private fun ImageVector.Builder.strokePath(pathData: String, width: Float = 1.5f, alpha: Float = 1f) {
+private fun ImageVector.Builder.strokePath(
+    pathData: String,
+    width: Float = 1.5f,
+    alpha: Float = 1f
+) {
     addPath(
         pathData = addPathNodes(pathData),
         stroke = ink,
@@ -61,8 +65,8 @@ val PrayerIconDhuhr: ImageVector by lazy {
         fillPath("M16.4 9 A4.4 4.4 0 1 1 7.6 9 A4.4 4.4 0 1 1 16.4 9 Z")
         strokePath(
             "M12 1.3 L12 2.9 M6.3 9 L4.7 9 M17.7 9 L19.3 9 " +
-                "M7.96 4.96 L6.83 3.83 M16.04 4.96 L17.17 3.83 " +
-                "M7.96 13.04 L6.83 14.17 M16.04 13.04 L17.17 14.17",
+                    "M7.96 4.96 L6.83 3.83 M16.04 4.96 L17.17 3.83 " +
+                    "M7.96 13.04 L6.83 14.17 M16.04 13.04 L17.17 14.17",
         )
     }
 }
@@ -73,7 +77,7 @@ val PrayerIconAsr: ImageVector by lazy {
         fillPath("M19.1 10.8 A4.1 4.1 0 1 1 10.9 10.8 A4.1 4.1 0 1 1 19.1 10.8 Z")
         strokePath(
             "M15 3.9 L15 5.4 M21.4 10.8 L19.9 10.8 " +
-                "M18.95 6.85 L20 5.8 M18.95 14.75 L20 15.8 M9.6 10.8 L8.1 10.8",
+                    "M18.95 6.85 L20 5.8 M18.95 14.75 L20 15.8 M9.6 10.8 L8.1 10.8",
         )
     }
 }

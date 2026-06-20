@@ -174,11 +174,51 @@ private fun PrayerTimesSuccessContent(
                 modifier = GlanceModifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                PrayerTimeItem("Fajr", data.fajrTime, data.fajrPassed, textColor, textSecondary, primaryColor, GlanceModifier.defaultWeight())
-                PrayerTimeItem("Dhuhr", data.dhuhrTime, data.dhuhrPassed, textColor, textSecondary, primaryColor, GlanceModifier.defaultWeight())
-                PrayerTimeItem("Asr", data.asrTime, data.asrPassed, textColor, textSecondary, primaryColor, GlanceModifier.defaultWeight())
-                PrayerTimeItem("Mgrb", data.maghribTime, data.maghribPassed, textColor, textSecondary, primaryColor, GlanceModifier.defaultWeight())
-                PrayerTimeItem("Isha", data.ishaTime, data.ishaPassed, textColor, textSecondary, primaryColor, GlanceModifier.defaultWeight())
+                PrayerTimeItem(
+                    "Fajr",
+                    data.fajrTime,
+                    data.fajrPassed,
+                    textColor,
+                    textSecondary,
+                    primaryColor,
+                    GlanceModifier.defaultWeight()
+                )
+                PrayerTimeItem(
+                    "Dhuhr",
+                    data.dhuhrTime,
+                    data.dhuhrPassed,
+                    textColor,
+                    textSecondary,
+                    primaryColor,
+                    GlanceModifier.defaultWeight()
+                )
+                PrayerTimeItem(
+                    "Asr",
+                    data.asrTime,
+                    data.asrPassed,
+                    textColor,
+                    textSecondary,
+                    primaryColor,
+                    GlanceModifier.defaultWeight()
+                )
+                PrayerTimeItem(
+                    "Mgrb",
+                    data.maghribTime,
+                    data.maghribPassed,
+                    textColor,
+                    textSecondary,
+                    primaryColor,
+                    GlanceModifier.defaultWeight()
+                )
+                PrayerTimeItem(
+                    "Isha",
+                    data.ishaTime,
+                    data.ishaPassed,
+                    textColor,
+                    textSecondary,
+                    primaryColor,
+                    GlanceModifier.defaultWeight()
+                )
             }
         }
     }

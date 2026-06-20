@@ -46,10 +46,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -146,11 +146,13 @@ fun BookmarksScreen(
                                         onNavigateToQuranAyah(surah, ayah)
                                     }
                                 }
+
                                 BookmarkType.HADITH -> bookmark.hadithBookId?.let { bookId ->
                                     bookmark.hadithNumber?.let { number ->
                                         onNavigateToHadith(bookId, number)
                                     }
                                 }
+
                                 BookmarkType.DUA -> bookmark.duaId?.let { duaId ->
                                     onNavigateToDua(duaId)
                                 }
@@ -164,9 +166,17 @@ fun BookmarksScreen(
                                         viewModel.onEvent(BookmarksEvent.DeleteQuranBookmark(ayahId))
                                     }
                                 }
+
                                 BookmarkType.HADITH -> bookmark.hadithBookId?.let {
-                                    viewModel.onEvent(BookmarksEvent.DeleteHadithBookmark(bookmark.id.removePrefix("hadith_")))
+                                    viewModel.onEvent(
+                                        BookmarksEvent.DeleteHadithBookmark(
+                                            bookmark.id.removePrefix(
+                                                "hadith_"
+                                            )
+                                        )
+                                    )
                                 }
+
                                 BookmarkType.DUA -> bookmark.duaId?.let {
                                     viewModel.onEvent(BookmarksEvent.DeleteDuaBookmark(it))
                                 }

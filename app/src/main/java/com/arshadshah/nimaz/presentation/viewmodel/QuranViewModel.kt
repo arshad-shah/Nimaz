@@ -97,14 +97,23 @@ sealed interface QuranEvent {
     data class Search(val query: String) : QuranEvent
     data class SetTopTab(val index: Int) : QuranEvent
     data class SetTab(val index: Int) : QuranEvent
-    data class ToggleBookmark(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) : QuranEvent
-    data class ToggleFavorite(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) : QuranEvent
-    data class UpdateReadingPosition(val surah: Int, val ayah: Int, val page: Int, val juz: Int) : QuranEvent
+    data class ToggleBookmark(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) :
+        QuranEvent
+
+    data class ToggleFavorite(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) :
+        QuranEvent
+
+    data class UpdateReadingPosition(val surah: Int, val ayah: Int, val page: Int, val juz: Int) :
+        QuranEvent
+
     data object ToggleTranslation : QuranEvent
     data object ClearSearch : QuranEvent
+
     // Audio events
     data class PlaySurahAudio(val surahNumber: Int, val surahName: String) : QuranEvent
-    data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) : QuranEvent
+    data class PlayAyahAudio(val ayahGlobalId: Int, val surahNumber: Int, val ayahNumber: Int) :
+        QuranEvent
+
     data object PauseAudio : QuranEvent
     data object ResumeAudio : QuranEvent
     data object StopAudio : QuranEvent
@@ -185,20 +194,43 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.Search -> search(event.query)
             is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
             is QuranEvent.SetTab -> _homeState.update { it.copy(selectedTab = event.index) }
-            is QuranEvent.ToggleBookmark -> toggleBookmark(event.ayahId, event.surahNumber, event.ayahNumber)
-            is QuranEvent.ToggleFavorite -> toggleFavorite(event.ayahId, event.surahNumber, event.ayahNumber)
-            is QuranEvent.UpdateReadingPosition -> updateReadingPosition(event.surah, event.ayah, event.page, event.juz)
+            is QuranEvent.ToggleBookmark -> toggleBookmark(
+                event.ayahId,
+                event.surahNumber,
+                event.ayahNumber
+            )
+
+            is QuranEvent.ToggleFavorite -> toggleFavorite(
+                event.ayahId,
+                event.surahNumber,
+                event.ayahNumber
+            )
+
+            is QuranEvent.UpdateReadingPosition -> updateReadingPosition(
+                event.surah,
+                event.ayah,
+                event.page,
+                event.juz
+            )
+
             QuranEvent.ToggleTranslation -> {
                 val newValue = !_readerState.value.showTranslation
                 _readerState.update { it.copy(showTranslation = newValue) }
                 viewModelScope.launch { preferencesDataStore.setShowTranslation(newValue) }
             }
+
             QuranEvent.ClearSearch -> {
                 _searchState.update { QuranSearchUiState() }
                 _homeState.update { it.copy(searchQuery = "", filteredSurahs = it.surahs) }
             }
+
             is QuranEvent.PlaySurahAudio -> playSurahAudio(event.surahNumber, event.surahName)
-            is QuranEvent.PlayAyahAudio -> playAyahAudio(event.ayahGlobalId, event.surahNumber, event.ayahNumber)
+            is QuranEvent.PlayAyahAudio -> playAyahAudio(
+                event.ayahGlobalId,
+                event.surahNumber,
+                event.ayahNumber
+            )
+
             QuranEvent.PauseAudio -> audioManager.togglePlayPause()
             QuranEvent.ResumeAudio -> audioManager.togglePlayPause()
             QuranEvent.StopAudio -> audioManager.stop()
@@ -233,7 +265,11 @@ class QuranViewModel @Inject constructor(
                 QuranBehaviorSettings(transSize, continuous, keepOn, reciter)
             }
 
-            combine(displayFlow, behaviorFlow, preferencesDataStore.showTajweed) { display, behavior, showTajweed ->
+            combine(
+                displayFlow,
+                behaviorFlow,
+                preferencesDataStore.showTajweed
+            ) { display, behavior, showTajweed ->
                 Triple(display, behavior, showTajweed)
             }.collect { (display, behavior, showTajweed) ->
                 audioManager.setReciter(behavior.reciterId)
@@ -298,7 +334,11 @@ class QuranViewModel @Inject constructor(
                     }
                     // SurahInfoScreen always plays full surah continuously
                     audioManager.setContinuousPlayback(true)
-                    audioManager.playSurah(surahNumber, surahWithAyahs.surah.nameEnglish, audioItems)
+                    audioManager.playSurah(
+                        surahNumber,
+                        surahWithAyahs.surah.nameEnglish,
+                        audioItems
+                    )
                 }
         }
     }
@@ -511,8 +551,9 @@ class QuranViewModel @Inject constructor(
                     val surahs = _homeState.value.surahs
                     val enrichedResults = results.take(50).map { result ->
                         if (result.surahName.isEmpty()) {
-                            val surahName = surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
-                                ?: "Surah ${result.ayah.surahNumber}"
+                            val surahName =
+                                surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
+                                    ?: "Surah ${result.ayah.surahNumber}"
                             result.copy(surahName = surahName)
                         } else {
                             result
@@ -526,9 +567,9 @@ class QuranViewModel @Inject constructor(
     private fun filterSurahs(surahs: List<Surah>, query: String): List<Surah> {
         return surahs.filter { surah ->
             query.isBlank() ||
-            surah.nameEnglish.contains(query, ignoreCase = true) ||
-            surah.nameTransliteration.contains(query, ignoreCase = true) ||
-            surah.nameArabic.contains(query)
+                    surah.nameEnglish.contains(query, ignoreCase = true) ||
+                    surah.nameTransliteration.contains(query, ignoreCase = true) ||
+                    surah.nameArabic.contains(query)
         }
     }
 
@@ -643,14 +684,14 @@ class QuranViewModel @Inject constructor(
     }
 
     private fun togglePageKhatam(ayahIds: List<Int>) {
-       val khatamId = _readerState.value.activeKhatamId ?: return
-       val readIds = _readerState.value.khatamReadAyahIds
-       val unreadIds = ayahIds.filter { it !in readIds }
-       if (unreadIds.isEmpty()) return
-       viewModelScope.launch {
-           khatamUseCases.markAyahsRead(khatamId, unreadIds)
-       }
-   }
+        val khatamId = _readerState.value.activeKhatamId ?: return
+        val readIds = _readerState.value.khatamReadAyahIds
+        val unreadIds = ayahIds.filter { it !in readIds }
+        if (unreadIds.isEmpty()) return
+        viewModelScope.launch {
+            khatamUseCases.markAyahsRead(khatamId, unreadIds)
+        }
+    }
 
     private fun unmarkAyahReadForKhatam(ayahId: Int) {
         val khatamId = _readerState.value.activeKhatamId ?: return

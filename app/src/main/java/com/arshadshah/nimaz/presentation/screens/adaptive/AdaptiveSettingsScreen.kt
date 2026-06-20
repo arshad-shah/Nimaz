@@ -8,7 +8,6 @@ import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaf
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.navigation.NavController
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
@@ -21,6 +20,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.SyncScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3AdaptiveApi::class)
 @Composable
@@ -137,27 +137,34 @@ fun AdaptiveSettingsScreen(
                                     }
                                 }
                             )
+
                             SettingsDetailPane.NOTIFICATIONS -> NotificationSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             SettingsDetailPane.QURAN -> QuranSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                 onNavigateToSelectReciter = {
                                     navController.navigate(Route.SelectReciter)
                                 }
                             )
+
                             SettingsDetailPane.APPEARANCE -> AppearanceSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             SettingsDetailPane.LOCATION -> LocationScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             SettingsDetailPane.LANGUAGE -> LanguageScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             SettingsDetailPane.WIDGETS -> WidgetsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             SettingsDetailPane.SYNC -> SyncScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )

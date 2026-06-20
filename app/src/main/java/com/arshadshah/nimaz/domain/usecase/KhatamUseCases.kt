@@ -51,7 +51,8 @@ class SetActiveKhatamUseCase @Inject constructor(private val repository: KhatamR
 }
 
 class MarkAyahsReadUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long, ayahIds: List<Int>) = repository.markAyahsRead(khatamId, ayahIds)
+    suspend operator fun invoke(khatamId: Long, ayahIds: List<Int>) =
+        repository.markAyahsRead(khatamId, ayahIds)
 }
 
 class GetReadAyahIdsUseCase @Inject constructor(private val repository: KhatamRepository) {
@@ -63,11 +64,13 @@ class ObserveReadAyahIdsUseCase @Inject constructor(private val repository: Khat
 }
 
 class GetJuzProgressUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long): List<JuzProgressInfo> = repository.getJuzProgress(khatamId)
+    suspend operator fun invoke(khatamId: Long): List<JuzProgressInfo> =
+        repository.getJuzProgress(khatamId)
 }
 
 class ObserveDailyLogsUseCase @Inject constructor(private val repository: KhatamRepository) {
-    operator fun invoke(khatamId: Long): Flow<List<DailyLogEntry>> = repository.observeDailyLogs(khatamId)
+    operator fun invoke(khatamId: Long): Flow<List<DailyLogEntry>> =
+        repository.observeDailyLogs(khatamId)
 }
 
 class CompleteKhatamUseCase @Inject constructor(private val repository: KhatamRepository) {
@@ -116,13 +119,16 @@ class GetKhatamStatsUseCase @Inject constructor(private val repository: KhatamRe
 }
 
 class GetNextUnreadPositionUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long): Pair<Int, Int>? = repository.getNextUnreadPosition(khatamId)
+    suspend operator fun invoke(khatamId: Long): Pair<Int, Int>? =
+        repository.getNextUnreadPosition(khatamId)
 }
 
 class UnmarkAyahReadUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long, ayahId: Int) = repository.unmarkAyahRead(khatamId, ayahId)
+    suspend operator fun invoke(khatamId: Long, ayahId: Int) =
+        repository.unmarkAyahRead(khatamId, ayahId)
 }
 
 class MarkSurahAsReadUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long, surahNumber: Int) = repository.markSurahAsRead(khatamId, surahNumber)
+    suspend operator fun invoke(khatamId: Long, surahNumber: Int) =
+        repository.markSurahAsRead(khatamId, surahNumber)
 }

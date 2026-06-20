@@ -128,17 +128,21 @@ class AdhanPlaybackService : Service() {
 
                 // Store prayer notification content for merged notification
                 currentPrayerName = prayerName
-                notificationTitle = intent.getStringExtra(EXTRA_NOTIFICATION_TITLE) ?: "$prayerName Adhan"
-                notificationMessage = intent.getStringExtra(EXTRA_NOTIFICATION_MESSAGE) ?: "Tap to stop"
+                notificationTitle =
+                    intent.getStringExtra(EXTRA_NOTIFICATION_TITLE) ?: "$prayerName Adhan"
+                notificationMessage =
+                    intent.getStringExtra(EXTRA_NOTIFICATION_MESSAGE) ?: "Tap to stop"
                 notificationColor = intent.getIntExtra(EXTRA_NOTIFICATION_COLOR, 0)
 
                 val adhanSound = AdhanSound.fromName(soundName)
                 startPlayback(adhanSound, isFajr, prayerName)
             }
+
             ACTION_STOP -> {
                 stopPlayback()
                 stopSelf()
             }
+
             else -> {
                 stopSelf()
             }
@@ -167,13 +171,19 @@ class AdhanPlaybackService : Service() {
         fallbackPrayerName = prayerName
 
         if (isValidAudioFile(primaryFile)) {
-            android.util.Log.d("AdhanPlayback", "Playing primary file: ${primaryFile.name} (isFajr=$isFajr)")
+            android.util.Log.d(
+                "AdhanPlayback",
+                "Playing primary file: ${primaryFile.name} (isFajr=$isFajr)"
+            )
             playFile(primaryFile, prayerName)
             return
         }
 
         // Primary file missing or corrupt — fall back to beep, NOT the other variant
-        android.util.Log.w("AdhanPlayback", "Primary file invalid: ${primaryFile.name} (exists=${primaryFile.exists()}, size=${if (primaryFile.exists()) primaryFile.length() else 0})")
+        android.util.Log.w(
+            "AdhanPlayback",
+            "Primary file invalid: ${primaryFile.name} (exists=${primaryFile.exists()}, size=${if (primaryFile.exists()) primaryFile.length() else 0})"
+        )
 
         if (isValidAudioFile(beepFile)) {
             android.util.Log.d("AdhanPlayback", "Falling back to beep sound")
@@ -182,7 +192,10 @@ class AdhanPlaybackService : Service() {
             return
         }
 
-        android.util.Log.w("AdhanPlayback", "No valid adhan or beep file found for ${adhanSound.name}")
+        android.util.Log.w(
+            "AdhanPlayback",
+            "No valid adhan or beep file found for ${adhanSound.name}"
+        )
         stopSelf()
     }
 
@@ -286,14 +299,15 @@ class AdhanPlaybackService : Service() {
 
     private fun requestAudioFocus() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                .setAudioAttributes(
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_ALARM)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                        .build()
-                )
-                .build()
+            audioFocusRequest =
+                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                    .setAudioAttributes(
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_ALARM)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                            .build()
+                    )
+                    .build()
             audioFocusRequest?.let { audioManager?.requestAudioFocus(it) }
         } else {
             @Suppress("DEPRECATION")

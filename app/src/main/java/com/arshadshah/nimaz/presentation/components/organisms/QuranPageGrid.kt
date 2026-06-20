@@ -258,7 +258,10 @@ internal fun LazyListScope.pageGridItems(
                                             text = name,
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
+                                            modifier = Modifier.padding(
+                                                horizontal = 6.dp,
+                                                vertical = 1.dp
+                                            )
                                         )
                                     }
                                 }
@@ -284,8 +287,10 @@ internal fun LazyListScope.pageGridItems(
                     ) {
                         gridPages.forEach { pg ->
                             val (readCount, totalCount) = pageProgressMap[pg] ?: (0 to 0)
-                            val progress = if (totalCount > 0) readCount.toFloat() / totalCount else 0f
-                            val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
+                            val progress =
+                                if (totalCount > 0) readCount.toFloat() / totalCount else 0f
+                            val isComplete =
+                                isKhatamActive && totalCount > 0 && readCount == totalCount
                             val isSelected = selectedPageNumber == pg
 
                             Surface(

@@ -15,10 +15,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
-import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HadithGrade
@@ -102,7 +102,9 @@ data class PrayerTimeDisplay(
 )
 
 sealed interface HomeEvent {
-    data class UpdateLocation(val latitude: Double, val longitude: Double, val name: String) : HomeEvent
+    data class UpdateLocation(val latitude: Double, val longitude: Double, val name: String) :
+        HomeEvent
+
     data object RefreshPrayerTimes : HomeEvent
     data object RefreshPermissions : HomeEvent
     data class TogglePrayerStatus(val prayerType: PrayerType) : HomeEvent
@@ -176,7 +178,8 @@ class HomeViewModel @Inject constructor(
                 // being deterministic: the same day always yields the same
                 // hadith.
                 val daysSinceEpoch = LocalDate.now().toEpochDay()
-                val offset = Math.floorMod(daysSinceEpoch * 2654435761L, totalHadiths.toLong()).toInt()
+                val offset =
+                    Math.floorMod(daysSinceEpoch * 2654435761L, totalHadiths.toLong()).toInt()
 
                 val hadith = hadithDao.getHadithByOffset(offset)
                 _state.update {
@@ -256,9 +259,15 @@ class HomeViewModel @Inject constructor(
         in 16..20 -> DUA_CATEGORY_EVENING
         else -> DUA_CATEGORY_BEFORE_SLEEP
     }
+
     fun onEvent(event: HomeEvent) {
         when (event) {
-            is HomeEvent.UpdateLocation -> updateLocation(event.latitude, event.longitude, event.name)
+            is HomeEvent.UpdateLocation -> updateLocation(
+                event.latitude,
+                event.longitude,
+                event.name
+            )
+
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
             HomeEvent.RefreshPermissions -> checkPermissions()
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
@@ -281,9 +290,9 @@ class HomeViewModel @Inject constructor(
         val hasLocation = ContextCompat.checkSelfPermission(
             context, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(
-            context, Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context, Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
         val isBatteryOptimized = !powerManager.isIgnoringBatteryOptimizations(context.packageName)
@@ -305,8 +314,10 @@ class HomeViewModel @Inject constructor(
             val prayerName = PrayerName.valueOf(prayerType.name)
             val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
             val currentStatus = _prayerRecords.value[prayerName] ?: PrayerStatus.NOT_PRAYED
-            val newStatus = if (currentStatus == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
-            val prayedAt = if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
+            val newStatus =
+                if (currentStatus == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
+            val prayedAt =
+                if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
 
             prayerRepository.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
             _prayerRecords.update { it + (prayerName to newStatus) }
@@ -376,7 +387,11 @@ class HomeViewModel @Inject constructor(
                 }
             ) { first, second -> first + second }
 
-            combine(locationFlow, calcSettingsFlow, adjustmentsFlow) { location, calcSettings, adjustments ->
+            combine(
+                locationFlow,
+                calcSettingsFlow,
+                adjustmentsFlow
+            ) { location, calcSettings, adjustments ->
                 Triple(location, calcSettings, adjustments)
             }.collect { (location, calcSettings, adjustments) ->
                 val (lat, lng, name) = location
@@ -385,15 +400,24 @@ class HomeViewModel @Inject constructor(
                 val hasLocation = lat != 0.0 && lng != 0.0
                 val latitude = if (hasLocation) lat else DEFAULT_LATITUDE
                 val longitude = if (hasLocation) lng else DEFAULT_LONGITUDE
-                val locationName = if (hasLocation && name.isNotBlank()) name else DEFAULT_LOCATION_NAME
+                val locationName =
+                    if (hasLocation && name.isNotBlank()) name else DEFAULT_LOCATION_NAME
 
                 // Cache calculation settings
-                cachedCalcMethod = try { CalculationMethod.valueOf(calcStr) } catch (_: Exception) { CalculationMethod.MUSLIM_WORLD_LEAGUE }
+                cachedCalcMethod = try {
+                    CalculationMethod.valueOf(calcStr)
+                } catch (_: Exception) {
+                    CalculationMethod.MUSLIM_WORLD_LEAGUE
+                }
                 cachedAsrCalc = when (asrStr.lowercase()) {
                     "hanafi" -> AsrCalculation.HANAFI
                     else -> AsrCalculation.STANDARD
                 }
-                cachedHighLatRule = try { HighLatitudeRule.valueOf(highStr) } catch (_: Exception) { null }
+                cachedHighLatRule = try {
+                    HighLatitudeRule.valueOf(highStr)
+                } catch (_: Exception) {
+                    null
+                }
                 cachedAdjustments = adjustments
 
                 _state.update {
@@ -474,7 +498,8 @@ class HomeViewModel @Inject constructor(
                 }
 
                 val nextPrayerIndex = sortedPrayers.indexOfFirst { !it.isPassed }
-                val currentPrayerIndex = if (nextPrayerIndex > 0) nextPrayerIndex - 1 else sortedPrayers.lastIndex
+                val currentPrayerIndex =
+                    if (nextPrayerIndex > 0) nextPrayerIndex - 1 else sortedPrayers.lastIndex
 
                 val updatedDisplays = sortedPrayers.mapIndexed { index, display ->
                     display.copy(

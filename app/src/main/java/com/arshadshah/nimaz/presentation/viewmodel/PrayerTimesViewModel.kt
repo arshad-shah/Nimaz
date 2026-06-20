@@ -166,9 +166,18 @@ class PrayerTimesViewModel @Inject constructor(
 
                     latitude = if (lat != 0.0) lat else 53.3498
                     longitude = if (lng != 0.0) lng else -6.2603
-                    calcMethod = try { CalculationMethod.valueOf(calcStr) } catch (_: Exception) { CalculationMethod.MUSLIM_WORLD_LEAGUE }
-                    asrCalc = if (asrStr.lowercase() == "hanafi") AsrCalculation.HANAFI else AsrCalculation.STANDARD
-                    highLatRule = try { HighLatitudeRule.valueOf(highStr) } catch (_: Exception) { null }
+                    calcMethod = try {
+                        CalculationMethod.valueOf(calcStr)
+                    } catch (_: Exception) {
+                        CalculationMethod.MUSLIM_WORLD_LEAGUE
+                    }
+                    asrCalc =
+                        if (asrStr.lowercase() == "hanafi") AsrCalculation.HANAFI else AsrCalculation.STANDARD
+                    highLatRule = try {
+                        HighLatitudeRule.valueOf(highStr)
+                    } catch (_: Exception) {
+                        null
+                    }
                     adjustments = adj
                     settingsReady = true
 
@@ -197,8 +206,18 @@ class PrayerTimesViewModel @Inject constructor(
         val byType = dayTimes.associate { it.type to it.time }
         val sunriseInstant = byType[PrayerType.SUNRISE]
         val maghribInstant = byType[PrayerType.MAGHRIB]
-        val sunriseStr = sunriseInstant?.let { formatClock12(it.toLocalDateTime(tz).hour, it.toLocalDateTime(tz).minute) } ?: "--:--"
-        val sunsetStr = maghribInstant?.let { formatClock12(it.toLocalDateTime(tz).hour, it.toLocalDateTime(tz).minute) } ?: "--:--"
+        val sunriseStr = sunriseInstant?.let {
+            formatClock12(
+                it.toLocalDateTime(tz).hour,
+                it.toLocalDateTime(tz).minute
+            )
+        } ?: "--:--"
+        val sunsetStr = maghribInstant?.let {
+            formatClock12(
+                it.toLocalDateTime(tz).hour,
+                it.toLocalDateTime(tz).minute
+            )
+        } ?: "--:--"
         val daylightStr = if (sunriseInstant != null && maghribInstant != null) {
             val mins = (maghribInstant - sunriseInstant).inWholeMinutes
             "${mins / 60}h ${mins % 60}m"
@@ -244,7 +263,8 @@ class PrayerTimesViewModel @Inject constructor(
         val nowMillis = Instant.now().toEpochMilli()
 
         var displays = dayTimes.map { pt ->
-            val local = Instant.ofEpochMilli(pt.time.toEpochMilliseconds()).atZone(zone).toLocalDateTime()
+            val local =
+                Instant.ofEpochMilli(pt.time.toEpochMilliseconds()).atZone(zone).toLocalDateTime()
             val isPassed = isToday && local.toLocalTime().isBefore(nowTime)
             PrayerTimeDisplay(
                 type = pt.type,
@@ -253,7 +273,8 @@ class PrayerTimesViewModel @Inject constructor(
                 isPassed = isPassed,
                 isCurrent = false,
                 isNext = false,
-                prayerStatus = statuses[PrayerName.valueOf(pt.type.name)] ?: PrayerStatus.NOT_PRAYED,
+                prayerStatus = statuses[PrayerName.valueOf(pt.type.name)]
+                    ?: PrayerStatus.NOT_PRAYED,
             )
         }
 
@@ -268,7 +289,8 @@ class PrayerTimesViewModel @Inject constructor(
             if (nextIndex >= 0) {
                 nextName = displays[nextIndex].type.displayName
                 val nextInstant = dayTimes.firstOrNull { it.type == displays[nextIndex].type }?.time
-                if (nextInstant != null) countdown = formatCountdown((nextInstant.toEpochMilliseconds() - nowMillis) / 1000)
+                if (nextInstant != null) countdown =
+                    formatCountdown((nextInstant.toEpochMilliseconds() - nowMillis) / 1000)
             } else {
                 // All of today's prayers have passed — count down to tomorrow's Fajr.
                 nextName = PrayerType.FAJR.displayName
@@ -278,7 +300,8 @@ class PrayerTimesViewModel @Inject constructor(
                     highLatitudeRule = highLatRule, adjustments = adjustments,
                 )
                 val fajr = tomorrow.firstOrNull { it.type == PrayerType.FAJR }?.time
-                if (fajr != null) countdown = formatCountdown((fajr.toEpochMilliseconds() - nowMillis) / 1000)
+                if (fajr != null) countdown =
+                    formatCountdown((fajr.toEpochMilliseconds() - nowMillis) / 1000)
             }
         }
 
@@ -320,8 +343,10 @@ class PrayerTimesViewModel @Inject constructor(
             val dateKey = date.toEpochDay() * 86_400_000L
             val name = PrayerName.valueOf(type.name)
             val current = statuses[name] ?: PrayerStatus.NOT_PRAYED
-            val newStatus = if (current == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
-            val prayedAt = if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
+            val newStatus =
+                if (current == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
+            val prayedAt =
+                if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
             prayerRepository.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
             // getPrayerRecordsForDate re-emits → applyTick refreshes the UI.
         }

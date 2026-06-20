@@ -104,7 +104,12 @@ fun QaidaLessonLines(
     }
 }
 
-@Preview(showBackground = true, widthDp = 412, heightDp = 360, name = "Lesson Lines — long instruction")
+@Preview(
+    showBackground = true,
+    widthDp = 412,
+    heightDp = 360,
+    name = "Lesson Lines — long instruction"
+)
 @Composable
 private fun QaidaLessonLinesPreview() {
     fun previewCell(id: Int, arabic: String, translit: String) = QaidaCell(
@@ -112,6 +117,7 @@ private fun QaidaLessonLinesPreview() {
         transliteration = translit, tokenType = TokenType.SYLLABLE,
         audioKey = "k$id", audioPath = "", highlightGroup = null, letterId = null, notes = null,
     )
+
     val content = QaidaLessonContent(
         lesson = QaidaLesson(
             id = 1, lessonNumber = 16, titleEnglish = "Integrated Words", titleArabic = "",

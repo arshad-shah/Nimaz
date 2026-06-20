@@ -10,16 +10,15 @@ import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneSca
 import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
-import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
-import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
@@ -204,18 +203,23 @@ fun AdaptiveMoreScreen(
                             MoreDetailPane.LOCATION -> LocationScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             MoreDetailPane.NOTIFICATIONS -> NotificationSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             MoreDetailPane.APPEARANCE -> AppearanceSettingsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             MoreDetailPane.LANGUAGE -> LanguageScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             MoreDetailPane.WIDGETS -> WidgetsScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } }
                             )
+
                             MoreDetailPane.ABOUT -> AboutScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                 onNavigateToPrivacyPolicy = {
@@ -245,9 +249,12 @@ fun AdaptiveMoreScreen(
                                     context.startActivity(intent)
                                 }
                             )
+
                             MoreDetailPane.HELP -> {
-                                val supportEmail = stringResource(com.arshadshah.nimaz.R.string.support_email)
-                                val supportSubject = stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
+                                val supportEmail =
+                                    stringResource(com.arshadshah.nimaz.R.string.support_email)
+                                val supportSubject =
+                                    stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                                 HelpScreen(
                                     onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                     onNavigateToTopic = { topicId ->
@@ -258,7 +265,12 @@ fun AdaptiveMoreScreen(
                                             data = Uri.parse("mailto:$supportEmail")
                                             putExtra(Intent.EXTRA_SUBJECT, supportSubject)
                                         }
-                                        context.startActivity(Intent.createChooser(intent, supportEmail))
+                                        context.startActivity(
+                                            Intent.createChooser(
+                                                intent,
+                                                supportEmail
+                                            )
+                                        )
                                     }
                                 )
                             }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -57,10 +56,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import com.arshadshah.nimaz.R
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
@@ -222,7 +221,12 @@ fun NotificationSettingsScreen(
                                         "isha" -> notificationState.ishaAdhanEnabled
                                         else -> true
                                     }
-                                    viewModel.onEvent(SettingsEvent.SetPrayerAdhanEnabled(prayer.key, !currentState))
+                                    viewModel.onEvent(
+                                        SettingsEvent.SetPrayerAdhanEnabled(
+                                            prayer.key,
+                                            !currentState
+                                        )
+                                    )
                                 },
                                 globalAdhanEnabled = notificationState.adhanEnabled
                             )
@@ -277,7 +281,8 @@ fun NotificationSettingsScreen(
                             adhanSounds.forEachIndexed { index, sound ->
                                 val soundDownloadState = downloadState[sound]
                                 val isThisPlaying = isPlaying && currentlyPlaying == sound
-                                val isDownloaded = viewModel.adhanAudioManager.isDownloaded(sound, false)
+                                val isDownloaded =
+                                    viewModel.adhanAudioManager.isDownloaded(sound, false)
 
                                 AdhanOptionRow(
                                     name = sound.displayName,
@@ -317,7 +322,10 @@ fun NotificationSettingsScreen(
                         // Pre-Adhan Reminder
                         NimazSettingsItem(
                             title = stringResource(R.string.notification_settings_pre_adhan),
-                            subtitle = stringResource(R.string.notification_settings_pre_adhan_subtitle, notificationState.reminderMinutes),
+                            subtitle = stringResource(
+                                R.string.notification_settings_pre_adhan_subtitle,
+                                notificationState.reminderMinutes
+                            ),
                             checked = notificationState.showReminderBefore,
                             onCheckedChange = {
                                 viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
@@ -382,8 +390,10 @@ fun NotificationSettingsScreen(
 
                 item {
                     val testSentMsg = stringResource(R.string.notification_settings_test_sent)
-                    val testAllSentMsg = stringResource(R.string.notification_settings_test_all_sent)
-                    val resetSuccessMsg = stringResource(R.string.notification_settings_reset_success)
+                    val testAllSentMsg =
+                        stringResource(R.string.notification_settings_test_all_sent)
+                    val resetSuccessMsg =
+                        stringResource(R.string.notification_settings_reset_success)
                     NimazMenuGroup {
                         Column(
                             modifier = Modifier.padding(16.dp),
@@ -409,7 +419,8 @@ fun NotificationSettingsScreen(
                             Button(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestAllNotifications)
-                                    Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT)
+                                        .show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp),
@@ -429,7 +440,8 @@ fun NotificationSettingsScreen(
                             OutlinedButton(
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.ResetNotifications)
-                                    Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT)
+                                        .show()
                                 },
                                 modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(12.dp)
@@ -452,8 +464,10 @@ fun NotificationSettingsScreen(
                 }
 
                 item {
-                    val powerManager = context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
-                    val isExempted = powerManager.isIgnoringBatteryOptimizations(context.packageName)
+                    val powerManager =
+                        context.getSystemService(android.content.Context.POWER_SERVICE) as PowerManager
+                    val isExempted =
+                        powerManager.isIgnoringBatteryOptimizations(context.packageName)
 
                     NimazMenuGroup {
                         Column(modifier = Modifier.padding(16.dp)) {
@@ -470,7 +484,9 @@ fun NotificationSettingsScreen(
                                     )
                                     Spacer(modifier = Modifier.height(4.dp))
                                     Text(
-                                        text = if (isExempted) stringResource(R.string.notification_settings_battery_disabled) else stringResource(R.string.notification_settings_battery_enabled),
+                                        text = if (isExempted) stringResource(R.string.notification_settings_battery_disabled) else stringResource(
+                                            R.string.notification_settings_battery_enabled
+                                        ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (isExempted) MaterialTheme.colorScheme.primary
                                         else Color(0xFFF59E0B)
@@ -495,7 +511,8 @@ fun NotificationSettingsScreen(
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Button(
                                     onClick = {
-                                        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                                        val intent =
+                                            Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                                         context.startActivity(intent)
                                     },
                                     modifier = Modifier.fillMaxWidth(),
@@ -583,7 +600,9 @@ private fun PrayerNotificationRow(
             Icon(
                 imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
                 else Icons.AutoMirrored.Filled.VolumeOff,
-                contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on) else stringResource(R.string.notification_settings_sound_off),
+                contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on) else stringResource(
+                    R.string.notification_settings_sound_off
+                ),
                 tint = when {
                     !globalAdhanEnabled -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                     prayer.isSoundOn -> MaterialTheme.colorScheme.primary
@@ -681,6 +700,7 @@ private fun AdhanOptionRow(
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
+
                 isPlaying -> {
                     Icon(
                         imageVector = Icons.Default.Stop,
@@ -689,6 +709,7 @@ private fun AdhanOptionRow(
                         modifier = Modifier.size(16.dp)
                     )
                 }
+
                 !isDownloaded -> {
                     Icon(
                         imageVector = Icons.Default.Download,
@@ -697,6 +718,7 @@ private fun AdhanOptionRow(
                         modifier = Modifier.size(16.dp)
                     )
                 }
+
                 else -> {
                     Icon(
                         imageVector = Icons.Default.PlayArrow,

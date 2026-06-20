@@ -65,7 +65,9 @@ sealed interface HadithEvent {
     data class SearchInBook(val bookId: String, val query: String) : HadithEvent
     data class SearchChapters(val query: String) : HadithEvent
     data class FilterByGrade(val grade: HadithGrade) : HadithEvent
-    data class ToggleBookmark(val hadithId: String, val bookId: String, val hadithNumber: Int) : HadithEvent
+    data class ToggleBookmark(val hadithId: String, val bookId: String, val hadithNumber: Int) :
+        HadithEvent
+
     data class NavigateToHadith(val index: Int) : HadithEvent
     data class SetFontSize(val size: Float) : HadithEvent
     data class SetArabicFontSize(val size: Float) : HadithEvent
@@ -106,12 +108,21 @@ class HadithViewModel @Inject constructor(
             is HadithEvent.LoadBook -> loadBook(event.bookId)
             is HadithEvent.LoadChapter -> loadChapter(event.chapterId)
             is HadithEvent.LoadHadithById -> loadHadithById(event.hadithId)
-            is HadithEvent.LoadHadithByNumber -> loadHadithByNumber(event.bookId, event.hadithNumber)
+            is HadithEvent.LoadHadithByNumber -> loadHadithByNumber(
+                event.bookId,
+                event.hadithNumber
+            )
+
             is HadithEvent.Search -> search(event.query)
             is HadithEvent.SearchInBook -> searchInBook(event.bookId, event.query)
             is HadithEvent.SearchChapters -> searchChapters(event.query)
             is HadithEvent.FilterByGrade -> filterByGrade(event.grade)
-            is HadithEvent.ToggleBookmark -> toggleBookmark(event.hadithId, event.bookId, event.hadithNumber)
+            is HadithEvent.ToggleBookmark -> toggleBookmark(
+                event.hadithId,
+                event.bookId,
+                event.hadithNumber
+            )
+
             is HadithEvent.NavigateToHadith -> _readerState.update { it.copy(currentHadithIndex = event.index) }
             is HadithEvent.SetFontSize -> _readerState.update { it.copy(fontSize = event.size) }
             is HadithEvent.SetArabicFontSize -> _readerState.update { it.copy(arabicFontSize = event.size) }
@@ -120,6 +131,7 @@ class HadithViewModel @Inject constructor(
                 _searchState.update { HadithSearchUiState() }
                 _chaptersState.update { it.copy(searchQuery = "", filteredChapters = it.chapters) }
             }
+
             HadithEvent.LoadAllBooks -> loadAllBooks()
             HadithEvent.LoadBookmarks -> loadBookmarks()
         }
@@ -268,7 +280,7 @@ class HadithViewModel @Inject constructor(
             } else {
                 state.chapters.filter { chapter ->
                     chapter.nameEnglish.contains(query, ignoreCase = true) ||
-                    chapter.nameArabic.contains(query)
+                            chapter.nameArabic.contains(query)
                 }
             }
             state.copy(searchQuery = query, filteredChapters = filtered)

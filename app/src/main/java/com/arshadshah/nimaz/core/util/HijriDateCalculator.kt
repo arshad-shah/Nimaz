@@ -197,13 +197,62 @@ object HijriDateCalculator {
      */
     fun getIslamicEvents(hijriYear: Int): List<IslamicEvent> {
         return listOf(
-            IslamicEvent(1, 1, hijriYear, "Islamic New Year", "رأس السنة الهجرية", EventType.HOLIDAY),
-            IslamicEvent(10, 1, hijriYear, "Day of Ashura", "يوم عاشوراء", EventType.RECOMMENDED_FAST),
-            IslamicEvent(12, 3, hijriYear, "Mawlid al-Nabi", "المولد النبوي", EventType.COMMEMORATION),
-            IslamicEvent(27, 7, hijriYear, "Isra and Mi'raj", "الإسراء والمعراج", EventType.COMMEMORATION),
-            IslamicEvent(15, 8, hijriYear, "Mid-Sha'ban", "ليلة النصف من شعبان", EventType.COMMEMORATION),
-            IslamicEvent(1, 9, hijriYear, "First Day of Ramadan", "أول أيام رمضان", EventType.RAMADAN),
-            IslamicEvent(27, 9, hijriYear, "Laylat al-Qadr (estimated)", "ليلة القدر", EventType.SPECIAL_NIGHT),
+            IslamicEvent(
+                1,
+                1,
+                hijriYear,
+                "Islamic New Year",
+                "رأس السنة الهجرية",
+                EventType.HOLIDAY
+            ),
+            IslamicEvent(
+                10,
+                1,
+                hijriYear,
+                "Day of Ashura",
+                "يوم عاشوراء",
+                EventType.RECOMMENDED_FAST
+            ),
+            IslamicEvent(
+                12,
+                3,
+                hijriYear,
+                "Mawlid al-Nabi",
+                "المولد النبوي",
+                EventType.COMMEMORATION
+            ),
+            IslamicEvent(
+                27,
+                7,
+                hijriYear,
+                "Isra and Mi'raj",
+                "الإسراء والمعراج",
+                EventType.COMMEMORATION
+            ),
+            IslamicEvent(
+                15,
+                8,
+                hijriYear,
+                "Mid-Sha'ban",
+                "ليلة النصف من شعبان",
+                EventType.COMMEMORATION
+            ),
+            IslamicEvent(
+                1,
+                9,
+                hijriYear,
+                "First Day of Ramadan",
+                "أول أيام رمضان",
+                EventType.RAMADAN
+            ),
+            IslamicEvent(
+                27,
+                9,
+                hijriYear,
+                "Laylat al-Qadr (estimated)",
+                "ليلة القدر",
+                EventType.SPECIAL_NIGHT
+            ),
             IslamicEvent(1, 10, hijriYear, "Eid al-Fitr", "عيد الفطر", EventType.EID),
             IslamicEvent(9, 12, hijriYear, "Day of Arafah", "يوم عرفة", EventType.RECOMMENDED_FAST),
             IslamicEvent(10, 12, hijriYear, "Eid al-Adha", "عيد الأضحى", EventType.EID),

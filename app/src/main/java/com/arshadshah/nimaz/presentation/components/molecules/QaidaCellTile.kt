@@ -70,7 +70,9 @@ fun QaidaCellTile(
         Surface(
             modifier = Modifier
                 .defaultMinSize(minWidth = 72.dp, minHeight = 84.dp)
-                .semantics { contentDescription = "${cell.transliteration}, tap to hear$doneSuffix" }
+                .semantics {
+                    contentDescription = "${cell.transliteration}, tap to hear$doneSuffix"
+                }
                 .clickable { onTap(cell) },
             shape = RoundedCornerShape(NimazCornerRadius.Large),
             color = container,

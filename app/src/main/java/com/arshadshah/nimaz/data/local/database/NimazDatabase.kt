@@ -4,6 +4,8 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.arshadshah.nimaz.data.local.database.NimazDatabase.Companion.MIGRATION_12_13
+import com.arshadshah.nimaz.data.local.database.NimazDatabase.Companion.PREPACKAGED_CALLBACK
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
@@ -17,8 +19,8 @@ import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
-import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
+import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
@@ -202,7 +204,7 @@ abstract class NimazDatabase : RoomDatabase() {
          * fresh copy, which is why the same repair is also exposed as
          * [MIGRATION_12_13] for devices that already hold the stale database.
          */
-        val PREPACKAGED_CALLBACK = object : RoomDatabase.PrepackagedDatabaseCallback() {
+        val PREPACKAGED_CALLBACK = object : PrepackagedDatabaseCallback() {
             override fun onOpenPrepackagedDatabase(db: SupportSQLiteDatabase) {
                 repairLegacyAssetSchema(db)
             }
@@ -225,22 +227,22 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.addColumnIfMissing("tasbih_presets", "category", "TEXT")
                 db.execSQL(
                     "UPDATE tasbih_presets SET category = 'after_prayer' WHERE name IN " +
-                        "('SubhanAllah','Alhamdulillah','Allahu Akbar'," +
-                        "'La ilaha illallahu wahdah','SubhanAllahi wa bihamdih')"
+                            "('SubhanAllah','Alhamdulillah','Allahu Akbar'," +
+                            "'La ilaha illallahu wahdah','SubhanAllahi wa bihamdih')"
                 )
                 db.execSQL(
                     "UPDATE tasbih_presets SET category = 'daily' WHERE name IN " +
-                        "('La ilaha illallah','Astaghfirullah')"
+                            "('La ilaha illallah','Astaghfirullah')"
                 )
                 db.execSQL(
                     "UPDATE tasbih_presets SET category = 'morning' WHERE name IN " +
-                        "('Asbahna wa asbahal-mulku lillah','Bismillahilladhi la yadurr'," +
-                        "'Radeetu billahi Rabba')"
+                            "('Asbahna wa asbahal-mulku lillah','Bismillahilladhi la yadurr'," +
+                            "'Radeetu billahi Rabba')"
                 )
                 db.execSQL(
                     "UPDATE tasbih_presets SET category = 'evening' WHERE name IN " +
-                        "('Amsayna wa amsal-mulku lillah','A''udhu bikalimatillahit-tammat'," +
-                        "'Allahumma bika amsayna')"
+                            "('Amsayna wa amsal-mulku lillah','A''udhu bikalimatillahit-tammat'," +
+                            "'Allahumma bika amsayna')"
                 )
             }
         }
@@ -257,7 +259,8 @@ abstract class NimazDatabase : RoomDatabase() {
         // the bundled help.json at runtime.
         val MIGRATION_13_14 = object : Migration(13, 14) {
             override fun migrate(db: SupportSQLiteDatabase) {
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `help_topic` (
                         `id` TEXT NOT NULL,
                         `display_order` INTEGER NOT NULL,
@@ -265,8 +268,10 @@ abstract class NimazDatabase : RoomDatabase() {
                         `color_key` TEXT NOT NULL,
                         PRIMARY KEY(`id`)
                     )
-                """.trimIndent())
-                db.execSQL("""
+                """.trimIndent()
+                )
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `help_item` (
                         `id` TEXT NOT NULL,
                         `topic_id` TEXT NOT NULL,
@@ -276,9 +281,11 @@ abstract class NimazDatabase : RoomDatabase() {
                         `estimated_minutes` INTEGER,
                         PRIMARY KEY(`id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_item_topic_id` ON `help_item` (`topic_id`)")
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `help_step` (
                         `id` TEXT NOT NULL,
                         `item_id` TEXT NOT NULL,
@@ -287,9 +294,11 @@ abstract class NimazDatabase : RoomDatabase() {
                         `path_labels` TEXT,
                         PRIMARY KEY(`id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_step_item_id` ON `help_step` (`item_id`)")
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `help_string` (
                         `owner_type` TEXT NOT NULL,
                         `owner_id` TEXT NOT NULL,
@@ -298,7 +307,8 @@ abstract class NimazDatabase : RoomDatabase() {
                         `value` TEXT NOT NULL,
                         PRIMARY KEY(`owner_type`, `owner_id`, `field_key`, `lang_code`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_owner_type_owner_id_lang_code` ON `help_string` (`owner_type`, `owner_id`, `lang_code`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_help_string_lang_code` ON `help_string` (`lang_code`)")
             }
@@ -315,7 +325,8 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_14_15 = object : Migration(14, 15) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Content: lessons
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_lessons` (
                         `id` INTEGER NOT NULL,
                         `lesson_number` INTEGER NOT NULL,
@@ -328,10 +339,12 @@ abstract class NimazDatabase : RoomDatabase() {
                         `display_order` INTEGER NOT NULL,
                         PRIMARY KEY(`id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Content: letters (reference table)
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_letters` (
                         `id` INTEGER NOT NULL,
                         `letter_arabic` TEXT NOT NULL,
@@ -349,10 +362,12 @@ abstract class NimazDatabase : RoomDatabase() {
                         `display_order` INTEGER NOT NULL,
                         PRIMARY KEY(`id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Content: lines (FK → lessons)
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_lines` (
                         `id` INTEGER NOT NULL,
                         `lesson_id` INTEGER NOT NULL,
@@ -364,11 +379,13 @@ abstract class NimazDatabase : RoomDatabase() {
                         PRIMARY KEY(`id`),
                         FOREIGN KEY(`lesson_id`) REFERENCES `qaida_lessons`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_lines_lesson_id` ON `qaida_lines` (`lesson_id`)")
 
                 // Content: cells (FK → lines CASCADE, FK → letters SET NULL)
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_cells` (
                         `id` INTEGER NOT NULL,
                         `line_id` INTEGER NOT NULL,
@@ -385,13 +402,15 @@ abstract class NimazDatabase : RoomDatabase() {
                         FOREIGN KEY(`line_id`) REFERENCES `qaida_lines`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE,
                         FOREIGN KEY(`letter_id`) REFERENCES `qaida_letters`(`id`) ON UPDATE NO ACTION ON DELETE SET NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_line_id` ON `qaida_cells` (`line_id`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_lesson_id` ON `qaida_cells` (`lesson_id`)")
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_qaida_cells_letter_id` ON `qaida_cells` (`letter_id`)")
 
                 // User progress: per-lesson (created empty)
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_lesson_progress` (
                         `lesson_id` INTEGER NOT NULL,
                         `status` TEXT NOT NULL,
@@ -402,10 +421,12 @@ abstract class NimazDatabase : RoomDatabase() {
                         `updated_at` INTEGER NOT NULL,
                         PRIMARY KEY(`lesson_id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // User progress: per-cell, optional fine-grained (created empty)
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `qaida_cell_progress` (
                         `lesson_id` INTEGER NOT NULL,
                         `cell_id` INTEGER NOT NULL,
@@ -414,7 +435,8 @@ abstract class NimazDatabase : RoomDatabase() {
                         `last_practiced_at` INTEGER NOT NULL,
                         PRIMARY KEY(`lesson_id`, `cell_id`)
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
             }
         }
 
@@ -423,11 +445,13 @@ abstract class NimazDatabase : RoomDatabase() {
                 // Fix incorrect start_page values in surahs table
                 // The start_page column had values from a different Mushaf edition
                 // that didn't match the actual ayah page data
-                db.execSQL("""
+                db.execSQL(
+                    """
                     UPDATE surahs SET start_page = (
                         SELECT MIN(a.page) FROM ayahs a WHERE a.surah_id = surahs.id
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
             }
         }
 
@@ -439,7 +463,11 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_9_10 = object : Migration(9, 10) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 val now = System.currentTimeMillis()
-                db.addColumnIfMissing("quran_favorites", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing(
+                    "quran_favorites",
+                    "updatedAt",
+                    "INTEGER NOT NULL DEFAULT $now"
+                )
             }
         }
 
@@ -450,11 +478,27 @@ abstract class NimazDatabase : RoomDatabase() {
                 // MIGRATION_9_10). Guard every ALTER so re-running on a database
                 // that already has the column is a no-op instead of a
                 // "duplicate column name" crash.
-                db.addColumnIfMissing("quran_favorites", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
-                db.addColumnIfMissing("tasbih_presets", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
-                db.addColumnIfMissing("tasbih_sessions", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing(
+                    "quran_favorites",
+                    "updatedAt",
+                    "INTEGER NOT NULL DEFAULT $now"
+                )
+                db.addColumnIfMissing(
+                    "tasbih_presets",
+                    "updatedAt",
+                    "INTEGER NOT NULL DEFAULT $now"
+                )
+                db.addColumnIfMissing(
+                    "tasbih_sessions",
+                    "updatedAt",
+                    "INTEGER NOT NULL DEFAULT $now"
+                )
                 db.addColumnIfMissing("khatam_ayahs", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
-                db.addColumnIfMissing("khatam_daily_log", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
+                db.addColumnIfMissing(
+                    "khatam_daily_log",
+                    "updatedAt",
+                    "INTEGER NOT NULL DEFAULT $now"
+                )
                 db.addColumnIfMissing("zakat_history", "updatedAt", "INTEGER NOT NULL DEFAULT $now")
             }
         }
@@ -462,7 +506,8 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_8_9 = object : Migration(8, 9) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Create asma_ul_husna table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `asma_ul_husna` (
                         `id` INTEGER NOT NULL PRIMARY KEY,
                         `number` INTEGER NOT NULL,
@@ -476,21 +521,25 @@ abstract class NimazDatabase : RoomDatabase() {
                         `usage_in_dua` TEXT NOT NULL,
                         `display_order` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create asma_ul_husna_bookmarks table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `asma_ul_husna_bookmarks` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `name_id` INTEGER NOT NULL,
                         `is_favorite` INTEGER NOT NULL DEFAULT 1,
                         `created_at` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_asma_ul_husna_bookmarks_name_id` ON `asma_ul_husna_bookmarks` (`name_id`)")
 
                 // Create asma_un_nabi table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `asma_un_nabi` (
                         `id` INTEGER NOT NULL PRIMARY KEY,
                         `number` INTEGER NOT NULL,
@@ -502,21 +551,25 @@ abstract class NimazDatabase : RoomDatabase() {
                         `source` TEXT NOT NULL,
                         `display_order` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create asma_un_nabi_bookmarks table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `asma_un_nabi_bookmarks` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `name_id` INTEGER NOT NULL,
                         `is_favorite` INTEGER NOT NULL DEFAULT 1,
                         `created_at` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_asma_un_nabi_bookmarks_name_id` ON `asma_un_nabi_bookmarks` (`name_id`)")
 
                 // Create prophets table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `prophets` (
                         `id` INTEGER NOT NULL PRIMARY KEY,
                         `number` INTEGER NOT NULL,
@@ -535,17 +588,20 @@ abstract class NimazDatabase : RoomDatabase() {
                         `miracles` TEXT NOT NULL,
                         `display_order` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create prophet_bookmarks table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `prophet_bookmarks` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `prophet_id` INTEGER NOT NULL,
                         `is_favorite` INTEGER NOT NULL DEFAULT 1,
                         `created_at` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_prophet_bookmarks_prophet_id` ON `prophet_bookmarks` (`prophet_id`)")
             }
         }
@@ -553,7 +609,8 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_7_8 = object : Migration(7, 8) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 // Create khatams table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `khatams` (
                         `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
                         `name` TEXT NOT NULL,
@@ -570,10 +627,12 @@ abstract class NimazDatabase : RoomDatabase() {
                         `completed_at` INTEGER,
                         `updated_at` INTEGER NOT NULL
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create khatam_ayahs table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `khatam_ayahs` (
                         `khatam_id` INTEGER NOT NULL,
                         `ayah_id` INTEGER NOT NULL,
@@ -581,7 +640,8 @@ abstract class NimazDatabase : RoomDatabase() {
                         PRIMARY KEY(`khatam_id`, `ayah_id`),
                         FOREIGN KEY(`khatam_id`) REFERENCES `khatams`(`id`) ON DELETE CASCADE
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create indexes for khatam_ayahs
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_ayahs_khatam_id` ON `khatam_ayahs` (`khatam_id`)")
@@ -589,7 +649,8 @@ abstract class NimazDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_ayahs_read_at` ON `khatam_ayahs` (`read_at`)")
 
                 // Create khatam_daily_log table
-                db.execSQL("""
+                db.execSQL(
+                    """
                     CREATE TABLE IF NOT EXISTS `khatam_daily_log` (
                         `khatam_id` INTEGER NOT NULL,
                         `date` INTEGER NOT NULL,
@@ -597,7 +658,8 @@ abstract class NimazDatabase : RoomDatabase() {
                         PRIMARY KEY(`khatam_id`, `date`),
                         FOREIGN KEY(`khatam_id`) REFERENCES `khatams`(`id`) ON DELETE CASCADE
                     )
-                """.trimIndent())
+                """.trimIndent()
+                )
 
                 // Create index for khatam_daily_log
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_khatam_daily_log_khatam_id` ON `khatam_daily_log` (`khatam_id`)")

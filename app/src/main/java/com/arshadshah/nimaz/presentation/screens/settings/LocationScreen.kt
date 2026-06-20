@@ -28,7 +28,6 @@ import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -77,7 +76,7 @@ fun LocationScreen(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                      permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (granted && pendingLocationDetection) {
             viewModel.onEvent(LocationEvent.UseCurrentGpsLocation)
             pendingLocationDetection = false
@@ -89,10 +88,10 @@ fun LocationScreen(
             context,
             Manifest.permission.ACCESS_FINE_LOCATION
         ) == android.content.pm.PackageManager.PERMISSION_GRANTED ||
-        ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                ContextCompat.checkSelfPermission(
+                    context,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
     }
 
     LaunchedEffect(state.error) {
@@ -212,8 +211,9 @@ private fun isLocationSelected(
     return when (currentLocation) {
         is CurrentLocationState.Set -> {
             kotlin.math.abs(currentLocation.latitude - location.latitude) < 0.001 &&
-            kotlin.math.abs(currentLocation.longitude - location.longitude) < 0.001
+                    kotlin.math.abs(currentLocation.longitude - location.longitude) < 0.001
         }
+
         else -> false
     }
 }
@@ -273,11 +273,17 @@ private fun CurrentLocationCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "${String.format("%.4f", currentLocation.latitude)}\u00B0 N, ${String.format("%.4f", currentLocation.longitude)}\u00B0 W",
+                            text = "${
+                                String.format(
+                                    "%.4f",
+                                    currentLocation.latitude
+                                )
+                            }\u00B0 N, ${String.format("%.4f", currentLocation.longitude)}\u00B0 W",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
                     }
+
                     CurrentLocationState.Loading -> {
                         Text(
                             text = "Detecting...",
@@ -286,6 +292,7 @@ private fun CurrentLocationCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                     }
+
                     CurrentLocationState.NotSet -> {
                         Text(
                             text = "Not set",

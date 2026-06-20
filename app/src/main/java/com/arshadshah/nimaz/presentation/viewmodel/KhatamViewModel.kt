@@ -153,7 +153,8 @@ class KhatamViewModel @Inject constructor(
                         val diffMs = System.currentTimeMillis() - khatam.startedAt
                         maxOf(1, (diffMs / (24 * 60 * 60 * 1000)).toInt())
                     } else 0
-                    val avgPace = if (daysActive > 0) khatam.totalAyahsRead.toFloat() / daysActive else 0f
+                    val avgPace =
+                        if (daysActive > 0) khatam.totalAyahsRead.toFloat() / daysActive else 0f
                     val nextUnread = khatamUseCases.getNextUnreadPosition(khatamId)
 
                     _detailState.update {
