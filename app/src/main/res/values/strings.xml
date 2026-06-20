@@ -176,6 +176,9 @@
     <string name="calendar_subtitle">Islamic calendar and events</string>
     <string name="monthly_prayer_times">Monthly Prayer Times</string>
     <string name="monthly_prayer_times_subtitle">Prayer times for the month</string>
+    <string name="qaida">Qaida</string>
+    <string name="qaida_subtitle">Learn to read the Qur\'an, letter by letter</string>
+    <string name="prayer_times_menu_subtitle">Daily prayer times with a month view</string>
     <string name="zakat">Zakat</string>
     <string name="zakat_subtitle">Zakat calculator</string>
     <string name="calculation_method_menu_subtitle">Prayer time calculation parameters</string>
@@ -194,6 +197,7 @@
     <string name="rate_us">Rate Us</string>
     <string name="rate_us_subtitle">Rate Nimaz on the store</string>
     <string name="delete_all_data">Delete All Data</string>
+    <string name="delete_all_data_subtitle">Permanently remove all your data</string>
     <string name="delete_all_data_dialog_title">Delete All Data</string>
     <string name="delete_all_data_dialog_message">This will permanently delete all your data including prayer tracking, bookmarks, tasbih history, and settings. This action cannot be undone.</string>
 
@@ -270,28 +274,28 @@
 
     <string name="trouble_times_wrong_title">Prayer times look wrong or off by about an hour</string>
     <string name="trouble_times_wrong_symptom">One or more prayer times seem too early or too late, sometimes by roughly an hour.</string>
-    <string name="trouble_times_wrong_solution">Open More > Prayer Settings > Calculation Method and confirm the calculation method, Asr method, and high latitude rule match what your region or mosque uses. Then open More > Prayer Settings > Location and make sure your city is correct and not an old manual location. A difference of about an hour is usually a time zone or daylight-saving issue, so set your phone\'s date, time, and time zone to automatic. Finally, clear any unintended values under Manual Adjustments (Minutes).</string>
+    <string name="trouble_times_wrong_solution">Open More > Settings > Calculation Method and confirm the calculation method, Asr method, and high latitude rule match what your region or mosque uses. Then open More > Settings > Location and make sure your city is correct and not an old manual location. A difference of about an hour is usually a time zone or daylight-saving issue, so set your phone\'s date, time, and time zone to automatic. Finally, clear any unintended values under Manual Adjustments (Minutes).</string>
     <string name="trouble_no_notifications_title">No prayer notifications or adhan</string>
     <string name="trouble_no_notifications_symptom">Prayer notifications or the adhan do not appear at prayer times.</string>
-    <string name="trouble_no_notifications_solution">In More > Prayer Settings > Notifications, turn on Enable Notifications and the prayers you want. On Android 13 and newer, grant the notification permission when prompted or in the system app settings. On Android 12 and newer, allow exact alarms for Nimaz in the system Alarms and reminders setting. Then tap Disable Battery Optimization on the same screen, and check that Do Not Disturb is off or that Honor Do Not Disturb is disabled. On Samsung, Xiaomi or MIUI, Oppo, and Huawei phones, also allow Nimaz to run in the background and turn off any aggressive battery or task-killer settings. Use Test Notification to confirm.</string>
+    <string name="trouble_no_notifications_solution">In More > Settings > Notifications, turn on Enable Notifications and the prayers you want. On Android 13 and newer, grant the notification permission when prompted or in the system app settings. On Android 12 and newer, allow exact alarms for Nimaz in the system Alarms and reminders setting. Then tap Disable Battery Optimization on the same screen, and check that Do Not Disturb is off or that Honor Do Not Disturb is disabled. On Samsung, Xiaomi or MIUI, Oppo, and Huawei phones, also allow Nimaz to run in the background and turn off any aggressive battery or task-killer settings. Use Test Notification to confirm.</string>
     <string name="trouble_adhan_silent_title">The adhan notification appears but there is no sound</string>
     <string name="trouble_adhan_silent_symptom">A prayer notification shows up, but the adhan does not play any sound.</string>
-    <string name="trouble_adhan_silent_solution">Open More > Prayer Settings > Notifications and make sure Enable Adhan Sound is on and a muezzin is selected and finished downloading. The adhan plays on the alarm stream, so raise the alarm and media volume and check the phone is not in silent mode. If you only want a short tone, choose Simple Beep. You can also open the system notification settings for Nimaz and confirm the adhan channel\'s sound is not turned off.</string>
+    <string name="trouble_adhan_silent_solution">Open More > Settings > Notifications and make sure Enable Adhan Sound is on and a muezzin is selected and finished downloading. The adhan plays on the alarm stream, so raise the alarm and media volume and check the phone is not in silent mode. If you only want a short tone, choose Simple Beep. You can also open the system notification settings for Nimaz and confirm the adhan channel\'s sound is not turned off.</string>
     <string name="trouble_location_title">Location will not update</string>
     <string name="trouble_location_symptom">Prayer times or Qibla use the wrong place, or current location detection fails.</string>
-    <string name="trouble_location_solution">Open More > Prayer Settings > Location and tap Use Current Location. Grant the location permission when asked and make sure your phone\'s GPS or location services are turned on. If a manually searched city is still selected it overrides automatic detection, so search and select the correct city or use current location again.</string>
+    <string name="trouble_location_solution">Open More > Settings > Location and tap Use Current Location. Grant the location permission when asked and make sure your phone\'s GPS or location services are turned on. If a manually searched city is still selected it overrides automatic detection, so search and select the correct city or use current location again.</string>
     <string name="trouble_qibla_title">Qibla points in the wrong direction</string>
     <string name="trouble_qibla_symptom">The Qibla compass points the wrong way or keeps drifting.</string>
-    <string name="trouble_qibla_solution">Calibrate the compass by moving your phone in a figure-8 motion until the accuracy reads Medium or High, and stay away from metal objects, magnets, speakers, and electronics that interfere with the magnetic sensor. Confirm your location is correct in More > Prayer Settings > Location. Some phones have a weak or missing magnetic sensor; on those devices, compare the reading against a known direction before relying on it.</string>
+    <string name="trouble_qibla_solution">Calibrate the compass by moving your phone in a figure-8 motion until the accuracy reads Medium or High, and stay away from metal objects, magnets, speakers, and electronics that interfere with the magnetic sensor. Confirm your location is correct in More > Settings > Location. Some phones have a weak or missing magnetic sensor; on those devices, compare the reading against a known direction before relying on it.</string>
     <string name="trouble_background_title">Nimaz stops working in the background</string>
     <string name="trouble_background_symptom">Notifications stop arriving after the app has been closed for a while, especially on certain brands.</string>
-    <string name="trouble_background_solution">Disable battery optimization for Nimaz from More > Prayer Settings > Notifications, and in your system settings allow the app to run in the background and turn off any battery saver or task killer for Nimaz. Manufacturers such as Samsung, Xiaomi or MIUI, Oppo, and Huawei are especially aggressive; the site dontkillmyapp.com has step-by-step instructions for each brand. After adjusting these settings, return to More > Prayer Settings > Notifications and tap Reset Notifications to reschedule.</string>
+    <string name="trouble_background_solution">Disable battery optimization for Nimaz from More > Settings > Notifications, and in your system settings allow the app to run in the background and turn off any battery saver or task killer for Nimaz. Manufacturers such as Samsung, Xiaomi or MIUI, Oppo, and Huawei are especially aggressive; the site dontkillmyapp.com has step-by-step instructions for each brand. After adjusting these settings, return to More > Settings > Notifications and tap Reset Notifications to reschedule.</string>
     <string name="trouble_hijri_title">The Hijri date is off by a day</string>
     <string name="trouble_hijri_symptom">The Hijri date or an Islamic event date is a day earlier or later than expected.</string>
     <string name="trouble_hijri_solution">Nimaz uses a calculated Hijri calendar, which can differ by a day from dates set by local moon sighting, since calculation and sighting do not always agree. There is currently no manual day adjustment, so the app follows its calculated date. For religious observances, rely on your local moon-sighting authority. The Hijri calendar is available under More > Tools > Calendar.</string>
     <string name="trouble_quran_audio_title">Quran or adhan audio will not download or play</string>
     <string name="trouble_quran_audio_symptom">Recitation or adhan audio fails to download, or playback does not start.</string>
-    <string name="trouble_quran_audio_solution">Audio files download the first time you play them, so make sure you have a working internet connection and enough free storage. For recitation, open Quran Settings, tap Reciter, and let the selected reciter finish downloading before playing. For the adhan, open More > Prayer Settings > Notifications and confirm the chosen muezzin shows as downloaded. If a download stalls, switch to another network and try again, or choose Simple Beep as a fallback for the adhan.</string>
+    <string name="trouble_quran_audio_solution">Audio files download the first time you play them, so make sure you have a working internet connection and enough free storage. For recitation, open Quran Settings, tap Reciter, and let the selected reciter finish downloading before playing. For the adhan, open More > Settings > Notifications and confirm the chosen muezzin shows as downloaded. If a download stalls, switch to another network and try again, or choose Simple Beep as a fallback for the adhan.</string>
 
     <!-- Qibla Screen -->
     <string name="compass">Compass</string>

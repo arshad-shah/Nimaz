@@ -21,14 +21,8 @@ import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
-import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
-import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
-import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
-import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
-import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
-import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 import com.google.android.play.core.review.ReviewManagerFactory
 import kotlinx.coroutines.launch
@@ -79,12 +73,8 @@ fun AdaptiveMoreScreen(
 
     if (windowSizeClass.isCompact) {
         MoreMenuScreen(
+            onNavigateToSettings = { navController.navigate(Route.Settings) },
             onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-            onNavigateToLocation = { navController.navigate(Route.SettingsLocation) },
-            onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) },
-            onNavigateToAppearance = { navController.navigate(Route.SettingsAppearance) },
-            onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
-            onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
             onNavigateToAbout = { navController.navigate(Route.SettingsAbout) },
             onNavigateToHelp = { navController.navigate(Route.SettingsHelp) },
             onNavigateToHadith = { navController.navigate(Route.HadithHome) },
@@ -94,7 +84,6 @@ fun AdaptiveMoreScreen(
             onNavigateToTafseer = {
                 navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
             },
-            onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
             onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
             onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
             onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
@@ -105,7 +94,6 @@ fun AdaptiveMoreScreen(
             onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
             onShareApp = shareApp,
             onRateApp = rateApp,
-            onDeleteAllData = { settingsViewModel.onEvent(SettingsEvent.DeleteAllData) },
         )
     } else {
         val navigator = rememberListDetailPaneScaffoldNavigator<MoreDetailArgs>()
@@ -116,47 +104,8 @@ fun AdaptiveMoreScreen(
             listPane = {
                 AnimatedPane {
                     MoreMenuScreen(
+                        onNavigateToSettings = { navController.navigate(Route.Settings) },
                         onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-                        onNavigateToLocation = {
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    MoreDetailArgs(MoreDetailPane.LOCATION)
-                                )
-                            }
-                        },
-                        onNavigateToNotifications = {
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    MoreDetailArgs(MoreDetailPane.NOTIFICATIONS)
-                                )
-                            }
-                        },
-                        onNavigateToAppearance = {
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    MoreDetailArgs(MoreDetailPane.APPEARANCE)
-                                )
-                            }
-                        },
-                        onNavigateToLanguage = {
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    MoreDetailArgs(MoreDetailPane.LANGUAGE)
-                                )
-                            }
-                        },
-                        onNavigateToWidgets = {
-                            scope.launch {
-                                navigator.navigateTo(
-                                    ListDetailPaneScaffoldRole.Detail,
-                                    MoreDetailArgs(MoreDetailPane.WIDGETS)
-                                )
-                            }
-                        },
                         onNavigateToAbout = {
                             scope.launch {
                                 navigator.navigateTo(
@@ -180,7 +129,6 @@ fun AdaptiveMoreScreen(
                         onNavigateToTafseer = {
                             navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
                         },
-                        onNavigateToCalculationMethod = { navController.navigate(Route.SettingsPrayerCalculation) },
                         onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                         onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
                         onNavigateToMonthlyPrayerTimes = { navController.navigate(Route.MonthlyPrayerTimes) },
@@ -191,7 +139,6 @@ fun AdaptiveMoreScreen(
                         onNavigateToQaida = { navController.navigate(Route.QaidaHome) },
                         onShareApp = shareApp,
                         onRateApp = rateApp,
-                        onDeleteAllData = { settingsViewModel.onEvent(SettingsEvent.DeleteAllData) },
                     )
                 }
             },
@@ -200,26 +147,6 @@ fun AdaptiveMoreScreen(
                     val args = navigator.currentDestination?.contentKey
                     if (args != null) {
                         when (args.pane) {
-                            MoreDetailPane.LOCATION -> LocationScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
-                            )
-
-                            MoreDetailPane.NOTIFICATIONS -> NotificationSettingsScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
-                            )
-
-                            MoreDetailPane.APPEARANCE -> AppearanceSettingsScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
-                            )
-
-                            MoreDetailPane.LANGUAGE -> LanguageScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
-                            )
-
-                            MoreDetailPane.WIDGETS -> WidgetsScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } }
-                            )
-
                             MoreDetailPane.ABOUT -> AboutScreen(
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                 onNavigateToPrivacyPolicy = {
@@ -283,7 +210,7 @@ fun AdaptiveMoreScreen(
 }
 
 enum class MoreDetailPane {
-    LOCATION, NOTIFICATIONS, APPEARANCE, LANGUAGE, WIDGETS, ABOUT, HELP
+    ABOUT, HELP
 }
 
 @kotlinx.parcelize.Parcelize

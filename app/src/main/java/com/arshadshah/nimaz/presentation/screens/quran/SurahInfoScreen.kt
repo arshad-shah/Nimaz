@@ -22,7 +22,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.InfoCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.molecules.HeroHeader
 import com.arshadshah.nimaz.presentation.components.organisms.BottomActions
-import com.arshadshah.nimaz.presentation.components.organisms.DetailGrid
 import com.arshadshah.nimaz.presentation.components.organisms.ThemesList
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -99,10 +98,6 @@ fun SurahInfoScreen(
                         text = surahInfo?.description
                             ?: "This surah contains divine guidance and wisdom for believers."
                     )
-
-                    // Details Grid
-                    NimazSectionTitle(text = "Details", uppercase = false)
-                    DetailGrid(surah = surah)
 
                     // Main Themes
                     NimazSectionTitle(text = "Main Themes", uppercase = false)

@@ -21,10 +21,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.FormatListNumbered
-import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
@@ -38,103 +35,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.RevelationType
-import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-@Composable
-internal fun DetailGrid(
-    surah: Surah,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            DetailCard(
-                icon = Icons.Default.LocationOn,
-                label = "Revelation",
-                value = if (surah.revelationType == RevelationType.MECCAN) "Makkah" else "Madinah",
-                modifier = Modifier.weight(1f)
-            )
-            DetailCard(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                label = "Juz",
-                value = surah.juzStart.toString(),
-                modifier = Modifier.weight(1f)
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            DetailCard(
-                icon = Icons.Default.FormatListNumbered,
-                label = "Order",
-                value = "${surah.orderInMushaf} in Mushaf",
-                modifier = Modifier.weight(1f)
-            )
-            DetailCard(
-                icon = Icons.Default.Book,
-                label = "Verses",
-                value = "${surah.numberOfAyahs} ayahs",
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun DetailCard(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(15.dp)
-    ) {
-        Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF737373)
-                )
-            }
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = value,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -419,26 +325,6 @@ private fun SurahAudioControlBar(
                 )
             }
         }
-    }
-}
-
-private val sampleSurah = Surah(
-    number = 1,
-    nameArabic = "\u0627\u0644\u0641\u0627\u062A\u062D\u0629",
-    nameEnglish = "Al-Fatihah",
-    nameTransliteration = "The Opening",
-    revelationType = RevelationType.MECCAN,
-    ayahCount = 7,
-    juzStart = 1,
-    orderInMushaf = 5,
-    startPage = 1
-)
-
-@Preview(showBackground = true)
-@Composable
-private fun DetailGridPreview() {
-    NimazTheme {
-        DetailGrid(surah = sampleSurah)
     }
 }
 

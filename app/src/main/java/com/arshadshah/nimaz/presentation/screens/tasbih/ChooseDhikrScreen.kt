@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -39,6 +40,7 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -252,14 +254,25 @@ private fun SwipeableDhikrRow(
         return
     }
     // Custom presets: swipe end→start to delete (with confirmation).
+    // Pass the confirmValueChange lambda into the state so we can intercept
+    // attempts to dismiss (EndToStart) and trigger the confirmation dialog
+    // without automatically completing the dismiss.
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { value ->
-            if (value == SwipeToDismissBoxValue.EndToStart) {
-                onRequestDelete()
-            }
-            false // never auto-dismiss; the confirm dialog drives the actual delete
-        }
+        initialValue = SwipeToDismissBoxValue.Settled,
+        positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
     )
+
+    // Observe state changes and intercept an EndToStart target by showing the
+    // confirmation dialog. We immediately reset the state so the item isn't
+    // automatically dismissed; the dialog's confirm action will perform deletion.
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onRequestDelete()
+            // Reset the state back to settled so the row remains visible.
+            // reset() is a suspend function on the state.
+            dismissState.reset()
+        }
+    }
     SwipeToDismissBox(
         state = dismissState,
         enableDismissFromStartToEnd = false,

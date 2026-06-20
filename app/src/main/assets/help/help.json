@@ -33,7 +33,7 @@
           },
           "steps": [
             { "id": "gs_g_setup_s1", "order": 1, "deeplink": "location",
-              "pathLabels": ["More", "Prayer Settings", "Location"],
+              "pathLabels": ["More", "Settings", "Location"],
               "title": {
                 "en": "Set your location", "tr": "Konumunu ayarla", "id": "Atur lokasi Anda",
                 "ms": "Tetapkan lokasi anda", "fr": "Définir votre position", "de": "Standort festlegen"
@@ -47,7 +47,7 @@
                 "de": "Tippe auf Aktuellen Standort verwenden oder suche deine Stadt. Das bestimmt Gebetszeiten und Qibla."
               } },
             { "id": "gs_g_setup_s2", "order": 2, "deeplink": "prayer_settings",
-              "pathLabels": ["More", "Prayer Settings"],
+              "pathLabels": ["More", "Settings", "Calculation Method"],
               "title": {
                 "en": "Choose a calculation method", "tr": "Bir hesaplama yöntemi seç", "id": "Pilih metode perhitungan",
                 "ms": "Pilih kaedah pengiraan", "fr": "Choisir une méthode de calcul", "de": "Berechnungsmethode wählen"
@@ -61,7 +61,7 @@
                 "de": "Wähle die Methode deiner örtlichen Moschee, damit die Zeiten übereinstimmen."
               } },
             { "id": "gs_g_setup_s3", "order": 3, "deeplink": "notifications",
-              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "pathLabels": ["More", "Settings", "Notifications"],
               "title": {
                 "en": "Turn on notifications", "tr": "Bildirimleri aç", "id": "Aktifkan notifikasi",
                 "ms": "Hidupkan pemberitahuan", "fr": "Activer les notifications", "de": "Benachrichtigungen aktivieren"
@@ -153,18 +153,18 @@
           },
           "steps": [
             { "id": "pt_g_method_s1", "order": 1, "deeplink": "prayer_settings",
-              "pathLabels": ["More", "Prayer Settings"],
+              "pathLabels": ["More", "Settings", "Calculation Method"],
               "title": {
                 "en": "Open Prayer Settings", "tr": "Namaz Ayarları'nı aç", "id": "Buka Pengaturan Salat",
                 "ms": "Buka Tetapan Solat", "fr": "Ouvrir les paramètres de prière", "de": "Gebetseinstellungen öffnen"
               },
               "body": {
-                "en": "From the bottom bar, go to More → Prayer Settings.",
-                "tr": "Alt çubuktan Daha Fazla → Namaz Ayarları'na gidin.",
-                "id": "Dari bilah bawah, buka Lainnya → Pengaturan Salat.",
-                "ms": "Dari bar bawah, pergi ke Lagi → Tetapan Solat.",
-                "fr": "Depuis la barre du bas, allez dans Plus → Paramètres de prière.",
-                "de": "Gehe in der unteren Leiste zu Mehr → Gebetseinstellungen."
+                "en": "From the bottom bar, go to More → Settings → Calculation Method.",
+                "tr": "Alt çubuktan Daha Fazla → Ayarlar → Hesaplama Yöntemi'ne gidin.",
+                "id": "Dari bilah bawah, buka Lainnya → Pengaturan → Metode Perhitungan.",
+                "ms": "Dari bar bawah, pergi ke Lagi → Tetapan → Kaedah Pengiraan.",
+                "fr": "Depuis la barre du bas, allez dans Plus → Paramètres → Méthode de calcul.",
+                "de": "Gehe in der unteren Leiste zu Mehr → Einstellungen → Berechnungsmethode."
               } },
             { "id": "pt_g_method_s2", "order": 2,
               "title": {
@@ -203,18 +203,18 @@
           },
           "steps": [
             { "id": "pt_g_adjust_s1", "order": 1, "deeplink": "prayer_settings",
-              "pathLabels": ["More", "Prayer Settings"],
+              "pathLabels": ["More", "Settings", "Calculation Method"],
               "title": {
                 "en": "Open Prayer Settings", "tr": "Namaz Ayarları'nı aç", "id": "Buka Pengaturan Salat",
                 "ms": "Buka Tetapan Solat", "fr": "Ouvrir les paramètres de prière", "de": "Gebetseinstellungen öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings and scroll to Manual Adjustments (Minutes).",
-                "tr": "Daha Fazla → Namaz Ayarları'na gidin ve Manuel Ayarlar (Dakika) bölümüne ilerleyin.",
-                "id": "Buka Lainnya → Pengaturan Salat dan gulir ke Penyesuaian Manual (Menit).",
-                "ms": "Pergi ke Lagi → Tetapan Solat dan tatal ke Pelarasan Manual (Minit).",
-                "fr": "Allez dans Plus → Paramètres de prière et faites défiler jusqu'à Ajustements manuels (minutes).",
-                "de": "Gehe zu Mehr → Gebetseinstellungen und scrolle zu Manuelle Anpassungen (Minuten)."
+                "en": "Go to More → Settings and scroll to Manual Adjustments (Minutes).",
+                "tr": "Daha Fazla → Ayarlar'a gidin ve Manuel Ayarlar (Dakika) bölümüne ilerleyin.",
+                "id": "Buka Lainnya → Pengaturan dan gulir ke Penyesuaian Manual (Menit).",
+                "ms": "Pergi ke Lagi → Tetapan dan tatal ke Pelarasan Manual (Minit).",
+                "fr": "Allez dans Plus → Paramètres et faites défiler jusqu'à Ajustements manuels (minutes).",
+                "de": "Gehe zu Mehr → Einstellungen und scrolle zu Manuelle Anpassungen (Minuten)."
               } },
             { "id": "pt_g_adjust_s2", "order": 2,
               "title": {
@@ -237,18 +237,18 @@
           },
           "steps": [
             { "id": "pt_g_asr_s1", "order": 1, "deeplink": "prayer_settings",
-              "pathLabels": ["More", "Prayer Settings"],
+              "pathLabels": ["More", "Settings", "Calculation Method"],
               "title": {
                 "en": "Open Prayer Settings", "tr": "Namaz Ayarları'nı aç", "id": "Buka Pengaturan Salat",
                 "ms": "Buka Tetapan Solat", "fr": "Ouvrir les paramètres de prière", "de": "Gebetseinstellungen öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings → Calculation Method.",
-                "tr": "Daha Fazla → Namaz Ayarları → Hesaplama Yöntemi'ne gidin.",
-                "id": "Buka Lainnya → Pengaturan Salat → Metode Perhitungan.",
-                "ms": "Pergi ke Lagi → Tetapan Solat → Kaedah Pengiraan.",
-                "fr": "Allez dans Plus → Paramètres de prière → Méthode de calcul.",
-                "de": "Gehe zu Mehr → Gebetseinstellungen → Berechnungsmethode."
+                "en": "Go to More → Settings → Calculation Method.",
+                "tr": "Daha Fazla → Ayarlar → Hesaplama Yöntemi'ne gidin.",
+                "id": "Buka Lainnya → Pengaturan → Metode Perhitungan.",
+                "ms": "Pergi ke Lagi → Tetapan → Kaedah Pengiraan.",
+                "fr": "Allez dans Plus → Paramètres → Méthode de calcul.",
+                "de": "Gehe zu Mehr → Einstellungen → Berechnungsmethode."
               } },
             { "id": "pt_g_asr_s2", "order": 2,
               "title": {
@@ -285,12 +285,12 @@
             "fr": "Puis-je être rappelé avant une prière ?", "de": "Kann ich vor einem Gebet erinnert werden?"
           },
           "answer": {
-            "en": "Yes — turn on Pre-Adhan Reminder in Prayer Settings → Notifications to be alerted a set number of minutes before each prayer.",
-            "tr": "Evet — her namazdan belirli dakika önce uyarılmak için Namaz Ayarları → Bildirimler'de Ezan Öncesi Hatırlatma'yı açın.",
-            "id": "Ya — aktifkan Pengingat Pra-Azan di Pengaturan Salat → Notifikasi untuk diingatkan sekian menit sebelum tiap salat.",
-            "ms": "Ya — hidupkan Peringatan Pra-Azan di Tetapan Solat → Pemberitahuan untuk diberi amaran beberapa minit sebelum setiap solat.",
-            "fr": "Oui — activez le Rappel avant l'Adhan dans Paramètres de prière → Notifications pour être alerté quelques minutes avant chaque prière.",
-            "de": "Ja — aktiviere die Vor-Adhan-Erinnerung unter Gebetseinstellungen → Benachrichtigungen, um einige Minuten vor jedem Gebet benachrichtigt zu werden."
+            "en": "Yes — turn on Pre-Adhan Reminder in Settings → Notifications to be alerted a set number of minutes before each prayer.",
+            "tr": "Evet — her namazdan belirli dakika önce uyarılmak için Ayarlar → Bildirimler'de Ezan Öncesi Hatırlatma'yı açın.",
+            "id": "Ya — aktifkan Pengingat Pra-Azan di Pengaturan → Notifikasi untuk diingatkan sekian menit sebelum tiap salat.",
+            "ms": "Ya — hidupkan Peringatan Pra-Azan di Tetapan → Pemberitahuan untuk diberi amaran beberapa minit sebelum setiap solat.",
+            "fr": "Oui — activez le Rappel avant l'Adhan dans Paramètres → Notifications pour être alerté quelques minutes avant chaque prière.",
+            "de": "Ja — aktiviere die Vor-Adhan-Erinnerung unter Einstellungen → Benachrichtigungen, um einige Minuten vor jedem Gebet benachrichtigt zu werden."
           } },
         { "id": "na_q_dnd", "type": "question", "order": 2,
           "question": {
@@ -314,18 +314,18 @@
           },
           "steps": [
             { "id": "na_g_enable_s1", "order": 1, "deeplink": "notifications",
-              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "pathLabels": ["More", "Settings", "Notifications"],
               "title": {
                 "en": "Open Notifications", "tr": "Bildirimler'i aç", "id": "Buka Notifikasi",
                 "ms": "Buka Pemberitahuan", "fr": "Ouvrir les notifications", "de": "Benachrichtigungen öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings → Notifications.",
-                "tr": "Daha Fazla → Namaz Ayarları → Bildirimler'e gidin.",
-                "id": "Buka Lainnya → Pengaturan Salat → Notifikasi.",
-                "ms": "Pergi ke Lagi → Tetapan Solat → Pemberitahuan.",
-                "fr": "Allez dans Plus → Paramètres de prière → Notifications.",
-                "de": "Gehe zu Mehr → Gebetseinstellungen → Benachrichtigungen."
+                "en": "Go to More → Settings → Notifications.",
+                "tr": "Daha Fazla → Ayarlar → Bildirimler'e gidin.",
+                "id": "Buka Lainnya → Pengaturan → Notifikasi.",
+                "ms": "Pergi ke Lagi → Tetapan → Pemberitahuan.",
+                "fr": "Allez dans Plus → Paramètres → Notifications.",
+                "de": "Gehe zu Mehr → Einstellungen → Benachrichtigungen."
               } },
             { "id": "na_g_enable_s2", "order": 2,
               "title": {
@@ -361,18 +361,18 @@
           },
           "steps": [
             { "id": "na_g_adhan_s1", "order": 1, "deeplink": "notifications",
-              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "pathLabels": ["More", "Settings", "Notifications"],
               "title": {
                 "en": "Open Notifications", "tr": "Bildirimler'i aç", "id": "Buka Notifikasi",
                 "ms": "Buka Pemberitahuan", "fr": "Ouvrir les notifications", "de": "Benachrichtigungen öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings → Notifications.",
-                "tr": "Daha Fazla → Namaz Ayarları → Bildirimler'e gidin.",
-                "id": "Buka Lainnya → Pengaturan Salat → Notifikasi.",
-                "ms": "Pergi ke Lagi → Tetapan Solat → Pemberitahuan.",
-                "fr": "Allez dans Plus → Paramètres de prière → Notifications.",
-                "de": "Gehe zu Mehr → Gebetseinstellungen → Benachrichtigungen."
+                "en": "Go to More → Settings → Notifications.",
+                "tr": "Daha Fazla → Ayarlar → Bildirimler'e gidin.",
+                "id": "Buka Lainnya → Pengaturan → Notifikasi.",
+                "ms": "Pergi ke Lagi → Tetapan → Pemberitahuan.",
+                "fr": "Allez dans Plus → Paramètres → Notifications.",
+                "de": "Gehe zu Mehr → Einstellungen → Benachrichtigungen."
               } },
             { "id": "na_g_adhan_s2", "order": 2,
               "title": {
@@ -396,18 +396,18 @@
           },
           "steps": [
             { "id": "na_g_reminder_s1", "order": 1, "deeplink": "notifications",
-              "pathLabels": ["More", "Prayer Settings", "Notifications"],
+              "pathLabels": ["More", "Settings", "Notifications"],
               "title": {
                 "en": "Open Notifications", "tr": "Bildirimler'i aç", "id": "Buka Notifikasi",
                 "ms": "Buka Pemberitahuan", "fr": "Ouvrir les notifications", "de": "Benachrichtigungen öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings → Notifications.",
-                "tr": "Daha Fazla → Namaz Ayarları → Bildirimler'e gidin.",
-                "id": "Buka Lainnya → Pengaturan Salat → Notifikasi.",
-                "ms": "Pergi ke Lagi → Tetapan Solat → Pemberitahuan.",
-                "fr": "Allez dans Plus → Paramètres de prière → Notifications.",
-                "de": "Gehe zu Mehr → Gebetseinstellungen → Benachrichtigungen."
+                "en": "Go to More → Settings → Notifications.",
+                "tr": "Daha Fazla → Ayarlar → Bildirimler'e gidin.",
+                "id": "Buka Lainnya → Pengaturan → Notifikasi.",
+                "ms": "Pergi ke Lagi → Tetapan → Pemberitahuan.",
+                "fr": "Allez dans Plus → Paramètres → Notifications.",
+                "de": "Gehe zu Mehr → Einstellungen → Benachrichtigungen."
               } },
             { "id": "na_g_reminder_s2", "order": 2,
               "title": {
@@ -471,18 +471,18 @@
           },
           "steps": [
             { "id": "lq_g_location_s1", "order": 1, "deeplink": "location",
-              "pathLabels": ["More", "Prayer Settings", "Location"],
+              "pathLabels": ["More", "Settings", "Location"],
               "title": {
                 "en": "Open Location", "tr": "Konum'u aç", "id": "Buka Lokasi",
                 "ms": "Buka Lokasi", "fr": "Ouvrir Localisation", "de": "Standort öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Settings → Location.",
-                "tr": "Daha Fazla → Namaz Ayarları → Konum'a gidin.",
-                "id": "Buka Lainnya → Pengaturan Salat → Lokasi.",
-                "ms": "Pergi ke Lagi → Tetapan Solat → Lokasi.",
-                "fr": "Allez dans Plus → Paramètres de prière → Localisation.",
-                "de": "Gehe zu Mehr → Gebetseinstellungen → Standort."
+                "en": "Go to More → Settings → Location.",
+                "tr": "Daha Fazla → Ayarlar → Konum'a gidin.",
+                "id": "Buka Lainnya → Pengaturan → Lokasi.",
+                "ms": "Pergi ke Lagi → Tetapan → Lokasi.",
+                "fr": "Allez dans Plus → Paramètres → Localisation.",
+                "de": "Gehe zu Mehr → Einstellungen → Standort."
               } },
             { "id": "lq_g_location_s2", "order": 2,
               "title": {
@@ -1104,12 +1104,12 @@
             "fr": "La position ne se met pas à jour", "de": "Standort aktualisiert sich nicht"
           },
           "answer": {
-            "en": "In Prayer Settings → Location tap Use Current Location, grant the permission and turn on GPS. A manually-searched city overrides detection, so reselect it or use current location.",
-            "tr": "Namaz Ayarları → Konum'da Geçerli Konumu Kullan'a dokunun, izni verin ve GPS'i açın. Elle aranan bir şehir algılamayı geçersiz kılar; yeniden seçin veya geçerli konumu kullanın.",
-            "id": "Di Pengaturan Salat → Lokasi ketuk Gunakan Lokasi Saat Ini, berikan izin, dan nyalakan GPS. Kota yang dicari manual menggantikan deteksi, jadi pilih ulang atau gunakan lokasi saat ini.",
-            "ms": "Di Tetapan Solat → Lokasi ketik Guna Lokasi Semasa, beri kebenaran dan hidupkan GPS. Bandar yang dicari secara manual mengatasi pengesanan, jadi pilih semula atau guna lokasi semasa.",
-            "fr": "Dans Paramètres de prière → Localisation, touchez Utiliser la position actuelle, accordez la permission et activez le GPS. Une ville recherchée manuellement remplace la détection, donc resélectionnez-la ou utilisez la position actuelle.",
-            "de": "Tippe in Gebetseinstellungen → Standort auf Aktuellen Standort verwenden, erteile die Berechtigung und aktiviere GPS. Eine manuell gesuchte Stadt überschreibt die Erkennung — wähle sie neu oder nutze den aktuellen Standort."
+            "en": "In Settings → Location tap Use Current Location, grant the permission and turn on GPS. A manually-searched city overrides detection, so reselect it or use current location.",
+            "tr": "Ayarlar → Konum'da Geçerli Konumu Kullan'a dokunun, izni verin ve GPS'i açın. Elle aranan bir şehir algılamayı geçersiz kılar; yeniden seçin veya geçerli konumu kullanın.",
+            "id": "Di Pengaturan → Lokasi ketuk Gunakan Lokasi Saat Ini, berikan izin, dan nyalakan GPS. Kota yang dicari manual menggantikan deteksi, jadi pilih ulang atau gunakan lokasi saat ini.",
+            "ms": "Di Tetapan → Lokasi ketik Guna Lokasi Semasa, beri kebenaran dan hidupkan GPS. Bandar yang dicari secara manual mengatasi pengesanan, jadi pilih semula atau guna lokasi semasa.",
+            "fr": "Dans Paramètres → Localisation, touchez Utiliser la position actuelle, accordez la permission et activez le GPS. Une ville recherchée manuellement remplace la détection, donc resélectionnez-la ou utilisez la position actuelle.",
+            "de": "Tippe in Einstellungen → Standort auf Aktuellen Standort verwenden, erteile die Berechtigung und aktiviere GPS. Eine manuell gesuchte Stadt überschreibt die Erkennung — wähle sie neu oder nutze den aktuellen Standort."
           } },
         { "id": "ts_q_qibla", "type": "question", "order": 5,
           "question": {

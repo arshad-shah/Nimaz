@@ -19,11 +19,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForwardIos
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Gavel
+import androidx.compose.material.icons.filled.InstallMobile
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Share
@@ -31,6 +35,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -100,8 +105,7 @@ fun AboutScreen(
             item {
                 QuickActionsRow(
                     onRateApp = onRateApp,
-                    onShareApp = onShareApp,
-                    onUpdates = onUpdateClick
+                    onShareApp = onShareApp
                 )
             }
 
@@ -209,7 +213,6 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
 private fun QuickActionsRow(
     onRateApp: () -> Unit,
     onShareApp: () -> Unit,
-    onUpdates: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(9.dp)) {
@@ -225,13 +228,6 @@ private fun QuickActionsRow(
             label = stringResource(R.string.about_share),
             primary = false,
             onClick = onShareApp,
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            icon = Icons.Filled.Refresh,
-            label = stringResource(R.string.about_updates),
-            primary = false,
-            onClick = onUpdates,
             modifier = Modifier.weight(1f)
         )
     }
@@ -284,16 +280,6 @@ private fun LinksCard(
     modifier: Modifier = Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    val updateSubtitle = when (updateState) {
-        is UpdateState.Checking -> stringResource(R.string.update_checking)
-        is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
-        is UpdateState.Starting -> stringResource(R.string.update_starting)
-        is UpdateState.Downloading -> stringResource(R.string.update_downloading)
-        is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
-        is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
-        is UpdateState.Error -> stringResource(R.string.update_check_failed)
-        else -> stringResource(R.string.update_tap_to_check)
-    }
 
     Column(
         modifier = modifier
@@ -336,13 +322,109 @@ private fun LinksCard(
             onNavigateToLicenses,
             true
         )
-        LinkItem(
-            Icons.Default.Refresh,
-            stringResource(R.string.check_for_updates),
-            updateSubtitle,
-            onUpdateClick,
-            false
+        UpdateStatusItem(
+            updateState = updateState,
+            onClick = onUpdateClick
         )
+    }
+}
+
+@Composable
+private fun UpdateStatusItem(
+    updateState: UpdateState,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val busy = updateState is UpdateState.Checking ||
+            updateState is UpdateState.Starting ||
+            updateState is UpdateState.Downloading
+    val actionable = updateState is UpdateState.UpdateAvailable ||
+            updateState is UpdateState.Downloaded
+    val isError = updateState is UpdateState.Error
+
+    val subtitle = when (updateState) {
+        is UpdateState.Checking -> stringResource(R.string.update_checking)
+        is UpdateState.UpdateAvailable -> stringResource(R.string.update_new_version)
+        is UpdateState.Starting -> stringResource(R.string.update_starting)
+        is UpdateState.Downloading -> stringResource(R.string.update_downloading)
+        is UpdateState.Downloaded -> stringResource(R.string.update_downloaded)
+        is UpdateState.NoUpdateAvailable -> stringResource(R.string.update_up_to_date)
+        is UpdateState.Error -> stringResource(R.string.update_check_failed)
+        else -> stringResource(R.string.update_tap_to_check)
+    }
+
+    val accent = when {
+        isError -> MaterialTheme.colorScheme.error
+        actionable || updateState is UpdateState.NoUpdateAvailable -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(enabled = !busy, onClick = onClick)
+            .padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(34.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(
+                    when {
+                        actionable -> MaterialTheme.colorScheme.primary
+                        isError -> MaterialTheme.colorScheme.errorContainer
+                        else -> MaterialTheme.colorScheme.surface
+                    }
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            if (busy) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            } else {
+                val icon = when (updateState) {
+                    is UpdateState.UpdateAvailable -> Icons.Default.Download
+                    is UpdateState.Downloaded -> Icons.Default.InstallMobile
+                    is UpdateState.NoUpdateAvailable -> Icons.Default.CheckCircle
+                    is UpdateState.Error -> Icons.Default.ErrorOutline
+                    else -> Icons.Default.Refresh
+                }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = if (actionable) MaterialTheme.colorScheme.onPrimary else accent,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = stringResource(R.string.check_for_updates),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodySmall,
+                fontWeight = if (actionable) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (actionable || isError) accent else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+        if (!busy) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
+                contentDescription = null,
+                tint = if (actionable) MaterialTheme.colorScheme.primary
+                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                modifier = Modifier.size(15.dp)
+            )
+        }
     }
 }
 
