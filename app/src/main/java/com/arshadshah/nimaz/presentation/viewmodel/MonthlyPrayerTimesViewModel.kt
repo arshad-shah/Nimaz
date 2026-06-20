@@ -40,7 +40,7 @@ data class MonthlyPrayerTimesUiState(
     val longitude: Double = 0.0,
     val ramadanHijriYear: Int? = null,
     val isLoading: Boolean = true,
-    val expandedDay: LocalDate? = null
+    val expandedDay: LocalDate? = LocalDate.now()
 )
 
 sealed interface MonthlyPrayerTimesEvent {

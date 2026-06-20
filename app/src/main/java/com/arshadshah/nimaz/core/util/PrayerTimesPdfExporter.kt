@@ -42,10 +42,8 @@ object PrayerTimesPdfExporter {
     /** One day's row. [times] in column order: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha. */
     data class Row(val date: LocalDate, val times: List<String>)
 
-    private val COLUMN_COLORS = intArrayOf(
-        0xFF6366F1.toInt(), 0xFFF59E0B.toInt(), 0xFFEAB308.toInt(),
-        0xFFF97316.toInt(), 0xFFEF4444.toInt(), 0xFF8B5CF6.toInt(),
-    )
+    /** A table column: which [idx] of Row.times, titles, accent, Ramadan emphasis. */
+    private data class Col(val idx: Int, val title: String, val ramadan: String?, val color: Int, val emph: Boolean)
 
     private val TEAL = 0xFF14B8A6.toInt()
     private val TEAL_DARK = 0xFF0F766E.toInt()
@@ -77,7 +75,6 @@ object PrayerTimesPdfExporter {
         val heading = ResourcesCompat.getFont(context, R.font.outfit_variable) ?: Typeface.DEFAULT
         val bold = Typeface.create(heading, Typeface.BOLD)
         val bodyBold = Typeface.create(body, Typeface.BOLD)
-        val italic = Typeface.create(body, Typeface.ITALIC)
 
         // Derive the span + Hijri/Ramadan context from the rows themselves, so a
         // Ramadan export (which can cross Gregorian months) titles correctly.
@@ -150,44 +147,48 @@ object PrayerTimesPdfExporter {
             y += 20f
         }
 
-        // ── Table geometry + column header ─────────────────────────────
+        // ── Table geometry + column header (Sunrise omitted) ───────────
         val left = MARGIN
         val right = PAGE_W - MARGIN
-        val dateColW = 100f
-        val colW = (right - (left + dateColW)) / 6f
-        val colCenter = FloatArray(6) { left + dateColW + colW * it + colW / 2f }
-        val titles = if (ramadanMode) {
-            listOf("SUHŪR", "SUNRISE", "DHUHR", "ASR", "IFTAR", "ISHA")
-        } else {
-            listOf("FAJR", "SUNRISE", "DHUHR", "ASR", "MAGHRIB", "ISHA")
-        }
-        // Fajr (0) & Maghrib (4) are emphasised (filled pills) in Ramadan mode.
-        val filledCol = booleanArrayOf(ramadanMode, false, false, false, ramadanMode, false)
+        val dateColW = 134f
+        // Columns map to indices of Row.times (which still includes Sunrise at 1).
+        val columns = listOf(
+            Col(0, "FAJR", "SUHŪR", 0xFF6366F1.toInt(), true),
+            Col(2, "DHUHR", null, 0xFFEAB308.toInt(), false),
+            Col(3, "ASR", null, 0xFFF97316.toInt(), false),
+            Col(4, "MAGHRIB", "IFTAR", 0xFFEF4444.toInt(), true),
+            Col(5, "ISHA", null, 0xFF8B5CF6.toInt(), false),
+        )
+        val colW = (right - (left + dateColW)) / columns.size
+        val colCenter = FloatArray(columns.size) { left + dateColW + colW * it + colW / 2f }
 
-        y += 22f
+        var headerY = y + 22f
         val pill = Paint().apply { isAntiAlias = true; typeface = bodyBold; textSize = 8.5f }
         val dh = Paint().apply { isAntiAlias = true; color = MUTED; typeface = bodyBold; textSize = 10f }
-        c.drawText("DATE", left + 4f, y, dh)
-        for (i in 0 until 6) {
-            drawPill(c, colCenter[i], y - 3f, titles[i], COLUMN_COLORS[i], filledCol[i], pill)
+        c.drawText("DATE", left + 4f, headerY, dh)
+        columns.forEachIndexed { i, col ->
+            val pillTitle = if (ramadanMode && col.ramadan != null) col.ramadan else col.title
+            drawPill(c, colCenter[i], headerY - 3f, pillTitle, col.color, ramadanMode && col.emph, pill)
         }
-        y += 8f
-        c.drawLine(left, y, right, y, Paint().apply { color = TEAL; strokeWidth = 1.5f })
-        y += 4f
+        headerY += 8f
+        c.drawLine(left, headerY, right, headerY, Paint().apply { color = TEAL; strokeWidth = 1.5f })
 
-        // ── Rows ──────────────────────────────────────────────────────
+        // ── Rows — distributed to fill the full height between the header
+        //    line and the footer divider (above the generation metadata). ──
+        val tableTop = headerY
+        val footerLineY = PAGE_H - 34f
+        val rowH = (footerLineY - 8f - tableTop) / rows.size
         val today = LocalDate.now()
-        val rowH = if (rows.size >= 30) 21f else 22f
-        val cell = Paint().apply { isAntiAlias = true; typeface = body; textSize = 10f; color = INK; textAlign = Paint.Align.CENTER }
-        val cellBold = Paint().apply { isAntiAlias = true; typeface = bodyBold; textSize = 10f; color = INK; textAlign = Paint.Align.CENTER }
-        val cellMuted = Paint().apply { isAntiAlias = true; typeface = italic; textSize = 9.5f; color = FAINT; textAlign = Paint.Align.CENTER }
-        val dayNum = Paint().apply { isAntiAlias = true; typeface = bodyBold; textSize = 11f; color = INK }
+        val cell = Paint().apply { isAntiAlias = true; typeface = body; textSize = 10.5f; color = INK; textAlign = Paint.Align.CENTER }
+        val cellBold = Paint().apply { isAntiAlias = true; typeface = bodyBold; textSize = 10.5f; color = INK; textAlign = Paint.Align.CENTER }
+        val dayNum = Paint().apply { isAntiAlias = true; typeface = bodyBold; textSize = 12f; color = INK }
         val dowP = Paint().apply { isAntiAlias = true; typeface = body; textSize = 9f; color = MUTED }
-        val subP = Paint().apply { isAntiAlias = true; typeface = body; textSize = 8f }
+        val subP = Paint().apply { isAntiAlias = true; typeface = body; textSize = 8.5f }
+        val divider = Paint().apply { color = LINE; strokeWidth = 0.8f }
 
-        rows.forEach { row ->
-            val top = y
-            val bottom = y + rowH
+        rows.forEachIndexed { index, row ->
+            val top = tableTop + index * rowH
+            val bottom = top + rowH
             val hijri = HijriDateCalculator.toHijri(row.date)
             val event = IslamicEvents.events
                 .filter { it.hijriMonth == hijri.month && it.hijriDay == hijri.day }
@@ -204,53 +205,43 @@ object PrayerTimesPdfExporter {
                 event != null -> tint(eventColor(event.eventType), 0x12) to eventColor(event.eventType)
                 lastTen -> tint(NIGHT, 0x0E) to 0
                 isFriday -> tint(GOLD, 0x10) to 0
-                row.date.dayOfMonth % 2 == 0 -> ROW_ALT to 0
+                index % 2 == 1 -> ROW_ALT to 0
                 else -> 0 to 0
             }
             if (bg != 0) c.drawRect(left, top, right, bottom, fill(bg))
             if (accent != 0) c.drawRect(left, top, left + 3f, bottom, fill(accent))
 
-            // Date cell — line 1: day + weekday + event tag; line 2: Hijri + Ramadan/Eid.
-            val l1 = top + 11f
-            val l2 = top + 19f
-            c.drawText(row.date.dayOfMonth.toString(), left + 7f, l1, dayNum)
-            val dowW = dayNum.measureText(row.date.dayOfMonth.toString())
-            c.drawText(row.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()), left + 11f + dowW, l1, dowP)
-            if (event != null && !isHoliday) {
-                subP.typeface = bodyBold
-                subP.color = eventColor(event.eventType)
-                val dw = dowP.measureText(row.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()))
-                c.drawText("· ${event.nameEnglish}", left + 16f + dowW + dw, l1, subP)
-            }
-            subP.typeface = body
-            subP.color = FAINT
-            c.drawText("${hijri.day} ${HijriDateCalculator.getHijriMonthName(hijri.month)}", left + 7f, l2, subP)
-            if (hijri.month == 9) {
-                val fast = fastDuration(row.times.getOrNull(0), row.times.getOrNull(4))
-                subP.typeface = bodyBold
-                subP.color = TEAL_DARK
-                val hw = subP.measureText("${hijri.day} ${HijriDateCalculator.getHijriMonthName(hijri.month)}  ")
-                c.drawText("Ramadan ${hijri.day}${if (fast != null) " · $fast fast" else ""}", left + 7f + hw, l2, subP)
-            } else if (isHoliday) {
-                subP.typeface = bodyBold
-                subP.color = GOLD_DARK
-                c.drawText("★ ${event!!.nameEnglish}", left + 7f + 70f, l2, subP)
+            // Date cell — two vertically-centred lines kept inside dateColW.
+            val midY = (top + bottom) / 2f
+            val numStr = row.date.dayOfMonth.toString()
+            c.drawText(numStr, left + 8f, midY - 2f, dayNum)
+            val numW = dayNum.measureText(numStr)
+            c.drawText(
+                row.date.dayOfWeek.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault()),
+                left + 12f + numW, midY - 2f, dowP,
+            )
+            val hijriText = "${hijri.day} ${HijriDateCalculator.getHijriMonthName(hijri.month).take(3)}"
+            subP.typeface = body; subP.color = FAINT
+            c.drawText(hijriText, left + 8f, midY + 9f, subP)
+            val markerX = left + 8f + subP.measureText("$hijriText  ")
+            when {
+                isHoliday -> { subP.typeface = bodyBold; subP.color = GOLD_DARK; c.drawText("★ ${event!!.nameEnglish}", markerX, midY + 9f, subP) }
+                event != null -> { subP.typeface = bodyBold; subP.color = eventColor(event.eventType); c.drawText(event.nameEnglish, markerX, midY + 9f, subP) }
+                hijri.month == 9 -> {
+                    val fast = fastDuration(row.times.getOrNull(0), row.times.getOrNull(4))
+                    if (fast != null) { subP.typeface = bodyBold; subP.color = TEAL_DARK; c.drawText("· $fast fast", markerX, midY + 9f, subP) }
+                }
             }
 
-            // Times — Sunrise muted, Fajr/Maghrib bold in Ramadan mode.
-            val tb = top + rowH * 0.6f
-            for (i in 0 until 6) {
-                val t = row.times.getOrElse(i) { "--" }
-                val paint = when {
-                    i == 1 -> cellMuted
-                    filledCol[i] -> cellBold
-                    else -> cell
-                }
-                c.drawText(t, colCenter[i], tb, paint)
+            // Times (Sunrise omitted) — Suhūr/Iftar bold in Ramadan mode.
+            columns.forEachIndexed { i, col ->
+                val t = row.times.getOrElse(col.idx) { "--" }
+                c.drawText(t, colCenter[i], midY + 3.5f, if (ramadanMode && col.emph) cellBold else cell)
             }
-            y = bottom
+
+            // Divider between rows.
+            if (index < rows.size - 1) c.drawLine(left, bottom, right, bottom, divider)
         }
-        c.drawLine(left, y, right, y, Paint().apply { color = LINE; strokeWidth = 1f })
 
         // ── Footer ────────────────────────────────────────────────────
         c.drawLine(left, PAGE_H - 34f, right, PAGE_H - 34f, Paint().apply { color = TEAL; strokeWidth = 1.2f })
