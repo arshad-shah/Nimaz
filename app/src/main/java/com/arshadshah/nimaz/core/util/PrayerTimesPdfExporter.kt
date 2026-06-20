@@ -19,7 +19,6 @@ import java.io.FileOutputStream
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
@@ -67,22 +66,31 @@ object PrayerTimesPdfExporter {
 
     fun export(
         context: Context,
-        month: YearMonth,
         locationName: String,
         methodLabel: String,
         rows: List<Row>,
         latitude: Double = 0.0,
         longitude: Double = 0.0,
     ): File {
+        require(rows.isNotEmpty()) { "No rows to export" }
         val body = ResourcesCompat.getFont(context, R.font.plus_jakarta_sans_variable) ?: Typeface.DEFAULT
         val heading = ResourcesCompat.getFont(context, R.font.outfit_variable) ?: Typeface.DEFAULT
         val bold = Typeface.create(heading, Typeface.BOLD)
         val bodyBold = Typeface.create(body, Typeface.BOLD)
         val italic = Typeface.create(body, Typeface.ITALIC)
 
-        // Hijri context for the whole sheet.
-        val firstHijri = HijriDateCalculator.toHijri(month.atDay(1))
-        val lastHijri = HijriDateCalculator.toHijri(month.atEndOfMonth())
+        // Derive the span + Hijri/Ramadan context from the rows themselves, so a
+        // Ramadan export (which can cross Gregorian months) titles correctly.
+        val first = rows.first().date
+        val last = rows.last().date
+        val firstHijri = HijriDateCalculator.toHijri(first)
+        val lastHijri = HijriDateCalculator.toHijri(last)
+        val gregTitle = if (first.month == last.month && first.year == last.year) {
+            "${first.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())} ${first.year}"
+        } else {
+            "${first.month.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault())} – " +
+                "${last.month.getDisplayName(java.time.format.TextStyle.SHORT, Locale.getDefault())} ${last.year}"
+        }
         val hijriMonths = if (firstHijri.month == lastHijri.month) {
             "${HijriDateCalculator.getHijriMonthName(firstHijri.month)} ${firstHijri.year}"
         } else {
@@ -106,7 +114,15 @@ object PrayerTimesPdfExporter {
                 shader = LinearGradient(0f, 0f, PAGE_W.toFloat(), 0f, TEAL, TEAL_DARK, Shader.TileMode.CLAMP)
             },
         )
-        drawCrescent(c, MARGIN + 22f, 46f, 16f, TEAL)
+        // Official app logo in a white tile.
+        val tileSize = 42f
+        c.drawRoundRect(MARGIN, 27f, MARGIN + tileSize, 27f + tileSize, 11f, 11f, fill(Color.WHITE))
+        runCatching {
+            val logo = context.packageManager.getApplicationIcon(context.packageName)
+            val pad = 5
+            logo.setBounds((MARGIN + pad).toInt(), 27 + pad, (MARGIN + tileSize - pad).toInt(), (27 + tileSize - pad).toInt())
+            logo.draw(c)
+        }
         val title = Paint().apply { isAntiAlias = true; color = Color.WHITE; typeface = bold; textSize = 25f }
         c.drawText("Nimaz", MARGIN + 52f, 44f, title)
         if (ramadanMode) {
@@ -116,7 +132,7 @@ object PrayerTimesPdfExporter {
             c.drawText("PRAYER TIMES", MARGIN + 53f, 64f, sub)
         }
         val mTitle = Paint().apply { isAntiAlias = true; color = Color.WHITE; typeface = bold; textSize = 19f; textAlign = Paint.Align.RIGHT }
-        c.drawText("${month.month.getDisplayName(java.time.format.TextStyle.FULL, Locale.getDefault())} ${month.year}", PAGE_W - MARGIN, 42f, mTitle)
+        c.drawText(gregTitle, PAGE_W - MARGIN, 42f, mTitle)
         val mSub = Paint().apply { isAntiAlias = true; color = 0xCCFFFFFF.toInt(); typeface = body; textSize = 11f; textAlign = Paint.Align.RIGHT }
         c.drawText(hijriMonths, PAGE_W - MARGIN, 60f, mSub)
         c.drawText(locationName, PAGE_W - MARGIN, 76f, mSub)
@@ -247,7 +263,9 @@ object PrayerTimesPdfExporter {
         doc.finishPage(page)
 
         val dir = File(context.cacheDir, "exports").apply { mkdirs() }
-        val file = File(dir, "Nimaz_PrayerTimes_${month.year}_${"%02d".format(month.monthValue)}.pdf")
+        val baseName = if (ramadanMode) "Nimaz_Ramadan_$ramadanYear"
+        else "Nimaz_PrayerTimes_${first.year}_${"%02d".format(first.monthValue)}"
+        val file = File(dir, "$baseName.pdf")
         FileOutputStream(file).use { doc.writeTo(it) }
         doc.close()
         return file
@@ -280,11 +298,6 @@ object PrayerTimesPdfExporter {
         paint.textAlign = Paint.Align.CENTER
         c.drawText(text, centerX, centerY + 3f, paint)
         paint.textAlign = Paint.Align.LEFT
-    }
-
-    private fun drawCrescent(c: Canvas, cx: Float, cy: Float, r: Float, carve: Int) {
-        c.drawCircle(cx, cy, r, fill(Color.WHITE))
-        c.drawCircle(cx + r * 0.42f, cy - r * 0.26f, r * 0.92f, fill(carve))
     }
 
     private fun drawBadge(c: Canvas, x: Float, topY: Float, text: String, font: Typeface) {

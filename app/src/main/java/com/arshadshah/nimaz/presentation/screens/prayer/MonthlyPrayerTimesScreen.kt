@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -24,8 +25,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,18 +36,24 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -53,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -77,45 +87,44 @@ fun MonthlyPrayerTimesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val context = LocalContext.current
+    var showExportSheet by remember { mutableStateOf(false) }
+    val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
+
+    fun shareRows(rows: List<DayPrayerTimes>) {
+        if (rows.isEmpty()) return
+        runCatching {
+            val pdfRows = rows.map {
+                PrayerTimesPdfExporter.Row(
+                    it.date,
+                    listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
+                )
+            }
+            val file = PrayerTimesPdfExporter.export(
+                context = context,
+                locationName = state.locationName,
+                methodLabel = state.methodLabel,
+                rows = pdfRows,
+                latitude = state.latitude,
+                longitude = state.longitude,
+            )
+            context.startActivity(
+                Intent.createChooser(
+                    PrayerTimesPdfExporter.buildShareIntent(context, file),
+                    "Share prayer times",
+                )
+            )
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            val context = LocalContext.current
-            val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
             NimazBackTopAppBar(
                 title = "Monthly Prayer Times",
                 onBackClick = onNavigateBack,
                 actions = {
-                    IconButton(
-                        onClick = {
-                            val s = state
-                            runCatching {
-                                val rows = s.dayPrayerTimes.map {
-                                    PrayerTimesPdfExporter.Row(
-                                        it.date,
-                                        listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
-                                    )
-                                }
-                                val file = PrayerTimesPdfExporter.export(
-                                    context = context,
-                                    month = s.currentMonth,
-                                    locationName = s.locationName,
-                                    methodLabel = s.methodLabel,
-                                    rows = rows,
-                                    latitude = s.latitude,
-                                    longitude = s.longitude,
-                                )
-                                context.startActivity(
-                                    Intent.createChooser(
-                                        PrayerTimesPdfExporter.buildShareIntent(context, file),
-                                        "Share prayer times",
-                                    )
-                                )
-                            }
-                        },
-                        enabled = canExport,
-                    ) {
+                    IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
                         Icon(Icons.Default.Share, contentDescription = "Export as PDF")
                     }
                 },
@@ -166,6 +175,118 @@ fun MonthlyPrayerTimesScreen(
             item {
                 Spacer(modifier = Modifier.height(NimazSpacing.Large))
             }
+        }
+    }
+
+    if (showExportSheet) {
+        val sheetState = rememberModalBottomSheetState()
+        ModalBottomSheet(
+            onDismissRequest = { showExportSheet = false },
+            sheetState = sheetState,
+        ) {
+            ExportSheet(
+                monthLabel = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                dayCount = state.dayPrayerTimes.size,
+                ramadanYear = state.ramadanHijriYear,
+                onThisMonth = {
+                    shareRows(state.dayPrayerTimes)
+                    showExportSheet = false
+                },
+                onRamadan = {
+                    shareRows(viewModel.ramadanDays())
+                    showExportSheet = false
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun ExportSheet(
+    monthLabel: String,
+    dayCount: Int,
+    ramadanYear: Int?,
+    onThisMonth: () -> Unit,
+    onRamadan: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp),
+    ) {
+        Text(
+            text = "Export as PDF",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
+        )
+        ExportOption(
+            icon = Icons.Default.CalendarMonth,
+            tint = MaterialTheme.colorScheme.primary,
+            title = "This month",
+            subtitle = "$monthLabel · $dayCount days",
+            onClick = onThisMonth,
+        )
+        if (ramadanYear != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            ExportOption(
+                icon = Icons.Default.DarkMode,
+                tint = NimazColors.Secondary,
+                title = "Ramadan $ramadanYear",
+                subtitle = "Full month · 1 → last day",
+                onClick = onRamadan,
+                highlight = true,
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ExportOption(
+    icon: ImageVector,
+    tint: Color,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit,
+    highlight: Boolean = false,
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(14.dp),
+        color = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            modifier = Modifier.padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(38.dp)
+                    .clip(RoundedCornerShape(11.dp))
+                    .background(tint.copy(alpha = 0.18f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }
@@ -284,11 +405,14 @@ private fun DayPrayerCard(
     val dayOfWeek =
         dayTimes.date.dayOfWeek.getDisplayName(TextStyle.SHORT, LocalLocale.current.platformLocale)
     val dayNumber = dayTimes.date.dayOfMonth.toString()
+    val hijri = HijriDateCalculator.toHijri(dayTimes.date)
+    val hijriLabel = "${hijri.day} ${HijriDateCalculator.getHijriMonthName(hijri.month).take(3)}"
 
     if (isToday) {
         TodayPrayerCard(
             dayNumber = dayNumber,
             dayOfWeek = dayOfWeek,
+            hijri = hijriLabel,
             prayers = prayers,
             isExpanded = isExpanded,
             onClick = onClick
@@ -297,6 +421,7 @@ private fun DayPrayerCard(
         RegularDayPrayerCard(
             dayNumber = dayNumber,
             dayOfWeek = dayOfWeek,
+            hijri = hijriLabel,
             prayers = prayers,
             isExpanded = isExpanded,
             onClick = onClick
@@ -309,6 +434,7 @@ private fun DayPrayerCard(
 private fun TodayPrayerCard(
     dayNumber: String,
     dayOfWeek: String,
+    hijri: String,
     prayers: List<PrayerTimeEntry>,
     isExpanded: Boolean,
     onClick: () -> Unit
@@ -350,6 +476,7 @@ private fun TodayPrayerCard(
                     DayBadge(
                         dayNumber = dayNumber,
                         dayOfWeek = dayOfWeek,
+                        hijri = hijri,
                         isToday = true
                     )
 
@@ -382,6 +509,7 @@ private fun TodayPrayerCard(
 private fun RegularDayPrayerCard(
     dayNumber: String,
     dayOfWeek: String,
+    hijri: String,
     prayers: List<PrayerTimeEntry>,
     isExpanded: Boolean,
     onClick: () -> Unit
@@ -410,6 +538,7 @@ private fun RegularDayPrayerCard(
                 DayBadge(
                     dayNumber = dayNumber,
                     dayOfWeek = dayOfWeek,
+                    hijri = hijri,
                     isToday = false
                 )
 
@@ -440,6 +569,7 @@ private fun RegularDayPrayerCard(
 private fun DayBadge(
     dayNumber: String,
     dayOfWeek: String,
+    hijri: String,
     isToday: Boolean
 ) {
     val bgColor = if (isToday) {
@@ -452,11 +582,12 @@ private fun DayBadge(
     } else {
         MaterialTheme.colorScheme.onSurface
     }
+    val hijriColor = if (isToday) textColor.copy(alpha = 0.85f) else MaterialTheme.colorScheme.primary
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .width(44.dp)
+            .width(52.dp)
             .clip(RoundedCornerShape(NimazCornerRadius.Medium))
             .background(bgColor)
             .padding(vertical = NimazSpacing.Small, horizontal = NimazSpacing.ExtraSmall)
@@ -471,6 +602,13 @@ private fun DayBadge(
             text = dayOfWeek,
             style = MaterialTheme.typography.labelSmall,
             color = textColor.copy(alpha = 0.8f)
+        )
+        Text(
+            text = hijri,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Medium,
+            color = hijriColor,
+            maxLines = 1,
         )
     }
 }
