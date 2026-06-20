@@ -6,10 +6,14 @@ import android.graphics.Paint
 import android.graphics.RadialGradient
 import android.graphics.RectF
 import android.graphics.Shader
-import androidx.compose.foundation.Canvas
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,66 +21,104 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Canvas
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
+import kotlin.math.roundToInt
+import kotlin.math.sin
 
 /**
- * A time-aware "sky scene" for the prayer-times experience.
+ * A living, time-aware "sky scene" for the prayer-times hero.
  *
- * There is no horizon and no markers — the sky itself tells the time. Each
- * [SkyPhase] paints its own gradient, clouds, and celestial body: a crisp sun
- * with a diffused corona + soft light shafts by day, and a real-phase moon at
- * Fajr (a dim setting crescent) and Isha (full night).
+ * The sky gradient, the sun's east→west arc and the moon's phase are all
+ * derived continuously from [timeOfDay] (0f = midnight … 1f = next midnight),
+ * so the sun sits exactly where it should at any moment, not just at the
+ * prayer anchors. Clouds drift slowly across.
  *
- * The moon is dynamic: pass [moonPhaseFraction] (0f = new … 0.5f = full … →
- * new), which [MoonPhase] derives from the date, and the renderer draws the
- * correct illuminated shape for the real sky.
+ * Performance: the heavy work — gradients, blurred corona/rays, the moon's
+ * [PathOperation] and soft terminator — is baked once into a small
+ * [ImageBitmap] (via [drawWithCache], keyed on [timeOfDay]/[moonFraction]) and
+ * only rebuilt when those change. The cloud sprite is baked once too; the only
+ * per-frame work is blitting the two bitmaps, with the clouds offset by a
+ * single animated float and recoloured by a [ColorFilter]. Bitmaps render at
+ * [SPRITE_SCALE] of the view size to keep the footprint small.
  *
- * @param phase which part of the day to paint.
- * @param timeLabel large overlay label, e.g. "3:42 PM".
- * @param statusLabel secondary overlay line, e.g. "Asr in 1h 12m".
- * @param moonPhaseFraction synodic phase 0f→1f; only used by FAJR and ISHA.
+ * @param timeOfDay fraction through a 24h day, 0f→1f.
+ * @param moonFraction synodic phase 0f→1f (see [MoonPhase]); used at night.
+ * @param cloudsEnabled set false to freeze cloud motion (e.g. battery saver).
  */
 @Composable
 fun PrayerSkyScene(
-    phase: SkyPhase,
+    timeOfDay: Float,
     timeLabel: String,
     statusLabel: String,
     modifier: Modifier = Modifier,
-    moonPhaseFraction: Float = 0.18f,
+    moonFraction: Float = 0.5f,
+    cloudsEnabled: Boolean = true,
 ) {
-    Box(modifier = modifier.clip(RoundedCornerShape(20.dp))) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            when (phase) {
-                SkyPhase.FAJR -> drawFajr(moonPhaseFraction)
-                SkyPhase.SUNRISE -> drawSunrise()
-                SkyPhase.DHUHR -> drawDhuhr()
-                SkyPhase.ASR -> drawAsr()
-                SkyPhase.MAGHRIB -> drawMaghrib()
-                SkyPhase.ISHA -> drawIsha(moonPhaseFraction)
-            }
-        }
+    val drift = rememberInfiniteTransition(label = "sky")
+    val cloudPhase by drift.animateFloat(
+        initialValue = 0f,
+        targetValue = if (cloudsEnabled) 1f else 0f,
+        animationSpec = infiniteRepeatable(tween(120_000, easing = LinearEasing), RepeatMode.Restart),
+        label = "clouds",
+    )
 
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(20.dp))
+            .drawWithCache {
+                val w = size.width.roundToInt().coerceAtLeast(1)
+                val h = size.height.roundToInt().coerceAtLeast(1)
+                val sw = (size.width * SPRITE_SCALE).roundToInt().coerceAtLeast(1)
+                val sh = (size.height * SPRITE_SCALE).roundToInt().coerceAtLeast(1)
+
+                // Baked once per (timeOfDay, moonFraction, size) change — not per frame.
+                val scene = bakeLayer(sw, sh, this, layoutDirection) { drawScene(timeOfDay, moonFraction) }
+                val clouds = bakeLayer(sw, sh, this, layoutDirection) { drawCloudLayer() }
+                val cloudTint = ColorFilter.tint(sampleCloud(timeOfDay), BlendMode.Modulate)
+                val full = IntSize(w, h)
+
+                onDrawBehind {
+                    val off = (cloudPhase * w).roundToInt()
+                    drawImage(scene, dstOffset = IntOffset.Zero, dstSize = full)
+                    drawImage(clouds, dstOffset = IntOffset(off, 0), dstSize = full, colorFilter = cloudTint)
+                    drawImage(clouds, dstOffset = IntOffset(off - w, 0), dstSize = full, colorFilter = cloudTint)
+                }
+            },
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             val shadow = Shadow(color = Color.Black.copy(alpha = 0.5f), offset = Offset(0f, 1f), blurRadius = 4f)
             Text(
@@ -94,8 +136,9 @@ fun PrayerSkyScene(
     }
 }
 
-/** One sky per prayer. */
-enum class SkyPhase { FAJR, SUNRISE, DHUHR, ASR, MAGHRIB, ISHA }
+private const val SPRITE_SCALE = 0.6f
+private const val SUNRISE_T = 0.27f
+private const val SUNSET_T = 0.80f
 
 /**
  * Moon phase from the date, after Jean Meeus, *Astronomical Algorithms*.
@@ -119,165 +162,161 @@ object MoonPhase {
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Phases
+// Scene composition (baked)
 // ─────────────────────────────────────────────────────────────────────────
 
-private fun DrawScope.drawFajr(moonFraction: Float) {
-    drawSky(
-        0f to Color(0xFF060A1C), 0.45f to Color(0xFF16204A),
-        0.74f to Color(0xFF3B3270), 0.9f to Color(0xFF8A4F6E), 1f to Color(0xFFD08A5E),
-    )
+private fun DrawScope.drawScene(t: Float, moonFraction: Float) {
+    drawRect(Brush.verticalGradient(*skyStops(t), startY = 0f, endY = size.height))
+
+    val night = nightFactor(t)
+    if (night > 0f) {
+        drawNight(night)
+        drawMoon(Offset(size.width * 0.72f, size.height * 0.32f), size.minDimension * 0.16f, moonFraction, alpha = night)
+    }
+
+    // Continuous sun: altitude is sin() of the day-fraction, so it rises from
+    // and sinks below the horizon smoothly. Drawn (fading) whenever it's at or
+    // just under the horizon — so Maghrib (sunset) shows it sitting on it.
+    val td = (t - SUNRISE_T) / (SUNSET_T - SUNRISE_T)
+    val alt = sin(PI * td).toFloat()
+    if (alt > -0.18f) {
+        val sunAlpha = if (alt >= 0f) 1f else ((alt + 0.18f) / 0.18f).coerceIn(0f, 1f)
+        drawSunAt(td, alt, sunAlpha)
+    }
+}
+
+/** How "night" it is: 1f deep night, 0f full day, ramped through dawn/dusk. */
+private fun nightFactor(t: Float): Float = when {
+    t < 0.20f -> 1f
+    t < SUNRISE_T -> (SUNRISE_T - t) / (SUNRISE_T - 0.20f)
+    t < SUNSET_T -> 0f
+    t < 0.87f -> (t - SUNSET_T) / (0.87f - SUNSET_T)
+    else -> 1f
+}.coerceIn(0f, 1f)
+
+private fun DrawScope.drawSunAt(td: Float, alt: Float, sunAlpha: Float) {
     val w = size.width
     val h = size.height
-    // first light creeping up from below
-    val glowC = Offset(w * 0.5f, h * 1.02f)
-    drawCircle(
-        Brush.radialGradient(
-            0f to Color(0xFFFFC98A).copy(alpha = 0.5f), 1f to Color(0x00FFC98A),
-            center = glowC, radius = w * 0.7f,
+    val sunX = lerpF(0.16f, 0.84f, td.coerceIn(0f, 1f)) * w
+    val horizonY = h * 0.92f
+    val apexY = h * 0.16f
+    val sunY = horizonY - alt * (horizonY - apexY) // alt<0 sinks it below the frame
+    val radius = size.minDimension * 0.085f
+    val warm = (1f - alt).coerceIn(0f, 1f) // warmer near the horizon
+
+    val diskMid = lerp(Color(0xFFFFF1A8), Color(0xFFFFCF87), warm)
+    val diskRim = lerp(Color(0xFFFACC15), Color(0xFFF97316), warm)
+    val coronaIn = lerp(Color(0xFFFFF6C2), Color(0xFFFFE0A0), warm)
+
+    drawSun(
+        center = Offset(sunX, sunY),
+        radius = radius,
+        disk = listOf(0f to Color.White, 0.7f to diskMid, 0.95f to diskRim, 1f to diskRim.copy(alpha = 0f)),
+        corona = listOf(
+            0f to coronaIn.copy(alpha = 0.85f), 0.34f to coronaIn.copy(alpha = 0.32f),
+            0.7f to coronaIn.copy(alpha = 0.1f), 1f to coronaIn.copy(alpha = 0f),
         ),
-        radius = w * 0.7f, center = glowC,
-    )
-    star(w * 0.14f, h * 0.16f, 1.3f, 0.5f)
-    star(w * 0.34f, h * 0.12f, 1f, 0.35f)
-    star(w * 0.66f, h * 0.18f, 1f, 0.4f)
-    drawCloud(w * 0.30f, h * 0.78f, scale(), Color(0xFF6A4A63), Color(0xFFC98A66), 0.8f)
-    drawMoon(Offset(w * 0.8f, h * 0.26f), size.minDimension * 0.10f, moonFraction, alpha = 0.9f)
-}
-
-private fun DrawScope.drawSunrise() {
-    drawSky(
-        0f to Color(0xFF2B3A8C), 0.4f to Color(0xFF7C6AB0),
-        0.66f to Color(0xFFE59AB0), 0.86f to Color(0xFFFBB778), 1f to Color(0xFFFFE0A3),
-    )
-    val w = size.width
-    val h = size.height
-    drawCloud(w * 0.55f, h * 0.32f, scale(), Color(0xFFFFF3E6), Color(0xFFF0A98F), 0.9f)
-    drawCloud(w * 0.82f, h * 0.5f, scale() * 0.8f, Color(0xFFFFF6EC), Color(0xFFE89FB0), 0.85f)
-    drawSun(
-        center = Offset(w * 0.2f, h * 0.72f), radius = size.minDimension * 0.085f,
-        disk = listOf(0f to Color(0xFFFFFEF5), 0.7f to Color(0xFFFFD9A0), 0.95f to Color(0xFFFBA76A), 1f to Color(0x00FBA76A)),
-        corona = listOf(0f to Color(0xFFFFE9C2).copy(alpha = 0.85f), 0.6f to Color(0xFFFFD9A0).copy(alpha = 0.18f), 1f to Color(0x00FFD9A0)),
         coronaScale = 2.7f,
-        rayColor = Color(0xFFFFE9C2), rayCount = 2, rayLengthFr = 0.62f, rayAlpha = 0.14f,
+        rayColor = coronaIn, rayCount = 5, rayLengthFr = 0.5f + 0.15f * alt.coerceAtLeast(0f), rayAlpha = 0.15f,
+        alpha = sunAlpha,
     )
 }
 
-private fun DrawScope.drawDhuhr() {
-    drawSky(
-        0f to Color(0xFF0A2E7A), 0.35f to Color(0xFF1E62D6),
-        0.66f to Color(0xFF4F9BF5), 0.9f to Color(0xFFBFE0FB), 1f to Color(0xFFEAF6FF),
-    )
+private fun DrawScope.drawNight(nf: Float) {
     val w = size.width
     val h = size.height
-    drawCloud(w * 0.22f, h * 0.7f, scale(), Color(0xFFFFFFFF), Color(0xFFC6DBF2), 0.92f)
-    drawCloud(w * 0.8f, h * 0.8f, scale() * 0.85f, Color(0xFFFFFFFF), Color(0xFFC6DBF2), 0.82f)
-    drawSun(
-        center = Offset(w * 0.5f, h * 0.3f), radius = size.minDimension * 0.075f,
-        disk = listOf(0f to Color(0xFFFFFFFF), 0.7f to Color(0xFFFFF1A8), 0.95f to Color(0xFFFACC15), 1f to Color(0x00FACC15)),
-        corona = listOf(0f to Color(0xFFFFF6C2).copy(alpha = 0.85f), 0.32f to Color(0xFFFDE047).copy(alpha = 0.4f), 0.66f to Color(0xFFFDE047).copy(alpha = 0.12f), 1f to Color(0x00FDE047)),
-        coronaScale = 2.7f,
-        rayColor = Color(0xFFFFF3B8), rayCount = 5, rayLengthFr = 0.6f, rayAlpha = 0.18f,
-    )
-}
-
-private fun DrawScope.drawAsr() {
-    drawSky(
-        0f to Color(0xFF15407F), 0.4f to Color(0xFF3E78C9),
-        0.68f to Color(0xFF8FB6E8), 0.88f to Color(0xFFF2D9A8), 1f to Color(0xFFFBE3B0),
-    )
-    val w = size.width
-    val h = size.height
-    drawCloud(w * 0.26f, h * 0.72f, scale(), Color(0xFFFFFDF5), Color(0xFFE3C79E), 0.9f)
-    drawCloud(w * 0.5f, h * 0.82f, scale() * 0.78f, Color(0xFFFFFDF5), Color(0xFFE3C79E), 0.78f)
-    drawSun(
-        center = Offset(w * 0.7f, h * 0.46f), radius = size.minDimension * 0.08f,
-        disk = listOf(0f to Color(0xFFFFFDF0), 0.7f to Color(0xFFFFE08A), 0.95f to Color(0xFFF4B23C), 1f to Color(0x00F4B23C)),
-        corona = listOf(0f to Color(0xFFFFE9B0).copy(alpha = 0.8f), 0.6f to Color(0xFFFFE9B0).copy(alpha = 0.16f), 1f to Color(0x00FFE9B0)),
-        coronaScale = 2.6f,
-        rayColor = Color(0xFFFFE9B0), rayCount = 4, rayLengthFr = 0.55f, rayAlpha = 0.16f,
-    )
-}
-
-private fun DrawScope.drawMaghrib() {
-    drawSky(
-        0f to Color(0xFF241056), 0.28f to Color(0xFF7A1E83),
-        0.52f to Color(0xFFD6356B), 0.76f to Color(0xFFF9733A), 1f to Color(0xFFFBD34D),
-    )
-    val w = size.width
-    val h = size.height
-    // warm haze glowing where the sun sets (west/right)
-    val hazeC = Offset(w * 0.8f, h * 0.95f)
-    drawCircle(
-        Brush.radialGradient(0f to Color(0xFFFFD27A).copy(alpha = 0.3f), 1f to Color(0x00FFD27A), center = hazeC, radius = w * 0.7f),
-        radius = w * 0.7f, center = hazeC,
-    )
-    drawCloud(w * 0.22f, h * 0.44f, scale() * 0.9f, Color(0xFFFFD9A8), Color(0xFF9B2F63), 0.82f)
-    drawCloud(w * 0.6f, h * 0.26f, scale() * 0.8f, Color(0xFFFFE3B0), Color(0xFF7A2A6E), 0.75f)
-    drawSun(
-        center = Offset(w * 0.82f, h * 0.74f), radius = size.minDimension * 0.09f,
-        disk = listOf(0f to Color(0xFFFFFDF6), 0.7f to Color(0xFFFFC15E), 0.95f to Color(0xFFF97316), 1f to Color(0x00F97316)),
-        corona = listOf(0f to Color(0xFFFFF4D6).copy(alpha = 0.9f), 0.3f to Color(0xFFFFD98A).copy(alpha = 0.5f), 0.62f to Color(0xFFFB923C).copy(alpha = 0.16f), 1f to Color(0x00FB923C)),
-        coronaScale = 2.9f,
-        rayColor = Color(0xFFFFE9B8), rayCount = 5, rayLengthFr = 0.7f, rayAlpha = 0.16f,
-    )
-}
-
-private fun DrawScope.drawIsha(moonFraction: Float) {
-    drawSky(
-        0f to Color(0xFF03060F), 0.5f to Color(0xFF0E1330),
-        0.82f to Color(0xFF1B1F4A), 1f to Color(0xFF33285E),
-    )
-    val w = size.width
-    val h = size.height
-    // galaxy band
     drawIntoCanvas { c ->
         val paint = Paint().apply {
             isAntiAlias = true
-            color = Color(0xFF7E8AD6).copy(alpha = 0.1f).toArgb()
+            color = Color(0xFF7E8AD6).copy(alpha = 0.1f * nf).toArgb()
             maskFilter = BlurMaskFilter(size.minDimension * 0.08f, BlurMaskFilter.Blur.NORMAL)
         }
         c.nativeCanvas.save()
         c.nativeCanvas.rotate(-18f, w * 0.42f, h * 0.5f)
-        c.nativeCanvas.drawOval(
-            RectF(w * 0.42f - w * 0.6f, h * 0.5f - h * 0.13f, w * 0.42f + w * 0.6f, h * 0.5f + h * 0.13f),
-            paint,
-        )
+        c.nativeCanvas.drawOval(RectF(w * 0.42f - w * 0.6f, h * 0.5f - h * 0.13f, w * 0.42f + w * 0.6f, h * 0.5f + h * 0.13f), paint)
         c.nativeCanvas.restore()
     }
-    star(w * 0.11f, h * 0.2f, 1.4f, 0.9f)
-    star(w * 0.26f, h * 0.14f, 1f, 0.6f)
-    star(w * 0.36f, h * 0.32f, 1.1f, 0.7f)
-    star(w * 0.83f, h * 0.18f, 1.3f, 0.85f)
-    star(w * 0.92f, h * 0.38f, 1f, 0.6f)
-    star(w * 0.55f, h * 0.21f, 1f, 0.6f)
-    star(w * 0.16f, h * 0.56f, 0.9f, 0.5f)
-    // sparkle
-    sparkle(w * 0.42f, h * 0.62f, size.minDimension * 0.018f)
-    drawCloud(w * 0.26f, h * 0.78f, scale(), Color(0xFF3A3E66), Color(0xFF171A38), 0.7f)
-    drawMoon(Offset(w * 0.73f, h * 0.36f), size.minDimension * 0.16f, moonFraction, alpha = 1f)
+    val stars = listOf(
+        Triple(0.11f, 0.20f, 1.4f), Triple(0.26f, 0.14f, 1f), Triple(0.36f, 0.32f, 1.1f),
+        Triple(0.83f, 0.18f, 1.3f), Triple(0.92f, 0.38f, 1f), Triple(0.55f, 0.21f, 1f),
+        Triple(0.16f, 0.56f, 0.9f), Triple(0.46f, 0.48f, 1f),
+    )
+    stars.forEach { (fx, fy, r) ->
+        drawCircle(Color.White.copy(alpha = 0.8f * nf), radius = r, center = Offset(w * fx, h * fy))
+    }
+    // one sparkle
+    val sx = w * 0.42f
+    val sy = h * 0.62f
+    val sr = size.minDimension * 0.018f
+    val sc = Color.White.copy(alpha = 0.85f * nf)
+    drawLine(sc, Offset(sx - sr, sy), Offset(sx + sr, sy), strokeWidth = 1f)
+    drawLine(sc, Offset(sx, sy - sr), Offset(sx, sy + sr), strokeWidth = 1f)
+}
+
+private fun DrawScope.drawCloudLayer() {
+    // White→grey luminance so a per-phase ColorFilter.tint shades them correctly.
+    val w = size.width
+    val h = size.height
+    drawCloud(w * 0.25f, h * 0.36f, scale(), Color.White, Color(0xFFAFAFAF), 0.95f)
+    drawCloud(w * 0.6f, h * 0.24f, scale() * 0.8f, Color.White, Color(0xFFAFAFAF), 0.9f)
+    drawCloud(w * 0.78f, h * 0.5f, scale() * 0.7f, Color.White, Color(0xFFAFAFAF), 0.85f)
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Shared drawing helpers
+// Time → colour sampling
 // ─────────────────────────────────────────────────────────────────────────
 
-private fun DrawScope.drawSky(vararg stops: Pair<Float, Color>) {
-    drawRect(Brush.verticalGradient(*stops, startY = 0f, endY = size.height))
+private class SkyKey(val t: Float, val sky: List<Color>, val cloud: Color)
+
+private val SKY_KEYS = listOf(
+    SkyKey(0.00f, listOf(Color(0xFF03060F), Color(0xFF0A0F26), Color(0xFF141A38), Color(0xFF1B1F4A), Color(0xFF33285E)), Color(0xFF2A2F52)),
+    SkyKey(0.20f, listOf(Color(0xFF060A1C), Color(0xFF16204A), Color(0xFF3B3270), Color(0xFF8A4F6E), Color(0xFFD08A5E)), Color(0xFF7A5A72)),
+    SkyKey(0.28f, listOf(Color(0xFF2B3A8C), Color(0xFF7C6AB0), Color(0xFFE59AB0), Color(0xFFFBB778), Color(0xFFFFE0A3)), Color(0xFFFCE0CE)),
+    SkyKey(0.50f, listOf(Color(0xFF0A2E7A), Color(0xFF1E62D6), Color(0xFF4F9BF5), Color(0xFFBFE0FB), Color(0xFFEAF6FF)), Color(0xFFF2F7FF)),
+    SkyKey(0.67f, listOf(Color(0xFF15407F), Color(0xFF3E78C9), Color(0xFF8FB6E8), Color(0xFFF2D9A8), Color(0xFFFBE3B0)), Color(0xFFFBEBCF)),
+    SkyKey(0.80f, listOf(Color(0xFF241056), Color(0xFF7A1E83), Color(0xFFD6356B), Color(0xFFF9733A), Color(0xFFFBD34D)), Color(0xFFF2B488)),
+    SkyKey(0.87f, listOf(Color(0xFF04060F), Color(0xFF0E1330), Color(0xFF241A45), Color(0xFF33285E), Color(0xFF3A2A55)), Color(0xFF3A3F66)),
+    SkyKey(1.00f, listOf(Color(0xFF03060F), Color(0xFF0A0F26), Color(0xFF141A38), Color(0xFF1B1F4A), Color(0xFF33285E)), Color(0xFF2A2F52)),
+)
+
+private fun bracket(t: Float): Triple<SkyKey, SkyKey, Float> {
+    val tt = t.coerceIn(0f, 1f)
+    for (i in 0 until SKY_KEYS.size - 1) {
+        val a = SKY_KEYS[i]
+        val b = SKY_KEYS[i + 1]
+        if (tt in a.t..b.t) {
+            val f = if (b.t > a.t) (tt - a.t) / (b.t - a.t) else 0f
+            return Triple(a, b, f)
+        }
+    }
+    return Triple(SKY_KEYS.last(), SKY_KEYS.last(), 0f)
 }
 
-/** A scale factor that maps the 360-wide reference design to the actual width. */
+private fun skyStops(t: Float): Array<Pair<Float, Color>> {
+    val (a, b, f) = bracket(t)
+    val c = List(5) { lerp(a.sky[it], b.sky[it], f) }
+    return arrayOf(0f to c[0], 0.4f to c[1], 0.66f to c[2], 0.88f to c[3], 1f to c[4])
+}
+
+private fun sampleCloud(t: Float): Color {
+    val (a, b, f) = bracket(t)
+    return lerp(a.cloud, b.cloud, f)
+}
+
+private fun lerpF(a: Float, b: Float, f: Float): Float = a + (b - a) * f
+
+// ─────────────────────────────────────────────────────────────────────────
+// Drawing primitives
+// ─────────────────────────────────────────────────────────────────────────
+
+/** Renders [block] into a fresh [ImageBitmap] of the given pixel size. */
+private fun bakeLayer(wPx: Int, hPx: Int, density: Density, ld: LayoutDirection, block: DrawScope.() -> Unit): ImageBitmap {
+    val image = ImageBitmap(wPx, hPx)
+    CanvasDrawScope().draw(density, ld, Canvas(image), Size(wPx.toFloat(), hPx.toFloat()), block)
+    return image
+}
+
 private fun DrawScope.scale(): Float = size.width / 360f
-
-private fun DrawScope.star(x: Float, y: Float, radius: Float, alpha: Float) {
-    drawCircle(Color.White.copy(alpha = alpha), radius = radius, center = Offset(x, y))
-}
-
-private fun DrawScope.sparkle(x: Float, y: Float, r: Float) {
-    val c = Color.White.copy(alpha = 0.85f)
-    drawLine(c, Offset(x - r, y), Offset(x + r, y), strokeWidth = 1f)
-    drawLine(c, Offset(x, y - r), Offset(x, y + r), strokeWidth = 1f)
-}
 
 private fun DrawScope.drawSun(
     center: Offset,
@@ -289,14 +328,14 @@ private fun DrawScope.drawSun(
     rayCount: Int,
     rayLengthFr: Float,
     rayAlpha: Float,
+    alpha: Float = 1f,
 ) {
-    // diffused light shafts: wide, heavily blurred, low opacity
-    if (rayCount > 0) {
+    if (rayCount > 0 && rayAlpha * alpha > 0.01f) {
         val rayLength = size.minDimension * rayLengthFr
         drawIntoCanvas { c ->
             val paint = Paint().apply {
                 isAntiAlias = true
-                color = rayColor.copy(alpha = rayAlpha).toArgb()
+                color = rayColor.copy(alpha = rayAlpha * alpha).toArgb()
                 maskFilter = BlurMaskFilter(radius * 0.7f, BlurMaskFilter.Blur.NORMAL)
             }
             val wb = radius * 0.42f
@@ -316,26 +355,14 @@ private fun DrawScope.drawSun(
             }
         }
     }
-    // diffused corona
-    drawCircle(
-        Brush.radialGradient(*corona.toTypedArray(), center = center, radius = radius * coronaScale),
-        radius = radius * coronaScale, center = center,
-    )
-    // crisp disk (gradient fades only at the very rim)
-    drawCircle(
-        Brush.radialGradient(*disk.toTypedArray(), center = center, radius = radius),
-        radius = radius, center = center,
-    )
+    drawCircle(Brush.radialGradient(*fade(corona, alpha), center = center, radius = radius * coronaScale), radius = radius * coronaScale, center = center)
+    drawCircle(Brush.radialGradient(*fade(disk, alpha), center = center, radius = radius), radius = radius, center = center)
 }
 
-private fun DrawScope.drawCloud(
-    cx: Float,
-    cy: Float,
-    s: Float,
-    top: Color,
-    bottom: Color,
-    alpha: Float,
-) {
+private fun fade(stops: List<Pair<Float, Color>>, alpha: Float): Array<Pair<Float, Color>> =
+    stops.map { it.first to it.second.copy(alpha = it.second.alpha * alpha) }.toTypedArray()
+
+private fun DrawScope.drawCloud(cx: Float, cy: Float, s: Float, top: Color, bottom: Color, alpha: Float) {
     drawIntoCanvas { c ->
         val paint = Paint().apply {
             isAntiAlias = true
@@ -356,34 +383,19 @@ private fun DrawScope.drawCloud(
     }
 }
 
-/**
- * The moon as a full sphere: a faint dark side (so the silhouette is always
- * round) with the illuminated region painted on top with spherical shading and
- * a soft terminator. The lit region is built with [PathOperation] and clipped
- * to the disc so the limb stays crisp while only the terminator is blurred.
- */
 private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, alpha: Float) {
     val cx = center.x
     val cy = center.y
     val r = radius
 
-    // halo
-    drawCircle(
-        Brush.radialGradient(0f to Color(0xFFC7D2FE).copy(alpha = 0.38f * alpha), 1f to Color(0x00C7D2FE), center = center, radius = r * 1.5f),
-        radius = r * 1.5f, center = center,
-    )
-    // faint dark side
-    drawCircle(
-        Brush.radialGradient(0f to Color(0xFF262C4C), 1f to Color(0xFF10142C), center = Offset(cx, cy - r * 0.05f), radius = r),
-        radius = r, center = center,
-    )
+    drawCircle(Brush.radialGradient(0f to Color(0xFFC7D2FE).copy(alpha = 0.38f * alpha), 1f to Color(0x00C7D2FE), center = center, radius = r * 1.5f), radius = r * 1.5f, center = center)
+    drawCircle(Brush.radialGradient(0f to Color(0xFF262C4C), 1f to Color(0xFF10142C), center = Offset(cx, cy - r * 0.05f), radius = r), radius = r, center = center)
 
-    // lit region geometry (limb slightly oversized so the blur doesn't soften it)
     val rg = r * 1.06f
     val cosv = cos(2 * PI * fraction).toFloat()
     val rx = rg * abs(cosv)
     val waxing = fraction < 0.5f
-    val crescent = cosv > 0f // illuminated fraction < 0.5
+    val crescent = cosv > 0f
     val lit = litRegion(cx, cy, rg, rx, waxing, crescent)
 
     clipPath(circlePath(cx, cy, r)) {
@@ -392,10 +404,7 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
                 isAntiAlias = true
                 shader = RadialGradient(
                     cx - r * 0.3f, cy - r * 0.34f, r * 1.4f,
-                    intArrayOf(
-                        Color(0xFFFFFFFF).toArgb(), Color(0xFFE9EDF6).toArgb(),
-                        Color(0xFFC5CCDE).toArgb(), Color(0xFFAAB2CC).toArgb(),
-                    ),
+                    intArrayOf(Color(0xFFFFFFFF).toArgb(), Color(0xFFE9EDF6).toArgb(), Color(0xFFC5CCDE).toArgb(), Color(0xFFAAB2CC).toArgb()),
                     floatArrayOf(0f, 0.55f, 0.85f, 1f),
                     Shader.TileMode.CLAMP,
                 )
@@ -408,7 +417,7 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
 }
 
 // ─────────────────────────────────────────────────────────────────────────
-// Geometry
+// Moon geometry
 // ─────────────────────────────────────────────────────────────────────────
 
 private fun circlePath(cx: Float, cy: Float, r: Float): Path =
@@ -422,11 +431,6 @@ private fun rectPath(rect: Rect): Path = Path().apply { addRect(rect) }
 private fun combine(a: Path, b: Path, op: PathOperation): Path =
     Path().apply { this.op(a, b, op) }
 
-/**
- * The illuminated region for a moon of radius [r] at ([cx],[cy]) with
- * terminator half-width [rx]. Built from a lit-side half-disc and a
- * terminator half-ellipse: subtracted for a crescent, unioned for a gibbous.
- */
 private fun litRegion(cx: Float, cy: Float, r: Float, rx: Float, waxing: Boolean, crescent: Boolean): Path {
     val rightRect = rectPath(Rect(cx, cy - r, cx + r, cy + r))
     val leftRect = rectPath(Rect(cx - r, cy - r, cx, cy + r))
@@ -450,54 +454,47 @@ private fun litRegion(cx: Float, cy: Float, r: Float, rx: Float, waxing: Boolean
 // Previews
 // ─────────────────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Fajr")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Fajr")
 @Composable
 private fun PrayerSkyScene_Fajr_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.FAJR, "5:23 AM", "First light · Sunrise in 1h 22m", scenePreviewModifier(), moonPhaseFraction = 0.92f)
-    }
+    NimazTheme { PrayerSkyScene(0.22f, "5:23 AM", "First light · Sunrise in 1h 22m", scenePreviewModifier(), moonFraction = 0.92f) }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Sunrise")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Sunrise")
 @Composable
 private fun PrayerSkyScene_Sunrise_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.SUNRISE, "6:45 AM", "Sunrise · Dhuhr in 6h 30m", scenePreviewModifier())
-    }
+    NimazTheme { PrayerSkyScene(0.29f, "6:45 AM", "Sunrise · Dhuhr in 6h 30m", scenePreviewModifier()) }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Dhuhr")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Mid-morning")
+@Composable
+private fun PrayerSkyScene_MidMorning_Preview() {
+    NimazTheme { PrayerSkyScene(0.4f, "9:32 AM", "Dhuhr in 3h 43m", scenePreviewModifier()) }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Dhuhr")
 @Composable
 private fun PrayerSkyScene_Dhuhr_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.DHUHR, "1:15 PM", "Dhuhr · Asr in 3h 15m", scenePreviewModifier())
-    }
+    NimazTheme { PrayerSkyScene(0.5f, "1:15 PM", "Dhuhr · Asr in 3h 15m", scenePreviewModifier()) }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Asr")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Asr")
 @Composable
 private fun PrayerSkyScene_Asr_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.ASR, "4:30 PM", "Asr · Maghrib in 3h 41m", scenePreviewModifier())
-    }
+    NimazTheme { PrayerSkyScene(0.67f, "4:30 PM", "Asr · Maghrib in 3h 41m", scenePreviewModifier()) }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Maghrib")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Maghrib")
 @Composable
 private fun PrayerSkyScene_Maghrib_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.MAGHRIB, "8:11 PM", "Maghrib · Isha in 1h 28m", scenePreviewModifier())
-    }
+    NimazTheme { PrayerSkyScene(0.8f, "8:11 PM", "Maghrib · Isha in 1h 28m", scenePreviewModifier()) }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Sky · Isha")
+@Preview(showBackground = true, widthDp = 380, heightDp = 220, name = "Living · Isha")
 @Composable
 private fun PrayerSkyScene_Isha_Preview() {
-    NimazTheme {
-        PrayerSkyScene(SkyPhase.ISHA, "9:39 PM", "Isha · Fajr in 6h 04m", scenePreviewModifier(), moonPhaseFraction = 0.62f)
-    }
+    NimazTheme { PrayerSkyScene(0.92f, "9:39 PM", "Isha · Fajr in 6h 04m", scenePreviewModifier(), moonFraction = 0.62f) }
 }
 
-@Composable
 private fun scenePreviewModifier(): Modifier =
     Modifier.fillMaxWidth().height(200.dp).padding(16.dp)

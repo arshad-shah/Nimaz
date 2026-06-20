@@ -63,6 +63,7 @@ import com.arshadshah.nimaz.presentation.screens.prophets.ProphetDetailScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
+import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.qaida.QaidaHomeScreen
@@ -268,6 +269,7 @@ fun NavGraph(
                     onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
+                    onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
                     onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
                 )
             }
@@ -563,19 +565,9 @@ fun NavGraph(
 
             // Prayer screens
             composable<Route.PrayerTimes> {
-                HomeScreen(
-                    onNavigateToQuran = { navController.navigate(Route.Quran) },
-                    onNavigateToHadith = { navController.navigate(Route.HadithHome) },
-                    onNavigateToDua = { navController.navigate(Route.DuaHome) },
-                    onNavigateToTasbih = { navController.navigate(Route.TasbihHome) },
-                    onNavigateToQibla = { navController.navigate(Route.Qibla) },
-                    onNavigateToCalendar = { navController.navigate(Route.IslamicCalendar) },
-                    onNavigateToFasting = { navController.navigate(Route.FastingHome) },
-                    onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
-                    onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
-                    onNavigateToSettings = { navController.navigate(Route.Settings) },
-                    onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
-                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
+                PrayerTimesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
 

@@ -56,11 +56,12 @@ fun PrayerTimeCard(
     isActive: Boolean,
     onClick: () -> Unit,
     onToggle: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showToggle: Boolean = true
 ) {
     val prayerColor = getPrayerColor(prayer.type)
     val isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED
-    val isSunrise = prayer.type == PrayerType.SUNRISE
+    val isSunrise = prayer.type == PrayerType.SUNRISE || !showToggle
 
     Card(
         modifier = modifier
@@ -79,22 +80,15 @@ fun PrayerTimeCard(
         // reads quietly until the next prayer pops.
         border = if (isActive) {
             BorderStroke(1.dp, prayerColor.copy(alpha = 0.4f))
-        } else null,
+        } else {
+            BorderStroke(1.dp, prayerColor.copy(alpha = 0.4f))
+        },
         onClick = onClick
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Left accent bar — only on the active prayer. 4dp wide, full
-            // card height, prayer-coloured. The single biggest readability
-            // win for spotting the next prayer at a glance.
-            Box(
-                modifier = Modifier
-                    .width(4.dp)
-                    .height(72.dp)
-                    .background(if (isActive) prayerColor else Color.Transparent)
-            )
 
             Row(
                 modifier = Modifier
@@ -133,10 +127,6 @@ fun PrayerTimeCard(
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        if (isActive) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            NextPill(accent = prayerColor)
-                        }
                     }
                     ArabicText(
                         text = getArabicPrayerName(prayer.type),
@@ -191,31 +181,6 @@ fun PrayerTimeCard(
     }
 }
 
-/**
- * Small "NEXT" pill rendered next to the active prayer's name. Uses the
- * prayer's accent colour at 20% opacity so it reads as part of the same
- * visual family as the left accent bar and the icon container.
- */
-@Composable
-private fun NextPill(accent: androidx.compose.ui.graphics.Color) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(accent.copy(alpha = 0.22f))
-            .padding(horizontal = 7.dp, vertical = 2.dp)
-    ) {
-        Text(
-            text = "NEXT",
-            style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = FontWeight.Bold,
-                fontSize = 10.sp,
-                letterSpacing = 0.8.sp
-            ),
-            color = accent
-        )
-    }
-}
-
 private val sampleAsr = PrayerTimeDisplay(
     PrayerType.ASR, "Asr", "4:30 PM",
     isPassed = false, isCurrent = true, isNext = true
@@ -229,6 +194,11 @@ private val sampleFajr = PrayerTimeDisplay(
 
 private val sampleMaghrib = PrayerTimeDisplay(
     PrayerType.MAGHRIB, "Maghrib", "6:12 PM",
+    isPassed = false, isCurrent = false, isNext = false
+)
+
+private val sampleSunrise = PrayerTimeDisplay(
+    PrayerType.SUNRISE, "Sunrise", "6:12 PM",
     isPassed = false, isCurrent = false, isNext = false
 )
 
@@ -273,3 +243,21 @@ private fun PrayerTimeCard_Upcoming_Preview() {
         )
     }
 }
+
+
+@Preview(showBackground = true, widthDp = 400, name = "Sunrise")
+@Composable
+private fun PrayerTimeCard_sunrise_Preview() {
+    NimazTheme {
+        PrayerTimeCard(
+            prayer = sampleSunrise,
+            isActive = false,
+            onClick = {},
+            onToggle = {},
+            modifier = Modifier.padding(16.dp)
+        )
+    }
+}
+
+
+

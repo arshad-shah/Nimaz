@@ -31,3 +31,6 @@ google-services.json
 
 # Visual companion brainstorm sessions
 .superpowers/
+
+# Playwright MCP screenshots / logs
+.playwright-mcp/

@@ -1,9 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
@@ -31,13 +27,13 @@ fun getPrayerColor(prayerType: PrayerType?): Color {
 
 fun getPrayerIcon(prayerType: PrayerType?): ImageVector {
     return when (prayerType) {
-        PrayerType.FAJR -> Icons.Default.DarkMode
-        PrayerType.SUNRISE -> Icons.Default.WbSunny
-        PrayerType.DHUHR -> Icons.Default.WbSunny
-        PrayerType.ASR -> Icons.Default.LightMode
-        PrayerType.MAGHRIB -> Icons.Default.WbSunny
-        PrayerType.ISHA -> Icons.Default.DarkMode
-        else -> Icons.Default.LightMode
+        PrayerType.FAJR -> PrayerIconFajr
+        PrayerType.SUNRISE -> PrayerIconSunrise
+        PrayerType.DHUHR -> PrayerIconDhuhr
+        PrayerType.ASR -> PrayerIconAsr
+        PrayerType.MAGHRIB -> PrayerIconMaghrib
+        PrayerType.ISHA -> PrayerIconIsha
+        else -> PrayerIconDhuhr
     }
 }
 

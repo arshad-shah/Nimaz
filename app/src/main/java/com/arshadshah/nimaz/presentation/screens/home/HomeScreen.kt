@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,6 +79,7 @@ fun HomeScreen(
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
+    onNavigateToPrayerTimes: () -> Unit = {},
     onOpenHadith: (hadithId: String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
@@ -162,6 +164,7 @@ fun HomeScreen(
                         updateManager = updateManager,
                         onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                         onNavigateToPrayerTracker = onNavigateToPrayerTracker,
+                        onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                         onOpenHadith = onOpenHadith,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
@@ -178,6 +181,7 @@ fun HomeScreen(
                         onNavigateToSettings = onNavigateToSettings,
                         onNavigateToPrayerSettings = onNavigateToPrayerSettings,
                         onNavigateToPrayerTracker = onNavigateToPrayerTracker,
+                        onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                         onOpenHadith = onOpenHadith,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
@@ -201,6 +205,7 @@ private fun HomeCompactContent(
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
@@ -288,7 +293,9 @@ private fun HomeCompactContent(
                 passedCount = state.prayerTimes.count { it.isPassed },
                 upcomingCount = state.prayerTimes.count { !it.isPassed },
                 onSettingsClick = onNavigateToPrayerSettings,
-                modifier = Modifier.padding(horizontal = 20.dp)
+                modifier = Modifier
+                    .padding(horizontal = 20.dp)
+                    .clickable { onNavigateToPrayerTimes() }
             )
 //            Spacer(modifier = Modifier.height(12.dp))
         }
@@ -315,6 +322,7 @@ private fun HomeTabletContent(
     onNavigateToSettings: () -> Unit,
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTracker: () -> Unit,
+    onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
@@ -374,7 +382,9 @@ private fun HomeTabletContent(
                         passedCount = state.prayerTimes.count { it.isPassed },
                         upcomingCount = state.prayerTimes.count { !it.isPassed },
                         onSettingsClick = onNavigateToPrayerSettings,
-                        modifier = Modifier.padding(horizontal = 4.dp, vertical = 8.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .clickable { onNavigateToPrayerTimes() }
                     )
                 }
 
