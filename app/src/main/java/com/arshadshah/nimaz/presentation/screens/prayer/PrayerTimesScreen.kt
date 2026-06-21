@@ -367,12 +367,13 @@ private fun InfoRow(label: String, value: String) {
     }
 }
 
+@Composable
 private fun relativeLabel(date: LocalDate): String {
     val diff = date.toEpochDay() - LocalDate.now().toEpochDay()
     return when {
-        diff == 1L -> "Tomorrow"
-        diff == -1L -> "Yesterday"
-        diff > 0 -> "In $diff days"
-        else -> "${-diff} days ago"
+        diff == 1L -> stringResource(R.string.fasting_tomorrow)
+        diff == -1L -> stringResource(R.string.relative_yesterday)
+        diff > 0 -> stringResource(R.string.relative_in_days_format, diff)
+        else -> stringResource(R.string.relative_days_ago_format, -diff)
     }
 }

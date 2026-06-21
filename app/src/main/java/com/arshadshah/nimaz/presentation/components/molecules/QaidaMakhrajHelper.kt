@@ -21,12 +21,13 @@ import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 
 /** Child-friendly label for where a letter is articulated. */
+@Composable
 fun makhrajLabel(area: MakhrajArea): String = when (area) {
-    MakhrajArea.JAWF -> "the mouth & throat (long sounds)"
-    MakhrajArea.HALQ -> "the throat"
-    MakhrajArea.LISAN -> "the tongue"
-    MakhrajArea.SHAFATAIN -> "the two lips"
-    MakhrajArea.KHAYSHUM -> "the nose"
+    MakhrajArea.JAWF -> stringResource(R.string.makhraj_jawf)
+    MakhrajArea.HALQ -> stringResource(R.string.makhraj_halq)
+    MakhrajArea.LISAN -> stringResource(R.string.makhraj_lisan)
+    MakhrajArea.SHAFATAIN -> stringResource(R.string.makhraj_shafatain)
+    MakhrajArea.KHAYSHUM -> stringResource(R.string.makhraj_khayshum)
 }
 
 private fun makhrajEmoji(area: MakhrajArea): String = when (area) {

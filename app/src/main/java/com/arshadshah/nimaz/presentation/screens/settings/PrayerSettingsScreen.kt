@@ -282,16 +282,17 @@ fun PrayerSettingsScreen(
  * subtitle so users can pick by where they live rather than by an unfamiliar
  * acronym ("Used in Pakistan" beats "Karachi" if you don't already know it).
  */
+@Composable
 private fun calculationMethodRegion(method: CalculationMethod): String = when (method) {
-    CalculationMethod.MUSLIM_WORLD_LEAGUE -> "Used in Europe, Far East, parts of the US"
-    CalculationMethod.EGYPTIAN -> "Used in Africa, Syria, Lebanon, Malaysia"
-    CalculationMethod.KARACHI -> "Used in Pakistan, Bangladesh, India, Afghanistan"
-    CalculationMethod.UMM_AL_QURA -> "Used in the Arabian Peninsula"
-    CalculationMethod.DUBAI -> "Used in the UAE"
-    CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Used in the UK, parts of Europe"
-    CalculationMethod.NORTH_AMERICA -> "Used in the US and Canada"
-    CalculationMethod.KUWAIT -> "Used in Kuwait"
-    CalculationMethod.QATAR -> "Used in Qatar"
-    CalculationMethod.SINGAPORE -> "Used in Singapore, Malaysia, Indonesia"
-    CalculationMethod.TURKEY -> "Used in Turkey and Central Asia"
+    CalculationMethod.MUSLIM_WORLD_LEAGUE -> stringResource(R.string.calc_region_mwl)
+    CalculationMethod.EGYPTIAN -> stringResource(R.string.calc_region_egyptian)
+    CalculationMethod.KARACHI -> stringResource(R.string.calc_region_karachi)
+    CalculationMethod.UMM_AL_QURA -> stringResource(R.string.calc_region_umm_al_qura)
+    CalculationMethod.DUBAI -> stringResource(R.string.calc_region_dubai)
+    CalculationMethod.MOON_SIGHTING_COMMITTEE -> stringResource(R.string.calc_region_moon_sighting)
+    CalculationMethod.NORTH_AMERICA -> stringResource(R.string.calc_region_north_america)
+    CalculationMethod.KUWAIT -> stringResource(R.string.calc_region_kuwait)
+    CalculationMethod.QATAR -> stringResource(R.string.calc_region_qatar)
+    CalculationMethod.SINGAPORE -> stringResource(R.string.calc_region_singapore)
+    CalculationMethod.TURKEY -> stringResource(R.string.calc_region_turkey)
 }

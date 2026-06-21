@@ -1289,6 +1289,31 @@
     <string name="quran_juz_number_format">Juz %1$d</string>
     <string name="tafseer_tap_end">Tap end position to highlight</string>
 
+    <!-- Makhraj (articulation) areas -->
+    <string name="makhraj_jawf">the mouth &amp; throat (long sounds)</string>
+    <string name="makhraj_halq">the throat</string>
+    <string name="makhraj_lisan">the tongue</string>
+    <string name="makhraj_shafatain">the two lips</string>
+    <string name="makhraj_khayshum">the nose</string>
+
+    <!-- Relative day labels -->
+    <string name="relative_yesterday">Yesterday</string>
+    <string name="relative_in_days_format">In %1$d days</string>
+    <string name="relative_days_ago_format">%1$d days ago</string>
+
+    <!-- Calculation method regions -->
+    <string name="calc_region_mwl">Used in Europe, Far East, parts of the US</string>
+    <string name="calc_region_egyptian">Used in Africa, Syria, Lebanon, Malaysia</string>
+    <string name="calc_region_karachi">Used in Pakistan, Bangladesh, India, Afghanistan</string>
+    <string name="calc_region_umm_al_qura">Used in the Arabian Peninsula</string>
+    <string name="calc_region_dubai">Used in the UAE</string>
+    <string name="calc_region_moon_sighting">Used in the UK, parts of Europe</string>
+    <string name="calc_region_north_america">Used in the US and Canada</string>
+    <string name="calc_region_kuwait">Used in Kuwait</string>
+    <string name="calc_region_qatar">Used in Qatar</string>
+    <string name="calc_region_singapore">Used in Singapore, Malaysia, Indonesia</string>
+    <string name="calc_region_turkey">Used in Turkey and Central Asia</string>
+
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
     <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
