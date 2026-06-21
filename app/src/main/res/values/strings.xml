@@ -1083,4 +1083,33 @@
         <item quantity="one">%1$d calculation recorded</item>
         <item quantity="other">%1$d calculations recorded</item>
     </plurals>
+
+    <!-- Quran ayah actions / identifiers -->
+    <string name="surah_number_format">Surah %1$d</string>
+    <string name="sajdah_wajib">Sajdah (Wajib)</string>
+    <string name="sajdah_recommended">Sajdah (Recommended)</string>
+    <string name="action_play">Play</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_tafseer">Tafseer</string>
+    <string name="unread">Unread</string>
+    <string name="listen">Listen</string>
+    <string name="days_count_format">%1$d days</string>
+
+    <!-- Quran surah info labels -->
+    <string name="quran_verses_label">Verses</string>
+    <string name="quran_revelation_label">Revelation</string>
+    <string name="quran_order_label">Order</string>
+    <string name="quran_juz_label">Juz</string>
+    <string name="quran_makki">Makki</string>
+    <string name="quran_madani">Madani</string>
+
+    <!-- Quran audio status (shared) -->
+    <string name="audio_preparing">Preparing Audio</string>
+    <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
+    <string name="audio_ayah_progress_format">Ayah %1$d of %2$d</string>
+    <string name="audio_downloading_short_format">Downloading %1$d / %2$d…</string>
+    <string name="audio_position_ayah_format">Ayah %1$d / %2$d</string>
+    <string name="audio_position_page_format">p. %1$d</string>
+    <string name="audio_position_juz_format">Juz %1$d</string>
 </resources>

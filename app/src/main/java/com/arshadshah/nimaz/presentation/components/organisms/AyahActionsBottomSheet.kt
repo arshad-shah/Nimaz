@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.res.stringResource
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -155,13 +156,13 @@ fun AyahActionsContent(
         ) {
             Column {
                 Text(
-                    text = surahName ?: "Surah ${ayah.surahNumber}",
+                    text = surahName ?: stringResource(R.string.surah_number_format, ayah.surahNumber),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Ayah ${ayah.ayahNumber}",
+                    text = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -173,7 +174,7 @@ fun AyahActionsContent(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             ) {
                 Text(
-                    text = "Juz ${ayah.juzNumber} | P${ayah.pageNumber}",
+                    text = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
@@ -207,9 +208,9 @@ fun AyahActionsContent(
             ) {
                 Text(
                     text = if (ayah.sajdaType == SajdaType.OBLIGATORY) {
-                        "Sajdah (Wajib)"
+                        stringResource(R.string.sajdah_wajib)
                     } else {
-                        "Sajdah (Recommended)"
+                        stringResource(R.string.sajdah_recommended)
                     },
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
@@ -247,7 +248,7 @@ fun AyahActionsContent(
             // Play button
             ActionButton(
                 icon = Icons.Default.PlayArrow,
-                label = "Play",
+                label = stringResource(R.string.action_play),
                 onClick = { onPlayClick(ayah) },
                 tint = MaterialTheme.colorScheme.primary
             )
@@ -255,7 +256,7 @@ fun AyahActionsContent(
             // Bookmark button
             ActionButton(
                 icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                label = "Bookmark",
+                label = stringResource(R.string.bookmark),
                 onClick = { onBookmarkClick(ayah) },
                 tint = if (isBookmarked) NimazColors.QuranColors.BookmarkPrimary
                 else MaterialTheme.colorScheme.onSurfaceVariant
@@ -264,7 +265,7 @@ fun AyahActionsContent(
             // Favorite button
             ActionButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                label = "Favorite",
+                label = stringResource(R.string.action_favorite),
                 onClick = { onFavoriteClick(ayah) },
                 tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -272,7 +273,7 @@ fun AyahActionsContent(
             // Copy button
             ActionButton(
                 icon = Icons.Default.ContentCopy,
-                label = "Copy",
+                label = stringResource(R.string.action_copy),
                 onClick = {
                     copyAyahToClipboard(context, ayah)
                     onCopyClick(ayah)
@@ -283,7 +284,7 @@ fun AyahActionsContent(
             // Share button
             ActionButton(
                 icon = Icons.Default.Share,
-                label = "Share",
+                label = stringResource(R.string.share),
                 onClick = {
                     shareAyah(context, ayah)
                     onShareClick(ayah)
@@ -295,7 +296,7 @@ fun AyahActionsContent(
             if (isKhatamActive) {
                 ActionButton(
                     icon = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                    label = if (isKhatamRead) "Unread" else "Read",
+                    label = if (isKhatamRead) stringResource(R.string.unread) else stringResource(R.string.read),
                     onClick = { onKhatamToggle(ayah) },
                     tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -304,7 +305,7 @@ fun AyahActionsContent(
             // Tafseer button
             ActionButton(
                 icon = Icons.AutoMirrored.Filled.MenuBook,
-                label = "Tafseer",
+                label = stringResource(R.string.action_tafseer),
                 onClick = { onTafseerClick(ayah) },
                 tint = MaterialTheme.colorScheme.primary
             )

@@ -147,17 +147,17 @@ internal fun HeroHeader(
                 ) {
                     StatItem(
                         value = surah.numberOfAyahs.toString(),
-                        label = "Verses"
+                        label = stringResource(R.string.quran_verses_label)
                     )
                     Spacer(modifier = Modifier.width(30.dp))
                     StatItem(
-                        value = if (surah.revelationType == RevelationType.MECCAN) "Makki" else "Madani",
-                        label = "Revelation"
+                        value = if (surah.revelationType == RevelationType.MECCAN) stringResource(R.string.quran_makki) else stringResource(R.string.quran_madani),
+                        label = stringResource(R.string.quran_revelation_label)
                     )
                     Spacer(modifier = Modifier.width(30.dp))
                     StatItem(
                         value = surah.orderInMushaf.toString(),
-                        label = "Order"
+                        label = stringResource(R.string.quran_order_label)
                     )
                 }
             }
@@ -255,12 +255,12 @@ internal fun SurahAudioControlBar(
                 if (isPreparing && totalToDownload > 0) {
                     // Show download status
                     Text(
-                        text = "Preparing Audio",
+                        text = stringResource(R.string.audio_preparing),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Downloading $downloadedCount of $totalToDownload ayahs",
+                        text = stringResource(R.string.audio_downloading_format, downloadedCount, totalToDownload),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -278,7 +278,7 @@ internal fun SurahAudioControlBar(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Ayah $currentAyah of $totalAyahs",
+                        text = stringResource(R.string.audio_ayah_progress_format, currentAyah, totalAyahs),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -365,7 +365,7 @@ private fun DetailCardPreview() {
     NimazTheme {
         DetailCard(
             icon = Icons.AutoMirrored.Filled.MenuBook,
-            label = "Juz",
+            label = stringResource(R.string.quran_juz_label),
             value = "1"
         )
     }
