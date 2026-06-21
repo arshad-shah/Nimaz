@@ -70,6 +70,9 @@ sealed interface Route {
     @Serializable
     data object DuaSearch : Route
 
+    @Serializable
+    data object DuaSettings : Route
+
     // Prayer screens
     @Serializable
     data object PrayerTimes : Route

@@ -559,6 +559,15 @@
     <string name="dua_reader_share">Kongsi</string>
     <string name="dua_reader_done">Selesai</string>
     <string name="dua_reader_source_label">Sumber: %1$s</string>
+    <string name="dua_reader_not_found">Doa tidak dijumpai</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Tetapan Doa</string>
+    <string name="translation_font_size">Saiz Terjemahan</string>
+    <string name="show_arabic">Tunjuk Arab</string>
+    <string name="show_arabic_subtitle">Tulisan Arab</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_translation">Ya Allah, aku memohon kepada-Mu ilmu yang bermanfaat</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Penjejak</string>

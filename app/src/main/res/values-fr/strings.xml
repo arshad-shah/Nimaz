@@ -559,6 +559,15 @@
     <string name="dua_reader_share">Partager</string>
     <string name="dua_reader_done">Terminé</string>
     <string name="dua_reader_source_label">Source : %1$s</string>
+    <string name="dua_reader_not_found">Doua introuvable</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Paramètres des Douas</string>
+    <string name="translation_font_size">Taille de la traduction</string>
+    <string name="show_arabic">Afficher l\'arabe</string>
+    <string name="show_arabic_subtitle">Écriture arabe</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_translation">Ô Allah, je Te demande une science utile</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Suivi</string>

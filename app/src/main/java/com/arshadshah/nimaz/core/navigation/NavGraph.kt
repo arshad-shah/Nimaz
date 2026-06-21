@@ -58,6 +58,7 @@ import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
@@ -529,6 +530,13 @@ fun NavGraph(
                 val args = backStackEntry.toRoute<Route.DuaReader>()
                 DuaReaderScreen(
                     duaId = args.duaId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.DuaSettings) }
+                )
+            }
+
+            composable<Route.DuaSettings> {
+                DuaSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

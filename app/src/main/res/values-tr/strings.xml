@@ -559,6 +559,15 @@
     <string name="dua_reader_share">Paylaş</string>
     <string name="dua_reader_done">Tamam</string>
     <string name="dua_reader_source_label">Kaynak: %1$s</string>
+    <string name="dua_reader_not_found">Dua bulunamadı</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Dua Ayarları</string>
+    <string name="translation_font_size">Çeviri Boyutu</string>
+    <string name="show_arabic">Arapçayı Göster</string>
+    <string name="show_arabic_subtitle">Arap yazısı</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_translation">"Allah'ım, Senden faydalı ilim isterim"</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Takip</string>

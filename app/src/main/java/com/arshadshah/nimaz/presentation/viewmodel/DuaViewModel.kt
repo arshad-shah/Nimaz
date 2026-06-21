@@ -9,10 +9,15 @@ import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.repository.DuaRepository
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import androidx.compose.ui.text.font.FontFamily
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -35,15 +40,17 @@ data class DuaCategoryUiState(
 )
 
 data class DuaReaderUiState(
-    val dua: Dua? = null,
-    val isFavorite: Boolean = false,
+    val duas: List<Dua> = emptyList(),
+    val initialIndex: Int = 0,
     val isLoading: Boolean = true,
     val error: String? = null,
     val showArabic: Boolean = true,
     val showTransliteration: Boolean = true,
     val showTranslation: Boolean = true,
     val fontSize: Float = 16f,
-    val arabicFontSize: Float = 28f
+    val arabicFontSize: Float = 28f,
+    val arabicFontFamily: FontFamily = AmiriFontFamily,
+    val selectedArabicFontId: String = "amiri"
 )
 
 data class DuaSearchUiState(
@@ -84,7 +91,8 @@ sealed interface DuaEvent {
 
 @HiltViewModel
 class DuaViewModel @Inject constructor(
-    private val duaRepository: DuaRepository
+    private val duaRepository: DuaRepository,
+    private val preferencesDataStore: PreferencesDataStore
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(DuaCollectionUiState())
@@ -109,6 +117,7 @@ class DuaViewModel @Inject constructor(
         loadAllCategories()
         loadFavorites()
         loadTodayProgress()
+        observeDuaSettings()
     }
 
     fun onEvent(event: DuaEvent) {
@@ -178,18 +187,60 @@ class DuaViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 val dua = duaRepository.getDuaById(duaId)
-
-                _readerState.update {
-                    it.copy(dua = dua, isLoading = false)
+                if (dua == null) {
+                    _readerState.update { it.copy(isLoading = false, error = "Dua not found") }
+                    return@launch
                 }
-
-                // Load favorite status
-                duaRepository.isDuaFavorite(duaId).collect { isFav ->
-                    _readerState.update { it.copy(isFavorite = isFav) }
+                // Load the sibling duas in this collection so the reader can page
+                // through them with a HorizontalPager.
+                duaRepository.getDuasByCategory(dua.categoryId).collect { categoryDuas ->
+                    val list = categoryDuas.ifEmpty { listOf(dua) }
+                    val index = list.indexOfFirst { it.id == duaId }.coerceAtLeast(0)
+                    _readerState.update {
+                        it.copy(duas = list, initialIndex = index, isLoading = false)
+                    }
                 }
             } catch (e: Exception) {
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
+        }
+    }
+
+    /**
+     * Reactively mirrors the persisted dua reading preferences into the reader
+     * state, exactly as the Quran reader observes its own prefs. Combined in two
+     * groups of three because [combine] only has typed overloads up to five flows.
+     */
+    private fun observeDuaSettings() {
+        viewModelScope.launch {
+            val displayFlow = combine(
+                preferencesDataStore.duaArabicFont,
+                preferencesDataStore.duaArabicFontSize,
+                preferencesDataStore.duaTranslationFontSize
+            ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
+
+            val toggleFlow = combine(
+                preferencesDataStore.duaShowArabic,
+                preferencesDataStore.duaShowTransliteration,
+                preferencesDataStore.duaShowTranslation
+            ) { showArabic, showTranslit, showTrans -> Triple(showArabic, showTranslit, showTrans) }
+
+            combine(displayFlow, toggleFlow) { display, toggles -> display to toggles }
+                .collect { (display, toggles) ->
+                    val (fontId, arabicSize, transSize) = display
+                    val (showArabic, showTranslit, showTrans) = toggles
+                    _readerState.update {
+                        it.copy(
+                            selectedArabicFontId = fontId,
+                            arabicFontSize = arabicSize,
+                            fontSize = transSize,
+                            showArabic = showArabic,
+                            showTransliteration = showTranslit,
+                            showTranslation = showTrans,
+                            arabicFontFamily = QuranArabicFont.fromId(fontId).fontFamily
+                        )
+                    }
+                }
         }
     }
 

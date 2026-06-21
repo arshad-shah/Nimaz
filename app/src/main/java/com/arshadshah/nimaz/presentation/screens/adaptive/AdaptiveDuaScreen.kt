@@ -66,6 +66,7 @@ fun AdaptiveDuaScreen(
                             DuaReaderScreen(
                                 duaId = args.duaId,
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                onNavigateToSettings = { navController.navigate(Route.DuaSettings) },
                             )
                         } else {
                             DuaCategoryScreen(

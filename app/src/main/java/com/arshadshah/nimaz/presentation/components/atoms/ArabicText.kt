@@ -150,6 +150,7 @@ fun DuaArabicText(
     modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.LARGE,
     customFontSize: Float? = null,
+    fontFamily: FontFamily = AmiriFontFamily,
     color: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val actualFontSize = customFontSize?.sp ?: size.fontSize
@@ -162,6 +163,7 @@ fun DuaArabicText(
         color = color,
         textAlign = TextAlign.Center,
         style = ArabicTextStyles.duaArabic.copy(
+            fontFamily = fontFamily,
             fontSize = actualFontSize,
             lineHeight = actualLineHeight
         )

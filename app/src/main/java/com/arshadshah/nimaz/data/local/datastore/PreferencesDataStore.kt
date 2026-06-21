@@ -117,6 +117,14 @@ class PreferencesDataStore @Inject constructor(
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
 
+        // Dua Settings
+        val DUA_ARABIC_FONT = stringPreferencesKey("dua_arabic_font")
+        val DUA_ARABIC_FONT_SIZE = floatPreferencesKey("dua_arabic_font_size")
+        val DUA_TRANSLATION_FONT_SIZE = floatPreferencesKey("dua_translation_font_size")
+        val DUA_SHOW_ARABIC = booleanPreferencesKey("dua_show_arabic")
+        val DUA_SHOW_TRANSLITERATION = booleanPreferencesKey("dua_show_transliteration")
+        val DUA_SHOW_TRANSLATION = booleanPreferencesKey("dua_show_translation")
+
         // Tasbih Settings
         val TASBIH_VIBRATION_ENABLED = booleanPreferencesKey("tasbih_vibration_enabled")
         val TASBIH_SOUND_ENABLED = booleanPreferencesKey("tasbih_sound_enabled")
@@ -636,6 +644,55 @@ class PreferencesDataStore @Inject constructor(
 
     suspend fun setShowTajweed(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.SHOW_TAJWEED] = enabled }
+    }
+
+    // Dua Settings
+    val duaArabicFont: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_ARABIC_FONT] ?: "amiri"
+    }
+
+    suspend fun setDuaArabicFont(fontId: String) {
+        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT] = fontId }
+    }
+
+    val duaArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_ARABIC_FONT_SIZE] ?: 28f
+    }
+
+    suspend fun setDuaArabicFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT_SIZE] = size }
+    }
+
+    val duaTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] ?: 16f
+    }
+
+    suspend fun setDuaTranslationFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] = size }
+    }
+
+    val duaShowArabic: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_ARABIC] ?: true
+    }
+
+    suspend fun setDuaShowArabic(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_ARABIC] = show }
+    }
+
+    val duaShowTransliteration: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_TRANSLITERATION] ?: true
+    }
+
+    suspend fun setDuaShowTransliteration(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLITERATION] = show }
+    }
+
+    val duaShowTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_TRANSLATION] ?: true
+    }
+
+    suspend fun setDuaShowTranslation(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLATION] = show }
     }
 
     // Tasbih Settings
