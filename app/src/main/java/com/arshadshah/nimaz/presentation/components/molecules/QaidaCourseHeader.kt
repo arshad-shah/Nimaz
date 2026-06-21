@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -77,7 +79,7 @@ fun QaidaCourseHeader(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "Lesson $lessonIndex of $totalLessons",
+                text = stringResource(R.string.qaida_lesson_progress, lessonIndex, totalLessons),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

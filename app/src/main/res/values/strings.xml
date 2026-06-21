@@ -1103,6 +1103,44 @@
     <string name="quran_juz_label">Juz</string>
     <string name="quran_makki">Makki</string>
     <string name="quran_madani">Madani</string>
+    <string name="quran_meccan">Meccan</string>
+    <string name="quran_medinan">Medinan</string>
+    <string name="quran_ayahs_count_format">%1$d Ayahs</string>
+    <string name="juz_page_dot_format">Juz %1$d • Page %2$d</string>
+    <string name="page_range_format">Pages %1$d–%2$d</string>
+    <string name="page_single_format">Page %1$d</string>
+
+    <!-- Common nav labels -->
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="today_uppercase">TODAY</string>
+    <string name="unknown_date">Unknown date</string>
+
+    <!-- Hadith Reader Screen -->
+    <string name="hadith_chapter_format">Chapter %1$d</string>
+    <string name="no_hadith_found">No hadith found</string>
+    <string name="hadith_of_count_format">of %1$d</string>
+    <string name="hadith_narrated_by_format">Narrated by %1$s</string>
+    <string name="hadith_isnad">Chain of Narration (Isnad)</string>
+
+    <!-- Monthly Prayer Times Screen -->
+    <string name="export_as_pdf">Export as PDF</string>
+    <string name="monthly_this_month">This month</string>
+    <string name="ramadan_year_format">Ramadan %1$d</string>
+    <string name="monthly_full_month_subtitle">Full month · 1 → last day</string>
+    <string name="ramadan_month_label">RAMADAN MONTH</string>
+
+    <!-- Prayer Times Screen -->
+    <string name="cd_prayer_settings">Prayer settings</string>
+    <string name="cd_previous_day">Previous day</string>
+    <string name="cd_pick_date">Pick a date</string>
+    <string name="cd_next_day">Next day</string>
+    <string name="prayer_info_daylight">Daylight</string>
+    <string name="prayer_info_sun">Sunrise / Sunset</string>
+    <string name="prayer_info_method">Method</string>
+
+    <!-- Qaida -->
+    <string name="qaida_lesson_progress">Lesson %1$d of %2$d</string>
 
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>

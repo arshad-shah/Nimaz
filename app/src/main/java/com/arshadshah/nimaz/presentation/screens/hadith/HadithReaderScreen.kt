@@ -106,9 +106,9 @@ fun HadithReaderScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = state.chapter?.nameEnglish ?: "Loading...",
+                title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
                 subtitle = state.chapter?.let {
-                    "Chapter ${it.chapterNumber}"
+                    stringResource(R.string.hadith_chapter_format, it.chapterNumber)
                 },
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
@@ -248,7 +248,7 @@ fun HadithReaderScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No hadith found",
+                    text = stringResource(R.string.no_hadith_found),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -305,7 +305,7 @@ private fun HadithNavigationBar(
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
             )
             Text(
-                text = "Previous",
+                text = stringResource(R.string.previous),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (hasPrevious) MaterialTheme.colorScheme.onSurfaceVariant
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
@@ -330,7 +330,7 @@ private fun HadithNavigationBar(
                     .padding(horizontal = 14.dp, vertical = 6.dp)
             )
             Text(
-                text = "of $totalCount",
+                text = stringResource(R.string.hadith_of_count_format, totalCount),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -350,7 +350,7 @@ private fun HadithNavigationBar(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Next",
+                text = stringResource(R.string.next),
                 style = MaterialTheme.typography.labelMedium,
                 color = if (hasNext) MaterialTheme.colorScheme.onSurfaceVariant
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
@@ -483,7 +483,7 @@ private fun HadithContentCard(
             // Narrator badge
             if (!hadith.narratorName.isNullOrEmpty()) {
                 Text(
-                    text = "Narrated by ${hadith.narratorName}",
+                    text = stringResource(R.string.hadith_narrated_by_format, hadith.narratorName),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier
@@ -549,7 +549,7 @@ private fun ChainOfNarrationSection(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Chain of Narration (Isnad)",
+                text = stringResource(R.string.hadith_isnad),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -690,7 +690,7 @@ private fun BottomActionBar(
                         modifier = Modifier.size(22.dp)
                     )
                 },
-                label = "Share",
+                label = stringResource(R.string.share),
                 onClick = onShareClick,
                 modifier = Modifier.weight(1f)
             )
@@ -703,7 +703,7 @@ private fun BottomActionBar(
                         modifier = Modifier.size(22.dp)
                     )
                 },
-                label = "Copy",
+                label = stringResource(R.string.action_copy),
                 onClick = onCopyClick,
                 modifier = Modifier.weight(1f)
             )

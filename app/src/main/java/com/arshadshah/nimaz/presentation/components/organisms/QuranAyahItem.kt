@@ -342,7 +342,7 @@ internal fun AyahItem(
             }
 
             Text(
-                text = "Juz ${ayah.juz} \u2022 Page ${ayah.page}",
+                text = stringResource(R.string.juz_page_dot_format, ayah.juz, ayah.page),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )

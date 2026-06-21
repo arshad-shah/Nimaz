@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +53,7 @@ fun NimazQadaPrayerItem(
             .toLocalDate()
             .format(dateFormatter)
     } catch (e: Exception) {
-        "Unknown date"
+        stringResource(R.string.unknown_date)
     }
 
     val prayerColor = getPrayerColor(prayer.prayerName)
