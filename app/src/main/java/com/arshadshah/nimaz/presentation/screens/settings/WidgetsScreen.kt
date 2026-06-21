@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -106,7 +108,7 @@ fun WidgetsScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Widgets",
+                title = stringResource(R.string.widgets),
                 onBackClick = onNavigateBack
             )
         }
@@ -121,7 +123,7 @@ fun WidgetsScreen(
             // Intro text
             item {
                 Text(
-                    text = "Add Nimaz widgets to your home screen for quick access to prayer times without opening the app.",
+                    text = stringResource(R.string.widgets_intro),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     lineHeight = 22.sp
@@ -131,9 +133,9 @@ fun WidgetsScreen(
             // Next Prayer Widget (2x2)
             item {
                 WidgetSection(
-                    title = "Next Prayer Widget (2\u00D72)",
-                    infoName = "Next Prayer",
-                    infoSize = "2\u00D72 \u2022 Shows countdown to next prayer",
+                    title = stringResource(R.string.widget_next_prayer_title),
+                    infoName = stringResource(R.string.widget_next_prayer),
+                    infoSize = stringResource(R.string.widget_next_prayer_size),
                     infoIcon = Icons.Default.Schedule,
                     preview = { NextPrayerWidgetPreview(previewData) }
                 )
@@ -142,9 +144,9 @@ fun WidgetsScreen(
             // Prayer Times Widget (4x1)
             item {
                 WidgetSection(
-                    title = "Prayer Times Widget (4\u00D71)",
-                    infoName = "Prayer Times",
-                    infoSize = "4\u00D71 \u2022 All prayers + countdown",
+                    title = stringResource(R.string.widget_prayer_times_title),
+                    infoName = stringResource(R.string.widget_prayer_times),
+                    infoSize = stringResource(R.string.widget_prayer_times_size),
                     infoIcon = Icons.AutoMirrored.Filled.ListAlt,
                     preview = { PrayerTimesWidgetPreview(previewData) }
                 )
@@ -153,9 +155,9 @@ fun WidgetsScreen(
             // Hijri Date Widget (2x2)
             item {
                 WidgetSection(
-                    title = "Hijri Date Widget (2\u00D72)",
-                    infoName = "Hijri Date",
-                    infoSize = "2\u00D72 \u2022 Islamic calendar date",
+                    title = stringResource(R.string.widget_hijri_date_title),
+                    infoName = stringResource(R.string.widget_hijri_date),
+                    infoSize = stringResource(R.string.widget_hijri_date_size),
                     infoIcon = Icons.Default.CalendarMonth,
                     preview = { HijriDateWidgetPreview(previewData) }
                 )
@@ -164,9 +166,9 @@ fun WidgetsScreen(
             // Prayer Tracker Widget (4x1)
             item {
                 WidgetSection(
-                    title = "Prayer Tracker Widget (4\u00D71)",
-                    infoName = "Prayer Tracker",
-                    infoSize = "4\u00D71 \u2022 Tap to mark prayers completed",
+                    title = stringResource(R.string.widget_prayer_tracker_title),
+                    infoName = stringResource(R.string.widget_prayer_tracker),
+                    infoSize = stringResource(R.string.widget_prayer_tracker_size),
                     infoIcon = Icons.Default.CheckCircle,
                     preview = { PrayerTrackerWidgetPreview() }
                 )
@@ -175,9 +177,9 @@ fun WidgetsScreen(
             // Hijri Calendar Widget (4x2)
             item {
                 WidgetSection(
-                    title = "Hijri Calendar Widget (4\u00D72)",
-                    infoName = "Hijri Calendar",
-                    infoSize = "4\u00D72 \u2022 Full month calendar + today\u2019s events",
+                    title = stringResource(R.string.widget_hijri_calendar_title),
+                    infoName = stringResource(R.string.widget_hijri_calendar),
+                    infoSize = stringResource(R.string.widget_hijri_calendar_size),
                     infoIcon = Icons.Default.CalendarMonth,
                     preview = { HijriCalendarWidgetPreview(previewData) }
                 )
@@ -187,7 +189,7 @@ fun WidgetsScreen(
             item {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "How to Add Widgets",
+                    text = stringResource(R.string.widgets_how_to),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onBackground
@@ -309,7 +311,7 @@ private fun NextPrayerWidgetPreview(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Next Prayer",
+                text = stringResource(R.string.widget_next_prayer),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
@@ -336,7 +338,7 @@ private fun NextPrayerWidgetPreview(
                     .padding(horizontal = 12.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "in ${data.countdown}",
+                    text = stringResource(R.string.widget_countdown_format, data.countdown),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.primary
@@ -388,7 +390,7 @@ private fun PrayerTimesWidgetPreview(
                         color = MaterialTheme.colorScheme.primary
                     )
                     Text(
-                        text = "in ${data.countdown}",
+                        text = stringResource(R.string.widget_countdown_format, data.countdown),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
@@ -501,7 +503,7 @@ private fun PrayerTrackerWidgetPreview(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Today",
+                    text = stringResource(R.string.today),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
@@ -688,7 +690,7 @@ private fun HijriCalendarWidgetPreview(
                     .padding(start = 8.dp)
             ) {
                 Text(
-                    text = "Today",
+                    text = stringResource(R.string.today),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.primary
@@ -704,7 +706,7 @@ private fun HijriCalendarWidgetPreview(
 
                 if (data.todayEvents.isEmpty()) {
                     Text(
-                        text = "No events",
+                        text = stringResource(R.string.widget_no_events),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                     )
@@ -745,10 +747,10 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         val steps = listOf(
-            "Long press on an empty area of your home screen",
-            "Tap \"Widgets\" from the menu that appears",
-            "Search for \"Nimaz\" and select your preferred widget",
-            "Drag the widget to your desired location"
+            stringResource(R.string.widgets_how_to_step_1),
+            stringResource(R.string.widgets_how_to_step_2),
+            stringResource(R.string.widgets_how_to_step_3),
+            stringResource(R.string.widgets_how_to_step_4)
         )
 
         steps.forEachIndexed { index, step ->

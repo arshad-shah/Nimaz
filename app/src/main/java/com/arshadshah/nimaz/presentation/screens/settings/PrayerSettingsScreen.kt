@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -60,7 +62,7 @@ fun PrayerSettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Prayer Settings",
+                title = stringResource(R.string.prayer_settings_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -77,35 +79,35 @@ fun PrayerSettingsScreen(
 
             // Calculation Method Section
             item {
-                NimazSectionHeader(title = "Calculation Method")
+                NimazSectionHeader(title = stringResource(R.string.calculation_method))
             }
             item {
                 NimazMenuGroup {
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
                         tintIcon = true,
-                        title = "Calculation Method",
+                        title = stringResource(R.string.calculation_method),
                         value = prayerState.calculationMethod.displayName(),
                         onClick = { showCalculationMethodDialog = true }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
-                        title = "Asr Calculation",
+                        title = stringResource(R.string.asr_calculation),
                         value = when (prayerState.asrMethod) {
-                            AsrJuristicMethod.STANDARD -> "Standard (Shafi'i, Maliki, Hanbali)"
-                            AsrJuristicMethod.HANAFI -> "Hanafi"
+                            AsrJuristicMethod.STANDARD -> stringResource(R.string.asr_standard)
+                            AsrJuristicMethod.HANAFI -> stringResource(R.string.asr_hanafi)
                         },
                         onClick = { showAsrMethodDialog = true }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.WbSunny,
-                        title = "High Latitude Method",
+                        title = stringResource(R.string.high_latitude_method),
                         value = when (prayerState.highLatitudeRule) {
-                            HighLatitudeRule.MIDDLE_OF_NIGHT -> "Middle of the Night"
-                            HighLatitudeRule.SEVENTH_OF_NIGHT -> "Seventh of the Night"
-                            HighLatitudeRule.TWILIGHT_ANGLE -> "Twilight Angle"
+                            HighLatitudeRule.MIDDLE_OF_NIGHT -> stringResource(R.string.middle_of_night)
+                            HighLatitudeRule.SEVENTH_OF_NIGHT -> stringResource(R.string.seventh_of_night)
+                            HighLatitudeRule.TWILIGHT_ANGLE -> stringResource(R.string.twilight_angle)
                         },
                         onClick = { showHighLatitudeDialog = true }
                     )
@@ -126,12 +128,12 @@ fun PrayerSettingsScreen(
 
             // Manual Adjustments Section
             item {
-                NimazSectionHeader(title = "Manual Adjustments (Minutes)")
+                NimazSectionHeader(title = stringResource(R.string.manual_adjustments))
             }
             item {
                 NimazMenuGroup {
                     NimazNumberStepper(
-                        label = "Fajr",
+                        label = stringResource(R.string.prayer_fajr),
                         value = prayerState.fajrAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("fajr", it))
@@ -139,7 +141,7 @@ fun PrayerSettingsScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
-                        label = "Sunrise",
+                        label = stringResource(R.string.prayer_sunrise),
                         value = prayerState.sunriseAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("sunrise", it))
@@ -147,7 +149,7 @@ fun PrayerSettingsScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
-                        label = "Dhuhr",
+                        label = stringResource(R.string.prayer_dhuhr),
                         value = prayerState.dhuhrAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("dhuhr", it))
@@ -155,7 +157,7 @@ fun PrayerSettingsScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
-                        label = "Asr",
+                        label = stringResource(R.string.prayer_asr),
                         value = prayerState.asrAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("asr", it))
@@ -163,7 +165,7 @@ fun PrayerSettingsScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
-                        label = "Maghrib",
+                        label = stringResource(R.string.prayer_maghrib),
                         value = prayerState.maghribAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("maghrib", it))
@@ -171,7 +173,7 @@ fun PrayerSettingsScreen(
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazNumberStepper(
-                        label = "Isha",
+                        label = stringResource(R.string.prayer_isha),
                         value = prayerState.ishaAdjustment,
                         onValueChange = {
                             viewModel.onEvent(SettingsEvent.SetPrayerAdjustment("isha", it))
@@ -182,20 +184,20 @@ fun PrayerSettingsScreen(
 
             // Notifications Section
             item {
-                NimazSectionHeader(title = "Notifications")
+                NimazSectionHeader(title = stringResource(R.string.notifications))
             }
             item {
                 NimazMenuGroup {
                     NimazSettingsItem(
                         icon = Icons.Default.Notifications,
-                        title = "Adhan Notifications",
+                        title = stringResource(R.string.adhan_notifications),
                         value = "All prayers enabled",
                         onClick = onNavigateToNotifications
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
-                        title = "Pre-Adhan Reminder",
+                        title = stringResource(R.string.pre_adhan_reminder),
                         value = "15 minutes before",
                         onClick = onNavigateToNotifications
                     )
@@ -213,7 +215,7 @@ fun PrayerSettingsScreen(
     // long lists.
     if (showCalculationMethodDialog) {
         NimazListPicker(
-            title = "Calculation Method",
+            title = stringResource(R.string.calculation_method),
             items = CalculationMethod.entries.map { method ->
                 NimazPickerItem(
                     value = method,
@@ -229,17 +231,17 @@ fun PrayerSettingsScreen(
 
     if (showAsrMethodDialog) {
         NimazListPicker(
-            title = "Asr Calculation",
+            title = stringResource(R.string.asr_calculation),
             items = listOf(
                 NimazPickerItem(
                     value = AsrJuristicMethod.STANDARD,
-                    title = "Standard (Shafi'i, Maliki, Hanbali)",
-                    description = "Shadow equals object length",
+                    title = stringResource(R.string.asr_standard),
+                    description = stringResource(R.string.asr_standard_desc),
                 ),
                 NimazPickerItem(
                     value = AsrJuristicMethod.HANAFI,
-                    title = "Hanafi",
-                    description = "Shadow equals twice object length",
+                    title = stringResource(R.string.asr_hanafi),
+                    description = stringResource(R.string.asr_hanafi_desc),
                 ),
             ),
             selected = prayerState.asrMethod,
@@ -250,22 +252,22 @@ fun PrayerSettingsScreen(
 
     if (showHighLatitudeDialog) {
         NimazListPicker(
-            title = "High Latitude Method",
+            title = stringResource(R.string.high_latitude_method),
             items = listOf(
                 NimazPickerItem(
                     value = HighLatitudeRule.MIDDLE_OF_NIGHT,
-                    title = "Middle of the Night",
-                    description = "Split the night in half from sunset to sunrise",
+                    title = stringResource(R.string.middle_of_night),
+                    description = stringResource(R.string.high_lat_middle_desc),
                 ),
                 NimazPickerItem(
                     value = HighLatitudeRule.SEVENTH_OF_NIGHT,
-                    title = "Seventh of the Night",
-                    description = "Use 1/7th of the night for Fajr and Isha",
+                    title = stringResource(R.string.seventh_of_night),
+                    description = stringResource(R.string.high_lat_seventh_desc),
                 ),
                 NimazPickerItem(
                     value = HighLatitudeRule.TWILIGHT_ANGLE,
-                    title = "Twilight Angle",
-                    description = "Use the angle-based method for Fajr and Isha",
+                    title = stringResource(R.string.twilight_angle),
+                    description = stringResource(R.string.high_lat_twilight_desc),
                 ),
             ),
             selected = prayerState.highLatitudeRule,

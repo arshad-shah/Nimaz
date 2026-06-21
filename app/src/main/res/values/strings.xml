@@ -1161,6 +1161,48 @@
     <string name="cd_disable_highlighting">Disable highlighting</string>
     <string name="cd_enable_highlighting">Enable highlighting</string>
 
+    <!-- Prayer Settings Screen -->
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="high_latitude_method">High Latitude Method</string>
+    <string name="middle_of_night">Middle of the Night</string>
+    <string name="seventh_of_night">Seventh of the Night</string>
+    <string name="twilight_angle">Twilight Angle</string>
+    <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
+    <string name="adhan_notifications">Adhan Notifications</string>
+    <string name="pre_adhan_reminder">Pre-Adhan Reminder</string>
+    <string name="asr_standard_desc">Shadow equals object length</string>
+    <string name="asr_hanafi_desc">Shadow equals twice object length</string>
+    <string name="high_lat_middle_desc">Split the night in half from sunset to sunrise</string>
+    <string name="high_lat_seventh_desc">Use 1/7th of the night for Fajr and Isha</string>
+    <string name="high_lat_twilight_desc">Use the angle-based method for Fajr and Isha</string>
+
+    <!-- Widgets Screen -->
+    <string name="widgets_intro">Add Nimaz widgets to your home screen for quick access to prayer times without opening the app.</string>
+    <string name="widget_next_prayer_title">Next Prayer Widget (2×2)</string>
+    <string name="widget_prayer_times_title">Prayer Times Widget (4×1)</string>
+    <string name="widget_hijri_date_title">Hijri Date Widget (2×2)</string>
+    <string name="widget_prayer_tracker_title">Prayer Tracker Widget (4×1)</string>
+    <string name="widget_hijri_calendar_title">Hijri Calendar Widget (4×2)</string>
+    <string name="widget_prayer_times">Prayer Times</string>
+    <string name="widget_hijri_date">Hijri Date</string>
+    <string name="widget_prayer_tracker">Prayer Tracker</string>
+    <string name="widget_hijri_calendar">Hijri Calendar</string>
+    <string name="widget_next_prayer_size">2×2 • Shows countdown to next prayer</string>
+    <string name="widget_prayer_times_size">4×1 • All prayers + countdown</string>
+    <string name="widget_hijri_date_size">2×2 • Islamic calendar date</string>
+    <string name="widget_prayer_tracker_size">4×1 • Tap to mark prayers completed</string>
+    <string name="widget_hijri_calendar_size">4×2 • Full month calendar + today\'s events</string>
+    <string name="widgets_how_to">How to Add Widgets</string>
+    <string name="widgets_how_to_step_1">Long press on an empty area of your home screen</string>
+    <string name="widgets_how_to_step_2">Tap \"Widgets\" from the menu that appears</string>
+    <string name="widgets_how_to_step_3">Search for \"Nimaz\" and select your preferred widget</string>
+    <string name="widgets_how_to_step_4">Drag the widget to your desired location</string>
+    <string name="widget_countdown_format">in %1$s</string>
+
+    <!-- Zakat Calculator (percent literals need formatted=false) -->
+    <string name="zakat_rate_subtitle" formatted="false">2.5% of eligible wealth</string>
+    <string name="zakat_due_2_5_percent" formatted="false">Zakat Due (2.5%)</string>
+
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
     <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
