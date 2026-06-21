@@ -27,10 +27,8 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-// Bismillah text constant
-private const val BISMILLAH_TEXT_DISPLAY = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
 
 // Theme colors for Mushaf header (matching QuranReaderScreen patterns)
 private val MushafHeaderGradientStart = Color(0xFF115E59)
@@ -157,7 +155,7 @@ fun MushafSurahHeader(
                 contentAlignment = Alignment.Center
             ) {
                 ArabicText(
-                    text = BISMILLAH_TEXT_DISPLAY,
+                    text = BISMILLAH_TEXT,
                     size = ArabicTextSize.LARGE,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -244,7 +242,7 @@ fun MushafSurahSeparator(
                 contentAlignment = Alignment.Center
             ) {
                 ArabicText(
-                    text = BISMILLAH_TEXT_DISPLAY,
+                    text = BISMILLAH_TEXT,
                     size = ArabicTextSize.LARGE,
                     color = MaterialTheme.colorScheme.primary
                 )

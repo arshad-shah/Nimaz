@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -205,7 +207,7 @@ private fun DonutChart(
                 color = NimazColors.StatusColors.Prayed
             )
             Text(
-                text = "Completed",
+                text = stringResource(R.string.completed),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -221,20 +223,20 @@ private fun DonutChart(
     ) {
         LegendItem(
             color = NimazColors.StatusColors.Prayed,
-            label = "Prayed",
+            label = stringResource(R.string.prayed),
             value = stats.totalPrayed
         )
         Spacer(modifier = Modifier.width(24.dp))
         LegendItem(
             color = NimazColors.StatusColors.Missed,
-            label = "Missed",
+            label = stringResource(R.string.missed),
             value = stats.totalMissed
         )
         if (stats.totalJamaah > 0) {
             Spacer(modifier = Modifier.width(24.dp))
             LegendItem(
                 color = NimazColors.StatusColors.Jamaah,
-                label = "Jamaah",
+                label = stringResource(R.string.jamaah),
                 value = stats.totalJamaah
             )
         }
@@ -511,17 +513,17 @@ private fun StatsSummary(
     ) {
         StatItem(
             value = stats.currentStreak.toString(),
-            label = "Current\nStreak",
+            label = stringResource(R.string.stat_current_streak),
             color = NimazColors.StatusColors.Prayed
         )
         StatItem(
             value = stats.longestStreak.toString(),
-            label = "Longest\nStreak",
+            label = stringResource(R.string.stat_longest_streak),
             color = MaterialTheme.colorScheme.secondary
         )
         StatItem(
             value = stats.totalJamaah.toString(),
-            label = "In\nJamaah",
+            label = stringResource(R.string.stat_in_jamaah),
             color = NimazColors.StatusColors.Jamaah
         )
     }

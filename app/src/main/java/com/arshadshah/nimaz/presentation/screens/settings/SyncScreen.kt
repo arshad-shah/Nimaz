@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -92,7 +94,7 @@ fun SyncScreen(
     Scaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = "Sync Data",
+                title = stringResource(R.string.sync_data),
                 onBackClick = {
                     viewModel.onEvent(SyncEvent.Cancel)
                     onNavigateBack()
@@ -195,13 +197,13 @@ fun SyncScreen(
 private fun RoleBadge(mode: SyncMode) {
     val (label, containerColor, contentColor) = when (mode) {
         SyncMode.SEND -> Triple(
-            "Sending",
+            stringResource(R.string.sync_sending),
             MaterialTheme.colorScheme.primaryContainer,
             MaterialTheme.colorScheme.onPrimaryContainer
         )
 
         SyncMode.RECEIVE -> Triple(
-            "Receiving",
+            stringResource(R.string.sync_receiving),
             MaterialTheme.colorScheme.tertiaryContainer,
             MaterialTheme.colorScheme.onTertiaryContainer
         )
@@ -252,13 +254,13 @@ private fun ModeSelectionContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
-        text = "Device-to-Device Sync",
+        text = stringResource(R.string.sync_device_to_device),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold
     )
 
     Text(
-        text = "Transfer your data between devices using a direct connection. Both devices must be nearby.",
+        text = stringResource(R.string.sync_intro),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -287,11 +289,11 @@ private fun ModeSelectionContent(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Send Data")
+                Text(stringResource(R.string.sync_send_data))
             }
 
             Text(
-                text = "Send this device's data to another device",
+                text = stringResource(R.string.sync_send_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -311,11 +313,11 @@ private fun ModeSelectionContent(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Receive Data")
+                Text(stringResource(R.string.sync_receive_data))
             }
 
             Text(
-                text = "Receive data from another device",
+                text = stringResource(R.string.sync_receive_subtitle),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -345,21 +347,21 @@ private fun AuthTokenContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
-        text = "Confirm Connection",
+        text = stringResource(R.string.sync_confirm_connection),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold
     )
 
     Text(
-        text = "Connecting to: $endpointName",
+        text = stringResource(R.string.sync_connecting_to_format, endpointName),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 
     // Role context
     val roleText = when (mode) {
-        SyncMode.SEND -> "You are sending data to this device"
-        SyncMode.RECEIVE -> "You are receiving data from this device"
+        SyncMode.SEND -> stringResource(R.string.sync_role_sending)
+        SyncMode.RECEIVE -> stringResource(R.string.sync_role_receiving)
         SyncMode.NONE -> ""
     }
     if (roleText.isNotEmpty()) {
@@ -382,7 +384,7 @@ private fun AuthTokenContent(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Verification Code",
+                text = stringResource(R.string.sync_verification_code),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -395,7 +397,7 @@ private fun AuthTokenContent(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Make sure this code matches on both devices",
+                text = stringResource(R.string.sync_code_match_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -417,7 +419,7 @@ private fun AuthTokenContent(
         ) {
             Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Reject")
+            Text(stringResource(R.string.sync_reject))
         }
 
         Button(
@@ -427,7 +429,7 @@ private fun AuthTokenContent(
         ) {
             Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Accept")
+            Text(stringResource(R.string.sync_accept))
         }
     }
 }
@@ -448,7 +450,7 @@ private fun WaitingForPartnerContent(
     Spacer(modifier = Modifier.height(20.dp))
 
     Text(
-        text = "Waiting for partner to accept...",
+        text = stringResource(R.string.sync_waiting_partner),
         style = MaterialTheme.typography.titleMedium,
         fontWeight = FontWeight.SemiBold,
         color = MaterialTheme.colorScheme.primary,
@@ -456,7 +458,7 @@ private fun WaitingForPartnerContent(
     )
 
     Text(
-        text = "Make sure the other device also taps Accept",
+        text = stringResource(R.string.sync_waiting_hint),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center,
@@ -469,7 +471,7 @@ private fun WaitingForPartnerContent(
         onClick = onCancel,
         shape = RoundedCornerShape(12.dp)
     ) {
-        Text("Cancel")
+        Text(stringResource(R.string.cancel))
     }
 }
 
@@ -485,20 +487,20 @@ private fun CancelledContent(
     val (icon, title, message) = when (reason) {
         CancelReason.BY_USER -> Triple(
             Icons.Default.SyncDisabled,
-            "Sync Cancelled",
-            "You cancelled the sync"
+            stringResource(R.string.sync_cancelled),
+            stringResource(R.string.sync_cancelled_by_you)
         )
 
         CancelReason.BY_PARTNER -> Triple(
             Icons.Default.PersonOff,
-            "Sync Cancelled",
-            "The other device cancelled the sync"
+            stringResource(R.string.sync_cancelled),
+            stringResource(R.string.sync_cancelled_by_partner)
         )
 
         CancelReason.CONNECTION_LOST -> Triple(
             Icons.Default.LinkOff,
-            "Connection Lost",
-            "Connection was lost unexpectedly"
+            stringResource(R.string.sync_connection_lost),
+            stringResource(R.string.sync_connection_lost_msg)
         )
     }
 
@@ -536,13 +538,13 @@ private fun CancelledContent(
             onClick = onClose,
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Close")
+            Text(stringResource(R.string.close))
         }
         Button(
             onClick = onTryAgain,
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Try Again")
+            Text(stringResource(R.string.try_again))
         }
     }
 }
@@ -596,7 +598,7 @@ private fun ProgressContent(
     )
 
     Text(
-        text = "Step ${state.stepsCompleted} of ${state.totalSteps}",
+        text = stringResource(R.string.sync_step_format, state.stepsCompleted, state.totalSteps),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
@@ -625,14 +627,14 @@ private fun ProgressContent(
                         tint = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                     Text(
-                        text = "Data sent!",
+                        text = stringResource(R.string.sync_data_sent),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                 }
                 Text(
-                    text = "Partner is importing: ${partnerState.label}",
+                    text = stringResource(R.string.sync_partner_importing_format, partnerState.label),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
@@ -672,7 +674,7 @@ private fun ProgressContent(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Transfer Progress",
+                        text = stringResource(R.string.sync_transfer_progress),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -703,7 +705,7 @@ private fun ProgressContent(
         state.dataSummary?.let { summary ->
             DataSummaryCard(
                 summary = summary,
-                title = if (state.mode == SyncMode.SEND) "Data Being Sent" else "Data Being Received"
+                title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_being_sent) else stringResource(R.string.sync_data_being_received)
             )
         }
     }
@@ -716,7 +718,7 @@ private fun ProgressContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     TextButton(onClick = onCancel) {
-        Text("Cancel")
+        Text(stringResource(R.string.cancel))
     }
 }
 
@@ -732,7 +734,7 @@ private fun ActivityLog(entries: List<ActivityLogEntry>) {
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
-                text = "Activity",
+                text = stringResource(R.string.sync_activity),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -760,6 +762,42 @@ private fun ActivityLog(entries: List<ActivityLogEntry>) {
     }
 }
 
+/**
+ * Maps a [com.arshadshah.nimaz.data.sync.SyncCategory] key to its localized
+ * label. Keys come from `SyncPayload.categories()`; if a new category is added
+ * there, add its label here too (SyncPayloadCoverageTest guards the data side).
+ */
+@Composable
+private fun syncCategoryLabel(key: String): String = stringResource(
+    when (key) {
+        "bookmarks" -> R.string.sync_item_bookmarks
+        "favorites" -> R.string.sync_item_favorites
+        "readingProgress" -> R.string.sync_item_reading_progress
+        "prayerRecords" -> R.string.sync_item_prayer_records
+        "fastRecords" -> R.string.sync_item_fast_records
+        "makeupFasts" -> R.string.sync_item_makeup_fasts
+        "tasbihPresets" -> R.string.sync_item_tasbih_presets
+        "tasbihSessions" -> R.string.sync_item_tasbih_sessions
+        "khatams" -> R.string.sync_item_khatams
+        "khatamAyahs" -> R.string.sync_item_khatam_ayahs
+        "khatamDailyLogs" -> R.string.sync_item_khatam_daily_logs
+        "tafseerHighlights" -> R.string.sync_item_tafseer_highlights
+        "tafseerNotes" -> R.string.sync_item_tafseer_notes
+        "zakatHistory" -> R.string.sync_item_zakat
+        "asmaUlHusnaBookmarks" -> R.string.sync_item_asma_ul_husna
+        "asmaUnNabiBookmarks" -> R.string.sync_item_asma_un_nabi
+        "prophetBookmarks" -> R.string.sync_item_prophets
+        "hadithBookmarks" -> R.string.sync_item_hadith_bookmarks
+        "duaBookmarks" -> R.string.sync_item_dua_bookmarks
+        "duaProgress" -> R.string.sync_item_dua_progress
+        "qaidaLessonProgress" -> R.string.sync_item_qaida_lessons
+        "qaidaCellProgress" -> R.string.sync_item_qaida_cells
+        "favoriteLocations" -> R.string.sync_item_locations
+        "preferences" -> R.string.sync_item_preferences
+        else -> R.string.sync_no_data
+    }
+)
+
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     Card(
@@ -780,42 +818,30 @@ private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-            val items = buildList {
-                if (summary.bookmarks > 0) add("Bookmarks" to summary.bookmarks)
-                if (summary.favorites > 0) add("Favorites" to summary.favorites)
-                if (summary.hasReadingProgress) add("Reading progress" to 1)
-                if (summary.prayerRecords > 0) add("Prayer records" to summary.prayerRecords)
-                if (summary.fastRecords > 0) add("Fasting records" to summary.fastRecords)
-                if (summary.makeupFasts > 0) add("Makeup fasts" to summary.makeupFasts)
-                if (summary.tasbihPresets > 0) add("Tasbih presets" to summary.tasbihPresets)
-                if (summary.tasbihSessions > 0) add("Tasbih sessions" to summary.tasbihSessions)
-                if (summary.khatams > 0) add("Khatam plans" to summary.khatams)
-                if (summary.khatamAyahs > 0) add("Khatam ayahs read" to summary.khatamAyahs)
-                if (summary.tafseerHighlights > 0) add("Tafseer highlights" to summary.tafseerHighlights)
-                if (summary.tafseerNotes > 0) add("Tafseer notes" to summary.tafseerNotes)
-                if (summary.zakatHistory > 0) add("Zakat calculations" to summary.zakatHistory)
-                if (summary.hasPreferences) add("App preferences" to 1)
-            }
+            // Driven entirely by SyncPayload.categories() so the screen always
+            // reflects exactly what the payload carries — no manual list to keep
+            // in sync as new features are added.
+            val visible = summary.categories.filter { it.count > 0 }
 
-            if (items.isEmpty()) {
+            if (visible.isEmpty()) {
                 Text(
-                    text = "No data to sync",
+                    text = stringResource(R.string.sync_no_data),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                items.forEach { (label, count) ->
+                visible.forEach { category ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = label,
+                            text = syncCategoryLabel(category.key),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = if (label == "Reading progress" || label == "App preferences") "" else "$count",
+                            text = if (category.isFlag) "" else "${category.count}",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -830,7 +856,7 @@ private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "Total size",
+                            text = stringResource(R.string.sync_total_size),
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -865,13 +891,13 @@ private fun CompletedContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
-        text = "Sync Complete!",
+        text = stringResource(R.string.sync_complete),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold
     )
 
     Text(
-        text = if (state.mode == SyncMode.SEND) "Data sent successfully" else "Data imported successfully",
+        text = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_sent_success) else stringResource(R.string.sync_imported_success),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center
@@ -882,7 +908,7 @@ private fun CompletedContent(
         Spacer(modifier = Modifier.height(8.dp))
         DataSummaryCard(
             summary = summary,
-            title = if (state.mode == SyncMode.SEND) "Data Sent" else "Data Imported"
+            title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_sent_title) else stringResource(R.string.sync_data_imported_title)
         )
     }
 
@@ -897,7 +923,7 @@ private fun CompletedContent(
         onClick = onDone,
         shape = RoundedCornerShape(12.dp)
     ) {
-        Text("Done")
+        Text(stringResource(R.string.done))
     }
 }
 
@@ -920,7 +946,7 @@ private fun ErrorContent(
     Spacer(modifier = Modifier.height(16.dp))
 
     Text(
-        text = "Sync Failed",
+        text = stringResource(R.string.sync_failed),
         style = MaterialTheme.typography.headlineSmall,
         fontWeight = FontWeight.Bold,
         color = MaterialTheme.colorScheme.error
@@ -945,13 +971,13 @@ private fun ErrorContent(
             onClick = onDismiss,
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Close")
+            Text(stringResource(R.string.close))
         }
         Button(
             onClick = onRetry,
             shape = RoundedCornerShape(12.dp)
         ) {
-            Text("Try Again")
+            Text(stringResource(R.string.try_again))
         }
     }
 }

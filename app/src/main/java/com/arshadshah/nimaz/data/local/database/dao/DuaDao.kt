@@ -73,6 +73,9 @@ interface DuaDao {
     @Query("SELECT * FROM dua_bookmarks ORDER BY createdAt DESC")
     fun getAllBookmarks(): Flow<List<DuaBookmarkEntity>>
 
+    @Query("SELECT * FROM dua_bookmarks")
+    suspend fun getAllBookmarksSync(): List<DuaBookmarkEntity>
+
     @Query("SELECT * FROM dua_bookmarks WHERE isFavorite = 1 ORDER BY createdAt DESC")
     fun getFavoriteDuas(): Flow<List<DuaBookmarkEntity>>
 
@@ -125,6 +128,9 @@ interface DuaDao {
 
     @Query("SELECT * FROM dua_progress WHERE duaId = :duaId ORDER BY date DESC")
     fun getProgressHistoryForDua(duaId: Int): Flow<List<DuaProgressEntity>>
+
+    @Query("SELECT * FROM dua_progress")
+    suspend fun getAllProgressSync(): List<DuaProgressEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProgress(progress: DuaProgressEntity)

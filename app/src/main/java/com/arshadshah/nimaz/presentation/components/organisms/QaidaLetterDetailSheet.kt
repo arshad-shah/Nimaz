@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -96,12 +98,13 @@ fun QaidaLetterDetailSheet(
             }
             // Hidden while audio is being regenerated (text-only mode).
             if (QAIDA_AUDIO_UI_ENABLED) {
+                val playLetterCd = stringResource(R.string.qaida_play_letter)
                 Box(
                     modifier = Modifier
                         .size(52.dp)
                         .clip(RoundedCornerShape(percent = 50))
                         .background(MaterialTheme.colorScheme.secondary)
-                        .semantics { contentDescription = "Play letter" }
+                        .semantics { contentDescription = playLetterCd }
                         .clickable { onPlay(letter) },
                     contentAlignment = Alignment.Center,
                 ) {
@@ -115,10 +118,10 @@ fun QaidaLetterDetailSheet(
             }
         }
 
-        SectionLabel("Its shapes")
+        SectionLabel(stringResource(R.string.qaida_its_shapes))
         QaidaLetterForms(letter)
 
-        SectionLabel("Where it's made")
+        SectionLabel(stringResource(R.string.qaida_where_made))
         QaidaMakhrajHelper(area = letter.makhrajArea, detail = letter.makhrajDetail)
     }
 }

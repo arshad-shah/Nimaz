@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.about
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -62,7 +64,7 @@ fun LicensesScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
-                title = "Open Source Licenses",
+                title = stringResource(R.string.licenses_title),
                 onBackClick = onNavigateBack
             )
         }

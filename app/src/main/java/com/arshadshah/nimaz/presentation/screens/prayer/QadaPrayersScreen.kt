@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -55,7 +57,7 @@ fun QadaPrayersScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Qada Prayers",
+                title = stringResource(R.string.qada_prayers),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -77,8 +79,8 @@ fun QadaPrayersScreen(
             if (qadaState.missedPrayers.isEmpty() && !qadaState.isLoading) {
                 item {
                     NimazEmptyState(
-                        title = "All Caught Up!",
-                        message = "You have no missed prayers to make up. Keep up the good work!"
+                        title = stringResource(R.string.all_caught_up),
+                        message = stringResource(R.string.all_caught_up_message)
                     )
                 }
             }
@@ -149,7 +151,7 @@ private fun QadaSummaryCard(totalMissed: Int) {
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Prayers to Make Up",
+                    text = stringResource(R.string.prayers_to_make_up),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = Color.White

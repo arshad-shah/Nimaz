@@ -110,7 +110,7 @@ fun SelectReciterScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Select Reciter",
+                title = stringResource(R.string.select_reciter_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -128,14 +128,14 @@ fun SelectReciterScreen(
                     query = searchQuery,
                     onQueryChange = { searchQuery = it },
                     onClear = { searchQuery = "" },
-                    placeholder = "Search reciters..."
+                    placeholder = stringResource(R.string.select_reciter_search_hint)
                 )
             }
 
             // Currently Selected Section
             item {
                 Text(
-                    text = "CURRENTLY SELECTED",
+                    text = stringResource(R.string.select_reciter_currently_selected),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     letterSpacing = MaterialTheme.typography.labelSmall.letterSpacing,
@@ -203,7 +203,7 @@ fun SelectReciterScreen(
                                         .background(MaterialTheme.colorScheme.primary)
                                 )
                                 Text(
-                                    text = "Active",
+                                    text = stringResource(R.string.active),
                                     style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.primary
@@ -217,7 +217,7 @@ fun SelectReciterScreen(
             // Popular Reciters Section
             item {
                 Text(
-                    text = "POPULAR RECITERS",
+                    text = stringResource(R.string.select_reciter_popular),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)

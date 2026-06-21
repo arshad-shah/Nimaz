@@ -43,7 +43,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccent
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -75,31 +77,11 @@ fun ProphetDetailScreen(
         },
         floatingActionButton = {
             state.prophet?.let { prophet ->
-                FloatingActionButton(
-                    onClick = {
-                        viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id))
-                    },
-                    containerColor = accent.chipContainer,
-                    contentColor = accent.onChipContainer
-                ) {
-                    Icon(
-                        imageVector = if (prophet.isFavorite) {
-                            Icons.Filled.Favorite
-                        } else {
-                            Icons.Outlined.FavoriteBorder
-                        },
-                        contentDescription = if (prophet.isFavorite) {
-                            stringResource(R.string.remove_from_favorites)
-                        } else {
-                            stringResource(R.string.add_to_favorites)
-                        },
-                        tint = if (prophet.isFavorite) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            accent.onChipContainer
-                        }
-                    )
-                }
+                FavoriteFab(
+                    isFavorite = prophet.isFavorite,
+                    accent = accent,
+                    onClick = { viewModel.onEvent(ProphetEvent.ToggleFavorite(prophet.id)) }
+                )
             }
         }
     ) { paddingValues ->
@@ -137,7 +119,7 @@ fun ProphetDetailScreen(
 
                 // Story Section
                 item {
-                    DetailSectionCard(
+                    NameDetailSectionCard(
                         title = stringResource(R.string.prophets_story),
                         content = prophet.storySummary,
                         titleColor = accent.contentTint
@@ -344,40 +326,5 @@ private fun TimelineItem(
             color = MaterialTheme.colorScheme.onSurface,
             fontWeight = FontWeight.SemiBold
         )
-    }
-}
-
-@Composable
-private fun DetailSectionCard(
-    title: String,
-    content: String,
-    titleColor: Color
-) {
-    if (content.isNotBlank()) {
-        NimazCard(
-            modifier = Modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(NimazSpacing.Large),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = titleColor
-                )
-                Text(
-                    text = content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 22.sp
-                )
-            }
-        }
     }
 }

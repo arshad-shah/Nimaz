@@ -5,6 +5,10 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.formatAyahWithEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.help
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +53,7 @@ fun HelpScreen(
     val state by viewModel.homeState.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { NimazBackTopAppBar(title = "Help", onBackClick = onNavigateBack) }
+        topBar = { NimazBackTopAppBar(title = stringResource(R.string.help_title), onBackClick = onNavigateBack) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -64,7 +66,7 @@ fun HelpScreen(
                 NimazSearchBar(
                     query = state.query,
                     onQueryChange = { viewModel.onEvent(HelpEvent.Search(it)) },
-                    placeholder = "Search help…",
+                    placeholder = stringResource(R.string.help_search_hint),
                     onClear = { viewModel.onEvent(HelpEvent.Search("")) }
                 )
             }
@@ -73,7 +75,7 @@ fun HelpScreen(
                 if (state.results.isEmpty()) {
                     item {
                         Text(
-                            text = "No results. Try different words.",
+                            text = stringResource(R.string.help_no_results),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.padding(8.dp)
@@ -89,7 +91,7 @@ fun HelpScreen(
             } else {
                 item {
                     NimazSectionTitle(
-                        text = "Browse topics",
+                        text = stringResource(R.string.help_browse_topics),
                         modifier = Modifier.padding(top = 4.dp)
                     )
                 }
@@ -167,12 +169,12 @@ private fun HelpContactCard(onClick: () -> Unit) {
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Still need help?",
+                    text = stringResource(R.string.help_still_need),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Email us — we usually reply within a day",
+                    text = stringResource(R.string.help_email_us),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

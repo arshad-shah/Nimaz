@@ -42,19 +42,7 @@ class PrayerTimeCalculator @Inject constructor() {
         val coordinates = Coordinates(latitude, longitude)
         val dateComponents = DateComponents(date.year, date.monthValue, date.dayOfMonth)
 
-        val method = when (calculationMethod) {
-            CalculationMethod.MUSLIM_WORLD_LEAGUE -> AdhanMethod.MUSLIM_WORLD_LEAGUE
-            CalculationMethod.EGYPTIAN -> AdhanMethod.EGYPTIAN
-            CalculationMethod.KARACHI -> AdhanMethod.KARACHI
-            CalculationMethod.UMM_AL_QURA -> AdhanMethod.UMM_AL_QURA
-            CalculationMethod.DUBAI -> AdhanMethod.DUBAI
-            CalculationMethod.MOON_SIGHTING_COMMITTEE -> AdhanMethod.MOON_SIGHTING_COMMITTEE
-            CalculationMethod.NORTH_AMERICA -> AdhanMethod.NORTH_AMERICA
-            CalculationMethod.KUWAIT -> AdhanMethod.KUWAIT
-            CalculationMethod.QATAR -> AdhanMethod.QATAR
-            CalculationMethod.SINGAPORE -> AdhanMethod.SINGAPORE
-            CalculationMethod.TURKEY -> AdhanMethod.TURKEY
-        }
+        val method = adhanMethodFor(calculationMethod)
 
         var parameters = method.parameters.copy(
             madhab = when (asrCalculation) {
@@ -133,19 +121,7 @@ class PrayerTimeCalculator @Inject constructor() {
     }
 
     private fun getCalculationParameters(location: Location): CalculationParameters {
-        val method = when (location.calculationMethod) {
-            CalculationMethod.MUSLIM_WORLD_LEAGUE -> AdhanMethod.MUSLIM_WORLD_LEAGUE
-            CalculationMethod.EGYPTIAN -> AdhanMethod.EGYPTIAN
-            CalculationMethod.KARACHI -> AdhanMethod.KARACHI
-            CalculationMethod.UMM_AL_QURA -> AdhanMethod.UMM_AL_QURA
-            CalculationMethod.DUBAI -> AdhanMethod.DUBAI
-            CalculationMethod.MOON_SIGHTING_COMMITTEE -> AdhanMethod.MOON_SIGHTING_COMMITTEE
-            CalculationMethod.NORTH_AMERICA -> AdhanMethod.NORTH_AMERICA
-            CalculationMethod.KUWAIT -> AdhanMethod.KUWAIT
-            CalculationMethod.QATAR -> AdhanMethod.QATAR
-            CalculationMethod.SINGAPORE -> AdhanMethod.SINGAPORE
-            CalculationMethod.TURKEY -> AdhanMethod.TURKEY
-        }
+        val method = adhanMethodFor(location.calculationMethod)
 
         val parameters = method.parameters.copy(
             madhab = when (location.asrCalculation) {
@@ -172,5 +148,20 @@ class PrayerTimeCalculator @Inject constructor() {
 
     private fun Instant.toJavaLocalDateTime(timeZone: TimeZone): LocalDateTime {
         return this.toKotlinLocalDateTime(timeZone).toJavaLocalDateTime()
+    }
+
+    /** Single mapping from our [CalculationMethod] to the adhan2 library method. */
+    private fun adhanMethodFor(method: CalculationMethod): AdhanMethod = when (method) {
+        CalculationMethod.MUSLIM_WORLD_LEAGUE -> AdhanMethod.MUSLIM_WORLD_LEAGUE
+        CalculationMethod.EGYPTIAN -> AdhanMethod.EGYPTIAN
+        CalculationMethod.KARACHI -> AdhanMethod.KARACHI
+        CalculationMethod.UMM_AL_QURA -> AdhanMethod.UMM_AL_QURA
+        CalculationMethod.DUBAI -> AdhanMethod.DUBAI
+        CalculationMethod.MOON_SIGHTING_COMMITTEE -> AdhanMethod.MOON_SIGHTING_COMMITTEE
+        CalculationMethod.NORTH_AMERICA -> AdhanMethod.NORTH_AMERICA
+        CalculationMethod.KUWAIT -> AdhanMethod.KUWAIT
+        CalculationMethod.QATAR -> AdhanMethod.QATAR
+        CalculationMethod.SINGAPORE -> AdhanMethod.SINGAPORE
+        CalculationMethod.TURKEY -> AdhanMethod.TURKEY
     }
 }

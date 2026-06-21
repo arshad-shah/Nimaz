@@ -943,4 +943,402 @@
     <string name="qaida_map">Map</string>
     <string name="qaida_next_lesson">Next lesson</string>
     <string name="qaida_play_line">Play line</string>
+
+    <!-- Quran Settings Screen -->
+    <string name="arabic_font_size">Arabic Font Size</string>
+    <string name="arabic_font_size_value">%1$dpx</string>
+    <string name="arabic_font">Arabic Font</string>
+    <string name="display_options">Display Options</string>
+    <string name="show_transliteration">Show Transliteration</string>
+    <string name="show_transliteration_subtitle">Roman letters pronunciation</string>
+    <string name="show_translation">Show Translation</string>
+    <string name="show_translation_subtitle">Meaning in your language</string>
+    <string name="continuous_reading">Continuous Reading</string>
+    <string name="continuous_reading_subtitle">Continue reading between surahs and auto-play next verse</string>
+    <string name="keep_screen_on">Keep Screen On</string>
+    <string name="keep_screen_on_subtitle">Prevent screen from turning off</string>
+    <string name="show_tajweed_colors">Show Tajweed Colors</string>
+    <string name="show_tajweed_colors_subtitle">Color-coded pronunciation rules</string>
+    <string name="audio">Audio</string>
+    <string name="reciter">Reciter</string>
+    <string name="quran_settings_preview">PREVIEW</string>
+    <string name="quran_settings_preview_transliteration">Bismillahir-Rahmanir-Rahim</string>
+    <string name="quran_settings_preview_translation">In the name of Allah, the Most Gracious, the Most Merciful</string>
+    <string name="quran_settings_preview_location">Juz 1 • Page 1</string>
+
+    <!-- Common reusable labels -->
+    <string name="active">Active</string>
+    <string name="al_quran">Al Quran</string>
+
+    <!-- Appearance Settings Screen -->
+    <string name="appearance_theme">Theme</string>
+    <string name="appearance_display">Display</string>
+    <string name="appearance_home_screen">Home Screen</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_system">System</string>
+    <string name="appearance_islamic_patterns">Islamic Patterns</string>
+    <string name="appearance_islamic_patterns_subtitle">Show decorative patterns</string>
+    <string name="appearance_animations">Animations</string>
+    <string name="appearance_animations_subtitle">Enable smooth transitions</string>
+    <string name="appearance_haptic">Haptic Feedback</string>
+    <string name="appearance_haptic_subtitle">Vibration on interactions</string>
+    <string name="appearance_24hour">24-Hour Time</string>
+    <string name="appearance_24hour_subtitle">Use 24-hour format</string>
+    <string name="appearance_show_islamic_date">Show Islamic Date</string>
+    <string name="appearance_show_islamic_date_subtitle">Display Hijri calendar</string>
+
+    <!-- Select Reciter Screen -->
+    <string name="select_reciter_title">Select Reciter</string>
+    <string name="select_reciter_search_hint">Search reciters…</string>
+    <string name="select_reciter_currently_selected">CURRENTLY SELECTED</string>
+    <string name="select_reciter_popular">POPULAR RECITERS</string>
+
+    <!-- Surah Info Screen -->
+    <string name="surah_info_about">About This Surah</string>
+    <string name="surah_info_main_themes">Main Themes</string>
+    <string name="surah_info_description_fallback">This surah contains divine guidance and wisdom for believers.</string>
+    <string name="surah_info_theme_guidance">Divine Guidance</string>
+    <string name="surah_info_theme_worship">Worship</string>
+    <string name="surah_info_theme_morality">Morality</string>
+    <string name="surah_info_theme_remembrance">Remembrance</string>
+
+    <!-- Quran Reader Screen -->
+    <string name="cd_switch_to_list_view">Switch to list view</string>
+    <string name="cd_switch_to_page_view">Switch to page view</string>
+    <string name="quran_continue_next_surah">Continue to next surah</string>
+    <string name="quran_mark_all_read">Mark all ayahs in this surah as read</string>
+
+    <!-- Empty states -->
+    <string name="no_ayahs_found">No ayahs found.</string>
+    <string name="no_chapters_found">No chapters found</string>
+
+    <!-- Canonical prayer names -->
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+
+    <!-- Prayer Stats Screen -->
+    <string name="statistics">Statistics</string>
+    <string name="stats_period_week">Week</string>
+    <string name="stats_period_month">Month</string>
+    <string name="stats_period_year">Year</string>
+    <string name="prayer_completion">Prayer Completion</string>
+    <string name="prayer_breakdown">Prayer Breakdown</string>
+    <string name="insights">Insights</string>
+    <string name="stat_perfect_days">Perfect\nDays</string>
+    <string name="stat_current_streak">Current\nStreak</string>
+    <string name="stat_longest_streak">Longest\nStreak</string>
+    <string name="prayer_insight_needs_attention">%1$s needs attention</string>
+    <string name="prayer_insight_needs_attention_desc">Your %1$s completion is at %2$d%%. Try setting an alarm to improve.</string>
+    <string name="prayer_insight_overall">Overall completion: %1$d%%</string>
+    <string name="prayer_insight_overall_desc">You\'ve completed %1$d out of %2$d prayers. Keep going!</string>
+    <string name="prayer_insight_best">Best prayer: %1$s</string>
+    <string name="prayer_insight_best_desc">You consistently complete %1$s at %2$d%%.</string>
+
+    <!-- Qada Prayers Screen -->
+    <string name="qada_prayers">Qada Prayers</string>
+
+    <!-- Settings Screen -->
+    <string name="sync_data">Sync Data</string>
+    <string name="settings_sync_subtitle">Transfer data between devices</string>
+
+    <!-- Location Screen -->
+    <string name="location_search_hint">Search city or address…</string>
+    <string name="location_search_results">Search Results</string>
+    <string name="location_recent">Recent</string>
+    <string name="location_popular_cities">Popular Cities</string>
+    <string name="location_detecting">Detecting…</string>
+    <string name="location_not_set">Not set</string>
+    <string name="location_current">Current</string>
+
+    <!-- Prayer stats chart -->
+    <string name="completed">Completed</string>
+    <string name="jamaah">Jamaah</string>
+    <string name="stat_in_jamaah">In\nJamaah</string>
+
+    <!-- Quran ayah identifiers (shared) -->
+    <string name="ayah_number_format">Ayah %1$d</string>
+    <string name="juz_page_format">Juz %1$d | P%2$d</string>
+
+    <!-- Search -->
+    <string name="popular_searches">Popular Searches</string>
+
+    <!-- Zakat History Screen -->
+    <string name="zakat_history_title">Zakat History</string>
+    <string name="no_zakat_history">No Zakat History</string>
+    <string name="zakat_history_calculation_history">Calculation History</string>
+    <string name="zakat_history_total_paid">Total Zakat Paid</string>
+    <string name="net_worth">Net Worth</string>
+    <string name="zakat_mark_as_paid">Mark as Paid</string>
+    <string name="zakat_paid">Paid</string>
+    <string name="zakat_unpaid">Unpaid</string>
+    <string name="nisab_label_format">Nisab: %1$s (%2$s)</string>
+    <string name="zakat_paid_on_format">Paid on: %1$s</string>
+    <string name="zakat_history_empty_message">Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.</string>
+    <string name="zakat_calculate">Calculate Zakat</string>
+    <plurals name="zakat_calculations_recorded">
+        <item quantity="one">%1$d calculation recorded</item>
+        <item quantity="other">%1$d calculations recorded</item>
+    </plurals>
+
+    <!-- Quran ayah actions / identifiers -->
+    <string name="surah_number_format">Surah %1$d</string>
+    <string name="sajdah_wajib">Sajdah (Wajib)</string>
+    <string name="sajdah_recommended">Sajdah (Recommended)</string>
+    <string name="action_play">Play</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_tafseer">Tafseer</string>
+    <string name="unread">Unread</string>
+    <string name="listen">Listen</string>
+    <string name="days_count_format">%1$d days</string>
+
+    <!-- Quran surah info labels -->
+    <string name="quran_verses_label">Verses</string>
+    <string name="quran_revelation_label">Revelation</string>
+    <string name="quran_order_label">Order</string>
+    <string name="quran_juz_label">Juz</string>
+    <string name="quran_makki">Makki</string>
+    <string name="quran_madani">Madani</string>
+    <string name="quran_meccan">Meccan</string>
+    <string name="quran_medinan">Medinan</string>
+    <string name="quran_ayahs_count_format">%1$d Ayahs</string>
+    <string name="juz_page_dot_format">Juz %1$d • Page %2$d</string>
+    <string name="page_range_format">Pages %1$d–%2$d</string>
+    <string name="page_single_format">Page %1$d</string>
+
+    <!-- Common nav labels -->
+    <string name="previous">Previous</string>
+    <string name="next">Next</string>
+    <string name="today_uppercase">TODAY</string>
+    <string name="unknown_date">Unknown date</string>
+
+    <!-- Hadith Reader Screen -->
+    <string name="hadith_chapter_format">Chapter %1$d</string>
+    <string name="no_hadith_found">No hadith found</string>
+    <string name="hadith_of_count_format">of %1$d</string>
+    <string name="hadith_narrated_by_format">Narrated by %1$s</string>
+    <string name="hadith_isnad">Chain of Narration (Isnad)</string>
+
+    <!-- Monthly Prayer Times Screen -->
+    <string name="export_as_pdf">Export as PDF</string>
+    <string name="monthly_this_month">This month</string>
+    <string name="ramadan_year_format">Ramadan %1$d</string>
+    <string name="monthly_full_month_subtitle">Full month · 1 → last day</string>
+    <string name="ramadan_month_label">RAMADAN MONTH</string>
+
+    <!-- Prayer Times Screen -->
+    <string name="cd_prayer_settings">Prayer settings</string>
+    <string name="cd_previous_day">Previous day</string>
+    <string name="cd_pick_date">Pick a date</string>
+    <string name="cd_next_day">Next day</string>
+    <string name="prayer_info_daylight">Daylight</string>
+    <string name="prayer_info_sun">Sunrise / Sunset</string>
+    <string name="prayer_info_method">Method</string>
+
+    <!-- Qaida -->
+    <string name="qaida_lesson_progress">Lesson %1$d of %2$d</string>
+
+    <!-- Common actions / content descriptions -->
+    <string name="save">Save</string>
+    <string name="pause">Pause</string>
+    <string name="sajdah">Sajdah</string>
+    <string name="cd_mark_as_read">Mark as read</string>
+    <string name="cd_mark_as_unread">Mark as unread</string>
+
+    <!-- Tafseer page content -->
+    <string name="tafseer_highlight">Highlight</string>
+    <string name="tafseer_highlight_notes">Highlight Notes</string>
+    <string name="tafseer_no_notes">No notes yet. Tap a highlight to add a note.</string>
+    <string name="tafseer_read_in_format">Read in %1$s</string>
+    <string name="tafseer_no_commentary_format">No %1$s commentary for this ayah</string>
+    <string name="tafseer_page_format">Page %1$d of %2$d</string>
+    <string name="tafseer_add_note">Add a note…</string>
+    <string name="tafseer_edit_note">Edit note</string>
+    <string name="cd_disable_highlighting">Disable highlighting</string>
+    <string name="cd_enable_highlighting">Enable highlighting</string>
+
+    <!-- Prayer Settings Screen -->
+    <string name="prayer_sunrise">Sunrise</string>
+    <string name="high_latitude_method">High Latitude Method</string>
+    <string name="middle_of_night">Middle of the Night</string>
+    <string name="seventh_of_night">Seventh of the Night</string>
+    <string name="twilight_angle">Twilight Angle</string>
+    <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
+    <string name="adhan_notifications">Adhan Notifications</string>
+    <string name="pre_adhan_reminder">Pre-Adhan Reminder</string>
+    <string name="asr_standard_desc">Shadow equals object length</string>
+    <string name="asr_hanafi_desc">Shadow equals twice object length</string>
+    <string name="high_lat_middle_desc">Split the night in half from sunset to sunrise</string>
+    <string name="high_lat_seventh_desc">Use 1/7th of the night for Fajr and Isha</string>
+    <string name="high_lat_twilight_desc">Use the angle-based method for Fajr and Isha</string>
+
+    <!-- Widgets Screen -->
+    <string name="widgets_intro">Add Nimaz widgets to your home screen for quick access to prayer times without opening the app.</string>
+    <string name="widget_next_prayer_title">Next Prayer Widget (2×2)</string>
+    <string name="widget_prayer_times_title">Prayer Times Widget (4×1)</string>
+    <string name="widget_hijri_date_title">Hijri Date Widget (2×2)</string>
+    <string name="widget_prayer_tracker_title">Prayer Tracker Widget (4×1)</string>
+    <string name="widget_hijri_calendar_title">Hijri Calendar Widget (4×2)</string>
+    <string name="widget_prayer_times">Prayer Times</string>
+    <string name="widget_hijri_date">Hijri Date</string>
+    <string name="widget_prayer_tracker">Prayer Tracker</string>
+    <string name="widget_hijri_calendar">Hijri Calendar</string>
+    <string name="widget_next_prayer_size">2×2 • Shows countdown to next prayer</string>
+    <string name="widget_prayer_times_size">4×1 • All prayers + countdown</string>
+    <string name="widget_hijri_date_size">2×2 • Islamic calendar date</string>
+    <string name="widget_prayer_tracker_size">4×1 • Tap to mark prayers completed</string>
+    <string name="widget_hijri_calendar_size">4×2 • Full month calendar + today\'s events</string>
+    <string name="widgets_how_to">How to Add Widgets</string>
+    <string name="widgets_how_to_step_1">Long press on an empty area of your home screen</string>
+    <string name="widgets_how_to_step_2">Tap \"Widgets\" from the menu that appears</string>
+    <string name="widgets_how_to_step_3">Search for \"Nimaz\" and select your preferred widget</string>
+    <string name="widgets_how_to_step_4">Drag the widget to your desired location</string>
+    <string name="widget_countdown_format">in %1$s</string>
+
+    <!-- Zakat Calculator (percent literals need formatted=false) -->
+    <string name="zakat_rate_subtitle" formatted="false">2.5% of eligible wealth</string>
+    <string name="zakat_due_2_5_percent" formatted="false">Zakat Due (2.5%)</string>
+
+    <!-- Common -->
+    <string name="close">Close</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- Sync Screen -->
+    <string name="sync_sending">Sending</string>
+    <string name="sync_receiving">Receiving</string>
+    <string name="sync_device_to_device">Device-to-Device Sync</string>
+    <string name="sync_intro">Transfer your data between devices using a direct connection. Both devices must be nearby.</string>
+    <string name="sync_send_data">Send Data</string>
+    <string name="sync_send_subtitle">Send this device\'s data to another device</string>
+    <string name="sync_receive_data">Receive Data</string>
+    <string name="sync_receive_subtitle">Receive data from another device</string>
+    <string name="sync_confirm_connection">Confirm Connection</string>
+    <string name="sync_connecting_to_format">Connecting to: %1$s</string>
+    <string name="sync_role_sending">You are sending data to this device</string>
+    <string name="sync_role_receiving">You are receiving data from this device</string>
+    <string name="sync_verification_code">Verification Code</string>
+    <string name="sync_code_match_hint">Make sure this code matches on both devices</string>
+    <string name="sync_reject">Reject</string>
+    <string name="sync_accept">Accept</string>
+    <string name="sync_waiting_partner">Waiting for partner to accept…</string>
+    <string name="sync_waiting_hint">Make sure the other device also taps Accept</string>
+    <string name="sync_cancelled">Sync Cancelled</string>
+    <string name="sync_cancelled_by_you">You cancelled the sync</string>
+    <string name="sync_cancelled_by_partner">The other device cancelled the sync</string>
+    <string name="sync_connection_lost">Connection Lost</string>
+    <string name="sync_connection_lost_msg">Connection was lost unexpectedly</string>
+    <string name="sync_step_format">Step %1$d of %2$d</string>
+    <string name="sync_data_sent">Data sent!</string>
+    <string name="sync_partner_importing_format">Partner is importing: %1$s</string>
+    <string name="sync_transfer_progress">Transfer Progress</string>
+    <string name="sync_activity">Activity</string>
+    <string name="sync_no_data">No data to sync</string>
+    <string name="sync_total_size">Total size</string>
+    <string name="sync_complete">Sync Complete!</string>
+    <string name="sync_failed">Sync Failed</string>
+    <string name="sync_data_being_sent">Data Being Sent</string>
+    <string name="sync_data_being_received">Data Being Received</string>
+    <string name="sync_sent_success">Data sent successfully</string>
+    <string name="sync_imported_success">Data imported successfully</string>
+    <string name="sync_data_sent_title">Data Sent</string>
+    <string name="sync_data_imported_title">Data Imported</string>
+    <string name="sync_item_bookmarks">Bookmarks</string>
+    <string name="sync_item_favorites">Favorites</string>
+    <string name="sync_item_reading_progress">Reading progress</string>
+    <string name="sync_item_prayer_records">Prayer records</string>
+    <string name="sync_item_fast_records">Fasting records</string>
+    <string name="sync_item_makeup_fasts">Makeup fasts</string>
+    <string name="sync_item_tasbih_presets">Tasbih presets</string>
+    <string name="sync_item_tasbih_sessions">Tasbih sessions</string>
+    <string name="sync_item_khatams">Khatam plans</string>
+    <string name="sync_item_khatam_ayahs">Khatam ayahs read</string>
+    <string name="sync_item_khatam_daily_logs">Khatam daily logs</string>
+    <string name="sync_item_asma_ul_husna">Asma ul Husna favorites</string>
+    <string name="sync_item_asma_un_nabi">Names of the Prophet favorites</string>
+    <string name="sync_item_prophets">Prophet favorites</string>
+    <string name="sync_item_hadith_bookmarks">Hadith bookmarks</string>
+    <string name="sync_item_dua_bookmarks">Dua bookmarks</string>
+    <string name="sync_item_dua_progress">Dua progress</string>
+    <string name="sync_item_qaida_lessons">Qaida lesson progress</string>
+    <string name="sync_item_qaida_cells">Qaida cell progress</string>
+    <string name="sync_item_locations">Saved locations</string>
+    <string name="sync_item_tafseer_highlights">Tafseer highlights</string>
+    <string name="sync_item_tafseer_notes">Tafseer notes</string>
+    <string name="sync_item_zakat">Zakat calculations</string>
+    <string name="sync_item_preferences">App preferences</string>
+
+    <!-- Help screens -->
+    <string name="help_title">Help</string>
+    <string name="help_search_hint">Search help…</string>
+    <string name="help_no_results">No results. Try different words.</string>
+    <string name="help_browse_topics">Browse topics</string>
+    <string name="help_still_need">Still need help?</string>
+    <string name="help_email_us">Email us — we usually reply within a day</string>
+    <string name="help_guide_title">Guide</string>
+    <string name="help_guide_unavailable">This guide is unavailable.</string>
+    <string name="help_thats_it">That\'s it!</string>
+    <string name="help_still_stuck">Still stuck? Contact us from the Help home.</string>
+    <string name="help_topic_unavailable">This topic is unavailable.</string>
+    <string name="help_common_questions">Common questions</string>
+    <string name="help_step_by_step">Step-by-step</string>
+
+    <!-- Qaida screens -->
+    <string name="qaida_letter_explorer">Letter explorer</string>
+    <string name="qaida_toggle_transliteration">Toggle transliteration</string>
+    <string name="qaida_arabic_letters">The Arabic Letters</string>
+    <string name="qaida_made_with_format">Made with %1$s</string>
+    <string name="qaida_play_letter">Play letter</string>
+    <string name="qaida_its_shapes">Its shapes</string>
+    <string name="qaida_where_made">Where it\'s made</string>
+
+    <!-- Quran / Bookmarks view-model titles -->
+    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayahs</string>
+    <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
+    <string name="bookmark_hadith_format">Hadith #%1$d</string>
+    <string name="dua_label">Dua</string>
+
+    <!-- About -->
+    <string name="licenses_title">Open Source Licenses</string>
+
+    <!-- Misc components -->
+    <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="tafseer_tap_end">Tap end position to highlight</string>
+
+    <!-- Makhraj (articulation) areas -->
+    <string name="makhraj_jawf">the mouth &amp; throat (long sounds)</string>
+    <string name="makhraj_halq">the throat</string>
+    <string name="makhraj_lisan">the tongue</string>
+    <string name="makhraj_shafatain">the two lips</string>
+    <string name="makhraj_khayshum">the nose</string>
+
+    <!-- Relative day labels -->
+    <string name="relative_yesterday">Yesterday</string>
+    <string name="relative_in_days_format">In %1$d days</string>
+    <string name="relative_days_ago_format">%1$d days ago</string>
+
+    <!-- Calculation method regions -->
+    <string name="calc_region_mwl">Used in Europe, Far East, parts of the US</string>
+    <string name="calc_region_egyptian">Used in Africa, Syria, Lebanon, Malaysia</string>
+    <string name="calc_region_karachi">Used in Pakistan, Bangladesh, India, Afghanistan</string>
+    <string name="calc_region_umm_al_qura">Used in the Arabian Peninsula</string>
+    <string name="calc_region_dubai">Used in the UAE</string>
+    <string name="calc_region_moon_sighting">Used in the UK, parts of Europe</string>
+    <string name="calc_region_north_america">Used in the US and Canada</string>
+    <string name="calc_region_kuwait">Used in Kuwait</string>
+    <string name="calc_region_qatar">Used in Qatar</string>
+    <string name="calc_region_singapore">Used in Singapore, Malaysia, Indonesia</string>
+    <string name="calc_region_turkey">Used in Turkey and Central Asia</string>
+
+    <!-- Quran audio status (shared) -->
+    <string name="audio_preparing">Preparing Audio</string>
+    <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
+    <string name="audio_ayah_progress_format">Ayah %1$d of %2$d</string>
+    <string name="audio_downloading_short_format">Downloading %1$d / %2$d…</string>
+    <string name="audio_position_ayah_format">Ayah %1$d / %2$d</string>
+    <string name="audio_position_page_format">p. %1$d</string>
+    <string name="audio_position_juz_format">Juz %1$d</string>
 </resources>

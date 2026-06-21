@@ -231,7 +231,7 @@ class PrayerTimesViewModel @Inject constructor(
                 sunrise = sunriseStr,
                 sunset = sunsetStr,
                 daylight = daylightStr,
-                methodLabel = "${prettyMethod(calcMethod)} · ${prettyAsr(asrCalc)}",
+                methodLabel = "${calcMethod.shortName()} · ${asrCalc.shortName()}",
                 moonFraction = moon,
             )
         }
@@ -386,24 +386,7 @@ class PrayerTimesViewModel @Inject constructor(
         }
     }
 
-    private fun prettyMethod(m: CalculationMethod): String = when (m) {
-        CalculationMethod.MUSLIM_WORLD_LEAGUE -> "MWL"
-        CalculationMethod.EGYPTIAN -> "Egyptian"
-        CalculationMethod.KARACHI -> "Karachi"
-        CalculationMethod.UMM_AL_QURA -> "Umm al-Qura"
-        CalculationMethod.DUBAI -> "Dubai"
-        CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Moonsighting"
-        CalculationMethod.NORTH_AMERICA -> "ISNA"
-        CalculationMethod.KUWAIT -> "Kuwait"
-        CalculationMethod.QATAR -> "Qatar"
-        CalculationMethod.SINGAPORE -> "Singapore"
-        CalculationMethod.TURKEY -> "Turkey"
-    }
 
-    private fun prettyAsr(a: AsrCalculation): String = when (a) {
-        AsrCalculation.HANAFI -> "Hanafi"
-        AsrCalculation.STANDARD -> "Standard"
-    }
 
     companion object {
         private val DATE_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("EEE, d MMM")

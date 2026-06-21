@@ -121,6 +121,12 @@ interface QaidaDao {
     @Query("SELECT * FROM qaida_lesson_progress ORDER BY lesson_id ASC")
     fun getAllProgress(): Flow<List<QaidaLessonProgressEntity>>
 
+    @Query("SELECT * FROM qaida_lesson_progress")
+    suspend fun getAllLessonProgressSync(): List<QaidaLessonProgressEntity>
+
+    @Query("SELECT * FROM qaida_cell_progress")
+    suspend fun getAllCellProgressSync(): List<QaidaCellProgressEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertLessonProgress(progress: QaidaLessonProgressEntity)
 

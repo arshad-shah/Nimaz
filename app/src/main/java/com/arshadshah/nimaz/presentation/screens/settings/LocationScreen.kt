@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -106,7 +108,7 @@ fun LocationScreen(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             NimazBackTopAppBar(
-                title = "Location",
+                title = stringResource(R.string.location),
                 onBackClick = onNavigateBack
             )
         }
@@ -128,14 +130,14 @@ fun LocationScreen(
                     },
                     onClear = { viewModel.onEvent(LocationEvent.ClearSearch) },
                     isLoading = state.isSearching,
-                    placeholder = "Search city or address..."
+                    placeholder = stringResource(R.string.location_search_hint)
                 )
             }
 
             // Search Results
             if (state.searchResults.isNotEmpty()) {
                 item {
-                    NimazSectionTitle(text = "Search Results")
+                    NimazSectionTitle(text = stringResource(R.string.location_search_results))
                 }
                 items(state.searchResults) { location ->
                     LocationListItem(
@@ -175,7 +177,7 @@ fun LocationScreen(
             // Recent Locations
             if (state.recentLocations.isNotEmpty()) {
                 item {
-                    NimazSectionTitle(text = "Recent")
+                    NimazSectionTitle(text = stringResource(R.string.location_recent))
                 }
                 items(state.recentLocations) { location ->
                     LocationListItem(
@@ -189,7 +191,7 @@ fun LocationScreen(
 
             // Popular Cities
             item {
-                NimazSectionTitle(text = "Popular Cities")
+                NimazSectionTitle(text = stringResource(R.string.location_popular_cities))
             }
             items(state.popularCities) { location ->
                 LocationListItem(
@@ -286,7 +288,7 @@ private fun CurrentLocationCard(
 
                     CurrentLocationState.Loading -> {
                         Text(
-                            text = "Detecting...",
+                            text = stringResource(R.string.location_detecting),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -295,7 +297,7 @@ private fun CurrentLocationCard(
 
                     CurrentLocationState.NotSet -> {
                         Text(
-                            text = "Not set",
+                            text = stringResource(R.string.location_not_set),
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
@@ -315,7 +317,7 @@ private fun CurrentLocationCard(
                         .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
                     Text(
-                        text = "Current",
+                        text = stringResource(R.string.location_current),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.tertiary

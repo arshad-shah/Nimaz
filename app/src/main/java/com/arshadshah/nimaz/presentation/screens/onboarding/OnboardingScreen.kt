@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
+import android.app.Activity
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -88,6 +92,22 @@ fun OnboardingScreen(
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Onboarding always uses a dark, illuminated background, so the status-bar
+    // icons must be light regardless of the app theme — otherwise dark icons
+    // disappear into the dark background. Restore the previous setting on exit.
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        DisposableEffect(Unit) {
+            val window = (view.context as Activity).window
+            val controller = WindowCompat.getInsetsController(window, view)
+            val previousLightStatus = controller.isAppearanceLightStatusBars
+            controller.isAppearanceLightStatusBars = false
+            onDispose {
+                controller.isAppearanceLightStatusBars = previousLightStatus
+            }
+        }
+    }
+
     // Permission launchers
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
@@ -160,10 +180,11 @@ fun OnboardingScreen(
         containerColor = Color(0xFF061A1C),
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
+        // Let the illuminated background bleed all the way up behind the status
+        // bar (edge-to-edge); only the interactive content respects the insets.
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(illuminatedBackground)
         ) {
             KhatamBand(
@@ -172,7 +193,11 @@ fun OnboardingScreen(
                     .height(96.dp)
                     .align(Alignment.TopCenter)
             )
-            Column(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
                 // Skip Button
                 Box(
                     modifier = Modifier

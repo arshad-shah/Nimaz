@@ -145,7 +145,7 @@ internal fun BottomActions(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Listen",
+                                text = stringResource(R.string.listen),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface
@@ -180,7 +180,7 @@ internal fun BottomActions(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "Start Reading",
+                            text = stringResource(R.string.quran_home_start_reading),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
@@ -245,12 +245,12 @@ private fun SurahAudioControlBar(
                 if (isPreparing && totalToDownload > 0) {
                     // Show download status
                     Text(
-                        text = "Preparing Audio",
+                        text = stringResource(R.string.audio_preparing),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Downloading $downloadedCount of $totalToDownload ayahs",
+                        text = stringResource(R.string.audio_downloading_format, downloadedCount, totalToDownload),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
@@ -268,7 +268,7 @@ private fun SurahAudioControlBar(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = "Ayah $currentAyah of $totalAyahs",
+                        text = stringResource(R.string.audio_ayah_progress_format, currentAyah, totalAyahs),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer

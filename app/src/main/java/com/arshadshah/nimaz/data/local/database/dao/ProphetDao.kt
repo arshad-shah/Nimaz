@@ -29,6 +29,9 @@ interface ProphetDao {
     @Query("SELECT * FROM prophet_bookmarks")
     fun getAllBookmarks(): Flow<List<ProphetBookmarkEntity>>
 
+    @Query("SELECT * FROM prophet_bookmarks")
+    suspend fun getAllBookmarksSync(): List<ProphetBookmarkEntity>
+
     @Query("SELECT EXISTS(SELECT 1 FROM prophet_bookmarks WHERE prophet_id = :prophetId)")
     suspend fun isBookmarked(prophetId: Int): Boolean
 

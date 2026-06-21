@@ -235,7 +235,7 @@ fun QuranReaderScreen(
     val headerTitle = when (state.readingMode) {
         ReadingMode.SURAH -> state.surahWithAyahs?.surah?.nameEnglish ?: ""
         ReadingMode.JUZ -> state.title
-        ReadingMode.PAGE -> "Al Quran"
+        ReadingMode.PAGE -> stringResource(R.string.al_quran)
     }
     val headerSubtitle = when (state.readingMode) {
         ReadingMode.PAGE -> ""
@@ -384,7 +384,7 @@ fun QuranReaderScreen(
                         IconButton(onClick = { usePageView = !usePageView }) {
                             Icon(
                                 imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
-                                contentDescription = if (usePageView) "Switch to list view" else "Switch to page view"
+                                contentDescription = if (usePageView) stringResource(R.string.cd_switch_to_list_view) else stringResource(R.string.cd_switch_to_page_view)
                             )
                         }
                     }
@@ -847,7 +847,7 @@ fun QuranReaderScreen(
                                                         modifier = Modifier.size(18.dp)
                                                     )
                                                     Spacer(modifier = Modifier.width(6.dp))
-                                                    Text("Continue to next surah")
+                                                    Text(stringResource(R.string.quran_continue_next_surah))
                                                 }
                                             }
                                         } else {
@@ -866,7 +866,7 @@ fun QuranReaderScreen(
                                                     modifier = Modifier.size(18.dp)
                                                 )
                                                 Spacer(modifier = Modifier.width(6.dp))
-                                                Text("Mark all ayahs in this surah as read")
+                                                Text(stringResource(R.string.quran_mark_all_read))
                                             }
                                         }
                                     }

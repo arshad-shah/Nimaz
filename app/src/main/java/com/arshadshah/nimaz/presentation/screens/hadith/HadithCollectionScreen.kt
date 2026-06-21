@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -435,17 +436,13 @@ private fun BookCard(
             Text(
                 text = stringResource(
                     R.string.hadith_count_format,
-                    formatNumber(book.totalHadiths)
+                    formatGrouped(book.totalHadiths)
                 ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
     }
-}
-
-private fun formatNumber(number: Int): String {
-    return String.format("%,d", number)
 }
 
 @Composable

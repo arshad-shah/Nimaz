@@ -162,8 +162,8 @@ fun SettingsScreen(
             item {
                 NimazMenuGroup {
                     NimazMenuItem(
-                        title = "Sync Data",
-                        subtitle = "Transfer data between devices",
+                        title = stringResource(R.string.sync_data),
+                        subtitle = stringResource(R.string.settings_sync_subtitle),
                         icon = Icons.Default.Sync,
                         onClick = onNavigateToSync
                     )

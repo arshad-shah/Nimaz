@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -96,7 +98,7 @@ fun AyahTranslationContent(
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Text(
-                    text = "Ayah ${ayah.ayahNumber}",
+                    text = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -106,7 +108,7 @@ fun AyahTranslationContent(
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             ) {
                 Text(
-                    text = "Juz ${ayah.juzNumber} | P${ayah.pageNumber}",
+                    text = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
@@ -155,7 +157,7 @@ fun AyahTranslationContent(
         if (showTranslation && !ayah.translation.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Translation",
+                text = stringResource(R.string.translation),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.primary,
@@ -179,7 +181,7 @@ fun AyahTranslationContent(
         if (showTransliteration && !ayah.transliteration.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Transliteration",
+                text = stringResource(R.string.transliteration),
                 style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.tertiary,
