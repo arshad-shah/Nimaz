@@ -79,6 +79,7 @@ import com.arshadshah.nimaz.domain.usecase.GetQuranFavoritesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetReadAyahIdsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetReadingProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSajdaAyahsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetVerseOfTheDayUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
@@ -280,7 +281,8 @@ object UseCaseModule {
             updateReadingPosition = UpdateReadingPositionUseCase(repository),
             incrementAyahsRead = IncrementAyahsReadUseCase(repository),
             getSurahInfo = GetSurahInfoUseCase(repository),
-            getPageAyahRanges = GetPageAyahRangesUseCase(repository)
+            getPageAyahRanges = GetPageAyahRangesUseCase(repository),
+            getVerseOfTheDay = GetVerseOfTheDayUseCase(repository)
         )
     }
 

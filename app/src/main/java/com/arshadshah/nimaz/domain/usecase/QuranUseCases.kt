@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.model.Translator
 import com.arshadshah.nimaz.domain.repository.QuranRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 class GetSurahListUseCase @Inject constructor(
@@ -159,6 +160,31 @@ class GetPageAyahRangesUseCase @Inject constructor(
     suspend operator fun invoke(): List<PageAyahRange> = repository.getPageAyahRanges()
 }
 
+/**
+ * Returns a deterministic "verse of the day" for a given day. The same day always
+ * resolves to the same ayah for every user (no randomness/persistence required),
+ * and the selected ayah carries its translation for the requested translator.
+ */
+class GetVerseOfTheDayUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(epochDay: Long, translatorId: String? = null): Ayah? {
+        // Map the day onto a stable ayah id in 1..TOTAL_AYAHS (handles negative epochDay).
+        val ayahId = (((epochDay % TOTAL_AYAHS) + TOTAL_AYAHS) % TOTAL_AYAHS).toInt() + 1
+        val ayah = repository.getAyahById(ayahId) ?: return null
+        val translation = if (translatorId != null) {
+            repository.getTranslationsForAyahs(listOf(ayahId), translatorId).first()[ayahId]
+        } else {
+            null
+        }
+        return if (translation != null) ayah.copy(translation = translation) else ayah
+    }
+
+    private companion object {
+        const val TOTAL_AYAHS = 6236
+    }
+}
+
 // Wrapper class for all Quran use cases
 data class QuranUseCases(
     val getSurahList: GetSurahListUseCase,
@@ -180,5 +206,6 @@ data class QuranUseCases(
     val updateReadingPosition: UpdateReadingPositionUseCase,
     val incrementAyahsRead: IncrementAyahsReadUseCase,
     val getSurahInfo: GetSurahInfoUseCase,
-    val getPageAyahRanges: GetPageAyahRangesUseCase
+    val getPageAyahRanges: GetPageAyahRangesUseCase,
+    val getVerseOfTheDay: GetVerseOfTheDayUseCase
 )
