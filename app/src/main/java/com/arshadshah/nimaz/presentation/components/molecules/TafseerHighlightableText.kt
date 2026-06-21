@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -114,7 +116,7 @@ fun TafseerHighlightableText(
                     .padding(top = 2.dp)
             ) {
                 Text(
-                    text = "Tap end position to highlight",
+                    text = stringResource(R.string.tafseer_tap_end),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

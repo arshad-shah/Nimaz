@@ -75,7 +75,7 @@ internal fun MushafPageBar(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = if (secondPageNumber != null) "Pages $pageNumber\u2013$secondPageNumber" else "Page $pageNumber",
+                    text = if (secondPageNumber != null) stringResource(R.string.page_range_format, pageNumber, secondPageNumber) else stringResource(R.string.page_single_format, pageNumber),
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colorScheme.onSurface

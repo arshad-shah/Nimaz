@@ -23,6 +23,12 @@ interface LocationDao {
     @Query("SELECT * FROM locations WHERE isFavorite = 1 ORDER BY name ASC")
     fun getFavoriteLocations(): Flow<List<LocationEntity>>
 
+    @Query("SELECT * FROM locations WHERE isFavorite = 1")
+    suspend fun getFavoriteLocationsSync(): List<LocationEntity>
+
+    @Query("SELECT * FROM locations")
+    suspend fun getAllLocationsSync(): List<LocationEntity>
+
     @Query("SELECT * FROM locations WHERE id = :id")
     suspend fun getLocationById(id: Long): LocationEntity?
 

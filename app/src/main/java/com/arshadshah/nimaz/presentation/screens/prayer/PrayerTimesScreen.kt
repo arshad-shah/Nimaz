@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -93,7 +95,7 @@ fun PrayerTimesScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Prayer settings")
+                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
                     }
                 },
             )
@@ -127,7 +129,7 @@ fun PrayerTimesScreen(
                             .clickable { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
                     ) {
                         Text(
-                            text = "Today",
+                            text = stringResource(R.string.today),
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onPrimary,
@@ -253,7 +255,7 @@ private fun DayNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilledTonalIconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = "Previous day")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
         }
         Row(
             modifier = Modifier
@@ -266,7 +268,7 @@ private fun DayNavBar(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = if (isToday) "TODAY" else relativeLabel(selectedDate).uppercase(),
+                    text = if (isToday) stringResource(R.string.today_uppercase) else relativeLabel(selectedDate).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
@@ -281,7 +283,7 @@ private fun DayNavBar(
                     )
                     Icon(
                         imageVector = Icons.Default.CalendarMonth,
-                        contentDescription = "Pick a date",
+                        contentDescription = stringResource(R.string.cd_pick_date),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier
                             .padding(start = 6.dp)
@@ -291,7 +293,7 @@ private fun DayNavBar(
             }
         }
         FilledTonalIconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = "Next day")
+            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
         }
     }
 }
@@ -336,9 +338,9 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            InfoRow("Daylight", daylight)
-            InfoRow("Sunrise / Sunset", "$sunrise — $sunset")
-            InfoRow("Method", method)
+            InfoRow(stringResource(R.string.prayer_info_daylight), daylight)
+            InfoRow(stringResource(R.string.prayer_info_sun), "$sunrise — $sunset")
+            InfoRow(stringResource(R.string.prayer_info_method), method)
         }
     }
 }
@@ -365,12 +367,13 @@ private fun InfoRow(label: String, value: String) {
     }
 }
 
+@Composable
 private fun relativeLabel(date: LocalDate): String {
     val diff = date.toEpochDay() - LocalDate.now().toEpochDay()
     return when {
-        diff == 1L -> "Tomorrow"
-        diff == -1L -> "Yesterday"
-        diff > 0 -> "In $diff days"
-        else -> "${-diff} days ago"
+        diff == 1L -> stringResource(R.string.fasting_tomorrow)
+        diff == -1L -> stringResource(R.string.relative_yesterday)
+        diff > 0 -> stringResource(R.string.relative_in_days_format, diff)
+        else -> stringResource(R.string.relative_days_ago_format, -diff)
     }
 }

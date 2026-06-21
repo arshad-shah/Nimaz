@@ -110,7 +110,7 @@ internal fun AudioBottomBar(
                 Column(modifier = Modifier.weight(1f)) {
                     if (isPreparing && totalToDownload > 0) {
                         Text(
-                            text = "Downloading $downloadedCount / $totalToDownload…",
+                            text = stringResource(R.string.audio_downloading_short_format, downloadedCount, totalToDownload),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             maxLines = 1,
@@ -129,9 +129,9 @@ internal fun AudioBottomBar(
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            PositionChip(text = "Ayah $currentAyahInSurah / $totalAyahsInSurah")
-                            PositionChip(text = "p. $pageNumber")
-                            PositionChip(text = "Juz $juzNumber")
+                            PositionChip(text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah))
+                            PositionChip(text = stringResource(R.string.audio_position_page_format, pageNumber))
+                            PositionChip(text = stringResource(R.string.audio_position_juz_format, juzNumber))
                         }
                     }
                 }

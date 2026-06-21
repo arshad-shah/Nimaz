@@ -164,6 +164,26 @@ enum class CalculationMethod {
             TURKEY -> "Diyanet, Turkey"
         }
     }
+
+    /**
+     * Compact label for dense UI (e.g. the prayer-times header). Centralised
+     * here so screens/view-models don't each keep their own copy.
+     */
+    fun shortName(): String {
+        return when (this) {
+            MUSLIM_WORLD_LEAGUE -> "MWL"
+            EGYPTIAN -> "Egyptian"
+            KARACHI -> "Karachi"
+            UMM_AL_QURA -> "Umm al-Qura"
+            DUBAI -> "Dubai"
+            MOON_SIGHTING_COMMITTEE -> "Moonsighting"
+            NORTH_AMERICA -> "ISNA"
+            KUWAIT -> "Kuwait"
+            QATAR -> "Qatar"
+            SINGAPORE -> "Singapore"
+            TURKEY -> "Turkey"
+        }
+    }
 }
 
 enum class AsrCalculation {
@@ -182,6 +202,14 @@ enum class AsrCalculation {
     fun displayName(): String {
         return when (this) {
             STANDARD -> "Standard (Shafi'i)"
+            HANAFI -> "Hanafi"
+        }
+    }
+
+    /** Compact label for dense UI. Centralised so view-models don't duplicate it. */
+    fun shortName(): String {
+        return when (this) {
+            STANDARD -> "Standard"
             HANAFI -> "Hanafi"
         }
     }

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,7 +69,7 @@ fun PrayerStatsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Statistics",
+                title = stringResource(R.string.statistics),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -93,10 +95,10 @@ fun PrayerStatsScreen(
                             label = {
                                 Text(
                                     text = when (period) {
-                                        StatsPeriod.WEEK -> "Week"
-                                        StatsPeriod.MONTH -> "Month"
-                                        StatsPeriod.YEAR -> "Year"
-                                        StatsPeriod.ALL_TIME -> "All Time"
+                                        StatsPeriod.WEEK -> stringResource(R.string.stats_period_week)
+                                        StatsPeriod.MONTH -> stringResource(R.string.stats_period_month)
+                                        StatsPeriod.YEAR -> stringResource(R.string.stats_period_year)
+                                        StatsPeriod.ALL_TIME -> stringResource(R.string.all_time)
                                     }
                                 )
                             }
@@ -126,32 +128,32 @@ fun PrayerStatsScreen(
                     PrayerStatsChart(
                         stats = stats,
                         chartType = PrayerChartType.DONUT,
-                        title = "Prayer Completion",
+                        title = stringResource(R.string.prayer_completion),
                         subtitle = periodLabel,
                         summaryItems = listOf(
                             ChartStatItem(
                                 "${stats.totalPrayed}",
-                                "Prayed",
+                                stringResource(R.string.prayed),
                                 NimazColors.StatusColors.Prayed
                             ),
                             ChartStatItem(
                                 "${stats.totalMissed}",
-                                "Missed",
+                                stringResource(R.string.missed),
                                 NimazColors.StatusColors.Missed
                             ),
                             ChartStatItem(
                                 "${stats.perfectDays}",
-                                "Perfect\nDays",
+                                stringResource(R.string.stat_perfect_days),
                                 NimazColors.PrayerColors.Maghrib
                             ),
                             ChartStatItem(
                                 "${state.currentStreak}",
-                                "Current\nStreak",
+                                stringResource(R.string.stat_current_streak),
                                 NimazColors.StatusColors.Prayed
                             ),
                             ChartStatItem(
                                 "${state.longestStreak}",
-                                "Longest\nStreak",
+                                stringResource(R.string.stat_longest_streak),
                                 MaterialTheme.colorScheme.secondary
                             )
                         )
@@ -165,7 +167,7 @@ fun PrayerStatsScreen(
                     PrayerStatsChart(
                         stats = stats,
                         chartType = PrayerChartType.BAR,
-                        title = "Prayer Breakdown",
+                        title = stringResource(R.string.prayer_breakdown),
                         summaryItems = emptyList()
                     )
                 }
@@ -190,11 +192,11 @@ private fun InsightsSection(
 ) {
     // Determine insights from data
     val prayerNames = listOf(
-        PrayerName.FAJR to "Fajr",
-        PrayerName.DHUHR to "Dhuhr",
-        PrayerName.ASR to "Asr",
-        PrayerName.MAGHRIB to "Maghrib",
-        PrayerName.ISHA to "Isha"
+        PrayerName.FAJR to stringResource(R.string.prayer_fajr),
+        PrayerName.DHUHR to stringResource(R.string.prayer_dhuhr),
+        PrayerName.ASR to stringResource(R.string.prayer_asr),
+        PrayerName.MAGHRIB to stringResource(R.string.prayer_maghrib),
+        PrayerName.ISHA to stringResource(R.string.prayer_isha)
     )
 
     // Find weakest prayer
@@ -217,7 +219,7 @@ private fun InsightsSection(
 
     Column(modifier = modifier) {
         Text(
-            text = "Insights",
+            text = stringResource(R.string.insights),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(bottom = 12.dp)
@@ -234,8 +236,8 @@ private fun InsightsSection(
                     icon = Icons.Default.Warning,
                     iconBackgroundColor = Color(0xFFF97316).copy(alpha = 0.2f),
                     iconTint = Color(0xFFF97316),
-                    title = "$name needs attention",
-                    description = "Your $name completion is at $percent%. Try setting an alarm to improve."
+                    title = stringResource(R.string.prayer_insight_needs_attention, name),
+                    description = stringResource(R.string.prayer_insight_needs_attention_desc, name, percent)
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
@@ -248,8 +250,8 @@ private fun InsightsSection(
                 icon = Icons.AutoMirrored.Filled.TrendingUp,
                 iconBackgroundColor = Color(0xFF22C55E).copy(alpha = 0.2f),
                 iconTint = Color(0xFF22C55E),
-                title = "Overall completion: $overallPercent%",
-                description = "You've completed ${stats.totalPrayed} out of $totalPrayers prayers. Keep going!"
+                title = stringResource(R.string.prayer_insight_overall, overallPercent),
+                description = stringResource(R.string.prayer_insight_overall_desc, stats.totalPrayed, totalPrayers)
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -265,8 +267,8 @@ private fun InsightsSection(
                     icon = Icons.Default.Lightbulb,
                     iconBackgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
                     iconTint = MaterialTheme.colorScheme.primary,
-                    title = "Best prayer: $name",
-                    description = "You consistently complete $name at $percent%."
+                    title = stringResource(R.string.prayer_insight_best, name),
+                    description = stringResource(R.string.prayer_insight_best_desc, name, percent)
                 )
             }
         }

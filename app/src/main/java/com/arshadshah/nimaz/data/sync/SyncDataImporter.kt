@@ -1,14 +1,30 @@
 package com.arshadshah.nimaz.data.sync
 
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
+import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
+import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
+import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
+import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
+import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
+import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
+import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
@@ -36,6 +52,13 @@ class SyncDataImporter @Inject constructor(
     private val khatamDao: KhatamDao,
     private val tafseerDao: TafseerDao,
     private val zakatDao: ZakatDao,
+    private val asmaUlHusnaDao: AsmaUlHusnaDao,
+    private val asmaUnNabiDao: AsmaUnNabiDao,
+    private val prophetDao: ProphetDao,
+    private val hadithDao: HadithDao,
+    private val duaDao: DuaDao,
+    private val qaidaDao: QaidaDao,
+    private val locationDao: LocationDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     /**
@@ -49,6 +72,10 @@ class SyncDataImporter @Inject constructor(
         importKhatamData(payload)
         importTafseerData(payload)
         importZakatData(payload)
+        importNamesData(payload)
+        importHadithDuaData(payload)
+        importQaidaData(payload)
+        importLocationsData(payload)
         importPreferencesData(payload)
     }
 
@@ -87,6 +114,27 @@ class SyncDataImporter @Inject constructor(
 
     suspend fun importZakatData(payload: SyncPayload) {
         importZakatHistory(payload.zakatHistory)
+    }
+
+    suspend fun importNamesData(payload: SyncPayload) {
+        importAsmaUlHusnaBookmarks(payload.asmaUlHusnaBookmarks)
+        importAsmaUnNabiBookmarks(payload.asmaUnNabiBookmarks)
+        importProphetBookmarks(payload.prophetBookmarks)
+    }
+
+    suspend fun importHadithDuaData(payload: SyncPayload) {
+        importHadithBookmarks(payload.hadithBookmarks)
+        importDuaBookmarks(payload.duaBookmarks)
+        importDuaProgress(payload.duaProgress)
+    }
+
+    suspend fun importQaidaData(payload: SyncPayload) {
+        importQaidaLessonProgress(payload.qaidaLessonProgress)
+        importQaidaCellProgress(payload.qaidaCellProgress)
+    }
+
+    suspend fun importLocationsData(payload: SyncPayload) {
+        importFavoriteLocations(payload.favoriteLocations)
     }
 
     suspend fun importPreferencesData(payload: SyncPayload) {
@@ -437,5 +485,191 @@ class SyncDataImporter @Inject constructor(
             }
         }
         if (toInsert.isNotEmpty()) zakatDao.insertCalculations(toInsert)
+    }
+
+    // --- Names & Prophets ---
+
+    private suspend fun importAsmaUlHusnaBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = asmaUlHusnaDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                asmaUlHusnaDao.insertBookmark(
+                    AsmaUlHusnaBookmarkEntity(
+                        nameId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importAsmaUnNabiBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = asmaUnNabiDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                asmaUnNabiDao.insertBookmark(
+                    AsmaUnNabiBookmarkEntity(
+                        nameId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importProphetBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = prophetDao.getAllBookmarksSync().map { it.prophetId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                prophetDao.insertBookmark(
+                    ProphetBookmarkEntity(
+                        prophetId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    // --- Hadith & Dua ---
+
+    private suspend fun importHadithBookmarks(incoming: List<SyncHadithBookmark>) {
+        val existing = hadithDao.getAllBookmarksSync().associateBy { it.hadithId }
+        for (item in incoming) {
+            val local = existing[item.hadithId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                hadithDao.insertBookmark(
+                    HadithBookmarkEntity(
+                        id = local?.id ?: 0,
+                        hadithId = item.hadithId,
+                        bookId = item.bookId,
+                        hadithNumber = item.hadithNumber,
+                        note = item.note,
+                        color = item.color,
+                        createdAt = item.createdAt,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importDuaBookmarks(incoming: List<SyncDuaBookmark>) {
+        val existing = duaDao.getAllBookmarksSync().associateBy { it.duaId }
+        for (item in incoming) {
+            val local = existing[item.duaId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                duaDao.insertBookmark(
+                    DuaBookmarkEntity(
+                        id = local?.id ?: 0,
+                        duaId = item.duaId,
+                        categoryId = item.categoryId,
+                        note = item.note,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importDuaProgress(incoming: List<SyncDuaProgress>) {
+        // dua_progress has no unique constraint on (duaId, date); merge on that
+        // pair so re-imports update the day's count rather than duplicating it.
+        val existing = duaDao.getAllProgressSync().associateBy { it.duaId to it.date }
+        for (item in incoming) {
+            val local = existing[item.duaId to item.date]
+            if (local == null || item.completedCount > local.completedCount) {
+                duaDao.insertProgress(
+                    DuaProgressEntity(
+                        id = local?.id ?: 0,
+                        duaId = item.duaId,
+                        date = item.date,
+                        completedCount = item.completedCount,
+                        targetCount = item.targetCount,
+                        isCompleted = item.isCompleted,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    // --- Qaida ---
+
+    private suspend fun importQaidaLessonProgress(incoming: List<SyncQaidaLessonProgress>) {
+        val existing = qaidaDao.getAllLessonProgressSync().associateBy { it.lessonId }
+        for (item in incoming) {
+            val local = existing[item.lessonId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                qaidaDao.upsertLessonProgress(
+                    QaidaLessonProgressEntity(
+                        lessonId = item.lessonId,
+                        status = item.status,
+                        stars = item.stars,
+                        lastCellId = item.lastCellId,
+                        completedCells = item.completedCells,
+                        totalCells = item.totalCells,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importQaidaCellProgress(incoming: List<SyncQaidaCellProgress>) {
+        val existing = qaidaDao.getAllCellProgressSync()
+            .associateBy { it.lessonId to it.cellId }
+        for (item in incoming) {
+            val local = existing[item.lessonId to item.cellId]
+            if (local == null || item.lastPracticedAt > local.lastPracticedAt) {
+                qaidaDao.upsertCellProgress(
+                    QaidaCellProgressEntity(
+                        lessonId = item.lessonId,
+                        cellId = item.cellId,
+                        heardCount = item.heardCount,
+                        isCompleted = item.isCompleted,
+                        lastPracticedAt = item.lastPracticedAt
+                    )
+                )
+            }
+        }
+    }
+
+    // --- Locations (favorites only; never touches the current location) ---
+
+    private suspend fun importFavoriteLocations(incoming: List<SyncLocation>) {
+        // Match on coordinates so a place isn't duplicated across devices.
+        val existing = locationDao.getAllLocationsSync()
+            .associateBy { it.latitude to it.longitude }
+        for (item in incoming) {
+            val local = existing[item.latitude to item.longitude]
+            if (local != null && item.updatedAt <= local.updatedAt) continue
+            locationDao.insertLocation(
+                LocationEntity(
+                    id = local?.id ?: 0,
+                    name = item.name,
+                    latitude = item.latitude,
+                    longitude = item.longitude,
+                    timezone = item.timezone,
+                    country = item.country,
+                    city = item.city,
+                    // Never change which location is "current" on this device.
+                    isCurrentLocation = local?.isCurrentLocation ?: false,
+                    isFavorite = true,
+                    calculationMethod = item.calculationMethod,
+                    asrCalculation = item.asrCalculation,
+                    highLatitudeRule = item.highLatitudeRule,
+                    fajrAngle = item.fajrAngle,
+                    ishaAngle = item.ishaAngle,
+                    createdAt = item.createdAt,
+                    updatedAt = item.updatedAt
+                )
+            )
+        }
     }
 }

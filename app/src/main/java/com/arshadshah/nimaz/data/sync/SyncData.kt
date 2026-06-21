@@ -26,8 +26,165 @@ data class SyncPayload(
     val tafseerNotes: List<SyncTafseerNote> = emptyList(),
     // Zakat
     val zakatHistory: List<SyncZakatHistory> = emptyList(),
+    // Names & Prophets favorites
+    val asmaUlHusnaBookmarks: List<SyncNameBookmark> = emptyList(),
+    val asmaUnNabiBookmarks: List<SyncNameBookmark> = emptyList(),
+    val prophetBookmarks: List<SyncNameBookmark> = emptyList(),
+    // Hadith & Dua bookmarks
+    val hadithBookmarks: List<SyncHadithBookmark> = emptyList(),
+    val duaBookmarks: List<SyncDuaBookmark> = emptyList(),
+    val duaProgress: List<SyncDuaProgress> = emptyList(),
+    // Qaida learning progress
+    val qaidaLessonProgress: List<SyncQaidaLessonProgress> = emptyList(),
+    val qaidaCellProgress: List<SyncQaidaCellProgress> = emptyList(),
+    // Saved (favorite) locations — never the device's current-location flag
+    val favoriteLocations: List<SyncLocation> = emptyList(),
     // Preferences
     val preferences: Map<String, String> = emptyMap()
+)
+
+// --- Names & Prophets (favorite toggles) ---
+
+/** A favorited name (Asma ul Husna / Asma un Nabi) or prophet. */
+@Serializable
+data class SyncNameBookmark(
+    val id: Long,
+    val refId: Int,
+    val isFavorite: Boolean,
+    val createdAt: Long
+)
+
+// --- Hadith & Dua bookmarks ---
+
+@Serializable
+data class SyncHadithBookmark(
+    val id: Long,
+    val hadithId: Int,
+    val bookId: Int,
+    val hadithNumber: Int,
+    val note: String?,
+    val color: String?,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
+@Serializable
+data class SyncDuaBookmark(
+    val id: Long,
+    val duaId: Int,
+    val categoryId: Int,
+    val note: String?,
+    val isFavorite: Boolean,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
+@Serializable
+data class SyncDuaProgress(
+    val id: Long,
+    val duaId: Int,
+    val date: Long,
+    val completedCount: Int,
+    val targetCount: Int,
+    val isCompleted: Boolean,
+    val createdAt: Long
+)
+
+// --- Qaida (Arabic letter learning progress) ---
+
+@Serializable
+data class SyncQaidaLessonProgress(
+    val lessonId: Int,
+    val status: String,
+    val stars: Int,
+    val lastCellId: Int?,
+    val completedCells: Int,
+    val totalCells: Int,
+    val updatedAt: Long
+)
+
+@Serializable
+data class SyncQaidaCellProgress(
+    val lessonId: Int,
+    val cellId: Int,
+    val heardCount: Int,
+    val isCompleted: Boolean,
+    val lastPracticedAt: Long
+)
+
+// --- Saved locations (favorites only) ---
+
+/**
+ * A user-saved favorite location with its per-location calculation settings.
+ * The device's "current location" flag is intentionally NOT carried — imported
+ * locations are always added as non-current favorites so a sync never changes
+ * the receiving device's active location or prayer times.
+ */
+@Serializable
+data class SyncLocation(
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val timezone: String,
+    val country: String?,
+    val city: String?,
+    val calculationMethod: String?,
+    val asrCalculation: String?,
+    val highLatitudeRule: String?,
+    val fajrAngle: Double?,
+    val ishaAngle: Double?,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
+/**
+ * A single human-countable category within a [SyncPayload].
+ *
+ * - [key] is a stable identifier the UI maps to a localized label.
+ * - [count] is the number of records (or 1/0 for singletons).
+ * - [isFlag] marks present/absent categories (reading progress, preferences)
+ *   that should be shown as "included" rather than with a number.
+ */
+data class SyncCategory(
+    val key: String,
+    val count: Int,
+    val isFlag: Boolean = false,
+)
+
+/**
+ * Single source of truth for everything a [SyncPayload] carries.
+ *
+ * The sync settings screen and the transfer summary are BOTH derived from this
+ * list, so whenever a new data field is added to [SyncPayload] it must be added
+ * here too — and then it automatically shows up in the UI. `SyncPayloadCoverageTest`
+ * uses reflection to fail the build if a payload data field is ever forgotten
+ * here, which keeps the sync screen from silently lagging behind new features.
+ */
+fun SyncPayload.categories(): List<SyncCategory> = listOf(
+    SyncCategory("bookmarks", bookmarks.size),
+    SyncCategory("favorites", favorites.size),
+    SyncCategory("readingProgress", if (readingProgress != null) 1 else 0, isFlag = true),
+    SyncCategory("prayerRecords", prayerRecords.size),
+    SyncCategory("fastRecords", fastRecords.size),
+    SyncCategory("makeupFasts", makeupFasts.size),
+    SyncCategory("tasbihPresets", tasbihPresets.size),
+    SyncCategory("tasbihSessions", tasbihSessions.size),
+    SyncCategory("khatams", khatams.size),
+    SyncCategory("khatamAyahs", khatamAyahs.size),
+    SyncCategory("khatamDailyLogs", khatamDailyLogs.size),
+    SyncCategory("tafseerHighlights", tafseerHighlights.size),
+    SyncCategory("tafseerNotes", tafseerNotes.size),
+    SyncCategory("zakatHistory", zakatHistory.size),
+    SyncCategory("asmaUlHusnaBookmarks", asmaUlHusnaBookmarks.size),
+    SyncCategory("asmaUnNabiBookmarks", asmaUnNabiBookmarks.size),
+    SyncCategory("prophetBookmarks", prophetBookmarks.size),
+    SyncCategory("hadithBookmarks", hadithBookmarks.size),
+    SyncCategory("duaBookmarks", duaBookmarks.size),
+    SyncCategory("duaProgress", duaProgress.size),
+    SyncCategory("qaidaLessonProgress", qaidaLessonProgress.size),
+    SyncCategory("qaidaCellProgress", qaidaCellProgress.size),
+    SyncCategory("favoriteLocations", favoriteLocations.size),
+    SyncCategory("preferences", preferences.size, isFlag = true),
 )
 
 // --- Quran ---

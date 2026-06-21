@@ -24,6 +24,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.NameCard
 import com.arshadshah.nimaz.presentation.components.molecules.NameFilterRow
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
@@ -86,12 +87,7 @@ fun AsmaUnNabiListScreen(
 
             // Content
             if (state.isLoading) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                NimazLoadingState()
             } else {
                 val displayList = state.filteredNames
 

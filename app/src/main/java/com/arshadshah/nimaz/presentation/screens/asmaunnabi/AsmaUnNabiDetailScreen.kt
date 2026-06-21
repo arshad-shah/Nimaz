@@ -35,7 +35,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NamesAccents
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
@@ -66,31 +68,11 @@ fun AsmaUnNabiDetailScreen(
         },
         floatingActionButton = {
             state.name?.let { name ->
-                FloatingActionButton(
-                    onClick = {
-                        viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id))
-                    },
-                    containerColor = accent.chipContainer,
-                    contentColor = accent.onChipContainer
-                ) {
-                    Icon(
-                        imageVector = if (name.isFavorite) {
-                            Icons.Filled.Favorite
-                        } else {
-                            Icons.Outlined.FavoriteBorder
-                        },
-                        contentDescription = if (name.isFavorite) {
-                            stringResource(R.string.remove_from_favorites)
-                        } else {
-                            stringResource(R.string.add_to_favorites)
-                        },
-                        tint = if (name.isFavorite) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            accent.onChipContainer
-                        }
-                    )
-                }
+                FavoriteFab(
+                    isFavorite = name.isFavorite,
+                    accent = accent,
+                    onClick = { viewModel.onEvent(AsmaUnNabiEvent.ToggleFavorite(name.id)) }
+                )
             }
         }
     ) { paddingValues ->
@@ -128,7 +110,7 @@ fun AsmaUnNabiDetailScreen(
 
                 // Meaning Section
                 item {
-                    DetailSectionCard(
+                    NameDetailSectionCard(
                         title = stringResource(R.string.asma_ul_husna_meaning),
                         content = name.meaning,
                         titleColor = accent.contentTint
@@ -137,7 +119,7 @@ fun AsmaUnNabiDetailScreen(
 
                 // Explanation Section
                 item {
-                    DetailSectionCard(
+                    NameDetailSectionCard(
                         title = stringResource(R.string.asma_ul_husna_explanation),
                         content = name.explanation,
                         titleColor = accent.contentTint
@@ -146,7 +128,7 @@ fun AsmaUnNabiDetailScreen(
 
                 // Source Section
                 item {
-                    DetailSectionCard(
+                    NameDetailSectionCard(
                         title = stringResource(R.string.asma_un_nabi_source),
                         content = name.source,
                         titleColor = accent.contentTint
@@ -157,41 +139,6 @@ fun AsmaUnNabiDetailScreen(
                 item {
                     Spacer(modifier = Modifier.height(72.dp))
                 }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DetailSectionCard(
-    title: String,
-    content: String,
-    titleColor: androidx.compose.ui.graphics.Color
-) {
-    if (content.isNotBlank()) {
-        NimazCard(
-            modifier = Modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
-            )
-        ) {
-            Column(
-                modifier = Modifier.padding(NimazSpacing.Large),
-                verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = titleColor
-                )
-                Text(
-                    text = content,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 22.sp
-                )
             }
         }
     }

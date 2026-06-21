@@ -55,15 +55,15 @@ fun QaidaHomeScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Qaida") },
+                title = { Text(stringResource(R.string.qaida)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onOpenLetters) {
-                        Icon(Icons.Filled.Translate, contentDescription = "Letter explorer")
+                        Icon(Icons.Filled.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
                     }
                     IconButton(onClick = { menuExpanded = true }) {
                         Icon(

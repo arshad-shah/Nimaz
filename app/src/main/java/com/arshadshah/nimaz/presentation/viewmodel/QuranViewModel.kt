@@ -23,7 +23,10 @@ import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import androidx.compose.ui.text.font.FontFamily
+import android.content.Context
+import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -137,7 +140,8 @@ class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     val audioManager: QuranAudioManager,
     private val preferencesDataStore: PreferencesDataStore,
-    private val khatamUseCases: KhatamUseCases
+    private val khatamUseCases: KhatamUseCases,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _homeState = MutableStateFlow(QuranHomeUiState())
@@ -380,7 +384,7 @@ class QuranViewModel @Inject constructor(
                 ayahNumber = ayah.ayahNumber
             )
         }
-        val title = _readerState.value.title.ifEmpty { "Surah $surahNumber" }
+        val title = _readerState.value.title.ifEmpty { context.getString(R.string.quran_home_surah_fallback, surahNumber) }
         // Respect continuousReading setting from QuranReaderScreen
         audioManager.setContinuousPlayback(_readerState.value.continuousReading)
         audioManager.playFromAyah(ayahGlobalId, audioItems, title)
@@ -457,7 +461,7 @@ class QuranViewModel @Inject constructor(
                             ayahs = surahWithAyahs?.ayahs ?: emptyList(),
                             title = surahWithAyahs?.surah?.nameEnglish ?: "",
                             subtitle = surahWithAyahs?.let { s ->
-                                "Surah ${s.surah.number} \u2022 ${s.surah.numberOfAyahs} Ayahs"
+                                context.getString(R.string.quran_surah_ayahs_format, s.surah.number, s.surah.numberOfAyahs)
                             } ?: "",
                             isLoading = false,
                             readingMode = ReadingMode.SURAH
@@ -475,7 +479,7 @@ class QuranViewModel @Inject constructor(
                 readingMode = ReadingMode.JUZ,
                 surahWithAyahs = null,
                 ayahs = emptyList(),
-                title = "Juz $juzNumber",
+                title = context.getString(R.string.quran_juz_number_format, juzNumber),
                 subtitle = ""
             )
         }
@@ -485,7 +489,7 @@ class QuranViewModel @Inject constructor(
                     _readerState.update {
                         it.copy(
                             ayahs = ayahs,
-                            title = "Juz $juzNumber",
+                            title = context.getString(R.string.quran_juz_number_format, juzNumber),
                             subtitle = "${ayahs.size} Ayahs",
                             isLoading = false
                         )
@@ -502,7 +506,7 @@ class QuranViewModel @Inject constructor(
                 it.copy(
                     ayahs = cached,
                     readingMode = ReadingMode.PAGE,
-                    title = "Page $pageNumber",
+                    title = context.getString(R.string.page_single_format, pageNumber),
                     subtitle = "${cached.size} Ayahs",
                     isLoading = false
                 )
@@ -517,7 +521,7 @@ class QuranViewModel @Inject constructor(
                 readingMode = ReadingMode.PAGE,
                 surahWithAyahs = null,
                 // Keep existing ayahs to prevent flicker during page transition
-                title = "Page $pageNumber",
+                title = context.getString(R.string.page_single_format, pageNumber),
                 subtitle = ""
             )
         }
@@ -571,7 +575,7 @@ class QuranViewModel @Inject constructor(
                         if (result.surahName.isEmpty()) {
                             val surahName =
                                 surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
-                                    ?: "Surah ${result.ayah.surahNumber}"
+                                    ?: context.getString(R.string.quran_home_surah_fallback, result.ayah.surahNumber)
                             result.copy(surahName = surahName)
                         } else {
                             result

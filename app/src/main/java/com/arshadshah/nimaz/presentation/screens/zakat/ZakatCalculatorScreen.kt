@@ -68,8 +68,7 @@ import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import com.arshadshah.nimaz.core.util.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,7 +84,7 @@ fun ZakatCalculatorScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Zakat Calculator",
+                title = stringResource(R.string.zakat_calculator),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
@@ -159,7 +158,7 @@ private fun ZakatCompactContent(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             NimazSectionHeader(
-                title = "Assets",
+                title = stringResource(R.string.assets),
                 trailingContent = {
                     Text(
                         text = formatCurrency(
@@ -178,7 +177,7 @@ private fun ZakatCompactContent(
         item {
             Spacer(modifier = Modifier.height(8.dp))
             NimazSectionHeader(
-                title = "Liabilities",
+                title = stringResource(R.string.liabilities),
                 trailingContent = {
                     Text(
                         text = formatCurrency(state.liabilities.total, state.currency),
@@ -248,7 +247,7 @@ private fun ZakatTabletContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 NimazSectionHeader(
-                    title = "Assets",
+                    title = stringResource(R.string.assets),
                     trailingContent = {
                         Text(
                             text = formatCurrency(
@@ -271,7 +270,7 @@ private fun ZakatTabletContent(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 NimazSectionHeader(
-                    title = "Liabilities",
+                    title = stringResource(R.string.liabilities),
                     trailingContent = {
                         Text(
                             text = formatCurrency(state.liabilities.total, state.currency),
@@ -312,8 +311,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Wallet,
             iconTint = NimazColors.ZakatColors.Cash,
             iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
-            label = "Cash on Hand",
-            hint = "Physical cash you possess",
+            label = stringResource(R.string.cash_on_hand),
+            hint = stringResource(R.string.hint_physical_cash),
             value = state.assets.cashOnHand,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateCash(it)) }
         )
@@ -321,8 +320,8 @@ private fun AssetInputCards(
             icon = Icons.Default.AccountBalance,
             iconTint = NimazColors.ZakatColors.Cash,
             iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
-            label = "Bank Balance",
-            hint = "All bank accounts combined",
+            label = stringResource(R.string.bank_balance),
+            hint = stringResource(R.string.hint_bank_accounts),
             value = state.assets.bankBalance,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBankBalance(it)) }
         )
@@ -330,8 +329,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Savings,
             iconTint = NimazColors.ZakatColors.Gold,
             iconBackground = NimazColors.ZakatColors.Gold.copy(alpha = 0.2f),
-            label = "Gold",
-            hint = "Weight in grams",
+            label = stringResource(R.string.gold),
+            hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.goldGrams,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateGold(it)) },
             suffix = "g"
@@ -340,8 +339,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Savings,
             iconTint = NimazColors.ZakatColors.Silver,
             iconBackground = NimazColors.ZakatColors.Silver.copy(alpha = 0.2f),
-            label = "Silver",
-            hint = "Weight in grams",
+            label = stringResource(R.string.silver),
+            hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.silverGrams,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateSilver(it)) },
             suffix = "g"
@@ -350,8 +349,8 @@ private fun AssetInputCards(
             icon = Icons.AutoMirrored.Filled.ShowChart,
             iconTint = NimazColors.ZakatColors.Investment,
             iconBackground = NimazColors.ZakatColors.Investment.copy(alpha = 0.2f),
-            label = "Investments",
-            hint = "Stocks, bonds, mutual funds",
+            label = stringResource(R.string.investments),
+            hint = stringResource(R.string.hint_stocks_bonds),
             value = state.assets.investments,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateInvestments(it)) }
         )
@@ -359,8 +358,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Business,
             iconTint = MaterialTheme.colorScheme.primary,
             iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-            label = "Business Inventory",
-            hint = "Goods held for trade",
+            label = stringResource(R.string.business_inventory),
+            hint = stringResource(R.string.hint_goods_for_trade),
             value = state.assets.businessInventory,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBusinessInventory(it)) }
         )
@@ -368,8 +367,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Receipt,
             iconTint = MaterialTheme.colorScheme.primary,
             iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-            label = "Receivables",
-            hint = "Money owed to you",
+            label = stringResource(R.string.receivables),
+            hint = stringResource(R.string.hint_money_owed_to_you),
             value = state.assets.receivables,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateReceivables(it)) }
         )
@@ -377,8 +376,8 @@ private fun AssetInputCards(
             icon = Icons.Default.Home,
             iconTint = MaterialTheme.colorScheme.primary,
             iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-            label = "Rental Income",
-            hint = "Income from properties",
+            label = stringResource(R.string.rental_income),
+            hint = stringResource(R.string.hint_income_from_properties),
             value = state.assets.rentalIncome,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateRentalIncome(it)) }
         )
@@ -386,8 +385,8 @@ private fun AssetInputCards(
             icon = Icons.Default.MoreHoriz,
             iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
             iconBackground = MaterialTheme.colorScheme.surfaceVariant,
-            label = "Other Assets",
-            hint = "Any other zakatable assets",
+            label = stringResource(R.string.other_assets),
+            hint = stringResource(R.string.hint_other_zakatable_assets),
             value = state.assets.otherAssets,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherAssets(it)) }
         )
@@ -404,8 +403,8 @@ private fun LiabilityInputCards(
             icon = Icons.Default.CreditCard,
             iconTint = MaterialTheme.colorScheme.error,
             iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-            label = "Debts Owed",
-            hint = "Personal debts",
+            label = stringResource(R.string.debts_owed),
+            hint = stringResource(R.string.hint_personal_debts),
             value = state.liabilities.debts,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateDebts(it)) }
         )
@@ -413,8 +412,8 @@ private fun LiabilityInputCards(
             icon = Icons.Default.AccountBalance,
             iconTint = MaterialTheme.colorScheme.error,
             iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-            label = "Loans",
-            hint = "Bank or personal loans",
+            label = stringResource(R.string.loans),
+            hint = stringResource(R.string.hint_bank_personal_loans),
             value = state.liabilities.loans,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateLoans(it)) }
         )
@@ -422,8 +421,8 @@ private fun LiabilityInputCards(
             icon = Icons.Default.Receipt,
             iconTint = MaterialTheme.colorScheme.error,
             iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-            label = "Bills Due",
-            hint = "Outstanding bills",
+            label = stringResource(R.string.bills_due),
+            hint = stringResource(R.string.hint_outstanding_bills),
             value = state.liabilities.billsDue,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateBillsDue(it)) }
         )
@@ -431,8 +430,8 @@ private fun LiabilityInputCards(
             icon = Icons.Default.MoreHoriz,
             iconTint = MaterialTheme.colorScheme.error,
             iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
-            label = "Other Liabilities",
-            hint = "Any other liabilities",
+            label = stringResource(R.string.other_liabilities),
+            hint = stringResource(R.string.hint_other_liabilities),
             value = state.liabilities.otherLiabilities,
             onValueChange = { viewModel.onEvent(ZakatEvent.UpdateOtherLiabilities(it)) }
         )
@@ -473,7 +472,7 @@ private fun ZakatResultSummaryCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Zakat Due",
+                    text = stringResource(R.string.zakat_due),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF1C1917).copy(alpha = 0.8f)
                 )
@@ -492,7 +491,7 @@ private fun ZakatResultSummaryCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "2.5% of eligible wealth",
+                    text = stringResource(R.string.zakat_rate_subtitle),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF1C1917).copy(alpha = 0.7f)
                 )
@@ -546,7 +545,7 @@ private fun NisabSelector(
         horizontalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         NisabOptionCard(
-            label = "Gold",
+            label = stringResource(R.string.gold),
             subtitle = "87.48g @ \$${goldPrice.toInt()}/g",
             isSelected = selectedType == NisabType.GOLD,
             accentColor = NimazColors.ZakatColors.Gold,
@@ -555,7 +554,7 @@ private fun NisabSelector(
         )
 
         NisabOptionCard(
-            label = "Silver",
+            label = stringResource(R.string.silver),
             subtitle = "612.36g @ \$${silverPrice}/g",
             isSelected = selectedType == NisabType.SILVER,
             accentColor = NimazColors.ZakatColors.Silver,
@@ -775,7 +774,7 @@ private fun BreakdownCard(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
-            text = "Calculation Breakdown",
+            text = stringResource(R.string.calculation_breakdown),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -796,12 +795,12 @@ private fun BreakdownCard(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 BreakdownRow(
-                    label = "Total Assets",
+                    label = stringResource(R.string.total_assets),
                     value = formatCurrency(totalAssets, currency),
                     valueColor = MaterialTheme.colorScheme.primary
                 )
                 BreakdownRow(
-                    label = "Total Liabilities",
+                    label = stringResource(R.string.total_liabilities),
                     value = "- ${formatCurrency(totalLiabilities, currency)}",
                     valueColor = MaterialTheme.colorScheme.error
                 )
@@ -812,20 +811,20 @@ private fun BreakdownCard(
                 )
 
                 BreakdownRow(
-                    label = "Net Zakatable Wealth",
+                    label = stringResource(R.string.net_zakatable_wealth),
                     value = formatCurrency(netWorth, currency),
                     valueColor = MaterialTheme.colorScheme.onSurface,
                     isBold = true
                 )
 
                 BreakdownRow(
-                    label = "Nisab Threshold",
+                    label = stringResource(R.string.nisab_threshold),
                     value = formatCurrency(nisabValue, currency),
                     valueColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 BreakdownRow(
-                    label = "Meets Nisab",
+                    label = stringResource(R.string.meets_nisab),
                     value = if (isAboveNisab) "Yes" else "No",
                     valueColor = if (isAboveNisab) {
                         MaterialTheme.colorScheme.primary
@@ -840,7 +839,7 @@ private fun BreakdownCard(
                 )
 
                 BreakdownRow(
-                    label = "Zakat Due (2.5%)",
+                    label = stringResource(R.string.zakat_due_2_5_percent),
                     value = formatCurrency(zakatDue, currency),
                     valueColor = NimazColors.ZakatColors.Gold,
                     isBold = true
@@ -860,7 +859,7 @@ private fun BreakdownCard(
             )
         ) {
             Text(
-                text = "Save Calculation",
+                text = stringResource(R.string.save_calculation),
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onPrimary,
@@ -901,9 +900,3 @@ private fun BreakdownRow(
     }
 }
 
-// --- Utilities ---
-
-private fun formatCurrency(amount: Double, currency: String): String {
-    val formatter = NumberFormat.getCurrencyInstance(Locale.US)
-    return formatter.format(amount)
-}

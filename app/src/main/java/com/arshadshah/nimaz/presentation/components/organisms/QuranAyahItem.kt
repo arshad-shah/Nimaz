@@ -56,45 +56,11 @@ import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
-import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-internal const val BISMILLAH_TEXT = "بِسْمِ ٱللَّهِ ٱلرَّحْمَٰنِ ٱلرَّحِيمِ"
-
-/**
- * Strip bismillah from first ayah's Arabic text for all surahs EXCEPT:
- * - Surah 1 (Al-Fatiha) - bismillah IS ayah 1
- * - Surah 9 (At-Tawbah) - has no bismillah
- */
-internal fun Ayah.getDisplayArabicText(): String {
-    return if (numberInSurah == 1 && surahNumber != 1 && surahNumber != 9) {
-        textArabic
-            .removePrefix("$BISMILLAH_TEXT ")
-            .removePrefix(BISMILLAH_TEXT)
-            .trim()
-    } else {
-        textArabic
-    }
-}
-
-/**
- * Process ayah text to append Arabic numeral with ornamental brackets at the end
- */
-internal fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
-    return "$arabicText ${formatAyahEndMarker(ayahNumber)}"
-}
-
-/**
- * Format just the ayah end marker with ornamental brackets
- */
-internal fun formatAyahEndMarker(ayahNumber: Int): String {
-    val unicodeAyaEndStart = "\uFD3F" // ﴿
-    val unicodeAyaEndEnd = "\uFD3E"   // ﴾
-    val arabicNumber = toArabicNumber(ayahNumber)
-    return "$unicodeAyaEndStart$arabicNumber$unicodeAyaEndEnd"
-}
 
 @Composable
 internal fun AyahItem(
@@ -166,7 +132,7 @@ internal fun AyahItem(
                     ) {
                         Icon(
                             imageVector = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                            contentDescription = if (isKhatamRead) "Mark as unread" else "Mark as read",
+                            contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread) else stringResource(R.string.cd_mark_as_read),
                             tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
@@ -225,7 +191,7 @@ internal fun AyahItem(
                 ) {
                     Icon(
                         imageVector = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isAudioPlaying) "Pause" else "Play",
+                        contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(R.string.action_play),
                         tint = if (isAudioPlaying || isHighlighted) MaterialTheme.colorScheme.primary
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
@@ -342,7 +308,7 @@ internal fun AyahItem(
                         color = Color(0xFFDC2626).copy(alpha = 0.15f)
                     ) {
                         Text(
-                            text = if (ayah.sajdaType == SajdaType.OBLIGATORY) "Sajdah (Wajib)" else "Sajdah",
+                            text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(R.string.sajdah),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
                             color = Color(0xFFDC2626),
@@ -376,7 +342,7 @@ internal fun AyahItem(
             }
 
             Text(
-                text = "Juz ${ayah.juz} \u2022 Page ${ayah.page}",
+                text = stringResource(R.string.juz_page_dot_format, ayah.juz, ayah.page),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -89,7 +91,7 @@ internal fun SurahBanner(
                     color = Color.White.copy(alpha = 0.15f)
                 ) {
                     Text(
-                        text = if (revelationType == RevelationType.MECCAN) "Meccan" else "Medinan",
+                        text = if (revelationType == RevelationType.MECCAN) stringResource(R.string.quran_meccan) else stringResource(R.string.quran_medinan),
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White,
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
@@ -97,7 +99,7 @@ internal fun SurahBanner(
                 }
                 Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "$ayahCount Ayahs",
+                    text = stringResource(R.string.quran_ayahs_count_format, ayahCount),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.8f)
                 )

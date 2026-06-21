@@ -69,6 +69,9 @@ interface HadithDao {
     @Query("SELECT * FROM hadith_bookmarks ORDER BY createdAt DESC")
     fun getAllBookmarks(): Flow<List<HadithBookmarkEntity>>
 
+    @Query("SELECT * FROM hadith_bookmarks")
+    suspend fun getAllBookmarksSync(): List<HadithBookmarkEntity>
+
     @Query("SELECT * FROM hadith_bookmarks WHERE bookId = :bookId ORDER BY createdAt DESC")
     fun getBookmarksByBook(bookId: Int): Flow<List<HadithBookmarkEntity>>
 

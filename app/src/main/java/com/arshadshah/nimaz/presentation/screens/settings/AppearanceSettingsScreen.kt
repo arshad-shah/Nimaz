@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,7 +61,7 @@ fun AppearanceSettingsScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Appearance",
+                title = stringResource(R.string.appearance),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -76,7 +78,7 @@ fun AppearanceSettingsScreen(
 
             // Theme Section
             item {
-                NimazSectionHeader(title = "Theme")
+                NimazSectionHeader(title = stringResource(R.string.appearance_theme))
             }
             item {
                 ThemeSelectionCard(
@@ -87,7 +89,7 @@ fun AppearanceSettingsScreen(
 
             // Display Section
             item {
-                NimazSectionHeader(title = "Display")
+                NimazSectionHeader(title = stringResource(R.string.appearance_display))
             }
             item {
                 DisplaySettingsCard(
@@ -112,7 +114,7 @@ fun AppearanceSettingsScreen(
 
             // Home Screen Section
             item {
-                NimazSectionHeader(title = "Home Screen")
+                NimazSectionHeader(title = stringResource(R.string.appearance_home_screen))
             }
             item {
                 HomeScreenSettingsCard(
@@ -145,7 +147,7 @@ private fun ThemeSelectionCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ThemePreviewOption(
-                label = "Dark",
+                label = stringResource(R.string.theme_dark),
                 isSelected = selectedTheme == AppTheme.DARK,
                 onClick = { onThemeSelected(AppTheme.DARK) },
                 modifier = Modifier.weight(1f)
@@ -160,7 +162,7 @@ private fun ThemeSelectionCard(
                 }
             }
             ThemePreviewOption(
-                label = "Light",
+                label = stringResource(R.string.theme_light),
                 isSelected = selectedTheme == AppTheme.LIGHT,
                 onClick = { onThemeSelected(AppTheme.LIGHT) },
                 modifier = Modifier.weight(1f)
@@ -175,7 +177,7 @@ private fun ThemeSelectionCard(
                 }
             }
             ThemePreviewOption(
-                label = "System",
+                label = stringResource(R.string.theme_system),
                 isSelected = selectedTheme == AppTheme.SYSTEM,
                 onClick = { onThemeSelected(AppTheme.SYSTEM) },
                 modifier = Modifier.weight(1f)
@@ -313,29 +315,29 @@ private fun DisplaySettingsCard(
 ) {
     NimazMenuGroup {
         NimazSettingsItem(
-            title = "Islamic Patterns",
-            subtitle = "Show decorative patterns",
+            title = stringResource(R.string.appearance_islamic_patterns),
+            subtitle = stringResource(R.string.appearance_islamic_patterns_subtitle),
             checked = showIslamicPatterns,
             onCheckedChange = { onIslamicPatternsToggle() }
         )
         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
         NimazSettingsItem(
-            title = "Animations",
-            subtitle = "Enable smooth transitions",
+            title = stringResource(R.string.appearance_animations),
+            subtitle = stringResource(R.string.appearance_animations_subtitle),
             checked = animationsEnabled,
             onCheckedChange = { onAnimationsToggle() }
         )
         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
         NimazSettingsItem(
-            title = "Haptic Feedback",
-            subtitle = "Vibration on interactions",
+            title = stringResource(R.string.appearance_haptic),
+            subtitle = stringResource(R.string.appearance_haptic_subtitle),
             checked = hapticFeedback,
             onCheckedChange = { onHapticFeedbackToggle() }
         )
         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
         NimazSettingsItem(
-            title = "24-Hour Time",
-            subtitle = "Use 24-hour format",
+            title = stringResource(R.string.appearance_24hour),
+            subtitle = stringResource(R.string.appearance_24hour_subtitle),
             checked = use24HourFormat,
             onCheckedChange = { on24HourToggle() }
         )
@@ -351,8 +353,8 @@ private fun HomeScreenSettingsCard(
 ) {
     NimazMenuGroup {
         NimazSettingsItem(
-            title = "Show Islamic Date",
-            subtitle = "Display Hijri calendar",
+            title = stringResource(R.string.appearance_show_islamic_date),
+            subtitle = stringResource(R.string.appearance_show_islamic_date_subtitle),
             checked = useHijriPrimary,
             onCheckedChange = { onHijriPrimaryToggle() }
         )

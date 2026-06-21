@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -93,17 +95,17 @@ fun SurahInfoScreen(
                     verticalArrangement = Arrangement.spacedBy(24.dp)
                 ) {
                     // About This Surah
-                    NimazSectionTitle(text = "About This Surah", uppercase = false)
+                    NimazSectionTitle(text = stringResource(R.string.surah_info_about), uppercase = false)
                     InfoCard(
                         text = surahInfo?.description
-                            ?: "This surah contains divine guidance and wisdom for believers."
+                            ?: stringResource(R.string.surah_info_description_fallback)
                     )
 
                     // Main Themes
-                    NimazSectionTitle(text = "Main Themes", uppercase = false)
+                    NimazSectionTitle(text = stringResource(R.string.surah_info_main_themes), uppercase = false)
                     ThemesList(
                         themes = surahInfo?.themes
-                            ?: listOf("Divine Guidance", "Worship", "Morality", "Remembrance")
+                            ?: listOf(stringResource(R.string.surah_info_theme_guidance), stringResource(R.string.surah_info_theme_worship), stringResource(R.string.surah_info_theme_morality), stringResource(R.string.surah_info_theme_remembrance))
                     )
                 }
             }

@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -207,9 +209,9 @@ private fun DaysUntilBadge(
     modifier: Modifier = Modifier
 ) {
     val text = when (daysUntil) {
-        0 -> "Today"
-        1 -> "Tomorrow"
-        else -> "$daysUntil days"
+        0 -> stringResource(R.string.today)
+        1 -> stringResource(R.string.fasting_tomorrow)
+        else -> stringResource(R.string.days_count_format, daysUntil)
     }
 
     Box(

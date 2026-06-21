@@ -421,12 +421,12 @@ fun ExpandableSearchBar(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Recent Searches",
+                                text = stringResource(R.string.recent_searches),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = "Clear",
+                                text = stringResource(R.string.cd_clear),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.clickable { onClearRecentSearches() }
@@ -476,7 +476,7 @@ fun ExpandableSearchBar(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = "Popular Searches",
+                                text = stringResource(R.string.popular_searches),
                                 style = MaterialTheme.typography.labelLarge,
                                 fontWeight = FontWeight.Bold
                             )

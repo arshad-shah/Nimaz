@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.hadith
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -87,7 +89,7 @@ fun HadithChaptersScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "No chapters found",
+                    text = stringResource(R.string.no_chapters_found),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

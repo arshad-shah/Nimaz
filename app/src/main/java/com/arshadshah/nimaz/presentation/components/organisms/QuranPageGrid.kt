@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -135,7 +137,7 @@ internal fun LazyListScope.pageGridItems(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Juz $juz",
+                        text = stringResource(R.string.quran_juz_number_format, juz),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary

@@ -125,11 +125,11 @@ fun MonthlyPrayerTimesScreen(
     Scaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = "Monthly Prayer Times",
+                title = stringResource(R.string.monthly_prayer_times),
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
-                        Icon(Icons.Default.Share, contentDescription = "Export as PDF")
+                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
                     }
                 }
             )
@@ -232,7 +232,7 @@ private fun ExportSheet(
             .padding(bottom = 16.dp),
     ) {
         Text(
-            text = "Export as PDF",
+            text = stringResource(R.string.export_as_pdf),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
@@ -240,7 +240,7 @@ private fun ExportSheet(
         ExportOption(
             icon = Icons.Default.CalendarMonth,
             tint = MaterialTheme.colorScheme.primary,
-            title = "This month",
+            title = stringResource(R.string.monthly_this_month),
             subtitle = "$monthLabel · $dayCount days",
             onClick = onThisMonth,
         )
@@ -249,8 +249,8 @@ private fun ExportSheet(
             ExportOption(
                 icon = Icons.Default.DarkMode,
                 tint = NimazColors.Secondary,
-                title = "Ramadan $ramadanYear",
-                subtitle = "Full month · 1 → last day",
+                title = stringResource(R.string.ramadan_year_format, ramadanYear),
+                subtitle = stringResource(R.string.monthly_full_month_subtitle),
                 onClick = onRamadan,
                 highlight = true,
             )
@@ -412,7 +412,7 @@ private fun MonthNavigationHeader(
                         .padding(horizontal = 10.dp, vertical = 3.dp)
                 ) {
                     Text(
-                        text = "RAMADAN MONTH",
+                        text = stringResource(R.string.ramadan_month_label),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Bold,
                         color = NimazColors.Secondary
