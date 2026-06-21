@@ -12,6 +12,8 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,6 +41,7 @@ import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -157,25 +160,52 @@ fun PrayerSkyScene(
             shape = shape,
             cloudsEnabled = cloudsEnabled,
         )
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             val shadow = Shadow(
-                color = Color.Black.copy(alpha = 0.5f),
+                color = Color.Black.copy(alpha = 0.35f),
                 offset = Offset(0f, 1f),
                 blurRadius = 4f
             )
-            Text(
+            GlassPill(
                 text = timeLabel,
-                style = MaterialTheme.typography.titleLarge.copy(shadow = shadow),
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
+                style = MaterialTheme.typography.titleLarge.copy(
+                    shadow = shadow,
+                    fontWeight = FontWeight.Bold,
+                ),
             )
-            Text(
+            GlassPill(
                 text = statusLabel,
                 style = MaterialTheme.typography.labelMedium.copy(shadow = shadow),
-                color = Color.White.copy(alpha = 0.9f),
             )
         }
     }
+}
+
+/**
+ * A translucent "frosted glass" pill used to keep overlay text legible over the
+ * living sky regardless of the time-of-day gradient behind it. The semi-opaque
+ * white fill establishes a consistent contrast floor without hiding the sky.
+ */
+@Composable
+private fun GlassPill(
+    text: String,
+    style: TextStyle,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = text,
+        style = style,
+        color = Color.White,
+        modifier = modifier
+            .background(
+                color = Color.White.copy(alpha = 0.20f),
+                shape = RoundedCornerShape(100),
+            )
+            .padding(horizontal = 14.dp, vertical = 6.dp),
+    )
 }
 
 private const val SPRITE_SCALE = 0.6f

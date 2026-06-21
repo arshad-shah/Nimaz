@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import android.content.Intent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -47,6 +48,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -61,6 +63,41 @@ import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
+
+/**
+ * A single ayah action rendered as an individual circular "pill". The pill fill
+ * and icon tint animate between an inactive neutral state and an [active] state
+ * tinted with [activeColor] (e.g. red for favourite, gold for bookmark).
+ */
+@Composable
+private fun AyahActionButton(
+    icon: ImageVector,
+    contentDescription: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+    activeColor: Color = MaterialTheme.colorScheme.primary,
+) {
+    val tint by animateColorAsState(
+        targetValue = if (active) activeColor
+        else MaterialTheme.colorScheme.onSurfaceVariant,
+        animationSpec = tween(200),
+        label = "ayah_action_tint"
+    )
+    IconButton(
+        onClick = onClick,
+        modifier = modifier
+            .size(36.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = tint,
+            modifier = Modifier.size(18.dp)
+        )
+    }
+}
 
 @Composable
 internal fun AyahItem(
@@ -140,32 +177,37 @@ internal fun AyahItem(
                 }
             }
 
-            Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
-                IconButton(
+            Surface(
+                shape = RoundedCornerShape(100),
+                color = MaterialTheme.colorScheme.surface,
+                shadowElevation = 2.dp,
+                border = BorderStroke(
+                    1.dp,
+                    MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
+                ),
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+              ) {
+                AyahActionButton(
+                    icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                    contentDescription = stringResource(R.string.cd_favorite),
                     onClick = onFavoriteClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                        contentDescription = stringResource(R.string.cd_favorite),
-                        tint = if (isFavorite) Color(0xFFEF4444)
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(
+                    active = isFavorite,
+                    activeColor = Color(0xFFEF4444),
+                )
+                AyahActionButton(
+                    icon = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                    contentDescription = stringResource(R.string.cd_bookmark),
                     onClick = onBookmarkClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = stringResource(R.string.cd_bookmark),
-                        tint = if (ayah.isBookmarked) NimazColors.QuranColors.BookmarkPrimary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(
+                    active = ayah.isBookmarked,
+                    activeColor = NimazColors.QuranColors.BookmarkPrimary,
+                )
+                AyahActionButton(
+                    icon = Icons.Default.Share,
+                    contentDescription = stringResource(R.string.cd_share),
                     onClick = {
                         val textToShare =
                             "${ayah.textArabic}\n\n${ayah.translation ?: ""}\n\n- Surah ${ayah.surahNumber}, Ayah ${ayah.numberInSurah}"
@@ -176,38 +218,20 @@ internal fun AyahItem(
                         }
                         context.startActivity(Intent.createChooser(sendIntent, "Share Ayah"))
                     },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(R.string.cd_share),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(
+                )
+                AyahActionButton(
+                    icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                    contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(R.string.action_play),
                     onClick = onPlayAyahClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                        contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(R.string.action_play),
-                        tint = if (isAudioPlaying || isHighlighted) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
-                IconButton(
+                    active = isAudioPlaying || isHighlighted,
+                )
+                AyahActionButton(
+                    icon = Icons.AutoMirrored.Filled.MenuBook,
+                    contentDescription = stringResource(R.string.cd_tafseer),
                     onClick = onTafseerClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = stringResource(R.string.cd_tafseer),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                    active = true,
+                )
+              }
             }
         }
 
@@ -356,33 +380,124 @@ internal fun AyahItem(
     }
 }
 
-@Preview(showBackground = true)
+/**
+ * Showcase of every [AyahItem] state: plain, active bookmark/favourite, audio
+ * playing + highlighted, transliteration shown, a sajdah verse, a hizb-marker
+ * verse, and khatam (read-tracking) mode. Rendered for both themes below.
+ */
 @Composable
-private fun AyahItemPreview() {
-    NimazTheme {
+private fun AyahItemShowcase() {
+    val baseArabic =
+        "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650"
+
+    fun ayah(
+        n: Int,
+        bookmarked: Boolean = false,
+        hizb: Int = 1,
+        rub: Int = 0,
+        sajda: SajdaType? = null,
+        transliteration: String? = null,
+    ) = Ayah(
+        id = n,
+        surahNumber = 1,
+        ayahNumber = n,
+        textArabic = baseArabic,
+        textSimple = "bismillah al-rahman al-raheem",
+        juzNumber = 1,
+        hizbNumber = hizb,
+        rubNumber = rub,
+        pageNumber = 1,
+        sajdaType = sajda,
+        sajdaNumber = if (sajda != null) 1 else null,
+        translation = "In the name of Allah, the Most Gracious, the Most Merciful.",
+        isBookmarked = bookmarked,
+        transliteration = transliteration,
+    )
+
+    Column(modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
+        // 1. Plain verse, translation only
         AyahItem(
-            ayah = Ayah(
-                id = 1,
-                surahNumber = 1,
-                ayahNumber = 1,
-                textArabic = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650",
-                textSimple = "bismillah al-rahman al-raheem",
-                juzNumber = 1,
-                hizbNumber = 1,
-                rubNumber = 0,
-                pageNumber = 1,
-                sajdaType = null,
-                sajdaNumber = null,
-                translation = "In the name of Allah, the Most Gracious, the Most Merciful.",
-                isBookmarked = false
-            ),
+            ayah = ayah(1),
             showTranslation = true,
             arabicFontSize = 28f,
             fontSize = 16f,
             onBookmarkClick = {},
-            onFavoriteClick = {},
-            onPlayAyahClick = {},
-            onTafseerClick = {}
         )
+        HorizontalDivider()
+        // 2. Active states: bookmarked + favourited
+        AyahItem(
+            ayah = ayah(2, bookmarked = true),
+            showTranslation = true,
+            isFavorite = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 3. Audio playing + highlighted row
+        AyahItem(
+            ayah = ayah(3),
+            showTranslation = true,
+            isAudioPlaying = true,
+            isHighlighted = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 4. Transliteration shown
+        AyahItem(
+            ayah = ayah(4, transliteration = "Bismi ll\u0101hi r-ra\u1E25m\u0101ni r-ra\u1E25\u012Bm"),
+            showTranslation = true,
+            showTransliteration = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 5. Sajdah verse marker
+        AyahItem(
+            ayah = ayah(5, sajda = SajdaType.OBLIGATORY),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 6. Hizb / quarter marker
+        AyahItem(
+            ayah = ayah(6, hizb = 2, rub = 1),
+            showTranslation = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+        HorizontalDivider()
+        // 7. Khatam mode (read-tracking), marked read
+        AyahItem(
+            ayah = ayah(7),
+            showTranslation = true,
+            isKhatamMode = true,
+            isKhatamRead = true,
+            arabicFontSize = 28f,
+            fontSize = 16f,
+            onBookmarkClick = {},
+        )
+    }
+}
+
+@Preview(name = "Ayah Item \u00B7 Light", showBackground = true, heightDp = 1400)
+@Composable
+private fun AyahItemShowcaseLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        AyahItemShowcase()
+    }
+}
+
+@Preview(name = "Ayah Item \u00B7 Dark", showBackground = true, heightDp = 1400)
+@Composable
+private fun AyahItemShowcaseDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        AyahItemShowcase()
     }
 }

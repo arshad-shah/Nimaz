@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pill Design Companion — Nimaz</title>
+<style>
+  :root{
+    /* Material 3-ish palette (light) */
+    --primary:#2e6b5e;
+    --primary-tint:rgba(46,107,94,.12);
+    --primary-tint-strong:rgba(46,107,94,.18);
+    --on-primary:#ffffff;
+    --surface:#fbf9f6;
+    --surface-container:#f0ede8;
+    --surface-variant:#e3e0da;
+    --outline:#cfcbc3;
+    --on-surface:#1c1b18;
+    --on-surface-var:#4a4843;
+    --gold:#c6a15b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Segoe UI',system-ui,sans-serif;}
+  body{background:#1b1a17;color:#e9e6e0;padding:28px;display:flex;flex-direction:column;gap:32px;align-items:center;}
+  h1{font-size:20px;font-weight:600;letter-spacing:.3px;}
+  .sub{color:#9c988f;font-size:13px;margin-top:-22px;margin-bottom:4px;}
+  .grid{display:flex;flex-wrap:wrap;gap:24px;justify-content:center;width:100%;max-width:1200px;}
+  .card{background:var(--surface);color:var(--on-surface);border-radius:22px;padding:20px;width:360px;box-shadow:0 8px 28px rgba(0,0,0,.4);}
+  .card h2{font-size:14px;font-weight:600;color:var(--primary);margin-bottom:4px;}
+  .card .desc{font-size:12px;color:var(--on-surface-var);margin-bottom:16px;line-height:1.4;}
+  .section-title{width:100%;max-width:1200px;font-size:15px;font-weight:600;color:#cduba;color:#d8d4cc;border-bottom:1px solid #333;padding-bottom:8px;}
+
+  /* ---- Ayah item mock ---- */
+  .ayah{background:var(--surface-container);border-radius:18px;padding:16px;}
+  .ayah .num{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--primary);color:#fff;font-size:12px;font-weight:600;margin-bottom:12px;}
+  .arabic{direction:rtl;text-align:right;font-size:26px;line-height:2;color:var(--on-surface);font-family:'Traditional Arabic','Amiri',serif;margin-bottom:6px;}
+  .translit{font-size:12px;color:var(--on-surface-var);font-style:italic;margin-bottom:4px;}
+  .trans{font-size:13px;color:var(--on-surface-var);margin-bottom:16px;line-height:1.45;}
+
+  .icon{width:20px;height:20px;display:inline-block;}
+  .row{display:flex;align-items:center;gap:8px;}
+  .spacer{flex:1;}
+
+  /* variant A: one pill around whole row */
+  .pill-row{display:inline-flex;align-items:center;gap:4px;background:var(--surface-variant);border-radius:999px;padding:4px;}
+  .pill-row .btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--on-surface-var);cursor:pointer;transition:.15s;}
+  .pill-row .btn:hover{background:rgba(0,0,0,.06);color:var(--primary);}
+  .pill-row .btn.active{background:var(--primary);color:#fff;}
+
+  /* variant B: individual pills */
+  .ind .btn{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--surface-variant);color:var(--on-surface-var);cursor:pointer;transition:.15s;}
+  .ind .btn:hover{background:var(--primary-tint);color:var(--primary);}
+  .ind .btn.active{background:var(--primary);color:#fff;}
+
+  /* variant C: outline pill row */
+  .pill-outline{display:inline-flex;align-items:center;gap:4px;background:transparent;border:1.5px solid var(--outline);border-radius:999px;padding:4px;}
+  .pill-outline .btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--on-surface-var);cursor:pointer;transition:.15s;}
+  .pill-outline .btn:hover{background:var(--primary-tint);color:var(--primary);}
+  .pill-outline .btn.active{background:var(--primary);color:#fff;}
+
+  /* variant D: primary tinted pill row */
+  .pill-tint{display:inline-flex;align-items:center;gap:4px;background:var(--primary-tint);border-radius:999px;padding:4px;}
+  .pill-tint .btn{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--primary);cursor:pointer;transition:.15s;}
+  .pill-tint .btn:hover{background:var(--primary-tint-strong);}
+  .pill-tint .btn.active{background:var(--primary);color:#fff;}
+
+  /* ---- Prayer times mock ---- */
+  .ptscreen{display:flex;flex-direction:column;gap:12px;}
+  .ptile{display:flex;align-items:center;gap:14px;background:var(--surface-container);border-radius:20px;padding:14px 16px;}
+  .ptile.next{background:var(--primary);color:#fff;}
+  .pt-ico{width:42px;height:42px;border-radius:14px;background:var(--surface-variant);display:flex;align-items:center;justify-content:center;color:var(--primary);}
+  .ptile.next .pt-ico{background:rgba(255,255,255,.18);color:#fff;}
+  /* name pill */
+  .name-pill{display:inline-flex;align-items:center;padding:5px 14px;border-radius:999px;background:var(--primary-tint);color:var(--primary);font-size:13px;font-weight:600;}
+  .ptile.next .name-pill{background:rgba(255,255,255,.22);color:#fff;}
+  /* timer pill */
+  .timer-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;background:var(--surface-variant);color:var(--on-surface);font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .ptile.next .timer-pill{background:rgba(255,255,255,.22);color:#fff;}
+  .pt-mid{display:flex;flex-direction:column;gap:6px;}
+  .pt-time{font-size:13px;color:var(--on-surface-var);}
+  .ptile.next .pt-time{color:rgba(255,255,255,.85);}
+
+  /* ---- Living sky hero ---- */
+  .hero{position:relative;height:220px;border-radius:18px;overflow:hidden;display:flex;align-items:flex-end;}
+  .sky-dusk{background:linear-gradient(180deg,#3a4a7a 0%,#9a6a8a 55%,#e0935a 100%);}
+  .sky-day{background:linear-gradient(180deg,#6db6e8 0%,#a9d6f0 70%,#dceefa 100%);}
+  .sky-night{background:linear-gradient(180deg,#0d1430 0%,#1c2a55 60%,#33406f 100%);}
+  .sun{position:absolute;top:26px;right:40px;font-size:40px;filter:drop-shadow(0 0 14px rgba(255,200,90,.8));}
+  .moon{position:absolute;top:24px;right:46px;font-size:34px;filter:drop-shadow(0 0 12px rgba(200,220,255,.7));}
+  .hero-overlay{position:relative;z-index:2;padding:18px;display:flex;flex-direction:column;align-items:flex-start;gap:10px;}
+  .hero-pill{display:inline-flex;align-items:center;padding:7px 18px;border-radius:999px;font-size:15px;font-weight:600;color:#fff;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+  .hero-pill.big{font-size:22px;font-weight:700;letter-spacing:1px;font-variant-numeric:tabular-nums;padding:9px 20px;}
+  .glass{background:rgba(255,255,255,.20);box-shadow:0 2px 12px rgba(0,0,0,.15);}
+  .glass-outline{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.55);}
+  .dark{background:rgba(20,28,50,.42);box-shadow:0 2px 12px rgba(0,0,0,.18);}
+  .hero-sub{font-size:12px;color:rgba(255,255,255,.9);text-shadow:0 1px 4px rgba(0,0,0,.4);padding-left:4px;}
+  .dark-sub{color:#1c2a4a;text-shadow:none;}
+
+  .tag{font-size:11px;color:#8c887f;margin-top:8px;text-align:center;}
+</style>
+</head>
+<body>
+  <h1>🕌 Pill Design Companion — Nimaz</h1>
+  <p class="sub">Visual mockups · pick the directions you like and tell me the letters</p>
+
+  <div class="section-title">1 · Ayah item options</div>
+  <div class="grid">
+
+    <div class="card">
+      <h2>A · One pill around the whole row</h2>
+      <p class="desc">All actions grouped inside a single rounded "toolbar" pill with a soft neutral fill. Bookmark shown active.</p>
+      <div class="ayah">
+        <div class="num">5</div>
+        <div class="arabic">إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
+        <div class="translit">Iyyaka na'budu wa iyyaka nasta'in</div>
+        <div class="trans">It is You we worship and You we ask for help.</div>
+        <div class="row">
+          <div class="pill-row">
+            <div class="btn active" title="bookmark">🔖</div>
+            <div class="btn" title="share">↗</div>
+            <div class="btn" title="play">▶</div>
+            <div class="btn" title="copy">⧉</div>
+            <div class="btn" title="more">⋯</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>B · Individual pill per icon</h2>
+      <p class="desc">Each action sits in its own circular pill. More tappable, more visual weight.</p>
+      <div class="ayah">
+        <div class="num">5</div>
+        <div class="arabic">إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
+        <div class="translit">Iyyaka na'budu wa iyyaka nasta'in</div>
+        <div class="trans">It is You we worship and You we ask for help.</div>
+        <div class="row ind">
+          <div class="btn active" title="bookmark">🔖</div>
+          <div class="btn" title="share">↗</div>
+          <div class="btn" title="play">▶</div>
+          <div class="btn" title="copy">⧉</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>C · Outline pill row</h2>
+      <p class="desc">Single grouped pill but transparent with a thin rounded border. Lighter "encased outline" feel.</p>
+      <div class="ayah">
+        <div class="num">5</div>
+        <div class="arabic">إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
+        <div class="translit">Iyyaka na'budu wa iyyaka nasta'in</div>
+        <div class="trans">It is You we worship and You we ask for help.</div>
+        <div class="row">
+          <div class="pill-outline">
+            <div class="btn active" title="bookmark">🔖</div>
+            <div class="btn" title="share">↗</div>
+            <div class="btn" title="play">▶</div>
+            <div class="btn" title="copy">⧉</div>
+            <div class="btn" title="more">⋯</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>D · Primary-tinted pill row</h2>
+      <p class="desc">Grouped pill with a faint accent-color fill so it picks up the app's green brand.</p>
+      <div class="ayah">
+        <div class="num">5</div>
+        <div class="arabic">إِيَّاكَ نَعْبُدُ وَإِيَّاكَ نَسْتَعِينُ</div>
+        <div class="translit">Iyyaka na'budu wa iyyaka nasta'in</div>
+        <div class="trans">It is You we worship and You we ask for help.</div>
+        <div class="row">
+          <div class="pill-tint">
+            <div class="btn active" title="bookmark">🔖</div>
+            <div class="btn" title="share">↗</div>
+            <div class="btn" title="play">▶</div>
+            <div class="btn" title="copy">⧉</div>
+            <div class="btn" title="more">⋯</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="section-title">2 · Living-sky hero — prayer name pill + timer pill over the sky</div>
+  <div class="grid">
+
+    <div class="card">
+      <h2>P1 · Frosted glass pills (recommended)</h2>
+      <p class="desc">Name + countdown each in a translucent white "frosted glass" pill over the sky. Stays legible as the sky color shifts.</p>
+      <div class="hero sky-dusk">
+        <span class="sun">☀</span>
+        <div class="hero-overlay">
+          <span class="hero-pill glass">Dhuhr</span>
+          <span class="hero-pill glass big">⏱ 02 : 14 : 33</span>
+          <span class="hero-sub">12:48 · until Asr</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>P2 · Dark scrim pills</h2>
+      <p class="desc">Same layout, but pills use a soft dark fill — higher contrast against bright daytime skies.</p>
+      <div class="hero sky-day">
+        <span class="sun">☀</span>
+        <div class="hero-overlay">
+          <span class="hero-pill dark">Dhuhr</span>
+          <span class="hero-pill dark big">⏱ 02 : 14 : 33</span>
+          <span class="hero-sub dark-sub">12:48 · until Asr</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>P3 · Outlined glass pills</h2>
+      <p class="desc">Translucent fill plus a thin light border — a crisper "encased" edge.</p>
+      <div class="hero sky-night">
+        <span class="moon">🌙</span>
+        <div class="hero-overlay">
+          <span class="hero-pill glass-outline">Isha</span>
+          <span class="hero-pill glass-outline big">⏱ 04 : 02 : 10</span>
+          <span class="hero-sub">21:30 · until Fajr</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <p class="tag">Colors are approximate Material-3 placeholders — final pills will use your real MaterialTheme.colorScheme tokens.</p>
+</body>
+</html>

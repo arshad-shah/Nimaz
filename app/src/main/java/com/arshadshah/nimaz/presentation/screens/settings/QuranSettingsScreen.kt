@@ -20,12 +20,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
@@ -35,9 +31,6 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,7 +46,8 @@ import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenuItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -170,11 +164,11 @@ fun QuranSettingsScreen(
 
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                    // Arabic Font selector — exposed dropdown menu. The list of
+                    // Arabic Font selector — Nimaz anchored dropdown. The list of
                     // options comes straight from QuranArabicFont.entries, so adding
-                    // a font (see comment above) automatically adds a menu item. The
-                    // live preview lives in the PREVIEW card at the top of the screen.
-                    var fontMenuExpanded by remember { mutableStateOf(false) }
+                    // a font (see comment above) automatically adds a menu item, each
+                    // rendered in its own typeface. The live preview lives in the
+                    // PREVIEW card at the top of the screen.
                     Column(
                         modifier = Modifier.padding(
                             start = 16.dp,
@@ -183,49 +177,18 @@ fun QuranSettingsScreen(
                             bottom = 14.dp
                         )
                     ) {
-                        Text(
-                            text = stringResource(R.string.arabic_font),
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontWeight = FontWeight.Medium,
-                            color = MaterialTheme.colorScheme.onSurface
+                        NimazDropdownField(
+                            label = stringResource(R.string.arabic_font),
+                            items = QuranArabicFont.entries.map { font ->
+                                NimazDropdownItem(
+                                    value = font.id,
+                                    label = font.displayName,
+                                    textFontFamily = font.fontFamily,
+                                )
+                            },
+                            selected = selectedFont.id,
+                            onSelected = { viewModel.onEvent(SettingsEvent.SetArabicFont(it)) }
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        ExposedDropdownMenuBox(
-                            expanded = fontMenuExpanded,
-                            onExpandedChange = { fontMenuExpanded = it }
-                        ) {
-                            OutlinedTextField(
-                                value = selectedFont.displayName,
-                                onValueChange = {},
-                                readOnly = true,
-                                singleLine = true,
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = fontMenuExpanded)
-                                },
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                            )
-                            ExposedDropdownMenu(
-                                expanded = fontMenuExpanded,
-                                onDismissRequest = { fontMenuExpanded = false }
-                            ) {
-                                QuranArabicFont.entries.forEach { font ->
-                                    val isSelected = font.id == quranState.selectedArabicFontId
-                                    NimazDropdownMenuItem(
-                                        text = font.displayName,
-                                        selected = isSelected,
-                                        textFontFamily = font.fontFamily,
-                                        onClick = {
-                                            viewModel.onEvent(SettingsEvent.SetArabicFont(font.id))
-                                            fontMenuExpanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }

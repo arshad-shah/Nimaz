@@ -19,11 +19,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuAnchorType
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -51,6 +47,8 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -229,50 +227,20 @@ fun FastManagementBottomSheet(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ExemptionReasonSelector(
     selectedReason: ExemptionReason?,
     onReasonSelected: (ExemptionReason?) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Text(
-            text = stringResource(R.string.fasting_sheet_exemption_reason),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium
-        )
-        ExposedDropdownMenuBox(
-            expanded = expanded,
-            onExpandedChange = { expanded = it }
-        ) {
-            OutlinedTextField(
-                value = selectedReason?.displayName()
-                    ?: stringResource(R.string.fasting_sheet_select_reason),
-                onValueChange = {},
-                readOnly = true,
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
-            )
-            ExposedDropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                ExemptionReason.entries.forEach { reason ->
-                    DropdownMenuItem(
-                        text = { Text(reason.displayName()) },
-                        onClick = {
-                            onReasonSelected(reason)
-                            expanded = false
-                        }
-                    )
-                }
-            }
-        }
-    }
+    NimazDropdownField(
+        label = stringResource(R.string.fasting_sheet_exemption_reason),
+        items = ExemptionReason.entries.map { reason ->
+            NimazDropdownItem(value = reason, label = reason.displayName())
+        },
+        selected = selectedReason,
+        placeholder = stringResource(R.string.fasting_sheet_select_reason),
+        onSelected = { onReasonSelected(it) }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
