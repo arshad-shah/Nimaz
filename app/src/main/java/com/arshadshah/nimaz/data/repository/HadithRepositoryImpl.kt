@@ -13,6 +13,7 @@ import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -36,9 +37,7 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override fun getAllBooks(): Flow<List<HadithBook>> {
-        return hadithDao.getAllBooks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getAllBooks().mapItems { it.toDomain() }
     }
 
     override suspend fun getBookById(bookId: String): HadithBook? {
@@ -101,15 +100,11 @@ class HadithRepositoryImpl @Inject constructor(
         val parts = chapterId.split("_")
         val chapterNum =
             if (parts.size == 2) parts[1].toIntOrNull() ?: 0 else chapterId.toIntOrNull() ?: 0
-        return hadithDao.getHadithsByChapter(chapterNum).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getHadithsByChapter(chapterNum).mapItems { it.toDomain() }
     }
 
     override fun getHadithsByBook(bookId: String): Flow<List<Hadith>> {
-        return hadithDao.getHadithsByBook(bookId.toIntOrNull() ?: 0).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getHadithsByBook(bookId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
     override suspend fun getHadithById(hadithId: String): Hadith? {
@@ -129,9 +124,7 @@ class HadithRepositoryImpl @Inject constructor(
             HadithGrade.MAWDU -> "mawdu"
             HadithGrade.UNKNOWN -> "unknown"
         }
-        return hadithDao.getHadithsByGrade(gradeString).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getHadithsByGrade(gradeString).mapItems { it.toDomain() }
     }
 
     override fun searchHadiths(query: String): Flow<List<HadithSearchResult>> {
@@ -175,15 +168,11 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override fun getAllBookmarks(): Flow<List<HadithBookmark>> {
-        return hadithDao.getAllBookmarks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getAllBookmarks().mapItems { it.toDomain() }
     }
 
     override fun getBookmarksByBook(bookId: String): Flow<List<HadithBookmark>> {
-        return hadithDao.getBookmarksByBook(bookId.toIntOrNull() ?: 0).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return hadithDao.getBookmarksByBook(bookId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
     override suspend fun getBookmarkByHadithId(hadithId: String): HadithBookmark? {

@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import kotlinx.coroutines.flow.Flow
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
@@ -48,15 +49,11 @@ class PrayerRepositoryImpl @Inject constructor(
     }
 
     override fun getPrayerRecordsForDate(date: Long): Flow<List<PrayerRecord>> {
-        return prayerDao.getPrayerRecordsForDate(date).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return prayerDao.getPrayerRecordsForDate(date).mapItems { it.toDomain() }
     }
 
     override fun getPrayerRecordsInRange(startDate: Long, endDate: Long): Flow<List<PrayerRecord>> {
-        return prayerDao.getPrayerRecordsInRange(startDate, endDate).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return prayerDao.getPrayerRecordsInRange(startDate, endDate).mapItems { it.toDomain() }
     }
 
     override suspend fun getPrayerRecord(date: Long, prayerName: PrayerName): PrayerRecord? {
@@ -64,15 +61,11 @@ class PrayerRepositoryImpl @Inject constructor(
     }
 
     override fun getPrayerRecordsByStatus(status: PrayerStatus): Flow<List<PrayerRecord>> {
-        return prayerDao.getPrayerRecordsByStatus(status.name.lowercase()).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return prayerDao.getPrayerRecordsByStatus(status.name.lowercase()).mapItems { it.toDomain() }
     }
 
     override fun getMissedPrayersRequiringQada(): Flow<List<PrayerRecord>> {
-        return prayerDao.getMissedPrayersRequiringQada().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return prayerDao.getMissedPrayersRequiringQada().mapItems { it.toDomain() }
     }
 
     override suspend fun insertPrayerRecord(record: PrayerRecord) {
@@ -223,9 +216,7 @@ class PrayerRepositoryImpl @Inject constructor(
 
     // Location operations
     override fun getAllLocations(): Flow<List<Location>> {
-        return locationDao.getAllLocations().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return locationDao.getAllLocations().mapItems { it.toDomain() }
     }
 
     override fun getCurrentLocation(): Flow<Location?> {
@@ -237,9 +228,7 @@ class PrayerRepositoryImpl @Inject constructor(
     }
 
     override fun getFavoriteLocations(): Flow<List<Location>> {
-        return locationDao.getFavoriteLocations().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return locationDao.getFavoriteLocations().mapItems { it.toDomain() }
     }
 
     override suspend fun getLocationById(id: Long): Location? {
@@ -247,9 +236,7 @@ class PrayerRepositoryImpl @Inject constructor(
     }
 
     override fun searchLocations(query: String): Flow<List<Location>> {
-        return locationDao.searchLocations(query).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return locationDao.searchLocations(query).mapItems { it.toDomain() }
     }
 
     override suspend fun insertLocation(location: Location): Long {

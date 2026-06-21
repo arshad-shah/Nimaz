@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
 import com.arshadshah.nimaz.domain.model.Prophet
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import kotlinx.coroutines.flow.Flow
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
@@ -37,7 +38,7 @@ class ProphetRepositoryImpl @Inject constructor(
     }
 
     override fun getFavoriteProphets(): Flow<List<Prophet>> {
-        return dao.getFavoriteProphets().map { list -> list.map { it.toDomain(isFavorite = true) } }
+        return dao.getFavoriteProphets().mapItems { it.toDomain(isFavorite = true) }
     }
 
     override suspend fun toggleFavorite(prophetId: Int) {

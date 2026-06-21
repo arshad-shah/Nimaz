@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import kotlinx.coroutines.flow.Flow
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
@@ -26,18 +27,14 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override fun getTafseerForSurah(surahNumber: Int, tafseerId: String): Flow<List<TafseerText>> {
-        return tafseerDao.getTafseerForSurah(surahNumber, tafseerId).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tafseerDao.getTafseerForSurah(surahNumber, tafseerId).mapItems { it.toDomain() }
     }
 
     override fun getHighlightsForAyah(
         ayahId: Int,
         tafseerId: String
     ): Flow<List<TafseerHighlight>> {
-        return tafseerDao.getHighlightsForAyah(ayahId, tafseerId).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tafseerDao.getHighlightsForAyah(ayahId, tafseerId).mapItems { it.toDomain() }
     }
 
     override suspend fun addHighlight(
@@ -84,9 +81,7 @@ class TafseerRepositoryImpl @Inject constructor(
     }
 
     override fun getNotesForAyah(ayahId: Int, tafseerId: String): Flow<List<TafseerNote>> {
-        return tafseerDao.getNotesForAyah(ayahId, tafseerId).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tafseerDao.getNotesForAyah(ayahId, tafseerId).mapItems { it.toDomain() }
     }
 
     override suspend fun addNote(ayahId: Int, tafseerId: String, text: String): Long {

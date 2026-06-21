@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -33,9 +34,7 @@ class DuaRepositoryImpl @Inject constructor(
         flow { seeder.seedIfNeeded(); emitAll(block()) }
 
     override fun getAllCategories(): Flow<List<DuaCategory>> = seededFlow {
-        duaDao.getAllCategories().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        duaDao.getAllCategories().mapItems { it.toDomain() }
     }
 
     override suspend fun getCategoryById(categoryId: String): DuaCategory? {
@@ -44,9 +43,7 @@ class DuaRepositoryImpl @Inject constructor(
     }
 
     override fun getDuasByCategory(categoryId: String): Flow<List<Dua>> = seededFlow {
-        duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
     override suspend fun getDuaById(duaId: String): Dua? {
@@ -56,9 +53,7 @@ class DuaRepositoryImpl @Inject constructor(
 
     override fun getDuasByOccasion(occasion: DuaOccasion): Flow<List<Dua>> = seededFlow {
         // Since there's no occasion column in the database, return empty list
-        duaDao.searchDuas(occasion.name.lowercase()).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        duaDao.searchDuas(occasion.name.lowercase()).mapItems { it.toDomain() }
     }
 
     override fun searchDuas(query: String): Flow<List<DuaSearchResult>> = seededFlow {
@@ -80,15 +75,11 @@ class DuaRepositoryImpl @Inject constructor(
     }
 
     override fun getAllBookmarks(): Flow<List<DuaBookmark>> {
-        return duaDao.getAllBookmarks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return duaDao.getAllBookmarks().mapItems { it.toDomain() }
     }
 
     override fun getFavoriteDuas(): Flow<List<DuaBookmark>> {
-        return duaDao.getFavoriteDuas().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return duaDao.getFavoriteDuas().mapItems { it.toDomain() }
     }
 
     override suspend fun getBookmarkByDuaId(duaId: String): DuaBookmark? {
@@ -123,15 +114,11 @@ class DuaRepositoryImpl @Inject constructor(
     }
 
     override fun getProgressForDate(date: Long): Flow<List<DuaProgress>> {
-        return duaDao.getProgressForDate(date).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return duaDao.getProgressForDate(date).mapItems { it.toDomain() }
     }
 
     override fun getProgressHistoryForDua(duaId: String): Flow<List<DuaProgress>> {
-        return duaDao.getProgressHistoryForDua(duaId.toIntOrNull() ?: 0).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return duaDao.getProgressHistoryForDua(duaId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
     override suspend fun incrementDuaProgress(duaId: String, date: Long, targetCount: Int) {
