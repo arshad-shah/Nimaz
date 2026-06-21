@@ -555,8 +555,6 @@
     <string name="dua_reader_recommended">Tavsiye Edilen</string>
     <string name="dua_reader_recite_once">%1$d kez oku</string>
     <string name="dua_reader_recite_times">%1$d kez oku</string>
-    <string name="dua_reader_recitation_counter">Okuma Sayacı</string>
-    <string name="dua_reader_target_format">Hedef: %1$dx</string>
     <string name="dua_reader_virtue">Bu Duanın Fazileti</string>
     <string name="dua_reader_share">Paylaş</string>
     <string name="dua_reader_done">Tamam</string>

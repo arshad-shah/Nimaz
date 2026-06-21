@@ -44,14 +44,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -143,7 +141,6 @@ fun DuaReaderScreen(
             }
         } else {
             state.dua?.let { dua ->
-                val repeatCount = dua.repeatCount ?: 0
                 val firstDuaMsg = stringResource(R.string.dua_reader_first_dua)
                 val sourceLabel = if (!dua.reference.isNullOrEmpty()) stringResource(
                     R.string.dua_reader_source_label,
@@ -191,22 +188,6 @@ fun DuaReaderScreen(
                             arabicFontSize = state.arabicFontSize,
                             fontSize = state.fontSize
                         )
-
-                        // Repeat Counter
-                        if (repeatCount > 0) {
-                            RecitationCounter(
-                                currentCount = state.progress?.completedCount ?: 0,
-                                targetCount = repeatCount,
-                                onIncrement = {
-                                    viewModel.onEvent(
-                                        DuaEvent.IncrementProgress(dua.id, repeatCount)
-                                    )
-                                },
-                                onDecrement = {
-                                    viewModel.onEvent(DuaEvent.DecrementProgress(dua.id))
-                                }
-                            )
-                        }
 
                         // Virtue / Benefits card
                         if (!dua.benefits.isNullOrEmpty()) {
@@ -495,118 +476,6 @@ private fun MetaItem(
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurface
             )
-        }
-    }
-}
-
-@Composable
-private fun RecitationCounter(
-    currentCount: Int,
-    targetCount: Int,
-    onIncrement: () -> Unit,
-    onDecrement: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val progress = currentCount.toFloat() / targetCount.toFloat()
-
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
-    ) {
-        Column(modifier = Modifier.padding(20.dp)) {
-            // Header
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.dua_reader_recitation_counter),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.dua_reader_target_format, targetCount),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Counter controls
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Minus button
-                Surface(
-                    onClick = onDecrement,
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.size(50.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Text(
-                            text = "\u2212",
-                            fontSize = 24.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                // Count value
-                Text(
-                    text = currentCount.toString(),
-                    style = MaterialTheme.typography.displaySmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.width(80.dp),
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.width(20.dp))
-
-                // Plus button
-                Surface(
-                    onClick = onIncrement,
-                    shape = RoundedCornerShape(14.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                    modifier = Modifier.size(50.dp)
-                ) {
-                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
-                        Text(
-                            text = "+",
-                            fontSize = 24.sp,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            // Progress bar
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(progress.coerceIn(0f, 1f))
-                        .height(6.dp)
-                        .clip(RoundedCornerShape(3.dp))
-                        .background(MaterialTheme.colorScheme.primary)
-                )
-            }
         }
     }
 }

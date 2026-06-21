@@ -555,8 +555,6 @@
     <string name="dua_reader_recommended">Disyorkan</string>
     <string name="dua_reader_recite_once">Baca %1$d kali</string>
     <string name="dua_reader_recite_times">Baca %1$d kali</string>
-    <string name="dua_reader_recitation_counter">Penghitung Bacaan</string>
-    <string name="dua_reader_target_format">Sasaran: %1$dx</string>
     <string name="dua_reader_virtue">Kelebihan Doa Ini</string>
     <string name="dua_reader_share">Kongsi</string>
     <string name="dua_reader_done">Selesai</string>

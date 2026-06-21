@@ -554,8 +554,6 @@
     <string name="dua_reader_recommended">Empfohlen</string>
     <string name="dua_reader_recite_once">%1$d Mal rezitieren</string>
     <string name="dua_reader_recite_times">%1$d Mal rezitieren</string>
-    <string name="dua_reader_recitation_counter">Rezitationszähler</string>
-    <string name="dua_reader_target_format">Ziel: %1$dx</string>
     <string name="dua_reader_virtue">Vorzüge dieses Duas</string>
     <string name="dua_reader_share">Teilen</string>
     <string name="dua_reader_done">Fertig</string>

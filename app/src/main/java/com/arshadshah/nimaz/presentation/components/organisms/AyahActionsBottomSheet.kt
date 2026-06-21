@@ -6,17 +6,11 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -30,18 +24,14 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -52,30 +42,21 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetAction
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetActionRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetPreviewCard
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Bottom sheet displayed when user taps an ayah in Mushaf view.
  *
- * Contents:
- * - Header: Surah name + Ayah number + Juz/Page info
- * - Arabic text preview
- * - Sajda indicator (if applicable)
- * - Translation text
- * - Action buttons row: Play, Bookmark, Favorite, Copy, Share
- *
- * @param ayah The ayah to show actions for
- * @param surahName Optional surah name for display
- * @param isBookmarked Whether the ayah is bookmarked
- * @param isFavorite Whether the ayah is favorited
- * @param onDismissRequest Callback when sheet is dismissed
- * @param onPlayClick Callback when play is clicked
- * @param onBookmarkClick Callback when bookmark is clicked
- * @param onFavoriteClick Callback when favorite is clicked
- * @param onShareClick Callback when share is clicked
- * @param onCopyClick Callback when copy is clicked
+ * Built on the shared [NimazBottomSheet] kit: header (surah + ayah + juz/page
+ * badge), an Arabic [NimazSheetPreviewCard], optional sajda indicator and
+ * translation card, and a [NimazSheetActionRow] of Play / Bookmark / Favorite /
+ * Copy / Share / (Khatam) / Tafseer.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,7 +81,8 @@ fun AyahActionsBottomSheet(
     NimazBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
     ) {
         AyahActionsContent(
             ayah = ayah,
@@ -143,218 +125,178 @@ fun AyahActionsContent(
 ) {
     val context = LocalContext.current
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp)
-    ) {
-        // Header: Surah name + Ayah number + Juz/Page info
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column {
-                Text(
-                    text = surahName ?: stringResource(R.string.surah_number_format, ayah.surahNumber),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(modifier = modifier.fillMaxWidth()) {
+        NimazSheetHeader(
+            title = surahName ?: stringResource(R.string.surah_number_format, ayah.surahNumber),
+            subtitle = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
+            badge = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber)
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
+            // Arabic text preview
+            NimazSheetPreviewCard {
+                ArabicText(
+                    text = ayah.textArabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
 
-            // Juz and Page info
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-            ) {
-                Text(
-                    text = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Arabic text preview
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            ArabicText(
-                text = ayah.textArabic,
-                size = ArabicTextSize.MEDIUM,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        // Sajda indicator (if applicable)
-        if (ayah.sajdaType != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = Color(0xFFDC2626).copy(alpha = 0.15f)
-            ) {
-                Text(
-                    text = if (ayah.sajdaType == SajdaType.OBLIGATORY) {
-                        stringResource(R.string.sajdah_wajib)
-                    } else {
-                        stringResource(R.string.sajdah_recommended)
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFDC2626),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-            }
-        }
-
-        // Translation text
-        if (!ayah.translation.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = ayah.translation,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Action buttons row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Play button
-            ActionButton(
-                icon = Icons.Default.PlayArrow,
-                label = stringResource(R.string.action_play),
-                onClick = { onPlayClick(ayah) },
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            // Bookmark button
-            ActionButton(
-                icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                label = stringResource(R.string.bookmark),
-                onClick = { onBookmarkClick(ayah) },
-                tint = if (isBookmarked) NimazColors.QuranColors.BookmarkPrimary
-                else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Favorite button
-            ActionButton(
-                icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                label = stringResource(R.string.action_favorite),
-                onClick = { onFavoriteClick(ayah) },
-                tint = if (isFavorite) Color(0xFFEF4444) else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Copy button
-            ActionButton(
-                icon = Icons.Default.ContentCopy,
-                label = stringResource(R.string.action_copy),
-                onClick = {
-                    copyAyahToClipboard(context, ayah)
-                    onCopyClick(ayah)
-                },
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Share button
-            ActionButton(
-                icon = Icons.Default.Share,
-                label = stringResource(R.string.share),
-                onClick = {
-                    shareAyah(context, ayah)
-                    onShareClick(ayah)
-                },
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            // Khatam read toggle (only when khatam is active)
-            if (isKhatamActive) {
-                ActionButton(
-                    icon = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                    label = if (isKhatamRead) stringResource(R.string.unread) else stringResource(R.string.read),
-                    onClick = { onKhatamToggle(ayah) },
-                    tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant
-                )
+            // Sajda indicator (if applicable)
+            if (ayah.sajdaType != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                SajdaIndicator(sajdaType = ayah.sajdaType, withGlyph = false)
             }
 
-            // Tafseer button
-            ActionButton(
-                icon = Icons.AutoMirrored.Filled.MenuBook,
-                label = stringResource(R.string.action_tafseer),
-                onClick = { onTafseerClick(ayah) },
-                tint = MaterialTheme.colorScheme.primary
-            )
-        }
+            // Translation text
+            if (!ayah.translation.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                NimazSheetPreviewCard {
+                    Text(
+                        text = ayah.translation,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
 
-        Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // Action buttons row
+            NimazSheetActionRow(
+                actions = buildAyahActions(
+                    ayah = ayah,
+                    context = context,
+                    isBookmarked = isBookmarked,
+                    isFavorite = isFavorite,
+                    isKhatamActive = isKhatamActive,
+                    isKhatamRead = isKhatamRead,
+                    onPlayClick = onPlayClick,
+                    onBookmarkClick = onBookmarkClick,
+                    onFavoriteClick = onFavoriteClick,
+                    onShareClick = onShareClick,
+                    onCopyClick = onCopyClick,
+                    onKhatamToggle = onKhatamToggle,
+                    onTafseerClick = onTafseerClick
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+        }
     }
 }
 
 @Composable
-private fun ActionButton(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
+private fun buildAyahActions(
+    ayah: Ayah,
+    context: Context,
+    isBookmarked: Boolean,
+    isFavorite: Boolean,
+    isKhatamActive: Boolean,
+    isKhatamRead: Boolean,
+    onPlayClick: (Ayah) -> Unit,
+    onBookmarkClick: (Ayah) -> Unit,
+    onFavoriteClick: (Ayah) -> Unit,
+    onShareClick: (Ayah) -> Unit,
+    onCopyClick: (Ayah) -> Unit,
+    onKhatamToggle: (Ayah) -> Unit,
+    onTafseerClick: (Ayah) -> Unit
+): List<NimazSheetAction> = buildList {
+    add(
+        NimazSheetAction(
+            icon = Icons.Default.PlayArrow,
+            label = stringResource(R.string.action_play),
+            onClick = { onPlayClick(ayah) },
+            tint = MaterialTheme.colorScheme.primary
+        )
+    )
+    add(
+        NimazSheetAction(
+            icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+            label = stringResource(R.string.bookmark),
+            onClick = { onBookmarkClick(ayah) },
+            tint = if (isBookmarked) NimazColors.QuranColors.BookmarkPrimary else null,
+            selected = isBookmarked
+        )
+    )
+    add(
+        NimazSheetAction(
+            icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            label = stringResource(R.string.action_favorite),
+            onClick = { onFavoriteClick(ayah) },
+            tint = if (isFavorite) Color(0xFFEF4444) else null,
+            selected = isFavorite
+        )
+    )
+    add(
+        NimazSheetAction(
+            icon = Icons.Default.ContentCopy,
+            label = stringResource(R.string.action_copy),
+            onClick = {
+                copyAyahToClipboard(context, ayah)
+                onCopyClick(ayah)
+            }
+        )
+    )
+    add(
+        NimazSheetAction(
+            icon = Icons.Default.Share,
+            label = stringResource(R.string.share),
+            onClick = {
+                shareAyah(context, ayah)
+                onShareClick(ayah)
+            }
+        )
+    )
+    if (isKhatamActive) {
+        add(
+            NimazSheetAction(
+                icon = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
+                label = if (isKhatamRead) stringResource(R.string.unread) else stringResource(R.string.read),
+                onClick = { onKhatamToggle(ayah) },
+                tint = if (isKhatamRead) Color(0xFF22C55E) else null,
+                selected = isKhatamRead
+            )
+        )
+    }
+    add(
+        NimazSheetAction(
+            icon = Icons.AutoMirrored.Filled.MenuBook,
+            label = stringResource(R.string.action_tafseer),
+            onClick = { onTafseerClick(ayah) },
+            tint = MaterialTheme.colorScheme.primary
+        )
+    )
+}
+
+/**
+ * Small inline sajda chip. [withGlyph] prefixes the prostration glyph (۩) used in
+ * the translation sheet; the actions sheet omits it.
+ */
+@Composable
+internal fun SajdaIndicator(
+    sajdaType: SajdaType,
     modifier: Modifier = Modifier,
-    tint: Color = MaterialTheme.colorScheme.onSurfaceVariant
+    withGlyph: Boolean = false
 ) {
+    val label = when (sajdaType) {
+        SajdaType.OBLIGATORY -> stringResource(R.string.sajdah_wajib)
+        else -> stringResource(R.string.sajdah_recommended)
+    }
     Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = Color.Transparent,
+        shape = RoundedCornerShape(8.dp),
+        color = Color(0xFFDC2626).copy(alpha = 0.15f),
         modifier = modifier
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.padding(8.dp)
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = label,
-                    tint = tint,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = label,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
+        Text(
+            text = if (withGlyph) "۩ $label" else label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = Color(0xFFDC2626),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+        )
     }
 }
 

@@ -735,8 +735,6 @@
     <string name="dua_reader_recommended">Recommended</string>
     <string name="dua_reader_recite_once">Recite %1$d time</string>
     <string name="dua_reader_recite_times">Recite %1$d times</string>
-    <string name="dua_reader_recitation_counter">Recitation Counter</string>
-    <string name="dua_reader_target_format">Target: %1$dx</string>
     <string name="dua_reader_virtue">Virtue of this Dua</string>
     <string name="dua_reader_share">Share</string>
     <string name="dua_reader_done">Done</string>
