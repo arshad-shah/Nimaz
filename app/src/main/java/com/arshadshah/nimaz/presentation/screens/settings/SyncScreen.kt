@@ -792,6 +792,7 @@ private fun syncCategoryLabel(key: String): String = stringResource(
         "duaProgress" -> R.string.sync_item_dua_progress
         "qaidaLessonProgress" -> R.string.sync_item_qaida_lessons
         "qaidaCellProgress" -> R.string.sync_item_qaida_cells
+        "favoriteLocations" -> R.string.sync_item_locations
         "preferences" -> R.string.sync_item_preferences
         else -> R.string.sync_no_data
     }

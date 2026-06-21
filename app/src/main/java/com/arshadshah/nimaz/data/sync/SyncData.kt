@@ -37,6 +37,8 @@ data class SyncPayload(
     // Qaida learning progress
     val qaidaLessonProgress: List<SyncQaidaLessonProgress> = emptyList(),
     val qaidaCellProgress: List<SyncQaidaCellProgress> = emptyList(),
+    // Saved (favorite) locations — never the device's current-location flag
+    val favoriteLocations: List<SyncLocation> = emptyList(),
     // Preferences
     val preferences: Map<String, String> = emptyMap()
 )
@@ -110,6 +112,31 @@ data class SyncQaidaCellProgress(
     val lastPracticedAt: Long
 )
 
+// --- Saved locations (favorites only) ---
+
+/**
+ * A user-saved favorite location with its per-location calculation settings.
+ * The device's "current location" flag is intentionally NOT carried — imported
+ * locations are always added as non-current favorites so a sync never changes
+ * the receiving device's active location or prayer times.
+ */
+@Serializable
+data class SyncLocation(
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val timezone: String,
+    val country: String?,
+    val city: String?,
+    val calculationMethod: String?,
+    val asrCalculation: String?,
+    val highLatitudeRule: String?,
+    val fajrAngle: Double?,
+    val ishaAngle: Double?,
+    val createdAt: Long,
+    val updatedAt: Long
+)
+
 /**
  * A single human-countable category within a [SyncPayload].
  *
@@ -156,6 +183,7 @@ fun SyncPayload.categories(): List<SyncCategory> = listOf(
     SyncCategory("duaProgress", duaProgress.size),
     SyncCategory("qaidaLessonProgress", qaidaLessonProgress.size),
     SyncCategory("qaidaCellProgress", qaidaCellProgress.size),
+    SyncCategory("favoriteLocations", favoriteLocations.size),
     SyncCategory("preferences", preferences.size, isFlag = true),
 )
 

@@ -1183,4 +1183,5 @@
     <string name="sync_item_qaida_lessons">Qaida-Lektionsfortschritt</string>
     <string name="sync_item_qaida_cells">Qaida-Zellenfortschritt</string>
     <string name="sync_item_dua_progress">Dua-Fortschritt</string>
+    <string name="sync_item_locations">Gespeicherte Orte</string>
 </resources>

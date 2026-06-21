@@ -1185,4 +1185,5 @@
     <string name="sync_item_qaida_lessons">Kemajuan pelajaran Qaida</string>
     <string name="sync_item_qaida_cells">Kemajuan sel Qaida</string>
     <string name="sync_item_dua_progress">Kemajuan Dua</string>
+    <string name="sync_item_locations">Lokasi disimpan</string>
 </resources>

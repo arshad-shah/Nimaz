@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
+import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
@@ -32,6 +33,7 @@ class SyncDataExporter @Inject constructor(
     private val hadithDao: HadithDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
+    private val locationDao: LocationDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
@@ -286,6 +288,26 @@ class SyncDataExporter @Inject constructor(
             )
         }
 
+        // Saved (favorite) locations only — current-location flag is not carried.
+        onProgress("Exporting saved locations...")
+        val favoriteLocations = locationDao.getFavoriteLocationsSync().map {
+            SyncLocation(
+                it.name,
+                it.latitude,
+                it.longitude,
+                it.timezone,
+                it.country,
+                it.city,
+                it.calculationMethod,
+                it.asrCalculation,
+                it.highLatitudeRule,
+                it.fajrAngle,
+                it.ishaAngle,
+                it.createdAt,
+                it.updatedAt
+            )
+        }
+
         // Preferences
         onProgress("Exporting preferences...")
         val preferences = preferencesDataStore.exportAllPreferences()
@@ -315,6 +337,7 @@ class SyncDataExporter @Inject constructor(
             duaProgress = duaProgress,
             qaidaLessonProgress = qaidaLessonProgress,
             qaidaCellProgress = qaidaCellProgress,
+            favoriteLocations = favoriteLocations,
             preferences = preferences
         )
     }

@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
+import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
@@ -20,6 +21,7 @@ import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
@@ -56,6 +58,7 @@ class SyncDataImporter @Inject constructor(
     private val hadithDao: HadithDao,
     private val duaDao: DuaDao,
     private val qaidaDao: QaidaDao,
+    private val locationDao: LocationDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     /**
@@ -72,6 +75,7 @@ class SyncDataImporter @Inject constructor(
         importNamesData(payload)
         importHadithDuaData(payload)
         importQaidaData(payload)
+        importLocationsData(payload)
         importPreferencesData(payload)
     }
 
@@ -127,6 +131,10 @@ class SyncDataImporter @Inject constructor(
     suspend fun importQaidaData(payload: SyncPayload) {
         importQaidaLessonProgress(payload.qaidaLessonProgress)
         importQaidaCellProgress(payload.qaidaCellProgress)
+    }
+
+    suspend fun importLocationsData(payload: SyncPayload) {
+        importFavoriteLocations(payload.favoriteLocations)
     }
 
     suspend fun importPreferencesData(payload: SyncPayload) {
@@ -629,6 +637,39 @@ class SyncDataImporter @Inject constructor(
                     )
                 )
             }
+        }
+    }
+
+    // --- Locations (favorites only; never touches the current location) ---
+
+    private suspend fun importFavoriteLocations(incoming: List<SyncLocation>) {
+        // Match on coordinates so a place isn't duplicated across devices.
+        val existing = locationDao.getAllLocationsSync()
+            .associateBy { it.latitude to it.longitude }
+        for (item in incoming) {
+            val local = existing[item.latitude to item.longitude]
+            if (local != null && item.updatedAt <= local.updatedAt) continue
+            locationDao.insertLocation(
+                LocationEntity(
+                    id = local?.id ?: 0,
+                    name = item.name,
+                    latitude = item.latitude,
+                    longitude = item.longitude,
+                    timezone = item.timezone,
+                    country = item.country,
+                    city = item.city,
+                    // Never change which location is "current" on this device.
+                    isCurrentLocation = local?.isCurrentLocation ?: false,
+                    isFavorite = true,
+                    calculationMethod = item.calculationMethod,
+                    asrCalculation = item.asrCalculation,
+                    highLatitudeRule = item.highLatitudeRule,
+                    fajrAngle = item.fajrAngle,
+                    ishaAngle = item.ishaAngle,
+                    createdAt = item.createdAt,
+                    updatedAt = item.updatedAt
+                )
+            )
         }
     }
 }

@@ -368,6 +368,7 @@ class SyncViewModel @Inject constructor(
             "Importing saved names & prophets..." to { importer.importNamesData(payload) },
             "Importing hadith & dua bookmarks..." to { importer.importHadithDuaData(payload) },
             "Importing Qaida progress..." to { importer.importQaidaData(payload) },
+            "Importing saved locations..." to { importer.importLocationsData(payload) },
             "Importing preferences..." to { importer.importPreferencesData(payload) },
         )
 
