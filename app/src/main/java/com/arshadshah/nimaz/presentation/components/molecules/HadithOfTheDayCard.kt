@@ -35,6 +35,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -76,20 +77,13 @@ fun HadithOfTheDayCard(
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(HadithAccent.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Book,
-                        contentDescription = null,
-                        tint = HadithAccent,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                IconBadge(
+                    imageVector = Icons.Default.Book,
+                    backgroundColor = HadithAccent.copy(alpha = 0.2f),
+                    iconColor = HadithAccent,
+                    containerSize = 32.dp,
+                    iconSize = 18.dp,
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.hadith_of_the_day),

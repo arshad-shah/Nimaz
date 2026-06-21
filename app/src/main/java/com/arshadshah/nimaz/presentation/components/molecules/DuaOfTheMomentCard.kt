@@ -39,6 +39,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -79,20 +80,13 @@ fun DuaOfTheMomentCard(
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(32.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(DuaAccent.copy(alpha = 0.2f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = iconForCategory(categoryLabel),
-                        contentDescription = null,
-                        tint = DuaAccent,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                IconBadge(
+                    imageVector = iconForCategory(categoryLabel),
+                    backgroundColor = DuaAccent.copy(alpha = 0.2f),
+                    iconColor = DuaAccent,
+                    containerSize = 32.dp,
+                    iconSize = 18.dp,
+                )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
