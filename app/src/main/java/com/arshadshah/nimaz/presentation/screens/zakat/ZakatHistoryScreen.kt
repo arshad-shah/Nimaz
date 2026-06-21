@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -70,7 +71,7 @@ fun ZakatHistoryScreen(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = "Zakat History",
+                title = stringResource(R.string.zakat_history_title),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
@@ -89,11 +90,11 @@ fun ZakatHistoryScreen(
     ) { paddingValues ->
         if (historyState.history.isEmpty() && !historyState.isLoading) {
             NimazEmptyState(
-                title = "No Zakat History",
-                message = "Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.",
+                title = stringResource(R.string.no_zakat_history),
+                message = stringResource(R.string.zakat_history_empty_message),
                 icon = Icons.Default.History,
                 iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-                actionLabel = "Calculate Zakat",
+                actionLabel = stringResource(R.string.zakat_calculate),
                 onAction = onNavigateToCalculator,
                 modifier = Modifier
                     .fillMaxSize()
@@ -118,7 +119,7 @@ fun ZakatHistoryScreen(
                 item {
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Calculation History",
+                        text = stringResource(R.string.zakat_history_calculation_history),
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -172,7 +173,7 @@ private fun TotalPaidSummaryCard(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "Total Zakat Paid",
+                    text = stringResource(R.string.zakat_history_total_paid),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF1C1917).copy(alpha = 0.8f)
                 )
@@ -190,7 +191,7 @@ private fun TotalPaidSummaryCard(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "$totalEntries calculation${if (totalEntries != 1) "s" else ""} recorded",
+                    text = pluralStringResource(R.plurals.zakat_calculations_recorded, totalEntries, totalEntries),
                     style = MaterialTheme.typography.bodySmall,
                     color = Color(0xFF1C1917).copy(alpha = 0.7f)
                 )
@@ -242,7 +243,7 @@ private fun HistoryEntryCard(
                     }
                 ) {
                     Text(
-                        text = if (entry.isPaid) "Paid" else "Unpaid",
+                        text = if (entry.isPaid) stringResource(R.string.zakat_paid) else stringResource(R.string.zakat_unpaid),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (entry.isPaid) {
                             NimazColors.StatusColors.Prayed
@@ -263,7 +264,7 @@ private fun HistoryEntryCard(
             ) {
                 Column {
                     Text(
-                        text = "Net Worth",
+                        text = stringResource(R.string.net_worth),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -276,7 +277,7 @@ private fun HistoryEntryCard(
 
                 Column(horizontalAlignment = Alignment.End) {
                     Text(
-                        text = "Zakat Due",
+                        text = stringResource(R.string.zakat_due),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -293,9 +294,11 @@ private fun HistoryEntryCard(
 
             // Nisab info
             Text(
-                text = "Nisab: ${
-                    entry.nisabType.name.lowercase().replaceFirstChar { it.uppercase() }
-                } (${formatCurrency(entry.nisabValue)})",
+                text = stringResource(
+                    R.string.nisab_label_format,
+                    entry.nisabType.name.lowercase().replaceFirstChar { it.uppercase() },
+                    formatCurrency(entry.nisabValue)
+                ),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -303,7 +306,7 @@ private fun HistoryEntryCard(
             // Paid date if applicable
             entry.paidAt?.let { paidAt ->
                 Text(
-                    text = "Paid on: ${dateFormat.format(Date(paidAt))}",
+                    text = stringResource(R.string.zakat_paid_on_format, dateFormat.format(Date(paidAt))),
                     style = MaterialTheme.typography.labelSmall,
                     color = NimazColors.StatusColors.Prayed
                 )
@@ -335,7 +338,7 @@ private fun HistoryEntryCard(
                                 modifier = Modifier.size(16.dp)
                             )
                             Text(
-                                text = "Mark as Paid",
+                                text = stringResource(R.string.zakat_mark_as_paid),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = NimazColors.StatusColors.Prayed
                             )

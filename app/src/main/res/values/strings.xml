@@ -1053,4 +1053,34 @@
     <string name="location_detecting">Detecting…</string>
     <string name="location_not_set">Not set</string>
     <string name="location_current">Current</string>
+
+    <!-- Prayer stats chart -->
+    <string name="completed">Completed</string>
+    <string name="jamaah">Jamaah</string>
+    <string name="stat_in_jamaah">In\nJamaah</string>
+
+    <!-- Quran ayah identifiers (shared) -->
+    <string name="ayah_number_format">Ayah %1$d</string>
+    <string name="juz_page_format">Juz %1$d | P%2$d</string>
+
+    <!-- Search -->
+    <string name="popular_searches">Popular Searches</string>
+
+    <!-- Zakat History Screen -->
+    <string name="zakat_history_title">Zakat History</string>
+    <string name="no_zakat_history">No Zakat History</string>
+    <string name="zakat_history_calculation_history">Calculation History</string>
+    <string name="zakat_history_total_paid">Total Zakat Paid</string>
+    <string name="net_worth">Net Worth</string>
+    <string name="zakat_mark_as_paid">Mark as Paid</string>
+    <string name="zakat_paid">Paid</string>
+    <string name="zakat_unpaid">Unpaid</string>
+    <string name="nisab_label_format">Nisab: %1$s (%2$s)</string>
+    <string name="zakat_paid_on_format">Paid on: %1$s</string>
+    <string name="zakat_history_empty_message">Your saved zakat calculations will appear here. Calculate and save your zakat to start tracking.</string>
+    <string name="zakat_calculate">Calculate Zakat</string>
+    <plurals name="zakat_calculations_recorded">
+        <item quantity="one">%1$d calculation recorded</item>
+        <item quantity="other">%1$d calculations recorded</item>
+    </plurals>
 </resources>
