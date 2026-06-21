@@ -41,6 +41,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
+import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
 class HijriCalendarWidget : GlanceAppWidget() {
 
@@ -85,25 +87,12 @@ private fun HijriCalendarContent(
     val primaryColor = ColorProvider(R.color.widget_primary)
 
     when (state) {
-        is HijriCalendarWidgetState.Loading -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(20.dp)
-                    .clickable(actionStartActivity(openCalendarIntent)),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = GlanceModifier.height(8.dp))
-                    Text(
-                        text = context.getString(R.string.widget_loading),
-                        style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                    )
-                }
-            }
-        }
+        is HijriCalendarWidgetState.Loading -> WidgetLoadingBox(
+            background = backgroundColor,
+            textSecondary = textSecondary,
+            onClick = actionStartActivity(openCalendarIntent),
+            cornerRadius = 20.dp,
+        )
 
         is HijriCalendarWidgetState.Success -> {
             HijriCalendarSuccessContent(
@@ -116,20 +105,15 @@ private fun HijriCalendarContent(
             )
         }
 
-        is HijriCalendarWidgetState.Error -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(20.dp)
-                    .clickable(actionStartActivity(openCalendarIntent)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = context.getString(R.string.widget_tap_to_refresh),
-                    style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                )
-            }
+        is HijriCalendarWidgetState.Error -> WidgetMessageBox(
+            background = backgroundColor,
+            onClick = actionStartActivity(openCalendarIntent),
+            cornerRadius = 20.dp,
+        ) {
+            Text(
+                text = context.getString(R.string.widget_tap_to_refresh),
+                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+            )
         }
     }
 }

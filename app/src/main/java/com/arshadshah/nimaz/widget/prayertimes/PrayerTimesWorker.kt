@@ -3,20 +3,16 @@ package com.arshadshah.nimaz.widget.prayertimes
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.widget.core.WidgetWork
+import com.arshadshah.nimaz.widget.core.formatWidgetTime
+import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -36,48 +32,24 @@ class PrayerTimesWorker @AssistedInject constructor(
     companion object {
         private const val UNIQUE_WORK_NAME = "PrayerTimesWorker"
         private const val ONE_TIME_WORK_NAME = "PrayerTimesWorkerOneTime"
+        private val REFRESH_INTERVAL: Duration = Duration.ofMinutes(15)
 
-        fun enqueuePeriodicWork(context: Context, force: Boolean = false) {
-            val manager = WorkManager.getInstance(context)
-            val request = PeriodicWorkRequestBuilder<PrayerTimesWorker>(
-                Duration.ofMinutes(15)
-            ).build()
+        fun enqueuePeriodicWork(context: Context, force: Boolean = false) =
+            WidgetWork.enqueuePeriodic<PrayerTimesWorker>(
+                context, UNIQUE_WORK_NAME, REFRESH_INTERVAL, force
+            )
 
-            val policy = if (force) {
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
-            } else {
-                ExistingPeriodicWorkPolicy.KEEP
-            }
+        fun enqueueImmediateWork(context: Context) =
+            WidgetWork.enqueueImmediate<PrayerTimesWorker>(context, ONE_TIME_WORK_NAME)
 
-            manager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, policy, request)
-        }
-
-        fun enqueueImmediateWork(context: Context) {
-            val manager = WorkManager.getInstance(context)
-            val request = OneTimeWorkRequestBuilder<PrayerTimesWorker>().build()
-            manager.enqueueUniqueWork(ONE_TIME_WORK_NAME, ExistingWorkPolicy.REPLACE, request)
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME)
-            WorkManager.getInstance(context).cancelUniqueWork(ONE_TIME_WORK_NAME)
-        }
+        fun cancel(context: Context) =
+            WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: PrayerTimesWidgetState
-    ) {
-        glanceIds.forEach { glanceId ->
-            updateAppWidgetState(
-                context = context,
-                definition = PrayerTimesStateDefinition,
-                glanceId = glanceId,
-                updateState = { newState }
-            )
-        }
-        PrayerTimesWidget().updateAll(context)
-    }
+    ) = updateWidgetState(context, PrayerTimesWidget(), PrayerTimesStateDefinition, glanceIds, newState)
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)
@@ -115,6 +87,12 @@ class PrayerTimesWorker @AssistedInject constructor(
                 return prayerLocalTime.time < localTime.time
             }
 
+            fun formatPrayer(prayerTime: com.arshadshah.nimaz.domain.model.PrayerTime?): String =
+                prayerTime?.let {
+                    val local = it.time.toLocalDateTime(timeZone)
+                    formatWidgetTime(local.hour, local.minute)
+                } ?: "—"
+
             val nextPrayer = prayerTimes.firstOrNull { prayerTime ->
                 prayerTime.type != PrayerType.SUNRISE &&
                         prayerTime.time.toLocalDateTime(timeZone).time > localTime.time
@@ -139,36 +117,11 @@ class PrayerTimesWorker @AssistedInject constructor(
                 hijriDate = "${hijriDate.day} ${hijriDate.monthName}",
                 nextPrayerName = nextPrayer?.type?.displayName ?: "—",
                 timeUntilNext = timeUntilNext,
-                fajrTime = fajr?.let {
-                    formatTime(
-                        it.time.toLocalDateTime(timeZone).hour,
-                        it.time.toLocalDateTime(timeZone).minute
-                    )
-                } ?: "—",
-                dhuhrTime = dhuhr?.let {
-                    formatTime(
-                        it.time.toLocalDateTime(timeZone).hour,
-                        it.time.toLocalDateTime(timeZone).minute
-                    )
-                } ?: "—",
-                asrTime = asr?.let {
-                    formatTime(
-                        it.time.toLocalDateTime(timeZone).hour,
-                        it.time.toLocalDateTime(timeZone).minute
-                    )
-                } ?: "—",
-                maghribTime = maghrib?.let {
-                    formatTime(
-                        it.time.toLocalDateTime(timeZone).hour,
-                        it.time.toLocalDateTime(timeZone).minute
-                    )
-                } ?: "—",
-                ishaTime = isha?.let {
-                    formatTime(
-                        it.time.toLocalDateTime(timeZone).hour,
-                        it.time.toLocalDateTime(timeZone).minute
-                    )
-                } ?: "—",
+                fajrTime = formatPrayer(fajr),
+                dhuhrTime = formatPrayer(dhuhr),
+                asrTime = formatPrayer(asr),
+                maghribTime = formatPrayer(maghrib),
+                ishaTime = formatPrayer(isha),
                 fajrPassed = isPassed(fajr),
                 dhuhrPassed = isPassed(dhuhr),
                 asrPassed = isPassed(asr),
@@ -183,10 +136,5 @@ class PrayerTimesWorker @AssistedInject constructor(
             setWidgetState(glanceIds, PrayerTimesWidgetState.Error(e.message))
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }
-    }
-
-    private fun formatTime(hour: Int, minute: Int): String {
-        val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-        return String.format("%d:%02d", h, minute)
     }
 }

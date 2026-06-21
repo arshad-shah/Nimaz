@@ -34,6 +34,8 @@ import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
+import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
+import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
 class NextPrayerWidget : GlanceAppWidget() {
 
@@ -59,25 +61,11 @@ private fun NextPrayerContent(state: NextPrayerWidgetState) {
     val primaryColor = ColorProvider(R.color.widget_primary)
 
     when (state) {
-        is NextPrayerWidgetState.Loading -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = GlanceModifier.height(8.dp))
-                    Text(
-                        text = context.getString(R.string.widget_loading),
-                        style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                    )
-                }
-            }
-        }
+        is NextPrayerWidgetState.Loading -> WidgetLoadingBox(
+            background = backgroundColor,
+            textSecondary = textSecondary,
+            onClick = actionStartActivity<MainActivity>(),
+        )
 
         is NextPrayerWidgetState.Success -> {
             NextPrayerSuccessContent(
@@ -89,22 +77,14 @@ private fun NextPrayerContent(state: NextPrayerWidgetState) {
             )
         }
 
-        is NextPrayerWidgetState.Error -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = context.getString(R.string.widget_tap_to_setup),
-                        style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                    )
-                }
-            }
+        is NextPrayerWidgetState.Error -> WidgetMessageBox(
+            background = backgroundColor,
+            onClick = actionStartActivity<MainActivity>(),
+        ) {
+            Text(
+                text = context.getString(R.string.widget_tap_to_setup),
+                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+            )
         }
     }
 }

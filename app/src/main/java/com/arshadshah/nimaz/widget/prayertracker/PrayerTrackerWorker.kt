@@ -3,17 +3,12 @@ package com.arshadshah.nimaz.widget.prayertracker
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
+import com.arshadshah.nimaz.widget.core.WidgetWork
+import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
@@ -29,48 +24,24 @@ class PrayerTrackerWorker @AssistedInject constructor(
     companion object {
         private const val UNIQUE_WORK_NAME = "PrayerTrackerWorker"
         private const val ONE_TIME_WORK_NAME = "PrayerTrackerWorkerOneTime"
+        private val REFRESH_INTERVAL: Duration = Duration.ofMinutes(30)
 
-        fun enqueuePeriodicWork(context: Context, force: Boolean = false) {
-            val manager = WorkManager.getInstance(context)
-            val request = PeriodicWorkRequestBuilder<PrayerTrackerWorker>(
-                Duration.ofMinutes(30)
-            ).build()
+        fun enqueuePeriodicWork(context: Context, force: Boolean = false) =
+            WidgetWork.enqueuePeriodic<PrayerTrackerWorker>(
+                context, UNIQUE_WORK_NAME, REFRESH_INTERVAL, force
+            )
 
-            val policy = if (force) {
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
-            } else {
-                ExistingPeriodicWorkPolicy.KEEP
-            }
+        fun enqueueImmediateWork(context: Context) =
+            WidgetWork.enqueueImmediate<PrayerTrackerWorker>(context, ONE_TIME_WORK_NAME)
 
-            manager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, policy, request)
-        }
-
-        fun enqueueImmediateWork(context: Context) {
-            val manager = WorkManager.getInstance(context)
-            val request = OneTimeWorkRequestBuilder<PrayerTrackerWorker>().build()
-            manager.enqueueUniqueWork(ONE_TIME_WORK_NAME, ExistingWorkPolicy.REPLACE, request)
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME)
-            WorkManager.getInstance(context).cancelUniqueWork(ONE_TIME_WORK_NAME)
-        }
+        fun cancel(context: Context) =
+            WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: PrayerTrackerWidgetState
-    ) {
-        glanceIds.forEach { glanceId ->
-            updateAppWidgetState(
-                context = context,
-                definition = PrayerTrackerStateDefinition,
-                glanceId = glanceId,
-                updateState = { newState }
-            )
-        }
-        PrayerTrackerWidget().updateAll(context)
-    }
+    ) = updateWidgetState(context, PrayerTrackerWidget(), PrayerTrackerStateDefinition, glanceIds, newState)
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)
