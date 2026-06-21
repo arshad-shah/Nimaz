@@ -40,6 +40,7 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 
 class PrayerTrackerWidget : GlanceAppWidget() {
@@ -250,7 +251,7 @@ private fun togglePrayerStatus(context: Context, prayerName: String) {
             val prayerDao = entryPoint.prayerDao()
 
             val today = LocalDate.now()
-            val todayEpoch = today.toEpochDay() * 86400000L
+            val todayEpoch = today.toUtcMidnightMillis()
 
             // Get current record
             val currentRecord = prayerDao.getPrayerRecord(todayEpoch, prayerName)

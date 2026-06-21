@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 
 @HiltWorker
@@ -53,7 +54,7 @@ class PrayerTrackerWorker @AssistedInject constructor(
 
         return try {
             val today = LocalDate.now()
-            val todayEpoch = today.toEpochDay() * 86400000L
+            val todayEpoch = today.toUtcMidnightMillis()
             val records = prayerDao.getPrayerRecordsForDateSync(todayEpoch)
             val recordMap = records.associate { it.prayerName to it.status }
 

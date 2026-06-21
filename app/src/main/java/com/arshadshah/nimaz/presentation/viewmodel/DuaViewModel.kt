@@ -20,8 +20,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class DuaCollectionUiState(
@@ -315,7 +315,7 @@ class DuaViewModel @Inject constructor(
     }
 
     private fun getTodayEpoch(): Long {
-        return LocalDate.now().atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        return LocalDate.now().toUtcMidnightMillis()
     }
 
     fun isDuaFavorite(duaId: String) = duaRepository.isDuaFavorite(duaId)

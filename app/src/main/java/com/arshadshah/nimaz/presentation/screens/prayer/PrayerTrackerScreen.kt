@@ -73,10 +73,10 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -451,7 +451,7 @@ private fun CalendarSection(
         onNextMonth = { onMonthChange(displayedMonth.plusMonths(1)) },
         selectionStyle = SelectionStyle.BORDER,
         dayStateProvider = { date ->
-            val epoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+            val epoch = date.toUtcMidnightMillis()
             val badgeColor = prayerStatusMap[epoch]
             CalendarDayState(
                 indicatorColor = if (date.isBefore(today) && badgeColor != null) badgeColor else null,

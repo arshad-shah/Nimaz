@@ -18,6 +18,7 @@ import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import kotlinx.coroutines.flow.Flow
 import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.map
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +31,7 @@ class PrayerRepositoryImpl @Inject constructor(
 ) : PrayerRepository {
 
     override fun getTodayPrayerRecords(): Flow<Map<PrayerName, PrayerStatus>> {
-        val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+        val todayEpoch = LocalDate.now().toUtcMidnightMillis()
         return prayerDao.getPrayerRecordsForDate(todayEpoch).map { entities ->
             entities.associate { PrayerName.fromString(it.prayerName) to PrayerStatus.fromString(it.status) }
         }

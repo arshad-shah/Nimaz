@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
-import java.time.ZoneOffset
 import javax.inject.Inject
 
 data class PrayerTrackerUiState(
@@ -168,7 +168,7 @@ class PrayerTrackerViewModel @Inject constructor(
     private fun selectDate(date: LocalDate) {
         _trackerState.update { it.copy(selectedDate = date, isLoading = true) }
 
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         // Cancel previous date's Flow collection before starting new one
         dateRecordsJob?.cancel()
@@ -200,7 +200,7 @@ class PrayerTrackerViewModel @Inject constructor(
         isJamaah: Boolean
     ) {
         val date = _trackerState.value.selectedDate
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
         val prayedAt = if (status == PrayerStatus.PRAYED || status == PrayerStatus.LATE) {
             System.currentTimeMillis()
         } else null
@@ -250,14 +250,14 @@ class PrayerTrackerViewModel @Inject constructor(
             StatsPeriod.ALL_TIME -> now.minusYears(10) to now
         }
 
-        val startEpoch = startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val currentEpoch = now.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val startEpoch = startDate.toUtcMidnightMillis()
+        val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
+        val currentEpoch = now.toUtcMidnightMillis()
 
         // Always load monthly stats
         val monthStart = now.minusMonths(1)
-        val monthStartEpoch = monthStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val monthEndEpoch = now.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val monthStartEpoch = monthStart.toUtcMidnightMillis()
+        val monthEndEpoch = now.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
             val stats = prayerRepository.getPrayerStats(startEpoch, endEpoch)
@@ -300,8 +300,8 @@ class PrayerTrackerViewModel @Inject constructor(
     private fun loadHistory(startDate: LocalDate, endDate: LocalDate) {
         _historyState.update { it.copy(startDate = startDate, endDate = endDate, isLoading = true) }
 
-        val startEpoch = startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val startEpoch = startDate.toUtcMidnightMillis()
+        val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
             prayerRepository.getPrayerRecordsInRange(startEpoch, endEpoch).collect { records ->
