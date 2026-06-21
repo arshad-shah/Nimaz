@@ -67,8 +67,10 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -283,7 +285,10 @@ private fun HadithPage(
 
             if (state.showChain && !hadith.narratorChain.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(20.dp))
-                ChainOfNarrationSection(chain = hadith.narratorChain)
+                ChainOfNarrationSection(
+                    chain = hadith.narratorChain,
+                    arabicFontFamily = state.arabicFontFamily
+                )
             }
         }
     }
@@ -293,6 +298,7 @@ private fun HadithPage(
 @Composable
 private fun ChainOfNarrationSection(
     chain: String,
+    arabicFontFamily: FontFamily,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -369,7 +375,10 @@ private fun ChainOfNarrationSection(
                                 )
                                 Text(
                                     text = narrator,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontFamily = arabicFontFamily,
+                                        textDirection = TextDirection.Rtl
+                                    ),
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.offset(x = (-15).dp)
@@ -380,9 +389,12 @@ private fun ChainOfNarrationSection(
                 } else {
                     Text(
                         text = chain,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 20.sp
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = arabicFontFamily,
+                            textDirection = TextDirection.Rtl,
+                            lineHeight = 26.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

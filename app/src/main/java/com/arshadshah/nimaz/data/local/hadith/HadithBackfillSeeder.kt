@@ -4,11 +4,9 @@ import android.content.Context
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -78,25 +76,21 @@ class HadithBackfillSeeder @Inject constructor(
 ) {
     private val mutex = Mutex()
 
-    suspend fun seedIfNeeded() = mutex.withLock {
-        applyTextFills()
-        deriveMissingChains()
-    }
-
     /**
-     * Applies the bundled text / narrator / curated-chain repairs, version-gated
-     * exactly as before.
+     * Applies the bundled text / narrator / curated-chain repairs, version-gated.
+     * Chains are only ever taken from this curated, verified data — they are
+     * never inferred from the Arabic — so an incorrect isnād is impossible.
      */
-    private suspend fun applyTextFills() {
+    suspend fun seedIfNeeded() = mutex.withLock {
         val stored = versionStore.get()
         val hasGaps = dao.emptyArabicCount() > 0
         // Fast path: nothing stale and no empty text left -> avoid parsing.
-        if (!hasGaps && stored > 0) return
+        if (!hasGaps && stored > 0) return@withLock
 
         val root = hadithFillsJson.decodeFromString(
             HadithFillsRoot.serializer(), assetReader.read("hadith/hadith_fills.json")
         )
-        if (!hasGaps && stored >= root.contentVersion) return
+        if (!hasGaps && stored >= root.contentVersion) return@withLock
 
         root.fills.forEach { fill ->
             if (fill.textArabic.isNotBlank()) {
@@ -114,31 +108,6 @@ class HadithBackfillSeeder @Inject constructor(
             }
         }
         versionStore.set(root.contentVersion)
-    }
-
-    /**
-     * Persists each hadith's chain of narration, derived from its (authentic)
-     * Arabic isnād via [IsnadParser]. This runs once — it drains the rows whose
-     * `narrator_chain` is still NULL (added empty by MIGRATION_16_17 for both
-     * fresh installs and existing users), stamping "" where no chain could be
-     * derived so they are not re-scanned. Runs after [applyTextFills] so chains
-     * parse from any freshly-repaired Arabic. CPU-bound, so kept off the caller's
-     * dispatcher.
-     */
-    private suspend fun deriveMissingChains() {
-        if (dao.countMissingChains() == 0) return
-        withContext(Dispatchers.Default) {
-            while (true) {
-                val batch = dao.getHadithsMissingChain(CHAIN_BATCH)
-                if (batch.isEmpty()) break
-                val updates = batch.map { it.id to (IsnadParser.parse(it.textArabic) ?: "") }
-                dao.setNarratorChains(updates)
-            }
-        }
-    }
-
-    private companion object {
-        const val CHAIN_BATCH = 500
     }
 }
 

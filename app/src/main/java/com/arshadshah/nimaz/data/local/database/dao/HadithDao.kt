@@ -17,12 +17,6 @@ data class HadithChapterCount(
     val hadithCount: Int
 )
 
-/** A hadith's id + Arabic text, used to derive its chain of narration. */
-data class HadithChainRow(
-    val id: Int,
-    val textArabic: String
-)
-
 @Dao
 interface HadithDao {
     // Book operations
@@ -93,24 +87,11 @@ interface HadithDao {
         narrator: String
     ): Int
 
-    // Stores a curated chain of narration (isnād) for a hadith, overriding the
-    // parser-derived chain. Keyed by the stable global `id`.
+    // Stores an authentic, curated chain of narration (isnād) for a hadith,
+    // keyed by the stable global `id`. This is the only source of displayed
+    // chains — they are never inferred.
     @Query("UPDATE hadiths SET narrator_chain = :chain WHERE id = :id")
     suspend fun updateNarratorChain(id: Int, chain: String): Int
-
-    // Chain-of-narration derivation (HadithBackfillSeeder): rows whose chain has
-    // not been derived yet (NULL) and that actually have Arabic to parse. Rows
-    // with no derivable chain are stamped with "" so they are not re-scanned.
-    @Query("SELECT COUNT(*) FROM hadiths WHERE narrator_chain IS NULL AND TRIM(text_arabic) != ''")
-    suspend fun countMissingChains(): Int
-
-    @Query("SELECT id, text_arabic AS textArabic FROM hadiths WHERE narrator_chain IS NULL AND TRIM(text_arabic) != '' LIMIT :limit")
-    suspend fun getHadithsMissingChain(limit: Int): List<HadithChainRow>
-
-    @Transaction
-    suspend fun setNarratorChains(entries: List<Pair<Int, String>>) {
-        entries.forEach { (id, chain) -> updateNarratorChain(id, chain) }
-    }
 
     // Bookmark operations
     @Query("SELECT * FROM hadith_bookmarks ORDER BY createdAt DESC")

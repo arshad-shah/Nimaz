@@ -4,7 +4,6 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
-import com.arshadshah.nimaz.data.local.hadith.IsnadParser
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -243,10 +242,10 @@ class HadithRepositoryImpl @Inject constructor(
             hadithNumberInBook = numberInBook,
             textArabic = textArabic,
             textEnglish = textEnglish,
-            // Prefer the stored isnād (curated, or derived by the seeder — which
-            // stamps "" when no chain could be derived); only rows the seeder has
-            // not reached yet fall back to parsing live.
-            narratorChain = narratorChain ?: IsnadParser.parse(textArabic),
+            // Only an authentic, curated chain of narration is ever shown — we
+            // never infer/guess one, so a hadith without verified isnād data
+            // simply has no chain (the reader hides the section).
+            narratorChain = narratorChain?.takeIf { it.isNotBlank() },
             narratorName = narrator,
             grade = HadithGrade.fromString(grade),
             gradeArabic = null,
