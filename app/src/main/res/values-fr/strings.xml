@@ -532,6 +532,15 @@
     <string name="quran_home_madinah">Médine</string>
     <string name="quran_home_verses_count">%1$d Versets</string>
     <string name="quran_home_surah_info">Info Sourate</string>
+    <string name="quran_home_verse_of_the_day">VERSET DU JOUR</string>
+    <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
+    <string name="quran_home_quick_actions">Accès rapide</string>
+    <string name="quran_home_recommended">Recommandé</string>
+    <string name="quran_home_reason_friday">Sunnah du vendredi</string>
+    <string name="quran_home_reason_before_sleep">Avant de dormir</string>
+    <string name="quran_home_reason_heart">Cœur du Coran</string>
+    <string name="quran_home_reason_mercy">Le Tout Miséricordieux</string>
+    <string name="quran_home_reason_provision">Demande de subsistance</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Chargement…</string>

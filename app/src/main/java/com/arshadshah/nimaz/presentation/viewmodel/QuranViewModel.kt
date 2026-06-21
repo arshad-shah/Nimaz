@@ -58,6 +58,7 @@ data class QuranHomeUiState(
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
     val pageAyahRanges: List<PageAyahRange> = emptyList(),
+    val verseOfTheDay: Ayah? = null,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -171,6 +172,7 @@ class QuranViewModel @Inject constructor(
         loadFavorites()
         loadFavoriteAyahIds()
         loadPageAyahRanges()
+        loadVerseOfTheDay()
         observeQuranSettings()
         setupDebouncedSearch()
         observeActiveKhatam()
@@ -408,6 +410,15 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch {
             val ranges = quranUseCases.getPageAyahRanges()
             _homeState.update { it.copy(pageAyahRanges = ranges) }
+        }
+    }
+
+    private fun loadVerseOfTheDay() {
+        viewModelScope.launch {
+            val translatorId = preferencesDataStore.quranTranslatorId.first()
+            val epochDay = java.time.LocalDate.now().toEpochDay()
+            val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
+            _homeState.update { it.copy(verseOfTheDay = verse) }
         }
     }
 

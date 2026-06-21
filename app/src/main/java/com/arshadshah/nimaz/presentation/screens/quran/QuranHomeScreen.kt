@@ -69,6 +69,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import java.time.DayOfWeek
+import java.time.LocalDate
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -78,7 +80,10 @@ import com.arshadshah.nimaz.presentation.components.molecules.BookmarkListItem
 import com.arshadshah.nimaz.presentation.components.molecules.ContinueReadingCard
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteAyahItem
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamProgressCard
+import com.arshadshah.nimaz.presentation.components.molecules.QuranQuickActions
+import com.arshadshah.nimaz.presentation.components.molecules.QuranRecommendedSurahs
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
+import com.arshadshah.nimaz.presentation.components.molecules.VerseOfTheDayCard
 import com.arshadshah.nimaz.presentation.components.organisms.JuzGrid
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.computeJuzHeaderIndices
@@ -195,7 +200,16 @@ fun QuranHomeScreen(
                         onNavigateToBookmarks = onNavigateToBookmarks,
                         onNavigateToQuranAyah = onNavigateToQuranAyah,
                         onNavigateToKhatam = onNavigateToKhatam,
-                        onNavigateToKhatamDetail = onNavigateToKhatamDetail
+                        onNavigateToKhatamDetail = onNavigateToKhatamDetail,
+                        onNavigateToFavorites = { viewModel.onEvent(QuranEvent.SetTopTab(2)) },
+                        onBrowseJuz = {
+                            viewModel.onEvent(QuranEvent.SetTopTab(1))
+                            viewModel.onEvent(QuranEvent.SetTab(1))
+                        },
+                        onBrowsePage = {
+                            viewModel.onEvent(QuranEvent.SetTopTab(1))
+                            viewModel.onEvent(QuranEvent.SetTab(2))
+                        }
                     )
 
                     1 -> BrowseTabContent(
@@ -229,12 +243,37 @@ private fun HomeTabContent(
     onNavigateToBookmarks: () -> Unit,
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
     onNavigateToKhatam: () -> Unit = {},
-    onNavigateToKhatamDetail: (Long) -> Unit = {}
+    onNavigateToKhatamDetail: (Long) -> Unit = {},
+    onNavigateToFavorites: () -> Unit = {},
+    onBrowseJuz: () -> Unit = {},
+    onBrowsePage: () -> Unit = {}
 ) {
+    val isFriday = remember { LocalDate.now().dayOfWeek == DayOfWeek.FRIDAY }
+
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // Verse of the Day — signature daily ayah
+        val verse = state.verseOfTheDay
+        if (verse != null) {
+            item(key = "verse_of_the_day") {
+                val surahName = state.surahs.find { it.number == verse.surahNumber }?.nameEnglish
+                    ?: stringResource(R.string.quran_home_surah_fallback, verse.surahNumber)
+                VerseOfTheDayCard(
+                    arabicText = verse.textArabic,
+                    translation = verse.translation,
+                    reference = stringResource(
+                        R.string.quran_home_verse_reference,
+                        surahName,
+                        verse.surahNumber,
+                        verse.ayahNumber
+                    ),
+                    onClick = { onNavigateToQuranAyah(verse.surahNumber, verse.ayahNumber) }
+                )
+            }
+        }
+
         // Continue Reading Card
         if (state.readingProgress != null) {
             val progress = state.readingProgress
@@ -323,6 +362,31 @@ private fun HomeTabContent(
             }
         }
 
+        // Quick Access shortcuts
+        item(key = "quick_actions_header") {
+            HomeSectionTitle(text = stringResource(R.string.quran_home_quick_actions))
+        }
+        item(key = "quick_actions") {
+            QuranQuickActions(
+                onJuzClick = onBrowseJuz,
+                onPageClick = onBrowsePage,
+                onBookmarksClick = onNavigateToBookmarks,
+                onFavoritesClick = onNavigateToFavorites
+            )
+        }
+
+        // Recommended surahs (contextual — Al-Kahf first on Fridays)
+        item(key = "recommended_header") {
+            HomeSectionTitle(text = stringResource(R.string.quran_home_recommended))
+        }
+        item(key = "recommended_surahs") {
+            QuranRecommendedSurahs(
+                surahs = state.surahs,
+                isFriday = isFriday,
+                onSurahClick = onNavigateToSurah
+            )
+        }
+
         // Bookmarks Horizontal Row
         if (bookmarks.isNotEmpty()) {
             item(key = "bookmarks_header") {
@@ -365,6 +429,17 @@ private fun HomeTabContent(
             }
         }
     }
+}
+
+@Composable
+private fun HomeSectionTitle(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+        color = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.padding(vertical = 4.dp)
+    )
 }
 
 @Composable
