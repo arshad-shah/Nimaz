@@ -67,6 +67,7 @@ fun AdaptiveHadithScreen(
                                 bookId = args.bookId,
                                 chapterId = args.chapterId,
                                 onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                onNavigateToSettings = { navController.navigate(Route.HadithSettings) },
                             )
                         } else {
                             HadithChaptersScreen(

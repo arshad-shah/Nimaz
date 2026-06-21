@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.screens.dua
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -18,17 +17,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
@@ -68,8 +63,9 @@ import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
@@ -218,7 +214,7 @@ private fun DuaPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             dua.occasion?.let { occasion ->
-                DuaLabelChip(text = occasion.displayName(), highlighted = true)
+                NimazLabelChip(text = occasion.displayName(), highlighted = true)
                 Spacer(modifier = Modifier.height(22.dp))
             }
 
@@ -289,7 +285,7 @@ private fun DuaMetaChips(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (!reference.isNullOrEmpty()) {
-            DuaLabelChip(text = reference, icon = Icons.Default.Book)
+            NimazLabelChip(text = reference, icon = Icons.Default.Book)
         }
         if (repeatCount > 0) {
             val label = if (repeatCount > 1) {
@@ -297,52 +293,7 @@ private fun DuaMetaChips(
             } else {
                 stringResource(R.string.dua_reader_recite_once, repeatCount)
             }
-            DuaLabelChip(text = label, icon = Icons.Default.Refresh)
-        }
-    }
-}
-
-@Composable
-private fun DuaLabelChip(
-    text: String,
-    modifier: Modifier = Modifier,
-    icon: ImageVector? = null,
-    highlighted: Boolean = false
-) {
-    val background = if (highlighted) {
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest
-    }
-    val foreground = if (highlighted) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(100),
-        color = background
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(14.dp),
-                    tint = foreground
-                )
-            }
-            Text(
-                text = text,
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.Medium,
-                color = foreground
-            )
+            NimazLabelChip(text = label, icon = Icons.Default.Refresh)
         }
     }
 }
@@ -406,145 +357,56 @@ private fun DuaReaderBottomBar(
     } else {
         ""
     }
-    val hasPager = pageCount > 1
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp, bottom = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+    NimazReaderBottomBar(
+        currentPage = currentPage,
+        pageCount = pageCount,
+        onPrev = onPrev,
+        onNext = onNext,
+        prevContentDescription = stringResource(R.string.dua_reader_prev),
+        nextContentDescription = stringResource(R.string.dua_reader_next)
     ) {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            if (hasPager) {
-                NavChevron(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                    enabled = currentPage > 0,
-                    onClick = onPrev,
-                    contentDescription = stringResource(R.string.dua_reader_prev)
-                )
+        NimazPillActionButton(
+            icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+            contentDescription = stringResource(R.string.dua_reader_favorite),
+            onClick = { viewModel.onEvent(DuaEvent.ToggleFavorite(dua.id, dua.categoryId)) },
+            active = isFavorite,
+            activeColor = Color(0xFFEF4444)
+        )
+        NimazPillActionButton(
+            icon = Icons.Default.Add,
+            contentDescription = stringResource(R.string.dua_reader_add_tasbih),
+            onClick = {
+                tasbihViewModel.onEvent(TasbihEvent.CreateCustomPreset(dua.toTasbihPreset()))
+                Toast.makeText(context, addedToTasbihMsg, Toast.LENGTH_SHORT).show()
             }
-            NimazActionPill {
-                NimazPillActionButton(
-                    icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-                    contentDescription = stringResource(R.string.dua_reader_favorite),
-                    onClick = { viewModel.onEvent(DuaEvent.ToggleFavorite(dua.id, dua.categoryId)) },
-                    active = isFavorite,
-                    activeColor = Color(0xFFEF4444)
-                )
-                NimazPillActionButton(
-                    icon = Icons.Default.Add,
-                    contentDescription = stringResource(R.string.dua_reader_add_tasbih),
-                    onClick = {
-                        tasbihViewModel.onEvent(TasbihEvent.CreateCustomPreset(dua.toTasbihPreset()))
-                        Toast.makeText(context, addedToTasbihMsg, Toast.LENGTH_SHORT).show()
+        )
+        NimazPillActionButton(
+            icon = Icons.Default.Share,
+            contentDescription = shareLabel,
+            onClick = {
+                val textToShare = buildString {
+                    appendLine(dua.titleEnglish)
+                    appendLine()
+                    appendLine(dua.textArabic)
+                    appendLine()
+                    if (!dua.textTransliteration.isNullOrEmpty()) {
+                        appendLine(dua.textTransliteration)
+                        appendLine()
                     }
-                )
-                NimazPillActionButton(
-                    icon = Icons.Default.Share,
-                    contentDescription = shareLabel,
-                    onClick = {
-                        val textToShare = buildString {
-                            appendLine(dua.titleEnglish)
-                            appendLine()
-                            appendLine(dua.textArabic)
-                            appendLine()
-                            if (!dua.textTransliteration.isNullOrEmpty()) {
-                                appendLine(dua.textTransliteration)
-                                appendLine()
-                            }
-                            appendLine(dua.textEnglish)
-                            if (sourceLabel.isNotEmpty()) {
-                                appendLine()
-                                appendLine(sourceLabel)
-                            }
-                        }
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, textToShare)
-                            type = "text/plain"
-                        }
-                        context.startActivity(Intent.createChooser(sendIntent, shareLabel))
-                    }
-                )
-            }
-            if (hasPager) {
-                NavChevron(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                    enabled = currentPage < pageCount - 1,
-                    onClick = onNext,
-                    contentDescription = stringResource(R.string.dua_reader_next)
-                )
-            }
-        }
-
-        if (hasPager) {
-            if (pageCount <= 12) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(pageCount) { index ->
-                        val selected = index == currentPage
-                        Box(
-                            modifier = Modifier
-                                .height(5.dp)
-                                .width(if (selected) 16.dp else 5.dp)
-                                .background(
-                                    color = if (selected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outlineVariant,
-                                    shape = if (selected) RoundedCornerShape(3.dp) else CircleShape
-                                )
-                        )
+                    appendLine(dua.textEnglish)
+                    if (sourceLabel.isNotEmpty()) {
+                        appendLine()
+                        appendLine(sourceLabel)
                     }
                 }
-            } else {
-                Text(
-                    text = "${currentPage + 1} / $pageCount",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, textToShare)
+                    type = "text/plain"
+                }
+                context.startActivity(Intent.createChooser(sendIntent, shareLabel))
             }
-        }
-    }
-}
-
-@Composable
-private fun NavChevron(
-    icon: ImageVector,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    contentDescription: String
-) {
-    val tint = if (enabled) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
-        modifier = Modifier.size(32.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = tint,
-                modifier = Modifier.size(18.dp)
-            )
-        }
+        )
     }
 }
 

@@ -53,7 +53,11 @@ data class HadithEntity(
     val textEnglish: String,
     val narrator: String,
     val grade: String,
-    val reference: String
+    val reference: String,
+    // Curated chain of narration (isnād). Null/blank means the reader derives it
+    // from [textArabic] via IsnadParser; a non-blank value overrides the parser.
+    @ColumnInfo(name = "narrator_chain")
+    val narratorChain: String? = null
 )
 
 @Entity(

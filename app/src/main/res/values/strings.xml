@@ -1138,6 +1138,22 @@
     <string name="hadith_of_count_format">of %1$d</string>
     <string name="hadith_narrated_by_format">Narrated by %1$s</string>
     <string name="hadith_isnad">Chain of Narration (Isnad)</string>
+    <string name="hadith_reader_not_found">Hadith not found</string>
+    <string name="hadith_copied">Copied to clipboard</string>
+    <string name="hadith_grade_sahih">Sahih</string>
+    <string name="hadith_grade_hasan">Hasan</string>
+    <string name="hadith_grade_daif">Daʿīf</string>
+    <string name="hadith_grade_mawdu">Mawḍūʿ</string>
+    <!-- Hadith Settings Screen -->
+    <string name="hadith_settings">Hadith Settings</string>
+    <string name="hadith_show_grade">Show grade badge</string>
+    <string name="hadith_show_grade_subtitle">Authenticity (Sahih, Hasan…)</string>
+    <string name="hadith_show_chain">Show chain of narration</string>
+    <string name="hadith_show_chain_subtitle">Isnād timeline</string>
+    <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
+    <string name="hadith_settings_preview_translation">Actions are but by intentions.</string>
+    <string name="hadith_chapters_title">Chapters</string>
+    <string name="hadith_chapters_count_format">%1$d chapters</string>
 
     <!-- Monthly Prayer Times Screen -->
     <string name="export_as_pdf">Export as PDF</string>

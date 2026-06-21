@@ -11,6 +11,18 @@ import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
 import kotlinx.coroutines.flow.Flow
 
+/** A chapter id paired with how many hadiths it contains. */
+data class HadithChapterCount(
+    val chapterId: Int,
+    val hadithCount: Int
+)
+
+/** A hadith's id + Arabic text, used to derive its chain of narration. */
+data class HadithChainRow(
+    val id: Int,
+    val textArabic: String
+)
+
 @Dao
 interface HadithDao {
     // Book operations
@@ -45,8 +57,8 @@ interface HadithDao {
     @Query("SELECT * FROM hadiths WHERE grade = :grade ORDER BY book_id, number_in_book")
     fun getHadithsByGrade(grade: String): Flow<List<HadithEntity>>
 
-    @Query("SELECT DISTINCT chapter_id FROM hadiths WHERE book_id = :bookId ORDER BY chapter_id ASC")
-    fun getChapterIdsForBook(bookId: Int): Flow<List<Int>>
+    @Query("SELECT chapter_id AS chapterId, COUNT(*) AS hadithCount FROM hadiths WHERE book_id = :bookId GROUP BY chapter_id ORDER BY chapter_id ASC")
+    fun getChapterCountsForBook(bookId: Int): Flow<List<HadithChapterCount>>
 
     // Get all hadiths (for hadith of the day)
     @Query("SELECT * FROM hadiths")
@@ -64,6 +76,41 @@ interface HadithDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertHadiths(hadiths: List<HadithEntity>)
+
+    // Backfill operations (HadithBackfillSeeder): fill chains of narration that
+    // shipped empty in the prepopulated DB. Keyed by the stable global `id`.
+    @Query("SELECT COUNT(*) FROM hadiths WHERE TRIM(text_arabic) = ''")
+    suspend fun emptyArabicCount(): Int
+
+    @Query(
+        "UPDATE hadiths SET text_arabic = :textArabic, text_english = :textEnglish, " +
+            "narrator = :narrator WHERE id = :id"
+    )
+    suspend fun backfillHadith(
+        id: Int,
+        textArabic: String,
+        textEnglish: String,
+        narrator: String
+    ): Int
+
+    // Stores a curated chain of narration (isnād) for a hadith, overriding the
+    // parser-derived chain. Keyed by the stable global `id`.
+    @Query("UPDATE hadiths SET narrator_chain = :chain WHERE id = :id")
+    suspend fun updateNarratorChain(id: Int, chain: String): Int
+
+    // Chain-of-narration derivation (HadithBackfillSeeder): rows whose chain has
+    // not been derived yet (NULL) and that actually have Arabic to parse. Rows
+    // with no derivable chain are stamped with "" so they are not re-scanned.
+    @Query("SELECT COUNT(*) FROM hadiths WHERE narrator_chain IS NULL AND TRIM(text_arabic) != ''")
+    suspend fun countMissingChains(): Int
+
+    @Query("SELECT id, text_arabic AS textArabic FROM hadiths WHERE narrator_chain IS NULL AND TRIM(text_arabic) != '' LIMIT :limit")
+    suspend fun getHadithsMissingChain(limit: Int): List<HadithChainRow>
+
+    @Transaction
+    suspend fun setNarratorChains(entries: List<Pair<Int, String>>) {
+        entries.forEach { (id, chain) -> updateNarratorChain(id, chain) }
+    }
 
     // Bookmark operations
     @Query("SELECT * FROM hadith_bookmarks ORDER BY createdAt DESC")

@@ -62,6 +62,7 @@ import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
@@ -459,7 +460,8 @@ fun NavGraph(
                 HadithReaderScreen(
                     bookId = args.bookId,
                     chapterId = args.chapterId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
                 )
             }
 
@@ -468,6 +470,13 @@ fun NavGraph(
                 HadithReaderScreen(
                     bookId = "",
                     chapterId = args.hadithId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
+            composable<Route.HadithSettings> {
+                HadithSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

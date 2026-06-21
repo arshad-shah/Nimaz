@@ -129,7 +129,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 16,
+    version = 17,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -222,6 +222,17 @@ abstract class NimazDatabase : RoomDatabase() {
         // Adds a `category` column to tasbih_presets and backfills the known
         // default adhkar (the prepackaged DB and any already-seeded extras had no
         // category, so the category tabs showed nothing). Idempotent.
+        // Adds the `narrator_chain` column to `hadiths` so a curated chain of
+        // narration (isnād) can be stored; when absent the reader derives the
+        // chain from the Arabic text. Room runs migrations even after
+        // createFromAsset, so this column is added for both fresh installs (whose
+        // asset predates it) and existing users. Idempotent.
+        val MIGRATION_16_17 = object : Migration(16, 17) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.addColumnIfMissing("hadiths", "narrator_chain", "TEXT")
+            }
+        }
+
         val MIGRATION_15_16 = object : Migration(15, 16) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.addColumnIfMissing("tasbih_presets", "category", "TEXT")

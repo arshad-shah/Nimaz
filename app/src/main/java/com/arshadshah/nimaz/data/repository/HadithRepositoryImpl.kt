@@ -4,6 +4,7 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
+import com.arshadshah.nimaz.data.local.hadith.IsnadParser
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -46,16 +47,20 @@ class HadithRepositoryImpl @Inject constructor(
     }
 
     override fun getChaptersByBook(bookId: String): Flow<List<HadithChapter>> {
-        // Get unique chapter IDs from hadiths since there's no chapters table
-        return hadithDao.getChapterIdsForBook(bookId.toIntOrNull() ?: 0).map { chapterIds ->
-            chapterIds.mapIndexed { index, chapterId ->
+        // Derive virtual chapters from the hadiths (there is no chapters table),
+        // with a real per-chapter hadith count. The stored chapter_id is 0-based,
+        // so the displayed chapter number is chapter_id + 1; the chapter `id`
+        // keeps the raw chapter_id for loading.
+        return hadithDao.getChapterCountsForBook(bookId.toIntOrNull() ?: 0).map { counts ->
+            counts.map { (chapterId, count) ->
+                val displayNumber = chapterId + 1
                 HadithChapter(
                     id = "${bookId}_$chapterId",
                     bookId = bookId,
-                    chapterNumber = chapterId,
-                    nameArabic = "الباب $chapterId",
-                    nameEnglish = "Chapter $chapterId",
-                    hadithCount = 0,
+                    chapterNumber = displayNumber,
+                    nameArabic = "الباب $displayNumber",
+                    nameEnglish = "Chapter $displayNumber",
+                    hadithCount = count,
                     hadithStartNumber = 0,
                     hadithEndNumber = 0
                 )
@@ -68,13 +73,14 @@ class HadithRepositoryImpl @Inject constructor(
         val parts = chapterId.split("_")
         if (parts.size != 2) return null
         val bookId = parts[0]
-        val chapterNumber = parts[1].toIntOrNull() ?: return null
+        val rawChapterId = parts[1].toIntOrNull() ?: return null
+        val displayNumber = rawChapterId + 1
         return HadithChapter(
             id = chapterId,
             bookId = bookId,
-            chapterNumber = chapterNumber,
-            nameArabic = "الباب $chapterNumber",
-            nameEnglish = "Chapter $chapterNumber",
+            chapterNumber = displayNumber,
+            nameArabic = "الباب $displayNumber",
+            nameEnglish = "Chapter $displayNumber",
             hadithCount = 0,
             hadithStartNumber = 0,
             hadithEndNumber = 0
@@ -237,7 +243,10 @@ class HadithRepositoryImpl @Inject constructor(
             hadithNumberInBook = numberInBook,
             textArabic = textArabic,
             textEnglish = textEnglish,
-            narratorChain = null,
+            // Prefer the stored isnād (curated, or derived by the seeder — which
+            // stamps "" when no chain could be derived); only rows the seeder has
+            // not reached yet fall back to parsing live.
+            narratorChain = narratorChain ?: IsnadParser.parse(textArabic),
             narratorName = narrator,
             grade = HadithGrade.fromString(grade),
             gradeArabic = null,

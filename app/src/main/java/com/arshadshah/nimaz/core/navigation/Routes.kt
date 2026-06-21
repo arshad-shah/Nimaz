@@ -54,6 +54,9 @@ sealed interface Route {
     @Serializable
     data object HadithBookmarks : Route
 
+    @Serializable
+    data object HadithSettings : Route
+
     // Dua screens
     @Serializable
     data object DuaHome : Route

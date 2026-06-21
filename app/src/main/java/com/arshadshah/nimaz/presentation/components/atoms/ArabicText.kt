@@ -123,6 +123,7 @@ fun HadithArabicText(
     modifier: Modifier = Modifier,
     size: ArabicTextSize = ArabicTextSize.MEDIUM,
     customFontSize: Float? = null,
+    fontFamily: FontFamily = AmiriFontFamily,
     color: Color = MaterialTheme.colorScheme.onSurface
 ) {
     val actualFontSize = customFontSize?.sp ?: size.fontSize
@@ -135,6 +136,7 @@ fun HadithArabicText(
         color = color,
         textAlign = TextAlign.End,
         style = ArabicTextStyles.hadithArabic.copy(
+            fontFamily = fontFamily,
             fontSize = actualFontSize,
             lineHeight = actualLineHeight
         )
