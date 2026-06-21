@@ -1012,4 +1012,45 @@
     <!-- Empty states -->
     <string name="no_ayahs_found">No ayahs found.</string>
     <string name="no_chapters_found">No chapters found</string>
+
+    <!-- Canonical prayer names -->
+    <string name="prayer_fajr">Fajr</string>
+    <string name="prayer_dhuhr">Dhuhr</string>
+    <string name="prayer_asr">Asr</string>
+    <string name="prayer_maghrib">Maghrib</string>
+    <string name="prayer_isha">Isha</string>
+
+    <!-- Prayer Stats Screen -->
+    <string name="statistics">Statistics</string>
+    <string name="stats_period_week">Week</string>
+    <string name="stats_period_month">Month</string>
+    <string name="stats_period_year">Year</string>
+    <string name="prayer_completion">Prayer Completion</string>
+    <string name="prayer_breakdown">Prayer Breakdown</string>
+    <string name="insights">Insights</string>
+    <string name="stat_perfect_days">Perfect\nDays</string>
+    <string name="stat_current_streak">Current\nStreak</string>
+    <string name="stat_longest_streak">Longest\nStreak</string>
+    <string name="prayer_insight_needs_attention">%1$s needs attention</string>
+    <string name="prayer_insight_needs_attention_desc">Your %1$s completion is at %2$d%%. Try setting an alarm to improve.</string>
+    <string name="prayer_insight_overall">Overall completion: %1$d%%</string>
+    <string name="prayer_insight_overall_desc">You\'ve completed %1$d out of %2$d prayers. Keep going!</string>
+    <string name="prayer_insight_best">Best prayer: %1$s</string>
+    <string name="prayer_insight_best_desc">You consistently complete %1$s at %2$d%%.</string>
+
+    <!-- Qada Prayers Screen -->
+    <string name="qada_prayers">Qada Prayers</string>
+
+    <!-- Settings Screen -->
+    <string name="sync_data">Sync Data</string>
+    <string name="settings_sync_subtitle">Transfer data between devices</string>
+
+    <!-- Location Screen -->
+    <string name="location_search_hint">Search city or address…</string>
+    <string name="location_search_results">Search Results</string>
+    <string name="location_recent">Recent</string>
+    <string name="location_popular_cities">Popular Cities</string>
+    <string name="location_detecting">Detecting…</string>
+    <string name="location_not_set">Not set</string>
+    <string name="location_current">Current</string>
 </resources>
