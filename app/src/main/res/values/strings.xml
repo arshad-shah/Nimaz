@@ -1261,6 +1261,34 @@
     <string name="sync_item_zakat">Zakat calculations</string>
     <string name="sync_item_preferences">App preferences</string>
 
+    <!-- Help screens -->
+    <string name="help_title">Help</string>
+    <string name="help_search_hint">Search help…</string>
+    <string name="help_no_results">No results. Try different words.</string>
+    <string name="help_browse_topics">Browse topics</string>
+    <string name="help_still_need">Still need help?</string>
+    <string name="help_email_us">Email us — we usually reply within a day</string>
+    <string name="help_guide_title">Guide</string>
+    <string name="help_guide_unavailable">This guide is unavailable.</string>
+    <string name="help_thats_it">That\'s it!</string>
+    <string name="help_still_stuck">Still stuck? Contact us from the Help home.</string>
+    <string name="help_topic_unavailable">This topic is unavailable.</string>
+    <string name="help_common_questions">Common questions</string>
+    <string name="help_step_by_step">Step-by-step</string>
+
+    <!-- Qaida screens -->
+    <string name="qaida_letter_explorer">Letter explorer</string>
+    <string name="qaida_toggle_transliteration">Toggle transliteration</string>
+    <string name="qaida_arabic_letters">The Arabic Letters</string>
+    <string name="qaida_made_with_format">Made with %1$s</string>
+
+    <!-- About -->
+    <string name="licenses_title">Open Source Licenses</string>
+
+    <!-- Misc components -->
+    <string name="quran_juz_number_format">Juz %1$d</string>
+    <string name="tafseer_tap_end">Tap end position to highlight</string>
+
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
     <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>

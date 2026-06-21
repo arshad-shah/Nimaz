@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.help
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,7 +56,7 @@ fun HelpGuideScreen(
     val guide = state.guide
 
     Scaffold(
-        topBar = { NimazBackTopAppBar(title = "Guide", onBackClick = onNavigateBack) }
+        topBar = { NimazBackTopAppBar(title = stringResource(R.string.help_guide_title), onBackClick = onNavigateBack) }
     ) { padding ->
         when {
             state.isLoading && guide == null -> {
@@ -70,7 +72,7 @@ fun HelpGuideScreen(
                     .fillMaxSize()
                     .padding(padding), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "This guide is unavailable.",
+                        text = stringResource(R.string.help_guide_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -161,12 +163,12 @@ private fun HelpGuideDone() {
             )
             Column {
                 Text(
-                    text = "That's it!",
+                    text = stringResource(R.string.help_thats_it),
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Still stuck? Contact us from the Help home.",
+                    text = stringResource(R.string.help_still_stuck),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

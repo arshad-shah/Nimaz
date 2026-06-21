@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.help
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -69,7 +71,7 @@ fun HelpTopicDetailScreen(
                     .fillMaxSize()
                     .padding(padding), contentAlignment = Alignment.Center) {
                     Text(
-                        text = "This topic is unavailable.",
+                        text = stringResource(R.string.help_topic_unavailable),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -87,7 +89,7 @@ fun HelpTopicDetailScreen(
                     item { HelpTopicHero(detail.topic) }
 
                     if (detail.questions.isNotEmpty()) {
-                        item { NimazSectionTitle(text = "Common questions") }
+                        item { NimazSectionTitle(text = stringResource(R.string.help_common_questions)) }
                         item {
                             NimazCard(style = NimazCardStyle.OUTLINED) {
                                 detail.questions.forEachIndexed { index, q ->
@@ -101,7 +103,7 @@ fun HelpTopicDetailScreen(
                     }
 
                     if (detail.guides.isNotEmpty()) {
-                        item { NimazSectionTitle(text = "Step-by-step") }
+                        item { NimazSectionTitle(text = stringResource(R.string.help_step_by_step)) }
                         items(detail.guides) { guide ->
                             HelpGuideRow(
                                 guide = guide,

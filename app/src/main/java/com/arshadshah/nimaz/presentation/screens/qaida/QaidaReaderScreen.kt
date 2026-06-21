@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.qaida
 
+import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -77,7 +79,7 @@ fun QaidaReaderScreen(
                 title = { Text(content?.lesson?.titleEnglish ?: "Lesson") },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
@@ -85,7 +87,7 @@ fun QaidaReaderScreen(
                         Icon(
                             imageVector = if (showTransliteration) Icons.Filled.Visibility
                             else Icons.Filled.VisibilityOff,
-                            contentDescription = "Toggle transliteration",
+                            contentDescription = stringResource(R.string.qaida_toggle_transliteration),
                         )
                     }
                 },

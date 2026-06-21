@@ -306,9 +306,9 @@ fun RevelationTypeChip(
     modifier: Modifier = Modifier
 ) {
     val (label, color) = if (isMeccan) {
-        "Meccan" to Color(0xFF795548)
+        stringResource(R.string.quran_meccan) to Color(0xFF795548)
     } else {
-        "Medinan" to Color(0xFF00796B)
+        stringResource(R.string.quran_medinan) to Color(0xFF00796B)
     }
 
     FilterChip(
