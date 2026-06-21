@@ -29,6 +29,9 @@ interface AsmaUlHusnaDao {
     @Query("SELECT * FROM asma_ul_husna_bookmarks")
     fun getAllBookmarks(): Flow<List<AsmaUlHusnaBookmarkEntity>>
 
+    @Query("SELECT * FROM asma_ul_husna_bookmarks")
+    suspend fun getAllBookmarksSync(): List<AsmaUlHusnaBookmarkEntity>
+
     @Query("SELECT EXISTS(SELECT 1 FROM asma_ul_husna_bookmarks WHERE name_id = :nameId)")
     suspend fun isBookmarked(nameId: Int): Boolean
 

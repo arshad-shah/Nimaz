@@ -73,6 +73,9 @@ interface DuaDao {
     @Query("SELECT * FROM dua_bookmarks ORDER BY createdAt DESC")
     fun getAllBookmarks(): Flow<List<DuaBookmarkEntity>>
 
+    @Query("SELECT * FROM dua_bookmarks")
+    suspend fun getAllBookmarksSync(): List<DuaBookmarkEntity>
+
     @Query("SELECT * FROM dua_bookmarks WHERE isFavorite = 1 ORDER BY createdAt DESC")
     fun getFavoriteDuas(): Flow<List<DuaBookmarkEntity>>
 

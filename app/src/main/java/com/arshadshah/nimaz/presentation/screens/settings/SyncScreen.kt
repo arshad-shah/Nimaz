@@ -762,6 +762,38 @@ private fun ActivityLog(entries: List<ActivityLogEntry>) {
     }
 }
 
+/**
+ * Maps a [com.arshadshah.nimaz.data.sync.SyncCategory] key to its localized
+ * label. Keys come from `SyncPayload.categories()`; if a new category is added
+ * there, add its label here too (SyncPayloadCoverageTest guards the data side).
+ */
+@Composable
+private fun syncCategoryLabel(key: String): String = stringResource(
+    when (key) {
+        "bookmarks" -> R.string.sync_item_bookmarks
+        "favorites" -> R.string.sync_item_favorites
+        "readingProgress" -> R.string.sync_item_reading_progress
+        "prayerRecords" -> R.string.sync_item_prayer_records
+        "fastRecords" -> R.string.sync_item_fast_records
+        "makeupFasts" -> R.string.sync_item_makeup_fasts
+        "tasbihPresets" -> R.string.sync_item_tasbih_presets
+        "tasbihSessions" -> R.string.sync_item_tasbih_sessions
+        "khatams" -> R.string.sync_item_khatams
+        "khatamAyahs" -> R.string.sync_item_khatam_ayahs
+        "khatamDailyLogs" -> R.string.sync_item_khatam_daily_logs
+        "tafseerHighlights" -> R.string.sync_item_tafseer_highlights
+        "tafseerNotes" -> R.string.sync_item_tafseer_notes
+        "zakatHistory" -> R.string.sync_item_zakat
+        "asmaUlHusnaBookmarks" -> R.string.sync_item_asma_ul_husna
+        "asmaUnNabiBookmarks" -> R.string.sync_item_asma_un_nabi
+        "prophetBookmarks" -> R.string.sync_item_prophets
+        "hadithBookmarks" -> R.string.sync_item_hadith_bookmarks
+        "duaBookmarks" -> R.string.sync_item_dua_bookmarks
+        "preferences" -> R.string.sync_item_preferences
+        else -> R.string.sync_no_data
+    }
+)
+
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     Card(
@@ -782,42 +814,30 @@ private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
 
-            val items = buildList {
-                if (summary.bookmarks > 0) add(stringResource(R.string.sync_item_bookmarks) to summary.bookmarks)
-                if (summary.favorites > 0) add(stringResource(R.string.sync_item_favorites) to summary.favorites)
-                if (summary.hasReadingProgress) add(stringResource(R.string.sync_item_reading_progress) to 1)
-                if (summary.prayerRecords > 0) add(stringResource(R.string.sync_item_prayer_records) to summary.prayerRecords)
-                if (summary.fastRecords > 0) add(stringResource(R.string.sync_item_fast_records) to summary.fastRecords)
-                if (summary.makeupFasts > 0) add(stringResource(R.string.sync_item_makeup_fasts) to summary.makeupFasts)
-                if (summary.tasbihPresets > 0) add(stringResource(R.string.sync_item_tasbih_presets) to summary.tasbihPresets)
-                if (summary.tasbihSessions > 0) add(stringResource(R.string.sync_item_tasbih_sessions) to summary.tasbihSessions)
-                if (summary.khatams > 0) add(stringResource(R.string.sync_item_khatams) to summary.khatams)
-                if (summary.khatamAyahs > 0) add(stringResource(R.string.sync_item_khatam_ayahs) to summary.khatamAyahs)
-                if (summary.tafseerHighlights > 0) add(stringResource(R.string.sync_item_tafseer_highlights) to summary.tafseerHighlights)
-                if (summary.tafseerNotes > 0) add(stringResource(R.string.sync_item_tafseer_notes) to summary.tafseerNotes)
-                if (summary.zakatHistory > 0) add(stringResource(R.string.sync_item_zakat) to summary.zakatHistory)
-                if (summary.hasPreferences) add(stringResource(R.string.sync_item_preferences) to 1)
-            }
+            // Driven entirely by SyncPayload.categories() so the screen always
+            // reflects exactly what the payload carries — no manual list to keep
+            // in sync as new features are added.
+            val visible = summary.categories.filter { it.count > 0 }
 
-            if (items.isEmpty()) {
+            if (visible.isEmpty()) {
                 Text(
                     text = stringResource(R.string.sync_no_data),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
-                items.forEach { (label, count) ->
+                visible.forEach { category ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = label,
+                            text = syncCategoryLabel(category.key),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Text(
-                            text = if (label == stringResource(R.string.sync_item_reading_progress) || label == stringResource(R.string.sync_item_preferences)) "" else "$count",
+                            text = if (category.isFlag) "" else "${category.count}",
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Medium,
                             color = MaterialTheme.colorScheme.onSurface

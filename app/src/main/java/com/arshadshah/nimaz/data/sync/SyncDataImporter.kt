@@ -1,14 +1,24 @@
 package com.arshadshah.nimaz.data.sync
 
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
+import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
+import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
+import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
+import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
@@ -36,6 +46,11 @@ class SyncDataImporter @Inject constructor(
     private val khatamDao: KhatamDao,
     private val tafseerDao: TafseerDao,
     private val zakatDao: ZakatDao,
+    private val asmaUlHusnaDao: AsmaUlHusnaDao,
+    private val asmaUnNabiDao: AsmaUnNabiDao,
+    private val prophetDao: ProphetDao,
+    private val hadithDao: HadithDao,
+    private val duaDao: DuaDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     /**
@@ -49,6 +64,8 @@ class SyncDataImporter @Inject constructor(
         importKhatamData(payload)
         importTafseerData(payload)
         importZakatData(payload)
+        importNamesData(payload)
+        importHadithDuaData(payload)
         importPreferencesData(payload)
     }
 
@@ -87,6 +104,17 @@ class SyncDataImporter @Inject constructor(
 
     suspend fun importZakatData(payload: SyncPayload) {
         importZakatHistory(payload.zakatHistory)
+    }
+
+    suspend fun importNamesData(payload: SyncPayload) {
+        importAsmaUlHusnaBookmarks(payload.asmaUlHusnaBookmarks)
+        importAsmaUnNabiBookmarks(payload.asmaUnNabiBookmarks)
+        importProphetBookmarks(payload.prophetBookmarks)
+    }
+
+    suspend fun importHadithDuaData(payload: SyncPayload) {
+        importHadithBookmarks(payload.hadithBookmarks)
+        importDuaBookmarks(payload.duaBookmarks)
     }
 
     suspend fun importPreferencesData(payload: SyncPayload) {
@@ -437,5 +465,95 @@ class SyncDataImporter @Inject constructor(
             }
         }
         if (toInsert.isNotEmpty()) zakatDao.insertCalculations(toInsert)
+    }
+
+    // --- Names & Prophets ---
+
+    private suspend fun importAsmaUlHusnaBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = asmaUlHusnaDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                asmaUlHusnaDao.insertBookmark(
+                    AsmaUlHusnaBookmarkEntity(
+                        nameId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importAsmaUnNabiBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = asmaUnNabiDao.getAllBookmarksSync().map { it.nameId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                asmaUnNabiDao.insertBookmark(
+                    AsmaUnNabiBookmarkEntity(
+                        nameId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importProphetBookmarks(incoming: List<SyncNameBookmark>) {
+        val existing = prophetDao.getAllBookmarksSync().map { it.prophetId }.toSet()
+        for (item in incoming) {
+            if (item.refId !in existing) {
+                prophetDao.insertBookmark(
+                    ProphetBookmarkEntity(
+                        prophetId = item.refId,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    // --- Hadith & Dua ---
+
+    private suspend fun importHadithBookmarks(incoming: List<SyncHadithBookmark>) {
+        val existing = hadithDao.getAllBookmarksSync().associateBy { it.hadithId }
+        for (item in incoming) {
+            val local = existing[item.hadithId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                hadithDao.insertBookmark(
+                    HadithBookmarkEntity(
+                        id = local?.id ?: 0,
+                        hadithId = item.hadithId,
+                        bookId = item.bookId,
+                        hadithNumber = item.hadithNumber,
+                        note = item.note,
+                        color = item.color,
+                        createdAt = item.createdAt,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importDuaBookmarks(incoming: List<SyncDuaBookmark>) {
+        val existing = duaDao.getAllBookmarksSync().associateBy { it.duaId }
+        for (item in incoming) {
+            val local = existing[item.duaId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                duaDao.insertBookmark(
+                    DuaBookmarkEntity(
+                        id = local?.id ?: 0,
+                        duaId = item.duaId,
+                        categoryId = item.categoryId,
+                        note = item.note,
+                        isFavorite = item.isFavorite,
+                        createdAt = item.createdAt,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
     }
 }

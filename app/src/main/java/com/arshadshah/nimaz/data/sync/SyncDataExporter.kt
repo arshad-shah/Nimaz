@@ -1,8 +1,13 @@
 package com.arshadshah.nimaz.data.sync
 
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
+import com.arshadshah.nimaz.data.local.database.dao.AsmaUnNabiDao
+import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.dao.FastingDao
+import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
+import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
@@ -20,6 +25,11 @@ class SyncDataExporter @Inject constructor(
     private val khatamDao: KhatamDao,
     private val tafseerDao: TafseerDao,
     private val zakatDao: ZakatDao,
+    private val asmaUlHusnaDao: AsmaUlHusnaDao,
+    private val asmaUnNabiDao: AsmaUnNabiDao,
+    private val prophetDao: ProphetDao,
+    private val hadithDao: HadithDao,
+    private val duaDao: DuaDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
@@ -202,6 +212,44 @@ class SyncDataExporter @Inject constructor(
             )
         }
 
+        // Names & Prophets favorites
+        onProgress("Exporting saved names & prophets...")
+        val asmaUlHusnaBookmarks = asmaUlHusnaDao.getAllBookmarksSync().map {
+            SyncNameBookmark(it.id, it.nameId, it.isFavorite, it.createdAt)
+        }
+        val asmaUnNabiBookmarks = asmaUnNabiDao.getAllBookmarksSync().map {
+            SyncNameBookmark(it.id, it.nameId, it.isFavorite, it.createdAt)
+        }
+        val prophetBookmarks = prophetDao.getAllBookmarksSync().map {
+            SyncNameBookmark(it.id, it.prophetId, it.isFavorite, it.createdAt)
+        }
+
+        // Hadith & Dua bookmarks
+        onProgress("Exporting hadith & dua bookmarks...")
+        val hadithBookmarks = hadithDao.getAllBookmarksSync().map {
+            SyncHadithBookmark(
+                it.id,
+                it.hadithId,
+                it.bookId,
+                it.hadithNumber,
+                it.note,
+                it.color,
+                it.createdAt,
+                it.updatedAt
+            )
+        }
+        val duaBookmarks = duaDao.getAllBookmarksSync().map {
+            SyncDuaBookmark(
+                it.id,
+                it.duaId,
+                it.categoryId,
+                it.note,
+                it.isFavorite,
+                it.createdAt,
+                it.updatedAt
+            )
+        }
+
         // Preferences
         onProgress("Exporting preferences...")
         val preferences = preferencesDataStore.exportAllPreferences()
@@ -223,6 +271,11 @@ class SyncDataExporter @Inject constructor(
             tafseerHighlights = highlights,
             tafseerNotes = notes,
             zakatHistory = zakatHistory,
+            asmaUlHusnaBookmarks = asmaUlHusnaBookmarks,
+            asmaUnNabiBookmarks = asmaUnNabiBookmarks,
+            prophetBookmarks = prophetBookmarks,
+            hadithBookmarks = hadithBookmarks,
+            duaBookmarks = duaBookmarks,
             preferences = preferences
         )
     }

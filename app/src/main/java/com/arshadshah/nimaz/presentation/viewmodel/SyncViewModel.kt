@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
+import com.arshadshah.nimaz.data.sync.SyncCategory
+import com.arshadshah.nimaz.data.sync.categories
 import com.arshadshah.nimaz.data.sync.NearbyConnectionsManager
 import com.arshadshah.nimaz.data.sync.SyncDataExporter
 import com.arshadshah.nimaz.data.sync.SyncDataImporter
@@ -23,21 +25,14 @@ import javax.inject.Inject
 
 enum class SyncMode { NONE, SEND, RECEIVE }
 
+/**
+ * Snapshot of what a [SyncPayload] contains, shown on the sync screen.
+ *
+ * Backed by [SyncPayload.categories] — the single source of truth — so the
+ * summary can never silently miss a newly-added sync field.
+ */
 data class SyncDataSummary(
-    val bookmarks: Int = 0,
-    val favorites: Int = 0,
-    val hasReadingProgress: Boolean = false,
-    val prayerRecords: Int = 0,
-    val fastRecords: Int = 0,
-    val makeupFasts: Int = 0,
-    val tasbihPresets: Int = 0,
-    val tasbihSessions: Int = 0,
-    val khatams: Int = 0,
-    val khatamAyahs: Int = 0,
-    val tafseerHighlights: Int = 0,
-    val tafseerNotes: Int = 0,
-    val zakatHistory: Int = 0,
-    val hasPreferences: Boolean = false,
+    val categories: List<SyncCategory> = emptyList(),
     val totalBytes: Long = 0,
 )
 
@@ -370,6 +365,8 @@ class SyncViewModel @Inject constructor(
             "Importing khatam data..." to { importer.importKhatamData(payload) },
             "Importing tafseer data..." to { importer.importTafseerData(payload) },
             "Importing zakat history..." to { importer.importZakatData(payload) },
+            "Importing saved names & prophets..." to { importer.importNamesData(payload) },
+            "Importing hadith & dua bookmarks..." to { importer.importHadithDuaData(payload) },
             "Importing preferences..." to { importer.importPreferencesData(payload) },
         )
 
@@ -396,20 +393,7 @@ class SyncViewModel @Inject constructor(
     }
 
     private fun buildSummaryFromPayload(payload: SyncPayload, bytes: Long) = SyncDataSummary(
-        bookmarks = payload.bookmarks.size,
-        favorites = payload.favorites.size,
-        hasReadingProgress = payload.readingProgress != null,
-        prayerRecords = payload.prayerRecords.size,
-        fastRecords = payload.fastRecords.size,
-        makeupFasts = payload.makeupFasts.size,
-        tasbihPresets = payload.tasbihPresets.size,
-        tasbihSessions = payload.tasbihSessions.size,
-        khatams = payload.khatams.size,
-        khatamAyahs = payload.khatamAyahs.size,
-        tafseerHighlights = payload.tafseerHighlights.size,
-        tafseerNotes = payload.tafseerNotes.size,
-        zakatHistory = payload.zakatHistory.size,
-        hasPreferences = payload.preferences.isNotEmpty(),
+        categories = payload.categories(),
         totalBytes = bytes,
     )
 

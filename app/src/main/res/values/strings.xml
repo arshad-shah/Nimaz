@@ -1256,6 +1256,12 @@
     <string name="sync_item_tasbih_sessions">Tasbih sessions</string>
     <string name="sync_item_khatams">Khatam plans</string>
     <string name="sync_item_khatam_ayahs">Khatam ayahs read</string>
+    <string name="sync_item_khatam_daily_logs">Khatam daily logs</string>
+    <string name="sync_item_asma_ul_husna">Asma ul Husna favorites</string>
+    <string name="sync_item_asma_un_nabi">Names of the Prophet favorites</string>
+    <string name="sync_item_prophets">Prophet favorites</string>
+    <string name="sync_item_hadith_bookmarks">Hadith bookmarks</string>
+    <string name="sync_item_dua_bookmarks">Dua bookmarks</string>
     <string name="sync_item_tafseer_highlights">Tafseer highlights</string>
     <string name="sync_item_tafseer_notes">Tafseer notes</string>
     <string name="sync_item_zakat">Zakat calculations</string>
