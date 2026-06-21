@@ -1281,6 +1281,9 @@
     <string name="qaida_toggle_transliteration">Toggle transliteration</string>
     <string name="qaida_arabic_letters">The Arabic Letters</string>
     <string name="qaida_made_with_format">Made with %1$s</string>
+    <string name="qaida_play_letter">Play letter</string>
+    <string name="qaida_its_shapes">Its shapes</string>
+    <string name="qaida_where_made">Where it\'s made</string>
 
     <!-- About -->
     <string name="licenses_title">Open Source Licenses</string>
