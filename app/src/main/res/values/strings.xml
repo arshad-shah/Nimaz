@@ -1203,6 +1203,64 @@
     <string name="zakat_rate_subtitle" formatted="false">2.5% of eligible wealth</string>
     <string name="zakat_due_2_5_percent" formatted="false">Zakat Due (2.5%)</string>
 
+    <!-- Common -->
+    <string name="close">Close</string>
+    <string name="try_again">Try Again</string>
+
+    <!-- Sync Screen -->
+    <string name="sync_sending">Sending</string>
+    <string name="sync_receiving">Receiving</string>
+    <string name="sync_device_to_device">Device-to-Device Sync</string>
+    <string name="sync_intro">Transfer your data between devices using a direct connection. Both devices must be nearby.</string>
+    <string name="sync_send_data">Send Data</string>
+    <string name="sync_send_subtitle">Send this device\'s data to another device</string>
+    <string name="sync_receive_data">Receive Data</string>
+    <string name="sync_receive_subtitle">Receive data from another device</string>
+    <string name="sync_confirm_connection">Confirm Connection</string>
+    <string name="sync_connecting_to_format">Connecting to: %1$s</string>
+    <string name="sync_role_sending">You are sending data to this device</string>
+    <string name="sync_role_receiving">You are receiving data from this device</string>
+    <string name="sync_verification_code">Verification Code</string>
+    <string name="sync_code_match_hint">Make sure this code matches on both devices</string>
+    <string name="sync_reject">Reject</string>
+    <string name="sync_accept">Accept</string>
+    <string name="sync_waiting_partner">Waiting for partner to accept…</string>
+    <string name="sync_waiting_hint">Make sure the other device also taps Accept</string>
+    <string name="sync_cancelled">Sync Cancelled</string>
+    <string name="sync_cancelled_by_you">You cancelled the sync</string>
+    <string name="sync_cancelled_by_partner">The other device cancelled the sync</string>
+    <string name="sync_connection_lost">Connection Lost</string>
+    <string name="sync_connection_lost_msg">Connection was lost unexpectedly</string>
+    <string name="sync_step_format">Step %1$d of %2$d</string>
+    <string name="sync_data_sent">Data sent!</string>
+    <string name="sync_partner_importing_format">Partner is importing: %1$s</string>
+    <string name="sync_transfer_progress">Transfer Progress</string>
+    <string name="sync_activity">Activity</string>
+    <string name="sync_no_data">No data to sync</string>
+    <string name="sync_total_size">Total size</string>
+    <string name="sync_complete">Sync Complete!</string>
+    <string name="sync_failed">Sync Failed</string>
+    <string name="sync_data_being_sent">Data Being Sent</string>
+    <string name="sync_data_being_received">Data Being Received</string>
+    <string name="sync_sent_success">Data sent successfully</string>
+    <string name="sync_imported_success">Data imported successfully</string>
+    <string name="sync_data_sent_title">Data Sent</string>
+    <string name="sync_data_imported_title">Data Imported</string>
+    <string name="sync_item_bookmarks">Bookmarks</string>
+    <string name="sync_item_favorites">Favorites</string>
+    <string name="sync_item_reading_progress">Reading progress</string>
+    <string name="sync_item_prayer_records">Prayer records</string>
+    <string name="sync_item_fast_records">Fasting records</string>
+    <string name="sync_item_makeup_fasts">Makeup fasts</string>
+    <string name="sync_item_tasbih_presets">Tasbih presets</string>
+    <string name="sync_item_tasbih_sessions">Tasbih sessions</string>
+    <string name="sync_item_khatams">Khatam plans</string>
+    <string name="sync_item_khatam_ayahs">Khatam ayahs read</string>
+    <string name="sync_item_tafseer_highlights">Tafseer highlights</string>
+    <string name="sync_item_tafseer_notes">Tafseer notes</string>
+    <string name="sync_item_zakat">Zakat calculations</string>
+    <string name="sync_item_preferences">App preferences</string>
+
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
     <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
