@@ -158,7 +158,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
                     _state.update {
                         it.copy(
                             locationName = if (name.isNotBlank()) name else "Dublin, Ireland",
-                            methodLabel = "${prettyMethod(calcMethod)} · ${prettyAsr(asrCalc)}",
+                            methodLabel = "${calcMethod.shortName()} · ${asrCalc.shortName()}",
                             latitude = latitude,
                             longitude = longitude,
                         )
@@ -228,22 +228,5 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         )
     }
 
-    private fun prettyMethod(m: CalculationMethod): String = when (m) {
-        CalculationMethod.MUSLIM_WORLD_LEAGUE -> "MWL"
-        CalculationMethod.EGYPTIAN -> "Egyptian"
-        CalculationMethod.KARACHI -> "Karachi"
-        CalculationMethod.UMM_AL_QURA -> "Umm al-Qura"
-        CalculationMethod.DUBAI -> "Dubai"
-        CalculationMethod.MOON_SIGHTING_COMMITTEE -> "Moonsighting"
-        CalculationMethod.NORTH_AMERICA -> "ISNA"
-        CalculationMethod.KUWAIT -> "Kuwait"
-        CalculationMethod.QATAR -> "Qatar"
-        CalculationMethod.SINGAPORE -> "Singapore"
-        CalculationMethod.TURKEY -> "Turkey"
-    }
 
-    private fun prettyAsr(a: AsrCalculation): String = when (a) {
-        AsrCalculation.HANAFI -> "Hanafi"
-        AsrCalculation.STANDARD -> "Standard"
-    }
 }
