@@ -1285,6 +1285,12 @@
     <string name="qaida_its_shapes">Its shapes</string>
     <string name="qaida_where_made">Where it\'s made</string>
 
+    <!-- Quran / Bookmarks view-model titles -->
+    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayahs</string>
+    <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
+    <string name="bookmark_hadith_format">Hadith #%1$d</string>
+    <string name="dua_label">Dua</string>
+
     <!-- About -->
     <string name="licenses_title">Open Source Licenses</string>
 

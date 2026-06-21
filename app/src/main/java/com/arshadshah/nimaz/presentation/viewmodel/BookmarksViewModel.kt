@@ -8,7 +8,10 @@ import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
+import android.content.Context
+import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -80,7 +83,8 @@ sealed interface BookmarksEvent {
 class BookmarksViewModel @Inject constructor(
     private val quranRepository: QuranRepository,
     private val hadithRepository: HadithRepository,
-    private val duaRepository: DuaRepository
+    private val duaRepository: DuaRepository,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _bookmarksState = MutableStateFlow(BookmarksUiState())
@@ -334,8 +338,8 @@ class BookmarksViewModel @Inject constructor(
     private fun QuranBookmark.toUnified() = UnifiedBookmark(
         id = "quran_$ayahId",
         type = BookmarkType.QURAN,
-        title = "Surah $surahNumber, Ayah $ayahNumber",
-        subtitle = "Quran",
+        title = context.getString(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
+        subtitle = context.getString(R.string.quran),
         arabicText = null, // Would be populated from ayah data
         createdAt = createdAt,
         note = note,
@@ -347,7 +351,7 @@ class BookmarksViewModel @Inject constructor(
     private fun HadithBookmark.toUnified() = UnifiedBookmark(
         id = "hadith_$hadithId",
         type = BookmarkType.HADITH,
-        title = "Hadith #$hadithNumber",
+        title = context.getString(R.string.bookmark_hadith_format, hadithNumber),
         subtitle = bookId,
         arabicText = null, // Would be populated from hadith data
         createdAt = createdAt,
@@ -360,7 +364,7 @@ class BookmarksViewModel @Inject constructor(
     private fun DuaBookmark.toUnified() = UnifiedBookmark(
         id = "dua_$duaId",
         type = BookmarkType.DUA,
-        title = "Dua",
+        title = context.getString(R.string.dua_label),
         subtitle = categoryId,
         arabicText = null, // Would be populated from dua data
         createdAt = createdAt,

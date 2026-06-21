@@ -125,7 +125,7 @@ fun MonthlyPrayerTimesScreen(
     Scaffold(
         topBar = {
             NimazBackTopAppBar(
-                title = "Monthly Prayer Times",
+                title = stringResource(R.string.monthly_prayer_times),
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
