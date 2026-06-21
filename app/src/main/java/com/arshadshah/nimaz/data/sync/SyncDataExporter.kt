@@ -8,6 +8,7 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
+import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
@@ -30,6 +31,7 @@ class SyncDataExporter @Inject constructor(
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
     private val duaDao: DuaDao,
+    private val qaidaDao: QaidaDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     suspend fun export(onProgress: suspend (String) -> Unit = {}): SyncPayload {
@@ -249,6 +251,40 @@ class SyncDataExporter @Inject constructor(
                 it.updatedAt
             )
         }
+        val duaProgress = duaDao.getAllProgressSync().map {
+            SyncDuaProgress(
+                it.id,
+                it.duaId,
+                it.date,
+                it.completedCount,
+                it.targetCount,
+                it.isCompleted,
+                it.createdAt
+            )
+        }
+
+        // Qaida learning progress
+        onProgress("Exporting Qaida progress...")
+        val qaidaLessonProgress = qaidaDao.getAllLessonProgressSync().map {
+            SyncQaidaLessonProgress(
+                it.lessonId,
+                it.status,
+                it.stars,
+                it.lastCellId,
+                it.completedCells,
+                it.totalCells,
+                it.updatedAt
+            )
+        }
+        val qaidaCellProgress = qaidaDao.getAllCellProgressSync().map {
+            SyncQaidaCellProgress(
+                it.lessonId,
+                it.cellId,
+                it.heardCount,
+                it.isCompleted,
+                it.lastPracticedAt
+            )
+        }
 
         // Preferences
         onProgress("Exporting preferences...")
@@ -276,6 +312,9 @@ class SyncDataExporter @Inject constructor(
             prophetBookmarks = prophetBookmarks,
             hadithBookmarks = hadithBookmarks,
             duaBookmarks = duaBookmarks,
+            duaProgress = duaProgress,
+            qaidaLessonProgress = qaidaLessonProgress,
+            qaidaCellProgress = qaidaCellProgress,
             preferences = preferences
         )
     }

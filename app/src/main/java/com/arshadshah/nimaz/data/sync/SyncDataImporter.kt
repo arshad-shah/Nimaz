@@ -9,6 +9,7 @@ import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
+import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.dao.QuranDao
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
@@ -16,9 +17,12 @@ import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.DuaProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.FastRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
+import com.arshadshah.nimaz.data.local.database.entity.QaidaLessonProgressEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamAyahEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
@@ -51,6 +55,7 @@ class SyncDataImporter @Inject constructor(
     private val prophetDao: ProphetDao,
     private val hadithDao: HadithDao,
     private val duaDao: DuaDao,
+    private val qaidaDao: QaidaDao,
     private val preferencesDataStore: PreferencesDataStore
 ) {
     /**
@@ -66,6 +71,7 @@ class SyncDataImporter @Inject constructor(
         importZakatData(payload)
         importNamesData(payload)
         importHadithDuaData(payload)
+        importQaidaData(payload)
         importPreferencesData(payload)
     }
 
@@ -115,6 +121,12 @@ class SyncDataImporter @Inject constructor(
     suspend fun importHadithDuaData(payload: SyncPayload) {
         importHadithBookmarks(payload.hadithBookmarks)
         importDuaBookmarks(payload.duaBookmarks)
+        importDuaProgress(payload.duaProgress)
+    }
+
+    suspend fun importQaidaData(payload: SyncPayload) {
+        importQaidaLessonProgress(payload.qaidaLessonProgress)
+        importQaidaCellProgress(payload.qaidaCellProgress)
     }
 
     suspend fun importPreferencesData(payload: SyncPayload) {
@@ -551,6 +563,69 @@ class SyncDataImporter @Inject constructor(
                         isFavorite = item.isFavorite,
                         createdAt = item.createdAt,
                         updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importDuaProgress(incoming: List<SyncDuaProgress>) {
+        // dua_progress has no unique constraint on (duaId, date); merge on that
+        // pair so re-imports update the day's count rather than duplicating it.
+        val existing = duaDao.getAllProgressSync().associateBy { it.duaId to it.date }
+        for (item in incoming) {
+            val local = existing[item.duaId to item.date]
+            if (local == null || item.completedCount > local.completedCount) {
+                duaDao.insertProgress(
+                    DuaProgressEntity(
+                        id = local?.id ?: 0,
+                        duaId = item.duaId,
+                        date = item.date,
+                        completedCount = item.completedCount,
+                        targetCount = item.targetCount,
+                        isCompleted = item.isCompleted,
+                        createdAt = item.createdAt
+                    )
+                )
+            }
+        }
+    }
+
+    // --- Qaida ---
+
+    private suspend fun importQaidaLessonProgress(incoming: List<SyncQaidaLessonProgress>) {
+        val existing = qaidaDao.getAllLessonProgressSync().associateBy { it.lessonId }
+        for (item in incoming) {
+            val local = existing[item.lessonId]
+            if (local == null || item.updatedAt > local.updatedAt) {
+                qaidaDao.upsertLessonProgress(
+                    QaidaLessonProgressEntity(
+                        lessonId = item.lessonId,
+                        status = item.status,
+                        stars = item.stars,
+                        lastCellId = item.lastCellId,
+                        completedCells = item.completedCells,
+                        totalCells = item.totalCells,
+                        updatedAt = item.updatedAt
+                    )
+                )
+            }
+        }
+    }
+
+    private suspend fun importQaidaCellProgress(incoming: List<SyncQaidaCellProgress>) {
+        val existing = qaidaDao.getAllCellProgressSync()
+            .associateBy { it.lessonId to it.cellId }
+        for (item in incoming) {
+            val local = existing[item.lessonId to item.cellId]
+            if (local == null || item.lastPracticedAt > local.lastPracticedAt) {
+                qaidaDao.upsertCellProgress(
+                    QaidaCellProgressEntity(
+                        lessonId = item.lessonId,
+                        cellId = item.cellId,
+                        heardCount = item.heardCount,
+                        isCompleted = item.isCompleted,
+                        lastPracticedAt = item.lastPracticedAt
                     )
                 )
             }

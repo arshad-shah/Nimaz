@@ -1184,4 +1184,7 @@
     <string name="sync_item_prophets">Peygamber favorileri</string>
     <string name="sync_item_hadith_bookmarks">Hadis yer imleri</string>
     <string name="sync_item_dua_bookmarks">Dua yer imleri</string>
+    <string name="sync_item_qaida_lessons">Qaida ders ilerlemesi</string>
+    <string name="sync_item_qaida_cells">Qaida hücre ilerlemesi</string>
+    <string name="sync_item_dua_progress">Dua ilerlemesi</string>
 </resources>

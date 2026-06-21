@@ -1182,4 +1182,7 @@
     <string name="sync_item_prophets">Kegemaran Nabi</string>
     <string name="sync_item_hadith_bookmarks">Penanda buku Hadith</string>
     <string name="sync_item_dua_bookmarks">Penanda buku Dua</string>
+    <string name="sync_item_qaida_lessons">Kemajuan pelajaran Qaida</string>
+    <string name="sync_item_qaida_cells">Kemajuan sel Qaida</string>
+    <string name="sync_item_dua_progress">Kemajuan Dua</string>
 </resources>

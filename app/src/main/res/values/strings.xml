@@ -1262,6 +1262,9 @@
     <string name="sync_item_prophets">Prophet favorites</string>
     <string name="sync_item_hadith_bookmarks">Hadith bookmarks</string>
     <string name="sync_item_dua_bookmarks">Dua bookmarks</string>
+    <string name="sync_item_dua_progress">Dua progress</string>
+    <string name="sync_item_qaida_lessons">Qaida lesson progress</string>
+    <string name="sync_item_qaida_cells">Qaida cell progress</string>
     <string name="sync_item_tafseer_highlights">Tafseer highlights</string>
     <string name="sync_item_tafseer_notes">Tafseer notes</string>
     <string name="sync_item_zakat">Zakat calculations</string>

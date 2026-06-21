@@ -1180,4 +1180,7 @@
     <string name="sync_item_prophets">Propheten-Favoriten</string>
     <string name="sync_item_hadith_bookmarks">Hadith-Lesezeichen</string>
     <string name="sync_item_dua_bookmarks">Dua-Lesezeichen</string>
+    <string name="sync_item_qaida_lessons">Qaida-Lektionsfortschritt</string>
+    <string name="sync_item_qaida_cells">Qaida-Zellenfortschritt</string>
+    <string name="sync_item_dua_progress">Dua-Fortschritt</string>
 </resources>

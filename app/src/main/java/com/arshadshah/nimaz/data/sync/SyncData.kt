@@ -33,6 +33,10 @@ data class SyncPayload(
     // Hadith & Dua bookmarks
     val hadithBookmarks: List<SyncHadithBookmark> = emptyList(),
     val duaBookmarks: List<SyncDuaBookmark> = emptyList(),
+    val duaProgress: List<SyncDuaProgress> = emptyList(),
+    // Qaida learning progress
+    val qaidaLessonProgress: List<SyncQaidaLessonProgress> = emptyList(),
+    val qaidaCellProgress: List<SyncQaidaCellProgress> = emptyList(),
     // Preferences
     val preferences: Map<String, String> = emptyMap()
 )
@@ -71,6 +75,39 @@ data class SyncDuaBookmark(
     val isFavorite: Boolean,
     val createdAt: Long,
     val updatedAt: Long
+)
+
+@Serializable
+data class SyncDuaProgress(
+    val id: Long,
+    val duaId: Int,
+    val date: Long,
+    val completedCount: Int,
+    val targetCount: Int,
+    val isCompleted: Boolean,
+    val createdAt: Long
+)
+
+// --- Qaida (Arabic letter learning progress) ---
+
+@Serializable
+data class SyncQaidaLessonProgress(
+    val lessonId: Int,
+    val status: String,
+    val stars: Int,
+    val lastCellId: Int?,
+    val completedCells: Int,
+    val totalCells: Int,
+    val updatedAt: Long
+)
+
+@Serializable
+data class SyncQaidaCellProgress(
+    val lessonId: Int,
+    val cellId: Int,
+    val heardCount: Int,
+    val isCompleted: Boolean,
+    val lastPracticedAt: Long
 )
 
 /**
@@ -116,6 +153,9 @@ fun SyncPayload.categories(): List<SyncCategory> = listOf(
     SyncCategory("prophetBookmarks", prophetBookmarks.size),
     SyncCategory("hadithBookmarks", hadithBookmarks.size),
     SyncCategory("duaBookmarks", duaBookmarks.size),
+    SyncCategory("duaProgress", duaProgress.size),
+    SyncCategory("qaidaLessonProgress", qaidaLessonProgress.size),
+    SyncCategory("qaidaCellProgress", qaidaCellProgress.size),
     SyncCategory("preferences", preferences.size, isFlag = true),
 )
 

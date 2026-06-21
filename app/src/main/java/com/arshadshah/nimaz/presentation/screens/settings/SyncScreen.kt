@@ -789,6 +789,9 @@ private fun syncCategoryLabel(key: String): String = stringResource(
         "prophetBookmarks" -> R.string.sync_item_prophets
         "hadithBookmarks" -> R.string.sync_item_hadith_bookmarks
         "duaBookmarks" -> R.string.sync_item_dua_bookmarks
+        "duaProgress" -> R.string.sync_item_dua_progress
+        "qaidaLessonProgress" -> R.string.sync_item_qaida_lessons
+        "qaidaCellProgress" -> R.string.sync_item_qaida_cells
         "preferences" -> R.string.sync_item_preferences
         else -> R.string.sync_no_data
     }

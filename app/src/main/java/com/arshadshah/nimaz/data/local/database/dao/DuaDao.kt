@@ -129,6 +129,9 @@ interface DuaDao {
     @Query("SELECT * FROM dua_progress WHERE duaId = :duaId ORDER BY date DESC")
     fun getProgressHistoryForDua(duaId: Int): Flow<List<DuaProgressEntity>>
 
+    @Query("SELECT * FROM dua_progress")
+    suspend fun getAllProgressSync(): List<DuaProgressEntity>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProgress(progress: DuaProgressEntity)
 
