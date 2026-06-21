@@ -19,6 +19,7 @@ import com.arshadshah.nimaz.data.local.database.dao.FastingDao
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
+import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HadithGrade
@@ -119,7 +120,8 @@ class HomeViewModel @Inject constructor(
     private val fastingDao: FastingDao,
     private val hadithDao: HadithDao,
     private val duaDao: DuaDao,
-    private val duaContentSeeder: DuaContentSeeder
+    private val duaContentSeeder: DuaContentSeeder,
+    private val hadithBackfillSeeder: HadithBackfillSeeder
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -166,6 +168,10 @@ class HomeViewModel @Inject constructor(
     private fun loadDailyHadith() {
         viewModelScope.launch {
             try {
+                // Fill in any chains of narration that shipped empty in the
+                // prepopulated DB before reading. On an app update the asset is
+                // not re-copied, so the seeder is what reaches existing users.
+                hadithBackfillSeeder.seedIfNeeded()
                 val totalHadiths = hadithDao.getHadithCount()
                 if (totalHadiths == 0) return@launch
 

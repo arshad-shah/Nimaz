@@ -70,50 +70,6 @@ class NimazBadgeTest {
         composeRule.onNodeWithText("Sahih").assertExists()
     }
 
-    // ── HadithGradeBadge ────────────────────────────────────────────────────
-
-    @Test
-    fun `HadithGradeBadge maps known grades`() {
-        composeRule.setThemedContent {
-            androidx.compose.foundation.layout.Column {
-                HadithGradeBadge(grade = "sahih")
-                HadithGradeBadge(grade = "hasan")
-                HadithGradeBadge(grade = "daif")
-                HadithGradeBadge(grade = "da'if")
-                HadithGradeBadge(grade = "mawdu")
-                HadithGradeBadge(grade = "mawdu'")
-            }
-        }
-        composeRule.onNodeWithText("Sahih").assertExists()
-        composeRule.onNodeWithText("Hasan").assertExists()
-        // "daif"/"da'if" and "mawdu"/"mawdu'" each map to the same label.
-        composeRule.onAllNodesWithText("Da'if").assertCountEquals(2)
-        composeRule.onAllNodesWithText("Mawdu'").assertCountEquals(2)
-    }
-
-    @Test
-    fun `HadithGradeBadge falls back to custom for unknown grade`() {
-        composeRule.setThemedContent {
-            HadithGradeBadge(grade = "Unknown")
-        }
-        composeRule.onNodeWithText("Unknown").assertExists()
-    }
-
-    // ── getHadithGradeBadgeColors (pure) ────────────────────────────────────
-
-    @Test
-    fun `getHadithGradeBadgeColors covers all grades`() {
-        assertThat(getHadithGradeBadgeColors("sahih").first).isEqualTo(BadgeType.Sahih.color)
-        assertThat(getHadithGradeBadgeColors("hasan").first).isEqualTo(BadgeType.Hasan.color)
-        assertThat(getHadithGradeBadgeColors("daif").first).isEqualTo(BadgeType.Daif.color)
-        assertThat(getHadithGradeBadgeColors("da'if").first).isEqualTo(BadgeType.Daif.color)
-        assertThat(getHadithGradeBadgeColors("mawdu").first).isEqualTo(BadgeType.Mawdu.color)
-        assertThat(getHadithGradeBadgeColors("mawdu'").first).isEqualTo(BadgeType.Mawdu.color)
-        val fallback = getHadithGradeBadgeColors("???")
-        assertThat(fallback.first).isEqualTo(Color.Gray)
-        assertThat(fallback.second).isEqualTo(Color.White)
-    }
-
     // ── SurahNumberBadge ────────────────────────────────────────────────────
 
     @Test

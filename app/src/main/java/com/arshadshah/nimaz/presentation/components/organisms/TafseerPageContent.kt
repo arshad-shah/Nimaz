@@ -11,6 +11,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +38,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -64,6 +64,7 @@ import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerBookFrame
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightableText
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
@@ -303,10 +304,12 @@ fun TafseerPageContent(
         val highlight = highlights.find { it.id == highlightId }
         if (highlight != null) {
             val sheetState = rememberModalBottomSheetState()
-            ModalBottomSheet(
+            NimazBottomSheet(
                 onDismissRequest = { tappedHighlightId = null },
                 sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = MaterialTheme.colorScheme.surface,
+                scrollable = false,
+                contentPadding = PaddingValues(0.dp)
             ) {
                 HighlightDetailSheetContent(
                     highlight = highlight,
@@ -328,10 +331,12 @@ fun TafseerPageContent(
     // Notes list bottom sheet
     if (showNotesSheet) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
+        NimazBottomSheet(
             onDismissRequest = { showNotesSheet = false },
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surface,
+            scrollable = false,
+            contentPadding = PaddingValues(0.dp)
         ) {
             HighlightNotesListContent(
                 highlights = highlightsWithNotes,

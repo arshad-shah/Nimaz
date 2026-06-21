@@ -1,8 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.hadith
 
+import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
@@ -10,36 +13,42 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,28 +59,31 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Hadith
-import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
+import com.arshadshah.nimaz.presentation.viewmodel.HadithReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
 
@@ -81,16 +93,20 @@ fun HadithReaderScreen(
     bookId: String,
     chapterId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToSettings: () -> Unit = {},
     viewModel: HadithViewModel = hiltViewModel()
 ) {
     val state by viewModel.readerState.collectAsState()
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val clipboard = LocalClipboard.current
-    val clipboardScope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val hadiths = state.hadiths
+    val scope = rememberCoroutineScope()
+
+    val pagerState = rememberPagerState(
+        initialPage = state.currentHadithIndex.coerceAtLeast(0),
+        pageCount = { hadiths.size }
+    )
 
     LaunchedEffect(chapterId, bookId) {
-        // If bookId is empty and chapterId doesn't contain "_", it's a hadithId from search
+        // If bookId is empty and chapterId isn't a "book_chapter" id, it's a hadithId from search.
         if (bookId.isEmpty() && !chapterId.contains("_")) {
             viewModel.onEvent(HadithEvent.LoadHadithById(chapterId))
         } else {
@@ -98,12 +114,15 @@ fun HadithReaderScreen(
         }
     }
 
-    val currentHadith = state.hadiths.getOrNull(state.currentHadithIndex)
-    val hasPrevious = state.currentHadithIndex > 0
-    val hasNext = state.currentHadithIndex < state.hadiths.size - 1
+    LaunchedEffect(state.currentHadithIndex, hadiths.size) {
+        if (hadiths.isNotEmpty()) {
+            pagerState.scrollToPage(state.currentHadithIndex.coerceIn(0, hadiths.lastIndex))
+        }
+    }
+
+    val currentHadith = hadiths.getOrNull(pagerState.currentPage)
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
                 title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
@@ -111,424 +130,180 @@ fun HadithReaderScreen(
                     stringResource(R.string.hadith_chapter_format, it.chapterNumber)
                 },
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(
+                            imageVector = Icons.Default.Settings,
+                            contentDescription = stringResource(R.string.hadith_settings),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             )
         },
-        bottomBar = {
-            currentHadith?.let { hadith ->
-                BottomActionBar(
-                    isBookmarked = hadith.isBookmarked,
-                    onBookmarkClick = {
-                        viewModel.onEvent(
-                            HadithEvent.ToggleBookmark(
-                                hadithId = hadith.id,
-                                bookId = bookId,
-                                hadithNumber = hadith.hadithNumber
-                            )
-                        )
-                    },
-                    onShareClick = {
-                        val shareText = buildString {
-                            appendLine(hadith.textArabic)
-                            appendLine()
-                            appendLine(hadith.textEnglish)
-                            hadith.narratorName?.let {
-                                appendLine()
-                                appendLine("Narrated by: $it")
-                            }
-                            hadith.reference?.let {
-                                appendLine()
-                                appendLine(it)
-                            }
-                        }
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, shareText)
-                            type = "text/plain"
-                        }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share Hadith"))
-                    },
-                    onCopyClick = {
-                        val text = buildString {
-                            appendLine(hadith.textArabic)
-                            appendLine()
-                            appendLine(hadith.textEnglish)
-                            hadith.narratorName?.let {
-                                appendLine()
-                                appendLine("Narrated by: $it")
-                            }
-                            hadith.reference?.let {
-                                appendLine()
-                                appendLine(it)
-                            }
-                        }
-                        clipboardScope.launch {
-                            clipboard.setClipEntry(
-                                ClipEntry(ClipData.newPlainText("Hadith", text))
-                            )
-                        }
-                    }
-                )
-            }
-        }
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-        } else if (currentHadith != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Navigation bar
-                HadithNavigationBar(
-                    currentNumber = currentHadith.hadithNumber,
-                    totalCount = state.hadiths.size,
-                    hasPrevious = hasPrevious,
-                    hasNext = hasNext,
-                    onPrevious = {
-                        viewModel.onEvent(
-                            HadithEvent.NavigateToHadith(state.currentHadithIndex - 1)
-                        )
-                    },
-                    onNext = {
-                        viewModel.onEvent(
-                            HadithEvent.NavigateToHadith(state.currentHadithIndex + 1)
-                        )
-                    }
-                )
-
-                // Scrollable content
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .widthIn(max = com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing.maxReadableWidth())
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 20.dp)
-                ) {
-                    // Grade badge
-                    currentHadith.grade?.let { grade ->
-                        GradeBadge(grade = grade)
-                        Spacer(modifier = Modifier.height(20.dp))
-                    }
-
-                    // Hadith card
-                    HadithContentCard(
-                        hadith = currentHadith,
-                        showArabic = state.showArabic,
-                        fontSize = state.fontSize,
-                        arabicFontSize = state.arabicFontSize
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            when {
+                state.isLoading && hadiths.isEmpty() -> {
+                    CircularProgressIndicator(
+                        modifier = Modifier.align(Alignment.Center),
+                        color = MaterialTheme.colorScheme.primary
                     )
+                }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                hadiths.isEmpty() -> {
+                    Text(
+                        text = stringResource(R.string.no_hadith_found),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
 
-                    // Chain of narration
-                    currentHadith.narratorChain?.let { chain ->
-                        if (chain.isNotBlank()) {
-                            ChainOfNarrationSection(chain = chain)
+                else -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxWidth(),
+                            key = { hadiths[it].id }
+                        ) { page ->
+                            HadithPage(hadith = hadiths[page], state = state)
+                        }
+
+                        currentHadith?.let { hadith ->
+                            HadithReaderBottomBar(
+                                hadith = hadith,
+                                viewModel = viewModel,
+                                currentPage = pagerState.currentPage,
+                                pageCount = hadiths.size,
+                                onPrev = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(
+                                            (pagerState.currentPage - 1).coerceAtLeast(0)
+                                        )
+                                    }
+                                },
+                                onNext = {
+                                    scope.launch {
+                                        pagerState.animateScrollToPage(
+                                            (pagerState.currentPage + 1).coerceAtMost(hadiths.lastIndex)
+                                        )
+                                    }
+                                }
+                            )
                         }
                     }
                 }
             }
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.no_hadith_found),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
         }
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun HadithNavigationBar(
-    currentNumber: Int,
-    totalCount: Int,
-    hasPrevious: Boolean,
-    hasNext: Boolean,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val borderColor = MaterialTheme.colorScheme.outlineVariant
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .drawBehind {
-                drawLine(
-                    color = borderColor,
-                    start = Offset(0f, size.height),
-                    end = Offset(size.width, size.height),
-                    strokeWidth = 1.dp.toPx()
-                )
-            }
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Previous button
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    if (hasPrevious) MaterialTheme.colorScheme.surfaceContainerHighest
-                    else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f)
-                )
-                .clickable(enabled = hasPrevious, onClick = onPrevious)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint = if (hasPrevious) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-            )
-            Text(
-                text = stringResource(R.string.previous),
-                style = MaterialTheme.typography.labelMedium,
-                color = if (hasPrevious) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-            )
-        }
-
-        // Hadith number badge
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Text(
-                text = "#$currentNumber",
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier
-                    .background(
-                        MaterialTheme.colorScheme.primaryContainer,
-                        RoundedCornerShape(20.dp)
-                    )
-                    .padding(horizontal = 14.dp, vertical = 6.dp)
-            )
-            Text(
-                text = stringResource(R.string.hadith_of_count_format, totalCount),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        // Next button
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    if (hasNext) MaterialTheme.colorScheme.surfaceContainerHighest
-                    else MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.3f)
-                )
-                .clickable(enabled = hasNext, onClick = onNext)
-                .padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.next),
-                style = MaterialTheme.typography.labelMedium,
-                color = if (hasNext) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-            )
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp),
-                tint = if (hasNext) MaterialTheme.colorScheme.onSurfaceVariant
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun GradeBadge(
-    grade: HadithGrade,
-    modifier: Modifier = Modifier
-) {
-    val (text, color, icon) = when (grade) {
-        HadithGrade.SAHIH -> Triple(
-            grade.displayName(),
-            NimazColors.StatusColors.Prayed,
-            Icons.Default.CheckCircle
-        )
-
-        HadithGrade.HASAN -> Triple(
-            grade.displayName(),
-            NimazColors.StatusColors.Late,
-            Icons.Default.CheckCircle
-        )
-
-        HadithGrade.DAIF -> Triple(
-            grade.displayName(),
-            NimazColors.StatusColors.Missed,
-            Icons.Default.Warning
-        )
-
-        HadithGrade.MAWDU -> Triple(
-            grade.displayName(),
-            Color.Gray,
-            Icons.Default.Warning
-        )
-
-        HadithGrade.UNKNOWN -> Triple(
-            grade.displayName(),
-            Color.Gray,
-            Icons.Default.Warning
-        )
-    }
-
-    Row(
-        modifier = modifier
-            .background(
-                color.copy(alpha = 0.15f),
-                RoundedCornerShape(20.dp)
-            )
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(6.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(14.dp),
-            tint = color
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = color
-        )
-    }
-}
-
-@Composable
-private fun HadithContentCard(
+private fun HadithPage(
     hadith: Hadith,
-    showArabic: Boolean,
-    fontSize: Float,
-    arabicFontSize: Float,
-    modifier: Modifier = Modifier
+    state: HadithReaderUiState
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-    ) {
-        // Arabic section with gradient background
-        if (showArabic) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.surfaceContainerHighest,
-                                MaterialTheme.colorScheme.surfaceContainer
-                            )
-                        )
-                    )
-                    .drawBehind {
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.08f),
-                            start = Offset(0f, size.height),
-                            end = Offset(size.width, size.height),
-                            strokeWidth = 1.dp.toPx()
-                        )
-                    }
-                    .padding(horizontal = 20.dp, vertical = 25.dp)
-            ) {
-                HadithArabicText(
-                    text = hadith.textArabic,
-                    customFontSize = arabicFontSize,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-        }
+    val grade = if (state.showGrade) hadithGradeDisplay(hadith.grade) else null
 
-        // English section
+    BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+        val minColumnHeight = maxHeight
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 25.dp)
+                .widthIn(max = AdaptiveSpacing.maxReadableWidth())
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp)
+                .heightIn(min = minColumnHeight),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Narrator badge
-            if (!hadith.narratorName.isNullOrEmpty()) {
-                Text(
-                    text = stringResource(R.string.hadith_narrated_by_format, hadith.narratorName),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier
-                        .background(
-                            MaterialTheme.colorScheme.surfaceContainerHighest,
-                            RoundedCornerShape(8.dp)
-                        )
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                )
-                Spacer(modifier = Modifier.height(15.dp))
+            if (grade != null || !hadith.narratorName.isNullOrEmpty()) {
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    grade?.let { HadithGradeChip(label = it.label, color = it.color) }
+                    hadith.narratorName?.trim()?.takeIf { it.isNotBlank() }?.let { narrator ->
+                        // The dataset's narrator field already includes the
+                        // "Narrated by …" prefix; only add it when it's missing.
+                        val narratorText = if (narrator.startsWith("narrat", ignoreCase = true)) {
+                            narrator
+                        } else {
+                            stringResource(R.string.hadith_narrated_by_format, narrator)
+                        }
+                        NimazLabelChip(text = narratorText, highlighted = true)
+                    }
+                }
+                Spacer(modifier = Modifier.height(20.dp))
             }
 
-            // English translation
-            Text(
-                text = hadith.textEnglish,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = fontSize.sp,
-                    lineHeight = (fontSize * 1.8f).sp
-                ),
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (state.showArabic) {
+                HadithArabicText(
+                    text = hadith.textArabic,
+                    customFontSize = state.arabicFontSize,
+                    fontFamily = state.arabicFontFamily,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
 
-            // Reference
-            hadith.reference?.let { ref ->
-                Spacer(modifier = Modifier.height(12.dp))
+            if (state.showTranslation) {
+                if (state.showArabic) {
+                    Spacer(modifier = Modifier.height(20.dp))
+                    HorizontalDivider(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
+                    )
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
                 Text(
-                    text = ref,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    textAlign = TextAlign.End,
-                    modifier = Modifier.fillMaxWidth()
+                    text = hadith.textEnglish,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        fontSize = state.fontSize.sp,
+                        lineHeight = (state.fontSize * 1.6f).sp
+                    ),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
+            }
+
+            if (!hadith.reference.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                NimazLabelChip(text = hadith.reference, icon = Icons.Default.Book)
+            }
+
+            if (state.showChain && !hadith.narratorChain.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(20.dp))
+                ChainOfNarrationSection(
+                    chain = hadith.narratorChain,
+                    arabicFontFamily = state.arabicFontFamily
                 )
             }
         }
     }
 }
 
+/** Collapsible, frosted chain-of-narration (isnād) section. Collapsed by default. */
 @Composable
 private fun ChainOfNarrationSection(
     chain: String,
+    arabicFontFamily: FontFamily,
     modifier: Modifier = Modifier
 ) {
-    var isExpanded by remember { mutableStateOf(true) }
+    var isExpanded by remember { mutableStateOf(false) }
+    val rotation by animateFloatAsState(if (isExpanded) 180f else 0f, label = "isnad_chevron")
 
-    // Parse chain - split by common delimiters
     val narrators = remember(chain) {
         chain.split("->", "←", "\n", " عن ")
             .map { it.trim() }
@@ -538,11 +313,13 @@ private fun ChainOfNarrationSection(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainer)
-            .padding(20.dp)
+            .background(
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                RoundedCornerShape(14.dp)
+            )
+            .clickable { isExpanded = !isExpanded }
+            .padding(16.dp)
     ) {
-        // Header
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -554,13 +331,11 @@ private fun ChainOfNarrationSection(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Text(
-                text = if (isExpanded) "Hide" else "Show",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .clickable { isExpanded = !isExpanded }
-                    .padding(4.dp)
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.rotate(rotation)
             )
         }
 
@@ -569,15 +344,11 @@ private fun ChainOfNarrationSection(
             enter = expandVertically(),
             exit = shrinkVertically()
         ) {
-            Column(
-                modifier = Modifier.padding(top = 15.dp)
-            ) {
+            Column(modifier = Modifier.padding(top = 15.dp)) {
                 if (narrators.size > 1) {
-                    // Render as timeline
                     val lineColor = MaterialTheme.colorScheme.outlineVariant
-                    val dotColor = MaterialTheme.colorScheme.outlineVariant
+                    val dotColor = MaterialTheme.colorScheme.primary
                     val bgColor = MaterialTheme.colorScheme.surface
-
                     Column(
                         modifier = Modifier
                             .padding(start = 6.dp)
@@ -592,14 +363,9 @@ private fun ChainOfNarrationSection(
                     ) {
                         narrators.forEach { narrator ->
                             Row(
-                                modifier = Modifier.padding(
-                                    start = 15.dp,
-                                    top = 10.dp,
-                                    bottom = 10.dp
-                                ),
+                                modifier = Modifier.padding(start = 15.dp, top = 10.dp, bottom = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                // Dot on the timeline
                                 Box(
                                     modifier = Modifier
                                         .offset(x = (-21).dp)
@@ -609,7 +375,10 @@ private fun ChainOfNarrationSection(
                                 )
                                 Text(
                                     text = narrator,
-                                    style = MaterialTheme.typography.bodySmall,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontFamily = arabicFontFamily,
+                                        textDirection = TextDirection.Rtl
+                                    ),
                                     fontWeight = FontWeight.Medium,
                                     color = MaterialTheme.colorScheme.onSurface,
                                     modifier = Modifier.offset(x = (-15).dp)
@@ -618,12 +387,14 @@ private fun ChainOfNarrationSection(
                         }
                     }
                 } else {
-                    // Single block of text for the chain
                     Text(
                         text = chain,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        lineHeight = 20.sp
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = arabicFontFamily,
+                            textDirection = TextDirection.Rtl,
+                            lineHeight = 26.sp
+                        ),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -631,120 +402,94 @@ private fun ChainOfNarrationSection(
     }
 }
 
+/**
+ * The consolidated bottom bar for the current hadith: Bookmark · Share · Copy,
+ * flanked by prev/next chevrons + page dots. Reuses [NimazReaderBottomBar].
+ */
+@SuppressLint("LocalContextGetResourceValueCall")
 @Composable
-private fun BottomActionBar(
-    isBookmarked: Boolean,
-    onBookmarkClick: () -> Unit,
-    onShareClick: () -> Unit,
-    onCopyClick: () -> Unit,
-    modifier: Modifier = Modifier
+private fun HadithReaderBottomBar(
+    hadith: Hadith,
+    viewModel: HadithViewModel,
+    currentPage: Int,
+    pageCount: Int,
+    onPrev: () -> Unit,
+    onNext: () -> Unit
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color.Transparent,
-                        MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-                        MaterialTheme.colorScheme.surface
-                    ),
-                    startY = 0f,
-                    endY = 80f
-                )
-            )
-            .padding(horizontal = 20.dp, vertical = 15.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceContainer)
-                .border(
-                    1.dp,
-                    MaterialTheme.colorScheme.outlineVariant,
-                    RoundedCornerShape(16.dp)
-                )
-                .padding(10.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            ActionButton(
-                icon = {
-                    Icon(
-                        imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                        contentDescription = stringResource(R.string.cd_bookmark),
-                        modifier = Modifier.size(22.dp)
-                    )
-                },
-                label = if (isBookmarked) "Saved" else "Save",
-                isActive = isBookmarked,
-                onClick = onBookmarkClick,
-                modifier = Modifier.weight(1f)
-            )
+    val context = LocalContext.current
+    val clipboard = LocalClipboard.current
+    val clipboardScope = rememberCoroutineScope()
+    val bookmarkFlow = remember(hadith.id) { viewModel.isHadithBookmarked(hadith.id) }
+    val isBookmarked by bookmarkFlow.collectAsState(initial = hadith.isBookmarked)
 
-            ActionButton(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(R.string.cd_share),
-                        modifier = Modifier.size(22.dp)
-                    )
-                },
-                label = stringResource(R.string.share),
-                onClick = onShareClick,
-                modifier = Modifier.weight(1f)
-            )
+    val shareLabel = stringResource(R.string.share)
+    val copiedMsg = stringResource(R.string.hadith_copied)
+    // stringResource is a @Composable call; avoid calling it from non-composable lambdas.
+    // Use Context.getString instead to build strings in non-composable helpers.
+    val narratedByFmt = { name: String ->
+        context.getString(R.string.hadith_narrated_by_format, name)
+    }
 
-            ActionButton(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.ContentCopy,
-                        contentDescription = stringResource(R.string.cd_copy),
-                        modifier = Modifier.size(22.dp)
-                    )
-                },
-                label = stringResource(R.string.action_copy),
-                onClick = onCopyClick,
-                modifier = Modifier.weight(1f)
-            )
+    fun buildHadithText(): String = buildString {
+        appendLine(hadith.textArabic)
+        appendLine()
+        appendLine(hadith.textEnglish)
+        hadith.narratorName?.takeIf { it.isNotBlank() }?.let {
+            appendLine()
+            appendLine(narratedByFmt(it))
+        }
+        hadith.reference?.takeIf { it.isNotBlank() }?.let {
+            appendLine()
+            appendLine(it)
         }
     }
-}
 
-@Composable
-private fun ActionButton(
-    icon: @Composable () -> Unit,
-    label: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    isActive: Boolean = false
-) {
-    val activeColor = NimazColors.StatusColors.Late // Gold-like color for active state
-    val inactiveColor = MaterialTheme.colorScheme.onSurfaceVariant
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick)
-            .padding(vertical = 10.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
+    NimazReaderBottomBar(
+        currentPage = currentPage,
+        pageCount = pageCount,
+        onPrev = onPrev,
+        onNext = onNext,
+        prevContentDescription = stringResource(R.string.previous),
+        nextContentDescription = stringResource(R.string.next)
     ) {
-        Box(
-            modifier = Modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            androidx.compose.runtime.CompositionLocalProvider(
-                androidx.compose.material3.LocalContentColor provides
-                        if (isActive) activeColor else inactiveColor
-            ) {
-                icon()
+        NimazPillActionButton(
+            icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+            contentDescription = stringResource(R.string.cd_bookmark),
+            onClick = {
+                viewModel.onEvent(
+                    HadithEvent.ToggleBookmark(
+                        hadithId = hadith.id,
+                        bookId = hadith.bookId,
+                        hadithNumber = hadith.hadithNumber
+                    )
+                )
+            },
+            active = isBookmarked,
+            activeColor = Color(0xFFEAB308)
+        )
+        NimazPillActionButton(
+            icon = Icons.Default.Share,
+            contentDescription = stringResource(R.string.cd_share),
+            onClick = {
+                val sendIntent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, buildHadithText())
+                    type = "text/plain"
+                }
+                context.startActivity(Intent.createChooser(sendIntent, shareLabel))
             }
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
-            color = if (isActive) activeColor else inactiveColor
+        )
+        NimazPillActionButton(
+            icon = Icons.Default.ContentCopy,
+            contentDescription = stringResource(R.string.cd_copy),
+            onClick = {
+                clipboardScope.launch {
+                    clipboard.setClipEntry(
+                        ClipEntry(ClipData.newPlainText("Hadith", buildHadithText()))
+                    )
+                    Toast.makeText(context, copiedMsg, Toast.LENGTH_SHORT).show()
+                }
+            }
         )
     }
 }

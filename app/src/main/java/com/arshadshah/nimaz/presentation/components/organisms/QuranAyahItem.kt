@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import android.content.Intent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -48,7 +47,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,6 +55,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
 import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
@@ -64,40 +64,6 @@ import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-
-/**
- * A single ayah action rendered as an individual circular "pill". The pill fill
- * and icon tint animate between an inactive neutral state and an [active] state
- * tinted with [activeColor] (e.g. red for favourite, gold for bookmark).
- */
-@Composable
-private fun AyahActionButton(
-    icon: ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-    active: Boolean = false,
-    activeColor: Color = MaterialTheme.colorScheme.primary,
-) {
-    val tint by animateColorAsState(
-        targetValue = if (active) activeColor
-        else MaterialTheme.colorScheme.onSurfaceVariant,
-        animationSpec = tween(200),
-        label = "ayah_action_tint"
-    )
-    IconButton(
-        onClick = onClick,
-        modifier = modifier
-            .size(36.dp)
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = tint,
-            modifier = Modifier.size(18.dp)
-        )
-    }
-}
 
 @Composable
 internal fun AyahItem(
@@ -177,35 +143,22 @@ internal fun AyahItem(
                 }
             }
 
-            Surface(
-                shape = RoundedCornerShape(100),
-                color = MaterialTheme.colorScheme.surface,
-                shadowElevation = 2.dp,
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.outline.copy(alpha = 0.7f)
-                ),
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically,
-              ) {
-                AyahActionButton(
+            NimazActionPill {
+                NimazPillActionButton(
                     icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                     contentDescription = stringResource(R.string.cd_favorite),
                     onClick = onFavoriteClick,
                     active = isFavorite,
                     activeColor = Color(0xFFEF4444),
                 )
-                AyahActionButton(
+                NimazPillActionButton(
                     icon = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
                     contentDescription = stringResource(R.string.cd_bookmark),
                     onClick = onBookmarkClick,
                     active = ayah.isBookmarked,
                     activeColor = NimazColors.QuranColors.BookmarkPrimary,
                 )
-                AyahActionButton(
+                NimazPillActionButton(
                     icon = Icons.Default.Share,
                     contentDescription = stringResource(R.string.cd_share),
                     onClick = {
@@ -219,19 +172,18 @@ internal fun AyahItem(
                         context.startActivity(Intent.createChooser(sendIntent, "Share Ayah"))
                     },
                 )
-                AyahActionButton(
+                NimazPillActionButton(
                     icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                     contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(R.string.action_play),
                     onClick = onPlayAyahClick,
                     active = isAudioPlaying || isHighlighted,
                 )
-                AyahActionButton(
+                NimazPillActionButton(
                     icon = Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = stringResource(R.string.cd_tafseer),
                     onClick = onTafseerClick,
                     active = true,
                 )
-              }
             }
         }
 

@@ -120,6 +120,25 @@ data class QuranSettingsUiState(
     val showTajweed: Boolean = false
 )
 
+data class DuaSettingsUiState(
+    val selectedArabicFontId: String = "amiri",
+    val arabicFontSize: Float = 28f,
+    val translationFontSize: Float = 16f,
+    val showArabic: Boolean = true,
+    val showTransliteration: Boolean = true,
+    val showTranslation: Boolean = true
+)
+
+data class HadithSettingsUiState(
+    val selectedArabicFontId: String = "amiri",
+    val arabicFontSize: Float = 24f,
+    val translationFontSize: Float = 16f,
+    val showArabic: Boolean = true,
+    val showTranslation: Boolean = true,
+    val showGrade: Boolean = true,
+    val showChain: Boolean = true
+)
+
 data class LocationSettingsUiState(
     val currentLocation: Location? = null,
     val savedLocations: List<Location> = emptyList(),
@@ -182,6 +201,23 @@ sealed interface SettingsEvent {
     data class SetReciter(val reciterId: String?) : SettingsEvent
     data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
 
+    // Dua
+    data class SetDuaArabicFont(val fontId: String) : SettingsEvent
+    data class SetDuaArabicFontSize(val size: Float) : SettingsEvent
+    data class SetDuaTranslationFontSize(val size: Float) : SettingsEvent
+    data class SetDuaShowArabic(val enabled: Boolean) : SettingsEvent
+    data class SetDuaShowTransliteration(val enabled: Boolean) : SettingsEvent
+    data class SetDuaShowTranslation(val enabled: Boolean) : SettingsEvent
+
+    // Hadith
+    data class SetHadithArabicFont(val fontId: String) : SettingsEvent
+    data class SetHadithArabicFontSize(val size: Float) : SettingsEvent
+    data class SetHadithTranslationFontSize(val size: Float) : SettingsEvent
+    data class SetHadithShowArabic(val enabled: Boolean) : SettingsEvent
+    data class SetHadithShowTranslation(val enabled: Boolean) : SettingsEvent
+    data class SetHadithShowGrade(val enabled: Boolean) : SettingsEvent
+    data class SetHadithShowChain(val enabled: Boolean) : SettingsEvent
+
     // Location
     data class SetCurrentLocation(val location: Location) : SettingsEvent
     data class AddLocation(val location: Location) : SettingsEvent
@@ -227,6 +263,12 @@ class SettingsViewModel @Inject constructor(
 
     private val _quranState = MutableStateFlow(QuranSettingsUiState())
     val quranState: StateFlow<QuranSettingsUiState> = _quranState.asStateFlow()
+
+    private val _duaState = MutableStateFlow(DuaSettingsUiState())
+    val duaState: StateFlow<DuaSettingsUiState> = _duaState.asStateFlow()
+
+    private val _hadithState = MutableStateFlow(HadithSettingsUiState())
+    val hadithState: StateFlow<HadithSettingsUiState> = _hadithState.asStateFlow()
 
     private val _locationState = MutableStateFlow(LocationSettingsUiState())
     val locationState: StateFlow<LocationSettingsUiState> = _locationState.asStateFlow()
@@ -569,6 +611,73 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { preferencesDataStore.setShowTajweed(event.enabled) }
             }
 
+            // Dua
+            is SettingsEvent.SetDuaArabicFont -> {
+                _duaState.update { it.copy(selectedArabicFontId = event.fontId) }
+                viewModelScope.launch { preferencesDataStore.setDuaArabicFont(event.fontId) }
+            }
+
+            is SettingsEvent.SetDuaArabicFontSize -> {
+                _duaState.update { it.copy(arabicFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setDuaArabicFontSize(event.size) }
+            }
+
+            is SettingsEvent.SetDuaTranslationFontSize -> {
+                _duaState.update { it.copy(translationFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setDuaTranslationFontSize(event.size) }
+            }
+
+            is SettingsEvent.SetDuaShowArabic -> {
+                _duaState.update { it.copy(showArabic = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setDuaShowArabic(event.enabled) }
+            }
+
+            is SettingsEvent.SetDuaShowTransliteration -> {
+                _duaState.update { it.copy(showTransliteration = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setDuaShowTransliteration(event.enabled) }
+            }
+
+            is SettingsEvent.SetDuaShowTranslation -> {
+                _duaState.update { it.copy(showTranslation = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setDuaShowTranslation(event.enabled) }
+            }
+
+            // Hadith
+            is SettingsEvent.SetHadithArabicFont -> {
+                _hadithState.update { it.copy(selectedArabicFontId = event.fontId) }
+                viewModelScope.launch { preferencesDataStore.setHadithArabicFont(event.fontId) }
+            }
+
+            is SettingsEvent.SetHadithArabicFontSize -> {
+                _hadithState.update { it.copy(arabicFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setHadithArabicFontSize(event.size) }
+            }
+
+            is SettingsEvent.SetHadithTranslationFontSize -> {
+                _hadithState.update { it.copy(translationFontSize = event.size) }
+                viewModelScope.launch { preferencesDataStore.setHadithTranslationFontSize(event.size) }
+            }
+
+            is SettingsEvent.SetHadithShowArabic -> {
+                _hadithState.update { it.copy(showArabic = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setHadithShowArabic(event.enabled) }
+            }
+
+            is SettingsEvent.SetHadithShowTranslation -> {
+                _hadithState.update { it.copy(showTranslation = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setHadithShowTranslation(event.enabled) }
+            }
+
+            is SettingsEvent.SetHadithShowGrade -> {
+                _hadithState.update { it.copy(showGrade = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setHadithShowGrade(event.enabled) }
+            }
+
+            is SettingsEvent.SetHadithShowChain -> {
+                _hadithState.update { it.copy(showChain = event.enabled) }
+                viewModelScope.launch { preferencesDataStore.setHadithShowChain(event.enabled) }
+            }
+
             // Location
             is SettingsEvent.SetCurrentLocation -> setCurrentLocation(event.location)
             is SettingsEvent.AddLocation -> addLocation(event.location)
@@ -767,6 +876,31 @@ class SettingsViewModel @Inject constructor(
                     keepScreenOn = keepScreenOn,
                     selectedReciterId = reciterId,
                     showTajweed = showTajweed
+                )
+            }
+
+            // Dua settings
+            _duaState.update {
+                it.copy(
+                    selectedArabicFontId = preferencesDataStore.duaArabicFont.first(),
+                    arabicFontSize = preferencesDataStore.duaArabicFontSize.first(),
+                    translationFontSize = preferencesDataStore.duaTranslationFontSize.first(),
+                    showArabic = preferencesDataStore.duaShowArabic.first(),
+                    showTransliteration = preferencesDataStore.duaShowTransliteration.first(),
+                    showTranslation = preferencesDataStore.duaShowTranslation.first()
+                )
+            }
+
+            // Hadith settings
+            _hadithState.update {
+                it.copy(
+                    selectedArabicFontId = preferencesDataStore.hadithArabicFont.first(),
+                    arabicFontSize = preferencesDataStore.hadithArabicFontSize.first(),
+                    translationFontSize = preferencesDataStore.hadithTranslationFontSize.first(),
+                    showArabic = preferencesDataStore.hadithShowArabic.first(),
+                    showTranslation = preferencesDataStore.hadithShowTranslation.first(),
+                    showGrade = preferencesDataStore.hadithShowGrade.first(),
+                    showChain = preferencesDataStore.hadithShowChain.first()
                 )
             }
         }

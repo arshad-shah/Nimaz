@@ -4,6 +4,10 @@ import com.arshadshah.nimaz.data.local.dua.AndroidDuaAssetReader
 import com.arshadshah.nimaz.data.local.dua.DataStoreDuaContentVersionStore
 import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
 import com.arshadshah.nimaz.data.local.dua.DuaContentVersionStore
+import com.arshadshah.nimaz.data.local.hadith.AndroidHadithAssetReader
+import com.arshadshah.nimaz.data.local.hadith.DataStoreHadithBackfillVersionStore
+import com.arshadshah.nimaz.data.local.hadith.HadithAssetReader
+import com.arshadshah.nimaz.data.local.hadith.HadithBackfillVersionStore
 import com.arshadshah.nimaz.data.local.help.AndroidHelpAssetReader
 import com.arshadshah.nimaz.data.local.help.DataStoreHelpContentVersionStore
 import com.arshadshah.nimaz.data.local.help.HelpAssetReader
@@ -238,6 +242,18 @@ abstract class RepositoryModule {
     abstract fun bindQaidaAssetReader(
         impl: AndroidQaidaAssetReader
     ): QaidaAssetReader
+
+    @Binds
+    @Singleton
+    abstract fun bindHadithBackfillVersionStore(
+        impl: DataStoreHadithBackfillVersionStore
+    ): HadithBackfillVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindHadithAssetReader(
+        impl: AndroidHadithAssetReader
+    ): HadithAssetReader
 
     @Binds
     @Singleton

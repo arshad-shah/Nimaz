@@ -11,15 +11,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -32,7 +31,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -46,7 +44,7 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import java.time.Instant
@@ -83,31 +81,51 @@ fun FastManagementBottomSheet(
     val hijriDate = remember(date) { HijriDateCalculator.toHijri(date) }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("EEEE, d MMMM yyyy") }
 
-    NimazBottomSheet(onDismissRequest = onDismiss) {
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
+        title = date.format(dateFormatter),
+        subtitle = hijriDate.formatted(),
+        footer = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                if (existingRecord != null) {
+                    OutlinedButton(
+                        onClick = onDelete,
+                        shape = RoundedCornerShape(100.dp),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            contentColor = MaterialTheme.colorScheme.error
+                        ),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(4.dp))
+                        Text(stringResource(R.string.fasting_sheet_delete))
+                    }
+                }
+                FilledTonalButton(
+                    onClick = { onSave(selectedStatus, selectedFastType, selectedExemptionReason, note) },
+                    shape = RoundedCornerShape(100.dp),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ),
+                    modifier = Modifier.weight(1f)
+                ) {
+                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(4.dp))
+                    Text(stringResource(R.string.fasting_sheet_save))
+                }
+            }
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
+                .padding(vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header: Gregorian + Hijri date
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = date.format(dateFormatter),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = hijriDate.formatted(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
             // Status selector
             Text(
                 text = stringResource(R.string.fasting_sheet_status),
@@ -183,46 +201,6 @@ fun FastManagementBottomSheet(
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
-
-            // Action buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                if (existingRecord != null) {
-                    OutlinedButton(
-                        onClick = onDelete,
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        ),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(
-                            Icons.Default.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.fasting_sheet_delete))
-                    }
-                }
-                Button(
-                    onClick = {
-                        onSave(selectedStatus, selectedFastType, selectedExemptionReason, note)
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(
-                        Icons.Default.Save,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.fasting_sheet_save))
-                }
-            }
         }
     }
 }
@@ -273,35 +251,53 @@ fun MakeupFastEditBottomSheet(
     }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMM yyyy") }
 
-    NimazBottomSheet(onDismissRequest = onDismiss) {
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.fasting_sheet_edit_makeup),
+        subtitle = stringResource(R.string.fasting_originally, hijriDate),
+        footer = {
+            FilledTonalButton(
+                onClick = {
+                    if (selectedStatus == MakeupFastStatus.FIDYA_PAID) {
+                        val amount = fidyaAmount.toDoubleOrNull() ?: 0.0
+                        onPayFidya(makeupFast.id, amount)
+                    } else {
+                        val updated = makeupFast.copy(
+                            reason = reason,
+                            note = note.ifBlank { null },
+                            status = selectedStatus,
+                            completedDate = if (selectedStatus == MakeupFastStatus.COMPLETED)
+                                System.currentTimeMillis() else makeupFast.completedDate,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        onSave(updated)
+                    }
+                    onDismiss()
+                },
+                shape = RoundedCornerShape(100.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(4.dp))
+                Text(stringResource(R.string.fasting_sheet_save))
+            }
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 8.dp),
+                .padding(vertical = 4.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Header
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.fasting_sheet_edit_makeup),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = stringResource(R.string.fasting_originally, hijriDate),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = originalDate.format(dateFormatter),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            Text(
+                text = originalDate.format(dateFormatter),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
 
             // Reason
             OutlinedTextField(
@@ -358,38 +354,6 @@ fun MakeupFastEditBottomSheet(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
-            }
-
-            // Save button
-            Button(
-                onClick = {
-                    if (selectedStatus == MakeupFastStatus.FIDYA_PAID) {
-                        val amount = fidyaAmount.toDoubleOrNull() ?: 0.0
-                        onPayFidya(makeupFast.id, amount)
-                    } else {
-                        val updated = makeupFast.copy(
-                            reason = reason,
-                            note = note.ifBlank { null },
-                            status = selectedStatus,
-                            completedDate = if (selectedStatus == MakeupFastStatus.COMPLETED)
-                                System.currentTimeMillis() else makeupFast.completedDate,
-                            updatedAt = System.currentTimeMillis()
-                        )
-                        onSave(updated)
-                    }
-                    onDismiss()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp)
-            ) {
-                Icon(
-                    Icons.Default.Save,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.fasting_sheet_save))
             }
         }
     }

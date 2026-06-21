@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.hadith
 
 import android.content.Intent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,12 +17,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -55,6 +53,10 @@ import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
@@ -107,7 +109,7 @@ fun HadithCollectionScreen(
                     .padding(paddingValues),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
             }
         } else {
             LazyColumn(
@@ -116,7 +118,6 @@ fun HadithCollectionScreen(
                     .padding(paddingValues),
                 contentPadding = PaddingValues(bottom = 24.dp)
             ) {
-                // Stats Row
                 item {
                     NimazStatsGrid(
                         stats = listOf(
@@ -131,7 +132,6 @@ fun HadithCollectionScreen(
                     )
                 }
 
-                // Hadith of the Day
                 item {
                     val hadithOfTheDay = state.hadithOfTheDay
                     val fallbackArabic = stringResource(R.string.hadith_fallback_arabic)
@@ -172,18 +172,12 @@ fun HadithCollectionScreen(
                                 putExtra(Intent.EXTRA_TEXT, shareText)
                                 type = "text/plain"
                             }
-                            context.startActivity(
-                                Intent.createChooser(
-                                    sendIntent,
-                                    shareHadithLabel
-                                )
-                            )
+                            context.startActivity(Intent.createChooser(sendIntent, shareHadithLabel))
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )
                 }
 
-                // Books Section Header
                 item {
                     NimazSectionHeader(
                         title = stringResource(R.string.kutub_al_sittah),
@@ -191,7 +185,6 @@ fun HadithCollectionScreen(
                     )
                 }
 
-                // Books Grid
                 item {
                     BooksGrid(
                         books = state.books,
@@ -204,7 +197,6 @@ fun HadithCollectionScreen(
     }
 }
 
-
 @Composable
 private fun HadithOfTheDayCard(
     hadith: Hadith?,
@@ -212,38 +204,28 @@ private fun HadithOfTheDayCard(
     onShareClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    // Fallback values when hadith is null
     val arabicText = hadith?.textArabic ?: stringResource(R.string.hadith_fallback_arabic)
     val translationText = hadith?.textEnglish ?: stringResource(R.string.hadith_fallback_english)
     val source = hadith?.reference ?: stringResource(R.string.hadith_fallback_source)
+    val grade = hadith?.let { hadithGradeDisplay(it.grade) }
+    val isBookmarked = hadith?.isBookmarked == true
 
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
-        )
+        style = NimazCardStyle.ELEVATED,
+        shape = RoundedCornerShape(20.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant
-                        )
-                    )
-                )
-                .padding(20.dp)
-        ) {
-            Column {
-                // Badge
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Box(
                     modifier = Modifier
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color(0xFFEAB308).copy(alpha = 0.2f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .clip(RoundedCornerShape(100))
+                        .background(Color(0xFFEAB308).copy(alpha = 0.16f))
+                        .padding(horizontal = 12.dp, vertical = 5.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -252,65 +234,65 @@ private fun HadithOfTheDayCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = Color(0xFFFACC15),
+                            tint = Color(0xFFCA8A04),
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
                             text = stringResource(R.string.hadith_of_the_day),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFFACC15),
-                            fontWeight = FontWeight.Medium
+                            color = Color(0xFFCA8A04),
+                            fontWeight = FontWeight.SemiBold
                         )
                     }
                 }
+                grade?.let { HadithGradeChip(label = it.label, color = it.color) }
+            }
 
-                Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-                // Arabic text - using HadithArabicText for proper Amiri font rendering
-                HadithArabicText(
-                    text = arabicText,
-                    size = ArabicTextSize.MEDIUM,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-                    modifier = Modifier.fillMaxWidth()
-                )
+            HadithArabicText(
+                text = arabicText,
+                size = ArabicTextSize.MEDIUM,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                modifier = Modifier.fillMaxWidth()
+            )
 
-                Spacer(modifier = Modifier.height(15.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
-                // English translation
+            Text(
+                text = translationText,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = 24.sp
+            )
+
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = translationText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 24.sp
+                    text = source,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Medium
                 )
 
-                Spacer(modifier = Modifier.height(15.dp))
-
-                // Source row
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = source,
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Medium
+                NimazActionPill {
+                    NimazPillActionButton(
+                        icon = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+                        contentDescription = stringResource(R.string.bookmark),
+                        onClick = onBookmarkClick,
+                        active = isBookmarked,
+                        activeColor = Color(0xFFEAB308)
                     )
-
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        HadithActionButton(
-                            icon = Icons.Default.BookmarkBorder,
-                            contentDescription = stringResource(R.string.bookmark),
-                            onClick = onBookmarkClick
-                        )
-                        HadithActionButton(
-                            icon = Icons.Default.Share,
-                            contentDescription = stringResource(R.string.share),
-                            onClick = onShareClick
-                        )
-                    }
+                    NimazPillActionButton(
+                        icon = Icons.Default.Share,
+                        contentDescription = stringResource(R.string.share),
+                        onClick = onShareClick
+                    )
                 }
             }
         }
@@ -318,37 +300,11 @@ private fun HadithOfTheDayCard(
 }
 
 @Composable
-private fun HadithActionButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    contentDescription: String,
-    onClick: () -> Unit = {}
-) {
-    Box(
-        modifier = Modifier
-            .size(36.dp)
-            .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(18.dp)
-        )
-    }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
 private fun BooksGrid(
     books: List<HadithBook>,
     onBookClick: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Use a Column with Rows to create a 2-column grid inside LazyColumn
     val rows = books.chunked(2)
     Column(
         modifier = modifier,
@@ -366,7 +322,6 @@ private fun BooksGrid(
                         modifier = Modifier.weight(1f)
                     )
                 }
-                // Fill remaining space if odd number
                 if (rowBooks.size == 1) {
                     Spacer(modifier = Modifier.weight(1f))
                 }
@@ -375,35 +330,26 @@ private fun BooksGrid(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BookCard(
     book: HadithBook,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    getBookColor(book.id)
     val bookGradient = getBookGradient(book.id)
 
-    Card(
-        onClick = onClick,
+    NimazCard(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        style = NimazCardStyle.FILLED,
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(15.dp)
-        ) {
-            // Book icon
+        Column(modifier = Modifier.padding(15.dp)) {
             Box(
                 modifier = Modifier
                     .size(50.dp)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        brush = Brush.linearGradient(bookGradient)
-                    ),
+                    .background(brush = Brush.linearGradient(bookGradient)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -425,11 +371,15 @@ private fun BookCard(
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            ArabicText(
-                text = book.nameArabic,
-                size = ArabicTextSize.SMALL,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            if (book.authorName.isNotBlank()) {
+                Text(
+                    text = book.authorName,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -442,19 +392,6 @@ private fun BookCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
             )
         }
-    }
-}
-
-@Composable
-private fun getBookColor(bookId: String): Color {
-    return when (bookId.lowercase()) {
-        "bukhari" -> Color(0xFF22C55E)
-        "muslim" -> Color(0xFF3B82F6)
-        "tirmidhi" -> Color(0xFFA855F7)
-        "nasai" -> Color(0xFFF97316)
-        "abudawud" -> Color(0xFFEC4899)
-        "ibnmajah" -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.primary
     }
 }
 

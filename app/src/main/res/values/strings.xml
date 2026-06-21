@@ -735,12 +735,19 @@
     <string name="dua_reader_recommended">Recommended</string>
     <string name="dua_reader_recite_once">Recite %1$d time</string>
     <string name="dua_reader_recite_times">Recite %1$d times</string>
-    <string name="dua_reader_recitation_counter">Recitation Counter</string>
-    <string name="dua_reader_target_format">Target: %1$dx</string>
     <string name="dua_reader_virtue">Virtue of this Dua</string>
     <string name="dua_reader_share">Share</string>
     <string name="dua_reader_done">Done</string>
     <string name="dua_reader_source_label">Source: %1$s</string>
+    <string name="dua_reader_not_found">Dua not found</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Dua Settings</string>
+    <string name="translation_font_size">Translation Size</string>
+    <string name="show_arabic">Show Arabic</string>
+    <string name="show_arabic_subtitle">Arabic script</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_translation">O Allah, I ask You for beneficial knowledge</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Tracker</string>
@@ -1131,6 +1138,22 @@
     <string name="hadith_of_count_format">of %1$d</string>
     <string name="hadith_narrated_by_format">Narrated by %1$s</string>
     <string name="hadith_isnad">Chain of Narration (Isnad)</string>
+    <string name="hadith_reader_not_found">Hadith not found</string>
+    <string name="hadith_copied">Copied to clipboard</string>
+    <string name="hadith_grade_sahih">Sahih</string>
+    <string name="hadith_grade_hasan">Hasan</string>
+    <string name="hadith_grade_daif">Daʿīf</string>
+    <string name="hadith_grade_mawdu">Mawḍūʿ</string>
+    <!-- Hadith Settings Screen -->
+    <string name="hadith_settings">Hadith Settings</string>
+    <string name="hadith_show_grade">Show grade badge</string>
+    <string name="hadith_show_grade_subtitle">Authenticity (Sahih, Hasan…)</string>
+    <string name="hadith_show_chain">Show chain of narration</string>
+    <string name="hadith_show_chain_subtitle">Isnād timeline</string>
+    <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
+    <string name="hadith_settings_preview_translation">Actions are but by intentions.</string>
+    <string name="hadith_chapters_title">Chapters</string>
+    <string name="hadith_chapters_count_format">%1$d chapters</string>
 
     <!-- Monthly Prayer Times Screen -->
     <string name="export_as_pdf">Export as PDF</string>

@@ -9,10 +9,15 @@ import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.repository.HadithRepository
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
+import androidx.compose.ui.text.font.FontFamily
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -40,8 +45,13 @@ data class HadithReaderUiState(
     val isLoading: Boolean = true,
     val error: String? = null,
     val showArabic: Boolean = true,
+    val showTranslation: Boolean = true,
+    val showGrade: Boolean = true,
+    val showChain: Boolean = true,
     val fontSize: Float = 16f,
-    val arabicFontSize: Float = 24f
+    val arabicFontSize: Float = 24f,
+    val arabicFontFamily: FontFamily = AmiriFontFamily,
+    val selectedArabicFontId: String = "amiri"
 )
 
 data class HadithSearchUiState(
@@ -79,7 +89,8 @@ sealed interface HadithEvent {
 
 @HiltViewModel
 class HadithViewModel @Inject constructor(
-    private val hadithRepository: HadithRepository
+    private val hadithRepository: HadithRepository,
+    private val preferencesDataStore: PreferencesDataStore
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(HadithCollectionUiState())
@@ -101,6 +112,7 @@ class HadithViewModel @Inject constructor(
         loadAllBooks()
         loadBookmarks()
         loadHadithOfTheDay()
+        observeHadithSettings()
     }
 
     fun onEvent(event: HadithEvent) {
@@ -310,4 +322,51 @@ class HadithViewModel @Inject constructor(
     }
 
     fun isHadithBookmarked(hadithId: String) = hadithRepository.isHadithBookmarked(hadithId)
+
+    /**
+     * Reactively mirrors the persisted hadith reading preferences into the reader
+     * state, exactly as the Quran/Dua readers observe their own prefs.
+     */
+    private fun observeHadithSettings() {
+        viewModelScope.launch {
+            val displayFlow = combine(
+                preferencesDataStore.hadithArabicFont,
+                preferencesDataStore.hadithArabicFontSize,
+                preferencesDataStore.hadithTranslationFontSize
+            ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
+
+            val toggleFlow = combine(
+                preferencesDataStore.hadithShowArabic,
+                preferencesDataStore.hadithShowTranslation,
+                preferencesDataStore.hadithShowGrade,
+                preferencesDataStore.hadithShowChain
+            ) { showArabic, showTranslation, showGrade, showChain ->
+                HadithToggles(showArabic, showTranslation, showGrade, showChain)
+            }
+
+            combine(displayFlow, toggleFlow) { display, toggles -> display to toggles }
+                .collect { (display, toggles) ->
+                    val (fontId, arabicSize, transSize) = display
+                    _readerState.update {
+                        it.copy(
+                            selectedArabicFontId = fontId,
+                            arabicFontSize = arabicSize,
+                            fontSize = transSize,
+                            showArabic = toggles.showArabic,
+                            showTranslation = toggles.showTranslation,
+                            showGrade = toggles.showGrade,
+                            showChain = toggles.showChain,
+                            arabicFontFamily = QuranArabicFont.fromId(fontId).fontFamily
+                        )
+                    }
+                }
+        }
+    }
+
+    private data class HadithToggles(
+        val showArabic: Boolean,
+        val showTranslation: Boolean,
+        val showGrade: Boolean,
+        val showChain: Boolean
+    )
 }

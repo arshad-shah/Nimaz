@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,7 +27,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -44,6 +44,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.screens.tasbih.BeadDesigns
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
@@ -61,16 +62,14 @@ fun BeadDesignPickerSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
-        Column(modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp)) {
-            Text(
-                text = stringResource(R.string.tasbih_bead_design),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(start = 4.dp, bottom = 12.dp)
-            )
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        title = stringResource(R.string.tasbih_bead_design),
+        scrollable = false,
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+        Column {
             LazyVerticalGrid(
                 columns = GridCells.Fixed(3),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -152,7 +151,11 @@ fun CurrentTasbihSheet(
     onDismiss: () -> Unit,
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    ModalBottomSheet(onDismissRequest = onDismiss, sheetState = sheetState) {
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        contentPadding = PaddingValues(0.dp)
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

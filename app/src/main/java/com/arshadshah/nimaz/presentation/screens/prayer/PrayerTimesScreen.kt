@@ -37,7 +37,6 @@ import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -58,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -217,9 +217,11 @@ fun PrayerTimesScreen(
     if (showMonthSheet) {
         val sheetState = rememberModalBottomSheetState()
         var displayedMonth by remember { mutableStateOf(YearMonth.from(state.selectedDate)) }
-        ModalBottomSheet(
+        NimazBottomSheet(
             onDismissRequest = { showMonthSheet = false },
             sheetState = sheetState,
+            scrollable = false,
+            contentPadding = PaddingValues(0.dp),
         ) {
             NimazCalendar(
                 displayedMonth = displayedMonth,

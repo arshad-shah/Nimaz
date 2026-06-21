@@ -58,9 +58,11 @@ import com.arshadshah.nimaz.presentation.screens.bookmarks.BookmarksScreen
 import com.arshadshah.nimaz.presentation.screens.calendar.IslamicCalendarScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaCategoryScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuaReaderScreen
+import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
@@ -458,7 +460,8 @@ fun NavGraph(
                 HadithReaderScreen(
                     bookId = args.bookId,
                     chapterId = args.chapterId,
-                    onNavigateBack = { navController.popBackStack() }
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
                 )
             }
 
@@ -467,6 +470,13 @@ fun NavGraph(
                 HadithReaderScreen(
                     bookId = "",
                     chapterId = args.hadithId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.HadithSettings) }
+                )
+            }
+
+            composable<Route.HadithSettings> {
+                HadithSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
@@ -529,6 +539,13 @@ fun NavGraph(
                 val args = backStackEntry.toRoute<Route.DuaReader>()
                 DuaReaderScreen(
                     duaId = args.duaId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Route.DuaSettings) }
+                )
+            }
+
+            composable<Route.DuaSettings> {
+                DuaSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

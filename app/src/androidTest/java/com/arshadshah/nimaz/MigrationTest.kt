@@ -63,4 +63,17 @@ class MigrationTest {
         cursor.close()
         assertThat(columns).contains("category")
     }
+
+    @Test
+    fun migrate16To17_addsNarratorChainColumn() {
+        helper.createDatabase(dbName, 16).close()
+        val db = helper.runMigrationsAndValidate(
+            dbName, 17, true, NimazDatabase.MIGRATION_16_17
+        )
+        val cursor = db.query("PRAGMA table_info(`hadiths`)")
+        val nameIndex = cursor.getColumnIndex("name")
+        val columns = generateSequence { if (cursor.moveToNext()) cursor.getString(nameIndex) else null }.toList()
+        cursor.close()
+        assertThat(columns).contains("narrator_chain")
+    }
 }

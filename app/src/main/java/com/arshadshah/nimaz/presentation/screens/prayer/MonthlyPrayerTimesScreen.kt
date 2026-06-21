@@ -38,7 +38,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -70,6 +69,7 @@ import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
@@ -183,9 +183,11 @@ fun MonthlyPrayerTimesScreen(
 
     if (showExportSheet) {
         val sheetState = rememberModalBottomSheetState()
-        ModalBottomSheet(
+        NimazBottomSheet(
             onDismissRequest = { showExportSheet = false },
             sheetState = sheetState,
+            scrollable = false,
+            contentPadding = PaddingValues(0.dp),
         ) {
             ExportSheet(
                 monthLabel = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),

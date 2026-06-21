@@ -40,7 +40,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -65,6 +64,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
@@ -199,18 +199,14 @@ fun KhatamListScreen(
 
     // Bottom sheet for khatam actions
     selectedKhatamForAction?.let { khatam ->
-        ModalBottomSheet(
+        NimazBottomSheet(
             onDismissRequest = { selectedKhatamForAction = null },
-            sheetState = rememberModalBottomSheetState()
+            sheetState = rememberModalBottomSheetState(),
+            title = khatam.name,
+            scrollable = false,
+            contentPadding = PaddingValues(0.dp)
         ) {
-            Column(modifier = Modifier.padding(bottom = 24.dp)) {
-                Text(
-                    text = khatam.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
-                )
-
+            Column {
                 if (!khatam.isActive && khatam.status != KhatamStatus.COMPLETED) {
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.khatam_set_active)) },

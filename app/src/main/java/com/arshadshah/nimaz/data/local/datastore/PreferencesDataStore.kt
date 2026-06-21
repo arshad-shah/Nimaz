@@ -62,6 +62,11 @@ class PreferencesDataStore @Inject constructor(
         // Dua content (data-driven; bumped when duas.json content changes)
         val DUA_CONTENT_VERSION = intPreferencesKey("dua_content_version")
 
+        // Hadith backfill (data-driven; bumped when hadith_fills.json changes).
+        // Fills in chains of narration (text_arabic/text_english) that shipped
+        // empty in the prepopulated DB, for users who already have the old data.
+        val HADITH_BACKFILL_VERSION = intPreferencesKey("hadith_backfill_version")
+
         // Qaida content (data-driven; bumped when qaida_content.json changes)
         val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
 
@@ -116,6 +121,23 @@ class PreferencesDataStore @Inject constructor(
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
+
+        // Dua Settings
+        val DUA_ARABIC_FONT = stringPreferencesKey("dua_arabic_font")
+        val DUA_ARABIC_FONT_SIZE = floatPreferencesKey("dua_arabic_font_size")
+        val DUA_TRANSLATION_FONT_SIZE = floatPreferencesKey("dua_translation_font_size")
+        val DUA_SHOW_ARABIC = booleanPreferencesKey("dua_show_arabic")
+        val DUA_SHOW_TRANSLITERATION = booleanPreferencesKey("dua_show_transliteration")
+        val DUA_SHOW_TRANSLATION = booleanPreferencesKey("dua_show_translation")
+
+        // Hadith Settings
+        val HADITH_ARABIC_FONT = stringPreferencesKey("hadith_arabic_font")
+        val HADITH_ARABIC_FONT_SIZE = floatPreferencesKey("hadith_arabic_font_size")
+        val HADITH_TRANSLATION_FONT_SIZE = floatPreferencesKey("hadith_translation_font_size")
+        val HADITH_SHOW_ARABIC = booleanPreferencesKey("hadith_show_arabic")
+        val HADITH_SHOW_TRANSLATION = booleanPreferencesKey("hadith_show_translation")
+        val HADITH_SHOW_GRADE = booleanPreferencesKey("hadith_show_grade")
+        val HADITH_SHOW_CHAIN = booleanPreferencesKey("hadith_show_chain")
 
         // Tasbih Settings
         val TASBIH_VIBRATION_ENABLED = booleanPreferencesKey("tasbih_vibration_enabled")
@@ -240,6 +262,17 @@ class PreferencesDataStore @Inject constructor(
     suspend fun setHelpContentVersion(version: Int) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HELP_CONTENT_VERSION] = version
+        }
+    }
+
+    // Hadith backfill version (0 = never applied)
+    val hadithBackfillVersion: Flow<Int> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_BACKFILL_VERSION] ?: 0
+    }
+
+    suspend fun setHadithBackfillVersion(version: Int) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.HADITH_BACKFILL_VERSION] = version
         }
     }
 
@@ -636,6 +669,112 @@ class PreferencesDataStore @Inject constructor(
 
     suspend fun setShowTajweed(enabled: Boolean) {
         dataStore.edit { it[PreferencesKeys.SHOW_TAJWEED] = enabled }
+    }
+
+    // Dua Settings
+    val duaArabicFont: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_ARABIC_FONT] ?: "amiri"
+    }
+
+    suspend fun setDuaArabicFont(fontId: String) {
+        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT] = fontId }
+    }
+
+    val duaArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_ARABIC_FONT_SIZE] ?: 28f
+    }
+
+    suspend fun setDuaArabicFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT_SIZE] = size }
+    }
+
+    val duaTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] ?: 16f
+    }
+
+    suspend fun setDuaTranslationFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] = size }
+    }
+
+    val duaShowArabic: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_ARABIC] ?: true
+    }
+
+    suspend fun setDuaShowArabic(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_ARABIC] = show }
+    }
+
+    val duaShowTransliteration: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_TRANSLITERATION] ?: true
+    }
+
+    suspend fun setDuaShowTransliteration(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLITERATION] = show }
+    }
+
+    val duaShowTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.DUA_SHOW_TRANSLATION] ?: true
+    }
+
+    suspend fun setDuaShowTranslation(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLATION] = show }
+    }
+
+    // Hadith Settings
+    val hadithArabicFont: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_ARABIC_FONT] ?: "amiri"
+    }
+
+    suspend fun setHadithArabicFont(fontId: String) {
+        dataStore.edit { it[PreferencesKeys.HADITH_ARABIC_FONT] = fontId }
+    }
+
+    val hadithArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_ARABIC_FONT_SIZE] ?: 24f
+    }
+
+    suspend fun setHadithArabicFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.HADITH_ARABIC_FONT_SIZE] = size }
+    }
+
+    val hadithTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE] ?: 16f
+    }
+
+    suspend fun setHadithTranslationFontSize(size: Float) {
+        dataStore.edit { it[PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE] = size }
+    }
+
+    val hadithShowArabic: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_SHOW_ARABIC] ?: true
+    }
+
+    suspend fun setHadithShowArabic(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_ARABIC] = show }
+    }
+
+    val hadithShowTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_SHOW_TRANSLATION] ?: true
+    }
+
+    suspend fun setHadithShowTranslation(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_TRANSLATION] = show }
+    }
+
+    val hadithShowGrade: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_SHOW_GRADE] ?: true
+    }
+
+    suspend fun setHadithShowGrade(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_GRADE] = show }
+    }
+
+    val hadithShowChain: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.HADITH_SHOW_CHAIN] ?: true
+    }
+
+    suspend fun setHadithShowChain(show: Boolean) {
+        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_CHAIN] = show }
     }
 
     // Tasbih Settings

@@ -126,43 +126,6 @@ fun StatusBadge(
 }
 
 /**
- * Hadith grade badge.
- */
-@Composable
-fun HadithGradeBadge(
-    grade: String,
-    modifier: Modifier = Modifier,
-    size: NimazBadgeSize = NimazBadgeSize.SMALL
-) {
-    val badgeType = when (grade.lowercase()) {
-        "sahih" -> BadgeType.Sahih
-        "hasan" -> BadgeType.Hasan
-        "daif", "da'if" -> BadgeType.Daif
-        "mawdu", "mawdu'" -> BadgeType.Mawdu
-        else -> BadgeType.Custom(grade, Color.Gray)
-    }
-
-    StatusBadge(
-        type = badgeType,
-        modifier = modifier,
-        size = size
-    )
-}
-
-/**
- * Get hadith grade badge colors as a Pair (background, text).
- */
-fun getHadithGradeBadgeColors(grade: String): Pair<Color, Color> {
-    return when (grade.lowercase()) {
-        "sahih" -> Pair(BadgeType.Sahih.color, Color.White)
-        "hasan" -> Pair(BadgeType.Hasan.color, Color.White)
-        "daif", "da'if" -> Pair(BadgeType.Daif.color, Color.White)
-        "mawdu", "mawdu'" -> Pair(BadgeType.Mawdu.color, Color.White)
-        else -> Pair(Color.Gray, Color.White)
-    }
-}
-
-/**
  * Surah number badge for Quran.
  */
 @Composable
@@ -237,22 +200,6 @@ private fun PrayerStatusBadgePreview() {
             StatusBadge(type = BadgeType.Pending)
             StatusBadge(type = BadgeType.Qada)
             StatusBadge(type = BadgeType.Jamaah)
-        }
-    }
-}
-
-@Preview(showBackground = true, name = "Hadith Grade Badge")
-@Composable
-private fun HadithGradeBadgePreview() {
-    NimazTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            HadithGradeBadge(grade = "Sahih")
-            HadithGradeBadge(grade = "Hasan")
-            HadithGradeBadge(grade = "Daif")
-            HadithGradeBadge(grade = "Unknown")
         }
     }
 }

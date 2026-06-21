@@ -3,14 +3,11 @@ package com.arshadshah.nimaz.presentation.components.organisms
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SheetState
@@ -18,10 +15,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -30,14 +24,17 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetHeader
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetPreviewCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
  * Bottom sheet showing translation and transliteration for an ayah.
  *
- * Opened from the "Translation" button in [AyahActionPopup].
- * Contains only display content — no action buttons.
+ * Opened from the "Translation" button in [AyahActionPopup]. Display-only — no
+ * action buttons. Built on the shared [NimazBottomSheet] kit.
  *
  * @param ayah The ayah to display
  * @param surahName Optional surah name
@@ -60,7 +57,8 @@ fun AyahTranslationBottomSheet(
     NimazBottomSheet(
         onDismissRequest = onDismissRequest,
         sheetState = sheetState,
-        modifier = modifier
+        modifier = modifier,
+        contentPadding = PaddingValues(0.dp)
     ) {
         AyahTranslationContent(
             ayah = ayah,
@@ -79,129 +77,64 @@ fun AyahTranslationContent(
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 16.dp)
-    ) {
-        // Header
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = surahName ?: "Surah ${ayah.surahNumber}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+    Column(modifier = modifier.fillMaxWidth()) {
+        NimazSheetHeader(
+            title = surahName ?: "Surah ${ayah.surahNumber}",
+            subtitle = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
+            badge = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber)
+        )
+
+        Column(modifier = Modifier.padding(horizontal = 20.dp, vertical = 4.dp)) {
+            // Arabic text preview
+            NimazSheetPreviewCard {
+                ArabicText(
+                    text = ayah.textArabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
             }
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
-            ) {
-                Text(
-                    text = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-                )
+
+            // Sajda indicator
+            if (ayah.sajdaType != null) {
+                Spacer(modifier = Modifier.height(12.dp))
+                SajdaIndicator(sajdaType = ayah.sajdaType, withGlyph = true)
             }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Arabic text preview
-        Surface(
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            ArabicText(
-                text = ayah.textArabic,
-                size = ArabicTextSize.MEDIUM,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(16.dp)
-            )
-        }
-
-        // Sajda indicator
-        if (ayah.sajdaType != null) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                color = Color(0xFFDC2626).copy(alpha = 0.15f)
-            ) {
-                Text(
-                    text = if (ayah.sajdaType == SajdaType.OBLIGATORY)
-                        "۩ Sajdah (Wajib)"
-                    else
-                        "۩ Sajdah (Recommended)",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFDC2626),
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
+            // Translation
+            if (showTranslation && !ayah.translation.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                NimazSheetSectionLabel(text = stringResource(R.string.translation))
+                NimazSheetPreviewCard {
+                    Text(
+                        text = ayah.translation,
+                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
 
-        // Translation
-        if (showTranslation && !ayah.translation.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.translation),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = ayah.translation,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(16.dp)
+            // Transliteration
+            if (showTransliteration && !ayah.transliteration.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp))
+                NimazSheetSectionLabel(
+                    text = stringResource(R.string.transliteration),
+                    color = MaterialTheme.colorScheme.tertiary
                 )
+                NimazSheetPreviewCard(
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f)
+                ) {
+                    Text(
+                        text = ayah.transliteration,
+                        style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
+                        color = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                }
             }
-        }
 
-        // Transliteration
-        if (showTransliteration && !ayah.transliteration.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = stringResource(R.string.transliteration),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.padding(bottom = 6.dp)
-            )
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.35f),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(
-                    text = ayah.transliteration,
-                    style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp),
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 

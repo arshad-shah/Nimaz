@@ -555,12 +555,19 @@
     <string name="dua_reader_recommended">Tavsiye Edilen</string>
     <string name="dua_reader_recite_once">%1$d kez oku</string>
     <string name="dua_reader_recite_times">%1$d kez oku</string>
-    <string name="dua_reader_recitation_counter">Okuma Sayacı</string>
-    <string name="dua_reader_target_format">Hedef: %1$dx</string>
     <string name="dua_reader_virtue">Bu Duanın Fazileti</string>
     <string name="dua_reader_share">Paylaş</string>
     <string name="dua_reader_done">Tamam</string>
     <string name="dua_reader_source_label">Kaynak: %1$s</string>
+    <string name="dua_reader_not_found">Dua bulunamadı</string>
+    <!-- Dua Settings Screen -->
+    <string name="dua_settings">Dua Ayarları</string>
+    <string name="translation_font_size">Çeviri Boyutu</string>
+    <string name="show_arabic">Arapçayı Göster</string>
+    <string name="show_arabic_subtitle">Arap yazısı</string>
+    <string name="dua_settings_preview_arabic">اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعِلْمَ النَّافِعَ</string>
+    <string name="dua_settings_preview_transliteration">"Allahumma inni as'aluka al-'ilm an-nafi'"</string>
+    <string name="dua_settings_preview_translation">"Allah'ım, Senden faydalı ilim isterim"</string>
 
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Takip</string>
@@ -1012,6 +1019,21 @@
     <string name="hadith_of_count_format">/ %1$d</string>
     <string name="hadith_narrated_by_format">%1$s tarafından rivayet edilmiştir</string>
     <string name="hadith_isnad">Rivayet Zinciri (İsnad)</string>
+    <string name="hadith_reader_not_found">Hadis bulunamadı</string>
+    <string name="hadith_copied">Panoya kopyalandı</string>
+    <string name="hadith_grade_sahih">Sahih</string>
+    <string name="hadith_grade_hasan">Hasan</string>
+    <string name="hadith_grade_daif">Daʿīf</string>
+    <string name="hadith_grade_mawdu">Mawḍūʿ</string>
+    <string name="hadith_settings">Hadis Ayarları</string>
+    <string name="hadith_show_grade">Derece rozetini göster</string>
+    <string name="hadith_show_grade_subtitle">Sıhhat (Sahih, Hasan…)</string>
+    <string name="hadith_show_chain">Rivayet zincirini göster</string>
+    <string name="hadith_show_chain_subtitle">İsnad zaman çizelgesi</string>
+    <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
+    <string name="hadith_settings_preview_translation">Ameller niyetlere göredir.</string>
+    <string name="hadith_chapters_title">Bölümler</string>
+    <string name="hadith_chapters_count_format">%1$d bölüm</string>
     <string name="export_as_pdf">PDF Olarak Dışa Aktar</string>
     <string name="monthly_this_month">Bu ay</string>
     <string name="ramadan_year_format">Ramazan %1$d</string>
