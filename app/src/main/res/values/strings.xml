@@ -1142,6 +1142,25 @@
     <!-- Qaida -->
     <string name="qaida_lesson_progress">Lesson %1$d of %2$d</string>
 
+    <!-- Common actions / content descriptions -->
+    <string name="save">Save</string>
+    <string name="pause">Pause</string>
+    <string name="sajdah">Sajdah</string>
+    <string name="cd_mark_as_read">Mark as read</string>
+    <string name="cd_mark_as_unread">Mark as unread</string>
+
+    <!-- Tafseer page content -->
+    <string name="tafseer_highlight">Highlight</string>
+    <string name="tafseer_highlight_notes">Highlight Notes</string>
+    <string name="tafseer_no_notes">No notes yet. Tap a highlight to add a note.</string>
+    <string name="tafseer_read_in_format">Read in %1$s</string>
+    <string name="tafseer_no_commentary_format">No %1$s commentary for this ayah</string>
+    <string name="tafseer_page_format">Page %1$d of %2$d</string>
+    <string name="tafseer_add_note">Add a note…</string>
+    <string name="tafseer_edit_note">Edit note</string>
+    <string name="cd_disable_highlighting">Disable highlighting</string>
+    <string name="cd_enable_highlighting">Enable highlighting</string>
+
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
     <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>

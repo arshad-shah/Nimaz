@@ -382,7 +382,7 @@ private fun TafseerNavBar(
                     color = MaterialTheme.colorScheme.primaryContainer,
                 ) {
                     Text(
-                        text = "Ayah $ayahNumber / $totalAyahs",
+                        text = stringResource(R.string.audio_position_ayah_format, ayahNumber, totalAyahs),
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -439,7 +439,7 @@ private fun TafseerNavBar(
                     }
 
                     Text(
-                        text = "Page ${currentContentPage + 1} of $totalContentPages",
+                        text = stringResource(R.string.tafseer_page_format, currentContentPage + 1, totalContentPages),
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.Medium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -500,7 +500,7 @@ private fun HighlightDetailSheetContent(
             )
             Spacer(modifier = Modifier.width(8.dp))
             Text(
-                text = "Highlight",
+                text = stringResource(R.string.tafseer_highlight),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
@@ -529,7 +529,7 @@ private fun HighlightDetailSheetContent(
         OutlinedTextField(
             value = noteText,
             onValueChange = { noteText = it },
-            label = { Text(if (highlight.note.isNullOrBlank()) "Add a note..." else "Edit note") },
+            label = { Text(if (highlight.note.isNullOrBlank()) stringResource(R.string.tafseer_add_note) else stringResource(R.string.tafseer_edit_note)) },
             modifier = Modifier.fillMaxWidth(),
             minLines = 2,
             maxLines = 5
@@ -550,17 +550,17 @@ private fun HighlightDetailSheetContent(
                     modifier = Modifier.size(18.dp)
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Delete", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
             }
 
             Row {
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
                 TextButton(
                     onClick = { onNoteSaved(noteText) }
                 ) {
-                    Text("Save")
+                    Text(stringResource(R.string.save))
                 }
             }
         }
@@ -580,7 +580,7 @@ private fun HighlightNotesListContent(
             .padding(bottom = 24.dp)
     ) {
         Text(
-            text = "Highlight Notes",
+            text = stringResource(R.string.tafseer_highlight_notes),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface
@@ -590,7 +590,7 @@ private fun HighlightNotesListContent(
 
         if (highlights.isEmpty()) {
             Text(
-                text = "No notes yet. Tap a highlight to add a note.",
+                text = stringResource(R.string.tafseer_no_notes),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 16.dp)
@@ -666,7 +666,7 @@ private fun TafseerEmptyState(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "No ${selectedSource.displayName} commentary for this ayah",
+            text = stringResource(R.string.tafseer_no_commentary_format, selectedSource.displayName),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -684,7 +684,7 @@ private fun TafseerEmptyState(
         )
         if (alternate != null) {
             TextButton(onClick = { onSourceSwitch(alternate) }) {
-                Text("Read in ${alternate.displayName}")
+                Text(stringResource(R.string.tafseer_read_in_format, alternate.displayName))
             }
         }
     }
@@ -716,7 +716,7 @@ private fun TafseerHighlightControls(
             IconButton(onClick = onToggleHighlightMode, modifier = Modifier.size(40.dp)) {
                 Icon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = if (isHighlightMode) "Disable highlighting" else "Enable highlighting",
+                    contentDescription = if (isHighlightMode) stringResource(R.string.cd_disable_highlighting) else stringResource(R.string.cd_enable_highlighting),
                     tint = if (isHighlightMode) MaterialTheme.colorScheme.primary
                     else MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(22.dp)
