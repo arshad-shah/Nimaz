@@ -2,9 +2,13 @@ package com.arshadshah.nimaz.widget.core
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceModifier
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.LocalContext
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
@@ -17,6 +21,9 @@ import androidx.glance.layout.Column
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
+import androidx.glance.layout.padding
+import androidx.glance.layout.size
+import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
@@ -78,4 +85,82 @@ fun WidgetLoadingBox(
             )
         }
     }
+}
+
+/**
+ * The standard solid, rounded, tappable widget surface. Pass a Column/Row that
+ * calls `fillMaxSize()` so `defaultWeight()` distributes inside it.
+ */
+@Composable
+fun WidgetCard(
+    background: ColorProvider,
+    onClick: Action,
+    modifier: GlanceModifier = GlanceModifier,
+    cornerRadius: Dp = 16.dp,
+    padding: Dp = 12.dp,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = GlanceModifier
+            .fillMaxSize()
+            .background(background)
+            .cornerRadius(cornerRadius)
+            .clickable(onClick)
+            .padding(padding)
+            .then(modifier),
+        content = content,
+    )
+}
+
+/** The single place widget icons are drawn — a tinted vector drawable. */
+@Composable
+fun WidgetIcon(
+    resId: Int,
+    tint: ColorProvider,
+    size: Dp = 16.dp,
+    contentDescription: String? = null,
+) {
+    Image(
+        provider = ImageProvider(resId),
+        contentDescription = contentDescription,
+        modifier = GlanceModifier.size(size),
+        colorFilter = ColorFilter.tint(tint),
+    )
+}
+
+/** Small medium-weight caption used for eyebrow labels. */
+@Composable
+fun WidgetLabel(text: String, color: ColorProvider, fontSize: TextUnit = 11.sp) {
+    Text(
+        text = text,
+        style = TextStyle(color = color, fontSize = fontSize, fontWeight = FontWeight.Medium),
+    )
+}
+
+/** Rounded badge container for countdowns and the "next prayer" highlight. */
+@Composable
+fun WidgetPill(
+    container: ColorProvider,
+    modifier: GlanceModifier = GlanceModifier,
+    cornerRadius: Dp = 8.dp,
+    content: @Composable () -> Unit,
+) {
+    Box(
+        modifier = GlanceModifier
+            .background(container)
+            .cornerRadius(cornerRadius)
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .then(modifier),
+        content = content,
+    )
+}
+
+/** Maps a prayer name to its celestial drawable. Defaults to the zenith sun. */
+fun prayerIconRes(prayerName: String): Int = when (prayerName.trim().lowercase()) {
+    "fajr" -> R.drawable.ic_widget_fajr
+    "dhuhr", "zuhr" -> R.drawable.ic_widget_dhuhr
+    "asr" -> R.drawable.ic_widget_asr
+    "maghrib" -> R.drawable.ic_widget_maghrib
+    "isha" -> R.drawable.ic_widget_isha
+    else -> R.drawable.ic_widget_dhuhr
 }
