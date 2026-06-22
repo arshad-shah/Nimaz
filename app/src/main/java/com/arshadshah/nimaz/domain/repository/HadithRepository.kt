@@ -38,6 +38,7 @@ interface HadithRepository {
     suspend fun getBookmarkByHadithId(hadithId: String): HadithBookmark?
     fun isHadithBookmarked(hadithId: String): Flow<Boolean>
     suspend fun toggleBookmark(hadithId: String, bookId: String, hadithNumber: Int)
+    suspend fun insertBookmark(bookmark: HadithBookmark)
     suspend fun updateBookmark(bookmark: HadithBookmark)
     suspend fun deleteBookmark(hadithId: String)
 

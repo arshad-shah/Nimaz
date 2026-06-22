@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,22 +25,27 @@ fun TafseerBookFrame(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val primaryLight = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    // Gold-forward "illuminated" edge over a faint warm tint (theme-safe: the
+    // tint is derived from the gold accent so it reads warm in light and dark).
+    val gold = MaterialTheme.colorScheme.tertiary
+    val goldSoft = gold.copy(alpha = 0.55f)
+    val primaryLight = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+    val warmTint = gold.copy(alpha = 0.05f)
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
+            .clip(RoundedCornerShape(16.dp))
+            .background(warmTint)
             .border(
                 width = 2.dp,
-                color = primaryColor,
-                shape = RoundedCornerShape(12.dp)
+                color = goldSoft,
+                shape = RoundedCornerShape(16.dp)
             )
             .padding(3.dp)
             .border(
                 width = 1.dp,
                 color = primaryLight,
-                shape = RoundedCornerShape(10.dp)
+                shape = RoundedCornerShape(13.dp)
             )
             .padding(2.dp)
     ) {

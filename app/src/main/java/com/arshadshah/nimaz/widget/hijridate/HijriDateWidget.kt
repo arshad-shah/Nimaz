@@ -31,6 +31,11 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import androidx.glance.layout.Row
+import androidx.glance.layout.width
+import com.arshadshah.nimaz.widget.core.WidgetCard
+import com.arshadshah.nimaz.widget.core.WidgetIcon
+import com.arshadshah.nimaz.widget.core.WidgetLabel
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
@@ -94,51 +99,37 @@ private fun HijriDateSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
-    Column(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
-            .padding(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalAlignment = Alignment.CenterVertically
+    WidgetCard(
+        background = backgroundColor,
+        onClick = actionStartActivity<MainActivity>(),
+        padding = 14.dp,
     ) {
-        Text(
-            text = data.gregorianDayOfWeek.ifEmpty { "—" },
-            style = TextStyle(
-                color = textSecondary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
+        Column(
+            modifier = GlanceModifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Spacer(modifier = GlanceModifier.defaultWeight())
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                WidgetIcon(resId = R.drawable.ic_widget_crescent, tint = primaryColor, size = 13.dp)
+                Spacer(modifier = GlanceModifier.width(5.dp))
+                WidgetLabel(text = data.gregorianDayOfWeek.ifEmpty { "—" }, color = textSecondary)
+            }
+            Spacer(modifier = GlanceModifier.height(6.dp))
+            Text(
+                text = data.hijriDay.toString(),
+                style = TextStyle(color = primaryColor, fontSize = 52.sp, fontWeight = FontWeight.Bold),
             )
-        )
-
-        Spacer(modifier = GlanceModifier.defaultWeight())
-
-        Text(
-            text = data.hijriDay.toString(),
-            style = TextStyle(
-                color = primaryColor,
-                fontSize = 42.sp,
-                fontWeight = FontWeight.Bold
+            Text(
+                text = "${data.hijriMonth.ifEmpty { "—" }} ${data.hijriYear}",
+                style = TextStyle(color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Medium),
             )
-        )
-
-        Text(
-            text = "${data.hijriMonth.ifEmpty { "—" }} ${data.hijriYear}",
-            style = TextStyle(
-                color = textColor,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
+            Spacer(modifier = GlanceModifier.height(4.dp))
+            Text(
+                text = data.gregorianDate.ifEmpty { "—" },
+                style = TextStyle(color = textSecondary, fontSize = 11.sp),
             )
-        )
-
-        Spacer(modifier = GlanceModifier.defaultWeight())
-
-        Text(
-            text = data.gregorianDate.ifEmpty { "—" },
-            style = TextStyle(color = textSecondary, fontSize = 11.sp)
-        )
+            Spacer(modifier = GlanceModifier.defaultWeight())
+        }
     }
 }
 

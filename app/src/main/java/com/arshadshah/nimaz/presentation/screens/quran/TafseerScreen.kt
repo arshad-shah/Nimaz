@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.screens.quran
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -9,7 +10,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -68,27 +68,34 @@ fun TafseerScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = state.surahName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column {
+                        Text(
+                            text = state.surahName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        val ayahNumber = state.ayahs.getOrNull(state.currentAyahIndex)?.ayahNumber
+                        if (ayahNumber != null && state.ayahs.isNotEmpty()) {
+                            Text(
+                                text = stringResource(
+                                    R.string.audio_position_ayah_format,
+                                    ayahNumber,
+                                    state.ayahs.size
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = stringResource(R.string.cd_export_annotations)
                         )
                     }
                 },
@@ -141,7 +148,6 @@ fun TafseerScreen(
                         ayah = ayah,
                         tafseer = if (isCurrentPage) state.currentTafseer else null,
                         highlights = if (isCurrentPage) state.highlights else emptyList(),
-                        totalAyahs = state.ayahs.size,
                         selectedSource = state.selectedSource,
                         availableSources = if (isCurrentPage) state.availableSources else emptySet(),
                         onSourceSwitch = { source ->
@@ -155,7 +161,8 @@ fun TafseerScreen(
                         },
                         onHighlightNoteUpdated = { id, note ->
                             viewModel.onEvent(TafseerEvent.UpdateHighlightNote(id, note))
-                        }
+                        },
+                        onShare = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }
                     )
                 }
             } else {

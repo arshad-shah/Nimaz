@@ -59,6 +59,7 @@
     <string name="delete">Delete</string>
     <string name="search">Search</string>
     <string name="location">Location</string>
+    <string name="location_set_prompt">Set location</string>
     <string name="settings">Settings</string>
     <string name="notifications">Notifications</string>
     <string name="appearance">Appearance</string>
@@ -544,6 +545,9 @@
     <string name="daily_adhkar">Daily Adhkar</string>
     <string name="situational_duas">Situational Duas</string>
     <string name="duas_count_format">%d duas</string>
+    <string name="all_categories_az">All Categories (A–Z)</string>
+    <string name="sort_categories_alphabetically">Sort categories alphabetically</string>
+    <string name="sort_categories_default">Switch to default order</string>
 
     <!-- Bookmarks Screen -->
     <string name="bookmarks_title">Bookmarks</string>
@@ -555,6 +559,12 @@
     <string name="quran_type">Quran</string>
     <string name="hadith_type">Hadith</string>
     <string name="dua_type">Dua</string>
+    <string name="bookmarks_count">%1$d saved</string>
+    <string name="bookmark_removed">Bookmark removed</string>
+    <string name="undo">Undo</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note_hint">Add a note…</string>
+    <string name="cd_more_options">More options</string>
 
     <!-- Islamic Calendar Screen -->
     <string name="islamic_calendar">Islamic Calendar</string>
@@ -931,6 +941,7 @@
     <string name="cd_previous_page">Previous page</string>
     <string name="cd_preview">Preview</string>
     <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
     <string name="cd_notes">Notes</string>
     <string name="cd_next_page">Next page</string>
     <string name="cd_new_calculation">New Calculation</string>
@@ -1188,6 +1199,9 @@
     <string name="tafseer_read_in_format">Read in %1$s</string>
     <string name="tafseer_no_commentary_format">No %1$s commentary for this ayah</string>
     <string name="tafseer_page_format">Page %1$d of %2$d</string>
+    <string name="tafseer_tab_surahs">Surahs</string>
+    <string name="tafseer_tab_notes">My notes</string>
+    <string name="tafseer_note_location">%1$s · Ayah %2$d</string>
     <string name="tafseer_add_note">Add a note…</string>
     <string name="tafseer_edit_note">Edit note</string>
     <string name="cd_disable_highlighting">Disable highlighting</string>

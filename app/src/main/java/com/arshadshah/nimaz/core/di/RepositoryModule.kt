@@ -55,6 +55,10 @@ import com.arshadshah.nimaz.domain.usecase.CompleteKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.CreateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteQuranBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertQuranBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateDuaBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.GetActiveKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUlHusnaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUnNabiUseCase
@@ -64,6 +68,7 @@ import com.arshadshah.nimaz.domain.usecase.GetAsmaUnNabiByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
 import com.arshadshah.nimaz.domain.usecase.GetCourseProgressUseCase
@@ -217,6 +222,7 @@ import com.arshadshah.nimaz.domain.usecase.UpdatePrayerStatusUseCase
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTafseerNotesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.AddHighlightUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateHighlightUseCase
@@ -403,6 +409,7 @@ object UseCaseModule {
             getSurahList = GetSurahListUseCase(repository),
             getSurahByNumber = GetSurahByNumberUseCase(repository),
             getAyahsBySurah = GetAyahsBySurahUseCase(repository),
+            getAyahById = GetAyahByIdUseCase(repository),
             getSurahWithAyahs = GetSurahWithAyahsUseCase(repository),
             getAyahsByJuz = GetAyahsByJuzUseCase(repository),
             getAyahsByPage = GetAyahsByPageUseCase(repository),
@@ -412,6 +419,7 @@ object UseCaseModule {
             toggleBookmark = ToggleQuranBookmarkUseCase(repository),
             getBookmarks = GetQuranBookmarksUseCase(repository),
             isAyahBookmarked = IsAyahBookmarkedUseCase(repository),
+            insertBookmark = InsertQuranBookmarkUseCase(repository),
             updateBookmark = UpdateQuranBookmarkUseCase(repository),
             deleteBookmark = DeleteQuranBookmarkUseCase(repository),
             toggleFavorite = ToggleQuranFavoriteUseCase(repository),
@@ -575,6 +583,8 @@ object UseCaseModule {
             searchDuas = SearchDuasUseCase(repository),
             toggleFavorite = ToggleDuaFavoriteUseCase(repository),
             getAllBookmarks = GetDuaBookmarksUseCase(repository),
+            insertBookmark = InsertDuaBookmarkUseCase(repository),
+            updateBookmark = UpdateDuaBookmarkUseCase(repository),
             deleteBookmark = DeleteDuaBookmarkUseCase(repository),
             getDailyDua = GetDailyDuaUseCase(repository)
         )
@@ -599,6 +609,7 @@ object UseCaseModule {
             getAllBookmarks = GetAllBookmarksUseCase(repository),
             isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
             toggleBookmark = ToggleBookmarkUseCase(repository),
+            insertBookmark = InsertHadithBookmarkUseCase(repository),
             updateBookmark = UpdateHadithBookmarkUseCase(repository),
             deleteBookmark = DeleteHadithBookmarkUseCase(repository),
             getDailyHadith = GetDailyHadithUseCase(repository)
@@ -671,7 +682,8 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideTafseerUseCases(
-        repository: TafseerRepository
+        repository: TafseerRepository,
+        quranRepository: QuranRepository
     ): TafseerUseCases {
         return TafseerUseCases(
             getTafseerForAyah = GetTafseerForAyahUseCase(repository),
@@ -683,7 +695,8 @@ object UseCaseModule {
             addNote = AddNoteUseCase(repository),
             updateNote = UpdateNoteUseCase(repository),
             deleteNote = DeleteNoteUseCase(repository),
-            exportAnnotations = ExportAnnotationsUseCase(repository)
+            exportAnnotations = ExportAnnotationsUseCase(repository),
+            getTafseerNotes = GetTafseerNotesUseCase(repository, quranRepository)
         )
     }
 

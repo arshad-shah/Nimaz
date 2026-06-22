@@ -25,6 +25,7 @@ data class HadithUseCases(
     val getAllBookmarks: GetAllBookmarksUseCase,
     val isHadithBookmarked: IsHadithBookmarkedUseCase,
     val toggleBookmark: ToggleBookmarkUseCase,
+    val insertBookmark: InsertHadithBookmarkUseCase,
     val updateBookmark: UpdateHadithBookmarkUseCase,
     val deleteBookmark: DeleteHadithBookmarkUseCase,
     val getDailyHadith: GetDailyHadithUseCase
@@ -87,6 +88,10 @@ class IsHadithBookmarkedUseCase @Inject constructor(private val repository: Hadi
 class ToggleBookmarkUseCase @Inject constructor(private val repository: HadithRepository) {
     suspend operator fun invoke(hadithId: String, bookId: String, hadithNumber: Int) =
         repository.toggleBookmark(hadithId, bookId, hadithNumber)
+}
+
+class InsertHadithBookmarkUseCase @Inject constructor(private val repository: HadithRepository) {
+    suspend operator fun invoke(bookmark: HadithBookmark) = repository.insertBookmark(bookmark)
 }
 
 class UpdateHadithBookmarkUseCase @Inject constructor(private val repository: HadithRepository) {

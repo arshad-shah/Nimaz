@@ -34,3 +34,16 @@ enum class TafseerSource(val id: String, val displayName: String) {
     IBN_KATHIR("ibn_kathir_en", "Ibn Kathir"),
     MAARIFUL_QURAN("maariful_quran_en", "Ma'arif al-Qur'an")
 }
+
+/**
+ * A saved tafseer note resolved to its location, for the "My notes" list on the
+ * Tafseer chapters page. Carries the surah/ayah so a tap can open the reader.
+ */
+data class TafseerNoteItem(
+    val highlightId: Long,
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val sourceLabel: String,
+    val color: String,
+    val note: String
+)

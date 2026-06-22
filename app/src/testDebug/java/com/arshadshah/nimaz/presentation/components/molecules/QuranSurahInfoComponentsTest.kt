@@ -47,13 +47,12 @@ class QuranSurahInfoComponentsTest {
 
         composeRule.onNodeWithText("Al-Fatihah").assertExists()
         composeRule.onNodeWithText("\"The Opening\"").assertExists()
-        composeRule.onNodeWithText("Verses").assertExists()
-        composeRule.onNodeWithText("Revelation").assertExists()
-        composeRule.onNodeWithText("Order").assertExists()
+        // stats render as combined chips: "<count> Verses", Makki/Madani, "Order <n>"
+        composeRule.onNodeWithText("7 Verses").assertExists()
         composeRule.onNodeWithText("Makki").assertExists()
-        // number badge + verse count + order values
-        composeRule.onNodeWithText("7").assertExists()
-        composeRule.onNodeWithText("5").assertExists()
+        composeRule.onNodeWithText("Order 5").assertExists()
+        // surah number badge
+        composeRule.onNodeWithText("1").assertExists()
         composeRule.onNodeWithContentDescription("Back").assertExists()
     }
 

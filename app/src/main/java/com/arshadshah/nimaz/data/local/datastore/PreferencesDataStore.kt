@@ -145,6 +145,7 @@ class PreferencesDataStore @Inject constructor(
         val DUA_SHOW_ARABIC = booleanPreferencesKey("dua_show_arabic")
         val DUA_SHOW_TRANSLITERATION = booleanPreferencesKey("dua_show_transliteration")
         val DUA_SHOW_TRANSLATION = booleanPreferencesKey("dua_show_translation")
+        val DUA_CATEGORIES_SORT_ALPHABETICAL = booleanPreferencesKey("dua_categories_sort_alphabetical")
 
         // Hadith Settings
         val HADITH_ARABIC_FONT = stringPreferencesKey("hadith_arabic_font")
@@ -530,6 +531,12 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setDuaShowTranslation(show: Boolean) =
         put(PreferencesKeys.DUA_SHOW_TRANSLATION, show)
+
+    override val duaCategoriesSortAlphabetical: Flow<Boolean> =
+        preference(PreferencesKeys.DUA_CATEGORIES_SORT_ALPHABETICAL, false)
+
+    override suspend fun setDuaCategoriesSortAlphabetical(enabled: Boolean) =
+        put(PreferencesKeys.DUA_CATEGORIES_SORT_ALPHABETICAL, enabled)
 
     // Hadith Settings
     override val hadithArabicFont: Flow<String> = preference(PreferencesKeys.HADITH_ARABIC_FONT, "amiri")

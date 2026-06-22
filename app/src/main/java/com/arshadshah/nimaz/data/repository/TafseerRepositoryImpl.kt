@@ -37,6 +37,10 @@ class TafseerRepositoryImpl @Inject constructor(
         return tafseerDao.getHighlightsForAyah(ayahId, tafseerId).mapItems { it.toDomain() }
     }
 
+    override fun getAllHighlights(): Flow<List<TafseerHighlight>> {
+        return tafseerDao.getAllHighlights().mapItems { it.toDomain() }
+    }
+
     override suspend fun addHighlight(
         ayahId: Int,
         tafseerId: String,

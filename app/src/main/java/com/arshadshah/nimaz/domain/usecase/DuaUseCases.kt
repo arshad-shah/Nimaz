@@ -23,6 +23,8 @@ data class DuaUseCases(
     val searchDuas: SearchDuasUseCase,
     val toggleFavorite: ToggleDuaFavoriteUseCase,
     val getAllBookmarks: GetDuaBookmarksUseCase,
+    val insertBookmark: InsertDuaBookmarkUseCase,
+    val updateBookmark: UpdateDuaBookmarkUseCase,
     val deleteBookmark: DeleteDuaBookmarkUseCase,
     val getDailyDua: GetDailyDuaUseCase
 )
@@ -69,6 +71,14 @@ class ToggleDuaFavoriteUseCase @Inject constructor(private val repository: DuaRe
 
 class GetDuaBookmarksUseCase @Inject constructor(private val repository: DuaRepository) {
     operator fun invoke(): Flow<List<DuaBookmark>> = repository.getAllBookmarks()
+}
+
+class InsertDuaBookmarkUseCase @Inject constructor(private val repository: DuaRepository) {
+    suspend operator fun invoke(bookmark: DuaBookmark) = repository.insertBookmark(bookmark)
+}
+
+class UpdateDuaBookmarkUseCase @Inject constructor(private val repository: DuaRepository) {
+    suspend operator fun invoke(bookmark: DuaBookmark) = repository.updateBookmark(bookmark)
 }
 
 class DeleteDuaBookmarkUseCase @Inject constructor(private val repository: DuaRepository) {

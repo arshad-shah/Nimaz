@@ -58,7 +58,7 @@ fun NimazReaderBottomBar(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (hasPager) {
@@ -83,15 +83,15 @@ fun NimazReaderBottomBar(
         if (hasPager) {
             if (pageCount <= 12) {
                 Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     repeat(pageCount) { index ->
                         val selected = index == currentPage
                         Box(
                             modifier = Modifier
-                                .height(5.dp)
-                                .width(if (selected) 16.dp else 5.dp)
+                                .height(6.dp)
+                                .width(if (selected) 20.dp else 6.dp)
                                 .background(
                                     color = if (selected) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.outlineVariant,
@@ -134,14 +134,14 @@ private fun NavChevron(
             if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
             else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
         ),
-        modifier = Modifier.size(32.dp)
+        modifier = Modifier.size(48.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
             Icon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = tint,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(24.dp)
             )
         }
     }

@@ -33,9 +33,15 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import androidx.glance.layout.width
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
+import com.arshadshah.nimaz.widget.core.WidgetCard
+import com.arshadshah.nimaz.widget.core.WidgetIcon
+import com.arshadshah.nimaz.widget.core.WidgetLabel
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
+import com.arshadshah.nimaz.widget.core.WidgetPill
+import com.arshadshah.nimaz.widget.core.prayerIconRes
 
 class NextPrayerWidget : GlanceAppWidget() {
 
@@ -98,75 +104,51 @@ private fun NextPrayerSuccessContent(
     primaryColor: ColorProvider
 ) {
     val context = LocalContext.current
-    Box(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
-            .padding(16.dp),
-        contentAlignment = Alignment.Center
+    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
+        WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
+    } else {
+        data.countdown.ifEmpty { "—" }
+    }
+
+    WidgetCard(
+        background = backgroundColor,
+        onClick = actionStartActivity<MainActivity>(),
+        padding = 16.dp,
     ) {
-        Column(
-            modifier = GlanceModifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = context.getString(R.string.widget_next_prayer),
-                style = TextStyle(
-                    color = textSecondary,
-                    fontSize = 11.sp,
-                    fontWeight = FontWeight.Medium
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                WidgetIcon(
+                    resId = prayerIconRes(data.prayerName),
+                    tint = primaryColor,
+                    size = 16.dp,
+                    contentDescription = data.prayerName,
                 )
-            )
-
-            Spacer(modifier = GlanceModifier.height(4.dp))
-
+                Spacer(modifier = GlanceModifier.width(6.dp))
+                WidgetLabel(
+                    text = context.getString(R.string.widget_next_prayer),
+                    color = textSecondary,
+                )
+            }
+            Spacer(modifier = GlanceModifier.height(10.dp))
             Text(
                 text = data.prayerName.ifEmpty { "—" },
-                style = TextStyle(
-                    color = primaryColor,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                style = TextStyle(color = primaryColor, fontSize = 20.sp, fontWeight = FontWeight.Bold),
             )
-
+            Spacer(modifier = GlanceModifier.defaultWeight())
             Text(
                 text = data.prayerTime.ifEmpty { "—" },
-                style = TextStyle(
-                    color = textColor,
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                style = TextStyle(color = textColor, fontSize = 32.sp, fontWeight = FontWeight.Bold),
             )
-
             Spacer(modifier = GlanceModifier.height(8.dp))
-
-            // Compute countdown live from stored epoch for freshness
-            val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
-                WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
-            } else {
-                data.countdown.ifEmpty { "—" }
-            }
-
-            Box(
-                modifier = GlanceModifier
-                    .background(ColorProvider(R.color.widget_primary_dim))
-                    .cornerRadius(8.dp)
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
-            ) {
+            WidgetPill(container = ColorProvider(R.color.widget_primary_dim)) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = if (data.isValid && liveCountdown != "—") "in " else "",
-                        style = TextStyle(color = primaryColor, fontSize = 12.sp)
+                        style = TextStyle(color = primaryColor, fontSize = 12.sp),
                     )
                     Text(
                         text = liveCountdown,
-                        style = TextStyle(
-                            color = primaryColor,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        style = TextStyle(color = primaryColor, fontSize = 12.sp, fontWeight = FontWeight.Bold),
                     )
                 }
             }

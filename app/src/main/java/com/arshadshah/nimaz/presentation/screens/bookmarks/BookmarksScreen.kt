@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.presentation.screens.bookmarks
 import android.content.Intent
 import android.text.format.DateUtils
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,38 +25,61 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VolunteerActivism
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxDefaults
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetAction
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetActionRow
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
+import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
-import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarkType
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksViewModel
@@ -75,180 +97,250 @@ fun BookmarksScreen(
     val state by viewModel.bookmarksState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // The bookmark whose overflow menu is open, and the bookmark whose note is
+    // being edited. Both null = nothing showing.
+    var optionsTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+    var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+
+    // Drive the Undo snackbar off the most recently deleted bookmark.
+    val removedMessage = stringResource(R.string.bookmark_removed)
+    val undoLabel = stringResource(R.string.undo)
+    val deletedId = state.recentlyDeleted?.id
+    LaunchedEffect(deletedId) {
+        if (deletedId != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = removedMessage,
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.onEvent(BookmarksEvent.UndoDelete)
+            } else {
+                viewModel.onEvent(BookmarksEvent.DismissUndo)
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.bookmarks_title),
+                subtitle = if (statsState.totalBookmarks > 0) {
+                    stringResource(R.string.bookmarks_count, statsState.totalBookmarks)
+                } else null,
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
-        if (state.allBookmarks.isEmpty() && !state.isLoading) {
-            NimazEmptyState(
-                title = stringResource(R.string.no_bookmarks_yet),
-                message = stringResource(R.string.no_bookmarks_hint),
-                icon = Icons.Default.Bookmark,
-                iconTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues)
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 0.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Tabs
-                item {
-                    TabRow(
-                        selectedFilter = state.selectedFilter,
-                        onFilterSelected = { viewModel.onEvent(BookmarksEvent.SetFilter(it)) }
-                    )
+        when {
+            state.isLoading && state.allBookmarks.isEmpty() -> {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
+            }
 
-                // Stats Row
-                item {
-                    NimazStatsGrid(
-                        stats = listOf(
-                            NimazStatData(
-                                value = statsState.quranCount.toString(),
-                                label = stringResource(R.string.quran_verses)
-                            ),
-                            NimazStatData(
-                                value = statsState.hadithCount.toString(),
-                                label = stringResource(R.string.hadith)
-                            ),
-                            NimazStatData(
-                                value = statsState.duaCount.toString(),
-                                label = stringResource(R.string.duas)
-                            )
+            state.allBookmarks.isEmpty() -> {
+                NimazEmptyState(
+                    title = stringResource(R.string.no_bookmarks_yet),
+                    message = stringResource(R.string.no_bookmarks_hint),
+                    icon = Icons.Default.Bookmark,
+                    iconTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .padding(20.dp)
+                )
+            }
+
+            else -> {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    item {
+                        BookmarkFilterTabs(
+                            selectedFilter = state.selectedFilter,
+                            allCount = statsState.totalBookmarks,
+                            quranCount = statsState.quranCount,
+                            hadithCount = statsState.hadithCount,
+                            duaCount = statsState.duaCount,
+                            onFilterSelected = { viewModel.onEvent(BookmarksEvent.SetFilter(it)) }
                         )
-                    )
-                }
+                    }
 
-                // Bookmark Cards
-                items(
-                    items = state.filteredBookmarks,
-                    key = { it.id }
-                ) { bookmark ->
-                    BookmarkCard(
-                        bookmark = bookmark,
-                        onClick = {
-                            when (bookmark.type) {
-                                BookmarkType.QURAN -> bookmark.surahNumber?.let { surah ->
-                                    bookmark.ayahNumber?.let { ayah ->
-                                        onNavigateToQuranAyah(surah, ayah)
-                                    }
-                                }
+                    items(
+                        items = state.filteredBookmarks,
+                        key = { it.id }
+                    ) { bookmark ->
+                        SwipeableBookmarkCard(
+                            bookmark = bookmark,
+                            onClick = { bookmark.navigate(onNavigateToQuranAyah, onNavigateToHadith, onNavigateToDua) },
+                            onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
+                            onMore = { optionsTarget = bookmark }
+                        )
+                    }
 
-                                BookmarkType.HADITH -> bookmark.hadithBookId?.let { bookId ->
-                                    bookmark.hadithNumber?.let { number ->
-                                        onNavigateToHadith(bookId, number)
-                                    }
-                                }
-
-                                BookmarkType.DUA -> bookmark.duaId?.let { duaId ->
-                                    onNavigateToDua(duaId)
-                                }
-                            }
-                        },
-                        onDelete = {
-                            when (bookmark.type) {
-                                BookmarkType.QURAN -> {
-                                    val ayahId = bookmark.id.removePrefix("quran_").toIntOrNull()
-                                    if (ayahId != null) {
-                                        viewModel.onEvent(BookmarksEvent.DeleteQuranBookmark(ayahId))
-                                    }
-                                }
-
-                                BookmarkType.HADITH -> bookmark.hadithBookId?.let {
-                                    viewModel.onEvent(
-                                        BookmarksEvent.DeleteHadithBookmark(
-                                            bookmark.id.removePrefix(
-                                                "hadith_"
-                                            )
-                                        )
-                                    )
-                                }
-
-                                BookmarkType.DUA -> bookmark.duaId?.let {
-                                    viewModel.onEvent(BookmarksEvent.DeleteDuaBookmark(it))
-                                }
-                            }
-                        }
-                    )
-                }
-
-                // Bottom spacing
-                item {
-                    Spacer(modifier = Modifier.height(16.dp))
+                    item { Spacer(modifier = Modifier.height(8.dp)) }
                 }
             }
         }
     }
+
+    // Overflow options sheet: Edit note · Share · Delete.
+    optionsTarget?.let { target ->
+        val context = LocalContext.current
+        val shareChooser = stringResource(R.string.share)
+        NimazBottomSheet(
+            onDismissRequest = { optionsTarget = null },
+            title = target.title,
+            subtitle = target.subtitle,
+            icon = target.type.icon(),
+            onClose = { optionsTarget = null }
+        ) {
+            NimazSheetActionRow(
+                actions = listOf(
+                    NimazSheetAction(
+                        icon = Icons.Default.Edit,
+                        label = stringResource(R.string.edit_note),
+                        onClick = {
+                            noteTarget = target
+                            optionsTarget = null
+                        }
+                    ),
+                    NimazSheetAction(
+                        icon = Icons.Default.Share,
+                        label = stringResource(R.string.share),
+                        onClick = {
+                            context.startActivity(
+                                Intent.createChooser(target.shareIntent(), shareChooser)
+                            )
+                            optionsTarget = null
+                        }
+                    ),
+                    NimazSheetAction(
+                        icon = Icons.Default.Delete,
+                        label = stringResource(R.string.delete),
+                        tint = MaterialTheme.colorScheme.error,
+                        onClick = {
+                            viewModel.onEvent(BookmarksEvent.DeleteBookmark(target.id))
+                            optionsTarget = null
+                        }
+                    )
+                )
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+
+    // Note editor sheet.
+    noteTarget?.let { target ->
+        NoteEditorSheet(
+            bookmark = target,
+            onDismiss = { noteTarget = null },
+            onSave = { note ->
+                viewModel.onEvent(BookmarksEvent.EditNote(target.id, note))
+                noteTarget = null
+            }
+        )
+    }
 }
 
 @Composable
-private fun TabRow(
+private fun BookmarkFilterTabs(
     selectedFilter: BookmarkType?,
+    allCount: Int,
+    quranCount: Int,
+    hadithCount: Int,
+    duaCount: Int,
     onFilterSelected: (BookmarkType?) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        TabChip(
-            label = stringResource(R.string.all),
-            isSelected = selectedFilter == null,
-            onClick = { onFilterSelected(null) }
-        )
-        BookmarkType.entries.forEach { type ->
-            val label = when (type) {
-                BookmarkType.QURAN -> stringResource(R.string.quran_type)
-                BookmarkType.HADITH -> stringResource(R.string.hadith_type)
-                BookmarkType.DUA -> stringResource(R.string.dua_type)
-            }
-            TabChip(
-                label = label,
-                isSelected = selectedFilter == type,
-                onClick = { onFilterSelected(type) }
-            )
-        }
+    val tabs = listOf(
+        "${stringResource(R.string.all)}  $allCount",
+        "${stringResource(R.string.quran_type)}  $quranCount",
+        "${stringResource(R.string.hadith_type)}  $hadithCount",
+        "${stringResource(R.string.dua_type)}  $duaCount"
+    )
+    val selectedIndex = when (selectedFilter) {
+        null -> 0
+        BookmarkType.QURAN -> 1
+        BookmarkType.HADITH -> 2
+        BookmarkType.DUA -> 3
     }
+    NimazPillTabs(
+        tabs = tabs,
+        selectedIndex = selectedIndex,
+        onTabSelect = { index ->
+            onFilterSelected(
+                when (index) {
+                    1 -> BookmarkType.QURAN
+                    2 -> BookmarkType.HADITH
+                    3 -> BookmarkType.DUA
+                    else -> null
+                }
+            )
+        },
+        modifier = modifier.horizontalScroll(rememberScrollState())
+    )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun TabChip(
-    label: String,
-    isSelected: Boolean,
+private fun SwipeableBookmarkCard(
+    bookmark: UnifiedBookmark,
     onClick: () -> Unit,
+    onDelete: () -> Unit,
+    onMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
-        onClick = onClick,
+    // Swipe end→start to delete; the deletion fires immediately and the Undo
+    // snackbar lets the user reverse it. Reset so the row settles before the
+    // list flow removes it.
+    val dismissState = rememberSwipeToDismissBoxState(
+        initialValue = SwipeToDismissBoxValue.Settled,
+        positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
+    )
+    LaunchedEffect(dismissState.currentValue) {
+        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
+            onDelete()
+            dismissState.reset()
+        }
+    }
+    SwipeToDismissBox(
+        state = dismissState,
         modifier = modifier,
-        shape = RoundedCornerShape(25.dp),
-        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer
-        else MaterialTheme.colorScheme.surfaceContainer,
-        border = null
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(16.dp))
+                    .padding(horizontal = 24.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.delete),
+                    tint = MaterialTheme.colorScheme.onErrorContainer
+                )
+            }
+        }
     ) {
-        Text(
-            text = label,
-            modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
-            style = MaterialTheme.typography.labelLarge,
-            fontWeight = FontWeight.Medium,
-            color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer
-            else MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        BookmarkCard(bookmark = bookmark, onClick = onClick, onMore = onMore)
     }
 }
 
@@ -256,168 +348,32 @@ private fun TabChip(
 private fun BookmarkCard(
     bookmark: UnifiedBookmark,
     onClick: () -> Unit,
-    onDelete: () -> Unit,
+    onMore: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
+    val typeColor = bookmark.type.color()
+    val onTypeColor = bookmark.type.onColor()
+    val typeLabel = bookmark.type.label()
 
-    val typeLabel = when (bookmark.type) {
-        BookmarkType.QURAN -> stringResource(R.string.quran_type)
-        BookmarkType.HADITH -> stringResource(R.string.hadith_type)
-        BookmarkType.DUA -> stringResource(R.string.dua_type)
-    }
-
-    val typeIcon = when (bookmark.type) {
-        BookmarkType.QURAN -> Icons.Default.Book
-        BookmarkType.HADITH -> Icons.Default.Description
-        BookmarkType.DUA -> Icons.Default.VolunteerActivism
-    }
-
-    val typeColor = when (bookmark.type) {
-        BookmarkType.QURAN -> MaterialTheme.colorScheme.primary
-        BookmarkType.HADITH -> MaterialTheme.colorScheme.tertiary
-        BookmarkType.DUA -> MaterialTheme.colorScheme.secondary
-    }
-
-    val shareLabel = stringResource(R.string.share)
-
-    val typeBgColor = when (bookmark.type) {
-        BookmarkType.QURAN -> MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-        BookmarkType.HADITH -> MaterialTheme.colorScheme.tertiary.copy(alpha = 0.15f)
-        BookmarkType.DUA -> MaterialTheme.colorScheme.secondary.copy(alpha = 0.15f)
-    }
-
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column {
-            // Header row: icon, title/meta, actions
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(15.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Type icon
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(typeBgColor),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = typeIcon,
-                        contentDescription = null,
-                        tint = typeColor,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(12.dp))
-
-                // Title and meta
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = bookmark.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = bookmark.subtitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                // Action buttons
-                IconButton(
-                    onClick = {
-                        val textToShare = buildString {
-                            append(bookmark.title)
-                            bookmark.arabicText?.let { append("\n\n$it") }
-                            bookmark.note?.let { append("\n\n$it") }
-                        }
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, textToShare)
-                            type = "text/plain"
-                        }
-                        context.startActivity(Intent.createChooser(sendIntent, shareLabel))
-                    },
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = stringResource(R.string.share),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-                IconButton(
-                    onClick = onDelete,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = stringResource(R.string.delete),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
-            }
-
-            // Preview section: Arabic text and translation
-            if (bookmark.arabicText != null || bookmark.note != null) {
-                Column(
-                    modifier = Modifier.padding(start = 15.dp, end = 15.dp, bottom = 15.dp)
-                ) {
-                    bookmark.arabicText?.let { arabic ->
-                        Text(
-                            text = arabic,
-                            style = MaterialTheme.typography.bodyLarge,
-                            fontSize = 18.sp,
-                            lineHeight = 32.sp,
-                            textAlign = TextAlign.End,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                    bookmark.note?.let { translation ->
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = translation,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis,
-                            lineHeight = 20.sp
-                        )
-                    }
-                }
-            }
-
-            // Footer: date and type badge
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(horizontal = 15.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Header: type badge + time + overflow.
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                NimazBadge(
+                    text = typeLabel,
+                    backgroundColor = typeColor,
+                    textColor = onTypeColor,
+                    size = NimazBadgeSize.SMALL,
+                    shape = RoundedCornerShape(50)
+                )
+                Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = stringResource(
                         R.string.added_format,
@@ -431,20 +387,160 @@ private fun BookmarkCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = typeBgColor
-                ) {
-                    Text(
-                        text = typeLabel,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        color = typeColor
+                IconButton(onClick = onMore, modifier = Modifier.size(36.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.cd_more_options),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
                     )
                 }
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Title (locator) — bold.
+            Text(
+                text = bookmark.title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            // Source / subtitle — only when it adds information beyond the badge.
+            if (bookmark.subtitle.isNotBlank() && !bookmark.subtitle.equals(typeLabel, ignoreCase = true)) {
+                Text(
+                    text = bookmark.subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            // Arabic preview, set off by a gold ornamental divider.
+            bookmark.arabicText?.let { arabic ->
+                TafseerOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                ArabicText(
+                    text = arabic,
+                    size = ArabicTextSize.SMALL,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            // Note preview.
+            bookmark.note?.let { note ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = note,
+                    style = MaterialTheme.typography.bodySmall,
+                    fontStyle = FontStyle.Italic,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun NoteEditorSheet(
+    bookmark: UnifiedBookmark,
+    onDismiss: () -> Unit,
+    onSave: (String?) -> Unit
+) {
+    var text by remember(bookmark.id) { mutableStateOf(bookmark.note.orEmpty()) }
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
+        title = stringResource(R.string.edit_note),
+        subtitle = bookmark.title,
+        icon = Icons.Default.Edit,
+        onClose = onDismiss,
+        footer = {
+            NimazSheetFooterButtons(
+                primaryText = stringResource(R.string.save),
+                onPrimary = { onSave(text) },
+                secondaryText = stringResource(R.string.cancel),
+                onSecondary = onDismiss
+            )
+        }
+    ) {
+        NimazSheetSectionLabel(text = stringResource(R.string.edit_note))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp),
+            placeholder = { Text(stringResource(R.string.note_hint)) }
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+// ---- UnifiedBookmark presentation helpers ----
+
+@Composable
+private fun BookmarkType.color(): Color = when (this) {
+    BookmarkType.QURAN -> MaterialTheme.colorScheme.primary
+    BookmarkType.HADITH -> MaterialTheme.colorScheme.tertiary
+    BookmarkType.DUA -> MaterialTheme.colorScheme.secondary
+}
+
+@Composable
+private fun BookmarkType.onColor(): Color = when (this) {
+    BookmarkType.QURAN -> MaterialTheme.colorScheme.onPrimary
+    BookmarkType.HADITH -> MaterialTheme.colorScheme.onTertiary
+    BookmarkType.DUA -> MaterialTheme.colorScheme.onSecondary
+}
+
+@Composable
+private fun BookmarkType.label(): String = when (this) {
+    BookmarkType.QURAN -> stringResource(R.string.quran_type)
+    BookmarkType.HADITH -> stringResource(R.string.hadith_type)
+    BookmarkType.DUA -> stringResource(R.string.dua_type)
+}
+
+private fun BookmarkType.icon(): ImageVector = when (this) {
+    BookmarkType.QURAN -> Icons.Default.Book
+    BookmarkType.HADITH -> Icons.Default.Description
+    BookmarkType.DUA -> Icons.Default.VolunteerActivism
+}
+
+private fun UnifiedBookmark.navigate(
+    onNavigateToQuranAyah: (Int, Int) -> Unit,
+    onNavigateToHadith: (String, Int) -> Unit,
+    onNavigateToDua: (String) -> Unit
+) {
+    when (type) {
+        BookmarkType.QURAN -> if (surahNumber != null && ayahNumber != null) {
+            onNavigateToQuranAyah(surahNumber, ayahNumber)
+        }
+
+        BookmarkType.HADITH -> if (hadithBookId != null && hadithNumber != null) {
+            onNavigateToHadith(hadithBookId, hadithNumber)
+        }
+
+        BookmarkType.DUA -> duaId?.let(onNavigateToDua)
+    }
+}
+
+private fun UnifiedBookmark.shareIntent(): Intent {
+    val body = buildString {
+        append(title)
+        arabicText?.let { append("\n\n$it") }
+        note?.let { append("\n\n$it") }
+    }
+    return Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, body)
+        type = "text/plain"
+    }
+}

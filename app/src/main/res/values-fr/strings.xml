@@ -1216,4 +1216,18 @@
     <string name="sync_item_qaida_cells">Progression des cellules Qaida</string>
     <string name="sync_item_dua_progress">Progression des Dua</string>
     <string name="sync_item_locations">Lieux enregistrés</string>
+    <string name="cd_pause">Pause</string>
+    <string name="location_set_prompt">Définir le lieu</string>
+    <string name="tafseer_tab_surahs">Sourates</string>
+    <string name="tafseer_tab_notes">Mes notes</string>
+    <string name="tafseer_note_location">%1$s · Verset %2$d</string>
+    <string name="bookmarks_count">%1$d enregistrés</string>
+    <string name="bookmark_removed">Signet supprimé</string>
+    <string name="undo">Annuler</string>
+    <string name="edit_note">Modifier la note</string>
+    <string name="note_hint">Ajouter une note…</string>
+    <string name="cd_more_options">Plus d\'options</string>
+    <string name="all_categories_az">Toutes les catégories (A–Z)</string>
+    <string name="sort_categories_alphabetically">Trier les catégories par ordre alphabétique</string>
+    <string name="sort_categories_default">Revenir à l\'ordre par défaut</string>
 </resources>

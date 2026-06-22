@@ -33,13 +33,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -54,18 +54,13 @@ internal fun ThemesList(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         themes.forEach { theme ->
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(20.dp))
-                    .background(MaterialTheme.colorScheme.surfaceContainerHigh)
-                    .padding(horizontal = 14.dp, vertical = 8.dp)
-            ) {
-                Text(
-                    text = theme,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
+            NimazBadge(
+                text = theme,
+                size = NimazBadgeSize.MEDIUM,
+                shape = RoundedCornerShape(50),
+                backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+                textColor = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -159,11 +154,7 @@ internal fun BottomActions(
                     modifier = Modifier
                         .weight(1f)
                         .clip(RoundedCornerShape(14.dp))
-                        .background(
-                            Brush.linearGradient(
-                                colors = listOf(Color(0xFF14B8A6), Color(0xFF0F766E))
-                            )
-                        )
+                        .background(MaterialTheme.colorScheme.primary)
                         .clickable(onClick = onStartReading)
                         .padding(vertical = 16.dp),
                     contentAlignment = Alignment.Center
@@ -175,7 +166,7 @@ internal fun BottomActions(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.MenuBook,
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = MaterialTheme.colorScheme.onPrimary,
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -183,7 +174,7 @@ internal fun BottomActions(
                             text = stringResource(R.string.quran_home_start_reading),
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }

@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
@@ -56,6 +57,10 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
+import com.arshadshah.nimaz.presentation.components.atoms.glassBackdropSource
+import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.PI
 import kotlin.math.abs
@@ -152,11 +157,14 @@ fun PrayerSkyScene(
     shape: Shape = RoundedCornerShape(20.dp),
     cloudsEnabled: Boolean = true,
 ) {
+    val backdrop = rememberGlassBackdrop()
     Box(modifier = modifier) {
         SkyBackground(
             timeOfDay = timeOfDay,
             moonFraction = moonFraction,
-            modifier = Modifier.matchParentSize(),
+            modifier = Modifier
+                .matchParentSize()
+                .glassBackdropSource(backdrop),
             shape = shape,
             cloudsEnabled = cloudsEnabled,
         )
@@ -175,37 +183,16 @@ fun PrayerSkyScene(
                     shadow = shadow,
                     fontWeight = FontWeight.Bold,
                 ),
+                tone = GlassPillTone.Solid,
+                backdrop = backdrop,
             )
             GlassPill(
                 text = statusLabel,
                 style = MaterialTheme.typography.labelMedium.copy(shadow = shadow),
+                backdrop = backdrop,
             )
         }
     }
-}
-
-/**
- * A translucent "frosted glass" pill used to keep overlay text legible over the
- * living sky regardless of the time-of-day gradient behind it. The semi-opaque
- * white fill establishes a consistent contrast floor without hiding the sky.
- */
-@Composable
-private fun GlassPill(
-    text: String,
-    style: TextStyle,
-    modifier: Modifier = Modifier,
-) {
-    Text(
-        text = text,
-        style = style,
-        color = Color.White,
-        modifier = modifier
-            .background(
-                color = Color.White.copy(alpha = 0.20f),
-                shape = RoundedCornerShape(100),
-            )
-            .padding(horizontal = 14.dp, vertical = 6.dp),
-    )
 }
 
 private const val SPRITE_SCALE = 0.6f
@@ -244,7 +231,7 @@ private fun DrawScope.drawScene(t: Float, moonFraction: Float) {
     if (night > 0f) {
         drawNight(night)
         drawMoon(
-            Offset(size.width * 0.72f, size.height * 0.32f),
+            Offset(size.width * 0.72f, size.height * 0.44f),
             size.minDimension * 0.16f,
             moonFraction,
             alpha = night
@@ -275,8 +262,8 @@ private fun DrawScope.drawSunAt(td: Float, alt: Float, sunAlpha: Float) {
     val w = size.width
     val h = size.height
     val sunX = lerpF(0.16f, 0.84f, td.coerceIn(0f, 1f)) * w
-    val horizonY = h * 0.92f
-    val apexY = h * 0.16f
+    val horizonY = h * 0.86f
+    val apexY = h * 0.30f
     val sunY = horizonY - alt * (horizonY - apexY) // alt<0 sinks it below the frame
     val radius = size.minDimension * 0.085f
     val warm = (1f - alt).coerceIn(0f, 1f) // warmer near the horizon
@@ -349,9 +336,9 @@ private fun DrawScope.drawCloudLayer() {
     // White→grey luminance so a per-phase ColorFilter.tint shades them correctly.
     val w = size.width
     val h = size.height
-    drawCloud(w * 0.25f, h * 0.36f, scale(), Color.White, Color(0xFFAFAFAF), 0.95f)
-    drawCloud(w * 0.6f, h * 0.24f, scale() * 0.8f, Color.White, Color(0xFFAFAFAF), 0.9f)
-    drawCloud(w * 0.78f, h * 0.5f, scale() * 0.7f, Color.White, Color(0xFFAFAFAF), 0.85f)
+    drawCloud(w * 0.25f, h * 0.49f, scale(), Color.White, Color(0xFFAFAFAF), 0.95f, CloudShape.Classic)
+    drawCloud(w * 0.6f, h * 0.37f, scale() * 0.8f, Color.White, Color(0xFFAFAFAF), 0.9f, CloudShape.Puffy)
+    drawCloud(w * 0.78f, h * 0.63f, scale() * 0.7f, Color.White, Color(0xFFAFAFAF), 0.85f, CloudShape.Wide)
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -550,13 +537,21 @@ private fun DrawScope.drawSun(
 private fun fade(stops: List<Pair<Float, Color>>, alpha: Float): Array<Pair<Float, Color>> =
     stops.map { it.first to it.second.copy(alpha = it.second.alpha * alpha) }.toTypedArray()
 
+/**
+ * Silhouette variants for [drawCloud]. All follow the same recipe — a base oval,
+ * a row of puff circles for the bumpy crown, and a flat-bottomed slab — so they
+ * read as one family while no two clouds look identical.
+ */
+private enum class CloudShape { Classic, Puffy, Wide }
+
 private fun DrawScope.drawCloud(
     cx: Float,
     cy: Float,
     s: Float,
     top: Color,
     bottom: Color,
-    alpha: Float
+    alpha: Float,
+    shape: CloudShape = CloudShape.Classic
 ) {
     drawIntoCanvas { c ->
         val paint = Paint().apply {
@@ -575,12 +570,36 @@ private fun DrawScope.drawCloud(
         }
         val dir = android.graphics.Path.Direction.CW
         val p = android.graphics.Path().apply {
-            addOval(RectF(cx - 30f * s, cy - 12f * s, cx + 30f * s, cy + 12f * s), dir)
-            addCircle(cx - 22f * s, cy - 2f * s, 14f * s, dir)
-            addCircle(cx - 6f * s, cy - 12f * s, 16f * s, dir)
-            addCircle(cx + 12f * s, cy - 8f * s, 13f * s, dir)
-            addCircle(cx + 24f * s, cy - 1f * s, 15f * s, dir)
-            addRoundRect(RectF(cx - 44f * s, cy, cx + 44f * s, cy + 16f * s), 8f * s, 8f * s, dir)
+            when (shape) {
+                CloudShape.Classic -> {
+                    addOval(RectF(cx - 30f * s, cy - 12f * s, cx + 30f * s, cy + 12f * s), dir)
+                    addCircle(cx - 22f * s, cy - 2f * s, 14f * s, dir)
+                    addCircle(cx - 6f * s, cy - 12f * s, 16f * s, dir)
+                    addCircle(cx + 12f * s, cy - 8f * s, 13f * s, dir)
+                    addCircle(cx + 24f * s, cy - 1f * s, 15f * s, dir)
+                    addRoundRect(RectF(cx - 44f * s, cy, cx + 44f * s, cy + 16f * s), 8f * s, 8f * s, dir)
+                }
+                // Rounder and taller — a fifth puff lifts the crown into a dome.
+                CloudShape.Puffy -> {
+                    addOval(RectF(cx - 28f * s, cy - 10f * s, cx + 28f * s, cy + 12f * s), dir)
+                    addCircle(cx - 20f * s, cy - 4f * s, 13f * s, dir)
+                    addCircle(cx - 8f * s, cy - 14f * s, 17f * s, dir)
+                    addCircle(cx + 6f * s, cy - 16f * s, 16f * s, dir)
+                    addCircle(cx + 18f * s, cy - 9f * s, 14f * s, dir)
+                    addCircle(cx + 26f * s, cy - 2f * s, 12f * s, dir)
+                    addRoundRect(RectF(cx - 40f * s, cy + 2f * s, cx + 40f * s, cy + 16f * s), 9f * s, 9f * s, dir)
+                }
+                // Stretched and flat — a low, drifting wisp with smaller bumps.
+                CloudShape.Wide -> {
+                    addOval(RectF(cx - 38f * s, cy - 8f * s, cx + 38f * s, cy + 10f * s), dir)
+                    addCircle(cx - 28f * s, cy - 2f * s, 11f * s, dir)
+                    addCircle(cx - 12f * s, cy - 9f * s, 14f * s, dir)
+                    addCircle(cx + 4f * s, cy - 10f * s, 14f * s, dir)
+                    addCircle(cx + 20f * s, cy - 6f * s, 12f * s, dir)
+                    addCircle(cx + 30f * s, cy - 1f * s, 10f * s, dir)
+                    addRoundRect(RectF(cx - 50f * s, cy, cx + 50f * s, cy + 14f * s), 7f * s, 7f * s, dir)
+                }
+            }
         }
         c.nativeCanvas.drawPath(p, paint)
     }
@@ -757,7 +776,11 @@ private fun PrayerSkyScene_Isha_Preview() {
             "9:39 PM",
             "Isha · Fajr in 6h 04m",
             scenePreviewModifier(),
-            moonFraction = 0.62f
+            moonFraction = 0.62f,
+            shape = RoundedCornerShape(
+                bottomStart = 26.dp,
+                bottomEnd = 26.dp
+            )
         )
     }
 }

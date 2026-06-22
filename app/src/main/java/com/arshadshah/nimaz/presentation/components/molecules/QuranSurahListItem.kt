@@ -3,6 +3,8 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -22,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -30,7 +31,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -39,10 +39,13 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val SurahNumberSlotWidth = 40.dp
 private val SurahNumberSlotSpacing = 12.dp
+private val ChipShape = RoundedCornerShape(50)
 
 private fun getJuzForPage(page: Int): Int {
     val juzStartPages = listOf(
@@ -56,12 +59,13 @@ private fun getJuzForPage(page: Int): Int {
     return 1
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 internal fun SurahListItem(
     surah: Surah,
     onClick: () -> Unit,
     onInfoClick: () -> Unit = {},
+    showInfo: Boolean = true,
     khatamReadCount: Int = 0,
     khatamTotalAyahs: Int = 0,
     isKhatamActive: Boolean = false,
@@ -144,29 +148,33 @@ internal fun SurahListItem(
                     modifier = Modifier.weight(1f)
                 )
 
-                // Arabic name — intrinsic width, never truncated
+                // Arabic name — intrinsic width, never truncated; teal for identity
                 ArabicText(
                     text = surah.nameArabic,
                     size = ArabicTextSize.MEDIUM,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.primary
                 )
 
                 // Info button
-                IconButton(
-                    onClick = onInfoClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = stringResource(R.string.quran_home_surah_info),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
+                if (showInfo) {
+                    IconButton(
+                        onClick = onInfoClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(R.string.quran_home_surah_info),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
-            // Metadata badges row — aligned with English name (40dp box + 12dp spacer = 52dp start)
-            Row(
+            // Metadata badges — design-system NimazBadge chips, aligned with the
+            // English name (40dp box + 12dp spacer = 52dp start), wrapping if needed.
+            val isMeccan = surah.revelationType == RevelationType.MECCAN
+            FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(
@@ -174,34 +182,48 @@ internal fun SurahListItem(
                         end = 14.dp,
                         bottom = 14.dp
                     ),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                val isMeccan = surah.revelationType == RevelationType.MECCAN
-                MetadataBadge(
-                    text = if (isMeccan) stringResource(R.string.quran_home_makkah) else stringResource(
-                        R.string.quran_home_madinah
-                    ),
-                    modifier = Modifier.weight(1f)
+                // Revelation — tinted (Makkah gold / Madinah teal)
+                NimazBadge(
+                    text = if (isMeccan) stringResource(R.string.quran_home_makkah)
+                    else stringResource(R.string.quran_home_madinah),
+                    size = NimazBadgeSize.SMALL,
+                    shape = ChipShape,
+                    backgroundColor = if (isMeccan) MaterialTheme.colorScheme.tertiaryContainer
+                    else MaterialTheme.colorScheme.primaryContainer,
+                    textColor = if (isMeccan) MaterialTheme.colorScheme.onTertiaryContainer
+                    else MaterialTheme.colorScheme.onPrimaryContainer
                 )
-                MetadataBadge(
+                NimazBadge(
                     text = stringResource(R.string.quran_home_verses_count, surah.ayahCount),
-                    modifier = Modifier.weight(1f)
+                    size = NimazBadgeSize.SMALL,
+                    shape = ChipShape,
+                    backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    outlined = true
                 )
                 if (startPage > 0) {
-                    MetadataBadge(
+                    NimazBadge(
                         text = stringResource(
                             R.string.quran_home_page_range_format,
                             startPage,
                             endPage
                         ),
-                        modifier = Modifier.weight(1f)
+                        size = NimazBadgeSize.SMALL,
+                        shape = ChipShape,
+                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        outlined = true
                     )
-                    MetadataBadge(
+                    NimazBadge(
                         text = stringResource(
                             R.string.quran_home_juz_indicator,
                             getJuzForPage(startPage)
                         ),
-                        modifier = Modifier.weight(1f)
+                        size = NimazBadgeSize.SMALL,
+                        shape = ChipShape,
+                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        outlined = true
                     )
                 }
             }
@@ -221,28 +243,6 @@ internal fun SurahListItem(
                 Spacer(modifier = Modifier.height(4.dp))
             }
         }
-    }
-}
-
-@Composable
-private fun MetadataBadge(
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        modifier = modifier,
-        shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)
-        )
     }
 }
 

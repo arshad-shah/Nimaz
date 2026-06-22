@@ -35,6 +35,8 @@ import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
+import com.arshadshah.nimaz.widget.core.WidgetCard
+import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import dagger.hilt.android.EntryPointAccessors
@@ -120,70 +122,42 @@ private fun PrayerTrackerSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
-    val checkedColor = ColorProvider(R.color.widget_checked)
-    val uncheckedColor = ColorProvider(R.color.widget_unchecked)
-
-    Box(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
-            .padding(12.dp)
+    WidgetCard(
+        background = backgroundColor,
+        onClick = actionStartActivity<MainActivity>(),
+        padding = 12.dp,
     ) {
-        Column(
-            modifier = GlanceModifier.fillMaxSize()
-        ) {
-            // Header row with title and count
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+        Column(modifier = GlanceModifier.fillMaxSize()) {
+            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = data.dateLabel,
-                    style = TextStyle(
-                        color = textSecondary,
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Medium
-                    )
+                    style = TextStyle(color = textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium),
                 )
                 Spacer(modifier = GlanceModifier.defaultWeight())
                 Text(
-                    text = "${data.prayedCount}/${data.totalCount}",
-                    style = TextStyle(
-                        color = primaryColor,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    text = "${data.prayedCount} / ${data.totalCount}",
+                    style = TextStyle(color = primaryColor, fontSize = 12.sp, fontWeight = FontWeight.Bold),
                 )
             }
-
             Spacer(modifier = GlanceModifier.height(8.dp))
-
-            // Prayer checkboxes row
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
                 val prayers = listOf(
-                    Triple("Fajr", "F", data.fajr),
-                    Triple("Dhuhr", "D", data.dhuhr),
-                    Triple("Asr", "A", data.asr),
-                    Triple("Maghrib", "M", data.maghrib),
-                    Triple("Isha", "I", data.isha)
+                    "Fajr" to data.fajr,
+                    "Dhuhr" to data.dhuhr,
+                    "Asr" to data.asr,
+                    "Maghrib" to data.maghrib,
+                    "Isha" to data.isha,
                 )
-
-                prayers.forEach { (name, shortName, isPrayed) ->
+                prayers.forEach { (name, isPrayed) ->
                     PrayerCheckbox(
                         prayerName = name,
-                        shortName = shortName,
                         isPrayed = isPrayed,
                         context = context,
-                        checkedColor = checkedColor,
-                        uncheckedColor = uncheckedColor,
+                        backgroundColor = backgroundColor,
+                        primaryColor = primaryColor,
                         textColor = textColor,
                         textSecondary = textSecondary,
-                        modifier = GlanceModifier.defaultWeight()
+                        modifier = GlanceModifier.defaultWeight(),
                     )
                 }
             }
@@ -194,50 +168,46 @@ private fun PrayerTrackerSuccessContent(
 @Composable
 private fun PrayerCheckbox(
     prayerName: String,
-    shortName: String,
     isPrayed: Boolean,
     context: Context,
-    checkedColor: ColorProvider,
-    uncheckedColor: ColorProvider,
+    backgroundColor: ColorProvider,
+    primaryColor: ColorProvider,
     textColor: ColorProvider,
     textSecondary: ColorProvider,
     modifier: GlanceModifier = GlanceModifier
 ) {
+    val uncheckedColor = ColorProvider(R.color.widget_unchecked)
+    val onPrimary = ColorProvider(R.color.widget_on_primary)
     Column(
-        modifier = modifier.clickable {
-            // Toggle prayer status
-            togglePrayerStatus(context, prayerName.lowercase())
-        },
+        modifier = modifier.clickable { togglePrayerStatus(context, prayerName.lowercase()) },
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Checkbox circle
-        Box(
-            modifier = GlanceModifier
-                .size(28.dp)
-                .cornerRadius(14.dp)
-                .background(if (isPrayed) checkedColor else uncheckedColor),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = if (isPrayed) "\u2713" else "",
-                style = TextStyle(
-                    color = ColorProvider(R.color.widget_background),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            )
+        if (isPrayed) {
+            // Filled teal disc + tinted check vector.
+            Box(
+                modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp).background(primaryColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                WidgetIcon(resId = R.drawable.ic_widget_check, tint = onPrimary, size = 16.dp)
+            }
+        } else {
+            // Outline ring built from two discs (Glance has no stroke modifier).
+            Box(
+                modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp).background(uncheckedColor),
+                contentAlignment = Alignment.Center,
+            ) {
+                Box(modifier = GlanceModifier.size(24.dp).cornerRadius(12.dp).background(backgroundColor)) {}
+            }
         }
-
-        Spacer(modifier = GlanceModifier.height(4.dp))
-
-        // Prayer name
+        Spacer(modifier = GlanceModifier.height(5.dp))
         Text(
-            text = shortName,
+            text = prayerName,
             style = TextStyle(
                 color = if (isPrayed) textColor else textSecondary,
-                fontSize = 10.sp,
-                fontWeight = if (isPrayed) FontWeight.Bold else FontWeight.Normal
-            )
+                fontSize = 9.sp,
+                fontWeight = if (isPrayed) FontWeight.Bold else FontWeight.Normal,
+            ),
+            maxLines = 1,
         )
     }
 }
