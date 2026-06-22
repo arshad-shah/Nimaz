@@ -162,7 +162,11 @@ in `core/di/DatabaseModule.kt`.
 - **Migrations must be idempotent.** SQLite has no `ADD COLUMN IF NOT EXISTS`, so column adds go through the `SupportSQLiteDatabase.addColumnIfMissing(...)` helper at the bottom of the file; table creates use `CREATE TABLE IF NOT EXISTS`.
 - **Content tables vs user-data tables.** Content tables (help/qaida/dua) are seeded; user-progress tables (`*_progress`, bookmarks) are always created empty.
 
-**Keep `SCHEMA_VERSION` in sync.** `NimazDatabase.SCHEMA_VERSION` (used only to tag crash reports via `NimazApp`'s `db_schema_version` key) must match `@Database(version = …)`. Both are currently **17** — **bump `SCHEMA_VERSION` alongside every new migration** so crash tags stay accurate.
+**One version constant.** The schema version lives in a single top-level `const val
+NIMAZ_DATABASE_VERSION` (in `NimazDatabase.kt`). It drives **both** the Room
+`@Database(version = …)` annotation and `NimazDatabase.SCHEMA_VERSION` (the latter only tags crash
+reports via `NimazApp`'s `db_schema_version` key). **Bump `NIMAZ_DATABASE_VERSION` in that one
+place** whenever you add a migration — the two can no longer drift.
 
 ---
 
@@ -302,7 +306,7 @@ receives.
 
 This file is a **living map of the subsystems**, not a one-time snapshot. When you change a
 subsystem — add/rename a Worker or service, change a notification channel or alarm scheme, add
-a migration (and bump `SCHEMA_VERSION`), add a content seeder or content-version key, change a
+a migration (and bump `NIMAZ_DATABASE_VERSION`), add a content seeder or content-version key, change a
 DataStore key surface, alter the sync payload/protocol, or swap a monitoring backend — **update
 the corresponding section here in the same change**, and add a row to the relevant table. Keep
 claims grounded in the code (read the file, cite the path in backticks). If a subsystem grows

@@ -307,8 +307,9 @@ private fun Xxx.toEntity() = XxxEntity(/* ... */)
 - Single database `NimazDatabase` (`data/local/database/`), shipped **pre-populated** from
   `app/src/main/assets/database/nimaz_prepopulated.db` via `.createFromAsset(...)`.
 - Entities in `entity/`, DAOs in `dao/`. **Schema changes require a migration** added to the
-  `addMigrations(...)` chain in `DatabaseModule` and a bump of the DB version. Never ship a
-  schema change without a migration (the app relies on the prepackaged DB).
+  `addMigrations(...)` chain in `DatabaseModule` and a bump of the single `NIMAZ_DATABASE_VERSION`
+  constant (in `NimazDatabase.kt`, which drives both `@Database(version)` and `SCHEMA_VERSION`).
+  Never ship a schema change without a migration (the app relies on the prepackaged DB).
 
 ---
 
