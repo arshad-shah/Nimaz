@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.Prophet
 import com.arshadshah.nimaz.domain.usecase.ProphetUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +53,13 @@ class ProphetViewModel @Inject constructor(
     }
 
     fun onEvent(event: ProphetEvent) {
+        when (event) {
+            is ProphetEvent.LoadDetail -> AppAnalytics.logFeatureUsed("prophet", "open_detail")
+            is ProphetEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("prophet", "toggle_favorite")
+            is ProphetEvent.Search -> AppAnalytics.logFeatureUsed("prophet", "search")
+            ProphetEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed("prophet", "toggle_favorites_filter")
+            else -> {}
+        }
         when (event) {
             is ProphetEvent.LoadDetail -> loadDetail(event.prophetId)
             is ProphetEvent.ToggleFavorite -> toggleFavorite(event.prophetId)

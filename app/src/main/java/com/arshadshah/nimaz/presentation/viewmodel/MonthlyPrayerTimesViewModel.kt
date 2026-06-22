@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -73,11 +74,13 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     fun onEvent(event: MonthlyPrayerTimesEvent) {
         when (event) {
             MonthlyPrayerTimesEvent.NextMonth -> {
+                AppAnalytics.logFeatureUsed("monthly_prayer_times", "next_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.plusMonths(1)) }
                 calculateMonth()
             }
 
             MonthlyPrayerTimesEvent.PreviousMonth -> {
+                AppAnalytics.logFeatureUsed("monthly_prayer_times", "previous_month")
                 _state.update { it.copy(currentMonth = it.currentMonth.minusMonths(1)) }
                 calculateMonth()
             }

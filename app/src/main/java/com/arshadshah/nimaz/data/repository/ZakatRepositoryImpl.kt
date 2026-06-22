@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.ZakatDao
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
@@ -43,7 +44,9 @@ private fun ZakatHistoryEntity.toDomain() = ZakatHistoryEntry(
     totalLiabilities = totalLiabilities,
     netWorth = netWorth,
     zakatDue = zakatDue,
-    nisabType = runCatching { NisabType.valueOf(nisabType) }.getOrDefault(NisabType.GOLD),
+    nisabType = runCatching { NisabType.valueOf(nisabType) }
+        .onFailure { CrashReporter.recordException(it) }
+        .getOrDefault(NisabType.GOLD),
     nisabValue = nisabValue,
     isPaid = isPaid,
     paidAt = paidAt,

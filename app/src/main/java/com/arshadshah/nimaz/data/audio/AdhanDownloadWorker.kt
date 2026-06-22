@@ -11,6 +11,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 
@@ -54,6 +55,7 @@ class AdhanDownloadWorker @AssistedInject constructor(
 
             Result.success()
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             Log.e(TAG, "Background adhan download failed", e)
             if (runAttemptCount < MAX_RETRIES) Result.retry() else Result.failure()
         }

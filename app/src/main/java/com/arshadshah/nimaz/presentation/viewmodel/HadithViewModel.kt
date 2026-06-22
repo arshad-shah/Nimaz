@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -117,6 +119,17 @@ class HadithViewModel @Inject constructor(
 
     fun onEvent(event: HadithEvent) {
         when (event) {
+            is HadithEvent.LoadBook -> AppAnalytics.logFeatureUsed("hadith", "open_book")
+            is HadithEvent.LoadChapter -> AppAnalytics.logFeatureUsed("hadith", "open_reader")
+            is HadithEvent.LoadHadithById -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
+            is HadithEvent.LoadHadithByNumber -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
+            is HadithEvent.Search -> AppAnalytics.logFeatureUsed("hadith", "search")
+            is HadithEvent.SearchInBook -> AppAnalytics.logFeatureUsed("hadith", "search_in_book")
+            is HadithEvent.FilterByGrade -> AppAnalytics.logFeatureUsed("hadith", "filter_by_grade")
+            is HadithEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed("hadith", "toggle_bookmark")
+            else -> {}
+        }
+        when (event) {
             is HadithEvent.LoadBook -> loadBook(event.bookId)
             is HadithEvent.LoadChapter -> loadChapter(event.chapterId)
             is HadithEvent.LoadHadithById -> loadHadithById(event.hadithId)
@@ -183,6 +196,8 @@ class HadithViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_book", e.message)
                 _chaptersState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -201,6 +216,8 @@ class HadithViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_chapter", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -233,6 +250,8 @@ class HadithViewModel @Inject constructor(
                     _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_hadith_by_id", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -252,6 +271,8 @@ class HadithViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_hadith_by_number", e.message)
                 _readerState.update { it.copy(error = e.message) }
             }
         }

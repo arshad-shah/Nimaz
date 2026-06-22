@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
@@ -122,6 +124,14 @@ class DuaViewModel @Inject constructor(
 
     fun onEvent(event: DuaEvent) {
         when (event) {
+            is DuaEvent.LoadCategory -> AppAnalytics.logFeatureUsed("dua", "open_category")
+            is DuaEvent.LoadDua -> AppAnalytics.logFeatureUsed("dua", "open_reader")
+            is DuaEvent.LoadDuasByOccasion -> AppAnalytics.logFeatureUsed("dua", "open_occasion")
+            is DuaEvent.Search -> AppAnalytics.logFeatureUsed("dua", "search")
+            is DuaEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("dua", "toggle_favorite")
+            else -> {}
+        }
+        when (event) {
             is DuaEvent.LoadCategory -> loadCategory(event.categoryId)
             is DuaEvent.LoadDua -> loadDua(event.duaId)
             is DuaEvent.LoadDuasByOccasion -> loadDuasByOccasion(event.occasion)
@@ -177,6 +187,8 @@ class DuaViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("dua", "load_category", e.message)
                 _categoryState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -201,6 +213,8 @@ class DuaViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("dua", "load_dua", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }

@@ -4,6 +4,7 @@ import android.content.Context
 import android.media.MediaPlayer
 import android.net.Uri
 import android.util.Log
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -135,6 +136,7 @@ class AdhanAudioManager @Inject constructor(
                 isId3 || isMpegSync || isWav
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             false
         }
     }
@@ -185,6 +187,7 @@ class AdhanAudioManager @Inject constructor(
             _isPlaying.value = true
             _currentlyPlaying.value = sound
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
             _isPlaying.value = false
             _currentlyPlaying.value = null
@@ -310,12 +313,14 @@ class AdhanAudioManager @Inject constructor(
                             updateDownloadState(sound, DownloadState.Completed)
                             return@withContext true
                         } catch (e: Exception) {
+                            CrashReporter.recordException(e)
                             lastError = "Failed to save file: ${e.message}"
                             tempFile.delete()
                             outputFile.delete()
                         }
                     }
                 } catch (e: Exception) {
+                    CrashReporter.recordException(e)
                     lastError = e.message ?: "Download failed"
                     Log.e(TAG, "Download attempt $attempt failed for $fileName: $lastError")
                     tempFile.delete()
@@ -503,6 +508,7 @@ class AdhanAudioManager @Inject constructor(
             updateDownloadState(AdhanSound.SIMPLE_BEEP, DownloadState.Completed)
             true
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
             updateDownloadState(
                 AdhanSound.SIMPLE_BEEP,

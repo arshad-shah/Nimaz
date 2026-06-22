@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.AsmaUnNabi
 import com.arshadshah.nimaz.domain.usecase.AsmaUnNabiUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -52,6 +53,13 @@ class AsmaUnNabiViewModel @Inject constructor(
     }
 
     fun onEvent(event: AsmaUnNabiEvent) {
+        when (event) {
+            is AsmaUnNabiEvent.LoadDetail -> AppAnalytics.logFeatureUsed("asma_un_nabi", "open_detail")
+            is AsmaUnNabiEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("asma_un_nabi", "toggle_favorite")
+            is AsmaUnNabiEvent.Search -> AppAnalytics.logFeatureUsed("asma_un_nabi", "search")
+            AsmaUnNabiEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed("asma_un_nabi", "toggle_favorites_filter")
+            else -> {}
+        }
         when (event) {
             is AsmaUnNabiEvent.LoadDetail -> loadDetail(event.nameId)
             is AsmaUnNabiEvent.ToggleFavorite -> toggleFavorite(event.nameId)

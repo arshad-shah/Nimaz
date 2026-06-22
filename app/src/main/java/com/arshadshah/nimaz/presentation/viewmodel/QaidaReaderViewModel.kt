@@ -4,6 +4,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentSeeder
@@ -68,6 +70,7 @@ class QaidaReaderViewModel @Inject constructor(
         // QaidaContentSeeder.
         viewModelScope.launch {
             runCatching { contentSeeder.seedIfNeeded() }
+                .onFailure { CrashReporter.recordException(it) }
         }
     }
 
@@ -125,6 +128,15 @@ class QaidaReaderViewModel @Inject constructor(
         }.stateIn(viewModelScope, sharing, null)
 
     fun onEvent(event: QaidaReaderEvent) {
+        when (event) {
+            is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed("qaida", "select_lesson")
+            is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed("qaida", "play_cell")
+            is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed("qaida", "play_line")
+            is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed("qaida", "play_letter")
+            QaidaReaderEvent.Resume -> AppAnalytics.logFeatureUsed("qaida", "resume")
+            QaidaReaderEvent.ResetJourney -> AppAnalytics.logFeatureUsed("qaida", "reset_journey")
+            else -> {}
+        }
         when (event) {
             is QaidaReaderEvent.SelectLesson -> selectLesson(event.lessonId)
             is QaidaReaderEvent.CellTapped -> onCellTapped(event.cell)

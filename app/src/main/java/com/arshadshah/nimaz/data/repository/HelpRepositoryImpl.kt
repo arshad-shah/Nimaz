@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.dao.HelpDao
 import com.arshadshah.nimaz.data.local.database.entity.HelpStringEntity
 import com.arshadshah.nimaz.data.local.help.HelpContentSeeder
@@ -47,7 +48,7 @@ class HelpRepositoryImpl @Inject constructor(
         if (raw.isNullOrBlank()) emptyList()
         else runCatching {
             helpJson.decodeFromString(ListSerializer(String.serializer()), raw)
-        }.getOrDefault(emptyList())
+        }.onFailure { CrashReporter.recordException(it) }.getOrDefault(emptyList())
 
     /** Seed once, then emit DB-backed flows. */
     private fun <T> seededFlow(block: () -> Flow<T>): Flow<T> =

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
@@ -98,6 +99,18 @@ class BookmarksViewModel @Inject constructor(
     }
 
     fun onEvent(event: BookmarksEvent) {
+        when (event) {
+            is BookmarksEvent.SetFilter -> AppAnalytics.logFeatureUsed("bookmarks", "set_filter")
+            is BookmarksEvent.SetSortOrder -> AppAnalytics.logFeatureUsed("bookmarks", "set_sort_order")
+            is BookmarksEvent.Search -> AppAnalytics.logFeatureUsed("bookmarks", "search")
+            is BookmarksEvent.DeleteQuranBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_quran")
+            is BookmarksEvent.DeleteHadithBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_hadith")
+            is BookmarksEvent.DeleteDuaBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_dua")
+            is BookmarksEvent.UpdateQuranBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
+            is BookmarksEvent.UpdateHadithBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
+            BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed("bookmarks", "clear_all")
+            else -> {}
+        }
         when (event) {
             is BookmarksEvent.SetFilter -> setFilter(event.type)
             is BookmarksEvent.SetSortOrder -> setSortOrder(event.order)

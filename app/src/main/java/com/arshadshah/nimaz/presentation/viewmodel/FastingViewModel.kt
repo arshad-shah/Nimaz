@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -222,7 +223,9 @@ class FastingViewModel @Inject constructor(
                     )
                 }
             }
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("fasting", "load_prayer_times", e.message)
             // Keep default placeholder times
         }
     }

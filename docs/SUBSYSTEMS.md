@@ -269,6 +269,17 @@ no deps). All third-party usage is isolated here.
 - `CrashReporter.kt` → Firebase **Crashlytics**. `recordException`, `log` (breadcrumb), `setCustomKey`. Pairs with `AppAnalytics.logError` (frequency) for the stack trace.
 - `PerfMonitor.kt` → Firebase **Performance**. Custom traces via `newTrace`/`stop` + inline `trace { }` / `traceSuspend { }`; catalog `Traces` (`app_initialize`, `notification_schedule`).
 
+**Instrumentation conventions (apply these as you write code):**
+- **Error-swallowing `catch`/`runCatching`** that hides a real failure (data load, IO, parse,
+  audio, network, background work) should call `CrashReporter.recordException(e)` — rename
+  `catch (_: …)` to `catch (e: …)`. In ViewModels, also call `AppAnalytics.logError(feature, type, e.message)`
+  for frequency. Skip *expected* control-flow catches (permission probes, optional system
+  services, "no data yet"). All monitoring calls are safe no-ops when Firebase is absent.
+- **Significant user actions** (open a reader/detail, toggle favorite/bookmark, create/complete/delete,
+  play audio, run a search) get one `AppAnalytics.logFeatureUsed("<feature>", "<action>")` in the
+  relevant `onEvent` branch — never log trivial state churn (text edits, scroll). Coverage is broad:
+  every ViewModel logs usage, and error paths across data/widget/worker/util/VM layers report to Crashlytics.
+
 ---
 
 ## 10. Device-to-device sync

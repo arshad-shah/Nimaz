@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
@@ -96,6 +98,8 @@ class CalendarViewModel @Inject constructor(
                 loadToday()
                 loadUpcomingEvents()
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("calendar", "load_events", e.message)
                 _calendarState.update {
                     it.copy(
                         error = "Failed to load events: ${e.message}",
@@ -107,6 +111,12 @@ class CalendarViewModel @Inject constructor(
     }
 
     fun onEvent(event: CalendarEvent) {
+        when (event) {
+            is CalendarEvent.SelectDate -> AppAnalytics.logFeatureUsed("calendar", "select_date")
+            is CalendarEvent.SetViewMode -> AppAnalytics.logFeatureUsed("calendar", "set_view_mode")
+            is CalendarEvent.NavigateToYear -> AppAnalytics.logFeatureUsed("calendar", "navigate_year")
+            else -> {}
+        }
         when (event) {
             is CalendarEvent.SelectDate -> selectDate(event.date)
             is CalendarEvent.NavigateToMonth -> navigateToMonth(event.month, event.year)

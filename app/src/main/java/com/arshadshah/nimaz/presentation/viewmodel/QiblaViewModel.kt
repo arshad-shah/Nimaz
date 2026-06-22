@@ -12,6 +12,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
@@ -283,6 +284,8 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("qibla", "calculate_direction", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -314,6 +317,8 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("qibla", "set_location", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }

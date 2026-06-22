@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.sync
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -53,7 +54,8 @@ sealed class SyncSignal {
 
         fun decode(bytes: ByteArray): SyncSignal? = try {
             json.decodeFromString(serializer(), String(bytes, Charsets.UTF_8))
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            CrashReporter.recordException(e)
             null
         }
     }

@@ -7,6 +7,7 @@ import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
 import androidx.datastore.dataStoreFile
 import androidx.glance.state.GlanceStateDefinition
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
@@ -53,6 +54,7 @@ abstract class JsonGlanceStateDefinition<T>(
         override suspend fun readFrom(input: InputStream): T = try {
             Json.decodeFromString(serializer, input.readBytes().decodeToString())
         } catch (e: SerializationException) {
+            CrashReporter.recordException(e)
             throw CorruptionException("Could not read $dataLabel data: ${e.message}")
         }
 

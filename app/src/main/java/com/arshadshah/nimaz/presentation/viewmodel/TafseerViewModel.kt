@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
@@ -63,6 +64,16 @@ class TafseerViewModel @Inject constructor(
     val state: StateFlow<TafseerUiState> = _state.asStateFlow()
 
     fun onEvent(event: TafseerEvent) {
+        when (event) {
+            is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed("tafseer", "open_surah")
+            is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed("tafseer", "switch_source")
+            is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed("tafseer", "add_highlight")
+            is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed("tafseer", "delete_highlight")
+            is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed("tafseer", "add_note")
+            is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed("tafseer", "delete_note")
+            is TafseerEvent.ExportAnnotations -> AppAnalytics.logFeatureUsed("tafseer", "export_annotations")
+            else -> {}
+        }
         when (event) {
             is TafseerEvent.LoadSurah -> loadSurah(event.surahNumber, event.ayahNumber)
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)

@@ -12,6 +12,8 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
@@ -183,7 +185,9 @@ class HomeViewModel @Inject constructor(
                         dailyHadithGrade = shortGradeLabel(hadith.grade)
                     )
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "load_daily_hadith", e.message)
                 // No hadith data available
             }
         }
@@ -227,13 +231,20 @@ class HomeViewModel @Inject constructor(
                         )
                     )
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "load_daily_dua", e.message)
                 // No dua data available
             }
         }
     }
 
     fun onEvent(event: HomeEvent) {
+        when (event) {
+            is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed("home", "update_location")
+            is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed("home", "toggle_prayer_status")
+            else -> {}
+        }
         when (event) {
             is HomeEvent.UpdateLocation -> updateLocation(
                 event.latitude,
@@ -599,6 +610,8 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "calculate_prayer_times", e.message)
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.sync
 
 import android.content.Context
 import android.util.Log
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
 import com.google.android.gms.nearby.connection.ConnectionInfo
@@ -186,6 +187,7 @@ class NearbyConnectionsManager @Inject constructor(
                                         ConnectionState.Error("No data handler registered")
                                 }
                         } catch (e: Exception) {
+                            CrashReporter.recordException(e)
                             Log.e(TAG, "BYTES data payload: decompression failed", e)
                             _connectionState.value =
                                 ConnectionState.Error("Failed to decompress: ${e.message}")
@@ -240,6 +242,7 @@ class NearbyConnectionsManager @Inject constructor(
                                         ConnectionState.Error("No data handler registered")
                                 }
                         } catch (e: Exception) {
+                            CrashReporter.recordException(e)
                             Log.e(TAG, "STREAM ${payload.id}: read failed", e)
                             _connectionState.value =
                                 ConnectionState.Error("Failed to read data: ${e.message}")

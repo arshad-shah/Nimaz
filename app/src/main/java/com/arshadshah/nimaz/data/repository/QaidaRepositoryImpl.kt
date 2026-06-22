@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.dao.QaidaDao
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellEntity
 import com.arshadshah.nimaz.data.local.database.entity.QaidaCellProgressEntity
@@ -123,6 +124,7 @@ class QaidaRepositoryImpl @Inject constructor(
             val jsonArray = JSONArray(json)
             (0 until jsonArray.length()).map { jsonArray.getString(it) }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             emptyList()
         }
     }

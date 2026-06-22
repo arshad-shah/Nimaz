@@ -4,6 +4,8 @@ import android.os.Build
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.data.sync.SyncCategory
@@ -224,6 +226,12 @@ class SyncViewModel @Inject constructor(
 
     fun onEvent(event: SyncEvent) {
         when (event) {
+            is SyncEvent.StartSend -> AppAnalytics.logFeatureUsed("sync", "start_send")
+            is SyncEvent.StartReceive -> AppAnalytics.logFeatureUsed("sync", "start_receive")
+            is SyncEvent.Cancel -> AppAnalytics.logFeatureUsed("sync", "cancel")
+            else -> {}
+        }
+        when (event) {
             is SyncEvent.StartSend -> startSend()
             is SyncEvent.StartReceive -> startReceive()
             is SyncEvent.AcceptConnection -> acceptConnection(event.endpointId)
@@ -293,6 +301,8 @@ class SyncViewModel @Inject constructor(
                         )
                     }
                 } catch (e: Exception) {
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("sync", "import", e.message)
                     Log.e(TAG, "Import failed!", e)
                     addLogEntry("Import failed: ${e.message}")
                     _uiState.update { it.copy(error = "Import failed: ${e.message}") }
@@ -345,6 +355,8 @@ class SyncViewModel @Inject constructor(
                 connectionsManager.sendData(jsonBytes)
                 Log.d(TAG, "sendData returned — transfer queued")
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("sync", "export", e.message)
                 Log.e(TAG, "Export/send failed!", e)
                 addLogEntry("Export failed: ${e.message}")
                 _uiState.update { it.copy(error = "Export failed: ${e.message}") }

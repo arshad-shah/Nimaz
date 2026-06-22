@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -124,6 +125,8 @@ class OnboardingViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("onboarding", "check_status", e.message)
                 _state.update {
                     it.copy(
                         isLoading = false,
@@ -146,6 +149,7 @@ class OnboardingViewModel @Inject constructor(
                 )
                 _state.update { it.copy(onboardingCompleted = true) }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 _state.update { it.copy(error = e.message) }
                 AppAnalytics.logError("onboarding", e.javaClass.simpleName, e.message)
             }
@@ -251,6 +255,8 @@ class OnboardingViewModel @Inject constructor(
                     _state.update { it.copy(error = "Could not detect location") }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("onboarding", "detect_location", e.message)
                 _state.update { it.copy(error = "Failed to detect location: ${e.message}") }
             }
         }
@@ -313,6 +319,8 @@ class OnboardingViewModel @Inject constructor(
                 "Unknown Location"
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("onboarding", "reverse_geocode", e.message)
             "Unknown Location"
         }
     }

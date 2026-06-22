@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
@@ -102,6 +103,13 @@ class PrayerTimesViewModel @Inject constructor(
     }
 
     fun onEvent(event: PrayerTimesEvent) {
+        when (event) {
+            PrayerTimesEvent.PreviousDay -> AppAnalytics.logFeatureUsed("prayer_times", "previous_day")
+            PrayerTimesEvent.NextDay -> AppAnalytics.logFeatureUsed("prayer_times", "next_day")
+            PrayerTimesEvent.GoToToday -> AppAnalytics.logFeatureUsed("prayer_times", "go_to_today")
+            is PrayerTimesEvent.TogglePrayer -> AppAnalytics.logFeatureUsed("prayer_times", "toggle_prayer")
+            else -> {}
+        }
         when (event) {
             PrayerTimesEvent.PreviousDay -> changeDay(-1)
             PrayerTimesEvent.NextDay -> changeDay(1)

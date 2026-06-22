@@ -9,6 +9,7 @@ import androidx.media3.common.MediaMetadata
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -453,7 +454,8 @@ class QuranAudioManager @Inject constructor(
                             retriever.extractMetadata(
                                 MediaMetadataRetriever.METADATA_KEY_DURATION
                             )?.toLongOrNull() ?: 0L
-                        } catch (_: Exception) {
+                        } catch (e: Exception) {
+                            CrashReporter.recordException(e)
                             0L
                         } finally {
                             retriever.release()
@@ -499,6 +501,7 @@ class QuranAudioManager @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 _audioState.update {
                     it.copy(
                         isPreparing = false,
@@ -779,7 +782,10 @@ class QuranAudioManager @Inject constructor(
                     }
                 }
                 // All retries failed
-                lastException?.let { destination.delete() }
+                lastException?.let {
+                    CrashReporter.recordException(it)
+                    destination.delete()
+                }
             }
         } finally {
             downloadingFiles.remove(key)

@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
@@ -551,6 +552,8 @@ class SettingsViewModel @Inject constructor(
                         // Now play the preview
                         adhanAudioManager.preview(sound, false)
                     } catch (e: Exception) {
+                        CrashReporter.recordException(e)
+                        AppAnalytics.logError("settings", "adhan_preview", e.message)
                         _adhanPreviewError.value = "Failed to play adhan preview: ${e.message}"
                     }
                 }

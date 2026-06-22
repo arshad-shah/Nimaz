@@ -33,6 +33,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
@@ -285,6 +286,7 @@ private fun togglePrayerStatus(context: Context, prayerName: String) {
             // Trigger widget update
             PrayerTrackerWorker.enqueueImmediateWork(context)
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             android.util.Log.e("PrayerTrackerWidget", "Failed to toggle prayer status", e)
         }
     }

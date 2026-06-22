@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
 import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
@@ -30,7 +31,8 @@ private fun IslamicEventEntity.toDomain(): IslamicEvent {
         hijriDay = hijriDay,
         eventType = try {
             IslamicEventType.valueOf(eventType.uppercase())
-        } catch (_: IllegalArgumentException) {
+        } catch (e: IllegalArgumentException) {
+            CrashReporter.recordException(e)
             IslamicEventType.HOLIDAY
         },
         isHoliday = isHoliday == 1,

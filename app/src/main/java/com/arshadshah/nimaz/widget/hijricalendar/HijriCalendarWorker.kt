@@ -6,6 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
@@ -95,6 +96,8 @@ class HijriCalendarWorker @AssistedInject constructor(
             setWidgetState(glanceIds, HijriCalendarWidgetState.Success(data))
             Result.success()
         } catch (e: Exception) {
+            CrashReporter.log("HijriCalendarWorker failed")
+            CrashReporter.recordException(e)
             setWidgetState(glanceIds, HijriCalendarWidgetState.Error(e.message))
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }

@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
@@ -204,6 +205,8 @@ class ZakatViewModel @Inject constructor(
                     it.copy(calculation = calculation, isCalculating = false)
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("zakat", "calculate", e.message)
                 _calculatorState.update {
                     it.copy(error = e.message, isCalculating = false)
                 }
