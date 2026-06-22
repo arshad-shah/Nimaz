@@ -36,6 +36,10 @@ These are the rules most often broken. Keep this checklist in mind for every cha
 8. **Verify before you finish.** `./gradlew :app:compileDebugKotlin` must pass (this runs
    KSP, so it validates Hilt + Room wiring too).
 
+> **Testing:** unit/Robolectric tests live in `app/src/test{,Debug}`; the on-device
+> instrumented suite (Hilt graph, Room, WorkManager, NavGraph flows) lives in
+> `app/src/androidTest` and is documented in **[`docs/TESTING.md`](TESTING.md)**.
+
 ---
 
 ## 1. High-level architecture
