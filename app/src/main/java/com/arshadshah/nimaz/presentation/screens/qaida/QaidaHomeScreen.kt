@@ -31,6 +31,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
+import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
 
 /**
@@ -123,7 +124,7 @@ fun QaidaHomeScreen(
             cancelText = stringResource(R.string.cancel),
             titleIcon = Icons.Filled.RestartAlt,
             isDestructive = true,
-            onConfirm = { viewModel.resetJourney() },
+            onConfirm = { viewModel.onEvent(QaidaReaderEvent.ResetJourney) },
             onDismiss = { showResetDialog = false },
         )
     }
