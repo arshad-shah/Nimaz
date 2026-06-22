@@ -17,6 +17,21 @@ data class ZakatCalculation(
     val note: String? = null
 )
 
+/** A persisted zakat calculation record, including payment status. */
+data class ZakatHistoryEntry(
+    val id: Long = 0,
+    val calculatedAt: Long,
+    val totalAssets: Double,
+    val totalLiabilities: Double,
+    val netWorth: Double,
+    val zakatDue: Double,
+    val nisabType: NisabType,
+    val nisabValue: Double,
+    val isPaid: Boolean = false,
+    val paidAt: Long? = null,
+    val notes: String? = null
+)
+
 data class ZakatAssets(
     val cashOnHand: Double = 0.0,
     val bankBalance: Double = 0.0,

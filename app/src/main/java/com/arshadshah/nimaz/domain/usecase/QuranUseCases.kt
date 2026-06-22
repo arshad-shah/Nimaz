@@ -185,9 +185,25 @@ class GetVerseOfTheDayUseCase @Inject constructor(
     }
 }
 
+class GetSurahByNumberUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(surahNumber: Int): Surah? =
+        repository.getSurahByNumber(surahNumber)
+}
+
+class GetAyahsBySurahUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    operator fun invoke(surahNumber: Int): Flow<List<Ayah>> =
+        repository.getAyahsBySurah(surahNumber)
+}
+
 // Wrapper class for all Quran use cases
 data class QuranUseCases(
     val getSurahList: GetSurahListUseCase,
+    val getSurahByNumber: GetSurahByNumberUseCase,
+    val getAyahsBySurah: GetAyahsBySurahUseCase,
     val getSurahWithAyahs: GetSurahWithAyahsUseCase,
     val getAyahsByJuz: GetAyahsByJuzUseCase,
     val getAyahsByPage: GetAyahsByPageUseCase,

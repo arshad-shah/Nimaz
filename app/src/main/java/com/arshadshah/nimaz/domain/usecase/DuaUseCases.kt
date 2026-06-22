@@ -20,7 +20,7 @@ data class DuaUseCases(
     val getProgressForDate: GetProgressForDateUseCase,
     val isDuaFavorite: IsDuaFavoriteUseCase,
     val searchDuas: SearchDuasUseCase,
-    val toggleFavorite: ToggleFavoriteUseCase
+    val toggleFavorite: ToggleDuaFavoriteUseCase
 )
 
 class GetAllCategoriesUseCase @Inject constructor(private val repository: DuaRepository) {
@@ -59,6 +59,6 @@ class SearchDuasUseCase @Inject constructor(private val repository: DuaRepositor
     operator fun invoke(query: String): Flow<List<DuaSearchResult>> = repository.searchDuas(query)
 }
 
-class ToggleFavoriteUseCase @Inject constructor(private val repository: DuaRepository) {
+class ToggleDuaFavoriteUseCase @Inject constructor(private val repository: DuaRepository) {
     suspend operator fun invoke(duaId: String, categoryId: String) = repository.toggleFavorite(duaId, categoryId)
 }

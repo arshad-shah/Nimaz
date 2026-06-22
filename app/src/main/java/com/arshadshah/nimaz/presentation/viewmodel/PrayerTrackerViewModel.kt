@@ -9,7 +9,7 @@ import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -79,7 +79,7 @@ sealed interface PrayerTrackerEvent {
 
 @HiltViewModel
 class PrayerTrackerViewModel @Inject constructor(
-    private val prayerRepository: PrayerRepository
+    private val prayerUseCases: PrayerUseCases
 ) : ViewModel() {
 
     private val _trackerState = MutableStateFlow(PrayerTrackerUiState())
@@ -151,7 +151,7 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private fun loadCurrentLocation() {
         viewModelScope.launch {
-            prayerRepository.getCurrentLocation().collect { location ->
+            prayerUseCases.getCurrentLocation().collect { location ->
                 currentLocation = location
                 // Reload prayer times if we have a location
                 location?.let {
@@ -176,7 +176,7 @@ class PrayerTrackerViewModel @Inject constructor(
             // Room's reactive Flow ensures cross-screen sync: when HomeScreen or
             // PrayerTracker updates a prayer status via the repository, Room emits
             // the change to all active Flow collectors automatically.
-            prayerRepository.getPrayerRecordsForDate(dateEpoch).collect { records ->
+            prayerUseCases.getPrayerRecordsForDate(dateEpoch).collect { records ->
                 _trackerState.update {
                     it.copy(prayerRecords = records, isLoading = false)
                 }
@@ -190,7 +190,7 @@ class PrayerTrackerViewModel @Inject constructor(
     }
 
     private fun loadPrayerTimes(date: LocalDate, location: Location) {
-        val prayerTimes = prayerRepository.getPrayerTimesForDate(date, location)
+        val prayerTimes = prayerUseCases.getPrayerTimesForDate(date, location)
         _trackerState.update { it.copy(prayerTimes = prayerTimes) }
     }
 
@@ -206,7 +206,7 @@ class PrayerTrackerViewModel @Inject constructor(
         } else null
 
         viewModelScope.launch {
-            prayerRepository.updatePrayerStatus(dateEpoch, prayerName, status, prayedAt, isJamaah)
+            prayerUseCases.updatePrayerStatus(dateEpoch, prayerName, status, prayedAt, isJamaah)
             // Refresh stats after update
             loadStats()
         }
@@ -222,7 +222,7 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private fun markQadaCompleted(record: PrayerRecord) {
         viewModelScope.launch {
-            prayerRepository.updatePrayerStatus(
+            prayerUseCases.updatePrayerStatus(
                 record.date,
                 record.prayerName,
                 PrayerStatus.QADA, // Mark as QADA completed
@@ -260,10 +260,10 @@ class PrayerTrackerViewModel @Inject constructor(
         val monthEndEpoch = now.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val stats = prayerRepository.getPrayerStats(startEpoch, endEpoch)
-            val monthlyStats = prayerRepository.getPrayerStats(monthStartEpoch, monthEndEpoch)
-            val currentStreak = prayerRepository.getCurrentStreak(currentEpoch)
-            val longestStreak = prayerRepository.getLongestStreak()
+            val stats = prayerUseCases.getPrayerStats(startEpoch, endEpoch)
+            val monthlyStats = prayerUseCases.getPrayerStats(monthStartEpoch, monthEndEpoch)
+            val currentStreak = prayerUseCases.getCurrentStreak(currentEpoch)
+            val longestStreak = prayerUseCases.getLongestStreak()
 
             _statsState.update {
                 it.copy(
@@ -279,7 +279,7 @@ class PrayerTrackerViewModel @Inject constructor(
 
     private fun loadQadaPrayers() {
         viewModelScope.launch {
-            prayerRepository.getMissedPrayersRequiringQada().collect { missedPrayers ->
+            prayerUseCases.getMissedPrayersRequiringQada().collect { missedPrayers ->
                 val grouped = missedPrayers.groupBy { record ->
                     val date = LocalDate.ofEpochDay(record.date / (24 * 60 * 60 * 1000))
                     "${date.month.name} ${date.year}"
@@ -304,7 +304,7 @@ class PrayerTrackerViewModel @Inject constructor(
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
-            prayerRepository.getPrayerRecordsInRange(startEpoch, endEpoch).collect { records ->
+            prayerUseCases.getPrayerRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _historyState.update { it.copy(records = records, isLoading = false) }
             }
         }

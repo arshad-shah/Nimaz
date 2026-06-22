@@ -11,7 +11,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -73,7 +73,7 @@ sealed interface PrayerTimesEvent {
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val prayerRepository: PrayerRepository,
+    private val prayerUseCases: PrayerUseCases,
     private val preferencesDataStore: PreferencesDataStore,
 ) : ViewModel() {
 
@@ -244,7 +244,7 @@ class PrayerTimesViewModel @Inject constructor(
         statusJob?.cancel()
         val dateKey = date.toEpochDay() * 86_400_000L
         statusJob = viewModelScope.launch {
-            prayerRepository.getPrayerRecordsForDate(dateKey).collect { records ->
+            prayerUseCases.getPrayerRecordsForDate(dateKey).collect { records ->
                 statuses = records.associate { it.prayerName to it.status }
                 applyTick()
             }
@@ -347,7 +347,7 @@ class PrayerTimesViewModel @Inject constructor(
                 if (current == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
             val prayedAt =
                 if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
-            prayerRepository.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
+            prayerUseCases.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
             // getPrayerRecordsForDate re-emits → applyTick refreshes the UI.
         }
     }

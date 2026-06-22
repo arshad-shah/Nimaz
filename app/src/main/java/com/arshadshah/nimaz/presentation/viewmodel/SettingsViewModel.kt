@@ -15,7 +15,7 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -245,7 +245,7 @@ sealed interface SettingsEvent {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val prayerRepository: PrayerRepository,
+    private val prayerUseCases: PrayerUseCases,
     private val preferencesDataStore: PreferencesDataStore,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     val adhanAudioManager: AdhanAudioManager,
@@ -908,19 +908,19 @@ class SettingsViewModel @Inject constructor(
 
     private fun loadLocations() {
         viewModelScope.launch {
-            prayerRepository.getCurrentLocation().collect { location ->
+            prayerUseCases.getCurrentLocation().collect { location ->
                 _locationState.update { it.copy(currentLocation = location) }
             }
         }
 
         viewModelScope.launch {
-            prayerRepository.getAllLocations().collect { locations ->
+            prayerUseCases.getAllLocations().collect { locations ->
                 _locationState.update { it.copy(savedLocations = locations, isLoading = false) }
             }
         }
 
         viewModelScope.launch {
-            prayerRepository.getFavoriteLocations().collect { favorites ->
+            prayerUseCases.getFavoriteLocations().collect { favorites ->
                 _locationState.update { it.copy(favoriteLocations = favorites) }
             }
         }
@@ -1028,26 +1028,26 @@ class SettingsViewModel @Inject constructor(
 
     private fun setCurrentLocation(location: Location) {
         viewModelScope.launch {
-            val id = prayerRepository.insertLocation(location)
-            prayerRepository.setCurrentLocation(id)
+            val id = prayerUseCases.insertLocation(location)
+            prayerUseCases.setCurrentLocation(id)
         }
     }
 
     private fun addLocation(location: Location) {
         viewModelScope.launch {
-            prayerRepository.insertLocation(location)
+            prayerUseCases.insertLocation(location)
         }
     }
 
     private fun removeLocation(location: Location) {
         viewModelScope.launch {
-            prayerRepository.deleteLocation(location)
+            prayerUseCases.deleteLocation(location)
         }
     }
 
     private fun toggleLocationFavorite(locationId: Long) {
         viewModelScope.launch {
-            prayerRepository.toggleFavorite(locationId)
+            prayerUseCases.toggleFavorite(locationId)
         }
     }
 

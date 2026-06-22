@@ -27,7 +27,7 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -117,7 +117,7 @@ sealed interface HomeEvent {
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val prayerRepository: PrayerRepository,
+    private val prayerUseCases: PrayerUseCases,
     private val preferencesDataStore: PreferencesDataStore,
     private val fastingDao: FastingDao,
     private val hadithDao: HadithDao,
@@ -148,7 +148,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadPrayerRecords() {
         viewModelScope.launch {
-            prayerRepository.getTodayPrayerRecords().collect { records ->
+            prayerUseCases.getTodayPrayerRecords().collect { records ->
                 _prayerRecords.update { records }
             }
         }
@@ -327,7 +327,7 @@ class HomeViewModel @Inject constructor(
             val prayedAt =
                 if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
 
-            prayerRepository.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
+            prayerUseCases.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
             _prayerRecords.update { it + (prayerName to newStatus) }
 
             // Update displays with new status
