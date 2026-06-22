@@ -2,14 +2,16 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
-import com.arshadshah.nimaz.domain.repository.DuaRepository
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import androidx.compose.ui.text.font.FontFamily
@@ -91,8 +93,8 @@ sealed interface DuaEvent {
 
 @HiltViewModel
 class DuaViewModel @Inject constructor(
-    private val duaRepository: DuaRepository,
-    private val preferencesDataStore: PreferencesDataStore
+    private val duaUseCases: DuaUseCases,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(DuaCollectionUiState())
@@ -121,6 +123,14 @@ class DuaViewModel @Inject constructor(
     }
 
     fun onEvent(event: DuaEvent) {
+        when (event) {
+            is DuaEvent.LoadCategory -> AppAnalytics.logFeatureUsed("dua", "open_category")
+            is DuaEvent.LoadDua -> AppAnalytics.logFeatureUsed("dua", "open_reader")
+            is DuaEvent.LoadDuasByOccasion -> AppAnalytics.logFeatureUsed("dua", "open_occasion")
+            is DuaEvent.Search -> AppAnalytics.logFeatureUsed("dua", "search")
+            is DuaEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("dua", "toggle_favorite")
+            else -> {}
+        }
         when (event) {
             is DuaEvent.LoadCategory -> loadCategory(event.categoryId)
             is DuaEvent.LoadDua -> loadDua(event.duaId)
@@ -152,7 +162,7 @@ class DuaViewModel @Inject constructor(
 
     private fun loadAllCategories() {
         viewModelScope.launch {
-            duaRepository.getAllCategories().collect { categories ->
+            duaUseCases.getAllCategories().collect { categories ->
                 _collectionState.update {
                     it.copy(
                         categories = categories,
@@ -168,15 +178,17 @@ class DuaViewModel @Inject constructor(
         _categoryState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                val category = duaRepository.getCategoryById(categoryId)
+                val category = duaUseCases.getCategoryById(categoryId)
                 _categoryState.update { it.copy(category = category) }
 
-                duaRepository.getDuasByCategory(categoryId).collect { duas ->
+                duaUseCases.getDuasByCategory(categoryId).collect { duas ->
                     _categoryState.update {
                         it.copy(duas = duas, isLoading = false)
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("dua", "load_category", e.message)
                 _categoryState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -186,14 +198,14 @@ class DuaViewModel @Inject constructor(
         _readerState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                val dua = duaRepository.getDuaById(duaId)
+                val dua = duaUseCases.getDuaById(duaId)
                 if (dua == null) {
                     _readerState.update { it.copy(isLoading = false, error = "Dua not found") }
                     return@launch
                 }
                 // Load the sibling duas in this collection so the reader can page
                 // through them with a HorizontalPager.
-                duaRepository.getDuasByCategory(dua.categoryId).collect { categoryDuas ->
+                duaUseCases.getDuasByCategory(dua.categoryId).collect { categoryDuas ->
                     val list = categoryDuas.ifEmpty { listOf(dua) }
                     val index = list.indexOfFirst { it.id == duaId }.coerceAtLeast(0)
                     _readerState.update {
@@ -201,6 +213,8 @@ class DuaViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("dua", "load_dua", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -214,15 +228,15 @@ class DuaViewModel @Inject constructor(
     private fun observeDuaSettings() {
         viewModelScope.launch {
             val displayFlow = combine(
-                preferencesDataStore.duaArabicFont,
-                preferencesDataStore.duaArabicFontSize,
-                preferencesDataStore.duaTranslationFontSize
+                settingsRepository.duaArabicFont,
+                settingsRepository.duaArabicFontSize,
+                settingsRepository.duaTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                preferencesDataStore.duaShowArabic,
-                preferencesDataStore.duaShowTransliteration,
-                preferencesDataStore.duaShowTranslation
+                settingsRepository.duaShowArabic,
+                settingsRepository.duaShowTransliteration,
+                settingsRepository.duaShowTranslation
             ) { showArabic, showTranslit, showTrans -> Triple(showArabic, showTranslit, showTrans) }
 
             combine(displayFlow, toggleFlow) { display, toggles -> display to toggles }
@@ -247,7 +261,7 @@ class DuaViewModel @Inject constructor(
     private fun loadDuasByOccasion(occasion: DuaOccasion) {
         _categoryState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
-            duaRepository.getDuasByOccasion(occasion).collect { duas ->
+            duaUseCases.getDuasByOccasion(occasion).collect { duas ->
                 _categoryState.update {
                     it.copy(duas = duas, isLoading = false)
                 }
@@ -263,7 +277,7 @@ class DuaViewModel @Inject constructor(
 
         _searchState.update { it.copy(query = query, isSearching = true) }
         viewModelScope.launch {
-            duaRepository.searchDuas(query).collect { results ->
+            duaUseCases.searchDuas(query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
         }
@@ -286,13 +300,13 @@ class DuaViewModel @Inject constructor(
 
     private fun toggleFavorite(duaId: String, categoryId: String) {
         viewModelScope.launch {
-            duaRepository.toggleFavorite(duaId, categoryId)
+            duaUseCases.toggleFavorite(duaId, categoryId)
         }
     }
 
     private fun loadFavorites() {
         viewModelScope.launch {
-            duaRepository.getFavoriteDuas().collect { favorites ->
+            duaUseCases.getFavoriteDuas().collect { favorites ->
                 _favoritesState.update { it.copy(favorites = favorites, isLoading = false) }
             }
         }
@@ -306,7 +320,7 @@ class DuaViewModel @Inject constructor(
     private fun loadProgressForDate(date: Long) {
         _dailyProgressState.update { it.copy(isLoading = true, date = date) }
         viewModelScope.launch {
-            duaRepository.getProgressForDate(date).collect { progressList ->
+            duaUseCases.getProgressForDate(date).collect { progressList ->
                 _dailyProgressState.update {
                     it.copy(progressList = progressList, isLoading = false)
                 }
@@ -318,5 +332,5 @@ class DuaViewModel @Inject constructor(
         return LocalDate.now().toUtcMidnightMillis()
     }
 
-    fun isDuaFavorite(duaId: String) = duaRepository.isDuaFavorite(duaId)
+    fun isDuaFavorite(duaId: String) = duaUseCases.isDuaFavorite(duaId)
 }

@@ -9,11 +9,13 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -87,8 +89,8 @@ sealed interface LocationEvent {
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesDataStore: PreferencesDataStore,
-    private val prayerRepository: PrayerRepository
+    private val settingsRepository: SettingsRepository,
+    private val prayerUseCases: PrayerUseCases
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LocationUiState())
@@ -113,13 +115,22 @@ class LocationViewModel @Inject constructor(
                 }
             }
 
-            LocationEvent.Search -> searchLocations(_state.value.searchQuery)
+            LocationEvent.Search -> {
+                AppAnalytics.logFeatureUsed("location", "search")
+                searchLocations(_state.value.searchQuery)
+            }
             LocationEvent.ClearSearch -> _state.update {
                 it.copy(searchQuery = "", searchResults = emptyList())
             }
 
-            is LocationEvent.SelectLocation -> selectLocation(event.location)
-            LocationEvent.UseCurrentGpsLocation -> detectCurrentLocation()
+            is LocationEvent.SelectLocation -> {
+                AppAnalytics.logFeatureUsed("location", "select_location")
+                selectLocation(event.location)
+            }
+            LocationEvent.UseCurrentGpsLocation -> {
+                AppAnalytics.logFeatureUsed("location", "use_gps")
+                detectCurrentLocation()
+            }
             LocationEvent.LoadCurrentLocation -> loadCurrentLocation()
             LocationEvent.DismissError -> _state.update { it.copy(error = null) }
         }
@@ -128,7 +139,7 @@ class LocationViewModel @Inject constructor(
     private fun loadCurrentLocation() {
         viewModelScope.launch {
             try {
-                val prefs = preferencesDataStore.userPreferences.first()
+                val prefs = settingsRepository.userPreferences.first()
                 if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
                     _state.update {
                         it.copy(
@@ -141,6 +152,8 @@ class LocationViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("location", "load_current", e.message)
                 // Silently fail - location not set
             }
         }
@@ -149,7 +162,7 @@ class LocationViewModel @Inject constructor(
     private fun loadRecentLocations() {
         viewModelScope.launch {
             try {
-                prayerRepository.getAllLocations().collect { locations ->
+                prayerUseCases.getAllLocations().collect { locations ->
                     val recentLocations = locations
                         .map { location ->
                             SearchLocation(
@@ -169,6 +182,8 @@ class LocationViewModel @Inject constructor(
                     _state.update { it.copy(recentLocations = recentLocations) }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("location", "load_recent", e.message)
                 // Silently fail
             }
         }
@@ -185,6 +200,8 @@ class LocationViewModel @Inject constructor(
                 }
                 _state.update { it.copy(searchResults = results, isSearching = false) }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("location", "search", e.message)
                 _state.update {
                     it.copy(
                         isSearching = false,
@@ -233,6 +250,8 @@ class LocationViewModel @Inject constructor(
                 } else null
             }.distinctBy { "${it.name}, ${it.country}" }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("location", "geocode_search", e.message)
             emptyList()
         }
     }
@@ -241,7 +260,7 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Save to DataStore
-                preferencesDataStore.updateLocation(
+                settingsRepository.updateLocation(
                     latitude = location.latitude,
                     longitude = location.longitude,
                     name = "${location.name}, ${location.country}"
@@ -264,7 +283,7 @@ class LocationViewModel @Inject constructor(
                     fajrAngle = null,
                     ishaAngle = null
                 )
-                prayerRepository.insertLocation(domainLocation)
+                prayerUseCases.insertLocation(domainLocation)
 
                 // Update state
                 _state.update {
@@ -279,6 +298,8 @@ class LocationViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("location", "select_location", e.message)
                 _state.update { it.copy(error = "Failed to save location: ${e.message}") }
             }
         }
@@ -302,7 +323,7 @@ class LocationViewModel @Inject constructor(
                     }
 
                     // Save location
-                    preferencesDataStore.updateLocation(
+                    settingsRepository.updateLocation(
                         latitude = location.first,
                         longitude = location.second,
                         name = locationName
@@ -327,6 +348,8 @@ class LocationViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("location", "detect_gps", e.message)
                 _state.update {
                     it.copy(
                         isLoadingGps = false,
@@ -405,6 +428,8 @@ class LocationViewModel @Inject constructor(
                 "Unknown Location"
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("location", "reverse_geocode", e.message)
             "Unknown Location"
         }
     }

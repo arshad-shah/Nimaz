@@ -2,12 +2,13 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.QuranBookmark
-import com.arshadshah.nimaz.domain.repository.DuaRepository
-import com.arshadshah.nimaz.domain.repository.HadithRepository
-import com.arshadshah.nimaz.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import android.content.Context
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -81,9 +82,9 @@ sealed interface BookmarksEvent {
 
 @HiltViewModel
 class BookmarksViewModel @Inject constructor(
-    private val quranRepository: QuranRepository,
-    private val hadithRepository: HadithRepository,
-    private val duaRepository: DuaRepository,
+    private val quranUseCases: QuranUseCases,
+    private val hadithUseCases: HadithUseCases,
+    private val duaUseCases: DuaUseCases,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -98,6 +99,18 @@ class BookmarksViewModel @Inject constructor(
     }
 
     fun onEvent(event: BookmarksEvent) {
+        when (event) {
+            is BookmarksEvent.SetFilter -> AppAnalytics.logFeatureUsed("bookmarks", "set_filter")
+            is BookmarksEvent.SetSortOrder -> AppAnalytics.logFeatureUsed("bookmarks", "set_sort_order")
+            is BookmarksEvent.Search -> AppAnalytics.logFeatureUsed("bookmarks", "search")
+            is BookmarksEvent.DeleteQuranBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_quran")
+            is BookmarksEvent.DeleteHadithBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_hadith")
+            is BookmarksEvent.DeleteDuaBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_dua")
+            is BookmarksEvent.UpdateQuranBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
+            is BookmarksEvent.UpdateHadithBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
+            BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed("bookmarks", "clear_all")
+            else -> {}
+        }
         when (event) {
             is BookmarksEvent.SetFilter -> setFilter(event.type)
             is BookmarksEvent.SetSortOrder -> setSortOrder(event.order)
@@ -121,7 +134,7 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadQuranBookmarks() {
         viewModelScope.launch {
-            quranRepository.getAllBookmarks().collect { bookmarks ->
+            quranUseCases.getBookmarks().collect { bookmarks ->
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
                             bookmarks.map { it.toUnified() }
@@ -144,7 +157,7 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadHadithBookmarks() {
         viewModelScope.launch {
-            hadithRepository.getAllBookmarks().collect { bookmarks ->
+            hadithUseCases.getAllBookmarks().collect { bookmarks ->
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
                             bookmarks.map { it.toUnified() }
@@ -167,7 +180,7 @@ class BookmarksViewModel @Inject constructor(
 
     private fun loadDuaBookmarks() {
         viewModelScope.launch {
-            duaRepository.getAllBookmarks().collect { bookmarks ->
+            duaUseCases.getAllBookmarks().collect { bookmarks ->
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.DUA } +
                             bookmarks.map { it.toUnified() }
@@ -280,44 +293,44 @@ class BookmarksViewModel @Inject constructor(
 
     private fun deleteQuranBookmark(ayahId: Int) {
         viewModelScope.launch {
-            quranRepository.deleteBookmark(ayahId)
+            quranUseCases.deleteBookmark(ayahId)
         }
     }
 
     private fun deleteHadithBookmark(hadithId: String) {
         viewModelScope.launch {
-            hadithRepository.deleteBookmark(hadithId)
+            hadithUseCases.deleteBookmark(hadithId)
         }
     }
 
     private fun deleteDuaBookmark(duaId: String) {
         viewModelScope.launch {
-            duaRepository.deleteBookmark(duaId)
+            duaUseCases.deleteBookmark(duaId)
         }
     }
 
     private fun updateQuranBookmarkNote(bookmark: QuranBookmark) {
         viewModelScope.launch {
-            quranRepository.updateBookmark(bookmark)
+            quranUseCases.updateBookmark(bookmark)
         }
     }
 
     private fun updateHadithBookmarkNote(bookmark: HadithBookmark) {
         viewModelScope.launch {
-            hadithRepository.updateBookmark(bookmark)
+            hadithUseCases.updateBookmark(bookmark)
         }
     }
 
     private fun clearAllBookmarks() {
         viewModelScope.launch {
             _bookmarksState.value.quranBookmarks.forEach {
-                quranRepository.deleteBookmark(it.ayahId)
+                quranUseCases.deleteBookmark(it.ayahId)
             }
             _bookmarksState.value.hadithBookmarks.forEach {
-                hadithRepository.deleteBookmark(it.hadithId)
+                hadithUseCases.deleteBookmark(it.hadithId)
             }
             _bookmarksState.value.duaBookmarks.forEach {
-                duaRepository.deleteBookmark(it.duaId)
+                duaUseCases.deleteBookmark(it.duaId)
             }
         }
     }

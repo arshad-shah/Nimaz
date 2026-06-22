@@ -3,13 +3,14 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.domain.model.ZakatAssets
 import com.arshadshah.nimaz.domain.model.ZakatCalculation
 import com.arshadshah.nimaz.domain.model.ZakatCalculator
+import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.domain.model.ZakatLiabilities
-import com.arshadshah.nimaz.domain.repository.ZakatRepository
+import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,20 +30,6 @@ data class ZakatCalculatorUiState(
     val isCalculating: Boolean = false,
     val showBreakdown: Boolean = false,
     val error: String? = null
-)
-
-data class ZakatHistoryEntry(
-    val id: Long,
-    val calculatedAt: Long,
-    val totalAssets: Double,
-    val totalLiabilities: Double,
-    val netWorth: Double,
-    val zakatDue: Double,
-    val nisabType: NisabType,
-    val nisabValue: Double,
-    val isPaid: Boolean = false,
-    val paidAt: Long? = null,
-    val notes: String? = null
 )
 
 data class ZakatHistoryUiState(
@@ -80,7 +67,7 @@ sealed interface ZakatEvent {
 
 @HiltViewModel
 class ZakatViewModel @Inject constructor(
-    private val zakatRepository: ZakatRepository
+    private val zakatUseCases: ZakatUseCases
 ) : ViewModel() {
 
     private val _calculatorState = MutableStateFlow(ZakatCalculatorUiState())
@@ -218,6 +205,8 @@ class ZakatViewModel @Inject constructor(
                     it.copy(calculation = calculation, isCalculating = false)
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("zakat", "calculate", e.message)
                 _calculatorState.update {
                     it.copy(error = e.message, isCalculating = false)
                 }
@@ -239,54 +228,35 @@ class ZakatViewModel @Inject constructor(
         val calculation = _calculatorState.value.calculation ?: return
 
         viewModelScope.launch {
-            val entity = ZakatHistoryEntity(
+            val entry = ZakatHistoryEntry(
                 calculatedAt = calculation.calculatedAt,
                 totalAssets = calculation.totalAssets,
                 totalLiabilities = calculation.totalLiabilities,
                 netWorth = calculation.netWorth,
                 zakatDue = calculation.zakatDue,
-                nisabType = calculation.nisabType.name,
+                nisabType = calculation.nisabType,
                 nisabValue = calculation.nisabValue
             )
-            zakatRepository.insertCalculation(entity)
+            zakatUseCases.insertCalculation(entry)
         }
     }
 
     private fun markAsPaid(entryId: Long) {
         viewModelScope.launch {
-            zakatRepository.markAsPaid(entryId, System.currentTimeMillis())
+            zakatUseCases.markAsPaid(entryId, System.currentTimeMillis())
         }
     }
 
     private fun deleteCalculation(entryId: Long) {
         viewModelScope.launch {
-            zakatRepository.deleteCalculation(entryId)
+            zakatUseCases.deleteCalculation(entryId)
         }
     }
 
     private fun loadHistory() {
         viewModelScope.launch {
-            zakatRepository.getAllHistory().collect { entities ->
-                val entries = entities.map { entity ->
-                    ZakatHistoryEntry(
-                        id = entity.id,
-                        calculatedAt = entity.calculatedAt,
-                        totalAssets = entity.totalAssets,
-                        totalLiabilities = entity.totalLiabilities,
-                        netWorth = entity.netWorth,
-                        zakatDue = entity.zakatDue,
-                        nisabType = try {
-                            NisabType.valueOf(entity.nisabType)
-                        } catch (_: Exception) {
-                            NisabType.GOLD
-                        },
-                        nisabValue = entity.nisabValue,
-                        isPaid = entity.isPaid,
-                        paidAt = entity.paidAt,
-                        notes = entity.notes
-                    )
-                }
-                val totalPaid = zakatRepository.getTotalPaid()
+            zakatUseCases.getAllHistory().collect { entries ->
+                val totalPaid = zakatUseCases.getTotalPaid()
                 _historyState.update {
                     it.copy(
                         history = entries,

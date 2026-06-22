@@ -46,6 +46,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
@@ -224,7 +225,7 @@ private fun HadithOfTheDayCard(
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(100))
-                        .background(Color(0xFFEAB308).copy(alpha = 0.16f))
+                        .background(NimazColors.Gold500.copy(alpha = 0.16f))
                         .padding(horizontal = 12.dp, vertical = 5.dp)
                 ) {
                     Row(
@@ -234,13 +235,13 @@ private fun HadithOfTheDayCard(
                         Icon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
-                            tint = Color(0xFFCA8A04),
+                            tint = NimazColors.GoldDark,
                             modifier = Modifier.size(14.dp)
                         )
                         Text(
                             text = stringResource(R.string.hadith_of_the_day),
                             style = MaterialTheme.typography.labelSmall,
-                            color = Color(0xFFCA8A04),
+                            color = NimazColors.GoldDark,
                             fontWeight = FontWeight.SemiBold
                         )
                     }
@@ -286,7 +287,7 @@ private fun HadithOfTheDayCard(
                         contentDescription = stringResource(R.string.bookmark),
                         onClick = onBookmarkClick,
                         active = isBookmarked,
-                        activeColor = Color(0xFFEAB308)
+                        activeColor = NimazColors.Gold500
                     )
                     NimazPillActionButton(
                         icon = Icons.Default.Share,
@@ -398,12 +399,12 @@ private fun BookCard(
 @Composable
 private fun getBookGradient(bookId: String): List<Color> {
     return when (bookId.lowercase()) {
-        "bukhari" -> listOf(Color(0xFF22C55E), Color(0xFF16A34A))
-        "muslim" -> listOf(Color(0xFF3B82F6), Color(0xFF2563EB))
-        "tirmidhi" -> listOf(Color(0xFFA855F7), Color(0xFF9333EA))
-        "nasai" -> listOf(Color(0xFFF97316), Color(0xFFEA580C))
-        "abudawud" -> listOf(Color(0xFFEC4899), Color(0xFFDB2777))
-        "ibnmajah" -> listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
-        else -> listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
+        "bukhari" -> NimazColors.HadithCollectionColors.Bukhari
+        "muslim" -> NimazColors.HadithCollectionColors.Muslim
+        "tirmidhi" -> NimazColors.HadithCollectionColors.Tirmidhi
+        "nasai" -> NimazColors.HadithCollectionColors.Nasai
+        "abudawud" -> NimazColors.HadithCollectionColors.AbuDawud
+        "ibnmajah" -> NimazColors.HadithCollectionColors.IbnMajah
+        else -> NimazColors.HadithCollectionColors.Default
     }
 }

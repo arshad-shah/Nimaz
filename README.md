@@ -16,6 +16,10 @@ The app is built with modern Android tooling:
 
 Core content and functionality are designed to remain available without constant network access.
 
+> **Architecture:** see [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — the source of truth
+> for layering, patterns, DI, navigation, theming, diagrams, and the new-feature recipe.
+> Agents should also read [`CLAUDE.md`](CLAUDE.md).
+
 ## Main Features
 
 - Prayer times and prayer tracking

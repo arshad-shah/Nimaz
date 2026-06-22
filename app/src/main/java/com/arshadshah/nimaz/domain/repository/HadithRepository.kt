@@ -41,6 +41,10 @@ interface HadithRepository {
     suspend fun updateBookmark(bookmark: HadithBookmark)
     suspend fun deleteBookmark(hadithId: String)
 
+    // Daily content (seeds the backfill before reading)
+    suspend fun getHadithCount(): Int
+    suspend fun getHadithByOffset(offset: Int): Hadith?
+
     // Data initialization
     suspend fun initializeHadithData()
     suspend fun isDataInitialized(): Boolean

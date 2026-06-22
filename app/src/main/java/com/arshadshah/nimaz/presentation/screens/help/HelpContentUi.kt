@@ -48,6 +48,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.domain.model.HelpItem
 import com.arshadshah.nimaz.domain.model.HelpStep
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -70,13 +71,13 @@ fun helpIcon(key: String?): ImageVector = when (key) {
 
 @Composable
 fun helpColor(key: String): Color = when (key) {
-    "indigo" -> Color(0xFF6366F1)
-    "gold" -> Color(0xFFEAB308)
-    "teal" -> Color(0xFF14B8A6)
-    "green" -> Color(0xFF22C55E)
-    "violet" -> Color(0xFF8B5CF6)
-    "orange" -> Color(0xFFF97316)
-    "sky" -> Color(0xFF0EA5E9)
+    "indigo" -> NimazColors.PrayerColors.Fajr
+    "gold" -> NimazColors.Gold500
+    "teal" -> NimazColors.Primary
+    "green" -> NimazColors.Success
+    "violet" -> NimazColors.PrayerColors.Isha
+    "orange" -> NimazColors.PrayerColors.Asr
+    "sky" -> NimazColors.Sky
     else -> MaterialTheme.colorScheme.primary
 }
 

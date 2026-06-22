@@ -10,6 +10,13 @@ data class DuaCategory(
     val duaCount: Int
 )
 
+/** A single dua chosen for "dua of the day", with its category label/icon. */
+data class DailyDuaSelection(
+    val dua: Dua,
+    val categoryName: String,
+    val categoryIcon: String?
+)
+
 data class Dua(
     val id: String,
     val categoryId: String,

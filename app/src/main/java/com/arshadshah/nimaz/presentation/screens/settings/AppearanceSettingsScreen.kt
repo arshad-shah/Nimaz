@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -156,7 +157,7 @@ private fun ThemeSelectionCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFF0C0A09))
+                        .background(NimazColors.Neutral950)
                 ) {
                     ThemePreviewContent(contentColor = Color.White)
                 }
@@ -171,9 +172,9 @@ private fun ThemeSelectionCard(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color(0xFFF5F5F4))
+                        .background(NimazColors.Neutral100)
                 ) {
-                    ThemePreviewContent(contentColor = Color(0xFF0C0A09))
+                    ThemePreviewContent(contentColor = NimazColors.Neutral950)
                 }
             }
             ThemePreviewOption(
@@ -187,7 +188,7 @@ private fun ThemeSelectionCard(
                     Canvas(modifier = Modifier.fillMaxSize()) {
                         val w = size.width
                         val h = size.height
-                        drawRect(color = Color(0xFF0C0A09))
+                        drawRect(color = NimazColors.Neutral950)
                         drawPath(
                             path = androidx.compose.ui.graphics.Path().apply {
                                 moveTo(w, 0f)
@@ -195,7 +196,7 @@ private fun ThemeSelectionCard(
                                 lineTo(0f, h)
                                 close()
                             },
-                            color = Color(0xFFF5F5F4)
+                            color = NimazColors.Neutral100
                         )
                     }
                 }

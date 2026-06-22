@@ -1,4 +1,10 @@
-# Nimaz Pro - Claude Code Task Instructions
+# Nimaz - Claude Code Task Instructions
+
+> **Historical reference.** This is an original design/planning document from the initial build;
+> it does **not** necessarily reflect the current code. For how the app is built today see
+> [`ARCHITECTURE.md`](ARCHITECTURE.md), [`NAVIGATION.md`](NAVIGATION.md) and
+> [`SUBSYSTEMS.md`](SUBSYSTEMS.md). App name: **Nimaz**; package: **`com.arshadshah.nimaz`**.
+
 
 > **Important**: Execute these tasks in order. Each task builds on the previous. Do not skip tasks.
 
@@ -22,7 +28,7 @@ Before starting, ensure you have:
 ```
 1. Create new Android Studio project:
    - Template: Empty Compose Activity
-   - Package name: com.nimazpro.app
+   - Package name: com.arshadshah.nimaz
    - Minimum SDK: 26 (Android 8.0)
    - Build configuration: Kotlin DSL
 
@@ -78,7 +84,7 @@ plugins {
 **Objective**: Set up the Clean Architecture folder structure.
 
 ```
-Create the following package structure under app/src/main/java/com/nimazpro/app/:
+Create the following package structure under app/src/main/java/com/arshadshah/nimaz/:
 
 ├── NimazProApp.kt
 ├── MainActivity.kt
@@ -123,7 +129,7 @@ Create the following package structure under app/src/main/java/com/nimazpro/app/
 
 **Create NimazProApp.kt**:
 ```kotlin
-package com.nimazpro.app
+package com.arshadshah.nimaz
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp
@@ -134,7 +140,7 @@ class NimazProApp : Application()
 
 **Create MainActivity.kt**:
 ```kotlin
-package com.nimazpro.app
+package com.arshadshah.nimaz
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -143,7 +149,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.nimazpro.app.presentation.theme.NimazProTheme
+import com.arshadshah.nimaz.presentation.theme.NimazProTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -179,7 +185,7 @@ class MainActivity : ComponentActivity() {
 
 **Create presentation/theme/Color.kt**:
 ```kotlin
-package com.nimazpro.app.presentation.theme
+package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
@@ -232,7 +238,7 @@ object NimazColors {
 
 **Create presentation/theme/Type.kt**:
 ```kotlin
-package com.nimazpro.app.presentation.theme
+package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
@@ -240,7 +246,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.R
+import com.arshadshah.nimaz.R
 
 val OutfitFontFamily = FontFamily(
     Font(R.font.outfit_regular, FontWeight.Normal),
@@ -358,7 +364,7 @@ val NimazTypography = Typography(
 
 **Create presentation/theme/Shape.kt**:
 ```kotlin
-package com.nimazpro.app.presentation.theme
+package com.arshadshah.nimaz.presentation.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Shapes
@@ -375,7 +381,7 @@ val NimazShapes = Shapes(
 
 **Create presentation/theme/Theme.kt**:
 ```kotlin
-package com.nimazpro.app.presentation.theme
+package com.arshadshah.nimaz.presentation.theme
 
 import android.app.Activity
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -473,7 +479,7 @@ fun NimazProTheme(
 
 **Create data/local/database/entity/SurahEntity.kt**:
 ```kotlin
-package com.nimazpro.app.data.local.database.entity
+package com.arshadshah.nimaz.data.local.database.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
@@ -516,12 +522,12 @@ data class SurahEntity(
 
 **Create data/local/database/NimazDatabase.kt**:
 ```kotlin
-package com.nimazpro.app.data.local.database
+package com.arshadshah.nimaz.data.local.database
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import com.nimazpro.app.data.local.database.dao.*
-import com.nimazpro.app.data.local.database.entity.*
+import com.arshadshah.nimaz.data.local.database.dao.*
+import com.arshadshah.nimaz.data.local.database.entity.*
 
 @Database(
     entities = [
@@ -564,11 +570,11 @@ abstract class NimazDatabase : RoomDatabase() {
 
 **Create core/di/DatabaseModule.kt**:
 ```kotlin
-package com.nimazpro.app.core.di
+package com.arshadshah.nimaz.core.di
 
 import android.content.Context
 import androidx.room.Room
-import com.nimazpro.app.data.local.database.NimazDatabase
+import com.arshadshah.nimaz.data.local.database.NimazDatabase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -632,7 +638,7 @@ object DatabaseModule {
 
 **Create core/navigation/Routes.kt**:
 ```kotlin
-package com.nimazpro.app.core.navigation
+package com.arshadshah.nimaz.core.navigation
 
 import kotlinx.serialization.Serializable
 
@@ -671,14 +677,14 @@ sealed interface Routes {
 
 **Create core/navigation/NavGraph.kt**:
 ```kotlin
-package com.nimazpro.app.core.navigation
+package com.arshadshah.nimaz.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
-import com.nimazpro.app.presentation.screens.home.HomeScreen
+import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
 // Import all other screens...
 
 @Composable
@@ -752,10 +758,10 @@ class MainActivity : ComponentActivity() {
 
 **Create data/local/database/dao/QuranDao.kt**:
 ```kotlin
-package com.nimazpro.app.data.local.database.dao
+package com.arshadshah.nimaz.data.local.database.dao
 
 import androidx.room.*
-import com.nimazpro.app.data.local.database.entity.*
+import com.arshadshah.nimaz.data.local.database.entity.*
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -837,7 +843,7 @@ data class AyahWithSurah(
 
 **Create domain/model/Surah.kt**:
 ```kotlin
-package com.nimazpro.app.domain.model
+package com.arshadshah.nimaz.domain.model
 
 data class Surah(
     val id: Int,
@@ -883,9 +889,9 @@ data class ReadingProgress(
 
 **Create domain/repository/QuranRepository.kt**:
 ```kotlin
-package com.nimazpro.app.domain.repository
+package com.arshadshah.nimaz.domain.repository
 
-import com.nimazpro.app.domain.model.*
+import com.arshadshah.nimaz.domain.model.*
 import kotlinx.coroutines.flow.Flow
 
 interface QuranRepository {
@@ -926,13 +932,13 @@ enum class SearchResultType {
 
 **Create data/repository/QuranRepositoryImpl.kt**:
 ```kotlin
-package com.nimazpro.app.data.repository
+package com.arshadshah.nimaz.data.repository
 
-import com.nimazpro.app.data.local.database.dao.QuranDao
-import com.nimazpro.app.data.local.database.entity.QuranBookmarkEntity
-import com.nimazpro.app.data.local.database.entity.ReadingProgressEntity
-import com.nimazpro.app.domain.model.*
-import com.nimazpro.app.domain.repository.QuranRepository
+import com.arshadshah.nimaz.data.local.database.dao.QuranDao
+import com.arshadshah.nimaz.data.local.database.entity.QuranBookmarkEntity
+import com.arshadshah.nimaz.data.local.database.entity.ReadingProgressEntity
+import com.arshadshah.nimaz.domain.model.*
+import com.arshadshah.nimaz.domain.repository.QuranRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
@@ -1078,12 +1084,12 @@ class QuranRepositoryImpl @Inject constructor(
 
 **Create presentation/screens/quran/QuranViewModel.kt**:
 ```kotlin
-package com.nimazpro.app.presentation.screens.quran
+package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.nimazpro.app.domain.model.*
-import com.nimazpro.app.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.model.*
+import com.arshadshah.nimaz.domain.repository.QuranRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch

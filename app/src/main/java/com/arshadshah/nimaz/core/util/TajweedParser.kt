@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.presentation.theme.NimazColors.TajweedColors
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -135,6 +136,7 @@ object TajweedParser {
                 }
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             // If parsing fails, return the raw text without colors
             buildAnnotatedString {
                 append(stripJson(tajweedText))
@@ -154,6 +156,7 @@ object TajweedParser {
             val segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
             segments.joinToString("") { it.t }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             stripJson(tajweedText)
         }
     }

@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import app.cash.turbine.test
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -38,7 +38,7 @@ class FastingViewModelTest {
 
     private lateinit var repository: FastingRepository
     private lateinit var prayerTimeCalculator: PrayerTimeCalculator
-    private lateinit var preferencesDataStore: PreferencesDataStore
+    private lateinit var settingsRepository: SettingsRepository
     private lateinit var viewModel: FastingViewModel
 
     private val now = System.currentTimeMillis()
@@ -49,11 +49,11 @@ class FastingViewModelTest {
 
         repository = mockk(relaxed = true)
         prayerTimeCalculator = mockk(relaxed = true)
-        preferencesDataStore = mockk(relaxed = true)
+        settingsRepository = mockk(relaxed = true)
 
         // Provide defaults so ViewModel init doesn't crash
-        every { preferencesDataStore.latitude } returns flowOf(53.3498)
-        every { preferencesDataStore.longitude } returns flowOf(-6.2603)
+        every { settingsRepository.latitude } returns flowOf(53.3498)
+        every { settingsRepository.longitude } returns flowOf(-6.2603)
         coEvery { repository.getFastRecordForDate(any()) } returns null
         every { repository.getFastRecordsInRange(any(), any()) } returns flowOf(emptyList())
         every { repository.getPendingMakeupFasts() } returns flowOf(emptyList())
@@ -74,7 +74,7 @@ class FastingViewModelTest {
     }
 
     private fun createViewModel(): FastingViewModel {
-        return FastingViewModel(repository, prayerTimeCalculator, preferencesDataStore)
+        return FastingViewModel(buildFastingUseCases(repository), prayerTimeCalculator, settingsRepository)
     }
 
     private fun dateToEpoch(date: LocalDate): Long {

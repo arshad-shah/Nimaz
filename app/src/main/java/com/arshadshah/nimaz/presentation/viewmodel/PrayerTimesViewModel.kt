@@ -2,8 +2,9 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -11,7 +12,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -73,8 +74,8 @@ sealed interface PrayerTimesEvent {
 @HiltViewModel
 class PrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore,
+    private val prayerUseCases: PrayerUseCases,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerTimesUiState())
@@ -103,6 +104,13 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTimesEvent) {
         when (event) {
+            PrayerTimesEvent.PreviousDay -> AppAnalytics.logFeatureUsed("prayer_times", "previous_day")
+            PrayerTimesEvent.NextDay -> AppAnalytics.logFeatureUsed("prayer_times", "next_day")
+            PrayerTimesEvent.GoToToday -> AppAnalytics.logFeatureUsed("prayer_times", "go_to_today")
+            is PrayerTimesEvent.TogglePrayer -> AppAnalytics.logFeatureUsed("prayer_times", "toggle_prayer")
+            else -> {}
+        }
+        when (event) {
             PrayerTimesEvent.PreviousDay -> changeDay(-1)
             PrayerTimesEvent.NextDay -> changeDay(1)
             PrayerTimesEvent.GoToToday -> selectDate(LocalDate.now())
@@ -127,23 +135,23 @@ class PrayerTimesViewModel @Inject constructor(
     private fun observeSettings() {
         viewModelScope.launch {
             combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName,
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName,
             ) { lat, lng, name -> Triple(lat, lng, name) }
                 .combine(
                     combine(
-                        preferencesDataStore.calculationMethod,
-                        preferencesDataStore.asrCalculation,
-                        preferencesDataStore.highLatitudeRule,
+                        settingsRepository.calculationMethod,
+                        settingsRepository.asrCalculation,
+                        settingsRepository.highLatitudeRule,
                     ) { calc, asr, high -> Triple(calc, asr, high) },
                 ) { location, calcSettings -> Pair(location, calcSettings) }
                 .combine(
                     combine(
-                        preferencesDataStore.fajrAdjustment,
-                        preferencesDataStore.sunriseAdjustment,
-                        preferencesDataStore.dhuhrAdjustment,
-                        preferencesDataStore.asrAdjustment,
+                        settingsRepository.fajrAdjustment,
+                        settingsRepository.sunriseAdjustment,
+                        settingsRepository.dhuhrAdjustment,
+                        settingsRepository.asrAdjustment,
                     ) { fajr, sunrise, dhuhr, asr ->
                         mapOf(
                             PrayerType.FAJR to fajr,
@@ -153,8 +161,8 @@ class PrayerTimesViewModel @Inject constructor(
                         )
                     }.combine(
                         combine(
-                            preferencesDataStore.maghribAdjustment,
-                            preferencesDataStore.ishaAdjustment,
+                            settingsRepository.maghribAdjustment,
+                            settingsRepository.ishaAdjustment,
                         ) { maghrib, isha ->
                             mapOf(PrayerType.MAGHRIB to maghrib, PrayerType.ISHA to isha)
                         },
@@ -244,7 +252,7 @@ class PrayerTimesViewModel @Inject constructor(
         statusJob?.cancel()
         val dateKey = date.toEpochDay() * 86_400_000L
         statusJob = viewModelScope.launch {
-            prayerRepository.getPrayerRecordsForDate(dateKey).collect { records ->
+            prayerUseCases.getPrayerRecordsForDate(dateKey).collect { records ->
                 statuses = records.associate { it.prayerName to it.status }
                 applyTick()
             }
@@ -347,7 +355,7 @@ class PrayerTimesViewModel @Inject constructor(
                 if (current == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED
             val prayedAt =
                 if (newStatus == PrayerStatus.PRAYED) Instant.now().toEpochMilli() else null
-            prayerRepository.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
+            prayerUseCases.updatePrayerStatus(dateKey, name, newStatus, prayedAt, false)
             // getPrayerRecordsForDate re-emits → applyTick refreshes the UI.
         }
     }

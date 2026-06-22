@@ -16,12 +16,14 @@ import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.FastingRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
+import com.arshadshah.nimaz.data.repository.IslamicEventRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
@@ -31,11 +33,13 @@ import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.HelpRepository
+import com.arshadshah.nimaz.domain.repository.IslamicEventRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
@@ -59,6 +63,8 @@ import com.arshadshah.nimaz.domain.usecase.GetAsmaUlHusnaByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUnNabiByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
 import com.arshadshah.nimaz.domain.usecase.GetCourseProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteAsmaUlHusnaUseCase
@@ -124,6 +130,110 @@ import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.arshadshah.nimaz.domain.usecase.UnmarkAyahReadUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateReadingPositionUseCase
+import com.arshadshah.nimaz.domain.usecase.CompleteSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteCustomPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteFastRecordByDateUseCase
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.FastingUseCases
+import com.arshadshah.nimaz.domain.usecase.GetActiveSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCategoryByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChapterByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChaptersByBookUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCompletedSessionsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCustomPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDefaultPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByCategoryUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByOccasionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastingStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFavoriteDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithOfTheDayUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByChapterUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPresetByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetProgressForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetRamadanFastedCountUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTasbihStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalCountInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.GetVoluntaryFastCountUseCase
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.usecase.InsertFastRecordUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.IsDuaFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.IsHadithBookmarkedUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkMakeupFastCompletedUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
+import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
+import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
+import com.arshadshah.nimaz.domain.usecase.ToggleBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleDuaFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleLocationFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateFastRecordUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateFastStatusUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdatePresetUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateSessionCountUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteCalculationUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllHistoryUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllLocationsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCurrentLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCurrentStreakUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFavoriteLocationsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetLongestStreakUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerTimesForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTodayPrayerRecordsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertCalculationUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkAsPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.domain.usecase.SetCurrentLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdatePrayerStatusUseCase
+import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
+import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
+import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.AddHighlightUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateHighlightUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteHighlightUseCase
+import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.AddNoteUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateNoteUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteNoteUseCase
+import com.arshadshah.nimaz.domain.usecase.ExportAnnotationsUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
+import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyHadithUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyDuaUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -266,6 +376,18 @@ abstract class RepositoryModule {
     abstract fun bindQaidaRepository(
         qaidaRepositoryImpl: QaidaRepositoryImpl
     ): QaidaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindIslamicEventRepository(
+        islamicEventRepositoryImpl: IslamicEventRepositoryImpl
+    ): IslamicEventRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        preferencesDataStore: PreferencesDataStore
+    ): SettingsRepository
 }
 
 @Module
@@ -279,6 +401,8 @@ object UseCaseModule {
     ): QuranUseCases {
         return QuranUseCases(
             getSurahList = GetSurahListUseCase(repository),
+            getSurahByNumber = GetSurahByNumberUseCase(repository),
+            getAyahsBySurah = GetAyahsBySurahUseCase(repository),
             getSurahWithAyahs = GetSurahWithAyahsUseCase(repository),
             getAyahsByJuz = GetAyahsByJuzUseCase(repository),
             getAyahsByPage = GetAyahsByPageUseCase(repository),
@@ -406,6 +530,170 @@ object UseCaseModule {
             getCourseProgress = GetCourseProgressUseCase(repository),
             resetProgress = ResetQaidaProgressUseCase(repository),
             observeCompletedCells = ObserveCompletedCellsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideTasbihUseCases(
+        repository: TasbihRepository
+    ): TasbihUseCases {
+        return TasbihUseCases(
+            getDefaultPresets = GetDefaultPresetsUseCase(repository),
+            getCustomPresets = GetCustomPresetsUseCase(repository),
+            getPresetById = GetPresetByIdUseCase(repository),
+            insertPreset = InsertPresetUseCase(repository),
+            updatePreset = UpdatePresetUseCase(repository),
+            deleteCustomPreset = DeleteCustomPresetUseCase(repository),
+            seedMissingDefaults = SeedMissingDefaultsUseCase(repository),
+            getSessionsForDate = GetSessionsForDateUseCase(repository),
+            getSessionsInRange = GetSessionsInRangeUseCase(repository),
+            getActiveSession = GetActiveSessionUseCase(repository),
+            getSessionById = GetSessionByIdUseCase(repository),
+            insertSession = InsertSessionUseCase(repository),
+            updateSessionCount = UpdateSessionCountUseCase(repository),
+            completeSession = CompleteSessionUseCase(repository),
+            getTasbihStats = GetTasbihStatsUseCase(repository),
+            getTotalCountInRange = GetTotalCountInRangeUseCase(repository),
+            getCompletedSessionsInRange = GetCompletedSessionsInRangeUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideDuaUseCases(
+        repository: DuaRepository
+    ): DuaUseCases {
+        return DuaUseCases(
+            getAllCategories = GetAllCategoriesUseCase(repository),
+            getCategoryById = GetCategoryByIdUseCase(repository),
+            getDuaById = GetDuaByIdUseCase(repository),
+            getDuasByCategory = GetDuasByCategoryUseCase(repository),
+            getDuasByOccasion = GetDuasByOccasionUseCase(repository),
+            getFavoriteDuas = GetFavoriteDuasUseCase(repository),
+            getProgressForDate = GetProgressForDateUseCase(repository),
+            isDuaFavorite = IsDuaFavoriteUseCase(repository),
+            searchDuas = SearchDuasUseCase(repository),
+            toggleFavorite = ToggleDuaFavoriteUseCase(repository),
+            getAllBookmarks = GetDuaBookmarksUseCase(repository),
+            deleteBookmark = DeleteDuaBookmarkUseCase(repository),
+            getDailyDua = GetDailyDuaUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideHadithUseCases(
+        repository: HadithRepository
+    ): HadithUseCases {
+        return HadithUseCases(
+            getAllBooks = GetAllBooksUseCase(repository),
+            getBookById = GetBookByIdUseCase(repository),
+            getChaptersByBook = GetChaptersByBookUseCase(repository),
+            getChapterById = GetChapterByIdUseCase(repository),
+            getHadithsByChapter = GetHadithsByChapterUseCase(repository),
+            getHadithById = GetHadithByIdUseCase(repository),
+            getHadithByNumber = GetHadithByNumberUseCase(repository),
+            getHadithsByGrade = GetHadithsByGradeUseCase(repository),
+            getHadithOfTheDay = GetHadithOfTheDayUseCase(repository),
+            searchHadiths = SearchHadithsUseCase(repository),
+            searchHadithsInBook = SearchHadithsInBookUseCase(repository),
+            getAllBookmarks = GetAllBookmarksUseCase(repository),
+            isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
+            toggleBookmark = ToggleBookmarkUseCase(repository),
+            updateBookmark = UpdateHadithBookmarkUseCase(repository),
+            deleteBookmark = DeleteHadithBookmarkUseCase(repository),
+            getDailyHadith = GetDailyHadithUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideFastingUseCases(
+        repository: FastingRepository
+    ): FastingUseCases {
+        return FastingUseCases(
+            getFastRecordForDate = GetFastRecordForDateUseCase(repository),
+            getFastRecordsInRange = GetFastRecordsInRangeUseCase(repository),
+            insertFastRecord = InsertFastRecordUseCase(repository),
+            updateFastRecord = UpdateFastRecordUseCase(repository),
+            updateFastStatus = UpdateFastStatusUseCase(repository),
+            deleteFastRecordByDate = DeleteFastRecordByDateUseCase(repository),
+            getRamadanFastedCount = GetRamadanFastedCountUseCase(repository),
+            getVoluntaryFastCount = GetVoluntaryFastCountUseCase(repository),
+            getFastingStats = GetFastingStatsUseCase(repository),
+            getAllMakeupFasts = GetAllMakeupFastsUseCase(repository),
+            getPendingMakeupFasts = GetPendingMakeupFastsUseCase(repository),
+            getMakeupFastCountForDate = GetMakeupFastCountForDateUseCase(repository),
+            insertMakeupFast = InsertMakeupFastUseCase(repository),
+            updateMakeupFast = UpdateMakeupFastUseCase(repository),
+            markMakeupFastCompleted = MarkMakeupFastCompletedUseCase(repository),
+            markFidyaPaid = MarkFidyaPaidUseCase(repository),
+            getTotalFidyaPaid = GetTotalFidyaPaidUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun providePrayerUseCases(
+        repository: PrayerRepository
+    ): PrayerUseCases {
+        return PrayerUseCases(
+            getPrayerRecordsForDate = GetPrayerRecordsForDateUseCase(repository),
+            getPrayerRecordsInRange = GetPrayerRecordsInRangeUseCase(repository),
+            getTodayPrayerRecords = GetTodayPrayerRecordsUseCase(repository),
+            updatePrayerStatus = UpdatePrayerStatusUseCase(repository),
+            getPrayerTimesForDate = GetPrayerTimesForDateUseCase(repository),
+            getCurrentStreak = GetCurrentStreakUseCase(repository),
+            getLongestStreak = GetLongestStreakUseCase(repository),
+            getMissedPrayersRequiringQada = GetMissedPrayersRequiringQadaUseCase(repository),
+            getPrayerStats = GetPrayerStatsUseCase(repository),
+            getCurrentLocation = GetCurrentLocationUseCase(repository),
+            getAllLocations = GetAllLocationsUseCase(repository),
+            getFavoriteLocations = GetFavoriteLocationsUseCase(repository),
+            insertLocation = InsertLocationUseCase(repository),
+            deleteLocation = DeleteLocationUseCase(repository),
+            setCurrentLocation = SetCurrentLocationUseCase(repository),
+            toggleFavorite = ToggleLocationFavoriteUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideZakatUseCases(
+        repository: ZakatRepository
+    ): ZakatUseCases {
+        return ZakatUseCases(
+            getAllHistory = GetAllHistoryUseCase(repository),
+            insertCalculation = InsertCalculationUseCase(repository),
+            markAsPaid = MarkAsPaidUseCase(repository),
+            getTotalPaid = GetTotalPaidUseCase(repository),
+            deleteCalculation = DeleteCalculationUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideTafseerUseCases(
+        repository: TafseerRepository
+    ): TafseerUseCases {
+        return TafseerUseCases(
+            getTafseerForAyah = GetTafseerForAyahUseCase(repository),
+            getHighlightsForAyah = GetHighlightsForAyahUseCase(repository),
+            addHighlight = AddHighlightUseCase(repository),
+            updateHighlight = UpdateHighlightUseCase(repository),
+            deleteHighlight = DeleteHighlightUseCase(repository),
+            getNotesForAyah = GetNotesForAyahUseCase(repository),
+            addNote = AddNoteUseCase(repository),
+            updateNote = UpdateNoteUseCase(repository),
+            deleteNote = DeleteNoteUseCase(repository),
+            exportAnnotations = ExportAnnotationsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideIslamicEventUseCases(
+        repository: IslamicEventRepository
+    ): IslamicEventUseCases {
+        return IslamicEventUseCases(
+            getAllEvents = GetAllIslamicEventsUseCase(repository)
         )
     }
 }

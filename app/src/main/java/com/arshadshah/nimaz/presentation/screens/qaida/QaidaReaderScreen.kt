@@ -29,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCelebrationOverlay
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLessonLines
+import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
 
 /**
@@ -42,7 +43,7 @@ fun QaidaReaderScreen(
     onNavigateBack: () -> Unit,
     viewModel: QaidaReaderViewModel = hiltViewModel(),
 ) {
-    LaunchedEffect(lessonId) { viewModel.selectLesson(lessonId) }
+    LaunchedEffect(lessonId) { viewModel.onEvent(QaidaReaderEvent.SelectLesson(lessonId)) }
 
     val content by viewModel.lessonContent.collectAsStateWithLifecycle()
     val playing by viewModel.playingCell.collectAsStateWithLifecycle()
@@ -102,8 +103,8 @@ fun QaidaReaderScreen(
                     content = c,
                     playingCellId = playing?.id,
                     showTransliteration = showTransliteration,
-                    onCellTap = viewModel::onCellTapped,
-                    onPlayLine = viewModel::playLine,
+                    onCellTap = { viewModel.onEvent(QaidaReaderEvent.CellTapped(it)) },
+                    onPlayLine = { viewModel.onEvent(QaidaReaderEvent.PlayLine(it)) },
                     completedCellIds = completedCellIds,
                 )
             }
@@ -115,7 +116,7 @@ fun QaidaReaderScreen(
                 unlockedTitle = unlockedTitle,
                 onNext = {
                     showCelebration = false
-                    viewModel.nextLesson()
+                    viewModel.onEvent(QaidaReaderEvent.NextLesson)
                 },
                 onMap = onNavigateBack,
             )

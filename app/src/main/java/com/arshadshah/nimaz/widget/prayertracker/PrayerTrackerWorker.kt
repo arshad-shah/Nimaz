@@ -6,6 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
@@ -79,6 +80,8 @@ class PrayerTrackerWorker @AssistedInject constructor(
             setWidgetState(glanceIds, PrayerTrackerWidgetState.Success(data))
             Result.success()
         } catch (e: Exception) {
+            CrashReporter.log("PrayerTrackerWorker failed")
+            CrashReporter.recordException(e)
             setWidgetState(glanceIds, PrayerTrackerWidgetState.Error(e.message))
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }

@@ -587,10 +587,10 @@ private fun EventTag(event: IslamicEvent) {
 }
 
 private fun eventAccent(type: IslamicEventType): Color = when (type) {
-    IslamicEventType.HOLIDAY -> Color(0xFFEAB308)
-    IslamicEventType.NIGHT -> Color(0xFF8B5CF6)
-    IslamicEventType.FAST -> Color(0xFF14B8A6)
-    IslamicEventType.HISTORICAL -> Color(0xFF6366F1)
+    IslamicEventType.HOLIDAY -> NimazColors.Gold500
+    IslamicEventType.NIGHT -> NimazColors.PrayerColors.Isha
+    IslamicEventType.FAST -> NimazColors.Primary
+    IslamicEventType.HISTORICAL -> NimazColors.PrayerColors.Fajr
 }
 
 /** Fast length from a formatted Fajr → Maghrib pair ("h:mm a"); null if unparseable. */

@@ -28,6 +28,7 @@ import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLetterBoard
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaLetterDetailSheet
+import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
 
 /**
@@ -74,7 +75,7 @@ fun QaidaLettersScreen(
             ) {
                 QaidaLetterDetailSheet(
                     letter = letter,
-                    onPlay = viewModel::playLetter,
+                    onPlay = { viewModel.onEvent(QaidaReaderEvent.PlayLetter(it)) },
                 )
             }
         }

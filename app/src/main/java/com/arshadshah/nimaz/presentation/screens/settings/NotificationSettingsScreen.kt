@@ -59,6 +59,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
@@ -73,11 +74,11 @@ import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
 // Prayer accent colors matching the HTML prototype
-private val FajrColor = Color(0xFF6366F1)
-private val DhuhrColor = Color(0xFFEAB308)
-private val AsrColor = Color(0xFFF97316)
-private val MaghribColor = Color(0xFFEF4444)
-private val IshaColor = Color(0xFF8B5CF6)
+private val FajrColor = NimazColors.PrayerColors.Fajr
+private val DhuhrColor = NimazColors.Gold500
+private val AsrColor = NimazColors.PrayerColors.Asr
+private val MaghribColor = NimazColors.PrayerColors.Maghrib
+private val IshaColor = NimazColors.PrayerColors.Isha
 
 private data class PrayerNotificationData(
     val name: String,
@@ -489,7 +490,7 @@ fun NotificationSettingsScreen(
                                         ),
                                         style = MaterialTheme.typography.bodySmall,
                                         color = if (isExempted) MaterialTheme.colorScheme.primary
-                                        else Color(0xFFF59E0B)
+                                        else NimazColors.Warning
                                     )
                                 }
                                 if (isExempted) {
@@ -518,7 +519,7 @@ fun NotificationSettingsScreen(
                                     modifier = Modifier.fillMaxWidth(),
                                     shape = RoundedCornerShape(12.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = Color(0xFFF59E0B),
+                                        containerColor = NimazColors.Warning,
                                         contentColor = Color.White
                                     )
                                 ) {
@@ -743,7 +744,7 @@ private fun PrayerNotificationRowEnabledPreview() {
             prayer = PrayerNotificationData(
                 name = "Fajr",
                 key = "fajr",
-                accentColor = Color(0xFF5B8DEF),
+                accentColor = NimazColors.InfoSoft,
                 isEnabled = true,
                 isSoundOn = true
             ),
@@ -762,7 +763,7 @@ private fun PrayerNotificationRowDisabledPreview() {
             prayer = PrayerNotificationData(
                 name = "Dhuhr",
                 key = "dhuhr",
-                accentColor = Color(0xFFFACC15),
+                accentColor = NimazColors.Gold400,
                 isEnabled = false,
                 isSoundOn = false
             ),

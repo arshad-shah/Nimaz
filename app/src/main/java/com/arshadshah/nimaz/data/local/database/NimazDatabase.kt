@@ -67,6 +67,13 @@ import com.arshadshah.nimaz.data.local.database.entity.TasbihSessionEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
 
+/**
+ * Single source of truth for the database schema version. Bump this (and add a
+ * migration) for any schema change — it drives both the Room `@Database(version = …)`
+ * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
+ */
+const val NIMAZ_DATABASE_VERSION = 17
+
 @Database(
     entities = [
         // Quran
@@ -129,7 +136,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
         LocationEntity::class,
         IslamicEventEntity::class
     ],
-    version = 17,
+    version = NIMAZ_DATABASE_VERSION,
     exportSchema = true
 )
 abstract class NimazDatabase : RoomDatabase() {
@@ -153,10 +160,10 @@ abstract class NimazDatabase : RoomDatabase() {
     companion object {
         const val DATABASE_NAME = "nimaz_database"
 
-        // Current Room schema version. Keep in sync with @Database(version = ...)
-        // above. Exposed so crash reports can be tagged with the schema version,
-        // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 16
+        // Exposed so crash reports can be tagged with the schema version, which
+        // makes migration-related crashes far easier to diagnose. Derived from the
+        // single source of truth so it can never drift from @Database(version = …).
+        const val SCHEMA_VERSION = NIMAZ_DATABASE_VERSION
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(

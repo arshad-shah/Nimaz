@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
+import com.arshadshah.nimaz.domain.model.PageAyahRange
 
 /**
  * Pre-computes the LazyColumn item index for each Juz header (1..30).

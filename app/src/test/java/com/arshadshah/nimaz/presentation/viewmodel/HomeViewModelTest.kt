@@ -4,14 +4,12 @@ import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.database.dao.DuaDao
-import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
-import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
-import com.arshadshah.nimaz.data.local.database.dao.FastingDao
-import com.arshadshah.nimaz.data.local.database.dao.HadithDao
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.repository.DuaRepository
+import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.google.common.truth.Truth.assertThat
 import io.mockk.every
@@ -43,12 +41,10 @@ class HomeViewModelTest {
     private lateinit var context: Context
     private lateinit var prayerTimeCalculator: PrayerTimeCalculator
     private lateinit var prayerRepository: PrayerRepository
-    private lateinit var preferencesDataStore: PreferencesDataStore
-    private lateinit var fastingDao: FastingDao
-    private lateinit var hadithDao: HadithDao
-    private lateinit var duaDao: DuaDao
-    private lateinit var duaContentSeeder: DuaContentSeeder
-    private lateinit var hadithBackfillSeeder: HadithBackfillSeeder
+    private lateinit var fastingRepository: FastingRepository
+    private lateinit var hadithRepository: HadithRepository
+    private lateinit var duaRepository: DuaRepository
+    private lateinit var settingsRepository: SettingsRepository
 
     @Before
     fun setUp() {
@@ -57,12 +53,10 @@ class HomeViewModelTest {
         context = ApplicationProvider.getApplicationContext()
         prayerTimeCalculator = mockk(relaxed = true)
         prayerRepository = mockk(relaxed = true)
-        preferencesDataStore = mockk(relaxed = true)
-        fastingDao = mockk(relaxed = true)
-        hadithDao = mockk(relaxed = true)
-        duaDao = mockk(relaxed = true)
-        duaContentSeeder = mockk(relaxed = true)
-        hadithBackfillSeeder = mockk(relaxed = true)
+        fastingRepository = mockk(relaxed = true)
+        hadithRepository = mockk(relaxed = true)
+        duaRepository = mockk(relaxed = true)
+        settingsRepository = mockk(relaxed = true)
 
         // The today's-records Flow emits synchronously, mirroring Room emitting an
         // initial value during ViewModel init before the rest of the constructor
@@ -78,13 +72,11 @@ class HomeViewModelTest {
     private fun createViewModel() = HomeViewModel(
         context = context,
         prayerTimeCalculator = prayerTimeCalculator,
-        prayerRepository = prayerRepository,
-        preferencesDataStore = preferencesDataStore,
-        fastingDao = fastingDao,
-        hadithDao = hadithDao,
-        duaDao = duaDao,
-        duaContentSeeder = duaContentSeeder,
-        hadithBackfillSeeder = hadithBackfillSeeder
+        prayerUseCases = buildPrayerUseCases(prayerRepository),
+        fastingUseCases = buildFastingUseCases(fastingRepository),
+        hadithUseCases = buildHadithUseCases(hadithRepository),
+        duaUseCases = buildDuaUseCases(duaRepository),
+        settingsRepository = settingsRepository
     )
 
     /**

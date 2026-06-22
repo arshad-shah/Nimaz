@@ -12,6 +12,7 @@ import android.graphics.pdf.PdfDocument
 import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
 import java.io.File
@@ -155,7 +156,7 @@ object PrayerTimesPdfExporter {
                 (27 + tileSize - pad).toInt()
             )
             logo.draw(c)
-        }
+        }.onFailure { CrashReporter.recordException(it) }
         val title = Paint().apply {
             isAntiAlias = true; color = Color.WHITE; typeface = bold; textSize = 25f
         }

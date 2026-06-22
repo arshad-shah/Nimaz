@@ -6,6 +6,7 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.widget.core.WidgetWork
@@ -120,6 +121,8 @@ class NextPrayerWorker @AssistedInject constructor(
             setWidgetState(glanceIds, NextPrayerWidgetState.Success(data))
             Result.success()
         } catch (e: Exception) {
+            CrashReporter.log("NextPrayerWorker failed")
+            CrashReporter.recordException(e)
             setWidgetState(glanceIds, NextPrayerWidgetState.Error(e.message))
             if (runAttemptCount < 3) Result.retry() else Result.failure()
         }

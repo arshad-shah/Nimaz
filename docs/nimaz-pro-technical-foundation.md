@@ -1,4 +1,10 @@
-# NIMAZ PRO
+# NIMAZ
+
+> **Historical reference.** This is an original design/planning document from the initial build;
+> it does **not** necessarily reflect the current code. For how the app is built today see
+> [`ARCHITECTURE.md`](ARCHITECTURE.md), [`NAVIGATION.md`](NAVIGATION.md) and
+> [`SUBSYSTEMS.md`](SUBSYSTEMS.md). App name: **Nimaz**; package: **`com.arshadshah.nimaz`**.
+
 ## Android Technical Foundation Document
 ### Complete Offline-First Islamic Companion App
 
@@ -23,7 +29,7 @@
 
 # 1. Executive Summary
 
-Nimaz Pro is a **100% offline-capable** Islamic companion app built with the latest Android technologies. This document provides the complete technical foundation for building the app, including database schemas, architecture patterns, and a comprehensive task list for Claude Code to execute.
+Nimaz is a **100% offline-capable** Islamic companion app built with the latest Android technologies. This document provides the complete technical foundation for building the app, including database schemas, architecture patterns, and a comprehensive task list for Claude Code to execute.
 
 ## 1.1 Core Principles
 
@@ -116,11 +122,11 @@ plugins {
 }
 
 android {
-    namespace = "com.nimazpro.app"
+    namespace = "com.arshadshah.nimaz"
     compileSdk = 35
     
     defaultConfig {
-        applicationId = "com.nimazpro.app"
+        applicationId = "com.arshadshah.nimaz"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
@@ -200,7 +206,7 @@ The app follows Clean Architecture with three main layers:
 ## 3.2 Package Structure
 
 ```
-com.nimazpro.app/
+com.arshadshah.nimaz/
 ├── NimazProApp.kt                    # @HiltAndroidApp
 ├── MainActivity.kt                   # @AndroidEntryPoint, single activity
 │
@@ -976,7 +982,7 @@ The following tasks should be executed in order. Each task creates a complete, t
 
 ### Task 1: Create Android Project
 
-Create new Android Studio project with Empty Compose Activity. Package: `com.nimazpro.app`. Min SDK 26, Target SDK 35.
+Create new Android Studio project with Empty Compose Activity. Package: `com.arshadshah.nimaz`. Min SDK 26, Target SDK 35.
 
 - Create project structure as defined in Section 3.2
 - Add all dependencies from Section 2.7 to build.gradle.kts
@@ -1425,7 +1431,7 @@ List any tasks this depends on.
 
 # Summary
 
-This document provides the complete technical foundation for building Nimaz Pro. Following the 35 tasks in order will result in a **100% functional offline-first app** with all data layers complete. The UI can then be built on top of this foundation, replacing the minimal placeholder screens with the designs from the HTML prototypes.
+This document provides the complete technical foundation for building Nimaz. Following the 35 tasks in order will result in a **100% functional offline-first app** with all data layers complete. The UI can then be built on top of this foundation, replacing the minimal placeholder screens with the designs from the HTML prototypes.
 
 ## Key Deliverables
 

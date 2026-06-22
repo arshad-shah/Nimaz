@@ -4,18 +4,19 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -245,8 +246,8 @@ sealed interface SettingsEvent {
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore,
+    private val prayerUseCases: PrayerUseCases,
+    private val settingsRepository: SettingsRepository,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     val adhanAudioManager: AdhanAudioManager,
     private val database: NimazDatabase
@@ -368,14 +369,14 @@ class SettingsViewModel @Inject constructor(
                         AppTheme.LIGHT -> "light"
                         AppTheme.DARK -> "dark"
                     }
-                    preferencesDataStore.setThemeMode(modeString)
+                    settingsRepository.setThemeMode(modeString)
                 }
             }
 
             is SettingsEvent.SetLanguage -> {
                 _generalState.update { it.copy(language = event.language) }
                 viewModelScope.launch {
-                    preferencesDataStore.setAppLanguage(event.language.code)
+                    settingsRepository.setAppLanguage(event.language.code)
                     LocaleHelper.setLocale(context, event.language.code)
                     _shouldRestart.value = true
                 }
@@ -383,45 +384,45 @@ class SettingsViewModel @Inject constructor(
 
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setUseHijriPrimary(event.enabled) }
+                viewModelScope.launch { settingsRepository.setUseHijriPrimary(event.enabled) }
             }
 
             is SettingsEvent.Set24HourFormat -> {
                 _generalState.update { it.copy(use24HourFormat = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setUse24HourFormat(event.enabled) }
+                viewModelScope.launch { settingsRepository.setUse24HourFormat(event.enabled) }
             }
 
             is SettingsEvent.SetShowSeconds -> _generalState.update { it.copy(showSeconds = event.enabled) }
             is SettingsEvent.SetHapticFeedback -> {
                 _generalState.update { it.copy(hapticFeedback = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setHapticFeedback(event.enabled) }
+                viewModelScope.launch { settingsRepository.setHapticFeedback(event.enabled) }
             }
 
             is SettingsEvent.SetShowIslamicPatterns -> {
                 _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowIslamicPatterns(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowIslamicPatterns(event.enabled) }
             }
 
             is SettingsEvent.SetAnimationsEnabled -> {
                 _generalState.update { it.copy(animationsEnabled = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setAnimationsEnabled(event.enabled) }
+                viewModelScope.launch { settingsRepository.setAnimationsEnabled(event.enabled) }
             }
 
             is SettingsEvent.SetShowCountdown -> {
                 _generalState.update { it.copy(showCountdown = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowCountdown(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowCountdown(event.enabled) }
             }
 
             is SettingsEvent.SetShowQuickActions -> {
                 _generalState.update { it.copy(showQuickActions = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowQuickActions(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowQuickActions(event.enabled) }
             }
 
             // Prayer
             is SettingsEvent.SetCalculationMethod -> {
                 _prayerState.update { it.copy(calculationMethod = event.method) }
                 viewModelScope.launch {
-                    preferencesDataStore.setCalculationMethod(event.method.name)
+                    settingsRepository.setCalculationMethod(event.method.name)
                     rescheduleNotifications()
                 }
             }
@@ -429,7 +430,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetAsrMethod -> {
                 _prayerState.update { it.copy(asrMethod = event.method) }
                 viewModelScope.launch {
-                    preferencesDataStore.setAsrCalculation(event.method.name.lowercase())
+                    settingsRepository.setAsrCalculation(event.method.name.lowercase())
                     rescheduleNotifications()
                 }
             }
@@ -437,7 +438,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetHighLatitudeRule -> {
                 _prayerState.update { it.copy(highLatitudeRule = event.rule) }
                 viewModelScope.launch {
-                    preferencesDataStore.setHighLatitudeRule(event.rule.name)
+                    settingsRepository.setHighLatitudeRule(event.rule.name)
                     rescheduleNotifications()
                 }
             }
@@ -455,7 +456,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetPrayerAdjustment -> {
                 updatePrayerAdjustment(event.prayer, event.minutes)
                 viewModelScope.launch {
-                    preferencesDataStore.setPrayerAdjustment(event.prayer, event.minutes)
+                    settingsRepository.setPrayerAdjustment(event.prayer, event.minutes)
                     rescheduleNotifications()
                 }
             }
@@ -464,7 +465,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetNotificationsEnabled -> {
                 _notificationState.update { it.copy(notificationsEnabled = event.enabled) }
                 viewModelScope.launch {
-                    preferencesDataStore.setPrayerNotificationsEnabled(event.enabled)
+                    settingsRepository.setPrayerNotificationsEnabled(event.enabled)
                     rescheduleNotifications()
                 }
             }
@@ -472,7 +473,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetPrayerNotification -> {
                 updatePrayerNotification(event.prayer, event.enabled)
                 viewModelScope.launch {
-                    preferencesDataStore.setPrayerNotificationEnabled(event.prayer, event.enabled)
+                    settingsRepository.setPrayerNotificationEnabled(event.prayer, event.enabled)
                     rescheduleNotifications()
                 }
             }
@@ -480,7 +481,7 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetAdhanEnabled -> {
                 _notificationState.update { it.copy(adhanEnabled = event.enabled) }
                 viewModelScope.launch {
-                    preferencesDataStore.setAdhanEnabled(event.enabled)
+                    settingsRepository.setAdhanEnabled(event.enabled)
                     rescheduleNotifications()
                 }
             }
@@ -488,24 +489,24 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetPrayerAdhanEnabled -> {
                 updatePrayerAdhanEnabled(event.prayer, event.enabled)
                 viewModelScope.launch {
-                    preferencesDataStore.setPrayerAdhanEnabled(event.prayer, event.enabled)
+                    settingsRepository.setPrayerAdhanEnabled(event.prayer, event.enabled)
                 }
             }
 
             is SettingsEvent.SetVibrationEnabled -> {
                 _notificationState.update { it.copy(vibrationEnabled = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setNotificationVibration(event.enabled) }
+                viewModelScope.launch { settingsRepository.setNotificationVibration(event.enabled) }
             }
 
             is SettingsEvent.SetRespectDnd -> {
                 _notificationState.update { it.copy(respectDnd = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setAdhanRespectDnd(event.enabled) }
+                viewModelScope.launch { settingsRepository.setAdhanRespectDnd(event.enabled) }
             }
 
             is SettingsEvent.SetReminderMinutes -> {
                 _notificationState.update { it.copy(reminderMinutes = event.minutes) }
                 viewModelScope.launch {
-                    preferencesDataStore.setNotificationReminderMinutes(event.minutes)
+                    settingsRepository.setNotificationReminderMinutes(event.minutes)
                     rescheduleNotifications()
                 }
             }
@@ -513,20 +514,20 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetShowReminderBefore -> {
                 _notificationState.update { it.copy(showReminderBefore = event.enabled) }
                 viewModelScope.launch {
-                    preferencesDataStore.setShowReminderBefore(event.enabled)
+                    settingsRepository.setShowReminderBefore(event.enabled)
                     rescheduleNotifications()
                 }
             }
 
             is SettingsEvent.SetPersistentNotification -> {
                 _notificationState.update { it.copy(persistentNotification = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setPersistentNotification(event.enabled) }
+                viewModelScope.launch { settingsRepository.setPersistentNotification(event.enabled) }
             }
 
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
-                    preferencesDataStore.setSelectedAdhanSound(event.sound)
+                    settingsRepository.setSelectedAdhanSound(event.sound)
                     // Download the selected adhan if not already downloaded
                     val sound = AdhanSound.fromName(event.sound)
                     if (!adhanAudioManager.isFullyDownloaded(sound)) {
@@ -551,6 +552,8 @@ class SettingsViewModel @Inject constructor(
                         // Now play the preview
                         adhanAudioManager.preview(sound, false)
                     } catch (e: Exception) {
+                        CrashReporter.recordException(e)
+                        AppAnalytics.logError("settings", "adhan_preview", e.message)
                         _adhanPreviewError.value = "Failed to play adhan preview: ${e.message}"
                     }
                 }
@@ -563,119 +566,119 @@ class SettingsViewModel @Inject constructor(
             // Quran
             is SettingsEvent.SetTranslator -> {
                 _quranState.update { it.copy(selectedTranslatorId = event.translatorId) }
-                viewModelScope.launch { preferencesDataStore.setQuranTranslatorId(event.translatorId) }
+                viewModelScope.launch { settingsRepository.setQuranTranslatorId(event.translatorId) }
             }
 
             is SettingsEvent.SetArabicFont -> {
                 _quranState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { preferencesDataStore.setQuranArabicFont(event.fontId) }
+                viewModelScope.launch { settingsRepository.setQuranArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetShowTranslation -> {
                 _quranState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowTranslation(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetShowTransliteration -> {
                 _quranState.update { it.copy(showTransliteration = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowTransliteration(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetArabicFontSize -> {
                 _quranState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setQuranArabicFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setQuranArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetTranslationFontSize -> {
                 _quranState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setQuranTranslationFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setQuranTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetContinuousReading -> {
                 _quranState.update { it.copy(continuousReading = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setContinuousReading(event.enabled) }
+                viewModelScope.launch { settingsRepository.setContinuousReading(event.enabled) }
             }
 
             is SettingsEvent.SetKeepScreenOn -> {
                 _quranState.update { it.copy(keepScreenOn = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setKeepScreenOn(event.enabled) }
+                viewModelScope.launch { settingsRepository.setKeepScreenOn(event.enabled) }
             }
 
             is SettingsEvent.SetReciter -> {
                 _quranState.update { it.copy(selectedReciterId = event.reciterId) }
-                viewModelScope.launch { preferencesDataStore.setSelectedReciterId(event.reciterId) }
+                viewModelScope.launch { settingsRepository.setSelectedReciterId(event.reciterId) }
             }
 
             is SettingsEvent.SetShowTajweed -> {
                 _quranState.update { it.copy(showTajweed = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setShowTajweed(event.enabled) }
+                viewModelScope.launch { settingsRepository.setShowTajweed(event.enabled) }
             }
 
             // Dua
             is SettingsEvent.SetDuaArabicFont -> {
                 _duaState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { preferencesDataStore.setDuaArabicFont(event.fontId) }
+                viewModelScope.launch { settingsRepository.setDuaArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetDuaArabicFontSize -> {
                 _duaState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setDuaArabicFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setDuaArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaTranslationFontSize -> {
                 _duaState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setDuaTranslationFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setDuaTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetDuaShowArabic -> {
                 _duaState.update { it.copy(showArabic = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setDuaShowArabic(event.enabled) }
+                viewModelScope.launch { settingsRepository.setDuaShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTransliteration -> {
                 _duaState.update { it.copy(showTransliteration = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setDuaShowTransliteration(event.enabled) }
+                viewModelScope.launch { settingsRepository.setDuaShowTransliteration(event.enabled) }
             }
 
             is SettingsEvent.SetDuaShowTranslation -> {
                 _duaState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setDuaShowTranslation(event.enabled) }
+                viewModelScope.launch { settingsRepository.setDuaShowTranslation(event.enabled) }
             }
 
             // Hadith
             is SettingsEvent.SetHadithArabicFont -> {
                 _hadithState.update { it.copy(selectedArabicFontId = event.fontId) }
-                viewModelScope.launch { preferencesDataStore.setHadithArabicFont(event.fontId) }
+                viewModelScope.launch { settingsRepository.setHadithArabicFont(event.fontId) }
             }
 
             is SettingsEvent.SetHadithArabicFontSize -> {
                 _hadithState.update { it.copy(arabicFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setHadithArabicFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setHadithArabicFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithTranslationFontSize -> {
                 _hadithState.update { it.copy(translationFontSize = event.size) }
-                viewModelScope.launch { preferencesDataStore.setHadithTranslationFontSize(event.size) }
+                viewModelScope.launch { settingsRepository.setHadithTranslationFontSize(event.size) }
             }
 
             is SettingsEvent.SetHadithShowArabic -> {
                 _hadithState.update { it.copy(showArabic = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setHadithShowArabic(event.enabled) }
+                viewModelScope.launch { settingsRepository.setHadithShowArabic(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowTranslation -> {
                 _hadithState.update { it.copy(showTranslation = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setHadithShowTranslation(event.enabled) }
+                viewModelScope.launch { settingsRepository.setHadithShowTranslation(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowGrade -> {
                 _hadithState.update { it.copy(showGrade = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setHadithShowGrade(event.enabled) }
+                viewModelScope.launch { settingsRepository.setHadithShowGrade(event.enabled) }
             }
 
             is SettingsEvent.SetHadithShowChain -> {
                 _hadithState.update { it.copy(showChain = event.enabled) }
-                viewModelScope.launch { preferencesDataStore.setHadithShowChain(event.enabled) }
+                viewModelScope.launch { settingsRepository.setHadithShowChain(event.enabled) }
             }
 
             // Location
@@ -736,20 +739,20 @@ class SettingsViewModel @Inject constructor(
     private fun loadSettings() {
         viewModelScope.launch {
             // General settings
-            val theme = when (preferencesDataStore.themeMode.first()) {
+            val theme = when (settingsRepository.themeMode.first()) {
                 "light" -> AppTheme.LIGHT
                 "dark" -> AppTheme.DARK
                 else -> AppTheme.SYSTEM
             }
-            val langCode = preferencesDataStore.appLanguage.first()
+            val langCode = settingsRepository.appLanguage.first()
             val language = AppLanguage.entries.find { it.code == langCode } ?: AppLanguage.ENGLISH
-            val showIslamicPatterns = preferencesDataStore.showIslamicPatterns.first()
-            val animationsEnabled = preferencesDataStore.animationsEnabled.first()
-            val showCountdown = preferencesDataStore.showCountdown.first()
-            val showQuickActions = preferencesDataStore.showQuickActions.first()
-            val hapticFeedback = preferencesDataStore.hapticFeedback.first()
-            val use24Hour = preferencesDataStore.use24HourFormat.first()
-            val useHijri = preferencesDataStore.useHijriPrimary.first()
+            val showIslamicPatterns = settingsRepository.showIslamicPatterns.first()
+            val animationsEnabled = settingsRepository.animationsEnabled.first()
+            val showCountdown = settingsRepository.showCountdown.first()
+            val showQuickActions = settingsRepository.showQuickActions.first()
+            val hapticFeedback = settingsRepository.hapticFeedback.first()
+            val use24Hour = settingsRepository.use24HourFormat.first()
+            val useHijri = settingsRepository.useHijriPrimary.first()
 
             _generalState.update {
                 it.copy(
@@ -766,30 +769,30 @@ class SettingsViewModel @Inject constructor(
             }
 
             // Prayer settings
-            val calcMethodStr = preferencesDataStore.calculationMethod.first()
+            val calcMethodStr = settingsRepository.calculationMethod.first()
             val calcMethod = try {
                 CalculationMethod.valueOf(calcMethodStr)
             } catch (_: Exception) {
                 CalculationMethod.MUSLIM_WORLD_LEAGUE
             }
-            val asrStr = preferencesDataStore.asrCalculation.first()
+            val asrStr = settingsRepository.asrCalculation.first()
             val asrMethod = when (asrStr.lowercase()) {
                 "hanafi" -> AsrJuristicMethod.HANAFI
                 else -> AsrJuristicMethod.STANDARD
             }
-            val highLatStr = preferencesDataStore.highLatitudeRule.first()
+            val highLatStr = settingsRepository.highLatitudeRule.first()
             val highLat = try {
                 HighLatitudeRule.valueOf(highLatStr)
             } catch (_: Exception) {
                 HighLatitudeRule.MIDDLE_OF_NIGHT
             }
 
-            val fajrAdj = preferencesDataStore.fajrAdjustment.first()
-            val sunriseAdj = preferencesDataStore.sunriseAdjustment.first()
-            val dhuhrAdj = preferencesDataStore.dhuhrAdjustment.first()
-            val asrAdj = preferencesDataStore.asrAdjustment.first()
-            val maghribAdj = preferencesDataStore.maghribAdjustment.first()
-            val ishaAdj = preferencesDataStore.ishaAdjustment.first()
+            val fajrAdj = settingsRepository.fajrAdjustment.first()
+            val sunriseAdj = settingsRepository.sunriseAdjustment.first()
+            val dhuhrAdj = settingsRepository.dhuhrAdjustment.first()
+            val asrAdj = settingsRepository.asrAdjustment.first()
+            val maghribAdj = settingsRepository.maghribAdjustment.first()
+            val ishaAdj = settingsRepository.ishaAdjustment.first()
 
             _prayerState.update {
                 it.copy(
@@ -806,27 +809,27 @@ class SettingsViewModel @Inject constructor(
             }
 
             // Notification settings
-            val notifEnabled = preferencesDataStore.prayerNotificationsEnabled.first()
-            val adhanEnabled = preferencesDataStore.adhanEnabled.first()
-            val vibration = preferencesDataStore.notificationVibration.first()
-            val reminderMin = preferencesDataStore.notificationReminderMinutes.first()
-            val showReminder = preferencesDataStore.showReminderBefore.first()
-            val persistent = preferencesDataStore.persistentNotification.first()
-            val respectDnd = preferencesDataStore.adhanRespectDnd.first()
-            val adhanSoundName = preferencesDataStore.selectedAdhanSound.first()
-            val fajrNotif = preferencesDataStore.fajrNotificationEnabled.first()
-            val sunriseNotif = preferencesDataStore.sunriseNotificationEnabled.first()
-            val dhuhrNotif = preferencesDataStore.dhuhrNotificationEnabled.first()
-            val asrNotif = preferencesDataStore.asrNotificationEnabled.first()
-            val maghribNotif = preferencesDataStore.maghribNotificationEnabled.first()
-            val ishaNotif = preferencesDataStore.ishaNotificationEnabled.first()
+            val notifEnabled = settingsRepository.prayerNotificationsEnabled.first()
+            val adhanEnabled = settingsRepository.adhanEnabled.first()
+            val vibration = settingsRepository.notificationVibration.first()
+            val reminderMin = settingsRepository.notificationReminderMinutes.first()
+            val showReminder = settingsRepository.showReminderBefore.first()
+            val persistent = settingsRepository.persistentNotification.first()
+            val respectDnd = settingsRepository.adhanRespectDnd.first()
+            val adhanSoundName = settingsRepository.selectedAdhanSound.first()
+            val fajrNotif = settingsRepository.fajrNotificationEnabled.first()
+            val sunriseNotif = settingsRepository.sunriseNotificationEnabled.first()
+            val dhuhrNotif = settingsRepository.dhuhrNotificationEnabled.first()
+            val asrNotif = settingsRepository.asrNotificationEnabled.first()
+            val maghribNotif = settingsRepository.maghribNotificationEnabled.first()
+            val ishaNotif = settingsRepository.ishaNotificationEnabled.first()
 
             // Per-prayer adhan settings
-            val fajrAdhan = preferencesDataStore.fajrAdhanEnabled.first()
-            val dhuhrAdhan = preferencesDataStore.dhuhrAdhanEnabled.first()
-            val asrAdhan = preferencesDataStore.asrAdhanEnabled.first()
-            val maghribAdhan = preferencesDataStore.maghribAdhanEnabled.first()
-            val ishaAdhan = preferencesDataStore.ishaAdhanEnabled.first()
+            val fajrAdhan = settingsRepository.fajrAdhanEnabled.first()
+            val dhuhrAdhan = settingsRepository.dhuhrAdhanEnabled.first()
+            val asrAdhan = settingsRepository.asrAdhanEnabled.first()
+            val maghribAdhan = settingsRepository.maghribAdhanEnabled.first()
+            val ishaAdhan = settingsRepository.ishaAdhanEnabled.first()
 
             _notificationState.update {
                 it.copy(
@@ -853,16 +856,16 @@ class SettingsViewModel @Inject constructor(
             }
 
             // Quran settings
-            val translatorId = preferencesDataStore.quranTranslatorId.first()
-            val arabicFontId = preferencesDataStore.quranArabicFont.first()
-            val showTranslation = preferencesDataStore.showTranslation.first()
-            val showTransliteration = preferencesDataStore.showTransliteration.first()
-            val arabicFontSize = preferencesDataStore.quranArabicFontSize.first()
-            val translationFontSize = preferencesDataStore.quranTranslationFontSize.first()
-            val continuousReading = preferencesDataStore.continuousReading.first()
-            val keepScreenOn = preferencesDataStore.keepScreenOn.first()
-            val reciterId = preferencesDataStore.selectedReciterId.first()
-            val showTajweed = preferencesDataStore.showTajweed.first()
+            val translatorId = settingsRepository.quranTranslatorId.first()
+            val arabicFontId = settingsRepository.quranArabicFont.first()
+            val showTranslation = settingsRepository.showTranslation.first()
+            val showTransliteration = settingsRepository.showTransliteration.first()
+            val arabicFontSize = settingsRepository.quranArabicFontSize.first()
+            val translationFontSize = settingsRepository.quranTranslationFontSize.first()
+            val continuousReading = settingsRepository.continuousReading.first()
+            val keepScreenOn = settingsRepository.keepScreenOn.first()
+            val reciterId = settingsRepository.selectedReciterId.first()
+            val showTajweed = settingsRepository.showTajweed.first()
 
             _quranState.update {
                 it.copy(
@@ -882,25 +885,25 @@ class SettingsViewModel @Inject constructor(
             // Dua settings
             _duaState.update {
                 it.copy(
-                    selectedArabicFontId = preferencesDataStore.duaArabicFont.first(),
-                    arabicFontSize = preferencesDataStore.duaArabicFontSize.first(),
-                    translationFontSize = preferencesDataStore.duaTranslationFontSize.first(),
-                    showArabic = preferencesDataStore.duaShowArabic.first(),
-                    showTransliteration = preferencesDataStore.duaShowTransliteration.first(),
-                    showTranslation = preferencesDataStore.duaShowTranslation.first()
+                    selectedArabicFontId = settingsRepository.duaArabicFont.first(),
+                    arabicFontSize = settingsRepository.duaArabicFontSize.first(),
+                    translationFontSize = settingsRepository.duaTranslationFontSize.first(),
+                    showArabic = settingsRepository.duaShowArabic.first(),
+                    showTransliteration = settingsRepository.duaShowTransliteration.first(),
+                    showTranslation = settingsRepository.duaShowTranslation.first()
                 )
             }
 
             // Hadith settings
             _hadithState.update {
                 it.copy(
-                    selectedArabicFontId = preferencesDataStore.hadithArabicFont.first(),
-                    arabicFontSize = preferencesDataStore.hadithArabicFontSize.first(),
-                    translationFontSize = preferencesDataStore.hadithTranslationFontSize.first(),
-                    showArabic = preferencesDataStore.hadithShowArabic.first(),
-                    showTranslation = preferencesDataStore.hadithShowTranslation.first(),
-                    showGrade = preferencesDataStore.hadithShowGrade.first(),
-                    showChain = preferencesDataStore.hadithShowChain.first()
+                    selectedArabicFontId = settingsRepository.hadithArabicFont.first(),
+                    arabicFontSize = settingsRepository.hadithArabicFontSize.first(),
+                    translationFontSize = settingsRepository.hadithTranslationFontSize.first(),
+                    showArabic = settingsRepository.hadithShowArabic.first(),
+                    showTranslation = settingsRepository.hadithShowTranslation.first(),
+                    showGrade = settingsRepository.hadithShowGrade.first(),
+                    showChain = settingsRepository.hadithShowChain.first()
                 )
             }
         }
@@ -908,26 +911,26 @@ class SettingsViewModel @Inject constructor(
 
     private fun loadLocations() {
         viewModelScope.launch {
-            prayerRepository.getCurrentLocation().collect { location ->
+            prayerUseCases.getCurrentLocation().collect { location ->
                 _locationState.update { it.copy(currentLocation = location) }
             }
         }
 
         viewModelScope.launch {
-            prayerRepository.getAllLocations().collect { locations ->
+            prayerUseCases.getAllLocations().collect { locations ->
                 _locationState.update { it.copy(savedLocations = locations, isLoading = false) }
             }
         }
 
         viewModelScope.launch {
-            prayerRepository.getFavoriteLocations().collect { favorites ->
+            prayerUseCases.getFavoriteLocations().collect { favorites ->
                 _locationState.update { it.copy(favoriteLocations = favorites) }
             }
         }
     }
 
     private suspend fun rescheduleNotifications() {
-        val prefs = preferencesDataStore.userPreferences.first()
+        val prefs = settingsRepository.userPreferences.first()
         val lat = prefs.latitude
         val lng = prefs.longitude
         val notifState = _notificationState.value
@@ -1028,32 +1031,32 @@ class SettingsViewModel @Inject constructor(
 
     private fun setCurrentLocation(location: Location) {
         viewModelScope.launch {
-            val id = prayerRepository.insertLocation(location)
-            prayerRepository.setCurrentLocation(id)
+            val id = prayerUseCases.insertLocation(location)
+            prayerUseCases.setCurrentLocation(id)
         }
     }
 
     private fun addLocation(location: Location) {
         viewModelScope.launch {
-            prayerRepository.insertLocation(location)
+            prayerUseCases.insertLocation(location)
         }
     }
 
     private fun removeLocation(location: Location) {
         viewModelScope.launch {
-            prayerRepository.deleteLocation(location)
+            prayerUseCases.deleteLocation(location)
         }
     }
 
     private fun toggleLocationFavorite(locationId: Long) {
         viewModelScope.launch {
-            prayerRepository.toggleFavorite(locationId)
+            prayerUseCases.toggleFavorite(locationId)
         }
     }
 
     private fun resetToDefaults() {
         viewModelScope.launch {
-            preferencesDataStore.clearAllData()
+            settingsRepository.clearAllData()
             _generalState.update { GeneralSettingsUiState() }
             _prayerState.update { PrayerSettingsUiState() }
             _notificationState.update { NotificationSettingsUiState() }
@@ -1089,7 +1092,7 @@ class SettingsViewModel @Inject constructor(
             database.tafseerDao().deleteAllUserData()
 
             // Clear DataStore preferences
-            preferencesDataStore.clearAllData()
+            settingsRepository.clearAllData()
 
             // Reset UI state to defaults
             _generalState.update { GeneralSettingsUiState() }

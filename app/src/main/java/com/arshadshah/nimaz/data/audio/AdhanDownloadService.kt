@@ -13,6 +13,7 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -170,6 +171,7 @@ class AdhanDownloadService : Service() {
                 ensureBeepExists()
                 showCompletionNotification(sound.displayName, results)
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 Log.e(TAG, "Download service error", e)
                 showErrorNotification()
             } finally {
@@ -186,6 +188,7 @@ class AdhanDownloadService : Service() {
                 ensureBeepExists()
                 showCompletionNotification(sound.displayName, results)
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 Log.e(TAG, "Download service error", e)
                 showErrorNotification()
             } finally {

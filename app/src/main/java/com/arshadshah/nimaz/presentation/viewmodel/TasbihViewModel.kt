@@ -10,12 +10,12 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.domain.model.TasbihStats
-import com.arshadshah.nimaz.domain.repository.TasbihRepository
+import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Job
@@ -102,8 +102,8 @@ sealed interface TasbihEvent {
 
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
-    private val tasbihRepository: TasbihRepository,
-    private val preferences: PreferencesDataStore,
+    private val tasbihUseCases: TasbihUseCases,
+    private val preferences: SettingsRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -174,7 +174,7 @@ class TasbihViewModel @Inject constructor(
         // Seed default adhkar added after the prepackaged DB shipped (one-time per version).
         viewModelScope.launch {
             if (preferences.tasbihPresetSeedVersion.first() < LATEST_PRESET_SEED_VERSION) {
-                tasbihRepository.seedMissingDefaults()
+                tasbihUseCases.seedMissingDefaults()
                 preferences.setTasbihPresetSeedVersion(LATEST_PRESET_SEED_VERSION)
             }
         }
@@ -240,7 +240,7 @@ class TasbihViewModel @Inject constructor(
 
     private fun loadPresets() {
         viewModelScope.launch {
-            tasbihRepository.getDefaultPresets().collect { defaults ->
+            tasbihUseCases.getDefaultPresets().collect { defaults ->
                 _presetsState.update {
                     it.copy(
                         defaultPresets = defaults,
@@ -250,7 +250,7 @@ class TasbihViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            tasbihRepository.getCustomPresets().collect { customs ->
+            tasbihUseCases.getCustomPresets().collect { customs ->
                 _presetsState.update {
                     it.copy(
                         customPresets = customs,
@@ -273,7 +273,7 @@ class TasbihViewModel @Inject constructor(
             val duration = completedAt - currentSession.startedAt
 
             viewModelScope.launch {
-                tasbihRepository.completeSession(currentSession.id, completedAt, duration)
+                tasbihUseCases.completeSession(currentSession.id, completedAt, duration)
                 loadHistory()
                 loadStats()
             }
@@ -311,7 +311,7 @@ class TasbihViewModel @Inject constructor(
         }
         if (current == id) return
         viewModelScope.launch {
-            tasbihRepository.getPresetById(id)?.let { selectPreset(it) }
+            tasbihUseCases.getPresetById(id)?.let { selectPreset(it) }
         }
     }
 
@@ -342,7 +342,7 @@ class TasbihViewModel @Inject constructor(
             viewModelScope.launch {
                 val state = _counterState.value
                 // Store the within-lap count; the DB sums currentCount + laps*target.
-                tasbihRepository.updateSessionCount(session.id, state.count, state.laps)
+                tasbihUseCases.updateSessionCount(session.id, state.count, state.laps)
             }
         }
     }
@@ -360,7 +360,7 @@ class TasbihViewModel @Inject constructor(
             val duration = completedAt - currentSession.startedAt
 
             viewModelScope.launch {
-                tasbihRepository.completeSession(currentSession.id, completedAt, duration)
+                tasbihUseCases.completeSession(currentSession.id, completedAt, duration)
                 loadHistory()
                 loadStats()
             }
@@ -394,19 +394,19 @@ class TasbihViewModel @Inject constructor(
 
     private fun createCustomPreset(preset: TasbihPreset) {
         viewModelScope.launch {
-            tasbihRepository.insertPreset(preset)
+            tasbihUseCases.insertPreset(preset)
         }
     }
 
     private fun updateCustomPreset(preset: TasbihPreset) {
         viewModelScope.launch {
-            tasbihRepository.updatePreset(preset)
+            tasbihUseCases.updatePreset(preset)
         }
     }
 
     private fun deleteCustomPreset(presetId: Long) {
         viewModelScope.launch {
-            tasbihRepository.deleteCustomPreset(presetId)
+            tasbihUseCases.deleteCustomPreset(presetId)
         }
     }
 
@@ -439,7 +439,7 @@ class TasbihViewModel @Inject constructor(
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
                 // Store the within-lap count; the DB sums currentCount + laps*target.
-                tasbihRepository.updateSessionCount(
+                tasbihUseCases.updateSessionCount(
                     session.id,
                     _counterState.value.count,
                     _counterState.value.laps
@@ -473,8 +473,8 @@ class TasbihViewModel @Inject constructor(
                 completedAt = null,
                 note = null
             )
-            val sessionId = tasbihRepository.insertSession(session)
-            val insertedSession = tasbihRepository.getSessionById(sessionId)
+            val sessionId = tasbihUseCases.insertSession(session)
+            val insertedSession = tasbihUseCases.getSessionById(sessionId)
 
             _counterState.update {
                 it.copy(
@@ -513,7 +513,7 @@ class TasbihViewModel @Inject constructor(
         // Also update the session in the database if there's an active one
         _counterState.value.currentSession?.let { session ->
             viewModelScope.launch {
-                tasbihRepository.updateSessionCount(session.id, 0, 0)
+                tasbihUseCases.updateSessionCount(session.id, 0, 0)
                 loadStats()
             }
         }
@@ -539,8 +539,8 @@ class TasbihViewModel @Inject constructor(
                 completedAt = null,
                 note = null
             )
-            val sessionId = tasbihRepository.insertSession(session)
-            val insertedSession = tasbihRepository.getSessionById(sessionId)
+            val sessionId = tasbihUseCases.insertSession(session)
+            val insertedSession = tasbihUseCases.getSessionById(sessionId)
 
             _counterState.update {
                 it.copy(
@@ -576,7 +576,7 @@ class TasbihViewModel @Inject constructor(
             val duration = completedAt - session.startedAt
 
             viewModelScope.launch {
-                tasbihRepository.completeSession(session.id, completedAt, duration)
+                tasbihUseCases.completeSession(session.id, completedAt, duration)
 
                 _counterState.update {
                     it.copy(
@@ -607,9 +607,9 @@ class TasbihViewModel @Inject constructor(
 
     private fun checkForActiveSession() {
         viewModelScope.launch {
-            val activeSession = tasbihRepository.getActiveSession()
+            val activeSession = tasbihUseCases.getActiveSession()
             activeSession?.let { session ->
-                val preset = session.presetId?.let { tasbihRepository.getPresetById(it) }
+                val preset = session.presetId?.let { tasbihUseCases.getPresetById(it) }
                 _counterState.update {
                     it.copy(
                         currentSession = session,
@@ -631,12 +631,12 @@ class TasbihViewModel @Inject constructor(
         val weekAgo = today - (7 * 24 * 60 * 60 * 1000)
 
         viewModelScope.launch {
-            tasbihRepository.getSessionsForDate(today).collect { todaySessions ->
+            tasbihUseCases.getSessionsForDate(today).collect { todaySessions ->
                 _historyState.update { it.copy(todaySessions = todaySessions) }
             }
         }
         viewModelScope.launch {
-            tasbihRepository.getSessionsInRange(weekAgo, today + (24 * 60 * 60 * 1000))
+            tasbihUseCases.getSessionsInRange(weekAgo, today + (24 * 60 * 60 * 1000))
                 .collect { weekSessions ->
                     _historyState.update { it.copy(weekSessions = weekSessions, isLoading = false) }
                 }
@@ -649,11 +649,11 @@ class TasbihViewModel @Inject constructor(
         val endOfToday = today + (24 * 60 * 60 * 1000)
 
         viewModelScope.launch {
-            val stats = tasbihRepository.getTasbihStats(weekAgo, endOfToday)
-            val totalToday = tasbihRepository.getTotalCountInRange(today, endOfToday)
-            val totalWeek = tasbihRepository.getTotalCountInRange(weekAgo, endOfToday)
+            val stats = tasbihUseCases.getTasbihStats(weekAgo, endOfToday)
+            val totalToday = tasbihUseCases.getTotalCountInRange(today, endOfToday)
+            val totalWeek = tasbihUseCases.getTotalCountInRange(weekAgo, endOfToday)
             val completedSessions =
-                tasbihRepository.getCompletedSessionsInRange(weekAgo, endOfToday)
+                tasbihUseCases.getCompletedSessionsInRange(weekAgo, endOfToday)
 
             // Calculate base total (excluding current session's count) for real-time display
             val currentSessionCount = _counterState.value.currentSession?.let {

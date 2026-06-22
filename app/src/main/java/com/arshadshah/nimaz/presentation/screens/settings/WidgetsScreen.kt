@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -483,7 +484,7 @@ private fun HijriDateWidgetPreview(
 private fun PrayerTrackerWidgetPreview(
     modifier: Modifier = Modifier
 ) {
-    val checkedColor = Color(0xFF22C55E) // Green
+    val checkedColor = NimazColors.Success // Green
     val uncheckedColor = MaterialTheme.colorScheme.surfaceVariant
 
     Box(

@@ -71,6 +71,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -325,8 +326,8 @@ private fun HomeTabContent(
                             .background(
                                 brush = Brush.linearGradient(
                                     colors = listOf(
-                                        Color(0xFF115E59),
-                                        Color(0xFF042F2E)
+                                        NimazColors.Primary800,
+                                        NimazColors.Primary950
                                     )
                                 ),
                                 shape = RoundedCornerShape(20.dp)
@@ -340,7 +341,7 @@ private fun HomeTabContent(
                             Icon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
-                                tint = Color(0xFFEAB308),
+                                tint = NimazColors.Gold500,
                                 modifier = Modifier.size(48.dp)
                             )
                             Spacer(modifier = Modifier.height(12.dp))
@@ -354,7 +355,7 @@ private fun HomeTabContent(
                             Text(
                                 text = stringResource(R.string.quran_home_begin_journey),
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color(0xFFD4D4D4)
+                                color = NimazColors.Gray300
                             )
                         }
                     }

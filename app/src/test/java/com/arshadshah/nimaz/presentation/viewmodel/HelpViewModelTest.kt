@@ -1,7 +1,7 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
 import app.cash.turbine.test
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
@@ -24,7 +24,7 @@ import org.junit.Test
 class HelpViewModelTest {
     private val dispatcher = StandardTestDispatcher()
     private lateinit var useCases: HelpUseCases
-    private lateinit var prefs: PreferencesDataStore
+    private lateinit var prefs: SettingsRepository
 
     @Before
     fun setUp() {

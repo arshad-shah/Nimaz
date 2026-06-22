@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
@@ -81,6 +82,15 @@ class KhatamViewModel @Inject constructor(
     }
 
     fun onEvent(event: KhatamEvent) {
+        when (event) {
+            is KhatamEvent.SetActiveKhatam -> AppAnalytics.logFeatureUsed("khatam", "set_active")
+            is KhatamEvent.DeleteKhatam -> AppAnalytics.logFeatureUsed("khatam", "delete")
+            is KhatamEvent.AbandonKhatam -> AppAnalytics.logFeatureUsed("khatam", "abandon")
+            is KhatamEvent.ReactivateKhatam -> AppAnalytics.logFeatureUsed("khatam", "reactivate")
+            is KhatamEvent.LoadKhatamDetail -> AppAnalytics.logFeatureUsed("khatam", "open_detail")
+            KhatamEvent.CreateKhatam -> AppAnalytics.logFeatureUsed("khatam", "create")
+            else -> {}
+        }
         when (event) {
             is KhatamEvent.SetActiveKhatam -> setActiveKhatam(event.khatamId)
             is KhatamEvent.DeleteKhatam -> deleteKhatam(event.khatamId)

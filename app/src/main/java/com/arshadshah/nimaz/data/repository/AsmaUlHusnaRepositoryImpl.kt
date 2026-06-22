@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.local.database.dao.AsmaUlHusnaDao
 import com.arshadshah.nimaz.data.local.database.entity.AsmaUlHusnaEntity
 import com.arshadshah.nimaz.domain.model.AsmaUlHusna
@@ -54,6 +55,7 @@ class AsmaUlHusnaRepositoryImpl @Inject constructor(
             val jsonArray = JSONArray(quranReferences)
             (0 until jsonArray.length()).map { jsonArray.getString(it) }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             emptyList()
         }
         return AsmaUlHusna(

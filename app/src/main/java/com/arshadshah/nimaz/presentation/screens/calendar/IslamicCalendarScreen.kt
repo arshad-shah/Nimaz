@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
@@ -257,9 +258,9 @@ private fun CalendarSection(
                     MaterialTheme.colorScheme.primary,
                     stringResource(R.string.month_start)
                 ),
-                CalendarLegendItem(Color(0xFFEAB308), stringResource(R.string.eid)),
-                CalendarLegendItem(Color(0xFF22C55E), stringResource(R.string.holy_night)),
-                CalendarLegendItem(Color(0xFFA855F7), stringResource(R.string.fasting))
+                CalendarLegendItem(NimazColors.Gold500, stringResource(R.string.eid)),
+                CalendarLegendItem(NimazColors.Success, stringResource(R.string.holy_night)),
+                CalendarLegendItem(NimazColors.Purple, stringResource(R.string.fasting))
             )
         )
     }
@@ -270,9 +271,9 @@ private fun CalendarSection(
 private fun getEventDotColor(events: List<IslamicEvent>): Color? {
     val primaryEvent = events.firstOrNull() ?: return null
     return when (primaryEvent.eventType) {
-        IslamicEventType.HOLIDAY -> Color(0xFFEAB308)
-        IslamicEventType.NIGHT -> Color(0xFF22C55E)
-        IslamicEventType.FAST -> Color(0xFFA855F7)
-        IslamicEventType.HISTORICAL -> Color(0xFF22C55E)
+        IslamicEventType.HOLIDAY -> NimazColors.Gold500
+        IslamicEventType.NIGHT -> NimazColors.Success
+        IslamicEventType.FAST -> NimazColors.Purple
+        IslamicEventType.HISTORICAL -> NimazColors.Success
     }
 }

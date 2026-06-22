@@ -12,14 +12,14 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.domain.model.QiblaDirection
 import com.arshadshah.nimaz.domain.model.QiblaInfo
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,8 +76,7 @@ sealed interface QiblaEvent {
 @HiltViewModel
 class QiblaViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _qiblaState = MutableStateFlow(QiblaUiState())
@@ -245,9 +244,9 @@ class QiblaViewModel @Inject constructor(
     private fun observeLocation() {
         viewModelScope.launch {
             combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName
             ) { lat, lng, name ->
                 Triple(lat, lng, name)
             }.collect { (lat, lng, name) ->
@@ -285,6 +284,8 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("qibla", "calculate_direction", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -316,6 +317,8 @@ class QiblaViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("qibla", "set_location", e.message)
                 _qiblaState.update { it.copy(error = e.message, isLoading = false) }
             }
         }

@@ -107,7 +107,7 @@ class QaidaReaderViewModelTest {
         val vm = createViewModel()
         val cell = cell(id = 11, lessonId = 1, audioKey = "l1_alif")
 
-        vm.onCellTapped(cell)
+        vm.onEvent(QaidaReaderEvent.CellTapped(cell))
         advanceUntilIdle()
 
         verify { audioManager.play("l1_alif") }
@@ -120,7 +120,7 @@ class QaidaReaderViewModelTest {
 
         vm.lessonContent.test {
             assertThat(awaitItem()).isNull() // nothing selected yet
-            vm.selectLesson(1)
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
             assertThat(awaitItem()?.lesson?.id).isEqualTo(1)
         }
     }
@@ -131,9 +131,9 @@ class QaidaReaderViewModelTest {
 
         vm.lessonContent.test {
             assertThat(awaitItem()).isNull()
-            vm.selectLesson(1)
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
             assertThat(awaitItem()?.lesson?.id).isEqualTo(1)
-            vm.selectLesson(2)
+            vm.onEvent(QaidaReaderEvent.SelectLesson(2))
             assertThat(awaitItem()?.lesson?.id).isEqualTo(2)
         }
 
@@ -149,7 +149,7 @@ class QaidaReaderViewModelTest {
         vm.courseProgress.test {
             awaitItem() // initial null
             awaitItem() // emitted rollup
-            vm.resume()
+            vm.onEvent(QaidaReaderEvent.Resume)
         }
         advanceUntilIdle()
 
@@ -162,10 +162,10 @@ class QaidaReaderViewModelTest {
 
         vm.lessonContent.test {
             assertThat(awaitItem()).isNull()
-            vm.selectLesson(1)
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
             assertThat(awaitItem()?.lesson?.id).isEqualTo(1)
 
-            vm.playLine(lineId = 100)
+            vm.onEvent(QaidaReaderEvent.PlayLine(lineId = 100))
             advanceUntilIdle()
 
             verify { audioManager.playSequence(listOf("l1_alif", "l1_baa")) }
@@ -180,7 +180,7 @@ class QaidaReaderViewModelTest {
 
         vm.playingCell.test {
             assertThat(awaitItem()).isNull()
-            vm.selectLesson(1)
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
             audioStateFlow.value = QaidaAudioState(currentKey = "l1_baa", isPlaying = true)
             advanceUntilIdle()
             assertThat(expectMostRecentItem()?.id).isEqualTo(12)
@@ -197,8 +197,8 @@ class QaidaReaderViewModelTest {
         vm.courseProgress.test {
             awaitItem()
             awaitItem()
-            vm.selectLesson(1)
-            vm.nextLesson()
+            vm.onEvent(QaidaReaderEvent.SelectLesson(1))
+            vm.onEvent(QaidaReaderEvent.NextLesson)
         }
         advanceUntilIdle()
 

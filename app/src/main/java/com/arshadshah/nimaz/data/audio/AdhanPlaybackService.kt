@@ -21,6 +21,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
 import javax.inject.Inject
@@ -269,6 +270,7 @@ class AdhanPlaybackService : Service() {
                 startForeground(notifId, createPlaybackNotification(prayerName))
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
             stopPlayback()
             stopSelf()

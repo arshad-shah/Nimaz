@@ -1,6 +1,6 @@
 package com.arshadshah.nimaz.domain.repository
 
-import com.arshadshah.nimaz.data.local.database.dao.PageAyahRange
+import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite

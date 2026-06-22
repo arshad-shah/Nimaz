@@ -2,14 +2,16 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
-import com.arshadshah.nimaz.domain.repository.HadithRepository
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import androidx.compose.ui.text.font.FontFamily
@@ -89,8 +91,8 @@ sealed interface HadithEvent {
 
 @HiltViewModel
 class HadithViewModel @Inject constructor(
-    private val hadithRepository: HadithRepository,
-    private val preferencesDataStore: PreferencesDataStore
+    private val hadithUseCases: HadithUseCases,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(HadithCollectionUiState())
@@ -116,6 +118,17 @@ class HadithViewModel @Inject constructor(
     }
 
     fun onEvent(event: HadithEvent) {
+        when (event) {
+            is HadithEvent.LoadBook -> AppAnalytics.logFeatureUsed("hadith", "open_book")
+            is HadithEvent.LoadChapter -> AppAnalytics.logFeatureUsed("hadith", "open_reader")
+            is HadithEvent.LoadHadithById -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
+            is HadithEvent.LoadHadithByNumber -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
+            is HadithEvent.Search -> AppAnalytics.logFeatureUsed("hadith", "search")
+            is HadithEvent.SearchInBook -> AppAnalytics.logFeatureUsed("hadith", "search_in_book")
+            is HadithEvent.FilterByGrade -> AppAnalytics.logFeatureUsed("hadith", "filter_by_grade")
+            is HadithEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed("hadith", "toggle_bookmark")
+            else -> {}
+        }
         when (event) {
             is HadithEvent.LoadBook -> loadBook(event.bookId)
             is HadithEvent.LoadChapter -> loadChapter(event.chapterId)
@@ -151,7 +164,7 @@ class HadithViewModel @Inject constructor(
 
     private fun loadAllBooks() {
         viewModelScope.launch {
-            hadithRepository.getAllBooks().collect { books ->
+            hadithUseCases.getAllBooks().collect { books ->
                 _collectionState.update {
                     it.copy(books = books, isLoading = false)
                 }
@@ -161,7 +174,7 @@ class HadithViewModel @Inject constructor(
 
     private fun loadHadithOfTheDay() {
         viewModelScope.launch {
-            val hadith = hadithRepository.getHadithOfTheDay()
+            val hadith = hadithUseCases.getHadithOfTheDay()
             _collectionState.update { it.copy(hadithOfTheDay = hadith) }
         }
     }
@@ -170,10 +183,10 @@ class HadithViewModel @Inject constructor(
         _chaptersState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                val book = hadithRepository.getBookById(bookId)
+                val book = hadithUseCases.getBookById(bookId)
                 _chaptersState.update { it.copy(book = book) }
 
-                hadithRepository.getChaptersByBook(bookId).collect { chapters ->
+                hadithUseCases.getChaptersByBook(bookId).collect { chapters ->
                     _chaptersState.update { state ->
                         state.copy(
                             chapters = chapters,
@@ -183,6 +196,8 @@ class HadithViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_book", e.message)
                 _chaptersState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -192,15 +207,17 @@ class HadithViewModel @Inject constructor(
         _readerState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                val chapter = hadithRepository.getChapterById(chapterId)
+                val chapter = hadithUseCases.getChapterById(chapterId)
                 _readerState.update { it.copy(chapter = chapter) }
 
-                hadithRepository.getHadithsByChapter(chapterId).collect { hadiths ->
+                hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
                     _readerState.update {
                         it.copy(hadiths = hadiths, isLoading = false, currentHadithIndex = 0)
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_chapter", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -210,14 +227,14 @@ class HadithViewModel @Inject constructor(
         _readerState.update { it.copy(isLoading = true, error = null) }
         viewModelScope.launch {
             try {
-                val hadith = hadithRepository.getHadithById(hadithId)
+                val hadith = hadithUseCases.getHadithById(hadithId)
                 if (hadith != null) {
                     // Load the chapter containing this hadith to get context
                     val chapterId = "${hadith.bookId}_${hadith.chapterId}"
-                    val chapter = hadithRepository.getChapterById(chapterId)
+                    val chapter = hadithUseCases.getChapterById(chapterId)
 
                     // Get all hadiths in this chapter
-                    hadithRepository.getHadithsByChapter(chapterId).collect { hadiths ->
+                    hadithUseCases.getHadithsByChapter(chapterId).collect { hadiths ->
                         // Find the index of the target hadith
                         val index = hadiths.indexOfFirst { it.id == hadithId }
                         _readerState.update {
@@ -233,6 +250,8 @@ class HadithViewModel @Inject constructor(
                     _readerState.update { it.copy(error = "Hadith not found", isLoading = false) }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_hadith_by_id", e.message)
                 _readerState.update { it.copy(error = e.message, isLoading = false) }
             }
         }
@@ -241,7 +260,7 @@ class HadithViewModel @Inject constructor(
     private fun loadHadithByNumber(bookId: String, hadithNumber: Int) {
         viewModelScope.launch {
             try {
-                val hadith = hadithRepository.getHadithByNumber(bookId, hadithNumber)
+                val hadith = hadithUseCases.getHadithByNumber(bookId, hadithNumber)
                 hadith?.let {
                     // Load the chapter containing this hadith
                     loadChapter(it.chapterId)
@@ -252,6 +271,8 @@ class HadithViewModel @Inject constructor(
                     }
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("hadith", "load_hadith_by_number", e.message)
                 _readerState.update { it.copy(error = e.message) }
             }
         }
@@ -265,7 +286,7 @@ class HadithViewModel @Inject constructor(
 
         _searchState.update { it.copy(query = query, isSearching = true) }
         viewModelScope.launch {
-            hadithRepository.searchHadiths(query).collect { results ->
+            hadithUseCases.searchHadiths(query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
         }
@@ -279,7 +300,7 @@ class HadithViewModel @Inject constructor(
 
         _searchState.update { it.copy(query = query, selectedBookId = bookId, isSearching = true) }
         viewModelScope.launch {
-            hadithRepository.searchHadithsInBook(bookId, query).collect { results ->
+            hadithUseCases.searchHadithsInBook(bookId, query).collect { results ->
                 _searchState.update { it.copy(results = results, isSearching = false) }
             }
         }
@@ -301,7 +322,7 @@ class HadithViewModel @Inject constructor(
 
     private fun filterByGrade(grade: HadithGrade) {
         viewModelScope.launch {
-            hadithRepository.getHadithsByGrade(grade).collect { hadiths ->
+            hadithUseCases.getHadithsByGrade(grade).collect { hadiths ->
                 _readerState.update { it.copy(hadiths = hadiths) }
             }
         }
@@ -309,19 +330,19 @@ class HadithViewModel @Inject constructor(
 
     private fun toggleBookmark(hadithId: String, bookId: String, hadithNumber: Int) {
         viewModelScope.launch {
-            hadithRepository.toggleBookmark(hadithId, bookId, hadithNumber)
+            hadithUseCases.toggleBookmark(hadithId, bookId, hadithNumber)
         }
     }
 
     private fun loadBookmarks() {
         viewModelScope.launch {
-            hadithRepository.getAllBookmarks().collect { bookmarks ->
+            hadithUseCases.getAllBookmarks().collect { bookmarks ->
                 _bookmarksState.update { it.copy(bookmarks = bookmarks, isLoading = false) }
             }
         }
     }
 
-    fun isHadithBookmarked(hadithId: String) = hadithRepository.isHadithBookmarked(hadithId)
+    fun isHadithBookmarked(hadithId: String) = hadithUseCases.isHadithBookmarked(hadithId)
 
     /**
      * Reactively mirrors the persisted hadith reading preferences into the reader
@@ -330,16 +351,16 @@ class HadithViewModel @Inject constructor(
     private fun observeHadithSettings() {
         viewModelScope.launch {
             val displayFlow = combine(
-                preferencesDataStore.hadithArabicFont,
-                preferencesDataStore.hadithArabicFontSize,
-                preferencesDataStore.hadithTranslationFontSize
+                settingsRepository.hadithArabicFont,
+                settingsRepository.hadithArabicFontSize,
+                settingsRepository.hadithTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                preferencesDataStore.hadithShowArabic,
-                preferencesDataStore.hadithShowTranslation,
-                preferencesDataStore.hadithShowGrade,
-                preferencesDataStore.hadithShowChain
+                settingsRepository.hadithShowArabic,
+                settingsRepository.hadithShowTranslation,
+                settingsRepository.hadithShowGrade,
+                settingsRepository.hadithShowChain
             ) { showArabic, showTranslation, showGrade, showChain ->
                 HadithToggles(showArabic, showTranslation, showGrade, showChain)
             }

@@ -7,6 +7,7 @@ import android.content.Intent
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
@@ -92,6 +93,8 @@ class BootReceiver : BroadcastReceiver() {
                     preReminderMinutes = preReminderMinutes
                 )
             } catch (e: Exception) {
+                CrashReporter.log("BootReceiver reschedule failed")
+                CrashReporter.recordException(e)
                 e.printStackTrace()
             }
         }
@@ -120,6 +123,8 @@ class BootReceiver : BroadcastReceiver() {
                     preReminderMinutes = preReminderMinutes
                 )
             } catch (e: Exception) {
+                CrashReporter.log("BootReceiver markMissedPrayersAndReschedule failed")
+                CrashReporter.recordException(e)
                 e.printStackTrace()
             }
         }
@@ -296,6 +301,7 @@ class BootReceiver : BroadcastReceiver() {
                 )
             } catch (e: Exception) {
                 e.printStackTrace()
+                CrashReporter.recordException(e)
                 showEnhancedPrayerNotification(
                     context,
                     prayerName,
@@ -511,6 +517,7 @@ class BootReceiver : BroadcastReceiver() {
 
             } catch (e: Exception) {
                 e.printStackTrace()
+                CrashReporter.recordException(e)
                 AppAnalytics.logError("daily_summary", e.javaClass.simpleName, e.message)
             }
         }

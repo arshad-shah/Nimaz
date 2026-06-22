@@ -51,7 +51,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.presentation.viewmodel.ZakatHistoryEntry
+import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
 import com.arshadshah.nimaz.core.util.formatCurrency
 import java.text.SimpleDateFormat
@@ -153,7 +153,7 @@ private fun TotalPaidSummaryCard(
     val goldGradient = Brush.linearGradient(
         colors = listOf(
             NimazColors.ZakatColors.Gold,
-            Color(0xFFCA8A04)
+            NimazColors.ZakatColors.GoldAccent
         )
     )
 
@@ -175,7 +175,7 @@ private fun TotalPaidSummaryCard(
                 Text(
                     text = stringResource(R.string.zakat_history_total_paid),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.8f)
+                    color = NimazColors.Neutral900.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -185,7 +185,7 @@ private fun TotalPaidSummaryCard(
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold
                     ),
-                    color = Color(0xFF1C1917)
+                    color = NimazColors.Neutral900
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -193,7 +193,7 @@ private fun TotalPaidSummaryCard(
                 Text(
                     text = pluralStringResource(R.plurals.zakat_calculations_recorded, totalEntries, totalEntries),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.7f)
+                    color = NimazColors.Neutral900.copy(alpha = 0.7f)
                 )
             }
         }

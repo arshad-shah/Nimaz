@@ -86,9 +86,9 @@ import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
 // Color constants for makeup fasts
-private val OrangeAccent = Color(0xFFF97316)
-private val OrangeDark = Color(0xFFEA580C)
-private val GreenAccent = Color(0xFF22C55E)
+private val OrangeAccent = NimazColors.PrayerColors.Asr
+private val OrangeDark = NimazColors.OrangeDark
+private val GreenAccent = NimazColors.Success
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -467,8 +467,8 @@ private fun RamadanMissedFastsTracker(
         Surface(
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            color = Color(0xFFEF4444).copy(alpha = 0.1f),
-            border = BorderStroke(1.dp, Color(0xFFEF4444).copy(alpha = 0.3f))
+            color = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.1f),
+            border = BorderStroke(1.dp, NimazColors.PrayerColors.Maghrib.copy(alpha = 0.3f))
         ) {
             Row(
                 modifier = Modifier.padding(15.dp),
@@ -479,14 +479,14 @@ private fun RamadanMissedFastsTracker(
                     modifier = Modifier
                         .size(40.dp)
                         .clip(RoundedCornerShape(10.dp))
-                        .background(Color(0xFFEF4444).copy(alpha = 0.2f)),
+                        .background(NimazColors.PrayerColors.Maghrib.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = "$unloggedDays",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFFEF4444)
+                        color = NimazColors.PrayerColors.Maghrib
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
@@ -639,7 +639,7 @@ private fun TodayFastSection(
                                 text = suhoorTime,
                                 style = MaterialTheme.typography.titleLarge,
                                 fontWeight = FontWeight.Bold,
-                                color = Color(0xFF818CF8) // Indigo for suhoor
+                                color = NimazColors.IndigoLight // Indigo for suhoor
                             )
                             Spacer(modifier = Modifier.height(5.dp))
                             Text(
@@ -731,7 +731,7 @@ private fun FastingCalendarSection(
     val legendItems = remember(ramadanDaysInMonth, fastedLabel, missedLabel, ramadanLabel) {
         buildList {
             add(CalendarLegendItem(NimazColors.FastingColors.Fasted, fastedLabel))
-            add(CalendarLegendItem(Color(0xFFEF4444), missedLabel))
+            add(CalendarLegendItem(NimazColors.PrayerColors.Maghrib, missedLabel))
             if (ramadanDaysInMonth.isNotEmpty()) {
                 add(CalendarLegendItem(NimazColors.FastingColors.Ramadan, ramadanLabel))
             }
@@ -753,7 +753,7 @@ private fun FastingCalendarSection(
                 CalendarDayState(
                     indicatorColor = when {
                         record?.status == FastStatus.FASTED -> NimazColors.FastingColors.Fasted
-                        record?.status == FastStatus.MAKEUP_DUE -> Color(0xFFEF4444)
+                        record?.status == FastStatus.MAKEUP_DUE -> NimazColors.PrayerColors.Maghrib
                         else -> null
                     },
                     backgroundColor = if (isRamadanDay)
@@ -893,7 +893,7 @@ private fun RecommendedFastsSection(
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             RecommendedFastCard(
                 icon = Icons.Default.CalendarMonth,
-                iconBgColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
+                iconBgColor = NimazColors.Info.copy(alpha = 0.2f),
                 name = stringResource(R.string.fasting_monday),
                 description = stringResource(R.string.fasting_sunnah_desc),
                 nextDate = mondayText,
@@ -902,7 +902,7 @@ private fun RecommendedFastsSection(
             )
             RecommendedFastCard(
                 icon = Icons.Default.CalendarMonth,
-                iconBgColor = Color(0xFFA855F7).copy(alpha = 0.2f),
+                iconBgColor = NimazColors.Purple.copy(alpha = 0.2f),
                 name = stringResource(R.string.fasting_thursday),
                 description = stringResource(R.string.fasting_sunnah_desc),
                 nextDate = thursdayText,
@@ -951,7 +951,7 @@ private fun RecommendedFastsSection(
                 }
                 RecommendedFastCard(
                     icon = Icons.Default.NightsStay,
-                    iconBgColor = Color(0xFF10B981).copy(alpha = 0.2f),
+                    iconBgColor = NimazColors.Emerald.copy(alpha = 0.2f),
                     name = fast.name,
                     description = fast.description,
                     nextDate = dateText,
@@ -1465,8 +1465,8 @@ private fun LegendItemPreview() {
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             modifier = Modifier.padding(16.dp)
         ) {
-            NimazLegendItem(color = Color(0xFF22C55E), label = "Fasted")
-            NimazLegendItem(color = Color(0xFFEF4444), label = "Missed")
+            NimazLegendItem(color = NimazColors.Success, label = "Fasted")
+            NimazLegendItem(color = NimazColors.PrayerColors.Maghrib, label = "Missed")
         }
     }
 }

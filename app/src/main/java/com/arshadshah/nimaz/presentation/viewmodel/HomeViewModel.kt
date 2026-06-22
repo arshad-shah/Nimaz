@@ -12,22 +12,23 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.database.dao.DuaDao
-import com.arshadshah.nimaz.data.local.database.dao.FastingDao
-import com.arshadshah.nimaz.data.local.database.dao.HadithDao
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
-import com.arshadshah.nimaz.data.local.dua.DuaContentSeeder
-import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.FastingUseCases
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -117,13 +118,11 @@ sealed interface HomeEvent {
 class HomeViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val prayerRepository: PrayerRepository,
-    private val preferencesDataStore: PreferencesDataStore,
-    private val fastingDao: FastingDao,
-    private val hadithDao: HadithDao,
-    private val duaDao: DuaDao,
-    private val duaContentSeeder: DuaContentSeeder,
-    private val hadithBackfillSeeder: HadithBackfillSeeder
+    private val prayerUseCases: PrayerUseCases,
+    private val fastingUseCases: FastingUseCases,
+    private val hadithUseCases: HadithUseCases,
+    private val duaUseCases: DuaUseCases,
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -148,7 +147,7 @@ class HomeViewModel @Inject constructor(
 
     private fun loadPrayerRecords() {
         viewModelScope.launch {
-            prayerRepository.getTodayPrayerRecords().collect { records ->
+            prayerUseCases.getTodayPrayerRecords().collect { records ->
                 _prayerRecords.update { records }
             }
         }
@@ -160,9 +159,9 @@ class HomeViewModel @Inject constructor(
             val startOfDay = today.toUtcMidnightMillis()
             val endOfDay = startOfDay + MILLIS_PER_DAY - 1
 
-            fastingDao.getFastRecordsInRange(startOfDay, endOfDay).collect { records ->
+            fastingUseCases.getFastRecordsInRange(startOfDay, endOfDay).collect { records ->
                 val todayRecord = records.firstOrNull()
-                _state.update { it.copy(fastingToday = todayRecord?.status == "fasted") }
+                _state.update { it.copy(fastingToday = todayRecord?.status == FastStatus.FASTED) }
             }
         }
     }
@@ -170,39 +169,25 @@ class HomeViewModel @Inject constructor(
     private fun loadDailyHadith() {
         viewModelScope.launch {
             try {
-                // Fill in any chains of narration that shipped empty in the
-                // prepopulated DB before reading. On an app update the asset is
-                // not re-copied, so the seeder is what reaches existing users.
-                hadithBackfillSeeder.seedIfNeeded()
-                val totalHadiths = hadithDao.getHadithCount()
-                if (totalHadiths == 0) return@launch
-
-                // Spread the daily selection across the whole collection. The
-                // previous approach incremented the offset by one per day, so
-                // consecutive days landed on adjacent (near-identical) hadiths
-                // and barely appeared to change. Multiplying the day index by a
-                // large odd constant (Knuth's multiplicative hash) scatters
-                // each day to a very different part of the database while still
-                // being deterministic: the same day always yields the same
-                // hadith.
-                val daysSinceEpoch = LocalDate.now().toEpochDay()
-                val offset =
-                    Math.floorMod(daysSinceEpoch * 2654435761L, totalHadiths.toLong()).toInt()
-
-                val hadith = hadithDao.getHadithByOffset(offset)
+                // GetDailyHadithUseCase seeds the backfill and applies the Knuth
+                // multiplicative-hash scatter so consecutive days land on very
+                // different hadiths while staying deterministic per day.
+                val hadith = hadithUseCases.getDailyHadith(LocalDate.now().toEpochDay()) ?: return@launch
                 _state.update {
                     it.copy(
-                        dailyHadith = hadith?.textEnglish?.let { text ->
+                        dailyHadith = hadith.textEnglish.let { text ->
                             if (text.length > 150) text.take(150).trimEnd() + "…" else text
                         },
-                        dailyHadithReference = hadith?.reference?.takeIf { ref -> ref.isNotBlank() },
+                        dailyHadithReference = hadith.reference?.takeIf { ref -> ref.isNotBlank() },
                         // Carry the id so tapping the card opens this exact hadith
                         // in the reader, and a short grade label for the card chip.
-                        dailyHadithId = hadith?.id?.toString(),
-                        dailyHadithGrade = shortGradeLabel(hadith?.grade)
+                        dailyHadithId = hadith.id,
+                        dailyHadithGrade = shortGradeLabel(hadith.grade)
                     )
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "load_daily_hadith", e.message)
                 // No hadith data available
             }
         }
@@ -212,8 +197,8 @@ class HomeViewModel @Inject constructor(
      * Short, chip-friendly grade label for the home hadith card (e.g. "Sahih").
      * Returns null for unknown/blank grades so the card simply omits the chip.
      */
-    private fun shortGradeLabel(rawGrade: String?): String? =
-        when (HadithGrade.fromString(rawGrade)) {
+    private fun shortGradeLabel(grade: HadithGrade?): String? =
+        when (grade) {
             HadithGrade.SAHIH -> context.getString(R.string.grade_sahih)
             HadithGrade.HASAN -> context.getString(R.string.grade_hasan)
             HadithGrade.DAIF -> context.getString(R.string.grade_daif)
@@ -228,47 +213,38 @@ class HomeViewModel @Inject constructor(
     private fun loadDailyDua() {
         viewModelScope.launch {
             try {
-                // Ensure newly shipped duas are seeded before reading directly
-                // from the DAO; on an app update the prepopulated DB is not
-                // re-copied, so the seeder is what brings in the new content.
-                duaContentSeeder.seedIfNeeded()
-                val categoryId = duaCategoryForHour(LocalTime.now().hour)
-                val category = duaDao.getCategoryById(categoryId) ?: return@launch
-                val duas = duaDao.getDuasByCategoryOnce(categoryId)
-                if (duas.isEmpty()) return@launch
-
-                val index = (LocalDate.now().dayOfYear % duas.size).coerceIn(0, duas.size - 1)
-                val dua = duas[index]
+                val now = LocalDate.now()
+                val selection = duaUseCases.getDailyDua(
+                    hourOfDay = LocalTime.now().hour,
+                    dayOfYear = now.dayOfYear
+                ) ?: return@launch
+                val dua = selection.dua
                 _state.update {
                     it.copy(
                         dailyDua = DailyDua(
                             title = dua.titleEnglish,
                             arabic = dua.textArabic,
-                            translation = dua.translation,
-                            source = dua.source,
-                            categoryLabel = category.nameEnglish,
-                            categoryIcon = category.icon
+                            translation = dua.textEnglish,
+                            source = dua.reference ?: "",
+                            categoryLabel = selection.categoryName,
+                            categoryIcon = selection.categoryIcon ?: ""
                         )
                     )
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "load_daily_dua", e.message)
                 // No dua data available
             }
         }
     }
 
-    /**
-     * Maps the hour of day to a dua category id (matching the prepopulated
-     * `dua_categories` table): morning adhkar through the day, evening adhkar
-     * in the late afternoon, and before-sleep adhkar at night.
-     */
-    private fun duaCategoryForHour(hour: Int): Int = when (hour) {
-        in 4..15 -> DUA_CATEGORY_MORNING
-        in 16..20 -> DUA_CATEGORY_EVENING
-        else -> DUA_CATEGORY_BEFORE_SLEEP
-    }
-
     fun onEvent(event: HomeEvent) {
+        when (event) {
+            is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed("home", "update_location")
+            is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed("home", "toggle_prayer_status")
+            else -> {}
+        }
         when (event) {
             is HomeEvent.UpdateLocation -> updateLocation(
                 event.latitude,
@@ -327,7 +303,7 @@ class HomeViewModel @Inject constructor(
             val prayedAt =
                 if (newStatus == PrayerStatus.PRAYED) System.currentTimeMillis() else null
 
-            prayerRepository.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
+            prayerUseCases.updatePrayerStatus(todayEpoch, prayerName, newStatus, prayedAt, false)
             _prayerRecords.update { it + (prayerName to newStatus) }
 
             // Update displays with new status
@@ -356,26 +332,26 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             // Combine location with all prayer calculation settings
             val locationFlow = combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName
             ) { lat: Double, lng: Double, name: String ->
                 Triple(lat, lng, name)
             }
 
             val calcSettingsFlow = combine(
-                preferencesDataStore.calculationMethod,
-                preferencesDataStore.asrCalculation,
-                preferencesDataStore.highLatitudeRule
+                settingsRepository.calculationMethod,
+                settingsRepository.asrCalculation,
+                settingsRepository.highLatitudeRule
             ) { calc: String, asr: String, high: String ->
                 Triple(calc, asr, high)
             }
 
             val adjustmentsFlow = combine(
-                preferencesDataStore.fajrAdjustment,
-                preferencesDataStore.sunriseAdjustment,
-                preferencesDataStore.dhuhrAdjustment,
-                preferencesDataStore.asrAdjustment,
+                settingsRepository.fajrAdjustment,
+                settingsRepository.sunriseAdjustment,
+                settingsRepository.dhuhrAdjustment,
+                settingsRepository.asrAdjustment,
             ) { fajr, sunrise, dhuhr, asr ->
                 mapOf(
                     PrayerType.FAJR to fajr,
@@ -385,8 +361,8 @@ class HomeViewModel @Inject constructor(
                 )
             }.combine(
                 combine(
-                    preferencesDataStore.maghribAdjustment,
-                    preferencesDataStore.ishaAdjustment
+                    settingsRepository.maghribAdjustment,
+                    settingsRepository.ishaAdjustment
                 ) { maghrib, isha ->
                     mapOf(
                         PrayerType.MAGHRIB to maghrib,
@@ -445,16 +421,11 @@ class HomeViewModel @Inject constructor(
         private const val DEFAULT_LATITUDE = 53.3498
         private const val DEFAULT_LONGITUDE = -6.2603
         private const val DEFAULT_LOCATION_NAME = "Dublin, Ireland"
-
-        // Dua category ids from the prepopulated `dua_categories` table.
-        private const val DUA_CATEGORY_MORNING = 1       // Morning Adhkar
-        private const val DUA_CATEGORY_EVENING = 2       // Evening Adhkar
-        private const val DUA_CATEGORY_BEFORE_SLEEP = 5  // Before Sleep
     }
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
         viewModelScope.launch {
-            preferencesDataStore.updateLocation(latitude, longitude, name)
+            settingsRepository.updateLocation(latitude, longitude, name)
             _state.update {
                 it.copy(
                     latitude = latitude,
@@ -639,6 +610,8 @@ class HomeViewModel @Inject constructor(
                     )
                 }
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("home", "calculate_prayer_times", e.message)
                 _state.update { it.copy(isLoading = false, error = e.message) }
             }
         }
@@ -657,7 +630,7 @@ class HomeViewModel @Inject constructor(
 
     private fun observeTimeFormat() {
         viewModelScope.launch {
-            preferencesDataStore.use24HourFormat.collect { enabled ->
+            settingsRepository.use24HourFormat.collect { enabled ->
                 use24HourFormat = enabled
                 calculatePrayerTimes() // Recalculate to reformat times
             }

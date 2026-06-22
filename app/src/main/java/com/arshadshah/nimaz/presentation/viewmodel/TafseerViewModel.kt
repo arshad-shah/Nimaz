@@ -2,13 +2,14 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
-import com.arshadshah.nimaz.domain.repository.QuranRepository
-import com.arshadshah.nimaz.domain.repository.TafseerRepository
+import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -55,14 +56,24 @@ sealed interface TafseerEvent {
 
 @HiltViewModel
 class TafseerViewModel @Inject constructor(
-    private val tafseerRepository: TafseerRepository,
-    private val quranRepository: QuranRepository
+    private val tafseerUseCases: TafseerUseCases,
+    private val quranUseCases: QuranUseCases
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(TafseerUiState())
     val state: StateFlow<TafseerUiState> = _state.asStateFlow()
 
     fun onEvent(event: TafseerEvent) {
+        when (event) {
+            is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed("tafseer", "open_surah")
+            is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed("tafseer", "switch_source")
+            is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed("tafseer", "add_highlight")
+            is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed("tafseer", "delete_highlight")
+            is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed("tafseer", "add_note")
+            is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed("tafseer", "delete_note")
+            is TafseerEvent.ExportAnnotations -> AppAnalytics.logFeatureUsed("tafseer", "export_annotations")
+            else -> {}
+        }
         when (event) {
             is TafseerEvent.LoadSurah -> loadSurah(event.surahNumber, event.ayahNumber)
             is TafseerEvent.NavigateToAyah -> onAyahChanged(event.index)
@@ -91,8 +102,8 @@ class TafseerViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isLoading = true, surahNumber = surahNumber)
 
-            val surah = quranRepository.getSurahByNumber(surahNumber)
-            val ayahs = quranRepository.getAyahsBySurah(surahNumber).first()
+            val surah = quranUseCases.getSurahByNumber(surahNumber)
+            val ayahs = quranUseCases.getAyahsBySurah(surahNumber).first()
 
             val initialIndex = ayahs.indexOfFirst { it.ayahNumber == ayahNumber }
                 .coerceAtLeast(0)
@@ -129,11 +140,11 @@ class TafseerViewModel @Inject constructor(
         val tafseerId = currentState.selectedSource.id
 
         viewModelScope.launch {
-            val tafseer = tafseerRepository.getTafseerForAyah(ayah.id, tafseerId)
+            val tafseer = tafseerUseCases.getTafseerForAyah(ayah.id, tafseerId)
             // Probe every source so the UI can suggest an alternate one when the
             // selected source has no content for this ayah (seed coverage is partial).
             val available = TafseerSource.entries.filter { source ->
-                tafseerRepository.getTafseerForAyah(ayah.id, source.id)
+                tafseerUseCases.getTafseerForAyah(ayah.id, source.id)
                     ?.text?.isNotBlank() == true
             }.toSet()
             _state.value = _state.value.copy(
@@ -143,13 +154,13 @@ class TafseerViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
-            tafseerRepository.getHighlightsForAyah(ayah.id, tafseerId).collectLatest { highlights ->
+            tafseerUseCases.getHighlightsForAyah(ayah.id, tafseerId).collectLatest { highlights ->
                 _state.value = _state.value.copy(highlights = highlights)
             }
         }
 
         viewModelScope.launch {
-            tafseerRepository.getNotesForAyah(ayah.id, tafseerId).collectLatest { notes ->
+            tafseerUseCases.getNotesForAyah(ayah.id, tafseerId).collectLatest { notes ->
                 _state.value = _state.value.copy(notes = notes)
             }
         }
@@ -162,7 +173,7 @@ class TafseerViewModel @Inject constructor(
 
         val ayah = ayahs[currentState.currentAyahIndex]
         viewModelScope.launch {
-            tafseerRepository.addHighlight(
+            tafseerUseCases.addHighlight(
                 ayahId = ayah.id,
                 tafseerId = currentState.selectedSource.id,
                 startOffset = startOffset,
@@ -174,14 +185,14 @@ class TafseerViewModel @Inject constructor(
 
     private fun deleteHighlight(highlightId: Long) {
         viewModelScope.launch {
-            tafseerRepository.deleteHighlight(highlightId)
+            tafseerUseCases.deleteHighlight(highlightId)
         }
     }
 
     private fun updateHighlightNote(highlightId: Long, note: String?) {
         val highlight = _state.value.highlights.find { it.id == highlightId } ?: return
         viewModelScope.launch {
-            tafseerRepository.updateHighlight(
+            tafseerUseCases.updateHighlight(
                 highlight.copy(
                     note = note,
                     updatedAt = System.currentTimeMillis()
@@ -197,7 +208,7 @@ class TafseerViewModel @Inject constructor(
 
         val ayah = ayahs[currentState.currentAyahIndex]
         viewModelScope.launch {
-            tafseerRepository.addNote(
+            tafseerUseCases.addNote(
                 ayahId = ayah.id,
                 tafseerId = currentState.selectedSource.id,
                 text = text
@@ -207,19 +218,19 @@ class TafseerViewModel @Inject constructor(
 
     private fun updateNote(note: TafseerNote) {
         viewModelScope.launch {
-            tafseerRepository.updateNote(note)
+            tafseerUseCases.updateNote(note)
         }
     }
 
     private fun deleteNote(noteId: Long) {
         viewModelScope.launch {
-            tafseerRepository.deleteNote(noteId)
+            tafseerUseCases.deleteNote(noteId)
         }
     }
 
     private fun exportAnnotations() {
         viewModelScope.launch {
-            val exported = tafseerRepository.exportAnnotations()
+            val exported = tafseerUseCases.exportAnnotations()
             _state.value = _state.value.copy(exportedText = exported)
         }
     }

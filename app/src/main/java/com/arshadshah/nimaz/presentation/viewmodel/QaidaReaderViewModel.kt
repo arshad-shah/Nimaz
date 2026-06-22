@@ -4,6 +4,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.audio.QaidaAudioManager
 import com.arshadshah.nimaz.data.audio.QaidaAudioState
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentSeeder
@@ -26,6 +28,17 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed interface QaidaReaderEvent {
+    data class SelectLesson(val lessonId: Int) : QaidaReaderEvent
+    data class CellTapped(val cell: QaidaCell) : QaidaReaderEvent
+    data class PlayLine(val lineId: Int) : QaidaReaderEvent
+    data class PlayLetter(val letter: QaidaLetter) : QaidaReaderEvent
+    data object NextLesson : QaidaReaderEvent
+    data object PreviousLesson : QaidaReaderEvent
+    data object Resume : QaidaReaderEvent
+    data object ResetJourney : QaidaReaderEvent
+}
 
 /**
  * The state holder behind the Qaida Reader UI (epic #171, sub-issue F of #177).
@@ -57,6 +70,7 @@ class QaidaReaderViewModel @Inject constructor(
         // QaidaContentSeeder.
         viewModelScope.launch {
             runCatching { contentSeeder.seedIfNeeded() }
+                .onFailure { CrashReporter.recordException(it) }
         }
     }
 
@@ -113,8 +127,30 @@ class QaidaReaderViewModel @Inject constructor(
                 ?.firstNotNullOfOrNull { line -> line.cells.firstOrNull { it.audioKey == key } }
         }.stateIn(viewModelScope, sharing, null)
 
+    fun onEvent(event: QaidaReaderEvent) {
+        when (event) {
+            is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed("qaida", "select_lesson")
+            is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed("qaida", "play_cell")
+            is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed("qaida", "play_line")
+            is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed("qaida", "play_letter")
+            QaidaReaderEvent.Resume -> AppAnalytics.logFeatureUsed("qaida", "resume")
+            QaidaReaderEvent.ResetJourney -> AppAnalytics.logFeatureUsed("qaida", "reset_journey")
+            else -> {}
+        }
+        when (event) {
+            is QaidaReaderEvent.SelectLesson -> selectLesson(event.lessonId)
+            is QaidaReaderEvent.CellTapped -> onCellTapped(event.cell)
+            is QaidaReaderEvent.PlayLine -> playLine(event.lineId)
+            is QaidaReaderEvent.PlayLetter -> playLetter(event.letter)
+            QaidaReaderEvent.NextLesson -> nextLesson()
+            QaidaReaderEvent.PreviousLesson -> previousLesson()
+            QaidaReaderEvent.Resume -> resume()
+            QaidaReaderEvent.ResetJourney -> resetJourney()
+        }
+    }
+
     /** Open a lesson, stopping any audio still playing from the previous one. */
-    fun selectLesson(lessonId: Int) {
+    private fun selectLesson(lessonId: Int) {
         if (_selectedLessonId.value == lessonId) return
         audioManager.stop()
         _selectedLessonId.value = lessonId
@@ -124,7 +160,7 @@ class QaidaReaderViewModel @Inject constructor(
      * Handle a token tap: play its clip and mark it heard (which advances the
      * lesson's progress and may unlock the next lesson, per sub-issue E).
      */
-    fun onCellTapped(cell: QaidaCell) {
+    private fun onCellTapped(cell: QaidaCell) {
         audioManager.play(cell.audioKey)
         viewModelScope.launch {
             qaidaUseCases.markCellHeard(cell.lessonId, cell.id)
@@ -132,7 +168,7 @@ class QaidaReaderViewModel @Inject constructor(
     }
 
     /** Play a whole line back-to-back, marking each of its cells heard. */
-    fun playLine(lineId: Int) {
+    private fun playLine(lineId: Int) {
         val line = lessonContent.value?.lines?.firstOrNull { it.line.id == lineId } ?: return
         if (line.cells.isEmpty()) return
         audioManager.playSequence(line.cells.map { it.audioKey })
@@ -142,12 +178,12 @@ class QaidaReaderViewModel @Inject constructor(
     }
 
     /** Play a single letter's clip from the letter explorer (no progress change). */
-    fun playLetter(letter: QaidaLetter) {
+    private fun playLetter(letter: QaidaLetter) {
         audioManager.play(letter.audioKey)
     }
 
     /** Move to the next lesson in display order, if it exists and is not locked. */
-    fun nextLesson() {
+    private fun nextLesson() {
         val lessons = courseProgress.value?.lessons ?: return
         val index = lessons.indexOfFirst { it.lesson.id == _selectedLessonId.value }
         if (index < 0 || index >= lessons.lastIndex) return
@@ -156,7 +192,7 @@ class QaidaReaderViewModel @Inject constructor(
     }
 
     /** Move to the previous lesson in display order, if there is one. */
-    fun previousLesson() {
+    private fun previousLesson() {
         val lessons = courseProgress.value?.lessons ?: return
         val index = lessons.indexOfFirst { it.lesson.id == _selectedLessonId.value }
         if (index <= 0) return
@@ -167,7 +203,7 @@ class QaidaReaderViewModel @Inject constructor(
      * Open the "continue where you left off" lesson: the first unlocked-but-
      * incomplete lesson, falling back to the first lesson if everything is done.
      */
-    fun resume() {
+    private fun resume() {
         val course = courseProgress.value ?: return
         val target = course.nextLessonId ?: course.lessons.firstOrNull()?.lesson?.id
         if (target != null) selectLesson(target)
@@ -178,7 +214,7 @@ class QaidaReaderViewModel @Inject constructor(
      * course rollup is reactive, so the home screen refreshes itself once the
      * rows are cleared. Stops any audio first.
      */
-    fun resetJourney() {
+    private fun resetJourney() {
         audioManager.stop()
         _selectedLessonId.value = null
         viewModelScope.launch {

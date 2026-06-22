@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.SystemClock
 import android.util.Log
 import androidx.glance.appwidget.updateAll
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.widget.core.formatWidgetCountdown
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidget
 import com.arshadshah.nimaz.widget.prayertimes.PrayerTimesWidget
@@ -82,11 +83,13 @@ class WidgetTickReceiver : BroadcastReceiver() {
             try {
                 NextPrayerWidget().updateAll(context)
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 Log.e("WidgetTickReceiver", "Failed to update NextPrayerWidget", e)
             }
             try {
                 PrayerTimesWidget().updateAll(context)
             } catch (e: Exception) {
+                CrashReporter.recordException(e)
                 Log.e("WidgetTickReceiver", "Failed to update PrayerTimesWidget", e)
             }
             pendingResult.finish()

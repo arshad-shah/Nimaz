@@ -2,7 +2,9 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -56,7 +58,7 @@ sealed interface HelpEvent {
 @HiltViewModel
 class HelpViewModel @Inject constructor(
     private val useCases: HelpUseCases,
-    preferences: PreferencesDataStore
+    preferences: SettingsRepository
 ) : ViewModel() {
 
     private val language: StateFlow<String> = preferences.appLanguage
@@ -77,7 +79,11 @@ class HelpViewModel @Inject constructor(
         // Topics re-resolve when the app language changes.
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopics(lang) }
-                .catch { e -> _homeState.update { it.copy(isLoading = false, error = e.message) } }
+                .catch { e ->
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("help", "load_topics", e.message)
+                    _homeState.update { it.copy(isLoading = false, error = e.message) }
+                }
                 .collect { topics ->
                     _homeState.update {
                         it.copy(
@@ -93,7 +99,11 @@ class HelpViewModel @Inject constructor(
                 .flatMapLatest { (q, lang) ->
                     if (q.isBlank()) flowOf(emptyList()) else useCases.search(q, lang)
                 }
-                .catch { /* keep last results on error */ }
+                .catch { e ->
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("help", "search", e.message)
+                    /* keep last results on error */
+                }
                 .collect { results ->
                     _homeState.update {
                         it.copy(
@@ -108,12 +118,20 @@ class HelpViewModel @Inject constructor(
     fun onEvent(event: HelpEvent) {
         when (event) {
             is HelpEvent.Search -> {
+                AppAnalytics.logFeatureUsed("help", "search")
                 query.value = event.query
                 _homeState.update { it.copy(query = event.query) }
             }
 
-            is HelpEvent.LoadTopic -> loadTopic(event.topicId)
-            is HelpEvent.LoadGuide -> loadGuide(event.guideId)
+            is HelpEvent.LoadTopic -> {
+                AppAnalytics.logFeatureUsed("help", "open_topic")
+                loadTopic(event.topicId)
+            }
+
+            is HelpEvent.LoadGuide -> {
+                AppAnalytics.logFeatureUsed("help", "open_guide")
+                loadGuide(event.guideId)
+            }
         }
     }
 
@@ -121,7 +139,11 @@ class HelpViewModel @Inject constructor(
         _topicState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getTopicDetail(topicId, lang) }
-                .catch { e -> _topicState.update { it.copy(isLoading = false, error = e.message) } }
+                .catch { e ->
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("help", "load_topic", e.message)
+                    _topicState.update { it.copy(isLoading = false, error = e.message) }
+                }
                 .collect { detail ->
                     _topicState.update {
                         it.copy(
@@ -137,7 +159,11 @@ class HelpViewModel @Inject constructor(
         _guideState.update { it.copy(isLoading = true) }
         viewModelScope.launch {
             language.flatMapLatest { lang -> useCases.getGuide(guideId, lang) }
-                .catch { e -> _guideState.update { it.copy(isLoading = false, error = e.message) } }
+                .catch { e ->
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("help", "load_guide", e.message)
+                    _guideState.update { it.copy(isLoading = false, error = e.message) }
+                }
                 .collect { guide ->
                     _guideState.update {
                         it.copy(

@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.TasbihCategory
@@ -370,7 +371,7 @@ private fun DuaReaderBottomBar(
             contentDescription = stringResource(R.string.dua_reader_favorite),
             onClick = { viewModel.onEvent(DuaEvent.ToggleFavorite(dua.id, dua.categoryId)) },
             active = isFavorite,
-            activeColor = Color(0xFFEF4444)
+            activeColor = NimazColors.PrayerColors.Maghrib
         )
         NimazPillActionButton(
             icon = Icons.Default.Add,

@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.help
 
 import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -146,7 +147,7 @@ private fun HelpGuideHero(guide: HelpGuideDetail) {
 
 @Composable
 private fun HelpGuideDone() {
-    val green = Color(0xFF22C55E)
+    val green = NimazColors.Success
     NimazCard(style = NimazCardStyle.OUTLINED) {
         Row(
             modifier = Modifier

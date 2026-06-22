@@ -29,6 +29,27 @@ object NimazColors {
     val SecondaryLight = Gold400
     val SecondaryDark = Color(0xFFFFA000)
     val SecondaryContainer = Color(0xFFFFECB3)
+
+    /** Darker amber-gold accent (e.g. icon tints/labels on gold surfaces). */
+    val GoldDark = Color(0xFFCA8A04)
+
+    // Semantic / categorical accents used across feature screens (Tailwind-derived).
+    val Success = Color(0xFF22C55E)
+    val Warning = Color(0xFFF59E0B)
+    val Info = Color(0xFF3B82F6)
+    val InfoSoft = Color(0xFF5B8DEF)
+    val Emerald = Color(0xFF10B981)
+    val Sky = Color(0xFF0EA5E9)
+    val Purple = Color(0xFFA855F7)
+    val Pink = Color(0xFFEC4899)
+    val Amber = Color(0xFFFBBF24)
+    val OrangeDark = Color(0xFFEA580C)
+    val IndigoLight = Color(0xFF818CF8)
+    val Gray300 = Color(0xFFD4D4D4)
+
+    // Onboarding illustration background (dark teal gradient).
+    val OnboardingBgTop = Color(0xFF061A1C)
+    val OnboardingBgBottom = Color(0xFF0A2A2A)
     val OnSecondary = Color(0xFF000000)
     val OnSecondaryContainer = Color(0xFF3E2723)
 
@@ -132,6 +153,20 @@ object NimazColors {
         val Silver = Color(0xFFC0C0C0)
         val Cash = Color(0xFF4CAF50)
         val Investment = Color(0xFF2196F3)
+
+        /** Darker amber-gold accent used on zakat calculator/history surfaces. */
+        val GoldAccent = Color(0xFFCA8A04)
+    }
+
+    // Per-collection gradient pairs for the Hadith book cards.
+    object HadithCollectionColors {
+        val Bukhari = listOf(Color(0xFF22C55E), Color(0xFF16A34A))
+        val Muslim = listOf(Color(0xFF3B82F6), Color(0xFF2563EB))
+        val Tirmidhi = listOf(Color(0xFFA855F7), Color(0xFF9333EA))
+        val Nasai = listOf(Color(0xFFF97316), Color(0xFFEA580C))
+        val AbuDawud = listOf(Color(0xFFEC4899), Color(0xFFDB2777))
+        val IbnMajah = listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
+        val Default = IbnMajah
     }
 
     // Tasbih Colors

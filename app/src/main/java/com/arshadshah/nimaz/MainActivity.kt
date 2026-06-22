@@ -25,7 +25,7 @@ import com.arshadshah.nimaz.core.util.InAppUpdateManager
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.data.audio.QuranAudioService
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWidget
@@ -39,7 +39,7 @@ val LocalInAppUpdateManager = staticCompositionLocalOf<InAppUpdateManager?> { nu
 class MainActivity : ComponentActivity() {
 
     @Inject
-    lateinit var preferencesDataStore: PreferencesDataStore
+    lateinit var settingsRepository: SettingsRepository
 
     @Inject
     lateinit var quranAudioManager: QuranAudioManager
@@ -83,16 +83,16 @@ class MainActivity : ComponentActivity() {
         inAppUpdateManager.checkForUpdate()
 
         setContent {
-            val themeModeString by preferencesDataStore.themeMode.collectAsState(initial = "system")
-            val dynamicColor by preferencesDataStore.dynamicColor.collectAsState(initial = false)
-            val hapticEnabled by preferencesDataStore.hapticFeedback.collectAsState(initial = true)
-            val animationsEnabled by preferencesDataStore.animationsEnabled.collectAsState(initial = true)
-            val use24HourFormat by preferencesDataStore.use24HourFormat.collectAsState(initial = false)
-            val useHijriPrimary by preferencesDataStore.useHijriPrimary.collectAsState(initial = false)
-            val showIslamicPatterns by preferencesDataStore.showIslamicPatterns.collectAsState(
+            val themeModeString by settingsRepository.themeMode.collectAsState(initial = "system")
+            val dynamicColor by settingsRepository.dynamicColor.collectAsState(initial = false)
+            val hapticEnabled by settingsRepository.hapticFeedback.collectAsState(initial = true)
+            val animationsEnabled by settingsRepository.animationsEnabled.collectAsState(initial = true)
+            val use24HourFormat by settingsRepository.use24HourFormat.collectAsState(initial = false)
+            val useHijriPrimary by settingsRepository.useHijriPrimary.collectAsState(initial = false)
+            val showIslamicPatterns by settingsRepository.showIslamicPatterns.collectAsState(
                 initial = true
             )
-            val localeCode by preferencesDataStore.appLanguage.collectAsState(initial = "en")
+            val localeCode by settingsRepository.appLanguage.collectAsState(initial = "en")
 
             val themeMode = when (themeModeString) {
                 "light" -> ThemeMode.LIGHT
