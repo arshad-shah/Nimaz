@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
-import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -126,7 +126,7 @@ sealed interface FastingEvent {
 
 @HiltViewModel
 class FastingViewModel @Inject constructor(
-    private val fastingRepository: FastingRepository,
+    private val fastingUseCases: FastingUseCases,
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val preferencesDataStore: PreferencesDataStore
 ) : ViewModel() {
@@ -326,7 +326,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val record = fastingRepository.getFastRecordForDate(dateEpoch)
+            val record = fastingUseCases.getFastRecordForDate(dateEpoch)
             _trackerState.update {
                 it.copy(
                     todayRecord = record,
@@ -358,7 +358,7 @@ class FastingViewModel @Inject constructor(
                 createdAt = now,
                 updatedAt = now
             )
-            fastingRepository.insertFastRecord(record)
+            fastingUseCases.insertFastRecord(record)
             selectDate(date)
             loadStats()
         }
@@ -368,7 +368,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            fastingRepository.updateFastStatus(dateEpoch, FastStatus.FASTED)
+            fastingUseCases.updateFastStatus(dateEpoch, FastStatus.FASTED)
             selectDate(date)
             loadStats()
         }
@@ -378,7 +378,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            fastingRepository.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
+            fastingUseCases.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
             selectDate(date)
             loadStats()
         }
@@ -388,9 +388,9 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
+            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
             if (existingRecord != null) {
-                fastingRepository.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
+                fastingUseCases.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
             } else {
                 val now = System.currentTimeMillis()
                 val hijri = HijriDateCalculator.toHijri(date)
@@ -409,7 +409,7 @@ class FastingViewModel @Inject constructor(
                     createdAt = now,
                     updatedAt = now
                 )
-                fastingRepository.insertFastRecord(record)
+                fastingUseCases.insertFastRecord(record)
             }
             selectDate(date)
             loadStats()
@@ -428,7 +428,7 @@ class FastingViewModel @Inject constructor(
                 FastStatus.NOT_FASTED -> {
                     val dateEpoch = date.toUtcMidnightMillis()
                     viewModelScope.launch {
-                        fastingRepository.updateFastStatus(dateEpoch, FastStatus.FASTED)
+                        fastingUseCases.updateFastStatus(dateEpoch, FastStatus.FASTED)
                         selectDate(date)
                         loadStats()
                     }
@@ -463,7 +463,7 @@ class FastingViewModel @Inject constructor(
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         calendarJob = viewModelScope.launch {
-            fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
+            fastingUseCases.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                 _calendarState.update { it.copy(records = records, isLoading = false) }
             }
         }
@@ -486,7 +486,7 @@ class FastingViewModel @Inject constructor(
                 val endEpoch =
                     ramadanEnd.plusDays(1).toUtcMidnightMillis()
 
-                fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
+                fastingUseCases.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                     val fasted = records.count { it.status == FastStatus.FASTED }
                     val missed = records.count { it.status == FastStatus.NOT_FASTED }
 
@@ -517,7 +517,7 @@ class FastingViewModel @Inject constructor(
         makeupPendingJob?.cancel()
         makeupAllJob?.cancel()
         makeupPendingJob = viewModelScope.launch {
-            fastingRepository.getPendingMakeupFasts().collect { pending ->
+            fastingUseCases.getPendingMakeupFasts().collect { pending ->
                 _makeupState.update {
                     it.copy(
                         pendingMakeupFasts = pending,
@@ -527,26 +527,26 @@ class FastingViewModel @Inject constructor(
             }
         }
         makeupAllJob = viewModelScope.launch {
-            fastingRepository.getAllMakeupFasts().collect { all ->
+            fastingUseCases.getAllMakeupFasts().collect { all ->
                 _makeupState.update { it.copy(allMakeupFasts = all) }
             }
         }
         viewModelScope.launch {
-            val totalFidya = fastingRepository.getTotalFidyaPaid()
+            val totalFidya = fastingUseCases.getTotalFidyaPaid()
             _makeupState.update { it.copy(totalFidyaPaid = totalFidya, isLoading = false) }
         }
     }
 
     private fun addMakeupFast(makeupFast: MakeupFast) {
         viewModelScope.launch {
-            fastingRepository.insertMakeupFast(makeupFast)
+            fastingUseCases.insertMakeupFast(makeupFast)
             loadMakeupFasts()
         }
     }
 
     private fun completeMakeupFast(makeupFastId: Long) {
         viewModelScope.launch {
-            fastingRepository.markMakeupFastCompleted(makeupFastId, System.currentTimeMillis())
+            fastingUseCases.markMakeupFastCompleted(makeupFastId, System.currentTimeMillis())
             loadMakeupFasts()
             loadStats()
         }
@@ -554,7 +554,7 @@ class FastingViewModel @Inject constructor(
 
     private fun payFidya(makeupFastId: Long, amount: Double) {
         viewModelScope.launch {
-            fastingRepository.markFidyaPaid(makeupFastId, amount)
+            fastingUseCases.markFidyaPaid(makeupFastId, amount)
             loadMakeupFasts()
         }
     }
@@ -578,9 +578,9 @@ class FastingViewModel @Inject constructor(
         val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val stats = fastingRepository.getFastingStats(startEpoch, endEpoch)
-            val ramadanCount = fastingRepository.getRamadanFastedCount()
-            val voluntaryCount = fastingRepository.getVoluntaryFastCount()
+            val stats = fastingUseCases.getFastingStats(startEpoch, endEpoch)
+            val ramadanCount = fastingUseCases.getRamadanFastedCount()
+            val voluntaryCount = fastingUseCases.getVoluntaryFastCount()
 
             _statsState.update {
                 it.copy(
@@ -597,7 +597,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
+            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
             val hijri = HijriDateCalculator.toHijri(date)
             val isRamadan = hijri.month == 9
 
@@ -626,7 +626,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
+            val existingRecord = fastingUseCases.getFastRecordForDate(dateEpoch)
             val now = System.currentTimeMillis()
             val hijri = HijriDateCalculator.toHijri(date)
 
@@ -647,16 +647,16 @@ class FastingViewModel @Inject constructor(
             )
 
             if (existingRecord != null) {
-                fastingRepository.updateFastRecord(record)
+                fastingUseCases.updateFastRecord(record)
             } else {
-                fastingRepository.insertFastRecord(record)
+                fastingUseCases.insertFastRecord(record)
             }
 
             // Auto-create makeup fast for missed/exempted Ramadan days
             if (fastType == FastType.RAMADAN &&
                 (status == FastStatus.NOT_FASTED || status == FastStatus.EXEMPTED)
             ) {
-                val existingMakeupCount = fastingRepository.getMakeupFastCountForDate(dateEpoch)
+                val existingMakeupCount = fastingUseCases.getMakeupFastCountForDate(dateEpoch)
                 if (existingMakeupCount == 0) {
                     val makeupFast = MakeupFast(
                         id = 0,
@@ -670,7 +670,7 @@ class FastingViewModel @Inject constructor(
                         createdAt = now,
                         updatedAt = now
                     )
-                    fastingRepository.insertMakeupFast(makeupFast)
+                    fastingUseCases.insertMakeupFast(makeupFast)
                 }
             }
 
@@ -687,7 +687,7 @@ class FastingViewModel @Inject constructor(
         val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
-            fastingRepository.deleteFastRecordByDate(dateEpoch)
+            fastingUseCases.deleteFastRecordByDate(dateEpoch)
             _sheetState.update { it.copy(isVisible = false) }
             selectDate(date)
             loadCalendarMonth()
@@ -698,7 +698,7 @@ class FastingViewModel @Inject constructor(
 
     private fun updateMakeupFastRecord(makeupFast: MakeupFast) {
         viewModelScope.launch {
-            fastingRepository.updateMakeupFast(makeupFast)
+            fastingUseCases.updateMakeupFast(makeupFast)
             loadMakeupFasts()
         }
     }

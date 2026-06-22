@@ -124,6 +124,68 @@ import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.arshadshah.nimaz.domain.usecase.UnmarkAyahReadUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateReadingPositionUseCase
+import com.arshadshah.nimaz.domain.usecase.CompleteSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteCustomPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteFastRecordByDateUseCase
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.FastingUseCases
+import com.arshadshah.nimaz.domain.usecase.GetActiveSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCategoryByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChapterByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChaptersByBookUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCompletedSessionsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCustomPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDefaultPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByCategoryUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByOccasionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastingStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFavoriteDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithOfTheDayUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByChapterUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPresetByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetProgressForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetRamadanFastedCountUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTasbihStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalCountInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.GetVoluntaryFastCountUseCase
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.usecase.InsertFastRecordUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertSessionUseCase
+import com.arshadshah.nimaz.domain.usecase.IsDuaFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.IsHadithBookmarkedUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkMakeupFastCompletedUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
+import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
+import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
+import com.arshadshah.nimaz.domain.usecase.ToggleBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateFastRecordUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateFastStatusUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdatePresetUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateSessionCountUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -406,6 +468,97 @@ object UseCaseModule {
             getCourseProgress = GetCourseProgressUseCase(repository),
             resetProgress = ResetQaidaProgressUseCase(repository),
             observeCompletedCells = ObserveCompletedCellsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideTasbihUseCases(
+        repository: TasbihRepository
+    ): TasbihUseCases {
+        return TasbihUseCases(
+            getDefaultPresets = GetDefaultPresetsUseCase(repository),
+            getCustomPresets = GetCustomPresetsUseCase(repository),
+            getPresetById = GetPresetByIdUseCase(repository),
+            insertPreset = InsertPresetUseCase(repository),
+            updatePreset = UpdatePresetUseCase(repository),
+            deleteCustomPreset = DeleteCustomPresetUseCase(repository),
+            seedMissingDefaults = SeedMissingDefaultsUseCase(repository),
+            getSessionsForDate = GetSessionsForDateUseCase(repository),
+            getSessionsInRange = GetSessionsInRangeUseCase(repository),
+            getActiveSession = GetActiveSessionUseCase(repository),
+            getSessionById = GetSessionByIdUseCase(repository),
+            insertSession = InsertSessionUseCase(repository),
+            updateSessionCount = UpdateSessionCountUseCase(repository),
+            completeSession = CompleteSessionUseCase(repository),
+            getTasbihStats = GetTasbihStatsUseCase(repository),
+            getTotalCountInRange = GetTotalCountInRangeUseCase(repository),
+            getCompletedSessionsInRange = GetCompletedSessionsInRangeUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideDuaUseCases(
+        repository: DuaRepository
+    ): DuaUseCases {
+        return DuaUseCases(
+            getAllCategories = GetAllCategoriesUseCase(repository),
+            getCategoryById = GetCategoryByIdUseCase(repository),
+            getDuaById = GetDuaByIdUseCase(repository),
+            getDuasByCategory = GetDuasByCategoryUseCase(repository),
+            getDuasByOccasion = GetDuasByOccasionUseCase(repository),
+            getFavoriteDuas = GetFavoriteDuasUseCase(repository),
+            getProgressForDate = GetProgressForDateUseCase(repository),
+            isDuaFavorite = IsDuaFavoriteUseCase(repository),
+            searchDuas = SearchDuasUseCase(repository),
+            toggleFavorite = ToggleFavoriteUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideHadithUseCases(
+        repository: HadithRepository
+    ): HadithUseCases {
+        return HadithUseCases(
+            getAllBooks = GetAllBooksUseCase(repository),
+            getBookById = GetBookByIdUseCase(repository),
+            getChaptersByBook = GetChaptersByBookUseCase(repository),
+            getChapterById = GetChapterByIdUseCase(repository),
+            getHadithsByChapter = GetHadithsByChapterUseCase(repository),
+            getHadithById = GetHadithByIdUseCase(repository),
+            getHadithByNumber = GetHadithByNumberUseCase(repository),
+            getHadithsByGrade = GetHadithsByGradeUseCase(repository),
+            getHadithOfTheDay = GetHadithOfTheDayUseCase(repository),
+            searchHadiths = SearchHadithsUseCase(repository),
+            searchHadithsInBook = SearchHadithsInBookUseCase(repository),
+            getAllBookmarks = GetAllBookmarksUseCase(repository),
+            isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
+            toggleBookmark = ToggleBookmarkUseCase(repository)
+        )
+    }
+    @Provides
+    @Singleton
+    fun provideFastingUseCases(
+        repository: FastingRepository
+    ): FastingUseCases {
+        return FastingUseCases(
+            getFastRecordForDate = GetFastRecordForDateUseCase(repository),
+            getFastRecordsInRange = GetFastRecordsInRangeUseCase(repository),
+            insertFastRecord = InsertFastRecordUseCase(repository),
+            updateFastRecord = UpdateFastRecordUseCase(repository),
+            updateFastStatus = UpdateFastStatusUseCase(repository),
+            deleteFastRecordByDate = DeleteFastRecordByDateUseCase(repository),
+            getRamadanFastedCount = GetRamadanFastedCountUseCase(repository),
+            getVoluntaryFastCount = GetVoluntaryFastCountUseCase(repository),
+            getFastingStats = GetFastingStatsUseCase(repository),
+            getAllMakeupFasts = GetAllMakeupFastsUseCase(repository),
+            getPendingMakeupFasts = GetPendingMakeupFastsUseCase(repository),
+            getMakeupFastCountForDate = GetMakeupFastCountForDateUseCase(repository),
+            insertMakeupFast = InsertMakeupFastUseCase(repository),
+            updateMakeupFast = UpdateMakeupFastUseCase(repository),
+            markMakeupFastCompleted = MarkMakeupFastCompletedUseCase(repository),
+            markFidyaPaid = MarkFidyaPaidUseCase(repository),
+            getTotalFidyaPaid = GetTotalFidyaPaidUseCase(repository)
         )
     }
 }
