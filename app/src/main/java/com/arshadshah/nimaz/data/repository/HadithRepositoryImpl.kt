@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.data.local.database.dao.HadithDao
+import com.arshadshah.nimaz.data.local.hadith.HadithBackfillSeeder
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.HadithEntity
@@ -22,8 +23,19 @@ import javax.inject.Singleton
 
 @Singleton
 class HadithRepositoryImpl @Inject constructor(
-    private val hadithDao: HadithDao
+    private val hadithDao: HadithDao,
+    private val backfillSeeder: HadithBackfillSeeder
 ) : HadithRepository {
+
+    override suspend fun getHadithCount(): Int {
+        backfillSeeder.seedIfNeeded()
+        return hadithDao.getHadithCount()
+    }
+
+    override suspend fun getHadithByOffset(offset: Int): Hadith? {
+        backfillSeeder.seedIfNeeded()
+        return hadithDao.getHadithByOffset(offset)?.toDomain()
+    }
 
     override suspend fun getHadithOfTheDay(): Hadith? {
         val totalHadiths = hadithDao.getHadithCount()

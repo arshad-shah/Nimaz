@@ -46,6 +46,12 @@ class DuaRepositoryImpl @Inject constructor(
         duaDao.getDuasByCategory(categoryId.toIntOrNull() ?: 0).mapItems { it.toDomain() }
     }
 
+    override suspend fun getDuasByCategoryOnce(categoryId: String): List<Dua> {
+        seeder.seedIfNeeded()
+        return duaDao.getDuasByCategoryOnce(categoryId.toIntOrNull() ?: return emptyList())
+            .map { it.toDomain() }
+    }
+
     override suspend fun getDuaById(duaId: String): Dua? {
         seeder.seedIfNeeded()
         return duaDao.getDuaById(duaId.toIntOrNull() ?: return null)?.toDomain()

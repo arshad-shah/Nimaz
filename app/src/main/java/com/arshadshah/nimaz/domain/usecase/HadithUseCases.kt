@@ -26,7 +26,8 @@ data class HadithUseCases(
     val isHadithBookmarked: IsHadithBookmarkedUseCase,
     val toggleBookmark: ToggleBookmarkUseCase,
     val updateBookmark: UpdateHadithBookmarkUseCase,
-    val deleteBookmark: DeleteHadithBookmarkUseCase
+    val deleteBookmark: DeleteHadithBookmarkUseCase,
+    val getDailyHadith: GetDailyHadithUseCase
 )
 
 class GetAllBooksUseCase @Inject constructor(private val repository: HadithRepository) {
@@ -94,4 +95,19 @@ class UpdateHadithBookmarkUseCase @Inject constructor(private val repository: Ha
 
 class DeleteHadithBookmarkUseCase @Inject constructor(private val repository: HadithRepository) {
     suspend operator fun invoke(hadithId: String) = repository.deleteBookmark(hadithId)
+}
+
+/**
+ * Deterministic "hadith of the day": scatters each day across the whole collection
+ * with a Knuth multiplicative hash so consecutive days land on very different
+ * hadiths, while the same day always yields the same one. [epochDay] is passed in
+ * (e.g. `LocalDate.now().toEpochDay()`) so the use case stays pure/testable.
+ */
+class GetDailyHadithUseCase @Inject constructor(private val repository: HadithRepository) {
+    suspend operator fun invoke(epochDay: Long): Hadith? {
+        val total = repository.getHadithCount()
+        if (total == 0) return null
+        val offset = Math.floorMod(epochDay * 2654435761L, total.toLong()).toInt()
+        return repository.getHadithByOffset(offset)
+    }
 }

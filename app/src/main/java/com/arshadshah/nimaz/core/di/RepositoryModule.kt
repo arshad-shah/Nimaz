@@ -230,6 +230,8 @@ import com.arshadshah.nimaz.domain.usecase.GetDuaBookmarksUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteDuaBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
 import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyHadithUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyDuaUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -565,7 +567,8 @@ object UseCaseModule {
             searchDuas = SearchDuasUseCase(repository),
             toggleFavorite = ToggleDuaFavoriteUseCase(repository),
             getAllBookmarks = GetDuaBookmarksUseCase(repository),
-            deleteBookmark = DeleteDuaBookmarkUseCase(repository)
+            deleteBookmark = DeleteDuaBookmarkUseCase(repository),
+            getDailyDua = GetDailyDuaUseCase(repository)
         )
     }
     @Provides
@@ -589,7 +592,8 @@ object UseCaseModule {
             isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
             toggleBookmark = ToggleBookmarkUseCase(repository),
             updateBookmark = UpdateHadithBookmarkUseCase(repository),
-            deleteBookmark = DeleteHadithBookmarkUseCase(repository)
+            deleteBookmark = DeleteHadithBookmarkUseCase(repository),
+            getDailyHadith = GetDailyHadithUseCase(repository)
         )
     }
     @Provides

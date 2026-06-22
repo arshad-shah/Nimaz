@@ -53,10 +53,10 @@ grep -rlnE "private val [a-zA-Z]+: [A-Za-z]+(Dao|RepositoryImpl)" \
   app/src/main/java/com/arshadshah/nimaz/presentation/viewmodel/
 ```
 
-- [ ] **`HomeViewModel` injects three DAOs** (`FastingDao`, `HadithDao`, `DuaDao`) for the
-  "daily hadith / daily dua of the day" features. This is entangled with seeders and DB integer
-  ids — **see AP-4** for the proper fix (extract use cases). Removing the DAO injections here
-  resolves both AP-2 and AP-4 for Home.
+- [x] ~~**`HomeViewModel` injects three DAOs** (`FastingDao`, `HadithDao`, `DuaDao`).~~
+  **Resolved.** Home now injects `FastingUseCases`/`HadithUseCases`/`DuaUseCases`; the daily
+  content goes through `GetDailyHadithUseCase`/`GetDailyDuaUseCase` (see AP-4), and seeding moved
+  into the repositories. Home no longer imports any `data.local.database.*`.
 - [x] ~~**`QuranViewModel` imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
 - [x] ~~**`QuranPageGrid` (organism) imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
 
@@ -91,13 +91,12 @@ and call use cases; they shouldn't compute domain results from raw data sources.
 **Why it hurts:** logic isn't reusable or unit-testable in isolation, and the VM grows into a
 god-object.
 
-- [ ] **Home "content of the day" rotation.** `HomeViewModel.loadDailyHadith()` /
-  `loadDailyDua()` pull total counts + offsets from DAOs and compute the daily pick inline
-  (Knuth-hash day scatter, time-of-day category, day-of-year rotation). **Fix:** extract
-  `GetDailyHadithUseCase` and `GetDailyDuaUseCase` (owning the seeders + the selection logic),
-  returning domain models. ⚠️ Behaviour-bearing — validate against the current output (the domain
-  models differ from entities: `Hadith.grade` is an enum, `DuaCategory.iconName` vs `icon`,
-  String vs Int ids), ideally with a runtime/visual check.
+- [x] ~~**Home "content of the day" rotation.**~~ **Resolved.** Extracted
+  `GetDailyHadithUseCase` (Knuth-hash day scatter) and `GetDailyDuaUseCase` (time-of-day category
+  + day-of-year rotation, returning a `DailyDuaSelection` domain model). The seeders moved into
+  the repositories (seed-then-read), and the daily reads use seeded repository methods
+  (`getHadithCount`/`getHadithByOffset`, `getDuasByCategoryOnce`). Behaviour preserved (identical
+  queries/selection math; field mappings verified); full unit suite green.
 - [ ] **General watch:** when a `private fun` in a ViewModel does multi-step computation over
   repository/use-case results (filtering, combining, ranking), consider whether it's a use case.
 

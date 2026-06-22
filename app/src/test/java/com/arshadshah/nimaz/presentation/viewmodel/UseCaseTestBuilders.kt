@@ -2,6 +2,8 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.repository.HadithRepository
+import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.usecase.*
 
 // Test helpers: wrap a (mock) repository in the real use-case wrappers so existing
@@ -45,4 +47,40 @@ fun buildPrayerUseCases(repository: PrayerRepository) = PrayerUseCases(
     deleteLocation = DeleteLocationUseCase(repository),
     setCurrentLocation = SetCurrentLocationUseCase(repository),
     toggleFavorite = ToggleLocationFavoriteUseCase(repository)
+)
+
+fun buildHadithUseCases(repository: HadithRepository) = HadithUseCases(
+    getAllBooks = GetAllBooksUseCase(repository),
+    getBookById = GetBookByIdUseCase(repository),
+    getChaptersByBook = GetChaptersByBookUseCase(repository),
+    getChapterById = GetChapterByIdUseCase(repository),
+    getHadithsByChapter = GetHadithsByChapterUseCase(repository),
+    getHadithById = GetHadithByIdUseCase(repository),
+    getHadithByNumber = GetHadithByNumberUseCase(repository),
+    getHadithsByGrade = GetHadithsByGradeUseCase(repository),
+    getHadithOfTheDay = GetHadithOfTheDayUseCase(repository),
+    searchHadiths = SearchHadithsUseCase(repository),
+    searchHadithsInBook = SearchHadithsInBookUseCase(repository),
+    getAllBookmarks = GetAllBookmarksUseCase(repository),
+    isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
+    toggleBookmark = ToggleBookmarkUseCase(repository),
+    updateBookmark = UpdateHadithBookmarkUseCase(repository),
+    deleteBookmark = DeleteHadithBookmarkUseCase(repository),
+    getDailyHadith = GetDailyHadithUseCase(repository)
+)
+
+fun buildDuaUseCases(repository: DuaRepository) = DuaUseCases(
+    getAllCategories = GetAllCategoriesUseCase(repository),
+    getCategoryById = GetCategoryByIdUseCase(repository),
+    getDuaById = GetDuaByIdUseCase(repository),
+    getDuasByCategory = GetDuasByCategoryUseCase(repository),
+    getDuasByOccasion = GetDuasByOccasionUseCase(repository),
+    getFavoriteDuas = GetFavoriteDuasUseCase(repository),
+    getProgressForDate = GetProgressForDateUseCase(repository),
+    isDuaFavorite = IsDuaFavoriteUseCase(repository),
+    searchDuas = SearchDuasUseCase(repository),
+    toggleFavorite = ToggleDuaFavoriteUseCase(repository),
+    getAllBookmarks = GetDuaBookmarksUseCase(repository),
+    deleteBookmark = DeleteDuaBookmarkUseCase(repository),
+    getDailyDua = GetDailyDuaUseCase(repository)
 )

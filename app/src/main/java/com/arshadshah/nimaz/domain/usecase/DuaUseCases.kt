@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.domain.model.DailyDuaSelection
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.DuaCategory
@@ -22,7 +23,8 @@ data class DuaUseCases(
     val searchDuas: SearchDuasUseCase,
     val toggleFavorite: ToggleDuaFavoriteUseCase,
     val getAllBookmarks: GetDuaBookmarksUseCase,
-    val deleteBookmark: DeleteDuaBookmarkUseCase
+    val deleteBookmark: DeleteDuaBookmarkUseCase,
+    val getDailyDua: GetDailyDuaUseCase
 )
 
 class GetAllCategoriesUseCase @Inject constructor(private val repository: DuaRepository) {
@@ -71,4 +73,37 @@ class GetDuaBookmarksUseCase @Inject constructor(private val repository: DuaRepo
 
 class DeleteDuaBookmarkUseCase @Inject constructor(private val repository: DuaRepository) {
     suspend operator fun invoke(duaId: String) = repository.deleteBookmark(duaId)
+}
+
+/**
+ * "Dua of the day": picks the adhkar category appropriate to the time of day, then
+ * rotates the specific dua within it daily. [hourOfDay] and [dayOfYear] are passed
+ * in so the use case stays pure/testable.
+ */
+class GetDailyDuaUseCase @Inject constructor(private val repository: DuaRepository) {
+    suspend operator fun invoke(hourOfDay: Int, dayOfYear: Int): DailyDuaSelection? {
+        val categoryId = categoryIdForHour(hourOfDay)
+        val category = repository.getCategoryById(categoryId) ?: return null
+        val duas = repository.getDuasByCategoryOnce(categoryId)
+        if (duas.isEmpty()) return null
+        val index = (dayOfYear % duas.size).coerceIn(0, duas.size - 1)
+        return DailyDuaSelection(
+            dua = duas[index],
+            categoryName = category.nameEnglish,
+            categoryIcon = category.iconName
+        )
+    }
+
+    // Adhkar category ids from the prepopulated `dua_categories` table.
+    private fun categoryIdForHour(hour: Int): String = when (hour) {
+        in 4..15 -> CATEGORY_MORNING
+        in 16..20 -> CATEGORY_EVENING
+        else -> CATEGORY_BEFORE_SLEEP
+    }
+
+    private companion object {
+        const val CATEGORY_MORNING = "1"
+        const val CATEGORY_EVENING = "2"
+        const val CATEGORY_BEFORE_SLEEP = "5"
+    }
 }
