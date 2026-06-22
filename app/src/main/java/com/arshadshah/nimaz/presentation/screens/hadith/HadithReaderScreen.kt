@@ -27,8 +27,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -39,15 +37,10 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +55,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -80,14 +72,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.templates.ReaderPagerScaffold
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HadithReaderScreen(
     bookId: String,
@@ -98,12 +90,6 @@ fun HadithReaderScreen(
 ) {
     val state by viewModel.readerState.collectAsState()
     val hadiths = state.hadiths
-    val scope = rememberCoroutineScope()
-
-    val pagerState = rememberPagerState(
-        initialPage = state.currentHadithIndex.coerceAtLeast(0),
-        pageCount = { hadiths.size }
-    )
 
     LaunchedEffect(chapterId, bookId) {
         // If bookId is empty and chapterId isn't a "book_chapter" id, it's a hadithId from search.
@@ -114,99 +100,31 @@ fun HadithReaderScreen(
         }
     }
 
-    LaunchedEffect(state.currentHadithIndex, hadiths.size) {
-        if (hadiths.isNotEmpty()) {
-            pagerState.scrollToPage(state.currentHadithIndex.coerceIn(0, hadiths.lastIndex))
-        }
-    }
-
-    val currentHadith = hadiths.getOrNull(pagerState.currentPage)
-
-    Scaffold(
-        topBar = {
-            NimazBackTopAppBar(
-                title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
-                subtitle = state.chapter?.let {
-                    stringResource(R.string.hadith_chapter_format, it.chapterNumber)
-                },
-                onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.hadith_settings),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            )
+    ReaderPagerScaffold(
+        items = hadiths,
+        targetIndex = state.currentHadithIndex,
+        isLoading = state.isLoading,
+        title = { state.chapter?.nameEnglish ?: stringResource(R.string.loading) },
+        subtitle = state.chapter?.let {
+            stringResource(R.string.hadith_chapter_format, it.chapterNumber)
         },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when {
-                state.isLoading && hadiths.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                hadiths.isEmpty() -> {
-                    Text(
-                        text = stringResource(R.string.no_hadith_found),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                else -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            key = { hadiths[it].id }
-                        ) { page ->
-                            HadithPage(hadith = hadiths[page], state = state)
-                        }
-
-                        currentHadith?.let { hadith ->
-                            HadithReaderBottomBar(
-                                hadith = hadith,
-                                viewModel = viewModel,
-                                currentPage = pagerState.currentPage,
-                                pageCount = hadiths.size,
-                                onPrev = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(
-                                            (pagerState.currentPage - 1).coerceAtLeast(0)
-                                        )
-                                    }
-                                },
-                                onNext = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(
-                                            (pagerState.currentPage + 1).coerceAtMost(hadiths.lastIndex)
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
+        onNavigateBack = onNavigateBack,
+        onSettingsClick = onNavigateToSettings,
+        settingsContentDescription = stringResource(R.string.hadith_settings),
+        emptyText = stringResource(R.string.no_hadith_found),
+        itemKey = { it.id },
+        pageContent = { hadith -> HadithPage(hadith = hadith, state = state) },
+        bottomBar = { hadith, currentPage, pageCount, onPrev, onNext ->
+            HadithReaderBottomBar(
+                hadith = hadith,
+                viewModel = viewModel,
+                currentPage = currentPage,
+                pageCount = pageCount,
+                onPrev = onPrev,
+                onNext = onNext
+            )
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -465,7 +383,7 @@ private fun HadithReaderBottomBar(
                 )
             },
             active = isBookmarked,
-            activeColor = Color(0xFFEAB308)
+            activeColor = NimazColors.ReaderActionColors.BookmarkActive
         )
         NimazPillActionButton(
             icon = Icons.Default.Share,

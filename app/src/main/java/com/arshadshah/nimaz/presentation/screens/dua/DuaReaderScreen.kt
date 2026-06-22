@@ -4,7 +4,6 @@ import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -18,8 +17,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -29,15 +26,10 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,10 +37,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -66,16 +56,15 @@ import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.templates.ReaderPagerScaffold
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DuaReaderScreen(
     duaId: String,
@@ -86,109 +75,34 @@ fun DuaReaderScreen(
 ) {
     val state by viewModel.readerState.collectAsState()
     val duas = state.duas
-    val scope = rememberCoroutineScope()
-
-    val pagerState = rememberPagerState(
-        initialPage = state.initialIndex.coerceAtLeast(0),
-        pageCount = { duas.size }
-    )
 
     LaunchedEffect(duaId) {
         viewModel.onEvent(DuaEvent.LoadDua(duaId))
     }
 
-    // Jump to the requested dua once the collection has loaded.
-    LaunchedEffect(state.initialIndex, duas.size) {
-        if (duas.isNotEmpty()) {
-            pagerState.scrollToPage(state.initialIndex.coerceIn(0, duas.lastIndex))
-        }
-    }
-
-    val currentDua = duas.getOrNull(pagerState.currentPage)
-
-    Scaffold(
-        topBar = {
-            NimazBackTopAppBar(
-                title = currentDua?.titleEnglish ?: stringResource(R.string.dua_reader_loading),
-                onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = stringResource(R.string.dua_settings),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
+    ReaderPagerScaffold(
+        items = duas,
+        targetIndex = state.initialIndex,
+        isLoading = state.isLoading,
+        title = { current -> current?.titleEnglish ?: stringResource(R.string.dua_reader_loading) },
+        onNavigateBack = onNavigateBack,
+        onSettingsClick = onNavigateToSettings,
+        settingsContentDescription = stringResource(R.string.dua_settings),
+        emptyText = stringResource(R.string.dua_reader_not_found),
+        itemKey = { it.id },
+        pageContent = { dua -> DuaPage(dua = dua, state = state) },
+        bottomBar = { dua, currentPage, pageCount, onPrev, onNext ->
+            DuaReaderBottomBar(
+                dua = dua,
+                viewModel = viewModel,
+                tasbihViewModel = tasbihViewModel,
+                currentPage = currentPage,
+                pageCount = pageCount,
+                onPrev = onPrev,
+                onNext = onNext
             )
-        },
-        containerColor = MaterialTheme.colorScheme.background
-    ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            when {
-                state.isLoading && duas.isEmpty() -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.align(Alignment.Center),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                duas.isEmpty() -> {
-                    Text(
-                        text = stringResource(R.string.dua_reader_not_found),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
-
-                else -> {
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        HorizontalPager(
-                            state = pagerState,
-                            modifier = Modifier
-                                .weight(1f)
-                                .fillMaxWidth(),
-                            key = { duas[it].id }
-                        ) { page ->
-                            DuaPage(dua = duas[page], state = state)
-                        }
-
-                        currentDua?.let { dua ->
-                            DuaReaderBottomBar(
-                                dua = dua,
-                                viewModel = viewModel,
-                                tasbihViewModel = tasbihViewModel,
-                                currentPage = pagerState.currentPage,
-                                pageCount = duas.size,
-                                onPrev = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(
-                                            (pagerState.currentPage - 1).coerceAtLeast(0)
-                                        )
-                                    }
-                                },
-                                onNext = {
-                                    scope.launch {
-                                        pagerState.animateScrollToPage(
-                                            (pagerState.currentPage + 1).coerceAtMost(duas.lastIndex)
-                                        )
-                                    }
-                                }
-                            )
-                        }
-                    }
-                }
-            }
         }
-    }
+    )
 }
 
 /**
@@ -370,7 +284,7 @@ private fun DuaReaderBottomBar(
             contentDescription = stringResource(R.string.dua_reader_favorite),
             onClick = { viewModel.onEvent(DuaEvent.ToggleFavorite(dua.id, dua.categoryId)) },
             active = isFavorite,
-            activeColor = Color(0xFFEF4444)
+            activeColor = NimazColors.ReaderActionColors.FavoriteActive
         )
         NimazPillActionButton(
             icon = Icons.Default.Add,

@@ -145,6 +145,13 @@ object NimazColors {
         val Mawdu = Color(0xFFEF4444)
     }
 
+    // Active-state accents for reader action pills (bookmark / favourite),
+    // shared by the hadith and dua readers and the hadith collection screen.
+    object ReaderActionColors {
+        val BookmarkActive = NimazColors.Gold500   // 0xFFEAB308
+        val FavoriteActive = Color(0xFFEF4444)
+    }
+
     // Zakat Colors
     object ZakatColors {
         val Gold = Color(0xFFFFD700)

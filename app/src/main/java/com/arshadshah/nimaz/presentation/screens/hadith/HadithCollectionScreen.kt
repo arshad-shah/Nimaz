@@ -61,6 +61,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 
@@ -286,7 +287,7 @@ private fun HadithOfTheDayCard(
                         contentDescription = stringResource(R.string.bookmark),
                         onClick = onBookmarkClick,
                         active = isBookmarked,
-                        activeColor = Color(0xFFEAB308)
+                        activeColor = NimazColors.ReaderActionColors.BookmarkActive
                     )
                     NimazPillActionButton(
                         icon = Icons.Default.Share,
