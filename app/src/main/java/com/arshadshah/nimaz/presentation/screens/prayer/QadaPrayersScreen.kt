@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
 import androidx.compose.ui.res.stringResource
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -116,8 +117,8 @@ fun QadaPrayersScreen(
 
 @Composable
 private fun QadaSummaryCard(totalMissed: Int) {
-    val warningOrange = Color(0xFFF97316)
-    val warningOrangeDark = Color(0xFFEA580C)
+    val warningOrange = NimazColors.PrayerColors.Asr
+    val warningOrangeDark = NimazColors.OrangeDark
 
     Box(
         modifier = Modifier

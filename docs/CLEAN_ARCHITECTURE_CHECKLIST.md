@@ -115,26 +115,22 @@ grep -rlE 'Color\(0x[0-9A-Fa-f]{6,8}\)' app/src/main/java/com/arshadshah/nimaz/p
  | while read f; do echo "$(grep -coE 'Color\(0x[0-9A-Fa-f]{6,8}\)' "$f")  $f"; done | sort -rn
 ```
 
-Snapshot: **21 screen files** still hold raw literals. Tackle a few per PR (relocate into
-`NimazColors`, preserving exact hex — zero visual change). Top offenders:
+Original snapshot was **21 screen files**. Now down to **3**, and those are accepted
+design-token / illustration files (see below).
 
-- [ ] `fasting/FastTrackerScreen.kt` (15)
-- [ ] `tasbih/BeadDesign.kt` (14 — bespoke bead-style gradients; relocate to a
-  `NimazColors.TasbihBeadStyles` token group, under visual review)
-- [x] ~~`hadith/HadithCollectionScreen.kt` (11)~~ — **Resolved.** `getBookGradient` now reads
-  `NimazColors.HadithCollectionColors`; gold accents use `NimazColors.Gold500` / `NimazColors.GoldDark`.
-- [ ] `prayer/PrayerStatsScreen.kt` (10)
-- [ ] `settings/NotificationSettingsScreen.kt` (9)
-- [ ] `prayer/PrayerTrackerScreen.kt` (8)
-- [ ] `onboarding/OnboardingArt.kt` (8 — illustration art; may legitimately keep brand literals,
-  but prefer named tokens)
-- [ ] `help/HelpContentUi.kt` (7), `dua/DuasCollectionScreen.kt` (7),
-  `calendar/IslamicCalendarScreen.kt` (7)
-- [ ] Remaining lower-count files (run the detect command for the live list):
-  `settings/AppearanceSettingsScreen.kt`, `quran/QuranHomeScreen.kt`,
-  `prayer/MonthlyPrayerTimesScreen.kt`, `hadith/HadithGradeChip.kt`,
-  `onboarding/OnboardingScreen.kt`, …
-- [x] ~~`zakat/ZakatCalculatorScreen.kt`, `zakat/ZakatHistoryScreen.kt`~~ — **resolved**.
+- [x] ~~All 18 feature screens with scattered literals~~ — **Resolved.** Literals across
+  `fasting/FastTrackerScreen`, `prayer/{PrayerStats,PrayerTracker,MonthlyPrayerTimes,QadaPrayers}`,
+  `settings/{Notification,Appearance,Widgets}`, `help/{HelpContentUi,HelpGuide}`,
+  `dua/{DuasCollection,DuaReader}`, `calendar/IslamicCalendar`, `hadith/{HadithCollection,HadithGradeChip,HadithReader}`,
+  `quran/QuranHomeScreen`, `onboarding/OnboardingScreen`, and `zakat/*` were relocated into
+  `NimazColors` (exact hex preserved — zero visual change). New semantic/categorical tokens were
+  added: `Success`, `Warning`, `Info`, `InfoSoft`, `Emerald`, `Sky`, `Purple`, `Pink`, `Amber`,
+  `OrangeDark`, `IndigoLight`, `Gray300`, `OnboardingBg*`, plus `HadithCollectionColors`. Prayer
+  palette usages map to `NimazColors.PrayerColors.*`.
+- [ ] **Accepted (not scattered screen literals) — leave unless a redesign touches them:**
+  `tasbih/BeadDesign.kt` and `tasbih/TasbihBeads.kt` (bespoke bead-style gradient palettes — this
+  *is* their design-token file) and `onboarding/OnboardingArt.kt` (illustration art). If you do
+  tokenize them, add a `NimazColors.TasbihBeadStyles` group under visual review.
 
 > Components (`presentation/components/`) also contain literals; many are intentional gradient
 > stops. Prefer named tokens, but a dedicated design-token file (e.g. `BeadDesign.kt`) holding

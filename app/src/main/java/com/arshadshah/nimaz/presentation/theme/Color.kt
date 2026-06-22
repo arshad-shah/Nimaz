@@ -32,6 +32,24 @@ object NimazColors {
 
     /** Darker amber-gold accent (e.g. icon tints/labels on gold surfaces). */
     val GoldDark = Color(0xFFCA8A04)
+
+    // Semantic / categorical accents used across feature screens (Tailwind-derived).
+    val Success = Color(0xFF22C55E)
+    val Warning = Color(0xFFF59E0B)
+    val Info = Color(0xFF3B82F6)
+    val InfoSoft = Color(0xFF5B8DEF)
+    val Emerald = Color(0xFF10B981)
+    val Sky = Color(0xFF0EA5E9)
+    val Purple = Color(0xFFA855F7)
+    val Pink = Color(0xFFEC4899)
+    val Amber = Color(0xFFFBBF24)
+    val OrangeDark = Color(0xFFEA580C)
+    val IndigoLight = Color(0xFF818CF8)
+    val Gray300 = Color(0xFFD4D4D4)
+
+    // Onboarding illustration background (dark teal gradient).
+    val OnboardingBgTop = Color(0xFF061A1C)
+    val OnboardingBgBottom = Color(0xFF0A2A2A)
     val OnSecondary = Color(0xFF000000)
     val OnSecondaryContainer = Color(0xFF3E2723)
 

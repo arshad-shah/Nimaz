@@ -82,6 +82,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.DuaCategory
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -376,14 +377,14 @@ private fun AdhkarListItem(
 @Composable
 private fun getCategoryColor(categoryId: String): Color {
     return when (categoryId.hashCode() % 8) {
-        0 -> Color(0xFFFBBF24) // morning/gold
-        1 -> Color(0xFF6366F1) // evening/indigo
-        2 -> Color(0xFF8B5CF6) // sleep/purple
+        0 -> NimazColors.Amber // morning/gold
+        1 -> NimazColors.PrayerColors.Fajr // evening/indigo
+        2 -> NimazColors.PrayerColors.Isha // sleep/purple
         3 -> MaterialTheme.colorScheme.primary // prayer/teal
-        4 -> Color(0xFFF97316) // travel/orange
-        5 -> Color(0xFF22C55E) // food/green
-        6 -> Color(0xFFEF4444) // protection/red
-        7 -> Color(0xFFEC4899) // forgiveness/pink
+        4 -> NimazColors.PrayerColors.Asr // travel/orange
+        5 -> NimazColors.Success // food/green
+        6 -> NimazColors.PrayerColors.Maghrib // protection/red
+        7 -> NimazColors.Pink // forgiveness/pink
         else -> MaterialTheme.colorScheme.primary
     }
 }

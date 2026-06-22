@@ -177,7 +177,7 @@ fun OnboardingScreen(
     val pagerState = rememberPagerState(pageCount = { totalPages })
 
     Scaffold(
-        containerColor = Color(0xFF061A1C),
+        containerColor = NimazColors.OnboardingBgTop,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
         // Let the illuminated background bleed all the way up behind the status
@@ -333,7 +333,7 @@ fun OnboardingScreen(
                             },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = IllumGold,
-                                contentColor = Color(0xFF0A2A2A)
+                                contentColor = NimazColors.OnboardingBgBottom
                             )
                         ) {
                             Text(
@@ -602,7 +602,7 @@ private fun PermissionCard(
                     onClick = onRequest,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = IllumGold,
-                        contentColor = Color(0xFF0A2A2A)
+                        contentColor = NimazColors.OnboardingBgBottom
                     ),
                     modifier = Modifier.height(if (compact) 36.dp else 40.dp),
                     contentPadding = ButtonDefaults.ContentPadding

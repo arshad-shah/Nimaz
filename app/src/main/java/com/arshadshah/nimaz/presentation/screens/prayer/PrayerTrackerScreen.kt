@@ -279,8 +279,8 @@ private fun QadaTabContent(viewModel: PrayerTrackerViewModel) {
 
 @Composable
 private fun QadaSummaryCard(totalMissed: Int) {
-    val warningOrange = Color(0xFFF97316)
-    val warningOrangeDark = Color(0xFFEA580C)
+    val warningOrange = NimazColors.PrayerColors.Asr
+    val warningOrangeDark = NimazColors.OrangeDark
 
     Box(
         modifier = Modifier
@@ -348,8 +348,8 @@ private fun QadaSummaryCard(totalMissed: Int) {
 
 @Composable
 private fun StreakCard(currentStreak: Int) {
-    val goldDark = Color(0xFFCA8A04)
-    val goldLight = Color(0xFFEAB308)
+    val goldDark = NimazColors.GoldDark
+    val goldLight = NimazColors.Gold500
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -382,7 +382,7 @@ private fun StreakCard(currentStreak: Int) {
                         Icon(
                             imageVector = Icons.Default.LocalFireDepartment,
                             contentDescription = null,
-                            tint = Color(0xFF1C1917),
+                            tint = NimazColors.Neutral900,
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -390,7 +390,7 @@ private fun StreakCard(currentStreak: Int) {
                         text = stringResource(R.string.current_streak),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF1C1917)
+                        color = NimazColors.Neutral900
                     )
                 }
                 Spacer(modifier = Modifier.height(10.dp))
@@ -398,13 +398,13 @@ private fun StreakCard(currentStreak: Int) {
                     text = "$currentStreak",
                     fontSize = 48.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1C1917),
+                    color = NimazColors.Neutral900,
                     lineHeight = 48.sp
                 )
                 Text(
                     text = stringResource(R.string.consecutive_days_all_prayers),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFF1C1917).copy(alpha = 0.8f)
+                    color = NimazColors.Neutral900.copy(alpha = 0.8f)
                 )
             }
         }

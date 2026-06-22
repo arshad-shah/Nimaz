@@ -234,8 +234,8 @@ private fun InsightsSection(
             if (percent < 90 && totalPrayers > 0) {
                 InsightCard(
                     icon = Icons.Default.Warning,
-                    iconBackgroundColor = Color(0xFFF97316).copy(alpha = 0.2f),
-                    iconTint = Color(0xFFF97316),
+                    iconBackgroundColor = NimazColors.PrayerColors.Asr.copy(alpha = 0.2f),
+                    iconTint = NimazColors.PrayerColors.Asr,
                     title = stringResource(R.string.prayer_insight_needs_attention, name),
                     description = stringResource(R.string.prayer_insight_needs_attention_desc, name, percent)
                 )
@@ -248,8 +248,8 @@ private fun InsightsSection(
             val overallPercent = (stats.totalPrayed.toFloat() / totalPrayers * 100).toInt()
             InsightCard(
                 icon = Icons.AutoMirrored.Filled.TrendingUp,
-                iconBackgroundColor = Color(0xFF22C55E).copy(alpha = 0.2f),
-                iconTint = Color(0xFF22C55E),
+                iconBackgroundColor = NimazColors.Success.copy(alpha = 0.2f),
+                iconTint = NimazColors.Success,
                 title = stringResource(R.string.prayer_insight_overall, overallPercent),
                 description = stringResource(R.string.prayer_insight_overall_desc, stats.totalPrayed, totalPrayers)
             )
@@ -331,8 +331,8 @@ private fun InsightCardWarningPreview() {
     NimazTheme {
         InsightCard(
             icon = Icons.Default.Warning,
-            iconBackgroundColor = Color(0xFFF97316).copy(alpha = 0.2f),
-            iconTint = Color(0xFFF97316),
+            iconBackgroundColor = NimazColors.PrayerColors.Asr.copy(alpha = 0.2f),
+            iconTint = NimazColors.PrayerColors.Asr,
             title = "Fajr needs attention",
             description = "Your Fajr completion is at 65%. Try setting an alarm to improve."
         )
@@ -345,8 +345,8 @@ private fun InsightCardTrendPreview() {
     NimazTheme {
         InsightCard(
             icon = Icons.AutoMirrored.Filled.TrendingUp,
-            iconBackgroundColor = Color(0xFF22C55E).copy(alpha = 0.2f),
-            iconTint = Color(0xFF22C55E),
+            iconBackgroundColor = NimazColors.Success.copy(alpha = 0.2f),
+            iconTint = NimazColors.Success,
             title = "Overall completion: 85%",
             description = "You've completed 120 out of 140 prayers. Keep going!"
         )
@@ -359,8 +359,8 @@ private fun InsightCardBestPreview() {
     NimazTheme {
         InsightCard(
             icon = Icons.Default.Lightbulb,
-            iconBackgroundColor = Color(0xFF3B82F6).copy(alpha = 0.2f),
-            iconTint = Color(0xFF3B82F6),
+            iconBackgroundColor = NimazColors.Info.copy(alpha = 0.2f),
+            iconTint = NimazColors.Info,
             title = "Best prayer: Maghrib",
             description = "You consistently complete Maghrib at 98%."
         )

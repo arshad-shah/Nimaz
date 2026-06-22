@@ -19,14 +19,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.HadithGrade
 
 // Hadith grade colour-coding, shared by the reader and settings preview.
-val SahihGreen = Color(0xFF22C55E)
-val HasanTeal = Color(0xFF0D9488)
-val DaifAmber = Color(0xFFF59E0B)
-val MawduRed = Color(0xFFEF4444)
+val SahihGreen = NimazColors.Success
+val HasanTeal = NimazColors.Primary600
+val DaifAmber = NimazColors.Warning
+val MawduRed = NimazColors.PrayerColors.Maghrib
 
 data class HadithGradeDisplay(val label: String, val color: Color)
 

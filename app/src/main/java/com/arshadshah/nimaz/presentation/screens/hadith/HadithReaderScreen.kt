@@ -74,6 +74,7 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
@@ -465,7 +466,7 @@ private fun HadithReaderBottomBar(
                 )
             },
             active = isBookmarked,
-            activeColor = Color(0xFFEAB308)
+            activeColor = NimazColors.Gold500
         )
         NimazPillActionButton(
             icon = Icons.Default.Share,
