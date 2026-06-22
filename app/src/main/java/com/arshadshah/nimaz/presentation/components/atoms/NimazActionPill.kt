@@ -45,8 +45,8 @@ fun NimazActionPill(
         ),
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            modifier = Modifier.padding(horizontal = 6.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             verticalAlignment = Alignment.CenterVertically,
             content = content
         )
@@ -75,13 +75,13 @@ fun NimazPillActionButton(
     )
     IconButton(
         onClick = onClick,
-        modifier = modifier.size(36.dp)
+        modifier = modifier.size(48.dp)
     ) {
         Icon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(22.dp)
         )
     }
 }

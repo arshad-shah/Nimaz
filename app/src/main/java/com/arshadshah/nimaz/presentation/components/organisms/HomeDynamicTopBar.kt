@@ -13,12 +13,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,13 +31,16 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
+import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -74,6 +74,8 @@ fun HomeDynamicTopBar(
     val progress = transitionProgress.coerceIn(0f, 1f)
     val surfaceColor = MaterialTheme.colorScheme.surface
     val dividerColor = MaterialTheme.colorScheme.outlineVariant
+
+    val backdrop = rememberGlassBackdrop()
 
     Box(
         modifier = modifier
@@ -118,7 +120,15 @@ fun HomeDynamicTopBar(
                         .alpha(1f - progress)
                         .graphicsLayer { translationY = -SLIDE_DISTANCE_DP.toPx() * progress }
                 ) {
-                    LocationPill(locationName = locationName)
+                    GlassPill(
+                        text = locationName,
+                        leadingIcon = Icons.Default.LocationOn,
+                        tone = GlassPillTone.Solid,
+                        backdrop = backdrop,
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                        )
+                    )
                 }
                 Box(
                     modifier = Modifier
@@ -140,50 +150,18 @@ fun HomeDynamicTopBar(
 
 private val SLIDE_DISTANCE_DP = 12.dp
 
-@Composable
-private fun LocationPill(locationName: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(Color.Black.copy(alpha = 0.28f))
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-    ) {
-        Icon(
-            imageVector = Icons.Default.LocationOn,
-            contentDescription = null,
-            tint = Color.White,
-            modifier = Modifier.size(16.dp),
-        )
-        Spacer(modifier = Modifier.width(6.dp))
-        Text(
-            text = locationName.ifEmpty { "Set location" },
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-    }
-}
 
 @Composable
 private fun SettingsButton(progress: Float, onClick: () -> Unit) {
-    // Scrim circle backs the icon while over the sky, fading as the bar solidifies.
-    val scrim = Color.Black.copy(alpha = 0.28f * (1f - progress))
-    val iconTint = lerp(Color.White, MaterialTheme.colorScheme.onSurfaceVariant, progress)
-    IconButton(
+    // The glass cross-fades with the bar: bright white over the sky, settling to
+    // a surface tint as the bar solidifies — no separate scrim needed.
+    val tint = lerp(Color.White, MaterialTheme.colorScheme.onSurfaceVariant, progress)
+    GlassIconButton(
+        icon = Icons.Default.Settings,
+        contentDescription = stringResource(R.string.cd_settings),
         onClick = onClick,
-        modifier = Modifier
-            .clip(CircleShape)
-            .background(scrim),
-    ) {
-        Icon(
-            imageVector = Icons.Default.Settings,
-            contentDescription = stringResource(R.string.cd_settings),
-            tint = iconTint,
-        )
-    }
+        tint = tint,
+    )
 }
 
 @Composable
@@ -239,9 +217,8 @@ private fun TopBar_AtRest_Preview() {
     NimazTheme {
         Box(
             modifier = Modifier.background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFF3E86C9), Color(0xFFBFE0F2))
-                )
+                Color(0xFF3E86C9)
+
             )
         ) {
             HomeDynamicTopBar(

@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -37,6 +38,11 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
+import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.StatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -44,6 +50,7 @@ import kotlinx.coroutines.delay
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneOffset
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Home hero: a living-sky banner (current time + date) at the original hero
@@ -71,7 +78,7 @@ fun HomeHero(
             val now = LocalTime.now()
             timeOfDay = (now.hour * 60 + now.minute) / 1440f
             clock = formatClock12(now.hour, now.minute)
-            delay(30_000)
+            delay(30_000.milliseconds)
         }
     }
     val moonFraction = remember {
@@ -81,7 +88,7 @@ fun HomeHero(
     }
     val useHijriPrimary = LocalUseHijriPrimary.current
     val shadow =
-        Shadow(color = Color.Black.copy(alpha = 0.45f), offset = Offset(0f, 1f), blurRadius = 6f)
+        Shadow(color = Color.Black.copy(alpha = 0.6f), offset = Offset(0f, 1f), blurRadius = 7f)
 
     // The screen is edge-to-edge, so grow the sky by the status-bar inset to
     // leave a clean band of empty sky behind the status bar at the top.
@@ -110,26 +117,28 @@ fun HomeHero(
                     .align(Alignment.Center)
                     .padding(top = statusBarTop),
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(
+                GlassPill(
                     text = clock,
+                    tone = GlassPillTone.Solid,
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
                         shadow = shadow
                     ),
-                    color = Color.White,
                 )
-                Text(
+
+                GlassPill(
                     text = if (useHijriPrimary) hijriDate.ifEmpty { gregorianDate } else gregorianDate,
                     style = MaterialTheme.typography.bodyMedium.copy(shadow = shadow),
-                    color = Color.White.copy(alpha = 0.9f),
                 )
                 if (useHijriPrimary && gregorianDate.isNotEmpty()) {
-                    Text(
+                    GlassPill(
                         text = gregorianDate,
                         style = MaterialTheme.typography.bodySmall.copy(shadow = shadow),
-                        color = Color.White.copy(alpha = 0.8f),
                     )
+
+
                 }
             }
         }
@@ -139,7 +148,7 @@ fun HomeHero(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)
-                .offset(y = (-28).dp),
+                .offset(y = (-10).dp),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -158,7 +167,7 @@ fun HomeHero(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 2.sp,
                     )
-                    Row(verticalAlignment = Alignment.Bottom) {
+                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Text(
                             text = nextPrayer?.displayName ?: "—",
                             style = MaterialTheme.typography.headlineSmall,
@@ -169,7 +178,7 @@ fun HomeHero(
                             text = getArabicPrayerName(nextPrayer),
                             size = ArabicTextSize.SMALL,
                             color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp),
+//                            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp),
                         )
                     }
                     Text(
@@ -214,13 +223,16 @@ val HERO_BOTTOM_RADIUS = 32.dp
 @Preview(showBackground = true, widthDp = 412, heightDp = 380)
 @Composable
 private fun HomeHero_Preview() {
-    NimazTheme {
+    NimazTheme(
+        useHijriPrimary = true
+    ) {
         HomeHero(
             hijriDate = "7 Rajab 1446",
             gregorianDate = "Friday, January 31, 2026",
-            nextPrayer = PrayerType.ASR,
+            nextPrayer = PrayerType.MAGHRIB,
             nextPrayerTime = "4:30 PM",
-            timeUntilNextPrayer = "1h 12m"
+            timeUntilNextPrayer = "1h 12m",
+
         )
     }
 }
