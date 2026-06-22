@@ -418,23 +418,35 @@ typed route object.
 
 ## 9. Known deviations & tech-debt registry
 
-These are places where the code currently diverges from the canonical patterns above. They
-are documented so agents **do not copy them** and can fix them intentionally. Status reflects
-validation against the live code.
+This registry tracks divergences from the canonical patterns. Most have now been resolved
+during the architecture-consistency pass; the **Resolved** table is kept as a record so the
+fixes aren't accidentally reverted, and the **Open** table lists what remains. Agents must not
+copy anything listed as Open.
+
+### Resolved (do not regress)
+
+| Area | What was fixed |
+|------|----------------|
+| Use-case layer | `Hadith`, `Dua`, `Fasting`, `Prayer`, `Tasbih`, `Tafseer`, `Zakat` now have `XxxUseCases` wrappers; `PrayerTimes/PrayerTracker/Home/Settings/Location`, `Search`, `Bookmarks` ViewModels inject use cases instead of repositories. |
+| Zakat clean-arch leak | `ZakatRepository` now exposes the `ZakatHistoryEntry` domain model (promoted to `domain/model`); entity↔domain mapping lives in `ZakatRepositoryImpl`. |
+| Calendar layer bypass | New `IslamicEventRepository` (+ impl mapping) and `IslamicEventUseCases`; `CalendarViewModel` no longer touches `IslamicEventDao`. |
+| QaidaReader UDF | `QaidaReaderViewModel` now has a sealed `QaidaReaderEvent` + single `onEvent`; action methods are private; Qaida screens dispatch events. |
+| Dead route | The orphaned `Route.MakeupFasts` declaration was removed (makeup fasts is a tab inside `FastTrackerScreen`). |
+| Theming (Zakat) | Zakat screens use `NimazColors.Neutral900` / `NimazColors.ZakatColors.GoldAccent`; no raw color literals remain there. |
+
+### Open (still to do — do not copy)
 
 | # | Area | Deviation | Canonical fix |
 |---|------|-----------|---------------|
-| 1 | Use-case layer | Several ViewModels inject a repository directly instead of `XxxUseCases`: `Hadith`, `Dua`, `Fasting`, `Prayer` (Times/Tracker + Home/Qibla/Settings consumers), `Tasbih`, `Tafseer`, `Zakat`. | Add an `XxxUseCases` wrapper per feature (§4.2) and inject it instead of the repository. |
-| 2 | Clean-arch leak | `domain/repository/ZakatRepository.kt` imports and exposes the Room `ZakatHistoryEntity` (domain depending on data). A `ZakatCalculation` domain model already exists but is unused. | Change the interface to expose `ZakatCalculation`; map in `ZakatRepositoryImpl` with `toDomain()/toEntity()`. |
-| 3 | Layer bypass | `CalendarViewModel` injects `IslamicEventDao` directly. It is the only ViewModel reaching into the data layer. | Route through an `IslamicEvent`/Calendar repository interface + use case. |
-| 4 | UDF intents | `QaidaReaderViewModel` has no `onEvent(...)`; it exposes ~8 public action methods instead (e.g. `selectLesson`, `playLine`). | Introduce a `QaidaReaderEvent` sealed interface and a single `onEvent` dispatcher. |
-| 5 | Service state leak | `QuranViewModel` re-exposes `AudioManager.audioState` directly to the UI. | Fold the audio state the UI needs into the ViewModel's own `UiState`. |
-| 6 | Dead route | `Route.MakeupFasts` is declared but never wired (makeup fasts is a **tab inside** `FastTrackerScreen` — this is correct UX). The declaration is orphaned. | Remove the unused `Route.MakeupFasts` declaration; keep the tab. |
-| 7 | Theming | Hardcoded `Color(0xFF…)` literals in screens — worst offenders: `zakat/ZakatCalculatorScreen.kt`, `zakat/ZakatHistoryScreen.kt`, `hadith/HadithCollectionScreen.kt`, `tasbih/BeadDesign.kt`. | Move values into `NimazColors` (e.g. add `ZakatColors`, `HadithCollections`, `TasbihBeadStyles`) and reference them. |
+| 1 | Layer bypass | `HomeViewModel` injects `FastingDao`, `HadithDao`, `DuaDao` directly for its "daily hadith / daily dua of the day" features. This logic reads entity-level fields and uses prepopulated-DB integer ids + seeders, so it is **not** a mechanical swap — the domain models differ (`Hadith.grade` is an enum, `DuaCategory.iconName` vs `icon`, String vs Int ids). | Extract `GetDailyHadithUseCase` / `GetDailyDuaUseCase` that own the daily-rotation business logic (and the seeders), returning domain models. Needs runtime/visual validation. |
+| 2 | Theming | Bespoke per-item gradient palettes still hold raw `Color(0xFF…)` literals: `hadith/HadithCollectionScreen.kt` (`getBookGradient`, per-collection pairs) and `tasbih/BeadDesign.kt` (bead style gradients). These are centralized design tokens, not scattered ad-hoc colors. | Relocate into `NimazColors` (e.g. `HadithCollectionColors`, `TasbihBeadStyles`) preserving exact hex; do under visual review. |
 
-> **What is NOT a deviation:** exposing multiple `StateFlow`s from one ViewModel for distinct
-> sub-screens (list/detail) is the accepted house style (see `AsmaUlHusnaViewModel`). Do not
-> "consolidate" these into a single mega-state.
+> **Accepted patterns (NOT deviations):**
+> - Exposing multiple `StateFlow`s from one ViewModel for distinct sub-screens (list/detail) is
+>   the house style (see `AsmaUlHusnaViewModel`). Do **not** "consolidate" them into one mega-state.
+> - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`) expose the audio engine's
+>   `StateFlow` (`audioManager.state`) directly to the UI for live highlight/progress. This is an
+>   intentional, consistent pattern for playback features — not a leak to "fix".
 
 ---
 

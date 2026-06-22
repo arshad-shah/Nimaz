@@ -74,7 +74,7 @@ class FastingViewModelTest {
     }
 
     private fun createViewModel(): FastingViewModel {
-        return FastingViewModel(repository, prayerTimeCalculator, preferencesDataStore)
+        return FastingViewModel(buildFastingUseCases(repository), prayerTimeCalculator, preferencesDataStore)
     }
 
     private fun dateToEpoch(date: LocalDate): Long {

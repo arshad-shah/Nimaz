@@ -78,7 +78,7 @@ class HomeViewModelTest {
     private fun createViewModel() = HomeViewModel(
         context = context,
         prayerTimeCalculator = prayerTimeCalculator,
-        prayerRepository = prayerRepository,
+        prayerUseCases = buildPrayerUseCases(prayerRepository),
         preferencesDataStore = preferencesDataStore,
         fastingDao = fastingDao,
         hadithDao = hadithDao,
