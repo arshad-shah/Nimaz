@@ -90,21 +90,21 @@ These tokens are applied in both changes and already exist in the theme:
 ### Visual design
 - An **elevated, rounded floating card** (not a flat docked strip), inset from the
   screen edges, sitting above the bottom.
-- **Art tile:** a calligraphic ornament tile (teal gradient) on the leading edge.
+- **No art/avatar tile.** The **leading element is the primary play/pause** control
+  itself — a teal circular button (≥44dp).
 - **Meta column:** surah name (Outfit, bold) + position line
   "Ayah X / Y · Juz · Page" (muted); a slim progress track beneath the text.
-- **Controls:** primary teal circular **play/pause** (≥44dp) + circular **stop**
-  (`Close`). A subtle "playing" equalizer/indicator when `isPlaying`.
+- **Trailing control:** circular **stop** (`Close`). A subtle "playing"
+  equalizer/indicator next to the title when `isPlaying`.
 - **States:**
   - *Idle:* progress = `readingProgress`; play icon.
   - *Playing:* pause icon + equalizer; progress tracks position.
   - *Preparing/downloading:* progress = `downloadProgress`; text shows
     `R.string.audio_downloading_short_format` (downloadedCount / total).
 
-### Optional (flag for review, not committed)
-- A **reciter name** line under the position. This requires passing the reciter
-  display name into the bar (a small additive parameter). Default: **omit** unless
-  approved, to keep the signature unchanged.
+### Decided: no reciter line
+- A reciter-name line was considered and **omitted** (confirmed). The bar's
+  parameter signature stays identical — no additive param, no call-site change.
 
 ### Behaviour preserved (acceptance)
 - `onPlayClick` starts/pauses from the current ayah; `onStopClick` stops.
@@ -130,10 +130,8 @@ These tokens are applied in both changes and already exist in the theme:
   highlight with a note, share — confirm unchanged behaviour. Play/stop audio,
   trigger a download — confirm player states.
 
-## Open questions for review
+## Resolved decisions
 
-1. **Reciter line** in the floating player — include it (needs one additive
-   param) or omit to keep the signature identical? *(Default: omit.)*
-2. **Broader refresh:** apply the same chip/divider styling to the Hadith/Dua
-   readers and settings now, or keep this PR scoped strictly to Tafseer + player?
-   *(Default: scoped to Tafseer + player.)*
+1. **Reciter line** — omitted. Player signature unchanged.
+2. **Scope** — strictly Tafseer reskin + Quran player. The Hadith/Dua chip/divider
+   refresh is deferred (not in this change).
