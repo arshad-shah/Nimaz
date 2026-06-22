@@ -102,6 +102,7 @@ fun TafseerChaptersScreen(
                         SurahListItem(
                             surah = surah,
                             onClick = { onOpenTafseer(surah.number, 1) },
+                            showInfo = false,
                             startPage = surah.startPage
                         )
                     }

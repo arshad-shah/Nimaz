@@ -62,6 +62,7 @@ internal fun SurahListItem(
     surah: Surah,
     onClick: () -> Unit,
     onInfoClick: () -> Unit = {},
+    showInfo: Boolean = true,
     khatamReadCount: Int = 0,
     khatamTotalAyahs: Int = 0,
     isKhatamActive: Boolean = false,
@@ -152,16 +153,18 @@ internal fun SurahListItem(
                 )
 
                 // Info button
-                IconButton(
-                    onClick = onInfoClick,
-                    modifier = Modifier.size(36.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Info,
-                        contentDescription = stringResource(R.string.quran_home_surah_info),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
-                    )
+                if (showInfo) {
+                    IconButton(
+                        onClick = onInfoClick,
+                        modifier = Modifier.size(36.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(R.string.quran_home_surah_info),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(18.dp)
+                        )
+                    }
                 }
             }
 
