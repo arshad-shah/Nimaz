@@ -9,7 +9,7 @@ import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import androidx.compose.ui.text.font.FontFamily
@@ -90,7 +90,7 @@ sealed interface HadithEvent {
 @HiltViewModel
 class HadithViewModel @Inject constructor(
     private val hadithUseCases: HadithUseCases,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(HadithCollectionUiState())
@@ -330,16 +330,16 @@ class HadithViewModel @Inject constructor(
     private fun observeHadithSettings() {
         viewModelScope.launch {
             val displayFlow = combine(
-                preferencesDataStore.hadithArabicFont,
-                preferencesDataStore.hadithArabicFontSize,
-                preferencesDataStore.hadithTranslationFontSize
+                settingsRepository.hadithArabicFont,
+                settingsRepository.hadithArabicFontSize,
+                settingsRepository.hadithTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                preferencesDataStore.hadithShowArabic,
-                preferencesDataStore.hadithShowTranslation,
-                preferencesDataStore.hadithShowGrade,
-                preferencesDataStore.hadithShowChain
+                settingsRepository.hadithShowArabic,
+                settingsRepository.hadithShowTranslation,
+                settingsRepository.hadithShowGrade,
+                settingsRepository.hadithShowChain
             ) { showArabic, showTranslation, showGrade, showChain ->
                 HadithToggles(showArabic, showTranslation, showGrade, showChain)
             }

@@ -145,10 +145,13 @@ design-token / illustration files (see below).
 **Why it hurts:** ties many ViewModels to a concrete data/infra class; harder to fake in tests.
 This one is **pervasive and lower priority** — listed so it's tracked, not because it's urgent.
 
-- [ ] **`PreferencesDataStore` injected directly** into many ViewModels (Home, Quran, Settings,
-  Dua, Hadith, Tasbih, Onboarding, Location, …). Consider a `SettingsRepository` /
-  `UserPreferences` domain abstraction so ViewModels depend on an interface, not the DataStore
-  class. Large blast radius — do incrementally or leave as an accepted infra dependency.
+- [x] ~~**`PreferencesDataStore` injected directly** into many ViewModels.~~ **Resolved.**
+  Extracted a `domain/repository/SettingsRepository` interface (147 members); `PreferencesDataStore`
+  now implements it, and `UserPreferences` moved to `domain/model`. All 13 ViewModels + `MainActivity`
+  inject `SettingsRepository`; bound via `@Binds` in `RepositoryModule`. Data-layer consumers
+  (seeders, sync, workers, `AppInitializer`, `BootReceiver`) keep the concrete class.
+  - [ ] **Minor leftover:** `settings/WidgetsScreen.kt` still *instantiates* `PreferencesDataStore(context)`
+    inline (line ~793) instead of going through DI/a ViewModel — convert when that screen is next touched.
 - [ ] **Audio managers expose data-layer `AudioState`.** `QuranViewModel` /
   `QaidaReaderViewModel` surface `audioManager.state` (a `data.audio` type) to the UI. This is an
   **accepted pattern** for playback features (see `ARCHITECTURE.md` §9). If desired, mirror the

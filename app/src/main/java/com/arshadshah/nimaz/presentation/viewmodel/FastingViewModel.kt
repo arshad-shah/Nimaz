@@ -5,7 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -128,7 +128,7 @@ sealed interface FastingEvent {
 class FastingViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val prayerTimeCalculator: PrayerTimeCalculator,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _trackerState = MutableStateFlow(FastingTrackerUiState())
@@ -174,8 +174,8 @@ class FastingViewModel @Inject constructor(
     private fun observeLocationAndLoadPrayerTimes() {
         viewModelScope.launch {
             combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude
+                settingsRepository.latitude,
+                settingsRepository.longitude
             ) { lat, lng -> Pair(lat, lng) }
                 .collect { (lat, lng) ->
                     val latitude = if (lat != 0.0) lat else DEFAULT_LATITUDE

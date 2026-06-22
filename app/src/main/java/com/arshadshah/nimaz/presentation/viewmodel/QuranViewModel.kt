@@ -8,7 +8,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.domain.model.PageAyahRange
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.QuranBookmark
@@ -139,7 +139,7 @@ sealed interface QuranEvent {
 class QuranViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
     val audioManager: QuranAudioManager,
-    private val preferencesDataStore: PreferencesDataStore,
+    private val settingsRepository: SettingsRepository,
     private val khatamUseCases: KhatamUseCases,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
@@ -226,7 +226,7 @@ class QuranViewModel @Inject constructor(
             QuranEvent.ToggleTranslation -> {
                 val newValue = !_readerState.value.showTranslation
                 _readerState.update { it.copy(showTranslation = newValue) }
-                viewModelScope.launch { preferencesDataStore.setShowTranslation(newValue) }
+                viewModelScope.launch { settingsRepository.setShowTranslation(newValue) }
             }
 
             QuranEvent.ClearSearch -> {
@@ -258,20 +258,20 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch {
             // Split into two groups of 4 to use typed combine overloads
             val displayFlow = combine(
-                preferencesDataStore.quranTranslatorId,
-                preferencesDataStore.showTranslation,
-                preferencesDataStore.showTransliteration,
-                preferencesDataStore.quranArabicFontSize,
-                preferencesDataStore.quranArabicFont
+                settingsRepository.quranTranslatorId,
+                settingsRepository.showTranslation,
+                settingsRepository.showTransliteration,
+                settingsRepository.quranArabicFontSize,
+                settingsRepository.quranArabicFont
             ) { translatorId: String, showTrans: Boolean, showTranslit: Boolean, arabicSize: Float, fontId: String ->
                 QuranDisplaySettings(translatorId, showTrans, showTranslit, arabicSize, fontId)
             }
 
             val behaviorFlow = combine(
-                preferencesDataStore.quranTranslationFontSize,
-                preferencesDataStore.continuousReading,
-                preferencesDataStore.keepScreenOn,
-                preferencesDataStore.selectedReciterId
+                settingsRepository.quranTranslationFontSize,
+                settingsRepository.continuousReading,
+                settingsRepository.keepScreenOn,
+                settingsRepository.selectedReciterId
             ) { transSize: Float, continuous: Boolean, keepOn: Boolean, reciter: String? ->
                 QuranBehaviorSettings(transSize, continuous, keepOn, reciter)
             }
@@ -279,7 +279,7 @@ class QuranViewModel @Inject constructor(
             combine(
                 displayFlow,
                 behaviorFlow,
-                preferencesDataStore.showTajweed
+                settingsRepository.showTajweed
             ) { display, behavior, showTajweed ->
                 Triple(display, behavior, showTajweed)
             }.collect { (display, behavior, showTajweed) ->
@@ -415,7 +415,7 @@ class QuranViewModel @Inject constructor(
 
     private fun loadVerseOfTheDay() {
         viewModelScope.launch {
-            val translatorId = preferencesDataStore.quranTranslatorId.first()
+            val translatorId = settingsRepository.quranTranslatorId.first()
             val epochDay = java.time.LocalDate.now().toEpochDay()
             val verse = quranUseCases.getVerseOfTheDay(epochDay, translatorId)
             _homeState.update { it.copy(verseOfTheDay = verse) }

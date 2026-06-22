@@ -9,7 +9,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
@@ -87,7 +87,7 @@ sealed interface LocationEvent {
 @HiltViewModel
 class LocationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesDataStore: PreferencesDataStore,
+    private val settingsRepository: SettingsRepository,
     private val prayerUseCases: PrayerUseCases
 ) : ViewModel() {
 
@@ -128,7 +128,7 @@ class LocationViewModel @Inject constructor(
     private fun loadCurrentLocation() {
         viewModelScope.launch {
             try {
-                val prefs = preferencesDataStore.userPreferences.first()
+                val prefs = settingsRepository.userPreferences.first()
                 if (prefs.latitude != 0.0 && prefs.longitude != 0.0) {
                     _state.update {
                         it.copy(
@@ -241,7 +241,7 @@ class LocationViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Save to DataStore
-                preferencesDataStore.updateLocation(
+                settingsRepository.updateLocation(
                     latitude = location.latitude,
                     longitude = location.longitude,
                     name = "${location.name}, ${location.country}"
@@ -302,7 +302,7 @@ class LocationViewModel @Inject constructor(
                     }
 
                     // Save location
-                    preferencesDataStore.updateLocation(
+                    settingsRepository.updateLocation(
                         latitude = location.first,
                         longitude = location.second,
                         name = locationName

@@ -10,7 +10,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.domain.model.TasbihSession
@@ -103,7 +103,7 @@ sealed interface TasbihEvent {
 @HiltViewModel
 class TasbihViewModel @Inject constructor(
     private val tasbihUseCases: TasbihUseCases,
-    private val preferences: PreferencesDataStore,
+    private val preferences: SettingsRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 

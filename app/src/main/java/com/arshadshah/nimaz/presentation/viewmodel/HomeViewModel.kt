@@ -14,7 +14,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -120,7 +120,7 @@ class HomeViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -321,26 +321,26 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             // Combine location with all prayer calculation settings
             val locationFlow = combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName
             ) { lat: Double, lng: Double, name: String ->
                 Triple(lat, lng, name)
             }
 
             val calcSettingsFlow = combine(
-                preferencesDataStore.calculationMethod,
-                preferencesDataStore.asrCalculation,
-                preferencesDataStore.highLatitudeRule
+                settingsRepository.calculationMethod,
+                settingsRepository.asrCalculation,
+                settingsRepository.highLatitudeRule
             ) { calc: String, asr: String, high: String ->
                 Triple(calc, asr, high)
             }
 
             val adjustmentsFlow = combine(
-                preferencesDataStore.fajrAdjustment,
-                preferencesDataStore.sunriseAdjustment,
-                preferencesDataStore.dhuhrAdjustment,
-                preferencesDataStore.asrAdjustment,
+                settingsRepository.fajrAdjustment,
+                settingsRepository.sunriseAdjustment,
+                settingsRepository.dhuhrAdjustment,
+                settingsRepository.asrAdjustment,
             ) { fajr, sunrise, dhuhr, asr ->
                 mapOf(
                     PrayerType.FAJR to fajr,
@@ -350,8 +350,8 @@ class HomeViewModel @Inject constructor(
                 )
             }.combine(
                 combine(
-                    preferencesDataStore.maghribAdjustment,
-                    preferencesDataStore.ishaAdjustment
+                    settingsRepository.maghribAdjustment,
+                    settingsRepository.ishaAdjustment
                 ) { maghrib, isha ->
                     mapOf(
                         PrayerType.MAGHRIB to maghrib,
@@ -414,7 +414,7 @@ class HomeViewModel @Inject constructor(
 
     private fun updateLocation(latitude: Double, longitude: Double, name: String) {
         viewModelScope.launch {
-            preferencesDataStore.updateLocation(latitude, longitude, name)
+            settingsRepository.updateLocation(latitude, longitude, name)
             _state.update {
                 it.copy(
                     latitude = latitude,
@@ -617,7 +617,7 @@ class HomeViewModel @Inject constructor(
 
     private fun observeTimeFormat() {
         viewModelScope.launch {
-            preferencesDataStore.use24HourFormat.collect { enabled ->
+            settingsRepository.use24HourFormat.collect { enabled ->
                 use24HourFormat = enabled
                 calculatePrayerTimes() // Recalculate to reformat times
             }

@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.repository.DuaRepository
@@ -44,7 +44,7 @@ class HomeViewModelTest {
     private lateinit var fastingRepository: FastingRepository
     private lateinit var hadithRepository: HadithRepository
     private lateinit var duaRepository: DuaRepository
-    private lateinit var preferencesDataStore: PreferencesDataStore
+    private lateinit var settingsRepository: SettingsRepository
 
     @Before
     fun setUp() {
@@ -56,7 +56,7 @@ class HomeViewModelTest {
         fastingRepository = mockk(relaxed = true)
         hadithRepository = mockk(relaxed = true)
         duaRepository = mockk(relaxed = true)
-        preferencesDataStore = mockk(relaxed = true)
+        settingsRepository = mockk(relaxed = true)
 
         // The today's-records Flow emits synchronously, mirroring Room emitting an
         // initial value during ViewModel init before the rest of the constructor
@@ -76,7 +76,7 @@ class HomeViewModelTest {
         fastingUseCases = buildFastingUseCases(fastingRepository),
         hadithUseCases = buildHadithUseCases(hadithRepository),
         duaUseCases = buildDuaUseCases(duaRepository),
-        preferencesDataStore = preferencesDataStore
+        settingsRepository = settingsRepository
     )
 
     /**

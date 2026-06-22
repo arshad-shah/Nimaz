@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -32,6 +33,7 @@ import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
@@ -380,6 +382,12 @@ abstract class RepositoryModule {
     abstract fun bindIslamicEventRepository(
         islamicEventRepositoryImpl: IslamicEventRepositoryImpl
     ): IslamicEventRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSettingsRepository(
+        preferencesDataStore: PreferencesDataStore
+    ): SettingsRepository
 }
 
 @Module

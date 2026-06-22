@@ -14,7 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -66,7 +66,7 @@ sealed interface OnboardingEvent {
 @HiltViewModel
 class OnboardingViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(OnboardingUiState())
@@ -116,7 +116,7 @@ class OnboardingViewModel @Inject constructor(
     private fun checkOnboardingStatus() {
         viewModelScope.launch {
             try {
-                val completed = preferencesDataStore.onboardingCompleted.first()
+                val completed = settingsRepository.onboardingCompleted.first()
                 _state.update {
                     it.copy(
                         onboardingCompleted = completed,
@@ -137,7 +137,7 @@ class OnboardingViewModel @Inject constructor(
     private fun completeOnboarding() {
         viewModelScope.launch {
             try {
-                preferencesDataStore.setOnboardingCompleted(true)
+                settingsRepository.setOnboardingCompleted(true)
                 val current = _state.value
                 AppAnalytics.logOnboardingCompleted(
                     locationGranted = current.locationPermissionGranted,
@@ -235,7 +235,7 @@ class OnboardingViewModel @Inject constructor(
                     }
 
                     // Save location to DataStore
-                    preferencesDataStore.updateLocation(
+                    settingsRepository.updateLocation(
                         latitude = location.first,
                         longitude = location.second,
                         name = locationName

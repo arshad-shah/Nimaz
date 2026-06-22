@@ -3,7 +3,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -74,7 +74,7 @@ sealed interface PrayerTimesEvent {
 class PrayerTimesViewModel @Inject constructor(
     private val prayerTimeCalculator: PrayerTimeCalculator,
     private val prayerUseCases: PrayerUseCases,
-    private val preferencesDataStore: PreferencesDataStore,
+    private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(PrayerTimesUiState())
@@ -127,23 +127,23 @@ class PrayerTimesViewModel @Inject constructor(
     private fun observeSettings() {
         viewModelScope.launch {
             combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName,
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName,
             ) { lat, lng, name -> Triple(lat, lng, name) }
                 .combine(
                     combine(
-                        preferencesDataStore.calculationMethod,
-                        preferencesDataStore.asrCalculation,
-                        preferencesDataStore.highLatitudeRule,
+                        settingsRepository.calculationMethod,
+                        settingsRepository.asrCalculation,
+                        settingsRepository.highLatitudeRule,
                     ) { calc, asr, high -> Triple(calc, asr, high) },
                 ) { location, calcSettings -> Pair(location, calcSettings) }
                 .combine(
                     combine(
-                        preferencesDataStore.fajrAdjustment,
-                        preferencesDataStore.sunriseAdjustment,
-                        preferencesDataStore.dhuhrAdjustment,
-                        preferencesDataStore.asrAdjustment,
+                        settingsRepository.fajrAdjustment,
+                        settingsRepository.sunriseAdjustment,
+                        settingsRepository.dhuhrAdjustment,
+                        settingsRepository.asrAdjustment,
                     ) { fajr, sunrise, dhuhr, asr ->
                         mapOf(
                             PrayerType.FAJR to fajr,
@@ -153,8 +153,8 @@ class PrayerTimesViewModel @Inject constructor(
                         )
                     }.combine(
                         combine(
-                            preferencesDataStore.maghribAdjustment,
-                            preferencesDataStore.ishaAdjustment,
+                            settingsRepository.maghribAdjustment,
+                            settingsRepository.ishaAdjustment,
                         ) { maghrib, isha ->
                             mapOf(PrayerType.MAGHRIB to maghrib, PrayerType.ISHA to isha)
                         },

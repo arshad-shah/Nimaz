@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import com.arshadshah.nimaz.domain.model.UserPreferences
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -24,7 +26,7 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 @Singleton
 class PreferencesDataStore @Inject constructor(
     private val context: Context
-) {
+) : SettingsRepository {
     private val dataStore = context.dataStore
 
     /** Observe a preference, falling back to [default] when it has not been set. */
@@ -163,161 +165,161 @@ class PreferencesDataStore @Inject constructor(
         val LOCATION_NAME = stringPreferencesKey("location_name")
     }
 
-    suspend fun clearAllData() {
+    override suspend fun clearAllData() {
         dataStore.edit { it.clear() }
     }
 
     // Onboarding
-    val onboardingCompleted: Flow<Boolean> = preference(PreferencesKeys.ONBOARDING_COMPLETED, false)
+    override val onboardingCompleted: Flow<Boolean> = preference(PreferencesKeys.ONBOARDING_COMPLETED, false)
 
-    suspend fun setOnboardingCompleted(completed: Boolean) =
+    override suspend fun setOnboardingCompleted(completed: Boolean) =
         put(PreferencesKeys.ONBOARDING_COMPLETED, completed)
 
     // Theme
-    val themeMode: Flow<String> = preference(PreferencesKeys.THEME_MODE, "system")
+    override val themeMode: Flow<String> = preference(PreferencesKeys.THEME_MODE, "system")
 
-    suspend fun setThemeMode(mode: String) = put(PreferencesKeys.THEME_MODE, mode)
+    override suspend fun setThemeMode(mode: String) = put(PreferencesKeys.THEME_MODE, mode)
 
-    val dynamicColor: Flow<Boolean> = preference(PreferencesKeys.DYNAMIC_COLOR, false)
+    override val dynamicColor: Flow<Boolean> = preference(PreferencesKeys.DYNAMIC_COLOR, false)
 
-    suspend fun setDynamicColor(enabled: Boolean) = put(PreferencesKeys.DYNAMIC_COLOR, enabled)
+    override suspend fun setDynamicColor(enabled: Boolean) = put(PreferencesKeys.DYNAMIC_COLOR, enabled)
 
     // Appearance
-    val showIslamicPatterns: Flow<Boolean> = preference(PreferencesKeys.SHOW_ISLAMIC_PATTERNS, true)
+    override val showIslamicPatterns: Flow<Boolean> = preference(PreferencesKeys.SHOW_ISLAMIC_PATTERNS, true)
 
-    suspend fun setShowIslamicPatterns(enabled: Boolean) =
+    override suspend fun setShowIslamicPatterns(enabled: Boolean) =
         put(PreferencesKeys.SHOW_ISLAMIC_PATTERNS, enabled)
 
-    val animationsEnabled: Flow<Boolean> = preference(PreferencesKeys.ANIMATIONS_ENABLED, true)
+    override val animationsEnabled: Flow<Boolean> = preference(PreferencesKeys.ANIMATIONS_ENABLED, true)
 
-    suspend fun setAnimationsEnabled(enabled: Boolean) =
+    override suspend fun setAnimationsEnabled(enabled: Boolean) =
         put(PreferencesKeys.ANIMATIONS_ENABLED, enabled)
 
     // Display
-    val showCountdown: Flow<Boolean> = preference(PreferencesKeys.SHOW_COUNTDOWN, true)
+    override val showCountdown: Flow<Boolean> = preference(PreferencesKeys.SHOW_COUNTDOWN, true)
 
-    suspend fun setShowCountdown(enabled: Boolean) = put(PreferencesKeys.SHOW_COUNTDOWN, enabled)
+    override suspend fun setShowCountdown(enabled: Boolean) = put(PreferencesKeys.SHOW_COUNTDOWN, enabled)
 
-    val showQuickActions: Flow<Boolean> = preference(PreferencesKeys.SHOW_QUICK_ACTIONS, true)
+    override val showQuickActions: Flow<Boolean> = preference(PreferencesKeys.SHOW_QUICK_ACTIONS, true)
 
-    suspend fun setShowQuickActions(enabled: Boolean) =
+    override suspend fun setShowQuickActions(enabled: Boolean) =
         put(PreferencesKeys.SHOW_QUICK_ACTIONS, enabled)
 
-    val hapticFeedback: Flow<Boolean> = preference(PreferencesKeys.HAPTIC_FEEDBACK, true)
+    override val hapticFeedback: Flow<Boolean> = preference(PreferencesKeys.HAPTIC_FEEDBACK, true)
 
-    suspend fun setHapticFeedback(enabled: Boolean) = put(PreferencesKeys.HAPTIC_FEEDBACK, enabled)
+    override suspend fun setHapticFeedback(enabled: Boolean) = put(PreferencesKeys.HAPTIC_FEEDBACK, enabled)
 
-    val use24HourFormat: Flow<Boolean> = preference(PreferencesKeys.USE_24_HOUR_FORMAT, false)
+    override val use24HourFormat: Flow<Boolean> = preference(PreferencesKeys.USE_24_HOUR_FORMAT, false)
 
-    suspend fun setUse24HourFormat(enabled: Boolean) =
+    override suspend fun setUse24HourFormat(enabled: Boolean) =
         put(PreferencesKeys.USE_24_HOUR_FORMAT, enabled)
 
-    val useHijriPrimary: Flow<Boolean> = preference(PreferencesKeys.USE_HIJRI_PRIMARY, false)
+    override val useHijriPrimary: Flow<Boolean> = preference(PreferencesKeys.USE_HIJRI_PRIMARY, false)
 
-    suspend fun setUseHijriPrimary(enabled: Boolean) =
+    override suspend fun setUseHijriPrimary(enabled: Boolean) =
         put(PreferencesKeys.USE_HIJRI_PRIMARY, enabled)
 
     // Language
-    val appLanguage: Flow<String> = preference(PreferencesKeys.APP_LANGUAGE, "en")
+    override val appLanguage: Flow<String> = preference(PreferencesKeys.APP_LANGUAGE, "en")
 
-    suspend fun setAppLanguage(language: String) = put(PreferencesKeys.APP_LANGUAGE, language)
+    override suspend fun setAppLanguage(language: String) = put(PreferencesKeys.APP_LANGUAGE, language)
 
     // Help content version (0 = never seeded)
-    val helpContentVersion: Flow<Int> = preference(PreferencesKeys.HELP_CONTENT_VERSION, 0)
+    override val helpContentVersion: Flow<Int> = preference(PreferencesKeys.HELP_CONTENT_VERSION, 0)
 
-    suspend fun setHelpContentVersion(version: Int) =
+    override suspend fun setHelpContentVersion(version: Int) =
         put(PreferencesKeys.HELP_CONTENT_VERSION, version)
 
     // Hadith backfill version (0 = never applied)
-    val hadithBackfillVersion: Flow<Int> = preference(PreferencesKeys.HADITH_BACKFILL_VERSION, 0)
+    override val hadithBackfillVersion: Flow<Int> = preference(PreferencesKeys.HADITH_BACKFILL_VERSION, 0)
 
-    suspend fun setHadithBackfillVersion(version: Int) =
+    override suspend fun setHadithBackfillVersion(version: Int) =
         put(PreferencesKeys.HADITH_BACKFILL_VERSION, version)
 
     // Tasbih counter style — true = bead strand, false = classic circle.
-    val tasbihBeadMode: Flow<Boolean> = preference(PreferencesKeys.TASBIH_BEAD_MODE, false)
+    override val tasbihBeadMode: Flow<Boolean> = preference(PreferencesKeys.TASBIH_BEAD_MODE, false)
 
-    suspend fun setTasbihBeadMode(enabled: Boolean) = put(PreferencesKeys.TASBIH_BEAD_MODE, enabled)
+    override suspend fun setTasbihBeadMode(enabled: Boolean) = put(PreferencesKeys.TASBIH_BEAD_MODE, enabled)
 
     // Tasbih bead design — stable key of the chosen BeadDesign (default "wood").
-    val tasbihBeadDesign: Flow<String> = preference(PreferencesKeys.TASBIH_BEAD_DESIGN, "wood")
+    override val tasbihBeadDesign: Flow<String> = preference(PreferencesKeys.TASBIH_BEAD_DESIGN, "wood")
 
-    suspend fun setTasbihBeadDesign(key: String) = put(PreferencesKeys.TASBIH_BEAD_DESIGN, key)
+    override suspend fun setTasbihBeadDesign(key: String) = put(PreferencesKeys.TASBIH_BEAD_DESIGN, key)
 
     // Currently selected tasbih preset id (-1 = free count). Shared across screens
     // so the Choose-Dhikr picker can drive the counter on a separate back-stack entry.
-    val tasbihSelectedPresetId: Flow<Long> = preference(PreferencesKeys.TASBIH_SELECTED_PRESET, -1L)
+    override val tasbihSelectedPresetId: Flow<Long> = preference(PreferencesKeys.TASBIH_SELECTED_PRESET, -1L)
 
-    suspend fun setTasbihSelectedPresetId(id: Long) =
+    override suspend fun setTasbihSelectedPresetId(id: Long) =
         put(PreferencesKeys.TASBIH_SELECTED_PRESET, id)
 
     // Versioned runtime seed of new default presets (prepackaged DB only has the
     // original five). Bump the latest version in the VM when new defaults are added.
-    val tasbihPresetSeedVersion: Flow<Int> =
+    override val tasbihPresetSeedVersion: Flow<Int> =
         preference(PreferencesKeys.TASBIH_PRESET_SEED_VERSION, 0)
 
-    suspend fun setTasbihPresetSeedVersion(version: Int) =
+    override suspend fun setTasbihPresetSeedVersion(version: Int) =
         put(PreferencesKeys.TASBIH_PRESET_SEED_VERSION, version)
 
     // Favourite preset ids (stored as strings).
-    val tasbihFavorites: Flow<Set<String>> =
+    override val tasbihFavorites: Flow<Set<String>> =
         preference(PreferencesKeys.TASBIH_FAVORITES, emptySet())
 
-    suspend fun setTasbihFavorites(ids: Set<String>) = put(PreferencesKeys.TASBIH_FAVORITES, ids)
+    override suspend fun setTasbihFavorites(ids: Set<String>) = put(PreferencesKeys.TASBIH_FAVORITES, ids)
 
     // Bead strand handedness — false = right-handed (beads advance right→left),
     // true = left-handed (beads advance left→right).
-    val tasbihLeftHanded: Flow<Boolean> = preference(PreferencesKeys.TASBIH_LEFT_HANDED, false)
+    override val tasbihLeftHanded: Flow<Boolean> = preference(PreferencesKeys.TASBIH_LEFT_HANDED, false)
 
-    suspend fun setTasbihLeftHanded(enabled: Boolean) =
+    override suspend fun setTasbihLeftHanded(enabled: Boolean) =
         put(PreferencesKeys.TASBIH_LEFT_HANDED, enabled)
 
     // Dua content version (0 = never seeded)
-    val duaContentVersion: Flow<Int> = preference(PreferencesKeys.DUA_CONTENT_VERSION, 0)
+    override val duaContentVersion: Flow<Int> = preference(PreferencesKeys.DUA_CONTENT_VERSION, 0)
 
-    suspend fun setDuaContentVersion(version: Int) =
+    override suspend fun setDuaContentVersion(version: Int) =
         put(PreferencesKeys.DUA_CONTENT_VERSION, version)
 
     // Qaida content version (0 = never seeded)
-    val qaidaContentVersion: Flow<Int> = preference(PreferencesKeys.QAIDA_CONTENT_VERSION, 0)
+    override val qaidaContentVersion: Flow<Int> = preference(PreferencesKeys.QAIDA_CONTENT_VERSION, 0)
 
-    suspend fun setQaidaContentVersion(version: Int) =
+    override suspend fun setQaidaContentVersion(version: Int) =
         put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
 
-    val arabicFontSize: Flow<String> = preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
+    override val arabicFontSize: Flow<String> = preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
 
-    suspend fun setArabicFontSize(size: String) = put(PreferencesKeys.ARABIC_FONT_SIZE, size)
+    override suspend fun setArabicFontSize(size: String) = put(PreferencesKeys.ARABIC_FONT_SIZE, size)
 
     // Prayer Settings
-    val calculationMethod: Flow<String> =
+    override val calculationMethod: Flow<String> =
         preference(PreferencesKeys.CALCULATION_METHOD, "MUSLIM_WORLD_LEAGUE")
 
-    suspend fun setCalculationMethod(method: String) =
+    override suspend fun setCalculationMethod(method: String) =
         put(PreferencesKeys.CALCULATION_METHOD, method)
 
-    val asrCalculation: Flow<String> = preference(PreferencesKeys.ASR_CALCULATION, "standard")
+    override val asrCalculation: Flow<String> = preference(PreferencesKeys.ASR_CALCULATION, "standard")
 
-    suspend fun setAsrCalculation(calculation: String) =
+    override suspend fun setAsrCalculation(calculation: String) =
         put(PreferencesKeys.ASR_CALCULATION, calculation)
 
-    val highLatitudeRule: Flow<String> =
+    override val highLatitudeRule: Flow<String> =
         preference(PreferencesKeys.HIGH_LATITUDE_RULE, "MIDDLE_OF_NIGHT")
 
-    suspend fun setHighLatitudeRule(rule: String) = put(PreferencesKeys.HIGH_LATITUDE_RULE, rule)
+    override suspend fun setHighLatitudeRule(rule: String) = put(PreferencesKeys.HIGH_LATITUDE_RULE, rule)
 
-    val currentLocationId: Flow<Long?> = preference(PreferencesKeys.CURRENT_LOCATION_ID)
+    override val currentLocationId: Flow<Long?> = preference(PreferencesKeys.CURRENT_LOCATION_ID)
 
-    suspend fun setCurrentLocationId(id: Long) = put(PreferencesKeys.CURRENT_LOCATION_ID, id)
+    override suspend fun setCurrentLocationId(id: Long) = put(PreferencesKeys.CURRENT_LOCATION_ID, id)
 
     // Prayer Adjustments
-    val fajrAdjustment: Flow<Int> = preference(PreferencesKeys.FAJR_ADJUSTMENT, 0)
-    val sunriseAdjustment: Flow<Int> = preference(PreferencesKeys.SUNRISE_ADJUSTMENT, 0)
-    val dhuhrAdjustment: Flow<Int> = preference(PreferencesKeys.DHUHR_ADJUSTMENT, 0)
-    val asrAdjustment: Flow<Int> = preference(PreferencesKeys.ASR_ADJUSTMENT, 0)
-    val maghribAdjustment: Flow<Int> = preference(PreferencesKeys.MAGHRIB_ADJUSTMENT, 0)
-    val ishaAdjustment: Flow<Int> = preference(PreferencesKeys.ISHA_ADJUSTMENT, 0)
+    override val fajrAdjustment: Flow<Int> = preference(PreferencesKeys.FAJR_ADJUSTMENT, 0)
+    override val sunriseAdjustment: Flow<Int> = preference(PreferencesKeys.SUNRISE_ADJUSTMENT, 0)
+    override val dhuhrAdjustment: Flow<Int> = preference(PreferencesKeys.DHUHR_ADJUSTMENT, 0)
+    override val asrAdjustment: Flow<Int> = preference(PreferencesKeys.ASR_ADJUSTMENT, 0)
+    override val maghribAdjustment: Flow<Int> = preference(PreferencesKeys.MAGHRIB_ADJUSTMENT, 0)
+    override val ishaAdjustment: Flow<Int> = preference(PreferencesKeys.ISHA_ADJUSTMENT, 0)
 
-    suspend fun setPrayerAdjustment(prayer: String, minutes: Int) {
+    override suspend fun setPrayerAdjustment(prayer: String, minutes: Int) {
         dataStore.edit { prefs ->
             val key = when (prayer.lowercase()) {
                 "fajr" -> PreferencesKeys.FAJR_ADJUSTMENT
@@ -333,36 +335,36 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Notifications
-    val prayerNotificationsEnabled: Flow<Boolean> =
+    override val prayerNotificationsEnabled: Flow<Boolean> =
         preference(PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED, true)
 
-    suspend fun setPrayerNotificationsEnabled(enabled: Boolean) =
+    override suspend fun setPrayerNotificationsEnabled(enabled: Boolean) =
         put(PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED, enabled)
 
-    val adhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ADHAN_ENABLED, false)
+    override val adhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ADHAN_ENABLED, false)
 
-    suspend fun setAdhanEnabled(enabled: Boolean) = put(PreferencesKeys.ADHAN_ENABLED, enabled)
+    override suspend fun setAdhanEnabled(enabled: Boolean) = put(PreferencesKeys.ADHAN_ENABLED, enabled)
 
-    val selectedAdhanSound: Flow<String> =
+    override val selectedAdhanSound: Flow<String> =
         preference(PreferencesKeys.SELECTED_ADHAN_SOUND, "MISHARY")
 
-    suspend fun setSelectedAdhanSound(sound: String) =
+    override suspend fun setSelectedAdhanSound(sound: String) =
         put(PreferencesKeys.SELECTED_ADHAN_SOUND, sound)
 
-    val fajrNotificationEnabled: Flow<Boolean> =
+    override val fajrNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.FAJR_NOTIFICATION_ENABLED, true)
-    val sunriseNotificationEnabled: Flow<Boolean> =
+    override val sunriseNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED, false)
-    val dhuhrNotificationEnabled: Flow<Boolean> =
+    override val dhuhrNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.DHUHR_NOTIFICATION_ENABLED, true)
-    val asrNotificationEnabled: Flow<Boolean> =
+    override val asrNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.ASR_NOTIFICATION_ENABLED, true)
-    val maghribNotificationEnabled: Flow<Boolean> =
+    override val maghribNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED, true)
-    val ishaNotificationEnabled: Flow<Boolean> =
+    override val ishaNotificationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.ISHA_NOTIFICATION_ENABLED, true)
 
-    suspend fun setPrayerNotificationEnabled(prayer: String, enabled: Boolean) {
+    override suspend fun setPrayerNotificationEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
             val key = when (prayer.lowercase()) {
                 "fajr" -> PreferencesKeys.FAJR_NOTIFICATION_ENABLED
@@ -378,13 +380,13 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Per-prayer adhan enabled
-    val fajrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.FAJR_ADHAN_ENABLED, true)
-    val dhuhrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.DHUHR_ADHAN_ENABLED, true)
-    val asrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ASR_ADHAN_ENABLED, true)
-    val maghribAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.MAGHRIB_ADHAN_ENABLED, true)
-    val ishaAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ISHA_ADHAN_ENABLED, true)
+    override val fajrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.FAJR_ADHAN_ENABLED, true)
+    override val dhuhrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.DHUHR_ADHAN_ENABLED, true)
+    override val asrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ASR_ADHAN_ENABLED, true)
+    override val maghribAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.MAGHRIB_ADHAN_ENABLED, true)
+    override val ishaAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ISHA_ADHAN_ENABLED, true)
 
-    suspend fun setPrayerAdhanEnabled(prayer: String, enabled: Boolean) {
+    override suspend fun setPrayerAdhanEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
             val key = when (prayer.lowercase()) {
                 "fajr" -> PreferencesKeys.FAJR_ADHAN_ENABLED
@@ -402,7 +404,7 @@ class PreferencesDataStore @Inject constructor(
      * Check if adhan is enabled for a specific prayer.
      * Sunrise always returns false (uses beep only).
      */
-    fun isAdhanEnabledForPrayer(prayer: String): Flow<Boolean> {
+    override fun isAdhanEnabledForPrayer(prayer: String): Flow<Boolean> {
         return when (prayer.lowercase()) {
             "fajr" -> fajrAdhanEnabled
             "dhuhr" -> dhuhrAdhanEnabled
@@ -414,177 +416,177 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
-    val adhanRespectDnd: Flow<Boolean> = preference(PreferencesKeys.ADHAN_RESPECT_DND, true)
+    override val adhanRespectDnd: Flow<Boolean> = preference(PreferencesKeys.ADHAN_RESPECT_DND, true)
 
-    suspend fun setAdhanRespectDnd(enabled: Boolean) =
+    override suspend fun setAdhanRespectDnd(enabled: Boolean) =
         put(PreferencesKeys.ADHAN_RESPECT_DND, enabled)
 
-    val notificationVibration: Flow<Boolean> =
+    override val notificationVibration: Flow<Boolean> =
         preference(PreferencesKeys.NOTIFICATION_VIBRATION, true)
 
-    suspend fun setNotificationVibration(enabled: Boolean) =
+    override suspend fun setNotificationVibration(enabled: Boolean) =
         put(PreferencesKeys.NOTIFICATION_VIBRATION, enabled)
 
-    val notificationReminderMinutes: Flow<Int> =
+    override val notificationReminderMinutes: Flow<Int> =
         preference(PreferencesKeys.NOTIFICATION_REMINDER_MINUTES, 15)
 
-    suspend fun setNotificationReminderMinutes(minutes: Int) =
+    override suspend fun setNotificationReminderMinutes(minutes: Int) =
         put(PreferencesKeys.NOTIFICATION_REMINDER_MINUTES, minutes)
 
-    val showReminderBefore: Flow<Boolean> = preference(PreferencesKeys.SHOW_REMINDER_BEFORE, true)
+    override val showReminderBefore: Flow<Boolean> = preference(PreferencesKeys.SHOW_REMINDER_BEFORE, true)
 
-    suspend fun setShowReminderBefore(enabled: Boolean) =
+    override suspend fun setShowReminderBefore(enabled: Boolean) =
         put(PreferencesKeys.SHOW_REMINDER_BEFORE, enabled)
 
-    val persistentNotification: Flow<Boolean> =
+    override val persistentNotification: Flow<Boolean> =
         preference(PreferencesKeys.PERSISTENT_NOTIFICATION, false)
 
-    suspend fun setPersistentNotification(enabled: Boolean) =
+    override suspend fun setPersistentNotification(enabled: Boolean) =
         put(PreferencesKeys.PERSISTENT_NOTIFICATION, enabled)
 
     // Quran Settings
-    val quranTranslatorId: Flow<String> =
+    override val quranTranslatorId: Flow<String> =
         preference(PreferencesKeys.QURAN_TRANSLATOR_ID, "sahih_international")
 
-    suspend fun setQuranTranslatorId(translatorId: String) =
+    override suspend fun setQuranTranslatorId(translatorId: String) =
         put(PreferencesKeys.QURAN_TRANSLATOR_ID, translatorId)
 
-    val showTranslation: Flow<Boolean> = preference(PreferencesKeys.SHOW_TRANSLATION, true)
+    override val showTranslation: Flow<Boolean> = preference(PreferencesKeys.SHOW_TRANSLATION, true)
 
-    suspend fun setShowTranslation(show: Boolean) = put(PreferencesKeys.SHOW_TRANSLATION, show)
+    override suspend fun setShowTranslation(show: Boolean) = put(PreferencesKeys.SHOW_TRANSLATION, show)
 
-    val showTransliteration: Flow<Boolean> =
+    override val showTransliteration: Flow<Boolean> =
         preference(PreferencesKeys.SHOW_TRANSLITERATION, false)
 
-    suspend fun setShowTransliteration(show: Boolean) =
+    override suspend fun setShowTransliteration(show: Boolean) =
         put(PreferencesKeys.SHOW_TRANSLITERATION, show)
 
-    val selectedReciterId: Flow<String?> = preference(PreferencesKeys.SELECTED_RECITER_ID)
+    override val selectedReciterId: Flow<String?> = preference(PreferencesKeys.SELECTED_RECITER_ID)
 
-    suspend fun setSelectedReciterId(reciterId: String?) {
+    override suspend fun setSelectedReciterId(reciterId: String?) {
         dataStore.edit {
             if (reciterId != null) it[PreferencesKeys.SELECTED_RECITER_ID] = reciterId
             else it.remove(PreferencesKeys.SELECTED_RECITER_ID)
         }
     }
 
-    val quranArabicFont: Flow<String> = preference(PreferencesKeys.QURAN_ARABIC_FONT, "amiri")
+    override val quranArabicFont: Flow<String> = preference(PreferencesKeys.QURAN_ARABIC_FONT, "amiri")
 
-    suspend fun setQuranArabicFont(fontId: String) =
+    override suspend fun setQuranArabicFont(fontId: String) =
         put(PreferencesKeys.QURAN_ARABIC_FONT, fontId)
 
-    val quranArabicFontSize: Flow<Float> =
+    override val quranArabicFontSize: Flow<Float> =
         preference(PreferencesKeys.QURAN_ARABIC_FONT_SIZE, 28f)
 
-    suspend fun setQuranArabicFontSize(size: Float) =
+    override suspend fun setQuranArabicFontSize(size: Float) =
         put(PreferencesKeys.QURAN_ARABIC_FONT_SIZE, size)
 
-    val quranTranslationFontSize: Flow<Float> =
+    override val quranTranslationFontSize: Flow<Float> =
         preference(PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setQuranTranslationFontSize(size: Float) =
+    override suspend fun setQuranTranslationFontSize(size: Float) =
         put(PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE, size)
 
-    val continuousReading: Flow<Boolean> = preference(PreferencesKeys.CONTINUOUS_READING, true)
+    override val continuousReading: Flow<Boolean> = preference(PreferencesKeys.CONTINUOUS_READING, true)
 
-    suspend fun setContinuousReading(enabled: Boolean) =
+    override suspend fun setContinuousReading(enabled: Boolean) =
         put(PreferencesKeys.CONTINUOUS_READING, enabled)
 
-    val keepScreenOn: Flow<Boolean> = preference(PreferencesKeys.KEEP_SCREEN_ON, true)
+    override val keepScreenOn: Flow<Boolean> = preference(PreferencesKeys.KEEP_SCREEN_ON, true)
 
-    suspend fun setKeepScreenOn(enabled: Boolean) = put(PreferencesKeys.KEEP_SCREEN_ON, enabled)
+    override suspend fun setKeepScreenOn(enabled: Boolean) = put(PreferencesKeys.KEEP_SCREEN_ON, enabled)
 
-    val showTajweed: Flow<Boolean> = preference(PreferencesKeys.SHOW_TAJWEED, false)
+    override val showTajweed: Flow<Boolean> = preference(PreferencesKeys.SHOW_TAJWEED, false)
 
-    suspend fun setShowTajweed(enabled: Boolean) = put(PreferencesKeys.SHOW_TAJWEED, enabled)
+    override suspend fun setShowTajweed(enabled: Boolean) = put(PreferencesKeys.SHOW_TAJWEED, enabled)
 
     // Dua Settings
-    val duaArabicFont: Flow<String> = preference(PreferencesKeys.DUA_ARABIC_FONT, "amiri")
+    override val duaArabicFont: Flow<String> = preference(PreferencesKeys.DUA_ARABIC_FONT, "amiri")
 
-    suspend fun setDuaArabicFont(fontId: String) = put(PreferencesKeys.DUA_ARABIC_FONT, fontId)
+    override suspend fun setDuaArabicFont(fontId: String) = put(PreferencesKeys.DUA_ARABIC_FONT, fontId)
 
-    val duaArabicFontSize: Flow<Float> = preference(PreferencesKeys.DUA_ARABIC_FONT_SIZE, 28f)
+    override val duaArabicFontSize: Flow<Float> = preference(PreferencesKeys.DUA_ARABIC_FONT_SIZE, 28f)
 
-    suspend fun setDuaArabicFontSize(size: Float) =
+    override suspend fun setDuaArabicFontSize(size: Float) =
         put(PreferencesKeys.DUA_ARABIC_FONT_SIZE, size)
 
-    val duaTranslationFontSize: Flow<Float> =
+    override val duaTranslationFontSize: Flow<Float> =
         preference(PreferencesKeys.DUA_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setDuaTranslationFontSize(size: Float) =
+    override suspend fun setDuaTranslationFontSize(size: Float) =
         put(PreferencesKeys.DUA_TRANSLATION_FONT_SIZE, size)
 
-    val duaShowArabic: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_ARABIC, true)
+    override val duaShowArabic: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_ARABIC, true)
 
-    suspend fun setDuaShowArabic(show: Boolean) = put(PreferencesKeys.DUA_SHOW_ARABIC, show)
+    override suspend fun setDuaShowArabic(show: Boolean) = put(PreferencesKeys.DUA_SHOW_ARABIC, show)
 
-    val duaShowTransliteration: Flow<Boolean> =
+    override val duaShowTransliteration: Flow<Boolean> =
         preference(PreferencesKeys.DUA_SHOW_TRANSLITERATION, true)
 
-    suspend fun setDuaShowTransliteration(show: Boolean) =
+    override suspend fun setDuaShowTransliteration(show: Boolean) =
         put(PreferencesKeys.DUA_SHOW_TRANSLITERATION, show)
 
-    val duaShowTranslation: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_TRANSLATION, true)
+    override val duaShowTranslation: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_TRANSLATION, true)
 
-    suspend fun setDuaShowTranslation(show: Boolean) =
+    override suspend fun setDuaShowTranslation(show: Boolean) =
         put(PreferencesKeys.DUA_SHOW_TRANSLATION, show)
 
     // Hadith Settings
-    val hadithArabicFont: Flow<String> = preference(PreferencesKeys.HADITH_ARABIC_FONT, "amiri")
+    override val hadithArabicFont: Flow<String> = preference(PreferencesKeys.HADITH_ARABIC_FONT, "amiri")
 
-    suspend fun setHadithArabicFont(fontId: String) =
+    override suspend fun setHadithArabicFont(fontId: String) =
         put(PreferencesKeys.HADITH_ARABIC_FONT, fontId)
 
-    val hadithArabicFontSize: Flow<Float> =
+    override val hadithArabicFontSize: Flow<Float> =
         preference(PreferencesKeys.HADITH_ARABIC_FONT_SIZE, 24f)
 
-    suspend fun setHadithArabicFontSize(size: Float) =
+    override suspend fun setHadithArabicFontSize(size: Float) =
         put(PreferencesKeys.HADITH_ARABIC_FONT_SIZE, size)
 
-    val hadithTranslationFontSize: Flow<Float> =
+    override val hadithTranslationFontSize: Flow<Float> =
         preference(PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setHadithTranslationFontSize(size: Float) =
+    override suspend fun setHadithTranslationFontSize(size: Float) =
         put(PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE, size)
 
-    val hadithShowArabic: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_ARABIC, true)
+    override val hadithShowArabic: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_ARABIC, true)
 
-    suspend fun setHadithShowArabic(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_ARABIC, show)
+    override suspend fun setHadithShowArabic(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_ARABIC, show)
 
-    val hadithShowTranslation: Flow<Boolean> =
+    override val hadithShowTranslation: Flow<Boolean> =
         preference(PreferencesKeys.HADITH_SHOW_TRANSLATION, true)
 
-    suspend fun setHadithShowTranslation(show: Boolean) =
+    override suspend fun setHadithShowTranslation(show: Boolean) =
         put(PreferencesKeys.HADITH_SHOW_TRANSLATION, show)
 
-    val hadithShowGrade: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_GRADE, true)
+    override val hadithShowGrade: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_GRADE, true)
 
-    suspend fun setHadithShowGrade(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_GRADE, show)
+    override suspend fun setHadithShowGrade(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_GRADE, show)
 
-    val hadithShowChain: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_CHAIN, true)
+    override val hadithShowChain: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_CHAIN, true)
 
-    suspend fun setHadithShowChain(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_CHAIN, show)
+    override suspend fun setHadithShowChain(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_CHAIN, show)
 
     // Tasbih Settings
-    val tasbihVibrationEnabled: Flow<Boolean> =
+    override val tasbihVibrationEnabled: Flow<Boolean> =
         preference(PreferencesKeys.TASBIH_VIBRATION_ENABLED, true)
 
-    suspend fun setTasbihVibrationEnabled(enabled: Boolean) =
+    override suspend fun setTasbihVibrationEnabled(enabled: Boolean) =
         put(PreferencesKeys.TASBIH_VIBRATION_ENABLED, enabled)
 
-    val tasbihSoundEnabled: Flow<Boolean> = preference(PreferencesKeys.TASBIH_SOUND_ENABLED, true)
+    override val tasbihSoundEnabled: Flow<Boolean> = preference(PreferencesKeys.TASBIH_SOUND_ENABLED, true)
 
-    suspend fun setTasbihSoundEnabled(enabled: Boolean) =
+    override suspend fun setTasbihSoundEnabled(enabled: Boolean) =
         put(PreferencesKeys.TASBIH_SOUND_ENABLED, enabled)
 
     // Location
-    val latitude: Flow<Double> = preference(PreferencesKeys.LATITUDE, 0.0)
+    override val latitude: Flow<Double> = preference(PreferencesKeys.LATITUDE, 0.0)
 
-    val longitude: Flow<Double> = preference(PreferencesKeys.LONGITUDE, 0.0)
+    override val longitude: Flow<Double> = preference(PreferencesKeys.LONGITUDE, 0.0)
 
-    val locationName: Flow<String> = preference(PreferencesKeys.LOCATION_NAME, "")
+    override val locationName: Flow<String> = preference(PreferencesKeys.LOCATION_NAME, "")
 
-    suspend fun updateLocation(latitude: Double, longitude: Double, name: String) {
+    override suspend fun updateLocation(latitude: Double, longitude: Double, name: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LATITUDE] = latitude
             preferences[PreferencesKeys.LONGITUDE] = longitude
@@ -593,7 +595,7 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Export all preferences as key-value map for sync
-    suspend fun exportAllPreferences(): Map<String, String> {
+    override suspend fun exportAllPreferences(): Map<String, String> {
         val preferences = dataStore.data.first()
         return preferences.asMap().map { (key, value) ->
             key.name to value.toString()
@@ -601,7 +603,7 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Import preferences from sync payload
-    suspend fun importPreferences(prefsMap: Map<String, String>) {
+    override suspend fun importPreferences(prefsMap: Map<String, String>) {
         dataStore.edit { preferences ->
             prefsMap.forEach { (key, value) ->
                 when {
@@ -636,7 +638,7 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Combined user preferences
-    val userPreferences: Flow<UserPreferences> = dataStore.data.map { preferences ->
+    override val userPreferences: Flow<UserPreferences> = dataStore.data.map { preferences ->
         UserPreferences(
             onboardingCompleted = preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false,
             themeMode = preferences[PreferencesKeys.THEME_MODE] ?: "system",
@@ -656,18 +658,3 @@ class PreferencesDataStore @Inject constructor(
         )
     }
 }
-
-data class UserPreferences(
-    val onboardingCompleted: Boolean,
-    val themeMode: String,
-    val dynamicColor: Boolean,
-    val appLanguage: String,
-    val calculationMethod: String,
-    val asrCalculation: String,
-    val latitude: Double,
-    val longitude: Double,
-    val locationName: String,
-    val prayerNotificationsEnabled: Boolean,
-    val quranTranslatorId: String,
-    val showTranslation: Boolean
-)

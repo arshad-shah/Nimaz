@@ -2,7 +2,7 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.domain.model.HelpSearchResult
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -56,7 +56,7 @@ sealed interface HelpEvent {
 @HiltViewModel
 class HelpViewModel @Inject constructor(
     private val useCases: HelpUseCases,
-    preferences: PreferencesDataStore
+    preferences: SettingsRepository
 ) : ViewModel() {
 
     private val language: StateFlow<String> = preferences.appLanguage

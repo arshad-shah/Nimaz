@@ -12,7 +12,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.CompassData
 import com.arshadshah.nimaz.domain.model.Location
@@ -75,7 +75,7 @@ sealed interface QiblaEvent {
 @HiltViewModel
 class QiblaViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _qiblaState = MutableStateFlow(QiblaUiState())
@@ -243,9 +243,9 @@ class QiblaViewModel @Inject constructor(
     private fun observeLocation() {
         viewModelScope.launch {
             combine(
-                preferencesDataStore.latitude,
-                preferencesDataStore.longitude,
-                preferencesDataStore.locationName
+                settingsRepository.latitude,
+                settingsRepository.longitude,
+                settingsRepository.locationName
             ) { lat, lng, name ->
                 Triple(lat, lng, name)
             }.collect { (lat, lng, name) ->

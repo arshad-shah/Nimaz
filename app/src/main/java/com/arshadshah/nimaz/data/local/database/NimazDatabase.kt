@@ -156,7 +156,7 @@ abstract class NimazDatabase : RoomDatabase() {
         // Current Room schema version. Keep in sync with @Database(version = ...)
         // above. Exposed so crash reports can be tagged with the schema version,
         // which makes migration-related crashes far easier to diagnose.
-        const val SCHEMA_VERSION = 16
+        const val SCHEMA_VERSION = 17
 
         // Tables that gained an `updatedAt` column in schema v10/v11.
         private val UPDATED_AT_TABLES = listOf(

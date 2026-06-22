@@ -9,7 +9,7 @@ import com.arshadshah.nimaz.domain.model.DuaOccasion
 import com.arshadshah.nimaz.domain.model.DuaProgress
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import androidx.compose.ui.text.font.FontFamily
@@ -92,7 +92,7 @@ sealed interface DuaEvent {
 @HiltViewModel
 class DuaViewModel @Inject constructor(
     private val duaUseCases: DuaUseCases,
-    private val preferencesDataStore: PreferencesDataStore
+    private val settingsRepository: SettingsRepository
 ) : ViewModel() {
 
     private val _collectionState = MutableStateFlow(DuaCollectionUiState())
@@ -214,15 +214,15 @@ class DuaViewModel @Inject constructor(
     private fun observeDuaSettings() {
         viewModelScope.launch {
             val displayFlow = combine(
-                preferencesDataStore.duaArabicFont,
-                preferencesDataStore.duaArabicFontSize,
-                preferencesDataStore.duaTranslationFontSize
+                settingsRepository.duaArabicFont,
+                settingsRepository.duaArabicFontSize,
+                settingsRepository.duaTranslationFontSize
             ) { fontId, arabicSize, transSize -> Triple(fontId, arabicSize, transSize) }
 
             val toggleFlow = combine(
-                preferencesDataStore.duaShowArabic,
-                preferencesDataStore.duaShowTransliteration,
-                preferencesDataStore.duaShowTranslation
+                settingsRepository.duaShowArabic,
+                settingsRepository.duaShowTransliteration,
+                settingsRepository.duaShowTranslation
             ) { showArabic, showTranslit, showTrans -> Triple(showArabic, showTranslit, showTrans) }
 
             combine(displayFlow, toggleFlow) { display, toggles -> display to toggles }
