@@ -1,4 +1,11 @@
-# Nimaz Pro - Data Sourcing & Integration Guide
+# Nimaz - Data Sourcing & Integration Guide
+
+> **Status:** the data *formats* below are still a useful reference, but the app now ships a
+> prebuilt database (`app/src/main/assets/database/nimaz_prepopulated.db`) and backfills newer
+> content at runtime via idempotent seeders. See the "Database & migrations" and "Content seeding
+> & versioning" sections of [`SUBSYSTEMS.md`](SUBSYSTEMS.md), and `nimaz-pro-data/` for the
+> generation scripts. App name: **Nimaz**; package: **`com.arshadshah.nimaz`**.
+
 
 ## For Parallel Claude Code Instance
 
@@ -295,7 +302,7 @@ Create `scripts/generate_database.py`:
 ```python
 #!/usr/bin/env python3
 """
-Nimaz Pro - SQLite Database Generator
+Nimaz - SQLite Database Generator
 Converts JSON files to pre-populated Room database
 """
 
@@ -561,7 +568,7 @@ def populate_database(conn):
 
 def main():
     print("=" * 60)
-    print("Nimaz Pro - Database Generator")
+    print("Nimaz - Database Generator")
     print("=" * 60)
     
     # Remove existing database
@@ -633,7 +640,7 @@ After app launch, query counts should match:
 Use this prompt to run data generation in parallel:
 
 ```
-I need you to generate all Islamic content data for the Nimaz Pro Android app.
+I need you to generate all Islamic content data for the Nimaz Android app.
 
 ## Task
 Create JSON files matching the exact formats specified in this document, then generate a pre-populated SQLite database.

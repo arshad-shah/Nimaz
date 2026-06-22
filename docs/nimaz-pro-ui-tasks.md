@@ -1,4 +1,10 @@
-# Nimaz Pro - UI Component & Screen Building Tasks
+# Nimaz - UI Component & Screen Building Tasks
+
+> **Historical reference.** This is an original design/planning document from the initial build;
+> it does **not** necessarily reflect the current code. For how the app is built today see
+> [`ARCHITECTURE.md`](ARCHITECTURE.md), [`NAVIGATION.md`](NAVIGATION.md) and
+> [`SUBSYSTEMS.md`](SUBSYSTEMS.md). App name: **Nimaz**; package: **`com.arshadshah.nimaz`**.
+
 
 > **Prerequisites**: Complete all 35 foundation tasks first. This document assumes you have working ViewModels and data layer.
 
@@ -32,7 +38,7 @@ Atoms are the smallest, indivisible UI components. They are pure composables wit
 Create buttons with 4 variants matching the design system.
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
@@ -41,7 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 enum class NimazButtonVariant {
     PRIMARY,      // Teal filled
@@ -179,7 +185,7 @@ enum class IconPosition { START, END }
 **File**: `presentation/components/atoms/NimazIconButton.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -194,7 +200,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 enum class NimazIconButtonStyle {
     FILLED,       // Solid background
@@ -253,7 +259,7 @@ fun NimazIconButton(
 **File**: `presentation/components/atoms/NimazCard.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -267,7 +273,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 enum class NimazCardStyle {
     FILLED,       // Solid neutral-900 background
@@ -342,7 +348,7 @@ fun NimazGradientCard(
 **File**: `presentation/components/atoms/ArabicText.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.LocalTextStyle
@@ -355,8 +361,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.presentation.theme.AmiriFontFamily
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun ArabicText(
@@ -420,7 +426,7 @@ fun Int.toArabicNumerals(): String {
 **File**: `presentation/components/atoms/NimazTextField.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -439,7 +445,7 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun NimazTextField(
@@ -567,7 +573,7 @@ fun NimazTextField(
 **File**: `presentation/components/atoms/NimazSwitch.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -583,7 +589,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun NimazSwitch(
@@ -631,7 +637,7 @@ fun NimazSwitch(
 **File**: `presentation/components/atoms/NimazChip.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -646,7 +652,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 enum class NimazChipStyle {
     FILLED,
@@ -753,7 +759,7 @@ fun NimazFilterChipGroup(
 **File**: `presentation/components/atoms/NimazBadge.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -768,7 +774,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 enum class NimazBadgeType {
     DEFAULT,      // Neutral gray
@@ -863,7 +869,7 @@ fun NimazCountBadge(
 **File**: `presentation/components/atoms/NimazDivider.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -872,7 +878,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun NimazDivider(
@@ -910,7 +916,7 @@ fun NimazVerticalDivider(
 **File**: `presentation/components/atoms/NimazProgressIndicators.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
@@ -929,7 +935,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 // Linear progress bar
 @Composable
@@ -1014,7 +1020,7 @@ fun NimazLoadingSpinner(
 **File**: `presentation/components/atoms/PrayerColorIndicator.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -1025,8 +1031,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.domain.model.PrayerType
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun PrayerColorIndicator(
@@ -1088,7 +1094,7 @@ fun PrayerColorBar(
 **File**: `presentation/components/atoms/NimazIcon.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -1104,7 +1110,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 // Icon with colored background container
 @Composable
@@ -1165,7 +1171,7 @@ fun NimazEmojiIcon(
 **File**: `presentation/components/atoms/NimazSlider.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.material3.*
@@ -1173,7 +1179,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun NimazSlider(
@@ -1212,7 +1218,7 @@ fun NimazSlider(
 **File**: `presentation/components/atoms/NimazSelectionControls.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -1231,7 +1237,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun NimazCheckbox(
@@ -1311,7 +1317,7 @@ fun NimazRadioButton(
 **File**: `presentation/components/atoms/NimazContainers.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.atoms
+package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -1324,7 +1330,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 // Bottom sheet handle
 @Composable
@@ -1428,7 +1434,7 @@ Molecules are combinations of atoms that form functional UI components.
 **File**: `presentation/components/molecules/PrayerTimeCard.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -1444,9 +1450,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.nimazpro.app.domain.model.PrayerType
-import com.nimazpro.app.presentation.components.atoms.*
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.*
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 data class PrayerTimeData(
     val type: PrayerType,
@@ -1572,7 +1578,7 @@ val PrayerType.icon: ImageVector
 **File**: `presentation/components/molecules/CountdownTimer.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -1586,8 +1592,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.presentation.theme.NimazColors
-import com.nimazpro.app.presentation.theme.OutfitFontFamily
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.OutfitFontFamily
 
 data class CountdownTime(
     val hours: Int,
@@ -1680,7 +1686,7 @@ fun CompactCountdown(
 **File**: `presentation/components/molecules/SurahListItem.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -1695,13 +1701,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.domain.model.RevelationType
-import com.nimazpro.app.domain.model.Surah
-import com.nimazpro.app.presentation.components.atoms.ArabicText
-import com.nimazpro.app.presentation.components.atoms.NimazBadge
-import com.nimazpro.app.presentation.components.atoms.NimazBadgeType
-import com.nimazpro.app.presentation.theme.NimazColors
-import com.nimazpro.app.presentation.theme.OutfitFontFamily
+import com.arshadshah.nimaz.domain.model.RevelationType
+import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeType
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.OutfitFontFamily
 
 @Composable
 fun SurahListItem(
@@ -1796,7 +1802,7 @@ fun SurahListItem(
 **File**: `presentation/components/molecules/AyahCard.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.components.molecules
+package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -1811,9 +1817,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.nimazpro.app.domain.model.Ayah
-import com.nimazpro.app.presentation.components.atoms.*
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.components.atoms.*
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun AyahCard(
@@ -2016,7 +2022,7 @@ Build complete screens using organisms and molecules.
 **File**: `presentation/screens/home/HomeScreen.kt`
 
 ```kotlin
-package com.nimazpro.app.presentation.screens.home
+package com.arshadshah.nimaz.presentation.screens.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -2031,10 +2037,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.nimazpro.app.presentation.components.atoms.*
-import com.nimazpro.app.presentation.components.molecules.*
-import com.nimazpro.app.presentation.components.organisms.*
-import com.nimazpro.app.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.components.atoms.*
+import com.arshadshah.nimaz.presentation.components.molecules.*
+import com.arshadshah.nimaz.presentation.components.organisms.*
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 @Composable
 fun HomeScreen(

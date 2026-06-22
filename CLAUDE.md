@@ -6,11 +6,39 @@ DataStore, type-safe Navigation Compose.
 
 ## Read this first
 
-**[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) is the source of truth** for how this app is
-structured (layer patterns, DI, navigation, theming, diagrams, a new-feature recipe, and a
-tech-debt registry of known deviations). Follow it so the architecture does not drift. When
-adding a feature, copy an existing one that follows the patterns — good references:
+The `docs/` folder is the source of truth — read the relevant doc before working, and **keep it
+updated as part of your change** (see "Documentation is part of the work" below):
+
+- **[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)** — layer patterns, DI, navigation, theming,
+  diagrams, the new-feature recipe, and the tech-debt registry (§9). The architectural source of truth.
+- **[`docs/NAVIGATION.md`](docs/NAVIGATION.md)** — the complete route graph + route table.
+- **[`docs/SUBSYSTEMS.md`](docs/SUBSYSTEMS.md)** — audio, widgets, background work, notifications,
+  database/migrations, preferences, content seeding, prayer-time calc, sync, init/monitoring.
+- **[`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)** — tick-box
+  anti-pattern backlog with detection commands.
+
+When adding a feature, copy an existing one that follows the patterns — good references:
 `AsmaUlHusna`, `Prophet`, `Khatam`, `Quran`.
+
+> Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The older
+> `docs/nimaz-pro-*.md` files are historical design/planning artifacts (they say "Nimaz Pro" /
+> `com.nimazpro.app`) — treat them as background, not current truth.
+
+## Documentation is part of the work
+
+Docs only stay useful if they track reality. **In every change, update the docs your change
+touches** — this is not optional:
+
+- Add/remove/rename a `Route` → update **`docs/NAVIGATION.md`** (route table *and*, if the
+  high-level map changes, the mermaid diagram; validate it).
+- Change a subsystem (audio, widgets, workers, notifications, DB schema/migrations, DataStore,
+  seeders, prayer-time calc, sync, init/monitoring) → update the relevant section of
+  **`docs/SUBSYSTEMS.md`**.
+- Change a layer pattern, DI convention, or resolve/introduce a deviation → update
+  **`docs/ARCHITECTURE.md`** (and its §9 registry).
+- Fix or discover a clean-architecture anti-pattern → tick / add to
+  **`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`**.
+- Change the DB schema or shipped data → update **`docs/nimaz-pro-data-guide.md`**.
 
 ## Non-negotiable rules
 
