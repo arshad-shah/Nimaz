@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.core.navigation
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -30,10 +31,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -227,6 +231,7 @@ fun NavGraph(
                 } == true
 
                 item(
+                    modifier = Modifier.testTag(ScreenTags.bottomNav(navItem.label)),
                     icon = { Icon(navItem.icon, contentDescription = navItem.label) },
                     label = { Text(navItem.label) },
                     selected = selected,
@@ -248,7 +253,7 @@ fun NavGraph(
             startDestination = startDestination,
         ) {
             // Onboarding
-            composable<Route.Onboarding> {
+            taggedComposable<Route.Onboarding>(ScreenTags.Onboarding) {
                 OnboardingScreen(
                     onComplete = {
                         navController.navigate(Route.Home) {
@@ -259,7 +264,7 @@ fun NavGraph(
             }
 
             // Main screens
-            composable<Route.Home> {
+            taggedComposable<Route.Home>(ScreenTags.Home) {
                 HomeScreen(
                     onNavigateToQuran = { navController.navigate(Route.Quran) },
                     onNavigateToHadith = { navController.navigate(Route.HadithHome) },
@@ -277,7 +282,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.Quran> {
+            taggedComposable<Route.Quran>(ScreenTags.Quran) {
                 AdaptiveQuranScreen(
                     navController = navController,
                     onNavigateToSearch = { navController.navigate(Route.GlobalSearch) },
@@ -293,7 +298,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.Tasbih> {
+            taggedComposable<Route.Tasbih>(ScreenTags.Tasbih) {
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
@@ -302,14 +307,14 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QiblaNav> {
+            taggedComposable<Route.QiblaNav>(ScreenTags.QiblaNav) {
                 QiblaScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Qaida (children's Arabic reader) screens
-            composable<Route.QaidaHome> {
+            taggedComposable<Route.QaidaHome>(ScreenTags.QaidaHome) {
                 QaidaHomeScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onOpenLesson = { lessonId -> navController.navigate(Route.QaidaReader(lessonId)) },
@@ -317,7 +322,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QaidaReader> { backStackEntry ->
+            taggedComposable<Route.QaidaReader>(ScreenTags.QaidaReader) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QaidaReader>()
                 QaidaReaderScreen(
                     lessonId = args.lessonId,
@@ -325,13 +330,13 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QaidaLetters> {
+            taggedComposable<Route.QaidaLetters>(ScreenTags.QaidaLetters) {
                 QaidaLettersScreen(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
 
-            composable<Route.More> {
+            taggedComposable<Route.More>(ScreenTags.More) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 AdaptiveMoreScreen(
                     navController = navController,
@@ -340,7 +345,7 @@ fun NavGraph(
             }
 
             // Quran screens
-            composable<Route.QuranReader> { backStackEntry ->
+            taggedComposable<Route.QuranReader>(ScreenTags.QuranReader) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QuranReader>()
                 QuranReaderScreen(
                     surahNumber = args.surahNumber,
@@ -358,7 +363,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.TafseerChapters> {
+            taggedComposable<Route.TafseerChapters>(ScreenTags.TafseerChapters) {
                 TafseerChaptersScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onOpenTafseer = { surah, ayah ->
@@ -367,7 +372,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.Tafseer> { backStackEntry ->
+            taggedComposable<Route.Tafseer>(ScreenTags.Tafseer) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.Tafseer>()
                 TafseerScreen(
                     surahNumber = args.surahNumber,
@@ -376,7 +381,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.SurahInfo> { backStackEntry ->
+            taggedComposable<Route.SurahInfo>(ScreenTags.SurahInfo) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.SurahInfo>()
                 SurahInfoScreen(
                     surahNumber = args.surahNumber,
@@ -387,7 +392,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QuranPage> { backStackEntry ->
+            taggedComposable<Route.QuranPage>(ScreenTags.QuranPage) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QuranPage>()
                 QuranReaderScreen(
                     pageNumber = args.pageNumber,
@@ -399,7 +404,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QuranJuz> { backStackEntry ->
+            taggedComposable<Route.QuranJuz>(ScreenTags.QuranJuz) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.QuranJuz>()
                 QuranReaderScreen(
                     juzNumber = args.juzNumber,
@@ -411,7 +416,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QuranSearch> {
+            taggedComposable<Route.QuranSearch>(ScreenTags.QuranSearch) {
                 SearchScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -429,7 +434,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.QuranBookmarks> {
+            taggedComposable<Route.QuranBookmarks>(ScreenTags.QuranBookmarks) {
                 BookmarksScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -445,7 +450,7 @@ fun NavGraph(
             }
 
             // Hadith screens
-            composable<Route.HadithHome> {
+            taggedComposable<Route.HadithHome>(ScreenTags.HadithHome) {
                 AdaptiveHadithScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
@@ -454,7 +459,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HadithBook> { backStackEntry ->
+            taggedComposable<Route.HadithBook>(ScreenTags.HadithBook) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HadithBook>()
                 HadithChaptersScreen(
                     bookId = args.bookId,
@@ -465,7 +470,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HadithChapter> { backStackEntry ->
+            taggedComposable<Route.HadithChapter>(ScreenTags.HadithChapter) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HadithChapter>()
                 HadithReaderScreen(
                     bookId = args.bookId,
@@ -475,7 +480,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HadithReader> { backStackEntry ->
+            taggedComposable<Route.HadithReader>(ScreenTags.HadithReader) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HadithReader>()
                 HadithReaderScreen(
                     bookId = "",
@@ -485,13 +490,13 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HadithSettings> {
+            taggedComposable<Route.HadithSettings>(ScreenTags.HadithSettings) {
                 HadithSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.HadithSearch> {
+            taggedComposable<Route.HadithSearch>(ScreenTags.HadithSearch) {
                 SearchScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -509,7 +514,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HadithBookmarks> {
+            taggedComposable<Route.HadithBookmarks>(ScreenTags.HadithBookmarks) {
                 BookmarksScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -525,7 +530,7 @@ fun NavGraph(
             }
 
             // Dua screens
-            composable<Route.DuaHome> {
+            taggedComposable<Route.DuaHome>(ScreenTags.DuaHome) {
                 AdaptiveDuaScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
@@ -534,7 +539,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.DuaCategory> { backStackEntry ->
+            taggedComposable<Route.DuaCategory>(ScreenTags.DuaCategory) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.DuaCategory>()
                 DuaCategoryScreen(
                     categoryId = args.categoryId,
@@ -545,7 +550,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.DuaReader> { backStackEntry ->
+            taggedComposable<Route.DuaReader>(ScreenTags.DuaReader) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.DuaReader>()
                 DuaReaderScreen(
                     duaId = args.duaId,
@@ -554,13 +559,13 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.DuaSettings> {
+            taggedComposable<Route.DuaSettings>(ScreenTags.DuaSettings) {
                 DuaSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.DuaFavorites> {
+            taggedComposable<Route.DuaFavorites>(ScreenTags.DuaFavorites) {
                 DuasCollectionScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToCategory = { categoryId ->
@@ -571,7 +576,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.DuaSearch> {
+            taggedComposable<Route.DuaSearch>(ScreenTags.DuaSearch) {
                 SearchScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -591,14 +596,14 @@ fun NavGraph(
             }
 
             // Prayer screens
-            composable<Route.PrayerTimes> {
+            taggedComposable<Route.PrayerTimes>(ScreenTags.PrayerTimes) {
                 PrayerTimesScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSettings = { navController.navigate(Route.SettingsPrayerCalculation) }
                 )
             }
 
-            composable<Route.PrayerTracker> { backStackEntry ->
+            taggedComposable<Route.PrayerTracker>(ScreenTags.PrayerTracker) { backStackEntry ->
                 val route = backStackEntry.toRoute<Route.PrayerTracker>()
                 PrayerTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
@@ -607,14 +612,14 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.PrayerStats> {
+            taggedComposable<Route.PrayerStats>(ScreenTags.PrayerStats) {
                 PrayerStatsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Redirect QadaPrayers to PrayerTracker with Qada tab selected
-            composable<Route.QadaPrayers> {
+            taggedComposable<Route.QadaPrayers>(ScreenTags.QadaPrayers) {
                 PrayerTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToStats = { navController.navigate(Route.PrayerStats) },
@@ -622,28 +627,28 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.MonthlyPrayerTimes> {
+            taggedComposable<Route.MonthlyPrayerTimes>(ScreenTags.MonthlyPrayerTimes) {
                 MonthlyPrayerTimesScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Fasting screens
-            composable<Route.FastingHome> {
+            taggedComposable<Route.FastingHome>(ScreenTags.FastingHome) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.FastingStats) }
                 )
             }
 
-            composable<Route.FastingTracker> {
+            taggedComposable<Route.FastingTracker>(ScreenTags.FastingTracker) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.FastingStats) }
                 )
             }
 
-            composable<Route.FastingStats> {
+            taggedComposable<Route.FastingStats>(ScreenTags.FastingStats) {
                 FastTrackerScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { }
@@ -651,7 +656,7 @@ fun NavGraph(
             }
 
             // Tasbih screens
-            composable<Route.TasbihHome> {
+            taggedComposable<Route.TasbihHome>(ScreenTags.TasbihHome) {
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihHistory) },
                     onNavigateToChooseDhikr = { navController.navigate(Route.TasbihPresets) },
@@ -660,7 +665,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.TasbihCounter> { backStackEntry ->
+            taggedComposable<Route.TasbihCounter>(ScreenTags.TasbihCounter) { backStackEntry ->
                 backStackEntry.toRoute<Route.TasbihCounter>()
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
@@ -669,41 +674,41 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.TasbihPresets> {
+            taggedComposable<Route.TasbihPresets>(ScreenTags.TasbihPresets) {
                 com.arshadshah.nimaz.presentation.screens.tasbih.ChooseDhikrScreen(
                     onBack = { navController.popBackStack() },
                     onNavigateToAddPreset = { navController.navigate(Route.TasbihAddPreset) }
                 )
             }
 
-            composable<Route.TasbihStats> {
+            taggedComposable<Route.TasbihStats>(ScreenTags.TasbihStats) {
                 TasbihScreen(
                     onNavigateToHistory = { },
                     onNavigateToSettings = { navController.navigate(Route.Settings) }
                 )
             }
 
-            composable<Route.TasbihHistory> {
+            taggedComposable<Route.TasbihHistory>(ScreenTags.TasbihHistory) {
                 com.arshadshah.nimaz.presentation.screens.tasbih.TasbihHistoryScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.TasbihAddPreset> {
+            taggedComposable<Route.TasbihAddPreset>(ScreenTags.TasbihAddPreset) {
                 com.arshadshah.nimaz.presentation.screens.tasbih.AddPresetScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Zakat screens
-            composable<Route.ZakatCalculator> {
+            taggedComposable<Route.ZakatCalculator>(ScreenTags.ZakatCalculator) {
                 ZakatCalculatorScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToHistory = { navController.navigate(Route.ZakatHistory) }
                 )
             }
 
-            composable<Route.ZakatHistory> {
+            taggedComposable<Route.ZakatHistory>(ScreenTags.ZakatHistory) {
                 ZakatHistoryScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToCalculator = { navController.navigate(Route.ZakatCalculator) }
@@ -711,20 +716,20 @@ fun NavGraph(
             }
 
             // Qibla
-            composable<Route.Qibla> {
+            taggedComposable<Route.Qibla>(ScreenTags.Qibla) {
                 QiblaScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Islamic Calendar
-            composable<Route.IslamicCalendar> {
+            taggedComposable<Route.IslamicCalendar>(ScreenTags.IslamicCalendar) {
                 IslamicCalendarScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.IslamicMonth> { backStackEntry ->
+            taggedComposable<Route.IslamicMonth>(ScreenTags.IslamicMonth) { backStackEntry ->
                 backStackEntry.toRoute<Route.IslamicMonth>()
                 IslamicCalendarScreen(
                     onNavigateBack = { navController.popBackStack() }
@@ -732,7 +737,7 @@ fun NavGraph(
             }
 
             // Settings
-            composable<Route.Settings> {
+            taggedComposable<Route.Settings>(ScreenTags.Settings) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 AdaptiveSettingsScreen(
                     navController = navController,
@@ -740,57 +745,57 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.SettingsPrayerCalculation> {
+            taggedComposable<Route.SettingsPrayerCalculation>(ScreenTags.SettingsPrayerCalculation) {
                 PrayerSettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToNotifications = { navController.navigate(Route.SettingsNotifications) }
                 )
             }
 
-            composable<Route.SettingsNotifications> {
+            taggedComposable<Route.SettingsNotifications>(ScreenTags.SettingsNotifications) {
                 NotificationSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsAppearance> {
+            taggedComposable<Route.SettingsAppearance>(ScreenTags.SettingsAppearance) {
                 AppearanceSettingsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsLanguage> {
+            taggedComposable<Route.SettingsLanguage>(ScreenTags.SettingsLanguage) {
                 LanguageScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsLocation> {
+            taggedComposable<Route.SettingsLocation>(ScreenTags.SettingsLocation) {
                 LocationScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsQuran> {
+            taggedComposable<Route.SettingsQuran>(ScreenTags.SettingsQuran) {
                 QuranSettingsScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToSelectReciter = { navController.navigate(Route.SelectReciter) }
                 )
             }
 
-            composable<Route.SelectReciter> {
+            taggedComposable<Route.SelectReciter>(ScreenTags.SelectReciter) {
                 SelectReciterScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsWidgets> {
+            taggedComposable<Route.SettingsWidgets>(ScreenTags.SettingsWidgets) {
                 WidgetsScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsAbout> {
+            taggedComposable<Route.SettingsAbout>(ScreenTags.SettingsAbout) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
@@ -855,7 +860,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.Licenses> {
+            taggedComposable<Route.Licenses>(ScreenTags.Licenses) {
                 LicensesScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToDetail = { hashCode ->
@@ -864,7 +869,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.LicenseDetail> { backStackEntry ->
+            taggedComposable<Route.LicenseDetail>(ScreenTags.LicenseDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.LicenseDetail>()
                 LicenseDetailScreen(
                     libraryHashCode = args.libraryHashCode,
@@ -873,14 +878,14 @@ fun NavGraph(
             }
 
             // Asma ul Husna screens
-            composable<Route.AsmaUlHusnaList> {
+            taggedComposable<Route.AsmaUlHusnaList>(ScreenTags.AsmaUlHusnaList) {
                 AdaptiveAsmaUlHusnaScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
 
-            composable<Route.AsmaUlHusnaDetail> { backStackEntry ->
+            taggedComposable<Route.AsmaUlHusnaDetail>(ScreenTags.AsmaUlHusnaDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.AsmaUlHusnaDetail>()
                 AsmaUlHusnaDetailScreen(
                     nameId = args.nameId,
@@ -889,14 +894,14 @@ fun NavGraph(
             }
 
             // Asma un Nabi screens
-            composable<Route.AsmaUnNabiList> {
+            taggedComposable<Route.AsmaUnNabiList>(ScreenTags.AsmaUnNabiList) {
                 AdaptiveAsmaUnNabiScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
 
-            composable<Route.AsmaUnNabiDetail> { backStackEntry ->
+            taggedComposable<Route.AsmaUnNabiDetail>(ScreenTags.AsmaUnNabiDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.AsmaUnNabiDetail>()
                 AsmaUnNabiDetailScreen(
                     nameId = args.nameId,
@@ -905,14 +910,14 @@ fun NavGraph(
             }
 
             // Prophets screens
-            composable<Route.ProphetsList> {
+            taggedComposable<Route.ProphetsList>(ScreenTags.ProphetsList) {
                 AdaptiveProphetsScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
 
-            composable<Route.ProphetDetail> { backStackEntry ->
+            taggedComposable<Route.ProphetDetail>(ScreenTags.ProphetDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.ProphetDetail>()
                 ProphetDetailScreen(
                     prophetId = args.prophetId,
@@ -921,7 +926,7 @@ fun NavGraph(
             }
 
             // Khatam screens
-            composable<Route.KhatamList> {
+            taggedComposable<Route.KhatamList>(ScreenTags.KhatamList) {
                 AdaptiveKhatamScreen(
                     navController = navController,
                     onNavigateBack = { navController.popBackStack() },
@@ -929,7 +934,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.KhatamDetail> { backStackEntry ->
+            taggedComposable<Route.KhatamDetail>(ScreenTags.KhatamDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.KhatamDetail>()
                 KhatamDetailScreen(
                     khatamId = args.khatamId,
@@ -940,13 +945,13 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.KhatamCreate> {
+            taggedComposable<Route.KhatamCreate>(ScreenTags.KhatamCreate) {
                 KhatamCreateScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
-            composable<Route.SettingsHelp> {
+            taggedComposable<Route.SettingsHelp>(ScreenTags.SettingsHelp) {
                 val context = androidx.compose.ui.platform.LocalContext.current
                 val supportEmail =
                     androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
@@ -977,7 +982,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HelpTopicDetail> { backStackEntry ->
+            taggedComposable<Route.HelpTopicDetail>(ScreenTags.HelpTopicDetail) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HelpTopicDetail>()
                 com.arshadshah.nimaz.presentation.screens.help.HelpTopicDetailScreen(
                     topicId = args.topicId,
@@ -986,7 +991,7 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.HelpGuide> { backStackEntry ->
+            taggedComposable<Route.HelpGuide>(ScreenTags.HelpGuide) { backStackEntry ->
                 val args = backStackEntry.toRoute<Route.HelpGuide>()
                 com.arshadshah.nimaz.presentation.screens.help.HelpGuideScreen(
                     guideId = args.guideId,
@@ -999,14 +1004,14 @@ fun NavGraph(
                 )
             }
 
-            composable<Route.SettingsSync> {
+            taggedComposable<Route.SettingsSync>(ScreenTags.SettingsSync) {
                 com.arshadshah.nimaz.presentation.screens.settings.SyncScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }
 
             // Bookmarks
-            composable<Route.AllBookmarks> {
+            taggedComposable<Route.AllBookmarks>(ScreenTags.AllBookmarks) {
                 BookmarksScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -1022,7 +1027,7 @@ fun NavGraph(
             }
 
             // Global Search
-            composable<Route.GlobalSearch> {
+            taggedComposable<Route.GlobalSearch>(ScreenTags.GlobalSearch) {
                 SearchScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
@@ -1039,6 +1044,26 @@ fun NavGraph(
                     }
                 )
             }
+        }
+    }
+}
+
+/**
+ * Like [composable], but wraps the destination content in a full-size [Box] carrying a
+ * stable [testTag] ([ScreenTags]). This gives the instrumented UI tests a locale- and
+ * copy-independent way to assert which screen is currently shown. The wrapper is
+ * otherwise transparent: it forwards the [AnimatedContentScope] receiver and the
+ * [NavBackStackEntry] so existing destination bodies (including `toRoute()` arg
+ * extraction and any shared-element usage) behave exactly as before.
+ */
+private inline fun <reified T : Any> NavGraphBuilder.taggedComposable(
+    tag: String,
+    crossinline content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit,
+) {
+    composable<T> { entry ->
+        val scope = this
+        Box(modifier = Modifier.fillMaxSize().testTag(tag)) {
+            scope.content(entry)
         }
     }
 }

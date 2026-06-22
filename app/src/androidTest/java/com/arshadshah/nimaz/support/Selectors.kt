@@ -53,8 +53,22 @@ object Selectors {
 
     object More {
         @StringRes val title = R.string.more
-        @StringRes val prayerTracker = R.string.prayer_tracker
         @StringRes val settings = R.string.settings
+        // Menu-item titles (each navigates to a feature landing screen).
+        @StringRes val prayerTracker = R.string.prayer_tracker
+        @StringRes val fasting = R.string.fasting
+        @StringRes val khatam = R.string.khatam_quran
+        @StringRes val qaida = R.string.qaida
+        @StringRes val asmaUlHusna = R.string.allahs_99_names
+        @StringRes val asmaUnNabi = R.string.prophets_99_names
+        @StringRes val prophets = R.string.prophets_of_islam
+        @StringRes val hadith = R.string.hadith
+        @StringRes val duas = R.string.duas
+        @StringRes val tafseer = R.string.tafseer
+        @StringRes val calendar = R.string.calendar
+        @StringRes val prayerTimes = R.string.prayer_times
+        @StringRes val monthlyPrayerTimes = R.string.monthly_prayer_times
+        @StringRes val zakat = R.string.zakat
         @StringRes val aboutNimaz = R.string.about_nimaz
         @StringRes val helpSupport = R.string.help_support
     }
@@ -62,6 +76,18 @@ object Selectors {
     object Prayer {
         @StringRes val trackerTitle = R.string.prayer_tracker_title
         @StringRes val times = R.string.prayer_times
+    }
+
+    /** Row labels on the Settings hub (each opens a settings sub-screen). */
+    object Settings {
+        @StringRes val calculationMethod = R.string.calculation_method
+        @StringRes val location = R.string.location
+        @StringRes val notifications = R.string.notifications
+        @StringRes val quranSettings = R.string.quran_settings
+        @StringRes val appearance = R.string.appearance
+        @StringRes val language = R.string.language
+        @StringRes val widgets = R.string.widgets
+        @StringRes val syncData = R.string.sync_data
     }
 
     object Qibla {
