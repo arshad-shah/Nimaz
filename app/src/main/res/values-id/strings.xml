@@ -1216,4 +1216,18 @@
     <string name="sync_item_qaida_cells">Kemajuan sel Qaida</string>
     <string name="sync_item_dua_progress">Kemajuan Dua</string>
     <string name="sync_item_locations">Lokasi tersimpan</string>
+    <string name="cd_pause">Jeda</string>
+    <string name="location_set_prompt">Atur lokasi</string>
+    <string name="tafseer_tab_surahs">Surah</string>
+    <string name="tafseer_tab_notes">Catatan saya</string>
+    <string name="tafseer_note_location">%1$s · Ayat %2$d</string>
+    <string name="bookmarks_count">%1$d disimpan</string>
+    <string name="bookmark_removed">Markah dihapus</string>
+    <string name="undo">Urungkan</string>
+    <string name="edit_note">Edit catatan</string>
+    <string name="note_hint">Tambahkan catatan…</string>
+    <string name="cd_more_options">Opsi lainnya</string>
+    <string name="all_categories_az">Semua Kategori (A–Z)</string>
+    <string name="sort_categories_alphabetically">Urutkan kategori menurut abjad</string>
+    <string name="sort_categories_default">Beralih ke urutan default</string>
 </resources>

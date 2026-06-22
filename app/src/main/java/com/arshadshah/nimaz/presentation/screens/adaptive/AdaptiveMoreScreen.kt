@@ -82,7 +82,7 @@ fun AdaptiveMoreScreen(
             onNavigateToZakat = { navController.navigate(Route.ZakatCalculator) },
             onNavigateToDuas = { navController.navigate(Route.DuaHome) },
             onNavigateToTafseer = {
-                navController.navigate(Route.Tafseer(surahNumber = 1, ayahNumber = 1))
+                navController.navigate(Route.TafseerChapters)
             },
             onNavigateToPrayerTracker = { navController.navigate(Route.PrayerTracker()) },
             onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },

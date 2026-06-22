@@ -1,19 +1,29 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
@@ -23,23 +33,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
- * Combined reading-position + audio-control bar.
+ * Floating "now playing" mini-player for the Quran reader.
  *
- * The thin bar at the top reflects the reader's position in the current surah
- * (driven by scroll when idle, by the playing ayah when audio is active —
- * they stay in sync via the auto-scroll-to-playing-ayah effect on the screen).
- * Hitting play starts audio from the currently displayed ayah.
+ * Presentation only — same inputs and the same [onPlayClick] / [onStopClick]
+ * contract as before. The leading control is the play/pause button itself
+ * (no album/art tile); the surah + position sit in the middle over a slim
+ * progress track that reflects reading position (or download progress while
+ * preparing); stop trails. A small equalizer animates while playing.
  */
 @Composable
 internal fun AudioBottomBar(
@@ -62,107 +78,151 @@ internal fun AudioBottomBar(
     val readingProgress = if (totalAyahsInSurah > 0) {
         (currentAyahInSurah.toFloat() / totalAyahsInSurah).coerceIn(0f, 1f)
     } else 0f
+    val isBusy = isDownloading || isPreparing
+    val shownProgress = if (isPreparing && totalToDownload > 0) downloadProgress else readingProgress
 
-    BottomAppBar(
-        modifier = modifier,
-        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-        contentColor = MaterialTheme.colorScheme.onSurface,
+    Surface(
+        modifier = modifier
+            .fillMaxWidth()
+            .navigationBarsPadding()
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        shape = RoundedCornerShape(20.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
         tonalElevation = 3.dp,
-        contentPadding = PaddingValues(0.dp)
+        shadowElevation = 8.dp,
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            LinearProgressIndicator(
-                progress = {
-                    if (isPreparing && totalToDownload > 0) downloadProgress else readingProgress
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(3.dp),
-                color = if (isPreparing) MaterialTheme.colorScheme.tertiary
-                else MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 6.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilledIconButton(onClick = onPlayClick, modifier = Modifier.size(36.dp)) {
-                    if (isDownloading || isPreparing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(18.dp),
-                            strokeWidth = 2.dp,
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                            contentDescription = if (isPlaying) "Pause" else "Play from current ayah",
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            // Leading: the play/pause control itself.
+            FilledIconButton(onClick = onPlayClick, modifier = Modifier.size(48.dp)) {
+                if (isBusy) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(
+                        imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
+                        contentDescription = stringResource(if (isPlaying) R.string.cd_pause else R.string.cd_play),
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.size(26.dp)
+                    )
                 }
+            }
 
-                Column(modifier = Modifier.weight(1f)) {
-                    if (isPreparing && totalToDownload > 0) {
-                        Text(
-                            text = stringResource(R.string.audio_downloading_short_format, downloadedCount, totalToDownload),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    } else {
+            Column(modifier = Modifier.weight(1f)) {
+                if (isPreparing && totalToDownload > 0) {
+                    Text(
+                        text = stringResource(R.string.audio_downloading_short_format, downloadedCount, totalToDownload),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                } else {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
                         Text(
                             text = surahName,
                             style = MaterialTheme.typography.labelLarge,
                             fontWeight = FontWeight.SemiBold,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            PositionChip(text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah))
-                            PositionChip(text = stringResource(R.string.audio_position_page_format, pageNumber))
-                            PositionChip(text = stringResource(R.string.audio_position_juz_format, juzNumber))
+                        if (isPlaying) {
+                            PlayingEqualizer(color = MaterialTheme.colorScheme.primary)
                         }
+                    }
+                    Row(
+                        modifier = Modifier.padding(top = 3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah),
+                            size = NimazBadgeSize.SMALL
+                        )
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_juz_format, juzNumber),
+                            size = NimazBadgeSize.SMALL,
+                            backgroundColor = MaterialTheme.colorScheme.outline,
+                            outlined = true
+                        )
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_page_format, pageNumber),
+                            size = NimazBadgeSize.SMALL,
+                            backgroundColor = MaterialTheme.colorScheme.outline,
+                            outlined = true
+                        )
                     }
                 }
 
-                if (isAudioActive || isPreparing) {
-                    IconButton(onClick = onStopClick, modifier = Modifier.size(36.dp)) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.cd_stop_audio),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
+                Spacer(modifier = Modifier.height(6.dp))
+                LinearProgressIndicator(
+                    progress = { shownProgress },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
+                    color = if (isPreparing) MaterialTheme.colorScheme.tertiary
+                    else MaterialTheme.colorScheme.primary,
+                    trackColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
+
+            if (isAudioActive || isPreparing) {
+                IconButton(onClick = onStopClick, modifier = Modifier.size(40.dp)) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = stringResource(R.string.cd_stop_audio),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
     }
 }
 
+/** Three bars that bob while audio plays — a lightweight "now playing" cue. */
 @Composable
-private fun PositionChip(text: String) {
-    Surface(
-        shape = RoundedCornerShape(4.dp),
-        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+private fun PlayingEqualizer(color: Color, modifier: Modifier = Modifier) {
+    val transition = rememberInfiniteTransition(label = "equalizer")
+    val durations = listOf(420, 560, 480)
+    Row(
+        modifier = modifier.height(14.dp),
+        verticalAlignment = Alignment.Bottom,
+        horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 1.dp)
-        )
+        durations.forEach { duration ->
+            val fraction by transition.animateFloat(
+                initialValue = 0.3f,
+                targetValue = 1f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(durationMillis = duration, easing = LinearEasing),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "bar"
+            )
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .fillMaxHeight(fraction)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(color)
+            )
+        }
     }
 }
 

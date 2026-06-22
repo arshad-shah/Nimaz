@@ -203,6 +203,10 @@ class HadithRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun insertBookmark(bookmark: HadithBookmark) {
+        hadithDao.insertBookmark(bookmark.toEntity())
+    }
+
     override suspend fun updateBookmark(bookmark: HadithBookmark) {
         hadithDao.updateBookmark(bookmark.toEntity())
     }

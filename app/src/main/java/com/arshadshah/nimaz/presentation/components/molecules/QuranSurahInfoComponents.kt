@@ -5,6 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,8 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,9 +43,11 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.StatItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 internal fun HeroHeader(
     surah: Surah,
@@ -55,15 +57,8 @@ internal fun HeroHeader(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF115E59),
-                        MaterialTheme.colorScheme.background
-                    )
-                )
-            )
-            .padding(top = 15.dp, bottom = 30.dp, start = 20.dp, end = 20.dp)
+            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.22f))
+            .padding(top = 15.dp, bottom = 28.dp, start = 20.dp, end = 20.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // Top bar with back button
@@ -74,95 +69,110 @@ internal fun HeroHeader(
                 IconButton(
                     onClick = onNavigateBack,
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.White.copy(alpha = 0.1f)
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
                     modifier = Modifier.size(40.dp)
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = Color.White.copy(alpha = 0.7f),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp)
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(25.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             // Surah header content centered
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Surah number badge
+                // Surah number tile — soft teal
                 Box(
                     modifier = Modifier
-                        .size(60.dp)
+                        .size(56.dp)
                         .clip(RoundedCornerShape(15.dp))
-                        .background(Color(0xFF0D9488)),
+                        .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = surah.number.toString(),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                 }
 
-                Spacer(modifier = Modifier.height(15.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-                // Arabic name
+                // Arabic name — teal
                 ArabicText(
                     text = surah.nameArabic,
                     size = ArabicTextSize.EXTRA_LARGE,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.primary
                 )
 
-                Spacer(modifier = Modifier.height(5.dp))
+                // Gold ornamental divider
+                TafseerOrnamentalDivider(
+                    modifier = Modifier.width(160.dp)
+                )
 
                 // English name
                 Text(
                     text = surah.nameEnglish,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onSurface
                 )
 
-                Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(4.dp))
 
                 // Meaning / transliteration
                 Text(
                     text = "\"${surah.nameTransliteration}\"",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFA3A3A3)
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
-                Spacer(modifier = Modifier.height(25.dp))
+                Spacer(modifier = Modifier.height(20.dp))
 
-                // Stats row: Verses, Revelation, Order
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                // Stats as soft teal chips: Verses, Revelation, Order
+                FlowRow(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    StatItem(
-                        value = surah.numberOfAyahs.toString(),
-                        label = stringResource(R.string.quran_verses_label)
+                    HeroStatChip(
+                        text = stringResource(
+                            R.string.quran_home_verses_count,
+                            surah.numberOfAyahs
+                        )
                     )
-                    Spacer(modifier = Modifier.width(30.dp))
-                    StatItem(
-                        value = if (surah.revelationType == RevelationType.MECCAN) stringResource(R.string.quran_makki) else stringResource(R.string.quran_madani),
-                        label = stringResource(R.string.quran_revelation_label)
+                    HeroStatChip(
+                        text = if (surah.revelationType == RevelationType.MECCAN)
+                            stringResource(R.string.quran_makki)
+                        else stringResource(R.string.quran_madani)
                     )
-                    Spacer(modifier = Modifier.width(30.dp))
-                    StatItem(
-                        value = surah.orderInMushaf.toString(),
-                        label = stringResource(R.string.quran_order_label)
+                    HeroStatChip(
+                        text = "${stringResource(R.string.quran_order_label)} ${surah.orderInMushaf}"
                     )
                 }
             }
         }
     }
+}
+
+@Composable
+private fun HeroStatChip(text: String) {
+    NimazBadge(
+        text = text,
+        size = NimazBadgeSize.MEDIUM,
+        shape = RoundedCornerShape(50),
+        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
+        textColor = MaterialTheme.colorScheme.onPrimaryContainer
+    )
 }
 
 @Composable
@@ -189,7 +199,7 @@ internal fun DetailCard(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelSmall,
-                color = Color(0xFF737373)
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(

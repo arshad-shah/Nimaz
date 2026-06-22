@@ -29,6 +29,7 @@ interface DuaRepository {
     fun isDuaBookmarked(duaId: String): Flow<Boolean>
     fun isDuaFavorite(duaId: String): Flow<Boolean>
     suspend fun toggleFavorite(duaId: String, categoryId: String)
+    suspend fun insertBookmark(bookmark: DuaBookmark)
     suspend fun updateBookmark(bookmark: DuaBookmark)
     suspend fun deleteBookmark(duaId: String)
 

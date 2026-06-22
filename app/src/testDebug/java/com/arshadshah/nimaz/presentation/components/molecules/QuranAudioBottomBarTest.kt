@@ -37,10 +37,11 @@ class QuranAudioBottomBarTest {
         }
 
         composeRule.onNodeWithText("Al-Baqarah").assertExists()
-        composeRule.onNodeWithText("Ayah 47 / 286").assertExists()
-        composeRule.onNodeWithText("p. 8").assertExists()
-        composeRule.onNodeWithText("Juz 1").assertExists()
-        composeRule.onNodeWithContentDescription("Play from current ayah").assertExists()
+        // Position is now a single combined line ("Ayah X / Y · Juz · p.").
+        composeRule.onNodeWithText("Ayah 47 / 286", substring = true).assertExists()
+        composeRule.onNodeWithText("p. 8", substring = true).assertExists()
+        composeRule.onNodeWithText("Juz 1", substring = true).assertExists()
+        composeRule.onNodeWithContentDescription("Play").assertExists()
     }
 
     @Test
@@ -146,7 +147,7 @@ class QuranAudioBottomBarTest {
             )
         }
 
-        composeRule.onNodeWithContentDescription("Play from current ayah").performClick()
+        composeRule.onNodeWithContentDescription("Play").performClick()
         assertThat(clicked).isTrue()
     }
 
@@ -198,6 +199,6 @@ class QuranAudioBottomBarTest {
         }
 
         composeRule.onNodeWithText("Al-Ikhlas").assertExists()
-        composeRule.onNodeWithText("Ayah 0 / 0").assertExists()
+        composeRule.onNodeWithText("Ayah 0 / 0", substring = true).assertExists()
     }
 }

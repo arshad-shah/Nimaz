@@ -30,6 +30,7 @@ data class DuaCollectionUiState(
     val categories: List<DuaCategory> = emptyList(),
     val filteredCategories: List<DuaCategory> = emptyList(),
     val searchQuery: String = "",
+    val sortAlphabetical: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -85,6 +86,7 @@ sealed interface DuaEvent {
     data object ToggleArabic : DuaEvent
     data object ToggleTransliteration : DuaEvent
     data object ToggleTranslation : DuaEvent
+    data object ToggleCategoriesSort : DuaEvent
     data object ClearSearch : DuaEvent
     data object LoadAllCategories : DuaEvent
     data object LoadFavorites : DuaEvent
@@ -144,12 +146,17 @@ class DuaViewModel @Inject constructor(
             DuaEvent.ToggleArabic -> _readerState.update { it.copy(showArabic = !it.showArabic) }
             DuaEvent.ToggleTransliteration -> _readerState.update { it.copy(showTransliteration = !it.showTransliteration) }
             DuaEvent.ToggleTranslation -> _readerState.update { it.copy(showTranslation = !it.showTranslation) }
+            DuaEvent.ToggleCategoriesSort -> toggleCategoriesSort()
             DuaEvent.ClearSearch -> {
                 _searchState.update { DuaSearchUiState() }
                 _collectionState.update {
                     it.copy(
                         searchQuery = "",
-                        filteredCategories = it.categories
+                        filteredCategories = filterAndSortCategories(
+                            it.categories,
+                            query = "",
+                            alphabetical = it.sortAlphabetical
+                        )
                     )
                 }
             }
@@ -162,15 +169,58 @@ class DuaViewModel @Inject constructor(
 
     private fun loadAllCategories() {
         viewModelScope.launch {
-            duaUseCases.getAllCategories().collect { categories ->
-                _collectionState.update {
-                    it.copy(
-                        categories = categories,
-                        filteredCategories = categories,
-                        isLoading = false
-                    )
+            combine(
+                duaUseCases.getAllCategories(),
+                settingsRepository.duaCategoriesSortAlphabetical
+            ) { categories, alphabetical -> categories to alphabetical }
+                .collect { (categories, alphabetical) ->
+                    _collectionState.update {
+                        it.copy(
+                            categories = categories,
+                            filteredCategories = filterAndSortCategories(
+                                categories,
+                                it.searchQuery,
+                                alphabetical
+                            ),
+                            sortAlphabetical = alphabetical,
+                            isLoading = false
+                        )
+                    }
                 }
+        }
+    }
+
+    private fun toggleCategoriesSort() {
+        AppAnalytics.logFeatureUsed("dua", "toggle_category_sort")
+        viewModelScope.launch {
+            settingsRepository.setDuaCategoriesSortAlphabetical(
+                !_collectionState.value.sortAlphabetical
+            )
+        }
+    }
+
+    /**
+     * Applies the active category search filter, then orders the result either
+     * alphabetically (by English name) or by the curated [DuaCategory.displayOrder].
+     */
+    private fun filterAndSortCategories(
+        categories: List<DuaCategory>,
+        query: String,
+        alphabetical: Boolean
+    ): List<DuaCategory> {
+        val filtered = if (query.isBlank()) {
+            categories
+        } else {
+            categories.filter { category ->
+                category.nameEnglish.contains(query, ignoreCase = true) ||
+                        category.nameArabic.contains(query) ||
+                        category.description?.contains(query, ignoreCase = true) == true
             }
+        }
+        return if (alphabetical) {
+            filtered.sortedBy { it.nameEnglish.lowercase() }
+        } else {
+            filtered.sortedBy { it.displayOrder }
         }
     }
 
@@ -285,16 +335,14 @@ class DuaViewModel @Inject constructor(
 
     private fun searchCategories(query: String) {
         _collectionState.update { state ->
-            val filtered = if (query.isBlank()) {
-                state.categories
-            } else {
-                state.categories.filter { category ->
-                    category.nameEnglish.contains(query, ignoreCase = true) ||
-                            category.nameArabic.contains(query) ||
-                            category.description?.contains(query, ignoreCase = true) == true
-                }
-            }
-            state.copy(searchQuery = query, filteredCategories = filtered)
+            state.copy(
+                searchQuery = query,
+                filteredCategories = filterAndSortCategories(
+                    state.categories,
+                    query,
+                    state.sortAlphabetical
+                )
+            )
         }
     }
 

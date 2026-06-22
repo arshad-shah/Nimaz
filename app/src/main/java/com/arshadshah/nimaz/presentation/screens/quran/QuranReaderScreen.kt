@@ -357,9 +357,7 @@ fun QuranReaderScreen(
                     // Khatam progress indicator
                     if (state.activeKhatamId != null) {
                         val khatamProgress =
-                            if (com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS > 0)
-                                state.khatamReadAyahIds.size.toFloat() / com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS
-                            else 0f
+                            state.khatamReadAyahIds.size.toFloat() / com.arshadshah.nimaz.domain.model.Khatam.TOTAL_QURAN_AYAHS
                         Box(
                             modifier = Modifier
                                 .padding(end = 4.dp)

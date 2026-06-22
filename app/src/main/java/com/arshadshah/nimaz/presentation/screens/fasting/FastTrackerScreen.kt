@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -142,42 +143,40 @@ fun FastTrackerScreen(
             )
         }
     ) { paddingValues ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+                .padding(paddingValues)
         ) {
-            // Tabs
-            item {
-                PrimaryTabRow(
-                    selectedTabIndex = selectedTab,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.primary,
-                    divider = {}
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTab == index,
-                            onClick = {
-                                selectedTab = index
-                                when (index) {
-                                    0 -> viewModel.onEvent(FastingEvent.LoadRamadan)
-                                    1 -> viewModel.onEvent(FastingEvent.LoadMakeupFasts)
-                                }
-                            },
-                            text = {
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
-                                )
-                            }
-                        )
-                    }
+            // Tabs — full-width, fixed above the scrolling content
+            PrimaryTabRow(
+                selectedTabIndex = selectedTab,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
+                divider = {}
+            ) {
+                tabs.forEachIndexed { index, title ->
+                    Tab(
+                        selected = selectedTab == index,
+                        // Data for both tabs is loaded in init and kept live via
+                        // Flow collectors — no need to re-dispatch a load here.
+                        onClick = { selectedTab = index },
+                        text = {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal
+                            )
+                        }
+                    )
                 }
             }
 
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
             // Content based on selected tab
             when (selectedTab) {
                 0 -> {
@@ -312,8 +311,6 @@ fun FastTrackerScreen(
                 }
             }
 
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
@@ -824,10 +821,13 @@ private fun RecommendedFastsSection(
         )
 
         buildList {
-            // Day of Ashura (10 Muharram)
-            events.filter { it.name == "Day of Ashura" }.forEach { event ->
-                val date = event.toGregorianDate()
-                if (!date.isBefore(today)) {
+            // Day of Ashura (10 Muharram) — events span two hijri years, so keep
+            // only the single nearest upcoming occurrence (avoids duplicate cards).
+            events.filter { it.name == "Day of Ashura" }
+                .map { it.toGregorianDate() }
+                .filter { !it.isBefore(today) }
+                .minOrNull()
+                ?.let { date ->
                     add(
                         RecommendedIslamicFast(
                             name = "Day of Ashura",
@@ -836,11 +836,12 @@ private fun RecommendedFastsSection(
                         )
                     )
                 }
-            }
-            // Day of Arafah (9 Dhul Hijjah)
-            events.filter { it.name == "Day of Arafah" }.forEach { event ->
-                val date = event.toGregorianDate()
-                if (!date.isBefore(today)) {
+            // Day of Arafah (9 Dhul Hijjah) — nearest upcoming occurrence only.
+            events.filter { it.name == "Day of Arafah" }
+                .map { it.toGregorianDate() }
+                .filter { !it.isBefore(today) }
+                .minOrNull()
+                ?.let { date ->
                     add(
                         RecommendedIslamicFast(
                             name = "Day of Arafah",
@@ -849,7 +850,6 @@ private fun RecommendedFastsSection(
                         )
                     )
                 }
-            }
             // 6 Days of Shawwal
             try {
                 val shawwalStart = HijriDateCalculator.toGregorian(2, 10, hijriToday.year)

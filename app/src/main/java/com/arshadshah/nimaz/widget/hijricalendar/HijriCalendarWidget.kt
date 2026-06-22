@@ -41,6 +41,7 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
@@ -398,17 +399,16 @@ private fun EventRow(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider,
 ) {
+    val iconRes = if (
+        event.type.contains("fast", ignoreCase = true) ||
+        event.type.contains("recommend", ignoreCase = true)
+    ) R.drawable.ic_widget_star else R.drawable.ic_widget_event
+
     Row(verticalAlignment = Alignment.Top) {
-        // Tiny accent dot — visual marker that this is a list item, not a
-        // paragraph. 4dp circle aligned with the text baseline-ish via a
-        // small top padding.
-        Box(
-            modifier = GlanceModifier
-                .padding(top = 5.dp)
-                .size(4.dp)
-                .cornerRadius(2.dp)
-                .background(primaryColor)
-        ) {}
+        // Small leading icon marks this as a typed list item, not a paragraph.
+        Box(modifier = GlanceModifier.padding(top = 1.dp)) {
+            WidgetIcon(resId = iconRes, tint = primaryColor, size = 12.dp)
+        }
         Spacer(modifier = GlanceModifier.width(6.dp))
         Column(modifier = GlanceModifier.defaultWeight()) {
             Text(

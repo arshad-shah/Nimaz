@@ -86,7 +86,17 @@ Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent 
 - **Per-minute AlarmManager tick** via `widget/WidgetUpdateScheduler.kt` (WorkManager's 15-min floor is too coarse for a live countdown). `setInexactRepeating(ELAPSED_REALTIME, …, 60_000)` fires `WidgetTickReceiver`, which just calls `updateAll(context)` on the two countdown widgets — it does **not** recompute prayer times; the composable recomputes the countdown string from the stored `nextPrayerEpochMillis`.
 - **Immediate refresh** on prayer-status change, from the tracker toggle and from `HomeViewModel` (keeps the widget in sync with in-app tracking).
 
-**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`), `WidgetWork.kt`.
+**Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
+
+**Widget UI design ("Refined Minimal").** Solid `widget_background` surface, `16dp`
+corners, teal `widget_primary` accent. **No emoji/ASCII/unicode glyphs** — all icons
+are monochrome vector drawables in `res/drawable/ic_widget_*.xml` drawn via `WidgetIcon`
+(`Image` + `ColorFilter.tint`), so they follow light/dark + accent. The Next Prayer
+widget picks a celestial icon per prayer via `prayerIconRes`; the Tracker uses a teal
+disc + `ic_widget_check` when prayed and a two-disc outline ring when not (Glance has no
+stroke modifier); Prayer Times is a clean 5-cell pill row with the next prayer filled
+teal and past prayers dimmed. A JVM regression test (`WidgetGlyphGuardTest`) fails the
+build if any widget source reintroduces a glyph.
 
 **Manifest/res.** Five `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
 

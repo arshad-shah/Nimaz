@@ -1219,4 +1219,18 @@
     <string name="sync_item_qaida_cells">Qaida hücre ilerlemesi</string>
     <string name="sync_item_dua_progress">Dua ilerlemesi</string>
     <string name="sync_item_locations">Kaydedilen konumlar</string>
+    <string name="cd_pause">Duraklat</string>
+    <string name="location_set_prompt">Konum belirle</string>
+    <string name="tafseer_tab_surahs">Sureler</string>
+    <string name="tafseer_tab_notes">Notlarım</string>
+    <string name="tafseer_note_location">%1$s · Ayet %2$d</string>
+    <string name="bookmarks_count">%1$d kayıtlı</string>
+    <string name="bookmark_removed">Yer işareti kaldırıldı</string>
+    <string name="undo">Geri al</string>
+    <string name="edit_note">Notu düzenle</string>
+    <string name="note_hint">Not ekle…</string>
+    <string name="cd_more_options">Daha fazla seçenek</string>
+    <string name="all_categories_az">Tüm Kategoriler (A–Z)</string>
+    <string name="sort_categories_alphabetically">Kategorileri alfabetik sırala</string>
+    <string name="sort_categories_default">Varsayılan sıralamaya geç</string>
 </resources>

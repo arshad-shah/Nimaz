@@ -130,6 +130,8 @@ interface SettingsRepository {
     suspend fun setDuaShowTransliteration(show: Boolean)
     val duaShowTranslation: Flow<Boolean>
     suspend fun setDuaShowTranslation(show: Boolean)
+    val duaCategoriesSortAlphabetical: Flow<Boolean>
+    suspend fun setDuaCategoriesSortAlphabetical(enabled: Boolean)
     val hadithArabicFont: Flow<String>
     suspend fun setHadithArabicFont(fontId: String)
     val hadithArabicFontSize: Flow<Float>

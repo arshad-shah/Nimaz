@@ -40,6 +40,11 @@ val highlightColors = listOf(
 
 private const val HIGHLIGHT_TAG = "HIGHLIGHT"
 
+// Highlight backgrounds are light pastels, so highlighted text needs a dark
+// foreground to stay legible in both light and dark themes (the default
+// onSurface colour is near-white in dark mode and disappears on the pastel).
+private val HighlightedTextColor = Color(0xFF1C1C1C)
+
 @Composable
 fun TafseerHighlightableText(
     text: String,
@@ -152,7 +157,10 @@ private fun buildStyledText(
             val end = highlight.endOffset.coerceIn(start, text.length)
             if (start < end) {
                 addStyle(
-                    style = SpanStyle(background = parseColor(highlight.color)),
+                    style = SpanStyle(
+                        background = parseColor(highlight.color),
+                        color = HighlightedTextColor
+                    ),
                     start = start,
                     end = end
                 )

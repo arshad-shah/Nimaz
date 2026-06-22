@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.SortByAlpha
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.VolunteerActivism
@@ -62,6 +63,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -115,6 +117,20 @@ fun DuasCollectionScreen(
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
                 actions = {
+                    IconButton(onClick = { viewModel.onEvent(DuaEvent.ToggleCategoriesSort) }) {
+                        Icon(
+                            imageVector = Icons.Default.SortByAlpha,
+                            contentDescription = stringResource(
+                                if (state.sortAlphabetical) R.string.sort_categories_default
+                                else R.string.sort_categories_alphabetically
+                            ),
+                            tint = if (state.sortAlphabetical) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                LocalContentColor.current
+                            }
+                        )
+                    }
                     IconButton(onClick = onNavigateToSearch) {
                         Icon(
                             imageVector = Icons.Default.Search,
@@ -158,53 +174,12 @@ fun DuasCollectionScreen(
                     }
                 }
 
-                // Daily Adhkar - 2-column grid
-                item {
-                    Text(
-                        text = stringResource(R.string.daily_adhkar),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(
-                            start = 20.dp,
-                            end = 20.dp,
-                            top = 20.dp,
-                            bottom = 12.dp
-                        )
-                    )
-                }
-
-                // Category grid (first 4 categories as grid cards)
-                item {
-                    val gridCategories = state.filteredCategories.take(4)
-                    val gridHeight = if (gridCategories.size <= 2) 160.dp else 320.dp
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(gridHeight)
-                            .padding(horizontal = 20.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        userScrollEnabled = false
-                    ) {
-                        items(
-                            items = gridCategories,
-                            key = { it.id }
-                        ) { category ->
-                            CategoryGridCard(
-                                category = category,
-                                onClick = { onNavigateToCategory(category.id) }
-                            )
-                        }
-                    }
-                }
-
-                // Situational Duas - list style
-                if (state.filteredCategories.size > 4) {
+                if (state.sortAlphabetical) {
+                    // Alphabetical mode: a single flat A–Z list (the curated
+                    // Daily/Situational split is meaningless once reordered).
                     item {
                         Text(
-                            text = stringResource(R.string.situational_duas),
+                            text = stringResource(R.string.all_categories_az),
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.SemiBold,
                             modifier = Modifier.padding(
@@ -217,7 +192,7 @@ fun DuasCollectionScreen(
                     }
 
                     items(
-                        items = state.filteredCategories.drop(4),
+                        items = state.filteredCategories,
                         key = { it.id }
                     ) { category ->
                         AdhkarListItem(
@@ -225,6 +200,76 @@ fun DuasCollectionScreen(
                             onClick = { onNavigateToCategory(category.id) },
                             modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
                         )
+                    }
+                } else {
+                    // Daily Adhkar - 2-column grid
+                    item {
+                        Text(
+                            text = stringResource(R.string.daily_adhkar),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(
+                                start = 20.dp,
+                                end = 20.dp,
+                                top = 20.dp,
+                                bottom = 12.dp
+                            )
+                        )
+                    }
+
+                    // Category grid (first 4 categories as grid cards)
+                    item {
+                        val gridCategories = state.filteredCategories.take(4)
+                        val gridHeight = if (gridCategories.size <= 2) 160.dp else 320.dp
+
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(2),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(gridHeight)
+                                .padding(horizontal = 20.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            userScrollEnabled = false
+                        ) {
+                            items(
+                                items = gridCategories,
+                                key = { it.id }
+                            ) { category ->
+                                CategoryGridCard(
+                                    category = category,
+                                    onClick = { onNavigateToCategory(category.id) }
+                                )
+                            }
+                        }
+                    }
+
+                    // Situational Duas - list style
+                    if (state.filteredCategories.size > 4) {
+                        item {
+                            Text(
+                                text = stringResource(R.string.situational_duas),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    top = 20.dp,
+                                    bottom = 12.dp
+                                )
+                            )
+                        }
+
+                        items(
+                            items = state.filteredCategories.drop(4),
+                            key = { it.id }
+                        ) { category ->
+                            AdhkarListItem(
+                                category = category,
+                                onClick = { onNavigateToCategory(category.id) },
+                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 5.dp)
+                            )
+                        }
                     }
                 }
             }
@@ -415,6 +460,7 @@ private fun getCategoryIcon(iconName: String?): ImageVector {
         "📜" -> Icons.Default.AutoStories
         "🌿" -> Icons.Default.Lightbulb
         "👨‍👩‍👧" -> Icons.Default.Groups
+        "💍" -> Icons.Default.Favorite
         "🐫" -> Icons.Default.Explore
         "🌹" -> Icons.Default.FavoriteBorder
         "🛡️" -> Icons.Default.Shield

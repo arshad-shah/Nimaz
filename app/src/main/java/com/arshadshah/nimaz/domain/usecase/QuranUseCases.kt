@@ -34,6 +34,12 @@ class GetSurahWithAyahsUseCase @Inject constructor(
         repository.getSurahWithAyahs(surahNumber, translatorId)
 }
 
+class GetAyahByIdUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(ayahId: Int): Ayah? = repository.getAyahById(ayahId)
+}
+
 class GetAyahsByJuzUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
@@ -88,6 +94,20 @@ class IsAyahBookmarkedUseCase @Inject constructor(
     private val repository: QuranRepository
 ) {
     operator fun invoke(ayahId: Int): Flow<Boolean> = repository.isAyahBookmarked(ayahId)
+}
+
+class InsertQuranBookmarkUseCase @Inject constructor(
+    private val repository: QuranRepository
+) {
+    suspend operator fun invoke(bookmark: QuranBookmark) {
+        repository.addBookmark(
+            ayahId = bookmark.ayahId,
+            surahNumber = bookmark.surahNumber,
+            ayahNumber = bookmark.ayahNumber,
+            note = bookmark.note,
+            color = bookmark.color
+        )
+    }
 }
 
 class UpdateQuranBookmarkUseCase @Inject constructor(
@@ -204,6 +224,7 @@ data class QuranUseCases(
     val getSurahList: GetSurahListUseCase,
     val getSurahByNumber: GetSurahByNumberUseCase,
     val getAyahsBySurah: GetAyahsBySurahUseCase,
+    val getAyahById: GetAyahByIdUseCase,
     val getSurahWithAyahs: GetSurahWithAyahsUseCase,
     val getAyahsByJuz: GetAyahsByJuzUseCase,
     val getAyahsByPage: GetAyahsByPageUseCase,
@@ -213,6 +234,7 @@ data class QuranUseCases(
     val toggleBookmark: ToggleQuranBookmarkUseCase,
     val getBookmarks: GetQuranBookmarksUseCase,
     val isAyahBookmarked: IsAyahBookmarkedUseCase,
+    val insertBookmark: InsertQuranBookmarkUseCase,
     val updateBookmark: UpdateQuranBookmarkUseCase,
     val deleteBookmark: DeleteQuranBookmarkUseCase,
     val toggleFavorite: ToggleQuranFavoriteUseCase,

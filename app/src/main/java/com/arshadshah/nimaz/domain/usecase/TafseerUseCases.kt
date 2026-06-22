@@ -2,9 +2,13 @@ package com.arshadshah.nimaz.domain.usecase
 
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.domain.model.TafseerNote
+import com.arshadshah.nimaz.domain.model.TafseerNoteItem
+import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
+import com.arshadshah.nimaz.domain.repository.QuranRepository
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 data class TafseerUseCases(
@@ -17,8 +21,39 @@ data class TafseerUseCases(
     val addNote: AddNoteUseCase,
     val updateNote: UpdateNoteUseCase,
     val deleteNote: DeleteNoteUseCase,
-    val exportAnnotations: ExportAnnotationsUseCase
+    val exportAnnotations: ExportAnnotationsUseCase,
+    val getTafseerNotes: GetTafseerNotesUseCase
 )
+
+/**
+ * All saved tafseer notes (highlights that have a note), resolved to their
+ * surah/ayah so the list can deep-link into the reader. Newest first (the DAO
+ * orders by created_at DESC).
+ */
+class GetTafseerNotesUseCase @Inject constructor(
+    private val tafseerRepository: TafseerRepository,
+    private val quranRepository: QuranRepository
+) {
+    operator fun invoke(): Flow<List<TafseerNoteItem>> =
+        tafseerRepository.getAllHighlights().map { highlights ->
+            highlights
+                .filter { !it.note.isNullOrBlank() }
+                .mapNotNull { highlight ->
+                    val ayah = quranRepository.getAyahById(highlight.ayahId)
+                        ?: return@mapNotNull null
+                    TafseerNoteItem(
+                        highlightId = highlight.id,
+                        surahNumber = ayah.surahNumber,
+                        ayahNumber = ayah.ayahNumber,
+                        sourceLabel = TafseerSource.entries
+                            .firstOrNull { it.id == highlight.tafseerId }?.displayName
+                            ?: highlight.tafseerId,
+                        color = highlight.color,
+                        note = highlight.note.orEmpty()
+                    )
+                }
+        }
+}
 
 class GetTafseerForAyahUseCase @Inject constructor(private val repository: TafseerRepository) {
     suspend operator fun invoke(ayahId: Int, tafseerId: String): TafseerText? =

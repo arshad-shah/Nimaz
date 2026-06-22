@@ -8,4 +8,5 @@
     <color name="widget_primary_dim">#1A14B8A6</color>
     <color name="widget_checked">#22C55E</color>
     <color name="widget_unchecked">#E5E5E5</color>
+    <color name="widget_on_primary">#FFFFFF</color>
 </resources>

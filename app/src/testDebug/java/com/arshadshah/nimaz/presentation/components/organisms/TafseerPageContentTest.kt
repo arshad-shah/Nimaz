@@ -47,25 +47,9 @@ class TafseerPageContentTest {
         text = text
     )
 
-    @Test
-    fun `renders ayah indicator with number and total`() {
-        composeRule.setThemedContent {
-            TafseerPageContent(
-                ayah = ayah(ayahNumber = 3),
-                tafseer = tafseer("Short commentary."),
-                highlights = emptyList(),
-                totalAyahs = 7,
-                selectedSource = TafseerSource.IBN_KATHIR,
-                availableSources = setOf(TafseerSource.IBN_KATHIR),
-                onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
-            )
-        }
-
-        composeRule.onNodeWithText("Ayah 3 / 7").assertExists()
-    }
+    // Note: the ayah indicator moved to the screen-level app bar (de-duplicated),
+    // so it is no longer rendered by TafseerPageContent and is covered at the
+    // screen level instead.
 
     @Test
     fun `renders both source filter chips`() {
@@ -74,7 +58,6 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = tafseer("Short commentary."),
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(
                     TafseerSource.IBN_KATHIR,
@@ -83,7 +66,8 @@ class TafseerPageContentTest {
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -98,13 +82,13 @@ class TafseerPageContentTest {
                 ayah = ayah(translation = "In the name of Allah."),
                 tafseer = tafseer("Short commentary."),
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -118,13 +102,13 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = tafseer("This is the commentary body."),
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -138,13 +122,13 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = null,
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -158,7 +142,6 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = null,
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(
                     TafseerSource.IBN_KATHIR,
@@ -167,7 +150,8 @@ class TafseerPageContentTest {
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -183,7 +167,6 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = tafseer("Short commentary."),
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(
                     TafseerSource.IBN_KATHIR,
@@ -192,7 +175,8 @@ class TafseerPageContentTest {
                 onSourceSwitch = { switchedTo = it },
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -207,13 +191,13 @@ class TafseerPageContentTest {
                 ayah = ayah(),
                 tafseer = tafseer("Short commentary."),
                 highlights = emptyList(),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 
@@ -240,13 +224,13 @@ class TafseerPageContentTest {
                         updatedAt = 0L
                     )
                 ),
-                totalAyahs = 7,
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
                 onHighlightCreated = { _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> }
+                onHighlightNoteUpdated = { _, _ -> },
+                onShare = {}
             )
         }
 

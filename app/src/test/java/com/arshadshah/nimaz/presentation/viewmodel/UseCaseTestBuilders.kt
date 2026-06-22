@@ -64,6 +64,7 @@ fun buildHadithUseCases(repository: HadithRepository) = HadithUseCases(
     getAllBookmarks = GetAllBookmarksUseCase(repository),
     isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
     toggleBookmark = ToggleBookmarkUseCase(repository),
+    insertBookmark = InsertHadithBookmarkUseCase(repository),
     updateBookmark = UpdateHadithBookmarkUseCase(repository),
     deleteBookmark = DeleteHadithBookmarkUseCase(repository),
     getDailyHadith = GetDailyHadithUseCase(repository)
@@ -81,6 +82,8 @@ fun buildDuaUseCases(repository: DuaRepository) = DuaUseCases(
     searchDuas = SearchDuasUseCase(repository),
     toggleFavorite = ToggleDuaFavoriteUseCase(repository),
     getAllBookmarks = GetDuaBookmarksUseCase(repository),
+    insertBookmark = InsertDuaBookmarkUseCase(repository),
+    updateBookmark = UpdateDuaBookmarkUseCase(repository),
     deleteBookmark = DeleteDuaBookmarkUseCase(repository),
     getDailyDua = GetDailyDuaUseCase(repository)
 )
