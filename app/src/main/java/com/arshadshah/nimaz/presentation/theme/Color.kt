@@ -29,6 +29,9 @@ object NimazColors {
     val SecondaryLight = Gold400
     val SecondaryDark = Color(0xFFFFA000)
     val SecondaryContainer = Color(0xFFFFECB3)
+
+    /** Darker amber-gold accent (e.g. icon tints/labels on gold surfaces). */
+    val GoldDark = Color(0xFFCA8A04)
     val OnSecondary = Color(0xFF000000)
     val OnSecondaryContainer = Color(0xFF3E2723)
 
@@ -135,6 +138,17 @@ object NimazColors {
 
         /** Darker amber-gold accent used on zakat calculator/history surfaces. */
         val GoldAccent = Color(0xFFCA8A04)
+    }
+
+    // Per-collection gradient pairs for the Hadith book cards.
+    object HadithCollectionColors {
+        val Bukhari = listOf(Color(0xFF22C55E), Color(0xFF16A34A))
+        val Muslim = listOf(Color(0xFF3B82F6), Color(0xFF2563EB))
+        val Tirmidhi = listOf(Color(0xFFA855F7), Color(0xFF9333EA))
+        val Nasai = listOf(Color(0xFFF97316), Color(0xFFEA580C))
+        val AbuDawud = listOf(Color(0xFFEC4899), Color(0xFFDB2777))
+        val IbnMajah = listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
+        val Default = IbnMajah
     }
 
     // Tasbih Colors

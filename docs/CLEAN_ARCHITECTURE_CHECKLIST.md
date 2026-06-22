@@ -121,8 +121,8 @@ Snapshot: **21 screen files** still hold raw literals. Tackle a few per PR (relo
 - [ ] `fasting/FastTrackerScreen.kt` (15)
 - [ ] `tasbih/BeadDesign.kt` (14 — bespoke bead-style gradients; relocate to a
   `NimazColors.TasbihBeadStyles` token group, under visual review)
-- [ ] `hadith/HadithCollectionScreen.kt` (11 — `getBookGradient`; relocate to a
-  `NimazColors.HadithCollectionColors` group)
+- [x] ~~`hadith/HadithCollectionScreen.kt` (11)~~ — **Resolved.** `getBookGradient` now reads
+  `NimazColors.HadithCollectionColors`; gold accents use `NimazColors.Gold500` / `NimazColors.GoldDark`.
 - [ ] `prayer/PrayerStatsScreen.kt` (10)
 - [ ] `settings/NotificationSettingsScreen.kt` (9)
 - [ ] `prayer/PrayerTrackerScreen.kt` (8)
