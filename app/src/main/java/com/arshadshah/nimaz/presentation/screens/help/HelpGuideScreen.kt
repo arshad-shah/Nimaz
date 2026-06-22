@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Timelapse
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +37,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.domain.model.HelpGuideDetail
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.HelpEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HelpViewModel
@@ -61,11 +61,7 @@ fun HelpGuideScreen(
     ) { padding ->
         when {
             state.isLoading && guide == null -> {
-                Box(Modifier
-                    .fillMaxSize()
-                    .padding(padding), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
+                NimazLoadingState(modifier = Modifier.padding(padding))
             }
 
             guide == null -> {

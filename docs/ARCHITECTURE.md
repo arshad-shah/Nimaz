@@ -410,10 +410,18 @@ typed route object.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
-  components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`, `NimazEmptyState`,
-  `NimazCalendar`) rather than re-rolling generic UI. Screen-local private composables are
-  fine for **feature-specific** layout that isn't reused elsewhere; promote anything reused
-  across screens into `components/`.
+  components (e.g. `NimazCard`, `NimazSurfaceCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
+  `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
+  In particular:
+    - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
+      **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
+    - a flat, outlined "content card" (surface container + 0 elevation + 1.dp `outline`
+      border + 16.dp corners) is `NimazSurfaceCard { … }`, not a hand-rolled `Card(...)` with
+      those four params repeated;
+    - a per-prayer accent colour is `prayerName.color()`
+      (`presentation/theme/PrayerColorExtensions.kt`), not a local `when (prayerName) { … }`.
+  Screen-local private composables are fine for **feature-specific** layout that isn't reused
+  elsewhere; promote anything reused across screens into `components/`.
 
 ---
 

@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -34,6 +33,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.color
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -56,7 +56,7 @@ fun NimazQadaPrayerItem(
         stringResource(R.string.unknown_date)
     }
 
-    val prayerColor = getPrayerColor(prayer.prayerName)
+    val prayerColor = prayer.prayerName.color()
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -126,17 +126,6 @@ fun NimazQadaPrayerItem(
                 }
             }
         }
-    }
-}
-
-private fun getPrayerColor(prayerName: PrayerName): Color {
-    return when (prayerName) {
-        PrayerName.FAJR -> NimazColors.PrayerColors.Fajr
-        PrayerName.SUNRISE -> NimazColors.PrayerColors.Sunrise
-        PrayerName.DHUHR -> NimazColors.PrayerColors.Dhuhr
-        PrayerName.ASR -> NimazColors.PrayerColors.Asr
-        PrayerName.MAGHRIB -> NimazColors.PrayerColors.Maghrib
-        PrayerName.ISHA -> NimazColors.PrayerColors.Isha
     }
 }
 

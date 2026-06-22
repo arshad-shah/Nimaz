@@ -47,6 +47,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.color
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -268,7 +269,7 @@ private fun BarChart(
                 prayedCount = prayed,
                 totalCount = total,
                 maxValue = maxValue,
-                prayerColor = getPrayerColor(prayer)
+                prayerColor = prayer.color()
             )
         }
     }
@@ -452,7 +453,7 @@ private fun RadialChart(
                 val y = center.y + radius * sin(angle).toFloat()
 
                 drawCircle(
-                    color = getPrayerColor(prayer),
+                    color = prayer.color(),
                     radius = 6.dp.toPx(),
                     center = Offset(x, y)
                 )
@@ -487,7 +488,7 @@ private fun RadialChart(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(getPrayerColor(prayer))
+                        .background(prayer.color())
                 )
                 Text(
                     text = prayer.displayName().take(3),
@@ -601,15 +602,6 @@ private fun LegendItem(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
-}
-
-private fun getPrayerColor(prayerName: PrayerName) = when (prayerName) {
-    PrayerName.FAJR -> NimazColors.PrayerColors.Fajr
-    PrayerName.SUNRISE -> NimazColors.PrayerColors.Sunrise
-    PrayerName.DHUHR -> NimazColors.PrayerColors.Dhuhr
-    PrayerName.ASR -> NimazColors.PrayerColors.Asr
-    PrayerName.MAGHRIB -> NimazColors.PrayerColors.Maghrib
-    PrayerName.ISHA -> NimazColors.PrayerColors.Isha
 }
 
 private val samplePrayerStats = PrayerStats(

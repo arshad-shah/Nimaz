@@ -162,6 +162,48 @@ fun GradientCard(
 }
 
 /**
+ * Flat, outlined "content card".
+ *
+ * Centralises the `surface` container + zero elevation + 1.dp `outline` border +
+ * 16.dp corners combination that was copy-pasted across the home/today surfaces
+ * (DuaOfTheMomentCard, HadithOfTheDayCard, FastingStatusCard, TodaysProgressCard,
+ * JumuahCard). Pass [onClick] to make the whole card tappable, or keep the click
+ * handling in the caller's [modifier].
+ */
+@Composable
+fun NimazSurfaceCard(
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null,
+    shape: Shape = RoundedCornerShape(16.dp),
+    containerColor: Color = MaterialTheme.colorScheme.surface,
+    border: BorderStroke? = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+    content: @Composable ColumnScope.() -> Unit
+) {
+    val colors = CardDefaults.cardColors(containerColor = containerColor)
+    val elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+    if (onClick != null) {
+        Card(
+            onClick = onClick,
+            modifier = modifier,
+            shape = shape,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            content = content
+        )
+    } else {
+        Card(
+            modifier = modifier,
+            shape = shape,
+            colors = colors,
+            elevation = elevation,
+            border = border,
+            content = content
+        )
+    }
+}
+
+/**
  * Prayer-themed card with appropriate gradient colors.
  */
 @Composable
