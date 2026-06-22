@@ -1,8 +1,8 @@
 package com.arshadshah.nimaz.navigation
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.support.BaseAppTest
-import com.arshadshah.nimaz.support.Selectors
 import com.arshadshah.nimaz.support.Selectors.NavLabel
 import dagger.hilt.android.testing.HiltAndroidTest
 import org.junit.Test
@@ -10,67 +10,55 @@ import org.junit.runner.RunWith
 
 /**
  * Walks the five primary destinations via the bottom navigation bar and asserts each
- * target screen actually rendered — keyed off a piece of screen-specific content
- * (resolved through [Selectors]) rather than the persistent nav label, so the
- * assertion proves navigation rather than just the bar's presence.
+ * target screen actually rendered — keyed off its [ScreenTags] root tag, so the
+ * assertion proves navigation (not just the persistent nav bar) and is independent of
+ * locale and on-screen copy.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
 class BottomNavigationTest : BaseAppTest() {
 
     @Test
-    fun quranTab_showsQuranHome() {
+    fun homeIsTheStartDestination() {
         launchApp()
+        assertScreen(ScreenTags.Home)
+    }
 
+    @Test
+    fun quranTab_showsQuranScreen() {
+        launchApp()
         tapBottomNav(NavLabel.QURAN)
-
-        // The Quran home shows its Browse/Favorites tabs.
-        waitForRes(Selectors.Quran.browseTab)
-        onRes(Selectors.Quran.browseTab).assertExists()
+        assertScreen(ScreenTags.Quran)
     }
 
     @Test
-    fun tasbihTab_showsCounterModes() {
+    fun tasbihTab_showsTasbihScreen() {
         launchApp()
-
         tapBottomNav(NavLabel.TASBIH)
-
-        waitForRes(Selectors.Tasbih.beads)
-        onRes(Selectors.Tasbih.beads).assertExists()
-        onRes(Selectors.Tasbih.classic).assertExists()
+        assertScreen(ScreenTags.Tasbih)
     }
 
     @Test
-    fun qiblaTab_showsCompass() {
+    fun qiblaTab_showsQiblaScreen() {
         launchApp()
-
         tapBottomNav(NavLabel.QIBLA)
-
-        waitForRes(Selectors.Qibla.compass)
-        onRes(Selectors.Qibla.compass).assertExists()
+        assertScreen(ScreenTags.QiblaNav)
     }
 
     @Test
-    fun moreTab_showsSettingsEntry() {
+    fun moreTab_showsMoreScreen() {
         launchApp()
-
         tapBottomNav(NavLabel.MORE)
-
-        waitForRes(Selectors.More.settings)
-        onRes(Selectors.More.settings).assertExists()
+        assertScreen(ScreenTags.More)
     }
 
     @Test
-    fun canReturnToHomeAfterNavigatingAway() {
+    fun tabsAreRestoredWhenReturningHome() {
         launchApp()
-
         tapBottomNav(NavLabel.QIBLA)
-        waitForRes(Selectors.Qibla.compass)
+        assertScreen(ScreenTags.QiblaNav)
 
         tapBottomNav(NavLabel.HOME)
-
-        // Home tab is selected again; the bottom bar (and Home label) remain visible.
-        waitForText(NavLabel.HOME)
-        onText(NavLabel.HOME).assertExists()
+        assertScreen(ScreenTags.Home)
     }
 }

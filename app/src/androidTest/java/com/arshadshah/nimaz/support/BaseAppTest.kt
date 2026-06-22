@@ -2,18 +2,23 @@ package com.arshadshah.nimaz.support
 
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.test.core.app.ActivityScenario
 import com.arshadshah.nimaz.MainActivity
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import javax.inject.Inject
@@ -50,6 +55,9 @@ abstract class BaseAppTest {
     @Inject
     lateinit var settings: SettingsRepository
 
+    /** The launched activity scenario; closed automatically after each test. */
+    private var scenario: ActivityScenario<MainActivity>? = null
+
     @Before
     fun setup() {
         hiltRule.inject()
@@ -57,11 +65,27 @@ abstract class BaseAppTest {
         runBlocking { settings.setOnboardingCompleted(true) }
     }
 
+    @After
+    fun tearDownActivity() {
+        scenario?.close()
+        scenario = null
+    }
+
     /** Launch [MainActivity] after state has been seeded, and wait for first frame. */
     protected fun launchApp(): ActivityScenario<MainActivity> {
-        val scenario = ActivityScenario.launch(MainActivity::class.java)
+        return ActivityScenario.launch(MainActivity::class.java).also {
+            scenario = it
+            compose.waitForIdle()
+        }
+    }
+
+    /**
+     * Press the system back button via the activity's dispatcher. Reliable on detail
+     * screens where the bottom nav is hidden and back affordances vary.
+     */
+    protected fun pressBack() {
+        scenario?.onActivity { it.onBackPressedDispatcher.onBackPressed() }
         compose.waitForIdle()
-        return scenario
     }
 
     // ── Selector-aware helpers (no inline literals in test bodies) ───────────
@@ -85,23 +109,66 @@ abstract class BaseAppTest {
     protected fun onContentDesc(desc: String): SemanticsNodeInteraction =
         compose.onNodeWithContentDescription(desc, substring = true, useUnmergedTree = true)
 
+    // ── Screen-identity helpers (locale-independent, via ScreenTags) ─────────
+
+    protected fun onTag(tag: String): SemanticsNodeInteraction =
+        compose.onNodeWithTag(tag, useUnmergedTree = true)
+
+    @OptIn(ExperimentalTestApi::class)
+    protected fun waitForTag(tag: String, timeoutMs: Long = 5_000) {
+        compose.waitUntilAtLeastOneExists(hasTestTag(tag), timeoutMs)
+    }
+
+    /** Wait for, then assert, that the screen tagged [tag] (from `ScreenTags`) is shown. */
+    protected fun assertScreen(tag: String) {
+        waitForTag(tag)
+        onTag(tag).assertExists()
+    }
+
+    /** Scroll the list tagged [listTag] until a node with [text] is composed, then tap it. */
+    protected fun scrollListToAndTap(listTag: String, text: String) {
+        compose.onNodeWithTag(listTag)
+            .performScrollToNode(hasText(text, substring = true))
+        compose.waitForIdle()
+        clickText(text)
+    }
+
+    /** Convenience: scroll-and-tap within the More menu's list. */
+    protected fun scrollMoreToAndTap(text: String) =
+        scrollListToAndTap(ScreenTags.MoreList, text)
+
     /** Click the bottom-nav tab with the given [Selectors.NavLabel] label. */
     protected fun tapBottomNav(label: String) {
-        // The NavigationSuite item exposes the label as both text and the icon's
-        // contentDescription; click the text node which is reliably present.
-        compose.onNodeWithText(label, useUnmergedTree = true).performClick()
+        // Click via the item's testTag (ScreenTags.bottomNav) rather than the label
+        // Text: the click/selectable action lives on the merged nav-item node, which is
+        // the node carrying the tag — clicking the inner Text node has no click action.
+        compose.onNodeWithTag(ScreenTags.bottomNav(label)).performClick()
         compose.waitForIdle()
     }
 
-    /** Tap a visible text element and settle. */
-    protected fun tapText(text: String) {
-        onText(text).performClick()
+    /**
+     * Click an element by its (substring) text. Uses the **merged** tree so the
+     * clickable row — e.g. a menu item whose title is a child Text — is the node
+     * tapped, not the non-clickable Text itself.
+     */
+    protected fun clickText(text: String) {
+        compose.onNodeWithText(text, substring = true, useUnmergedTree = false).performClick()
+        compose.waitForIdle()
+    }
+
+    /** Backwards-compatible alias for [clickText]. */
+    protected fun tapText(text: String) = clickText(text)
+
+    /**
+     * Click an icon button by its content description. Uses the **merged** semantics
+     * tree so the node carrying the click action (the IconButton, which absorbs the
+     * inner Icon's description) is the one tapped — not the non-clickable Icon.
+     */
+    protected fun tapContentDesc(desc: String) {
+        compose.onNodeWithContentDescription(desc, useUnmergedTree = false).performClick()
         compose.waitForIdle()
     }
 
     /** Tap the standard "Back" affordance (contentDescription = R.string.cd_back). */
-    protected fun tapBack() {
-        onContentDesc(Selectors.str(Selectors.Common.back)).performClick()
-        compose.waitForIdle()
-    }
+    protected fun tapBack() = tapContentDesc(Selectors.str(Selectors.Common.back))
 }

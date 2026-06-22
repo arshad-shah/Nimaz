@@ -34,6 +34,13 @@ Requires JDK 21 + Android SDK (`local.properties` `sdk.dir` or `ANDROID_HOME`).
   This is behaviourally identical in production.
 - **WorkManager:** worker tests configure WorkManager via `WorkManagerTestInitHelper`
   with the injected `HiltWorkerFactory` (`androidx.work:work-testing`).
+- **Screen tags:** every routed destination is wrapped by `taggedComposable` in
+  `NavGraph` with a stable tag from `core/navigation/ScreenTags`, and each bottom-nav
+  item carries `ScreenTags.bottomNav(label)`. Because the tag is on the wrapper (composed
+  immediately, before any data loads), navigation assertions are deterministic and
+  independent of locale, seeded content, or on-screen copy. The hub lists (More,
+  Settings) are also tagged so tests can scroll to off-screen entries. This is the one
+  source of truth — `Selectors` in the test code references `ScreenTags` directly.
 
 ## Module layout (`app/src/androidTest/java/com/arshadshah/nimaz`)
 
@@ -44,7 +51,7 @@ Requires JDK 21 + Android SDK (`local.properties` `sdk.dir` or `ANDROID_HOME`).
 | `preferences/`   | `SettingsRepository` (DataStore) round-trips + export/import. |
 | `notifications/` | `PrayerNotificationScheduler` channel creation + schedule/cancel smoke. |
 | `work/`          | Every `@HiltWorker` widget/adhan worker executed via the real factory. |
-| `navigation/`    | Launches `MainActivity` and walks the bottom-nav tabs + More-menu flows. |
+| `navigation/`    | Launches `MainActivity` and asserts navigation **by `ScreenTags`**: all 5 bottom-nav tabs (`BottomNavigationTest`), every More-menu feature — daily practice, learning, tools, support (`FeatureNavigationTest`), every Settings sub-screen (`SettingsNavigationTest`), and back-navigation round-trips (`MoreMenuNavigationTest`). |
 | (root)           | `MigrationTest` (per-step) and `MigrationChainTest` (v7→current). |
 
 ## Conventions
