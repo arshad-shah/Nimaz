@@ -1215,4 +1215,9 @@
     <string name="sync_item_qaida_cells">Qaida-Zellenfortschritt</string>
     <string name="sync_item_dua_progress">Dua-Fortschritt</string>
     <string name="sync_item_locations">Gespeicherte Orte</string>
+    <string name="cd_pause">Pause</string>
+    <string name="location_set_prompt">Standort festlegen</string>
+    <string name="tafseer_tab_surahs">Suren</string>
+    <string name="tafseer_tab_notes">Meine Notizen</string>
+    <string name="tafseer_note_location">%1$s · Vers %2$d</string>
 </resources>

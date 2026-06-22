@@ -1216,4 +1216,9 @@
     <string name="sync_item_qaida_cells">Progression des cellules Qaida</string>
     <string name="sync_item_dua_progress">Progression des Dua</string>
     <string name="sync_item_locations">Lieux enregistrés</string>
+    <string name="cd_pause">Pause</string>
+    <string name="location_set_prompt">Définir le lieu</string>
+    <string name="tafseer_tab_surahs">Sourates</string>
+    <string name="tafseer_tab_notes">Mes notes</string>
+    <string name="tafseer_note_location">%1$s · Verset %2$d</string>
 </resources>

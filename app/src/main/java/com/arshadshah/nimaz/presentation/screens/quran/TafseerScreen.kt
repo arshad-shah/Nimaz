@@ -10,7 +10,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -100,14 +99,6 @@ fun TafseerScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }) {
-                        Icon(
-                            imageVector = Icons.Default.Share,
-                            contentDescription = stringResource(R.string.cd_export_annotations)
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -157,7 +148,6 @@ fun TafseerScreen(
                         ayah = ayah,
                         tafseer = if (isCurrentPage) state.currentTafseer else null,
                         highlights = if (isCurrentPage) state.highlights else emptyList(),
-                        totalAyahs = state.ayahs.size,
                         selectedSource = state.selectedSource,
                         availableSources = if (isCurrentPage) state.availableSources else emptySet(),
                         onSourceSwitch = { source ->
@@ -171,7 +161,8 @@ fun TafseerScreen(
                         },
                         onHighlightNoteUpdated = { id, note ->
                             viewModel.onEvent(TafseerEvent.UpdateHighlightNote(id, note))
-                        }
+                        },
+                        onShare = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }
                     )
                 }
             } else {

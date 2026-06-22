@@ -80,6 +80,7 @@ import com.arshadshah.nimaz.presentation.screens.qibla.QiblaScreen
 import com.arshadshah.nimaz.presentation.screens.quran.QuranReaderScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SelectReciterScreen
 import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
+import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
@@ -353,6 +354,15 @@ fun NavGraph(
                         navController.navigate(Route.QuranReader(nextSurah)) {
                             popUpTo<Route.QuranReader> { inclusive = true }
                         }
+                    }
+                )
+            }
+
+            composable<Route.TafseerChapters> {
+                TafseerChaptersScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onOpenTafseer = { surah, ayah ->
+                        navController.navigate(Route.Tafseer(surahNumber = surah, ayahNumber = ayah))
                     }
                 )
             }

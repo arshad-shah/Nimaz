@@ -217,6 +217,7 @@ import com.arshadshah.nimaz.domain.usecase.UpdatePrayerStatusUseCase
 import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
 import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTafseerNotesUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.AddHighlightUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateHighlightUseCase
@@ -671,7 +672,8 @@ object UseCaseModule {
     @Provides
     @Singleton
     fun provideTafseerUseCases(
-        repository: TafseerRepository
+        repository: TafseerRepository,
+        quranRepository: QuranRepository
     ): TafseerUseCases {
         return TafseerUseCases(
             getTafseerForAyah = GetTafseerForAyahUseCase(repository),
@@ -683,7 +685,8 @@ object UseCaseModule {
             addNote = AddNoteUseCase(repository),
             updateNote = UpdateNoteUseCase(repository),
             deleteNote = DeleteNoteUseCase(repository),
-            exportAnnotations = ExportAnnotationsUseCase(repository)
+            exportAnnotations = ExportAnnotationsUseCase(repository),
+            getTafseerNotes = GetTafseerNotesUseCase(repository, quranRepository)
         )
     }
 

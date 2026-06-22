@@ -1190,6 +1190,9 @@
     <string name="tafseer_read_in_format">Read in %1$s</string>
     <string name="tafseer_no_commentary_format">No %1$s commentary for this ayah</string>
     <string name="tafseer_page_format">Page %1$d of %2$d</string>
+    <string name="tafseer_tab_surahs">Surahs</string>
+    <string name="tafseer_tab_notes">My notes</string>
+    <string name="tafseer_note_location">%1$s · Ayah %2$d</string>
     <string name="tafseer_add_note">Add a note…</string>
     <string name="tafseer_edit_note">Edit note</string>
     <string name="cd_disable_highlighting">Disable highlighting</string>

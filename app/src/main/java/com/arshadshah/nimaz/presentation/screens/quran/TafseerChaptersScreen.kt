@@ -1,0 +1,199 @@
+package com.arshadshah.nimaz.presentation.screens.quran
+
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.TafseerNoteItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
+import com.arshadshah.nimaz.presentation.components.molecules.parseColor
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.viewmodel.TafseerChaptersViewModel
+
+/**
+ * Surah picker shown before the Tafseer reader when entered from the More menu —
+ * mirrors the Hadith/Dua/Quran browse flow. A "My notes" tab surfaces the user's
+ * annotated tafseer for quick access. Reuses [SurahListItem], [NimazPillTabs] and
+ * [NimazCard]; tapping a surah or note opens the reader at the right ayah.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun TafseerChaptersScreen(
+    onNavigateBack: () -> Unit,
+    onOpenTafseer: (surahNumber: Int, ayahNumber: Int) -> Unit,
+    viewModel: TafseerChaptersViewModel = hiltViewModel()
+) {
+    val state by viewModel.state.collectAsState()
+    var selectedTab by remember { mutableIntStateOf(0) }
+
+    val notesTabLabel = stringResource(R.string.tafseer_tab_notes) +
+        if (state.notes.isNotEmpty()) " · ${state.notes.size}" else ""
+
+    Scaffold(
+        topBar = {
+            NimazBackTopAppBar(
+                title = stringResource(R.string.tafseer),
+                onBackClick = onNavigateBack
+            )
+        },
+        containerColor = MaterialTheme.colorScheme.background
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+        ) {
+            NimazPillTabs(
+                tabs = listOf(stringResource(R.string.tafseer_tab_surahs), notesTabLabel),
+                selectedIndex = selectedTab,
+                onTabSelect = { selectedTab = it },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
+            )
+
+            when {
+                state.isLoading -> Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                }
+
+                selectedTab == 0 -> LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    items(state.surahs, key = { it.number }) { surah ->
+                        SurahListItem(
+                            surah = surah,
+                            onClick = { onOpenTafseer(surah.number, 1) },
+                            startPage = surah.startPage
+                        )
+                    }
+                }
+
+                state.notes.isEmpty() -> Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(32.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.tafseer_no_notes),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                else -> {
+                    val nameBySurah = remember(state.surahs) {
+                        state.surahs.associate { it.number to it.nameEnglish }
+                    }
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        items(state.notes, key = { it.highlightId }) { note ->
+                            TafseerNoteCard(
+                                note = note,
+                                surahName = nameBySurah[note.surahNumber]
+                                    ?: "Surah ${note.surahNumber}",
+                                onClick = { onOpenTafseer(note.surahNumber, note.ayahNumber) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TafseerNoteCard(
+    note: TafseerNoteItem,
+    surahName: String,
+    onClick: () -> Unit
+) {
+    NimazCard(onClick = onClick) {
+        Row(
+            modifier = Modifier.padding(14.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            Box(
+                modifier = Modifier
+                    .padding(top = 3.dp)
+                    .size(12.dp)
+                    .clip(CircleShape)
+                    .background(parseColor(note.color))
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(
+                            R.string.tafseer_note_location,
+                            surahName,
+                            note.ayahNumber
+                        ),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = note.sourceLabel,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.size(4.dp))
+                Text(
+                    text = note.note,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+    }
+}

@@ -44,6 +44,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -142,17 +144,28 @@ internal fun AudioBottomBar(
                             PlayingEqualizer(color = MaterialTheme.colorScheme.primary)
                         }
                     }
-                    Text(
-                        text = listOf(
-                            stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah),
-                            stringResource(R.string.audio_position_juz_format, juzNumber),
-                            stringResource(R.string.audio_position_page_format, pageNumber),
-                        ).joinToString("  ·  "),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Row(
+                        modifier = Modifier.padding(top = 3.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah),
+                            size = NimazBadgeSize.SMALL
+                        )
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_juz_format, juzNumber),
+                            size = NimazBadgeSize.SMALL,
+                            backgroundColor = MaterialTheme.colorScheme.outline,
+                            outlined = true
+                        )
+                        NimazBadge(
+                            text = stringResource(R.string.audio_position_page_format, pageNumber),
+                            size = NimazBadgeSize.SMALL,
+                            backgroundColor = MaterialTheme.colorScheme.outline,
+                            outlined = true
+                        )
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(6.dp))

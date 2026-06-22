@@ -2,10 +2,11 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.togetherWith
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -29,8 +30,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -51,8 +54,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -65,6 +66,8 @@ import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerBookFrame
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightableText
@@ -153,13 +156,13 @@ fun TafseerPageContent(
     ayah: Ayah,
     tafseer: TafseerText?,
     highlights: List<TafseerHighlight>,
-    totalAyahs: Int,
     selectedSource: TafseerSource,
     availableSources: Set<TafseerSource>,
     onSourceSwitch: (TafseerSource) -> Unit,
     onHighlightCreated: (startOffset: Int, endOffset: Int, color: String) -> Unit,
     onHighlightDeleted: (highlightId: Long) -> Unit,
     onHighlightNoteUpdated: (highlightId: Long, note: String?) -> Unit,
+    onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isHighlightMode by remember { mutableStateOf(false) }
@@ -179,18 +182,20 @@ fun TafseerPageContent(
     val highlightsWithNotes =
         remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
 
+    val sources = TafseerSource.entries
+
     Column(modifier = modifier.fillMaxSize()) {
-        // ── Static Navigation Bar (always visible at top) ──
-        TafseerNavBar(
-            ayahNumber = ayah.ayahNumber,
-            totalAyahs = totalAyahs,
-            selectedSource = selectedSource,
-            onSourceSwitch = onSourceSwitch,
-            currentContentPage = currentContentPage,
-            totalContentPages = totalContentPages,
-            onPreviousPage = { if (currentContentPage > 0) currentContentPage-- },
-            onNextPage = { if (currentContentPage < totalContentPages - 1) currentContentPage++ }
-        )
+        // ── Source switcher (top) — reuses the Qibla/Tasbih NimazPillTabs ──
+        if (sources.size > 1) {
+            NimazPillTabs(
+                tabs = sources.map { it.displayName },
+                selectedIndex = sources.indexOf(selectedSource).coerceAtLeast(0),
+                onTabSelect = { onSourceSwitch(sources[it]) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 8.dp)
+            )
+        }
 
         // ── Scrollable Content ──
         Box(modifier = Modifier.weight(1f)) {
@@ -198,7 +203,7 @@ fun TafseerPageContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
-                    .padding(bottom = 80.dp)
+                    .padding(bottom = 16.dp)
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -284,18 +289,46 @@ fun TafseerPageContent(
 
                 Spacer(modifier = Modifier.height(16.dp))
             }
+        }
 
-            // Floating highlight controls
-            TafseerHighlightControls(
-                isHighlightMode = isHighlightMode,
-                onToggleHighlightMode = { isHighlightMode = !isHighlightMode },
+        // ── Highlight colour rail (shown while in highlight mode) ──
+        AnimatedVisibility(
+            visible = isHighlightMode,
+            enter = expandVertically() + fadeIn(),
+            exit = shrinkVertically() + fadeOut()
+        ) {
+            HighlightColorRail(
                 selectedColor = selectedColor,
                 onColorSelected = { selectedColor = it },
-                noteCount = highlightsWithNotes.size,
-                onNoteButtonClick = { showNotesSheet = true },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 16.dp)
+                onDone = { isHighlightMode = false }
+            )
+        }
+
+        // ── Bottom bar (page nav + actions) — matches the Dua/Hadith readers ──
+        NimazReaderBottomBar(
+            currentPage = currentContentPage,
+            pageCount = totalContentPages,
+            onPrev = { if (currentContentPage > 0) currentContentPage-- },
+            onNext = { if (currentContentPage < totalContentPages - 1) currentContentPage++ },
+            prevContentDescription = stringResource(R.string.cd_previous_page),
+            nextContentDescription = stringResource(R.string.cd_next_page)
+        ) {
+            NimazPillActionButton(
+                icon = Icons.Default.Edit,
+                contentDescription = if (isHighlightMode) stringResource(R.string.cd_disable_highlighting)
+                else stringResource(R.string.cd_enable_highlighting),
+                onClick = { isHighlightMode = !isHighlightMode },
+                active = isHighlightMode
+            )
+            NimazPillActionButton(
+                icon = Icons.Outlined.EditNote,
+                contentDescription = stringResource(R.string.cd_notes),
+                onClick = { showNotesSheet = true }
+            )
+            NimazPillActionButton(
+                icon = Icons.Default.Share,
+                contentDescription = stringResource(R.string.cd_export_annotations),
+                onClick = onShare
             )
         }
     }
@@ -352,151 +385,58 @@ fun TafseerPageContent(
     }
 }
 
-// ── Static Navigation Bar ──────────────────────────────────────────────────────
+// ── Highlight colour rail ───────────────────────────────────────────────────────
 
 @Composable
-private fun TafseerNavBar(
-    ayahNumber: Int,
-    totalAyahs: Int,
-    selectedSource: TafseerSource,
-    onSourceSwitch: (TafseerSource) -> Unit,
-    currentContentPage: Int,
-    totalContentPages: Int,
-    onPreviousPage: () -> Unit,
-    onNextPage: () -> Unit,
-    modifier: Modifier = Modifier
+private fun HighlightColorRail(
+    selectedColor: String,
+    onColorSelected: (String) -> Unit,
+    onDone: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        shadowElevation = 2.dp,
-        modifier = modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        tonalElevation = 2.dp,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 6.dp)
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Top row: Ayah indicator + Source chips
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Ayah badge — soft teal pill
-                Surface(
-                    shape = RoundedCornerShape(100),
-                    color = MaterialTheme.colorScheme.primaryContainer,
+            highlightColors.forEach { (hex, name) ->
+                val isSelected = hex == selectedColor
+                Box(
+                    contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(parseColor(hex))
+                        .then(
+                            if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                            else Modifier
+                        )
+                        .clickable { onColorSelected(hex) }
                 ) {
-                    Text(
-                        text = stringResource(R.string.audio_position_ayah_format, ayahNumber, totalAyahs),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp)
-                    )
-                }
-
-                // Source pills
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    TafseerSource.entries.forEach { source ->
-                        SourcePill(
-                            label = source.displayName,
-                            selected = selectedSource == source,
-                            onClick = { onSourceSwitch(source) }
+                    if (isSelected) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = stringResource(R.string.cd_item_selected, name),
+                            tint = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(18.dp)
                         )
                     }
                 }
             }
-
-            // Bottom row: Page navigation (only if multiple pages)
-            if (totalContentPages > 1) {
-                Spacer(modifier = Modifier.height(2.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    PageNavButton(
-                        icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
-                        contentDescription = stringResource(R.string.cd_previous_page),
-                        enabled = currentContentPage > 0,
-                        onClick = onPreviousPage
-                    )
-
-                    Text(
-                        text = stringResource(R.string.tafseer_page_format, currentContentPage + 1, totalContentPages),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(horizontal = 12.dp)
-                    )
-
-                    PageNavButton(
-                        icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                        contentDescription = stringResource(R.string.cd_next_page),
-                        enabled = currentContentPage < totalContentPages - 1,
-                        onClick = onNextPage
-                    )
-                }
+            Spacer(modifier = Modifier.weight(1f))
+            IconButton(onClick = onDone) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = stringResource(R.string.cd_disable_highlighting),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
-        }
-    }
-}
-
-@Composable
-private fun SourcePill(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(100),
-        color = if (selected) MaterialTheme.colorScheme.primary else Color.Transparent,
-        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
-        else MaterialTheme.colorScheme.onSurfaceVariant,
-        border = if (selected) null else BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-        )
-    }
-}
-
-@Composable
-private fun PageNavButton(
-    icon: ImageVector,
-    contentDescription: String,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
-        modifier = Modifier.size(40.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            Icon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = if (enabled) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f),
-                modifier = Modifier.size(22.dp)
-            )
         }
     }
 }
@@ -726,111 +666,3 @@ private fun TafseerEmptyState(
     }
 }
 
-// ── Floating Highlight Controls ─────────────────────────────────────────────────
-
-@Composable
-private fun TafseerHighlightControls(
-    isHighlightMode: Boolean,
-    onToggleHighlightMode: () -> Unit,
-    selectedColor: String,
-    onColorSelected: (String) -> Unit,
-    noteCount: Int,
-    onNoteButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        shape = RoundedCornerShape(100),
-        shadowElevation = 6.dp,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            IconButton(onClick = onToggleHighlightMode, modifier = Modifier.size(40.dp)) {
-                Icon(
-                    imageVector = Icons.Default.Edit,
-                    contentDescription = if (isHighlightMode) stringResource(R.string.cd_disable_highlighting) else stringResource(R.string.cd_enable_highlighting),
-                    tint = if (isHighlightMode) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
-
-            AnimatedVisibility(
-                visible = isHighlightMode,
-                enter = slideInVertically(initialOffsetY = { it }),
-                exit = slideOutVertically(targetOffsetY = { it })
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    highlightColors.forEach { (hex, name) ->
-                        val isSelected = hex == selectedColor
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .size(32.dp)
-                                .clip(CircleShape)
-                                .background(parseColor(hex))
-                                .then(
-                                    if (isSelected) Modifier.border(
-                                        2.dp,
-                                        MaterialTheme.colorScheme.onSurface,
-                                        CircleShape
-                                    )
-                                    else Modifier
-                                )
-                                .clickable { onColorSelected(hex) }
-                        ) {
-                            if (isSelected) {
-                                Icon(
-                                    imageVector = Icons.Default.Check,
-                                    contentDescription = stringResource(
-                                        R.string.cd_item_selected,
-                                        name
-                                    ),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(4.dp))
-
-            Box(contentAlignment = Alignment.TopEnd) {
-                IconButton(onClick = onNoteButtonClick, modifier = Modifier.size(40.dp)) {
-                    Icon(
-                        imageVector = Icons.Outlined.EditNote,
-                        contentDescription = stringResource(R.string.cd_notes),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-                if (noteCount > 0) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .align(Alignment.TopEnd)
-                    ) {
-                        Text(
-                            text = noteCount.toString(),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
