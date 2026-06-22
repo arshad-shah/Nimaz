@@ -107,6 +107,10 @@ class DuaRepositoryImpl @Inject constructor(
         )
     }
 
+    override suspend fun insertBookmark(bookmark: DuaBookmark) {
+        duaDao.insertBookmark(bookmark.toEntity())
+    }
+
     override suspend fun updateBookmark(bookmark: DuaBookmark) {
         duaDao.updateBookmark(bookmark.toEntity())
     }

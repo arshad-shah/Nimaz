@@ -56,7 +56,10 @@ data class BookmarksUiState(
     val sortOrder: BookmarkSortOrder = BookmarkSortOrder.DATE_NEWEST,
     val searchQuery: String = "",
     val isLoading: Boolean = true,
-    val error: String? = null
+    val error: String? = null,
+    // Holds the most recently deleted bookmark so the UI can offer an Undo
+    // snackbar; cleared on undo, dismiss, or a subsequent delete.
+    val recentlyDeleted: UnifiedBookmark? = null
 )
 
 data class BookmarkStatsUiState(
@@ -68,14 +71,12 @@ data class BookmarkStatsUiState(
 
 sealed interface BookmarksEvent {
     data class SetFilter(val type: BookmarkType?) : BookmarksEvent
-    data class SetSortOrder(val order: BookmarkSortOrder) : BookmarksEvent
-    data class Search(val query: String) : BookmarksEvent
-    data class DeleteQuranBookmark(val ayahId: Int) : BookmarksEvent
-    data class DeleteHadithBookmark(val hadithId: String) : BookmarksEvent
-    data class DeleteDuaBookmark(val duaId: String) : BookmarksEvent
-    data class UpdateQuranBookmarkNote(val bookmark: QuranBookmark) : BookmarksEvent
-    data class UpdateHadithBookmarkNote(val bookmark: HadithBookmark) : BookmarksEvent
-    data object ClearSearch : BookmarksEvent
+    /** Delete any bookmark by its unified id (e.g. "quran_12"). Captures it for Undo. */
+    data class DeleteBookmark(val id: String) : BookmarksEvent
+    data object UndoDelete : BookmarksEvent
+    data object DismissUndo : BookmarksEvent
+    /** Set (or clear, with null) the note on any bookmark by its unified id. */
+    data class EditNote(val id: String, val note: String?) : BookmarksEvent
     data object RefreshAll : BookmarksEvent
     data object ClearAllBookmarks : BookmarksEvent
 }
@@ -101,26 +102,18 @@ class BookmarksViewModel @Inject constructor(
     fun onEvent(event: BookmarksEvent) {
         when (event) {
             is BookmarksEvent.SetFilter -> AppAnalytics.logFeatureUsed("bookmarks", "set_filter")
-            is BookmarksEvent.SetSortOrder -> AppAnalytics.logFeatureUsed("bookmarks", "set_sort_order")
-            is BookmarksEvent.Search -> AppAnalytics.logFeatureUsed("bookmarks", "search")
-            is BookmarksEvent.DeleteQuranBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_quran")
-            is BookmarksEvent.DeleteHadithBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_hadith")
-            is BookmarksEvent.DeleteDuaBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete_dua")
-            is BookmarksEvent.UpdateQuranBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
-            is BookmarksEvent.UpdateHadithBookmarkNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
+            is BookmarksEvent.DeleteBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete")
+            BookmarksEvent.UndoDelete -> AppAnalytics.logFeatureUsed("bookmarks", "undo_delete")
+            is BookmarksEvent.EditNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
             BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed("bookmarks", "clear_all")
             else -> {}
         }
         when (event) {
             is BookmarksEvent.SetFilter -> setFilter(event.type)
-            is BookmarksEvent.SetSortOrder -> setSortOrder(event.order)
-            is BookmarksEvent.Search -> search(event.query)
-            is BookmarksEvent.DeleteQuranBookmark -> deleteQuranBookmark(event.ayahId)
-            is BookmarksEvent.DeleteHadithBookmark -> deleteHadithBookmark(event.hadithId)
-            is BookmarksEvent.DeleteDuaBookmark -> deleteDuaBookmark(event.duaId)
-            is BookmarksEvent.UpdateQuranBookmarkNote -> updateQuranBookmarkNote(event.bookmark)
-            is BookmarksEvent.UpdateHadithBookmarkNote -> updateHadithBookmarkNote(event.bookmark)
-            BookmarksEvent.ClearSearch -> clearSearch()
+            is BookmarksEvent.DeleteBookmark -> deleteBookmark(event.id)
+            BookmarksEvent.UndoDelete -> undoDelete()
+            BookmarksEvent.DismissUndo -> dismissUndo()
+            is BookmarksEvent.EditNote -> editNote(event.id, event.note)
             BookmarksEvent.RefreshAll -> loadAllBookmarks()
             BookmarksEvent.ClearAllBookmarks -> clearAllBookmarks()
         }
@@ -135,9 +128,12 @@ class BookmarksViewModel @Inject constructor(
     private fun loadQuranBookmarks() {
         viewModelScope.launch {
             quranUseCases.getBookmarks().collect { bookmarks ->
+                val mapped = bookmarks.map { bm ->
+                    bm.toUnified().copy(arabicText = quranUseCases.getAyahById(bm.ayahId)?.textArabic)
+                }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
-                            bookmarks.map { it.toUnified() }
+                            mapped
                     state.copy(
                         quranBookmarks = bookmarks,
                         allBookmarks = unified,
@@ -158,9 +154,12 @@ class BookmarksViewModel @Inject constructor(
     private fun loadHadithBookmarks() {
         viewModelScope.launch {
             hadithUseCases.getAllBookmarks().collect { bookmarks ->
+                val mapped = bookmarks.map { bm ->
+                    bm.toUnified().copy(arabicText = hadithUseCases.getHadithById(bm.hadithId)?.textArabic)
+                }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
-                            bookmarks.map { it.toUnified() }
+                            mapped
                     state.copy(
                         hadithBookmarks = bookmarks,
                         allBookmarks = unified,
@@ -181,9 +180,12 @@ class BookmarksViewModel @Inject constructor(
     private fun loadDuaBookmarks() {
         viewModelScope.launch {
             duaUseCases.getAllBookmarks().collect { bookmarks ->
+                val mapped = bookmarks.map { bm ->
+                    bm.toUnified().copy(arabicText = duaUseCases.getDuaById(bm.duaId)?.textArabic)
+                }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.DUA } +
-                            bookmarks.map { it.toUnified() }
+                            mapped
                     state.copy(
                         duaBookmarks = bookmarks,
                         allBookmarks = unified,
@@ -209,48 +211,6 @@ class BookmarksViewModel @Inject constructor(
                     state.allBookmarks,
                     type,
                     state.searchQuery,
-                    state.sortOrder
-                )
-            )
-        }
-    }
-
-    private fun setSortOrder(order: BookmarkSortOrder) {
-        _bookmarksState.update { state ->
-            state.copy(
-                sortOrder = order,
-                filteredBookmarks = applyFilters(
-                    state.allBookmarks,
-                    state.selectedFilter,
-                    state.searchQuery,
-                    order
-                )
-            )
-        }
-    }
-
-    private fun search(query: String) {
-        _bookmarksState.update { state ->
-            state.copy(
-                searchQuery = query,
-                filteredBookmarks = applyFilters(
-                    state.allBookmarks,
-                    state.selectedFilter,
-                    query,
-                    state.sortOrder
-                )
-            )
-        }
-    }
-
-    private fun clearSearch() {
-        _bookmarksState.update { state ->
-            state.copy(
-                searchQuery = "",
-                filteredBookmarks = applyFilters(
-                    state.allBookmarks,
-                    state.selectedFilter,
-                    "",
                     state.sortOrder
                 )
             )
@@ -291,33 +251,61 @@ class BookmarksViewModel @Inject constructor(
         return result
     }
 
-    private fun deleteQuranBookmark(ayahId: Int) {
-        viewModelScope.launch {
-            quranUseCases.deleteBookmark(ayahId)
+    // The re-insert action captured when a bookmark is deleted, so Undo can
+    // losslessly restore it (note/colour/favourite preserved).
+    private var pendingRestore: (suspend () -> Unit)? = null
+
+    private fun deleteBookmark(id: String) {
+        val state = _bookmarksState.value
+        val unified = state.allBookmarks.find { it.id == id } ?: return
+        when (unified.type) {
+            BookmarkType.QURAN -> {
+                val original = state.quranBookmarks.find { "quran_${it.ayahId}" == id } ?: return
+                pendingRestore = { quranUseCases.insertBookmark(original) }
+                viewModelScope.launch { quranUseCases.deleteBookmark(original.ayahId) }
+            }
+
+            BookmarkType.HADITH -> {
+                val original = state.hadithBookmarks.find { "hadith_${it.hadithId}" == id } ?: return
+                pendingRestore = { hadithUseCases.insertBookmark(original) }
+                viewModelScope.launch { hadithUseCases.deleteBookmark(original.hadithId) }
+            }
+
+            BookmarkType.DUA -> {
+                val original = state.duaBookmarks.find { "dua_${it.duaId}" == id } ?: return
+                pendingRestore = { duaUseCases.insertBookmark(original) }
+                viewModelScope.launch { duaUseCases.deleteBookmark(original.duaId) }
+            }
         }
+        _bookmarksState.update { it.copy(recentlyDeleted = unified) }
     }
 
-    private fun deleteHadithBookmark(hadithId: String) {
-        viewModelScope.launch {
-            hadithUseCases.deleteBookmark(hadithId)
-        }
+    private fun undoDelete() {
+        val restore = pendingRestore ?: return
+        pendingRestore = null
+        viewModelScope.launch { restore() }
+        _bookmarksState.update { it.copy(recentlyDeleted = null) }
     }
 
-    private fun deleteDuaBookmark(duaId: String) {
-        viewModelScope.launch {
-            duaUseCases.deleteBookmark(duaId)
-        }
+    private fun dismissUndo() {
+        pendingRestore = null
+        _bookmarksState.update { it.copy(recentlyDeleted = null) }
     }
 
-    private fun updateQuranBookmarkNote(bookmark: QuranBookmark) {
+    private fun editNote(id: String, note: String?) {
+        val state = _bookmarksState.value
+        val trimmed = note?.trim()?.ifBlank { null }
         viewModelScope.launch {
-            quranUseCases.updateBookmark(bookmark)
-        }
-    }
+            when {
+                id.startsWith("quran_") -> state.quranBookmarks.find { "quran_${it.ayahId}" == id }
+                    ?.let { quranUseCases.updateBookmark(it.copy(note = trimmed)) }
 
-    private fun updateHadithBookmarkNote(bookmark: HadithBookmark) {
-        viewModelScope.launch {
-            hadithUseCases.updateBookmark(bookmark)
+                id.startsWith("hadith_") -> state.hadithBookmarks.find { "hadith_${it.hadithId}" == id }
+                    ?.let { hadithUseCases.updateBookmark(it.copy(note = trimmed)) }
+
+                id.startsWith("dua_") -> state.duaBookmarks.find { "dua_${it.duaId}" == id }
+                    ?.let { duaUseCases.updateBookmark(it.copy(note = trimmed)) }
+            }
         }
     }
 
@@ -353,7 +341,7 @@ class BookmarksViewModel @Inject constructor(
         type = BookmarkType.QURAN,
         title = context.getString(R.string.bookmark_surah_ayah_format, surahNumber, ayahNumber),
         subtitle = context.getString(R.string.quran),
-        arabicText = null, // Would be populated from ayah data
+        arabicText = null, // Enriched in loadQuranBookmarks via getAyahById
         createdAt = createdAt,
         note = note,
         color = color,
@@ -366,7 +354,7 @@ class BookmarksViewModel @Inject constructor(
         type = BookmarkType.HADITH,
         title = context.getString(R.string.bookmark_hadith_format, hadithNumber),
         subtitle = bookId,
-        arabicText = null, // Would be populated from hadith data
+        arabicText = null, // Enriched in loadHadithBookmarks via getHadithById
         createdAt = createdAt,
         note = note,
         color = null,
@@ -379,9 +367,9 @@ class BookmarksViewModel @Inject constructor(
         type = BookmarkType.DUA,
         title = context.getString(R.string.dua_label),
         subtitle = categoryId,
-        arabicText = null, // Would be populated from dua data
+        arabicText = null, // Enriched in loadDuaBookmarks via getDuaById
         createdAt = createdAt,
-        note = null,
+        note = note,
         color = null,
         duaId = duaId,
         categoryId = categoryId

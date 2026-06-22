@@ -46,6 +46,30 @@ per-screen checklist for the readers we haven't refreshed yet.
   chapters "My notes" tab) backed by a `getAll…()` query resolved to a navigable
   location. Reuse this pattern instead of a separate hidden screen.
 
+## Applied since
+
+### Bookmarks page (`BookmarksScreen`) — done
+The unified bookmarks page (Quran/Hadith/Dua, routes `QuranBookmarks` /
+`HadithBookmarks` / `AllBookmarks`) was reskinned into this language:
+- Boxed filter chips → **`NimazPillTabs`** switcher, each pill carrying its
+  count; the separate `NimazStatsGrid` was removed (counts live in the tabs +
+  the app-bar subtitle "%d saved").
+- Bespoke `BookmarkCard` → a minimal **`NimazCard`** row: a filled
+  **`NimazBadge`** type chip, a locator title, optional source line, a gold
+  **`TafseerOrnamentalDivider`** + **`ArabicText`** (Amiri) preview when ayah
+  text is present, and an italic note preview.
+- Interactions: **swipe-to-delete** (`SwipeToDismissBox`) with an **Undo**
+  snackbar (lossless re-insert), and inline **note editing** via a
+  **`NimazBottomSheet`** reached from a `⋯` overflow (`NimazSheetActionRow`:
+  Edit note · Share · Delete).
+- Data plumbing added for the above: `insertBookmark(domain)` on the Quran
+  (via existing `addBookmark`), Hadith and Dua repositories/use-cases (lossless
+  Undo), plus a Dua `updateBookmark` use-case so Dua notes have parity with
+  Quran/Hadith. `DuaBookmark.toUnified()` now carries its note.
+- `UnifiedBookmark.arabicText` is still `null` for all types (an existing
+  TODO), so the divider/Arabic block stays hidden until that data is wired —
+  the card degrades gracefully to badge + title + note.
+
 ## Deferred work (backlog)
 
 ### Hadith reader & collection

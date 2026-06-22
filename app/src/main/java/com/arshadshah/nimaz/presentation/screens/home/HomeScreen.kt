@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.home
 
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -33,14 +34,18 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
@@ -123,6 +128,23 @@ fun HomeScreen(
                 }
             }
         }
+    }
+
+    // Status-bar icon contrast: white over the living-sky hero, switching to
+    // theme-appropriate (dark icons in a light theme, white in dark) once the
+    // top bar solidifies on scroll. Tablet has no sky hero, so it always uses
+    // the theme-appropriate contrast. (isAppearanceLightStatusBars == true means
+    // a light status-bar background, i.e. dark icons.)
+    val view = LocalView.current
+    val isLightTheme = MaterialTheme.colorScheme.surface.luminance() > 0.5f
+    val overSkyHero = windowSizeClass.isCompact && topBarProgress < 0.5f
+    val appearanceLightStatusBars = if (overSkyHero) false else isLightTheme
+    DisposableEffect(view, appearanceLightStatusBars) {
+        val window = (view.context as Activity).window
+        val controller = WindowCompat.getInsetsController(window, view)
+        val previous = controller.isAppearanceLightStatusBars
+        controller.isAppearanceLightStatusBars = appearanceLightStatusBars
+        onDispose { controller.isAppearanceLightStatusBars = previous }
     }
 
     val nextPrayerTimeText = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
@@ -302,7 +324,6 @@ private fun HomeCompactContent(
                     .padding(horizontal = 20.dp)
                     .clickable { onNavigateToPrayerTimes() }
             )
-//            Spacer(modifier = Modifier.height(12.dp))
         }
 
         items(state.prayerTimes) { prayer ->

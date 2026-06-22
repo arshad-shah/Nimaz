@@ -1221,4 +1221,13 @@
     <string name="tafseer_tab_surahs">Sourates</string>
     <string name="tafseer_tab_notes">Mes notes</string>
     <string name="tafseer_note_location">%1$s · Verset %2$d</string>
+    <string name="bookmarks_count">%1$d enregistrés</string>
+    <string name="bookmark_removed">Signet supprimé</string>
+    <string name="undo">Annuler</string>
+    <string name="edit_note">Modifier la note</string>
+    <string name="note_hint">Ajouter une note…</string>
+    <string name="cd_more_options">Plus d\'options</string>
+    <string name="all_categories_az">Toutes les catégories (A–Z)</string>
+    <string name="sort_categories_alphabetically">Trier les catégories par ordre alphabétique</string>
+    <string name="sort_categories_default">Revenir à l\'ordre par défaut</string>
 </resources>

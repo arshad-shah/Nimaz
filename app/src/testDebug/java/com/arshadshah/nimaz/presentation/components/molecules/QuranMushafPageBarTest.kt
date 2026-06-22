@@ -52,8 +52,8 @@ class QuranMushafPageBarTest {
             )
         }
         composeRule.onNodeWithText("Page 15").assertExists()
-        composeRule.onNodeWithText("  •  Juz 1").assertExists()
-        composeRule.onNodeWithText("  •  Hizb 2").assertExists()
+        composeRule.onNodeWithText("Juz 1").assertExists()
+        composeRule.onNodeWithText("Hizb 2").assertExists()
         composeRule.onNodeWithContentDescription("Next page").assertExists()
         composeRule.onNodeWithContentDescription("Previous page").assertExists()
     }
@@ -92,7 +92,7 @@ class QuranMushafPageBarTest {
         }
         composeRule.onNodeWithText("Page 1").assertExists()
         // juz/hizb are 0 -> not rendered
-        composeRule.onNodeWithText("  •  Juz 0").assertDoesNotExist()
+        composeRule.onNodeWithText("Juz 0").assertDoesNotExist()
         // khatam active but ayahs empty -> toggle button not rendered
         composeRule.onNodeWithContentDescription("Mark page as read").assertDoesNotExist()
     }

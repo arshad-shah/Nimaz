@@ -1222,4 +1222,13 @@
     <string name="tafseer_tab_surahs">Surah</string>
     <string name="tafseer_tab_notes">Nota saya</string>
     <string name="tafseer_note_location">%1$s · Ayat %2$d</string>
+    <string name="bookmarks_count">%1$d disimpan</string>
+    <string name="bookmark_removed">Penanda buku dialih keluar</string>
+    <string name="undo">Buat asal</string>
+    <string name="edit_note">Edit nota</string>
+    <string name="note_hint">Tambah nota…</string>
+    <string name="cd_more_options">Lagi pilihan</string>
+    <string name="all_categories_az">Semua Kategori (A–Z)</string>
+    <string name="sort_categories_alphabetically">Susun kategori mengikut abjad</string>
+    <string name="sort_categories_default">Tukar ke susunan lalai</string>
 </resources>

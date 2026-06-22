@@ -545,6 +545,9 @@
     <string name="daily_adhkar">Daily Adhkar</string>
     <string name="situational_duas">Situational Duas</string>
     <string name="duas_count_format">%d duas</string>
+    <string name="all_categories_az">All Categories (A–Z)</string>
+    <string name="sort_categories_alphabetically">Sort categories alphabetically</string>
+    <string name="sort_categories_default">Switch to default order</string>
 
     <!-- Bookmarks Screen -->
     <string name="bookmarks_title">Bookmarks</string>
@@ -556,6 +559,12 @@
     <string name="quran_type">Quran</string>
     <string name="hadith_type">Hadith</string>
     <string name="dua_type">Dua</string>
+    <string name="bookmarks_count">%1$d saved</string>
+    <string name="bookmark_removed">Bookmark removed</string>
+    <string name="undo">Undo</string>
+    <string name="edit_note">Edit note</string>
+    <string name="note_hint">Add a note…</string>
+    <string name="cd_more_options">More options</string>
 
     <!-- Islamic Calendar Screen -->
     <string name="islamic_calendar">Islamic Calendar</string>

@@ -1220,4 +1220,13 @@
     <string name="tafseer_tab_surahs">Suren</string>
     <string name="tafseer_tab_notes">Meine Notizen</string>
     <string name="tafseer_note_location">%1$s · Vers %2$d</string>
+    <string name="bookmarks_count">%1$d gespeichert</string>
+    <string name="bookmark_removed">Lesezeichen entfernt</string>
+    <string name="undo">Rückgängig</string>
+    <string name="edit_note">Notiz bearbeiten</string>
+    <string name="note_hint">Notiz hinzufügen…</string>
+    <string name="cd_more_options">Weitere Optionen</string>
+    <string name="all_categories_az">Alle Kategorien (A–Z)</string>
+    <string name="sort_categories_alphabetically">Kategorien alphabetisch sortieren</string>
+    <string name="sort_categories_default">Zur Standardreihenfolge wechseln</string>
 </resources>
