@@ -39,9 +39,10 @@ adding a feature, copy an existing one that follows the patterns — good refere
 Requires JDK 21 + Android SDK (compileSdk 36); set `sdk.dir` in `local.properties` or
 `ANDROID_HOME`. Develop on a feature branch; do not push to `dev` without explicit approval.
 
-## Known deviations
+## Known deviations & cleanup backlog
 
-Some areas intentionally diverge from the canonical patterns (use-case gaps, a Zakat
-clean-arch leak, Calendar's direct DAO use, QaidaReader's missing `onEvent`, etc.). They are
-catalogued in **§9 of `docs/ARCHITECTURE.md`** — do not copy them; fix them per the table.
+Resolved vs open deviations are tracked in **§9 of `docs/ARCHITECTURE.md`**. A tick-box backlog
+of clean-architecture anti-patterns to chip away at (with detection commands) lives in
+**[`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)** — do not copy
+open items; fix them and tick the box.
 </content>

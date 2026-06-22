@@ -423,6 +423,10 @@ during the architecture-consistency pass; the **Resolved** table is kept as a re
 fixes aren't accidentally reverted, and the **Open** table lists what remains. Agents must not
 copy anything listed as Open.
 
+> For a categorised, tick-box backlog of clean-architecture anti-patterns (with detection
+> commands to re-scan for new instances), see
+> [`CLEAN_ARCHITECTURE_CHECKLIST.md`](CLEAN_ARCHITECTURE_CHECKLIST.md).
+
 ### Resolved (do not regress)
 
 | Area | What was fixed |
