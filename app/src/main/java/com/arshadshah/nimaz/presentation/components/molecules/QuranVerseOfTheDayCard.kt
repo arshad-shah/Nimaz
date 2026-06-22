@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -61,17 +62,12 @@ internal fun VerseOfTheDayCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
-                        )
-                    ),
+                    brush = Brush.linearGradient(NimazColors.QuranColors.BannerGradient),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.BannerBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -84,7 +80,7 @@ internal fun VerseOfTheDayCard(
                     Icon(
                         imageVector = Icons.Default.AutoStories,
                         contentDescription = null,
-                        tint = Color(0xFFEAB308),
+                        tint = NimazColors.QuranColors.BannerAccent,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
@@ -123,7 +119,7 @@ internal fun VerseOfTheDayCard(
                     text = reference,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFEAB308)
+                    color = NimazColors.QuranColors.BannerAccent
                 )
             }
         }

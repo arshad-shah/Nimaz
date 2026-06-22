@@ -32,6 +32,7 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,17 +63,12 @@ internal fun ContinueReadingCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
-                        )
-                    ),
+                    brush = Brush.linearGradient(NimazColors.QuranColors.BannerGradient),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.BannerBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -105,7 +101,7 @@ internal fun ContinueReadingCard(
                     ArabicText(
                         text = surahName.nameArabic,
                         size = ArabicTextSize.MEDIUM,
-                        color = Color(0xFFEAB308)
+                        color = NimazColors.QuranColors.BannerAccent
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -149,7 +145,7 @@ internal fun ContinueReadingCard(
                                 .fillMaxWidth(progressFraction)
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Color(0xFFEAB308))
+                                .background(NimazColors.QuranColors.BannerAccent)
                         )
                     }
 

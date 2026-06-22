@@ -145,6 +145,16 @@ object NimazColors {
         val SajdaAyah = Color(0xFFE91E63)
         val BookmarkPrimary = Color(0xFFFFC107)
         val BookmarkSecondary = Color(0xFF00BCD4)
+
+        /**
+         * Teal "mushaf" gradient + accents shared by the Quran banners and cards
+         * (Verse-of-the-day, Continue-reading, Surah/Juz banners). Centralises the
+         * 115E59→042F2E gradient, 0F766E border and gold accent that were hardcoded
+         * (and copy-pasted) across each of them.
+         */
+        val BannerGradient = listOf(NimazColors.Primary800, NimazColors.Primary950)
+        val BannerBorder = NimazColors.Primary700
+        val BannerAccent = NimazColors.Gold500
     }
 
     // Zakat Colors
