@@ -132,6 +132,9 @@ object NimazColors {
         val Silver = Color(0xFFC0C0C0)
         val Cash = Color(0xFF4CAF50)
         val Investment = Color(0xFF2196F3)
+
+        /** Darker amber-gold accent used on zakat calculator/history surfaces. */
+        val GoldAccent = Color(0xFFCA8A04)
     }
 
     // Tasbih Colors

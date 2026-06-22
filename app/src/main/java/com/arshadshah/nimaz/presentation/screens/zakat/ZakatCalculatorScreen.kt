@@ -452,7 +452,7 @@ private fun ZakatResultSummaryCard(
     val goldGradient = Brush.linearGradient(
         colors = listOf(
             NimazColors.ZakatColors.Gold,
-            Color(0xFFCA8A04)
+            NimazColors.ZakatColors.GoldAccent
         )
     )
 
@@ -474,7 +474,7 @@ private fun ZakatResultSummaryCard(
                 Text(
                     text = stringResource(R.string.zakat_due),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.8f)
+                    color = NimazColors.Neutral900.copy(alpha = 0.8f)
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -485,7 +485,7 @@ private fun ZakatResultSummaryCard(
                         fontWeight = FontWeight.Bold,
                         lineHeight = 36.sp
                     ),
-                    color = Color(0xFF1C1917)
+                    color = NimazColors.Neutral900
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
@@ -493,7 +493,7 @@ private fun ZakatResultSummaryCard(
                 Text(
                     text = stringResource(R.string.zakat_rate_subtitle),
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.7f)
+                    color = NimazColors.Neutral900.copy(alpha = 0.7f)
                 )
 
                 Spacer(modifier = Modifier.height(15.dp))
@@ -522,7 +522,7 @@ private fun ZakatResultSummaryCard(
                         }"
                     },
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF1C1917).copy(alpha = 0.8f),
+                    color = NimazColors.Neutral900.copy(alpha = 0.8f),
                     textAlign = TextAlign.Center
                 )
             }
