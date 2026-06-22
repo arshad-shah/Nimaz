@@ -63,6 +63,7 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
@@ -998,20 +999,11 @@ private fun RecommendedFastCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(44.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(iconBgColor),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
-            )
-        }
+        IconBadge(
+            imageVector = icon,
+            backgroundColor = iconBgColor,
+            iconColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -1028,20 +1020,14 @@ private fun RecommendedFastCard(
         }
 
         if (isFasted) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(GreenAccent.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = GreenAccent,
-                    modifier = Modifier.size(16.dp)
-                )
-            }
+            IconBadge(
+                imageVector = Icons.Default.Check,
+                backgroundColor = GreenAccent.copy(alpha = 0.2f),
+                iconColor = GreenAccent,
+                containerSize = 28.dp,
+                iconSize = 16.dp,
+                cornerRadius = 14.dp
+            )
         } else {
             Box(
                 modifier = Modifier
@@ -1410,20 +1396,14 @@ private fun MakeupCompletedFastItem(
             horizontalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             // Green check icon
-            Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(GreenAccent.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = GreenAccent,
-                    modifier = Modifier.size(18.dp)
-                )
-            }
+            IconBadge(
+                imageVector = Icons.Default.Check,
+                backgroundColor = GreenAccent.copy(alpha = 0.2f),
+                iconColor = GreenAccent,
+                containerSize = 32.dp,
+                iconSize = 18.dp,
+                cornerRadius = 10.dp
+            )
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(
