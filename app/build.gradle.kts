@@ -42,7 +42,10 @@ android {
         versionCode = 332
         versionName = "3.0.32"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        // Custom runner swaps in HiltTestApplication so instrumented tests run on
+        // the full Hilt graph without NimazApp's Firebase / AppInitializer / device
+        // service bootstrap. See androidTest/.../support/HiltTestRunner.kt.
+        testInstrumentationRunner = "com.arshadshah.nimaz.support.HiltTestRunner"
 
         // Room schema export
         ksp {
@@ -223,6 +226,8 @@ dependencies {
     androidTestImplementation(libs.google.truth)
     androidTestImplementation(libs.hilt.testing)
     androidTestImplementation(libs.room.testing)
+    androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.kotlinx.coroutines.android)
     kspAndroidTest(libs.hilt.compiler)
 
     debugImplementation(libs.androidx.compose.ui.tooling)
