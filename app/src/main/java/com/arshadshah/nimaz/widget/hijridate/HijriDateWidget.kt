@@ -31,6 +31,8 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
+import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
 class HijriDateWidget : GlanceAppWidget() {
 
@@ -56,25 +58,11 @@ private fun HijriDateContent(state: HijriDateWidgetState) {
     val primaryColor = ColorProvider(R.color.widget_primary)
 
     when (state) {
-        is HijriDateWidgetState.Loading -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = GlanceModifier.height(8.dp))
-                    Text(
-                        text = context.getString(R.string.widget_loading),
-                        style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                    )
-                }
-            }
-        }
+        is HijriDateWidgetState.Loading -> WidgetLoadingBox(
+            background = backgroundColor,
+            textSecondary = textSecondary,
+            onClick = actionStartActivity<MainActivity>(),
+        )
 
         is HijriDateWidgetState.Success -> {
             HijriDateSuccessContent(
@@ -86,20 +74,14 @@ private fun HijriDateContent(state: HijriDateWidgetState) {
             )
         }
 
-        is HijriDateWidgetState.Error -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = context.getString(R.string.widget_tap_to_refresh),
-                    style = TextStyle(color = textSecondary, fontSize = 12.sp)
-                )
-            }
+        is HijriDateWidgetState.Error -> WidgetMessageBox(
+            background = backgroundColor,
+            onClick = actionStartActivity<MainActivity>(),
+        ) {
+            Text(
+                text = context.getString(R.string.widget_tap_to_refresh),
+                style = TextStyle(color = textSecondary, fontSize = 12.sp)
+            )
         }
     }
 }

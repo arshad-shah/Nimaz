@@ -42,6 +42,8 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.DayOfWeek
+import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
@@ -155,8 +157,8 @@ class HomeViewModel @Inject constructor(
     private fun observeFastingStatus() {
         viewModelScope.launch {
             val today = LocalDate.now()
-            val startOfDay = today.toEpochDay() * 86400000L
-            val endOfDay = startOfDay + 86400000L - 1
+            val startOfDay = today.toUtcMidnightMillis()
+            val endOfDay = startOfDay + MILLIS_PER_DAY - 1
 
             fastingDao.getFastRecordsInRange(startOfDay, endOfDay).collect { records ->
                 val todayRecord = records.firstOrNull()
@@ -318,7 +320,7 @@ class HomeViewModel @Inject constructor(
 
         viewModelScope.launch {
             val prayerName = PrayerName.valueOf(prayerType.name)
-            val todayEpoch = LocalDate.now().toEpochDay() * 86400000L
+            val todayEpoch = LocalDate.now().toUtcMidnightMillis()
             val currentStatus = _prayerRecords.value[prayerName] ?: PrayerStatus.NOT_PRAYED
             val newStatus =
                 if (currentStatus == PrayerStatus.PRAYED) PrayerStatus.NOT_PRAYED else PrayerStatus.PRAYED

@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.data.local.database.entity.AsmaUnNabiEntity
 import com.arshadshah.nimaz.domain.model.AsmaUnNabi
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
 import kotlinx.coroutines.flow.Flow
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -36,7 +37,7 @@ class AsmaUnNabiRepositoryImpl @Inject constructor(
     }
 
     override fun getFavoriteNames(): Flow<List<AsmaUnNabi>> {
-        return dao.getFavoriteNames().map { list -> list.map { it.toDomain(isFavorite = true) } }
+        return dao.getFavoriteNames().mapItems { it.toDomain(isFavorite = true) }
     }
 
     override suspend fun toggleFavorite(nameId: Int) {

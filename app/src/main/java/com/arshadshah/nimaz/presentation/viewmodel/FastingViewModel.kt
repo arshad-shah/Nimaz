@@ -25,9 +25,9 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.Duration
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
@@ -323,7 +323,7 @@ class FastingViewModel @Inject constructor(
     private fun selectDate(date: LocalDate) {
         _trackerState.update { it.copy(selectedDate = date, isLoading = true) }
 
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             val record = fastingRepository.getFastRecordForDate(dateEpoch)
@@ -338,7 +338,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun startFast(date: LocalDate, fastType: FastType) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             val now = System.currentTimeMillis()
@@ -365,7 +365,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun completeFast(date: LocalDate) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             fastingRepository.updateFastStatus(dateEpoch, FastStatus.FASTED)
@@ -375,7 +375,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun breakFast(date: LocalDate) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             fastingRepository.updateFastStatus(dateEpoch, FastStatus.NOT_FASTED)
@@ -385,7 +385,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun missFast(date: LocalDate, reason: String?) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
@@ -426,7 +426,7 @@ class FastingViewModel @Inject constructor(
             when (currentRecord.status) {
                 FastStatus.FASTED -> breakFast(date)
                 FastStatus.NOT_FASTED -> {
-                    val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                    val dateEpoch = date.toUtcMidnightMillis()
                     viewModelScope.launch {
                         fastingRepository.updateFastStatus(dateEpoch, FastStatus.FASTED)
                         selectDate(date)
@@ -459,8 +459,8 @@ class FastingViewModel @Inject constructor(
         val startDate = LocalDate.of(year, month, 1)
         val endDate = startDate.plusMonths(1).minusDays(1)
 
-        val startEpoch = startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val startEpoch = startDate.toUtcMidnightMillis()
+        val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         calendarJob = viewModelScope.launch {
             fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
@@ -482,9 +482,9 @@ class FastingViewModel @Inject constructor(
                 val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(hijriToday.year)
                 val ramadanEnd = HijriDateCalculator.getLastDayOfRamadan(hijriToday.year)
 
-                val startEpoch = ramadanStart.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                val startEpoch = ramadanStart.toUtcMidnightMillis()
                 val endEpoch =
-                    ramadanEnd.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+                    ramadanEnd.plusDays(1).toUtcMidnightMillis()
 
                 fastingRepository.getFastRecordsInRange(startEpoch, endEpoch).collect { records ->
                     val fasted = records.count { it.status == FastStatus.FASTED }
@@ -574,8 +574,8 @@ class FastingViewModel @Inject constructor(
             FastingStatsPeriod.ALL_TIME -> now.minusYears(10) to now
         }
 
-        val startEpoch = startDate.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
-        val endEpoch = endDate.plusDays(1).atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val startEpoch = startDate.toUtcMidnightMillis()
+        val endEpoch = endDate.plusDays(1).toUtcMidnightMillis()
 
         viewModelScope.launch {
             val stats = fastingRepository.getFastingStats(startEpoch, endEpoch)
@@ -594,7 +594,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun openFastSheet(date: LocalDate) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
@@ -623,7 +623,7 @@ class FastingViewModel @Inject constructor(
         exemptionReason: ExemptionReason?,
         note: String
     ) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             val existingRecord = fastingRepository.getFastRecordForDate(dateEpoch)
@@ -684,7 +684,7 @@ class FastingViewModel @Inject constructor(
     }
 
     private fun deleteFastRecord(date: LocalDate) {
-        val dateEpoch = date.atStartOfDay().toEpochSecond(ZoneOffset.UTC) * 1000
+        val dateEpoch = date.toUtcMidnightMillis()
 
         viewModelScope.launch {
             fastingRepository.deleteFastRecordByDate(dateEpoch)

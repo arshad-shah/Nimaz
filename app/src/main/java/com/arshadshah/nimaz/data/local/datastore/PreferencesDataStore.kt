@@ -14,6 +14,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -25,6 +26,19 @@ class PreferencesDataStore @Inject constructor(
     private val context: Context
 ) {
     private val dataStore = context.dataStore
+
+    /** Observe a preference, falling back to [default] when it has not been set. */
+    private fun <T> preference(key: Preferences.Key<T>, default: T): Flow<T> =
+        dataStore.data.map { it[key] ?: default }
+
+    /** Observe a nullable preference (no default — emits null until set). */
+    private fun <T> preference(key: Preferences.Key<T>): Flow<T?> =
+        dataStore.data.map { it[key] }
+
+    /** Persist a single preference value. */
+    private suspend fun <T> put(key: Preferences.Key<T>, value: T) {
+        dataStore.edit { it[key] = value }
+    }
 
     // Keys
     private object PreferencesKeys {
@@ -154,278 +168,154 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Onboarding
-    val onboardingCompleted: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ONBOARDING_COMPLETED] ?: false
-    }
+    val onboardingCompleted: Flow<Boolean> = preference(PreferencesKeys.ONBOARDING_COMPLETED, false)
 
-    suspend fun setOnboardingCompleted(completed: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ONBOARDING_COMPLETED] = completed
-        }
-    }
+    suspend fun setOnboardingCompleted(completed: Boolean) =
+        put(PreferencesKeys.ONBOARDING_COMPLETED, completed)
 
     // Theme
-    val themeMode: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.THEME_MODE] ?: "system"
-    }
+    val themeMode: Flow<String> = preference(PreferencesKeys.THEME_MODE, "system")
 
-    suspend fun setThemeMode(mode: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.THEME_MODE] = mode
-        }
-    }
+    suspend fun setThemeMode(mode: String) = put(PreferencesKeys.THEME_MODE, mode)
 
-    val dynamicColor: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DYNAMIC_COLOR] ?: false
-    }
+    val dynamicColor: Flow<Boolean> = preference(PreferencesKeys.DYNAMIC_COLOR, false)
 
-    suspend fun setDynamicColor(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DYNAMIC_COLOR] = enabled
-        }
-    }
+    suspend fun setDynamicColor(enabled: Boolean) = put(PreferencesKeys.DYNAMIC_COLOR, enabled)
 
     // Appearance
-    val showIslamicPatterns: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_ISLAMIC_PATTERNS] ?: true
-    }
+    val showIslamicPatterns: Flow<Boolean> = preference(PreferencesKeys.SHOW_ISLAMIC_PATTERNS, true)
 
-    suspend fun setShowIslamicPatterns(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.SHOW_ISLAMIC_PATTERNS] = enabled }
-    }
+    suspend fun setShowIslamicPatterns(enabled: Boolean) =
+        put(PreferencesKeys.SHOW_ISLAMIC_PATTERNS, enabled)
 
-    val animationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ANIMATIONS_ENABLED] ?: true
-    }
+    val animationsEnabled: Flow<Boolean> = preference(PreferencesKeys.ANIMATIONS_ENABLED, true)
 
-    suspend fun setAnimationsEnabled(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.ANIMATIONS_ENABLED] = enabled }
-    }
+    suspend fun setAnimationsEnabled(enabled: Boolean) =
+        put(PreferencesKeys.ANIMATIONS_ENABLED, enabled)
 
     // Display
-    val showCountdown: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_COUNTDOWN] ?: true
-    }
+    val showCountdown: Flow<Boolean> = preference(PreferencesKeys.SHOW_COUNTDOWN, true)
 
-    suspend fun setShowCountdown(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.SHOW_COUNTDOWN] = enabled }
-    }
+    suspend fun setShowCountdown(enabled: Boolean) = put(PreferencesKeys.SHOW_COUNTDOWN, enabled)
 
-    val showQuickActions: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_QUICK_ACTIONS] ?: true
-    }
+    val showQuickActions: Flow<Boolean> = preference(PreferencesKeys.SHOW_QUICK_ACTIONS, true)
 
-    suspend fun setShowQuickActions(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.SHOW_QUICK_ACTIONS] = enabled }
-    }
+    suspend fun setShowQuickActions(enabled: Boolean) =
+        put(PreferencesKeys.SHOW_QUICK_ACTIONS, enabled)
 
-    val hapticFeedback: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HAPTIC_FEEDBACK] ?: true
-    }
+    val hapticFeedback: Flow<Boolean> = preference(PreferencesKeys.HAPTIC_FEEDBACK, true)
 
-    suspend fun setHapticFeedback(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.HAPTIC_FEEDBACK] = enabled }
-    }
+    suspend fun setHapticFeedback(enabled: Boolean) = put(PreferencesKeys.HAPTIC_FEEDBACK, enabled)
 
-    val use24HourFormat: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.USE_24_HOUR_FORMAT] ?: false
-    }
+    val use24HourFormat: Flow<Boolean> = preference(PreferencesKeys.USE_24_HOUR_FORMAT, false)
 
-    suspend fun setUse24HourFormat(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.USE_24_HOUR_FORMAT] = enabled }
-    }
+    suspend fun setUse24HourFormat(enabled: Boolean) =
+        put(PreferencesKeys.USE_24_HOUR_FORMAT, enabled)
 
-    val useHijriPrimary: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.USE_HIJRI_PRIMARY] ?: false
-    }
+    val useHijriPrimary: Flow<Boolean> = preference(PreferencesKeys.USE_HIJRI_PRIMARY, false)
 
-    suspend fun setUseHijriPrimary(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.USE_HIJRI_PRIMARY] = enabled }
-    }
+    suspend fun setUseHijriPrimary(enabled: Boolean) =
+        put(PreferencesKeys.USE_HIJRI_PRIMARY, enabled)
 
     // Language
-    val appLanguage: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.APP_LANGUAGE] ?: "en"
-    }
+    val appLanguage: Flow<String> = preference(PreferencesKeys.APP_LANGUAGE, "en")
 
-    suspend fun setAppLanguage(language: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.APP_LANGUAGE] = language
-        }
-    }
+    suspend fun setAppLanguage(language: String) = put(PreferencesKeys.APP_LANGUAGE, language)
 
     // Help content version (0 = never seeded)
-    val helpContentVersion: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HELP_CONTENT_VERSION] ?: 0
-    }
+    val helpContentVersion: Flow<Int> = preference(PreferencesKeys.HELP_CONTENT_VERSION, 0)
 
-    suspend fun setHelpContentVersion(version: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.HELP_CONTENT_VERSION] = version
-        }
-    }
+    suspend fun setHelpContentVersion(version: Int) =
+        put(PreferencesKeys.HELP_CONTENT_VERSION, version)
 
     // Hadith backfill version (0 = never applied)
-    val hadithBackfillVersion: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_BACKFILL_VERSION] ?: 0
-    }
+    val hadithBackfillVersion: Flow<Int> = preference(PreferencesKeys.HADITH_BACKFILL_VERSION, 0)
 
-    suspend fun setHadithBackfillVersion(version: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.HADITH_BACKFILL_VERSION] = version
-        }
-    }
+    suspend fun setHadithBackfillVersion(version: Int) =
+        put(PreferencesKeys.HADITH_BACKFILL_VERSION, version)
 
     // Tasbih counter style — true = bead strand, false = classic circle.
-    val tasbihBeadMode: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_BEAD_MODE] ?: false
-    }
+    val tasbihBeadMode: Flow<Boolean> = preference(PreferencesKeys.TASBIH_BEAD_MODE, false)
 
-    suspend fun setTasbihBeadMode(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_BEAD_MODE] = enabled
-        }
-    }
+    suspend fun setTasbihBeadMode(enabled: Boolean) = put(PreferencesKeys.TASBIH_BEAD_MODE, enabled)
 
     // Tasbih bead design — stable key of the chosen BeadDesign (default "wood").
-    val tasbihBeadDesign: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] ?: "wood"
-    }
+    val tasbihBeadDesign: Flow<String> = preference(PreferencesKeys.TASBIH_BEAD_DESIGN, "wood")
 
-    suspend fun setTasbihBeadDesign(key: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_BEAD_DESIGN] = key
-        }
-    }
+    suspend fun setTasbihBeadDesign(key: String) = put(PreferencesKeys.TASBIH_BEAD_DESIGN, key)
 
     // Currently selected tasbih preset id (-1 = free count). Shared across screens
     // so the Choose-Dhikr picker can drive the counter on a separate back-stack entry.
-    val tasbihSelectedPresetId: Flow<Long> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] ?: -1L
-    }
+    val tasbihSelectedPresetId: Flow<Long> = preference(PreferencesKeys.TASBIH_SELECTED_PRESET, -1L)
 
-    suspend fun setTasbihSelectedPresetId(id: Long) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_SELECTED_PRESET] = id
-        }
-    }
+    suspend fun setTasbihSelectedPresetId(id: Long) =
+        put(PreferencesKeys.TASBIH_SELECTED_PRESET, id)
 
     // Versioned runtime seed of new default presets (prepackaged DB only has the
     // original five). Bump the latest version in the VM when new defaults are added.
-    val tasbihPresetSeedVersion: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_PRESET_SEED_VERSION] ?: 0
-    }
+    val tasbihPresetSeedVersion: Flow<Int> =
+        preference(PreferencesKeys.TASBIH_PRESET_SEED_VERSION, 0)
 
-    suspend fun setTasbihPresetSeedVersion(version: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_PRESET_SEED_VERSION] = version
-        }
-    }
+    suspend fun setTasbihPresetSeedVersion(version: Int) =
+        put(PreferencesKeys.TASBIH_PRESET_SEED_VERSION, version)
 
     // Favourite preset ids (stored as strings).
-    val tasbihFavorites: Flow<Set<String>> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_FAVORITES] ?: emptySet()
-    }
+    val tasbihFavorites: Flow<Set<String>> =
+        preference(PreferencesKeys.TASBIH_FAVORITES, emptySet())
 
-    suspend fun setTasbihFavorites(ids: Set<String>) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_FAVORITES] = ids
-        }
-    }
+    suspend fun setTasbihFavorites(ids: Set<String>) = put(PreferencesKeys.TASBIH_FAVORITES, ids)
 
     // Bead strand handedness — false = right-handed (beads advance right→left),
     // true = left-handed (beads advance left→right).
-    val tasbihLeftHanded: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_LEFT_HANDED] ?: false
-    }
+    val tasbihLeftHanded: Flow<Boolean> = preference(PreferencesKeys.TASBIH_LEFT_HANDED, false)
 
-    suspend fun setTasbihLeftHanded(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_LEFT_HANDED] = enabled
-        }
-    }
+    suspend fun setTasbihLeftHanded(enabled: Boolean) =
+        put(PreferencesKeys.TASBIH_LEFT_HANDED, enabled)
 
     // Dua content version (0 = never seeded)
-    val duaContentVersion: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_CONTENT_VERSION] ?: 0
-    }
+    val duaContentVersion: Flow<Int> = preference(PreferencesKeys.DUA_CONTENT_VERSION, 0)
 
-    suspend fun setDuaContentVersion(version: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.DUA_CONTENT_VERSION] = version
-        }
-    }
+    suspend fun setDuaContentVersion(version: Int) =
+        put(PreferencesKeys.DUA_CONTENT_VERSION, version)
 
     // Qaida content version (0 = never seeded)
-    val qaidaContentVersion: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QAIDA_CONTENT_VERSION] ?: 0
-    }
+    val qaidaContentVersion: Flow<Int> = preference(PreferencesKeys.QAIDA_CONTENT_VERSION, 0)
 
-    suspend fun setQaidaContentVersion(version: Int) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.QAIDA_CONTENT_VERSION] = version
-        }
-    }
+    suspend fun setQaidaContentVersion(version: Int) =
+        put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
 
-    val arabicFontSize: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ARABIC_FONT_SIZE] ?: "medium"
-    }
+    val arabicFontSize: Flow<String> = preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
 
-    suspend fun setArabicFontSize(size: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ARABIC_FONT_SIZE] = size
-        }
-    }
+    suspend fun setArabicFontSize(size: String) = put(PreferencesKeys.ARABIC_FONT_SIZE, size)
 
     // Prayer Settings
-    val calculationMethod: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.CALCULATION_METHOD] ?: "MUSLIM_WORLD_LEAGUE"
-    }
+    val calculationMethod: Flow<String> =
+        preference(PreferencesKeys.CALCULATION_METHOD, "MUSLIM_WORLD_LEAGUE")
 
-    suspend fun setCalculationMethod(method: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CALCULATION_METHOD] = method
-        }
-    }
+    suspend fun setCalculationMethod(method: String) =
+        put(PreferencesKeys.CALCULATION_METHOD, method)
 
-    val asrCalculation: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ASR_CALCULATION] ?: "standard"
-    }
+    val asrCalculation: Flow<String> = preference(PreferencesKeys.ASR_CALCULATION, "standard")
 
-    suspend fun setAsrCalculation(calculation: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ASR_CALCULATION] = calculation
-        }
-    }
+    suspend fun setAsrCalculation(calculation: String) =
+        put(PreferencesKeys.ASR_CALCULATION, calculation)
 
-    val highLatitudeRule: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HIGH_LATITUDE_RULE] ?: "MIDDLE_OF_NIGHT"
-    }
+    val highLatitudeRule: Flow<String> =
+        preference(PreferencesKeys.HIGH_LATITUDE_RULE, "MIDDLE_OF_NIGHT")
 
-    suspend fun setHighLatitudeRule(rule: String) {
-        dataStore.edit { it[PreferencesKeys.HIGH_LATITUDE_RULE] = rule }
-    }
+    suspend fun setHighLatitudeRule(rule: String) = put(PreferencesKeys.HIGH_LATITUDE_RULE, rule)
 
-    val currentLocationId: Flow<Long?> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.CURRENT_LOCATION_ID]
-    }
+    val currentLocationId: Flow<Long?> = preference(PreferencesKeys.CURRENT_LOCATION_ID)
 
-    suspend fun setCurrentLocationId(id: Long) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CURRENT_LOCATION_ID] = id
-        }
-    }
+    suspend fun setCurrentLocationId(id: Long) = put(PreferencesKeys.CURRENT_LOCATION_ID, id)
 
     // Prayer Adjustments
-    val fajrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.FAJR_ADJUSTMENT] ?: 0 }
-    val sunriseAdjustment: Flow<Int> =
-        dataStore.data.map { it[PreferencesKeys.SUNRISE_ADJUSTMENT] ?: 0 }
-    val dhuhrAdjustment: Flow<Int> =
-        dataStore.data.map { it[PreferencesKeys.DHUHR_ADJUSTMENT] ?: 0 }
-    val asrAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ASR_ADJUSTMENT] ?: 0 }
-    val maghribAdjustment: Flow<Int> =
-        dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADJUSTMENT] ?: 0 }
-    val ishaAdjustment: Flow<Int> = dataStore.data.map { it[PreferencesKeys.ISHA_ADJUSTMENT] ?: 0 }
+    val fajrAdjustment: Flow<Int> = preference(PreferencesKeys.FAJR_ADJUSTMENT, 0)
+    val sunriseAdjustment: Flow<Int> = preference(PreferencesKeys.SUNRISE_ADJUSTMENT, 0)
+    val dhuhrAdjustment: Flow<Int> = preference(PreferencesKeys.DHUHR_ADJUSTMENT, 0)
+    val asrAdjustment: Flow<Int> = preference(PreferencesKeys.ASR_ADJUSTMENT, 0)
+    val maghribAdjustment: Flow<Int> = preference(PreferencesKeys.MAGHRIB_ADJUSTMENT, 0)
+    val ishaAdjustment: Flow<Int> = preference(PreferencesKeys.ISHA_ADJUSTMENT, 0)
 
     suspend fun setPrayerAdjustment(prayer: String, minutes: Int) {
         dataStore.edit { prefs ->
@@ -443,46 +333,34 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Notifications
-    val prayerNotificationsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED] ?: true
-    }
+    val prayerNotificationsEnabled: Flow<Boolean> =
+        preference(PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED, true)
 
-    suspend fun setPrayerNotificationsEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED] = enabled
-        }
-    }
+    suspend fun setPrayerNotificationsEnabled(enabled: Boolean) =
+        put(PreferencesKeys.PRAYER_NOTIFICATIONS_ENABLED, enabled)
 
-    val adhanEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ADHAN_ENABLED] ?: false
-    }
+    val adhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ADHAN_ENABLED, false)
 
-    suspend fun setAdhanEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.ADHAN_ENABLED] = enabled
-        }
-    }
+    suspend fun setAdhanEnabled(enabled: Boolean) = put(PreferencesKeys.ADHAN_ENABLED, enabled)
 
-    val selectedAdhanSound: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SELECTED_ADHAN_SOUND] ?: "MISHARY"
-    }
+    val selectedAdhanSound: Flow<String> =
+        preference(PreferencesKeys.SELECTED_ADHAN_SOUND, "MISHARY")
 
-    suspend fun setSelectedAdhanSound(sound: String) {
-        dataStore.edit { it[PreferencesKeys.SELECTED_ADHAN_SOUND] = sound }
-    }
+    suspend fun setSelectedAdhanSound(sound: String) =
+        put(PreferencesKeys.SELECTED_ADHAN_SOUND, sound)
 
     val fajrNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.FAJR_NOTIFICATION_ENABLED] ?: true }
+        preference(PreferencesKeys.FAJR_NOTIFICATION_ENABLED, true)
     val sunriseNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED] ?: false }
+        preference(PreferencesKeys.SUNRISE_NOTIFICATION_ENABLED, false)
     val dhuhrNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.DHUHR_NOTIFICATION_ENABLED] ?: true }
+        preference(PreferencesKeys.DHUHR_NOTIFICATION_ENABLED, true)
     val asrNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.ASR_NOTIFICATION_ENABLED] ?: true }
+        preference(PreferencesKeys.ASR_NOTIFICATION_ENABLED, true)
     val maghribNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED] ?: true }
+        preference(PreferencesKeys.MAGHRIB_NOTIFICATION_ENABLED, true)
     val ishaNotificationEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.ISHA_NOTIFICATION_ENABLED] ?: true }
+        preference(PreferencesKeys.ISHA_NOTIFICATION_ENABLED, true)
 
     suspend fun setPrayerNotificationEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
@@ -500,16 +378,11 @@ class PreferencesDataStore @Inject constructor(
     }
 
     // Per-prayer adhan enabled
-    val fajrAdhanEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.FAJR_ADHAN_ENABLED] ?: true }
-    val dhuhrAdhanEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.DHUHR_ADHAN_ENABLED] ?: true }
-    val asrAdhanEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.ASR_ADHAN_ENABLED] ?: true }
-    val maghribAdhanEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.MAGHRIB_ADHAN_ENABLED] ?: true }
-    val ishaAdhanEnabled: Flow<Boolean> =
-        dataStore.data.map { it[PreferencesKeys.ISHA_ADHAN_ENABLED] ?: true }
+    val fajrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.FAJR_ADHAN_ENABLED, true)
+    val dhuhrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.DHUHR_ADHAN_ENABLED, true)
+    val asrAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ASR_ADHAN_ENABLED, true)
+    val maghribAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.MAGHRIB_ADHAN_ENABLED, true)
+    val ishaAdhanEnabled: Flow<Boolean> = preference(PreferencesKeys.ISHA_ADHAN_ENABLED, true)
 
     suspend fun setPrayerAdhanEnabled(prayer: String, enabled: Boolean) {
         dataStore.edit { prefs ->
@@ -536,85 +409,57 @@ class PreferencesDataStore @Inject constructor(
             "asr" -> asrAdhanEnabled
             "maghrib" -> maghribAdhanEnabled
             "isha" -> ishaAdhanEnabled
-            "sunrise" -> kotlinx.coroutines.flow.flowOf(false) // Sunrise never gets adhan
-            else -> kotlinx.coroutines.flow.flowOf(false)
+            "sunrise" -> flowOf(false) // Sunrise never gets adhan
+            else -> flowOf(false)
         }
     }
 
-    val adhanRespectDnd: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.ADHAN_RESPECT_DND] ?: true
-    }
+    val adhanRespectDnd: Flow<Boolean> = preference(PreferencesKeys.ADHAN_RESPECT_DND, true)
 
-    suspend fun setAdhanRespectDnd(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.ADHAN_RESPECT_DND] = enabled }
-    }
+    suspend fun setAdhanRespectDnd(enabled: Boolean) =
+        put(PreferencesKeys.ADHAN_RESPECT_DND, enabled)
 
-    val notificationVibration: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.NOTIFICATION_VIBRATION] ?: true
-    }
+    val notificationVibration: Flow<Boolean> =
+        preference(PreferencesKeys.NOTIFICATION_VIBRATION, true)
 
-    suspend fun setNotificationVibration(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.NOTIFICATION_VIBRATION] = enabled }
-    }
+    suspend fun setNotificationVibration(enabled: Boolean) =
+        put(PreferencesKeys.NOTIFICATION_VIBRATION, enabled)
 
-    val notificationReminderMinutes: Flow<Int> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.NOTIFICATION_REMINDER_MINUTES] ?: 15
-    }
+    val notificationReminderMinutes: Flow<Int> =
+        preference(PreferencesKeys.NOTIFICATION_REMINDER_MINUTES, 15)
 
-    suspend fun setNotificationReminderMinutes(minutes: Int) {
-        dataStore.edit { it[PreferencesKeys.NOTIFICATION_REMINDER_MINUTES] = minutes }
-    }
+    suspend fun setNotificationReminderMinutes(minutes: Int) =
+        put(PreferencesKeys.NOTIFICATION_REMINDER_MINUTES, minutes)
 
-    val showReminderBefore: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_REMINDER_BEFORE] ?: true
-    }
+    val showReminderBefore: Flow<Boolean> = preference(PreferencesKeys.SHOW_REMINDER_BEFORE, true)
 
-    suspend fun setShowReminderBefore(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.SHOW_REMINDER_BEFORE] = enabled }
-    }
+    suspend fun setShowReminderBefore(enabled: Boolean) =
+        put(PreferencesKeys.SHOW_REMINDER_BEFORE, enabled)
 
-    val persistentNotification: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.PERSISTENT_NOTIFICATION] ?: false
-    }
+    val persistentNotification: Flow<Boolean> =
+        preference(PreferencesKeys.PERSISTENT_NOTIFICATION, false)
 
-    suspend fun setPersistentNotification(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.PERSISTENT_NOTIFICATION] = enabled }
-    }
+    suspend fun setPersistentNotification(enabled: Boolean) =
+        put(PreferencesKeys.PERSISTENT_NOTIFICATION, enabled)
 
     // Quran Settings
-    val quranTranslatorId: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] ?: "sahih_international"
-    }
+    val quranTranslatorId: Flow<String> =
+        preference(PreferencesKeys.QURAN_TRANSLATOR_ID, "sahih_international")
 
-    suspend fun setQuranTranslatorId(translatorId: String) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.QURAN_TRANSLATOR_ID] = translatorId
-        }
-    }
+    suspend fun setQuranTranslatorId(translatorId: String) =
+        put(PreferencesKeys.QURAN_TRANSLATOR_ID, translatorId)
 
-    val showTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_TRANSLATION] ?: true
-    }
+    val showTranslation: Flow<Boolean> = preference(PreferencesKeys.SHOW_TRANSLATION, true)
 
-    suspend fun setShowTranslation(show: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_TRANSLATION] = show
-        }
-    }
+    suspend fun setShowTranslation(show: Boolean) = put(PreferencesKeys.SHOW_TRANSLATION, show)
 
-    val showTransliteration: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_TRANSLITERATION] ?: false
-    }
+    val showTransliteration: Flow<Boolean> =
+        preference(PreferencesKeys.SHOW_TRANSLITERATION, false)
 
-    suspend fun setShowTransliteration(show: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.SHOW_TRANSLITERATION] = show
-        }
-    }
+    suspend fun setShowTransliteration(show: Boolean) =
+        put(PreferencesKeys.SHOW_TRANSLITERATION, show)
 
-    val selectedReciterId: Flow<String?> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SELECTED_RECITER_ID]
-    }
+    val selectedReciterId: Flow<String?> = preference(PreferencesKeys.SELECTED_RECITER_ID)
 
     suspend fun setSelectedReciterId(reciterId: String?) {
         dataStore.edit {
@@ -623,193 +468,121 @@ class PreferencesDataStore @Inject constructor(
         }
     }
 
-    val quranArabicFont: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QURAN_ARABIC_FONT] ?: "amiri"
-    }
+    val quranArabicFont: Flow<String> = preference(PreferencesKeys.QURAN_ARABIC_FONT, "amiri")
 
-    suspend fun setQuranArabicFont(fontId: String) {
-        dataStore.edit { it[PreferencesKeys.QURAN_ARABIC_FONT] = fontId }
-    }
+    suspend fun setQuranArabicFont(fontId: String) =
+        put(PreferencesKeys.QURAN_ARABIC_FONT, fontId)
 
-    val quranArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QURAN_ARABIC_FONT_SIZE] ?: 28f
-    }
+    val quranArabicFontSize: Flow<Float> =
+        preference(PreferencesKeys.QURAN_ARABIC_FONT_SIZE, 28f)
 
-    suspend fun setQuranArabicFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.QURAN_ARABIC_FONT_SIZE] = size }
-    }
+    suspend fun setQuranArabicFontSize(size: Float) =
+        put(PreferencesKeys.QURAN_ARABIC_FONT_SIZE, size)
 
-    val quranTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE] ?: 16f
-    }
+    val quranTranslationFontSize: Flow<Float> =
+        preference(PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setQuranTranslationFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE] = size }
-    }
+    suspend fun setQuranTranslationFontSize(size: Float) =
+        put(PreferencesKeys.QURAN_TRANSLATION_FONT_SIZE, size)
 
-    val continuousReading: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.CONTINUOUS_READING] ?: true
-    }
+    val continuousReading: Flow<Boolean> = preference(PreferencesKeys.CONTINUOUS_READING, true)
 
-    suspend fun setContinuousReading(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.CONTINUOUS_READING] = enabled }
-    }
+    suspend fun setContinuousReading(enabled: Boolean) =
+        put(PreferencesKeys.CONTINUOUS_READING, enabled)
 
-    val keepScreenOn: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.KEEP_SCREEN_ON] ?: true
-    }
+    val keepScreenOn: Flow<Boolean> = preference(PreferencesKeys.KEEP_SCREEN_ON, true)
 
-    suspend fun setKeepScreenOn(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.KEEP_SCREEN_ON] = enabled }
-    }
+    suspend fun setKeepScreenOn(enabled: Boolean) = put(PreferencesKeys.KEEP_SCREEN_ON, enabled)
 
-    val showTajweed: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.SHOW_TAJWEED] ?: false
-    }
+    val showTajweed: Flow<Boolean> = preference(PreferencesKeys.SHOW_TAJWEED, false)
 
-    suspend fun setShowTajweed(enabled: Boolean) {
-        dataStore.edit { it[PreferencesKeys.SHOW_TAJWEED] = enabled }
-    }
+    suspend fun setShowTajweed(enabled: Boolean) = put(PreferencesKeys.SHOW_TAJWEED, enabled)
 
     // Dua Settings
-    val duaArabicFont: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_ARABIC_FONT] ?: "amiri"
-    }
+    val duaArabicFont: Flow<String> = preference(PreferencesKeys.DUA_ARABIC_FONT, "amiri")
 
-    suspend fun setDuaArabicFont(fontId: String) {
-        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT] = fontId }
-    }
+    suspend fun setDuaArabicFont(fontId: String) = put(PreferencesKeys.DUA_ARABIC_FONT, fontId)
 
-    val duaArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_ARABIC_FONT_SIZE] ?: 28f
-    }
+    val duaArabicFontSize: Flow<Float> = preference(PreferencesKeys.DUA_ARABIC_FONT_SIZE, 28f)
 
-    suspend fun setDuaArabicFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.DUA_ARABIC_FONT_SIZE] = size }
-    }
+    suspend fun setDuaArabicFontSize(size: Float) =
+        put(PreferencesKeys.DUA_ARABIC_FONT_SIZE, size)
 
-    val duaTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] ?: 16f
-    }
+    val duaTranslationFontSize: Flow<Float> =
+        preference(PreferencesKeys.DUA_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setDuaTranslationFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.DUA_TRANSLATION_FONT_SIZE] = size }
-    }
+    suspend fun setDuaTranslationFontSize(size: Float) =
+        put(PreferencesKeys.DUA_TRANSLATION_FONT_SIZE, size)
 
-    val duaShowArabic: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_SHOW_ARABIC] ?: true
-    }
+    val duaShowArabic: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_ARABIC, true)
 
-    suspend fun setDuaShowArabic(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.DUA_SHOW_ARABIC] = show }
-    }
+    suspend fun setDuaShowArabic(show: Boolean) = put(PreferencesKeys.DUA_SHOW_ARABIC, show)
 
-    val duaShowTransliteration: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_SHOW_TRANSLITERATION] ?: true
-    }
+    val duaShowTransliteration: Flow<Boolean> =
+        preference(PreferencesKeys.DUA_SHOW_TRANSLITERATION, true)
 
-    suspend fun setDuaShowTransliteration(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLITERATION] = show }
-    }
+    suspend fun setDuaShowTransliteration(show: Boolean) =
+        put(PreferencesKeys.DUA_SHOW_TRANSLITERATION, show)
 
-    val duaShowTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.DUA_SHOW_TRANSLATION] ?: true
-    }
+    val duaShowTranslation: Flow<Boolean> = preference(PreferencesKeys.DUA_SHOW_TRANSLATION, true)
 
-    suspend fun setDuaShowTranslation(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.DUA_SHOW_TRANSLATION] = show }
-    }
+    suspend fun setDuaShowTranslation(show: Boolean) =
+        put(PreferencesKeys.DUA_SHOW_TRANSLATION, show)
 
     // Hadith Settings
-    val hadithArabicFont: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_ARABIC_FONT] ?: "amiri"
-    }
+    val hadithArabicFont: Flow<String> = preference(PreferencesKeys.HADITH_ARABIC_FONT, "amiri")
 
-    suspend fun setHadithArabicFont(fontId: String) {
-        dataStore.edit { it[PreferencesKeys.HADITH_ARABIC_FONT] = fontId }
-    }
+    suspend fun setHadithArabicFont(fontId: String) =
+        put(PreferencesKeys.HADITH_ARABIC_FONT, fontId)
 
-    val hadithArabicFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_ARABIC_FONT_SIZE] ?: 24f
-    }
+    val hadithArabicFontSize: Flow<Float> =
+        preference(PreferencesKeys.HADITH_ARABIC_FONT_SIZE, 24f)
 
-    suspend fun setHadithArabicFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.HADITH_ARABIC_FONT_SIZE] = size }
-    }
+    suspend fun setHadithArabicFontSize(size: Float) =
+        put(PreferencesKeys.HADITH_ARABIC_FONT_SIZE, size)
 
-    val hadithTranslationFontSize: Flow<Float> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE] ?: 16f
-    }
+    val hadithTranslationFontSize: Flow<Float> =
+        preference(PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE, 16f)
 
-    suspend fun setHadithTranslationFontSize(size: Float) {
-        dataStore.edit { it[PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE] = size }
-    }
+    suspend fun setHadithTranslationFontSize(size: Float) =
+        put(PreferencesKeys.HADITH_TRANSLATION_FONT_SIZE, size)
 
-    val hadithShowArabic: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_SHOW_ARABIC] ?: true
-    }
+    val hadithShowArabic: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_ARABIC, true)
 
-    suspend fun setHadithShowArabic(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_ARABIC] = show }
-    }
+    suspend fun setHadithShowArabic(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_ARABIC, show)
 
-    val hadithShowTranslation: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_SHOW_TRANSLATION] ?: true
-    }
+    val hadithShowTranslation: Flow<Boolean> =
+        preference(PreferencesKeys.HADITH_SHOW_TRANSLATION, true)
 
-    suspend fun setHadithShowTranslation(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_TRANSLATION] = show }
-    }
+    suspend fun setHadithShowTranslation(show: Boolean) =
+        put(PreferencesKeys.HADITH_SHOW_TRANSLATION, show)
 
-    val hadithShowGrade: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_SHOW_GRADE] ?: true
-    }
+    val hadithShowGrade: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_GRADE, true)
 
-    suspend fun setHadithShowGrade(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_GRADE] = show }
-    }
+    suspend fun setHadithShowGrade(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_GRADE, show)
 
-    val hadithShowChain: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.HADITH_SHOW_CHAIN] ?: true
-    }
+    val hadithShowChain: Flow<Boolean> = preference(PreferencesKeys.HADITH_SHOW_CHAIN, true)
 
-    suspend fun setHadithShowChain(show: Boolean) {
-        dataStore.edit { it[PreferencesKeys.HADITH_SHOW_CHAIN] = show }
-    }
+    suspend fun setHadithShowChain(show: Boolean) = put(PreferencesKeys.HADITH_SHOW_CHAIN, show)
 
     // Tasbih Settings
-    val tasbihVibrationEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_VIBRATION_ENABLED] ?: true
-    }
+    val tasbihVibrationEnabled: Flow<Boolean> =
+        preference(PreferencesKeys.TASBIH_VIBRATION_ENABLED, true)
 
-    suspend fun setTasbihVibrationEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_VIBRATION_ENABLED] = enabled
-        }
-    }
+    suspend fun setTasbihVibrationEnabled(enabled: Boolean) =
+        put(PreferencesKeys.TASBIH_VIBRATION_ENABLED, enabled)
 
-    val tasbihSoundEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.TASBIH_SOUND_ENABLED] ?: true
-    }
+    val tasbihSoundEnabled: Flow<Boolean> = preference(PreferencesKeys.TASBIH_SOUND_ENABLED, true)
 
-    suspend fun setTasbihSoundEnabled(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.TASBIH_SOUND_ENABLED] = enabled
-        }
-    }
+    suspend fun setTasbihSoundEnabled(enabled: Boolean) =
+        put(PreferencesKeys.TASBIH_SOUND_ENABLED, enabled)
 
     // Location
-    val latitude: Flow<Double> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.LATITUDE] ?: 0.0
-    }
+    val latitude: Flow<Double> = preference(PreferencesKeys.LATITUDE, 0.0)
 
-    val longitude: Flow<Double> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.LONGITUDE] ?: 0.0
-    }
+    val longitude: Flow<Double> = preference(PreferencesKeys.LONGITUDE, 0.0)
 
-    val locationName: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.LOCATION_NAME] ?: ""
-    }
+    val locationName: Flow<String> = preference(PreferencesKeys.LOCATION_NAME, "")
 
     suspend fun updateLocation(latitude: Double, longitude: Double, name: String) {
         dataStore.edit { preferences ->

@@ -30,6 +30,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -160,20 +161,11 @@ private fun FastingStateBadge(fastingToday: Boolean) {
 
 @Composable
 private fun FastingIconChip() {
-    Box(
-        modifier = Modifier
-            .size(44.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = Icons.Default.LightMode,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(22.dp)
-        )
-    }
+    IconBadge(
+        imageVector = Icons.Default.LightMode,
+        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+        iconColor = MaterialTheme.colorScheme.secondary,
+    )
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Fasting")

@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -67,20 +68,12 @@ fun NimazSettingsItem(
             val resolvedTint =
                 if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
 
-            Box(
-                modifier = Modifier
-                    .size(42.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(resolvedBackground),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = resolvedTint,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
+            IconBadge(
+                imageVector = icon,
+                backgroundColor = resolvedBackground,
+                iconColor = resolvedTint,
+                containerSize = 42.dp,
+            )
             Spacer(modifier = Modifier.width(15.dp))
         }
 

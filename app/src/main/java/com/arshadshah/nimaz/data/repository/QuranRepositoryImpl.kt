@@ -23,6 +23,7 @@ import com.arshadshah.nimaz.domain.repository.QuranRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
@@ -35,9 +36,7 @@ class QuranRepositoryImpl @Inject constructor(
 ) : QuranRepository {
 
     override fun getAllSurahs(): Flow<List<Surah>> {
-        return quranDao.getAllSurahs().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.getAllSurahs().mapItems { it.toDomain() }
     }
 
     override suspend fun getSurahByNumber(surahNumber: Int): Surah? {
@@ -49,15 +48,11 @@ class QuranRepositoryImpl @Inject constructor(
             RevelationType.MECCAN -> "meccan"
             RevelationType.MEDINAN -> "medinan"
         }
-        return quranDao.getSurahsByRevelationType(typeString).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.getSurahsByRevelationType(typeString).mapItems { it.toDomain() }
     }
 
     override fun searchSurahs(query: String): Flow<List<Surah>> {
-        return quranDao.searchSurahs(query).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.searchSurahs(query).mapItems { it.toDomain() }
     }
 
     override fun getAyahsBySurah(surahNumber: Int): Flow<List<Ayah>> {
@@ -123,9 +118,7 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override fun getSajdaAyahs(): Flow<List<Ayah>> {
-        return quranDao.getSajdaAyahs().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.getSajdaAyahs().mapItems { it.toDomain() }
     }
 
     override suspend fun getPageAyahRanges(): List<PageAyahRange> {
@@ -225,9 +218,7 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override fun getAllBookmarks(): Flow<List<QuranBookmark>> {
-        return quranDao.getAllBookmarks().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.getAllBookmarks().mapItems { it.toDomain() }
     }
 
     override suspend fun getBookmarkByAyahId(ayahId: Int): QuranBookmark? {
@@ -269,9 +260,7 @@ class QuranRepositoryImpl @Inject constructor(
     }
 
     override fun getAllFavorites(): Flow<List<QuranFavorite>> {
-        return quranDao.getAllFavorites().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return quranDao.getAllFavorites().mapItems { it.toDomain() }
     }
 
     override fun getFavoriteAyahIds(): Flow<List<Int>> {

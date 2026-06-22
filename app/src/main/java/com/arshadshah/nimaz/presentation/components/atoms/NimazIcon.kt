@@ -80,6 +80,41 @@ fun ContainedIcon(
 }
 
 /**
+ * Icon inside a rounded-square badge with explicit sizing.
+ *
+ * Unlike [ContainedIcon] (which derives its dimensions from [NimazIconSize]
+ * presets), this exposes raw container/icon/corner sizes so it can replace the
+ * many bespoke "Box { Icon }" chips scattered across cards and list items
+ * without changing their appearance.
+ */
+@Composable
+fun IconBadge(
+    imageVector: ImageVector,
+    backgroundColor: Color,
+    iconColor: Color,
+    modifier: Modifier = Modifier,
+    containerSize: Dp = 44.dp,
+    iconSize: Dp = 22.dp,
+    cornerRadius: Dp = 12.dp,
+    contentDescription: String? = null,
+) {
+    Box(
+        modifier = modifier
+            .size(containerSize)
+            .clip(RoundedCornerShape(cornerRadius))
+            .background(backgroundColor),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = contentDescription,
+            tint = iconColor,
+            modifier = Modifier.size(iconSize)
+        )
+    }
+}
+
+/**
  * Prayer icon with prayer-specific color.
  */
 @Composable

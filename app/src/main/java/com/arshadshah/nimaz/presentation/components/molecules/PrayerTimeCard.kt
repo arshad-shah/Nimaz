@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -93,24 +94,15 @@ fun PrayerTimeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Prayer Icon
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(
-                            prayerColor.copy(
-                                alpha = if (prayer.isPassed && !isActive) 0.12f else 0.2f
-                            )
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = getPrayerIcon(prayer.type),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(26.dp)
-                    )
-                }
+                IconBadge(
+                    imageVector = getPrayerIcon(prayer.type),
+                    backgroundColor = prayerColor.copy(
+                        alpha = if (prayer.isPassed && !isActive) 0.12f else 0.2f
+                    ),
+                    iconColor = MaterialTheme.colorScheme.onSurface,
+                    containerSize = 44.dp,
+                    iconSize = 26.dp,
+                )
 
                 Spacer(modifier = Modifier.width(14.dp))
 

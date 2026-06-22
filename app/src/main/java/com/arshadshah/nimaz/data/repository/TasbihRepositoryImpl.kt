@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.domain.model.TasbihStats
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import kotlinx.coroutines.flow.Flow
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -22,28 +23,20 @@ class TasbihRepositoryImpl @Inject constructor(
 ) : TasbihRepository {
 
     override fun getAllPresets(): Flow<List<TasbihPreset>> {
-        return tasbihDao.getAllPresets().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getAllPresets().mapItems { it.toDomain() }
     }
 
     override fun getDefaultPresets(): Flow<List<TasbihPreset>> {
-        return tasbihDao.getDefaultPresets().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getDefaultPresets().mapItems { it.toDomain() }
     }
 
     override fun getCustomPresets(): Flow<List<TasbihPreset>> {
-        return tasbihDao.getCustomPresets().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getCustomPresets().mapItems { it.toDomain() }
     }
 
     override fun getPresetsByCategory(category: TasbihCategory): Flow<List<TasbihPreset>> {
         // No category column in database, filter in memory
-        return tasbihDao.getAllPresets().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getAllPresets().mapItems { it.toDomain() }
     }
 
     override suspend fun getPresetById(id: Long): TasbihPreset? {
@@ -63,21 +56,15 @@ class TasbihRepositoryImpl @Inject constructor(
     }
 
     override fun getSessionsForDate(date: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsForDate(date).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getSessionsForDate(date).mapItems { it.toDomain() }
     }
 
     override fun getSessionsInRange(startDate: Long, endDate: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsInRange(startDate, endDate).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getSessionsInRange(startDate, endDate).mapItems { it.toDomain() }
     }
 
     override fun getSessionsForPreset(presetId: Long): Flow<List<TasbihSession>> {
-        return tasbihDao.getSessionsForPreset(presetId).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return tasbihDao.getSessionsForPreset(presetId).mapItems { it.toDomain() }
     }
 
     override suspend fun getSessionById(id: Long): TasbihSession? {

@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -49,19 +50,19 @@ class KhatamRepositoryImpl @Inject constructor(
     }
 
     override fun observeInProgressKhatams(): Flow<List<Khatam>> {
-        return khatamDao.observeInProgressKhatams().map { list -> list.map { it.toDomain() } }
+        return khatamDao.observeInProgressKhatams().mapItems { it.toDomain() }
     }
 
     override fun observeCompletedKhatams(): Flow<List<Khatam>> {
-        return khatamDao.observeCompletedKhatams().map { list -> list.map { it.toDomain() } }
+        return khatamDao.observeCompletedKhatams().mapItems { it.toDomain() }
     }
 
     override fun observeAbandonedKhatams(): Flow<List<Khatam>> {
-        return khatamDao.observeAbandonedKhatams().map { list -> list.map { it.toDomain() } }
+        return khatamDao.observeAbandonedKhatams().mapItems { it.toDomain() }
     }
 
     override fun observeAllKhatams(): Flow<List<Khatam>> {
-        return khatamDao.observeAllKhatams().map { list -> list.map { it.toDomain() } }
+        return khatamDao.observeAllKhatams().mapItems { it.toDomain() }
     }
 
     override suspend fun setActiveKhatam(khatamId: Long) {

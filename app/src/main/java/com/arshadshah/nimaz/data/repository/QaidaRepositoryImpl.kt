@@ -21,6 +21,7 @@ import com.arshadshah.nimaz.domain.model.QaidaLine
 import com.arshadshah.nimaz.domain.model.QaidaLineContent
 import com.arshadshah.nimaz.domain.model.TokenType
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.json.JSONArray
@@ -34,7 +35,7 @@ class QaidaRepositoryImpl @Inject constructor(
 
     // ── Lessons ───────────────────────────────────────────────────────────
     override fun getLessons(): Flow<List<QaidaLesson>> {
-        return qaidaDao.getAllLessons().map { entities -> entities.map { it.toDomain() } }
+        return qaidaDao.getAllLessons().mapItems { it.toDomain() }
     }
 
     override suspend fun getLesson(lessonId: Int): QaidaLesson? {
@@ -47,7 +48,7 @@ class QaidaRepositoryImpl @Inject constructor(
 
     // ── Letters ───────────────────────────────────────────────────────────
     override fun getLetters(): Flow<List<QaidaLetter>> {
-        return qaidaDao.getAllLetters().map { entities -> entities.map { it.toDomain() } }
+        return qaidaDao.getAllLetters().mapItems { it.toDomain() }
     }
 
     override suspend fun getLetter(letterId: Int): QaidaLetter? {
@@ -61,7 +62,7 @@ class QaidaRepositoryImpl @Inject constructor(
 
     override fun getCellsForLesson(lessonId: Int): Flow<List<QaidaCell>> {
         return qaidaDao.getCellsForLesson(lessonId)
-            .map { entities -> entities.map { it.toDomain() } }
+            .mapItems { it.toDomain() }
     }
 
     override suspend fun getCellCountForLesson(lessonId: Int): Int {
@@ -70,7 +71,7 @@ class QaidaRepositoryImpl @Inject constructor(
 
     // ── Lesson progress ─────────────────────────────────────────────────────
     override fun getAllProgress(): Flow<List<QaidaLessonProgress>> {
-        return qaidaDao.getAllProgress().map { entities -> entities.map { it.toDomain() } }
+        return qaidaDao.getAllProgress().mapItems { it.toDomain() }
     }
 
     override fun observeLessonProgress(lessonId: Int): Flow<QaidaLessonProgress?> {
@@ -92,7 +93,7 @@ class QaidaRepositoryImpl @Inject constructor(
 
     override fun observeCellProgressForLesson(lessonId: Int): Flow<List<QaidaCellProgress>> {
         return qaidaDao.getCellProgressForLesson(lessonId)
-            .map { entities -> entities.map { it.toDomain() } }
+            .mapItems { it.toDomain() }
     }
 
     override suspend fun getCompletedCellCount(lessonId: Int): Int {

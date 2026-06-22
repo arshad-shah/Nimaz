@@ -34,10 +34,13 @@ import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
+import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
+import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 
 class PrayerTrackerWidget : GlanceAppWidget() {
@@ -63,30 +66,11 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
     val primaryColor = ColorProvider(R.color.widget_primary)
 
     when (state) {
-        is PrayerTrackerWidgetState.Loading -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    CircularProgressIndicator()
-                    Spacer(modifier = GlanceModifier.height(8.dp))
-                    Text(
-                        text = context.getString(R.string.widget_loading),
-                        style = TextStyle(
-                            color = textSecondary,
-                            fontSize = 12.sp
-                        )
-                    )
-                }
-            }
-        }
+        is PrayerTrackerWidgetState.Loading -> WidgetLoadingBox(
+            background = backgroundColor,
+            textSecondary = textSecondary,
+            onClick = actionStartActivity<MainActivity>(),
+        )
 
         is PrayerTrackerWidgetState.Success -> {
             PrayerTrackerSuccessContent(
@@ -99,34 +83,28 @@ private fun PrayerTrackerContent(context: Context, state: PrayerTrackerWidgetSta
             )
         }
 
-        is PrayerTrackerWidgetState.Error -> {
-            Box(
-                modifier = GlanceModifier
-                    .fillMaxSize()
-                    .background(backgroundColor)
-                    .cornerRadius(16.dp)
-                    .clickable(actionStartActivity<MainActivity>()),
-                contentAlignment = Alignment.Center
+        is PrayerTrackerWidgetState.Error -> WidgetMessageBox(
+            background = backgroundColor,
+            onClick = actionStartActivity<MainActivity>(),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = context.getString(R.string.widget_error_loading),
-                        style = TextStyle(
-                            color = textSecondary,
-                            fontSize = 12.sp
-                        )
+                Text(
+                    text = context.getString(R.string.widget_error_loading),
+                    style = TextStyle(
+                        color = textSecondary,
+                        fontSize = 12.sp
                     )
-                    Spacer(modifier = GlanceModifier.height(4.dp))
-                    Text(
-                        text = context.getString(R.string.widget_tap_to_retry),
-                        style = TextStyle(
-                            color = primaryColor,
-                            fontSize = 10.sp
-                        )
+                )
+                Spacer(modifier = GlanceModifier.height(4.dp))
+                Text(
+                    text = context.getString(R.string.widget_tap_to_retry),
+                    style = TextStyle(
+                        color = primaryColor,
+                        fontSize = 10.sp
                     )
-                }
+                )
             }
         }
     }
@@ -273,7 +251,7 @@ private fun togglePrayerStatus(context: Context, prayerName: String) {
             val prayerDao = entryPoint.prayerDao()
 
             val today = LocalDate.now()
-            val todayEpoch = today.toEpochDay() * 86400000L
+            val todayEpoch = today.toUtcMidnightMillis()
 
             // Get current record
             val currentRecord = prayerDao.getPrayerRecord(todayEpoch, prayerName)

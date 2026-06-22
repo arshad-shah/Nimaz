@@ -3,17 +3,12 @@ package com.arshadshah.nimaz.widget.hijricalendar
 import android.content.Context
 import androidx.glance.GlanceId
 import androidx.glance.appwidget.GlanceAppWidgetManager
-import androidx.glance.appwidget.state.updateAppWidgetState
-import androidx.glance.appwidget.updateAll
 import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
-import androidx.work.ExistingPeriodicWorkPolicy
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.PeriodicWorkRequestBuilder
-import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.widget.core.WidgetWork
+import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
@@ -30,48 +25,24 @@ class HijriCalendarWorker @AssistedInject constructor(
     companion object {
         private const val UNIQUE_WORK_NAME = "HijriCalendarWorker"
         private const val ONE_TIME_WORK_NAME = "HijriCalendarWorkerOneTime"
+        private val REFRESH_INTERVAL: Duration = Duration.ofHours(6)
 
-        fun enqueuePeriodicWork(context: Context, force: Boolean = false) {
-            val manager = WorkManager.getInstance(context)
-            val request = PeriodicWorkRequestBuilder<HijriCalendarWorker>(
-                Duration.ofHours(6)
-            ).build()
+        fun enqueuePeriodicWork(context: Context, force: Boolean = false) =
+            WidgetWork.enqueuePeriodic<HijriCalendarWorker>(
+                context, UNIQUE_WORK_NAME, REFRESH_INTERVAL, force
+            )
 
-            val policy = if (force) {
-                ExistingPeriodicWorkPolicy.CANCEL_AND_REENQUEUE
-            } else {
-                ExistingPeriodicWorkPolicy.KEEP
-            }
+        fun enqueueImmediateWork(context: Context) =
+            WidgetWork.enqueueImmediate<HijriCalendarWorker>(context, ONE_TIME_WORK_NAME)
 
-            manager.enqueueUniquePeriodicWork(UNIQUE_WORK_NAME, policy, request)
-        }
-
-        fun enqueueImmediateWork(context: Context) {
-            val manager = WorkManager.getInstance(context)
-            val request = OneTimeWorkRequestBuilder<HijriCalendarWorker>().build()
-            manager.enqueueUniqueWork(ONE_TIME_WORK_NAME, ExistingWorkPolicy.REPLACE, request)
-        }
-
-        fun cancel(context: Context) {
-            WorkManager.getInstance(context).cancelUniqueWork(UNIQUE_WORK_NAME)
-            WorkManager.getInstance(context).cancelUniqueWork(ONE_TIME_WORK_NAME)
-        }
+        fun cancel(context: Context) =
+            WidgetWork.cancel(context, UNIQUE_WORK_NAME, ONE_TIME_WORK_NAME)
     }
 
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: HijriCalendarWidgetState
-    ) {
-        glanceIds.forEach { glanceId ->
-            updateAppWidgetState(
-                context = context,
-                definition = HijriCalendarStateDefinition,
-                glanceId = glanceId,
-                updateState = { newState }
-            )
-        }
-        HijriCalendarWidget().updateAll(context)
-    }
+    ) = updateWidgetState(context, HijriCalendarWidget(), HijriCalendarStateDefinition, glanceIds, newState)
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)

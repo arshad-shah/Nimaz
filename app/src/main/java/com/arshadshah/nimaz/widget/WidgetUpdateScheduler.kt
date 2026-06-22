@@ -8,6 +8,7 @@ import android.content.Intent
 import android.os.SystemClock
 import android.util.Log
 import androidx.glance.appwidget.updateAll
+import com.arshadshah.nimaz.widget.core.formatWidgetCountdown
 import com.arshadshah.nimaz.widget.nextprayer.NextPrayerWidget
 import com.arshadshah.nimaz.widget.prayertimes.PrayerTimesWidget
 import kotlinx.coroutines.CoroutineScope
@@ -68,20 +69,8 @@ object WidgetUpdateScheduler {
      */
     fun computeCountdown(targetEpochMillis: Long): String {
         if (targetEpochMillis <= 0L) return "—"
-        val now = System.currentTimeMillis()
-        val diff = targetEpochMillis - now
-        if (diff <= 0L) return "—"
-
-        val totalSeconds = diff / 1000
-        val hours = totalSeconds / 3600
-        val minutes = (totalSeconds % 3600) / 60
-        val seconds = totalSeconds % 60
-
-        return when {
-            hours > 0 -> "${hours}h ${minutes}m"
-            minutes > 0 -> "${minutes}m ${seconds}s"
-            else -> "${seconds}s"
-        }
+        val diff = targetEpochMillis - System.currentTimeMillis()
+        return formatWidgetCountdown(diff / 1000)
     }
 }
 

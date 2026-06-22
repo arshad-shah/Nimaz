@@ -11,6 +11,7 @@ import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.domain.repository.FastingRepository
+import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
@@ -26,27 +27,19 @@ class FastingRepositoryImpl @Inject constructor(
     }
 
     override fun getFastRecordsInRange(startDate: Long, endDate: Long): Flow<List<FastRecord>> {
-        return fastingDao.getFastRecordsInRange(startDate, endDate).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getFastRecordsInRange(startDate, endDate).mapItems { it.toDomain() }
     }
 
     override fun getFastRecordsByHijriMonth(hijriMonth: Int): Flow<List<FastRecord>> {
-        return fastingDao.getFastRecordsByHijriMonth(hijriMonth).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getFastRecordsByHijriMonth(hijriMonth).mapItems { it.toDomain() }
     }
 
     override fun getFastRecordsByType(fastType: FastType): Flow<List<FastRecord>> {
-        return fastingDao.getFastRecordsByType(fastType.name.lowercase()).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getFastRecordsByType(fastType.name.lowercase()).mapItems { it.toDomain() }
     }
 
     override fun getFastRecordsByStatus(status: FastStatus): Flow<List<FastRecord>> {
-        return fastingDao.getFastRecordsByStatus(status.name.lowercase()).map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getFastRecordsByStatus(status.name.lowercase()).mapItems { it.toDomain() }
     }
 
     override suspend fun insertFastRecord(record: FastRecord) {
@@ -74,15 +67,11 @@ class FastingRepositoryImpl @Inject constructor(
     }
 
     override fun getPendingMakeupFasts(): Flow<List<MakeupFast>> {
-        return fastingDao.getPendingMakeupFasts().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getPendingMakeupFasts().mapItems { it.toDomain() }
     }
 
     override fun getAllMakeupFasts(): Flow<List<MakeupFast>> {
-        return fastingDao.getAllMakeupFasts().map { entities ->
-            entities.map { it.toDomain() }
-        }
+        return fastingDao.getAllMakeupFasts().mapItems { it.toDomain() }
     }
 
     override suspend fun getMakeupFastById(id: Long): MakeupFast? {
