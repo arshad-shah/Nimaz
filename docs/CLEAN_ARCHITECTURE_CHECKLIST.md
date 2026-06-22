@@ -29,12 +29,11 @@ unit-test the domain without Room on the classpath.
 grep -rlnE "import com.arshadshah.nimaz.data\." app/src/main/java/com/arshadshah/nimaz/domain/
 ```
 
-- [ ] **`PageAyahRange` leak.** `domain/repository/QuranRepository.kt` and
-  `domain/usecase/QuranUseCases.kt` import `data.local.database.dao.PageAyahRange` (a class
-  declared inside `QuranDao`). **Fix:** add a `PageAyahRange` (or `AyahRange`) model in
-  `domain/model/QuranModels.kt`, have the repository return that, and map from the DAO type in
-  `QuranRepositoryImpl`. Then update `QuranUseCases`, `QuranViewModel`, and `QuranPageGrid`
-  (see AP-2) to the domain type.
+- [x] ~~**`PageAyahRange` leak.**~~ **Resolved.** Added `PageAyahRange` to
+  `domain/model/QuranModels.kt`; the Room projection was renamed to `PageAyahRangeRow` (kept in
+  `QuranDao`) and `QuranRepositoryImpl` maps row → domain via `toDomain()`. `QuranRepository`,
+  `QuranUseCases`, `QuranViewModel`, and `QuranPageGrid` now use the domain type. `domain/`
+  imports nothing from `data/`.
 
 ---
 
@@ -58,10 +57,8 @@ grep -rlnE "private val [a-zA-Z]+: [A-Za-z]+(Dao|RepositoryImpl)" \
   "daily hadith / daily dua of the day" features. This is entangled with seeders and DB integer
   ids — **see AP-4** for the proper fix (extract use cases). Removing the DAO injections here
   resolves both AP-2 and AP-4 for Home.
-- [ ] **`QuranViewModel` imports `PageAyahRange`** (DAO type). Fixed automatically once AP-1 is
-  done and the VM switches to the domain type.
-- [ ] **`QuranPageGrid` (organism) imports `PageAyahRange`** (DAO type). Same fix as AP-1; a UI
-  component should never reference a DAO-defined type.
+- [x] ~~**`QuranViewModel` imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
+- [x] ~~**`QuranPageGrid` (organism) imports `PageAyahRange`** (DAO type).~~ **Resolved** with AP-1.
 
 ---
 

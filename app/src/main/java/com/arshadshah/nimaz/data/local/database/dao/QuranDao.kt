@@ -15,7 +15,7 @@ import com.arshadshah.nimaz.data.local.database.entity.SurahInfoEntity
 import com.arshadshah.nimaz.data.local.database.entity.TranslationEntity
 import kotlinx.coroutines.flow.Flow
 
-data class PageAyahRange(
+data class PageAyahRangeRow(
     val page: Int,
     val minAyahId: Int,
     val maxAyahId: Int,
@@ -57,7 +57,7 @@ interface QuranDao {
     fun getAyahsByPage(pageNumber: Int): Flow<List<AyahEntity>>
 
     @Query("SELECT page, MIN(id) AS minAyahId, MAX(id) AS maxAyahId, COUNT(id) AS ayahCount FROM ayahs GROUP BY page ORDER BY page ASC")
-    suspend fun getPageAyahRanges(): List<PageAyahRange>
+    suspend fun getPageAyahRanges(): List<PageAyahRangeRow>
 
     @Query("SELECT * FROM ayahs WHERE sajda_type IS NOT NULL ORDER BY id ASC")
     fun getSajdaAyahs(): Flow<List<AyahEntity>>

@@ -56,6 +56,14 @@ data class QuranBookmark(
     val updatedAt: Long
 )
 
+/** The span of ayah ids that make up a single mushaf page. */
+data class PageAyahRange(
+    val page: Int,
+    val minAyahId: Int,
+    val maxAyahId: Int,
+    val ayahCount: Int
+)
+
 data class ReadingProgress(
     val lastReadSurah: Int,
     val lastReadAyah: Int,
