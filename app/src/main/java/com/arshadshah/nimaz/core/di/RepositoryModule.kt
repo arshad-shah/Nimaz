@@ -22,6 +22,7 @@ import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.FastingRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HadithRepositoryImpl
 import com.arshadshah.nimaz.data.repository.HelpRepositoryImpl
+import com.arshadshah.nimaz.data.repository.IslamicEventRepositoryImpl
 import com.arshadshah.nimaz.data.repository.KhatamRepositoryImpl
 import com.arshadshah.nimaz.data.repository.PrayerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ProphetRepositoryImpl
@@ -36,6 +37,7 @@ import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
 import com.arshadshah.nimaz.domain.repository.HelpRepository
+import com.arshadshah.nimaz.domain.repository.IslamicEventRepository
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
@@ -222,6 +224,12 @@ import com.arshadshah.nimaz.domain.usecase.AddNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.ExportAnnotationsUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
+import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -364,6 +372,12 @@ abstract class RepositoryModule {
     abstract fun bindQaidaRepository(
         qaidaRepositoryImpl: QaidaRepositoryImpl
     ): QaidaRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindIslamicEventRepository(
+        islamicEventRepositoryImpl: IslamicEventRepositoryImpl
+    ): IslamicEventRepository
 }
 
 @Module
@@ -549,7 +563,9 @@ object UseCaseModule {
             getProgressForDate = GetProgressForDateUseCase(repository),
             isDuaFavorite = IsDuaFavoriteUseCase(repository),
             searchDuas = SearchDuasUseCase(repository),
-            toggleFavorite = ToggleDuaFavoriteUseCase(repository)
+            toggleFavorite = ToggleDuaFavoriteUseCase(repository),
+            getAllBookmarks = GetDuaBookmarksUseCase(repository),
+            deleteBookmark = DeleteDuaBookmarkUseCase(repository)
         )
     }
     @Provides
@@ -571,7 +587,9 @@ object UseCaseModule {
             searchHadithsInBook = SearchHadithsInBookUseCase(repository),
             getAllBookmarks = GetAllBookmarksUseCase(repository),
             isHadithBookmarked = IsHadithBookmarkedUseCase(repository),
-            toggleBookmark = ToggleBookmarkUseCase(repository)
+            toggleBookmark = ToggleBookmarkUseCase(repository),
+            updateBookmark = UpdateHadithBookmarkUseCase(repository),
+            deleteBookmark = DeleteHadithBookmarkUseCase(repository)
         )
     }
     @Provides
@@ -654,6 +672,16 @@ object UseCaseModule {
             updateNote = UpdateNoteUseCase(repository),
             deleteNote = DeleteNoteUseCase(repository),
             exportAnnotations = ExportAnnotationsUseCase(repository)
+        )
+    }
+
+    @Provides
+    @Singleton
+    fun provideIslamicEventUseCases(
+        repository: IslamicEventRepository
+    ): IslamicEventUseCases {
+        return IslamicEventUseCases(
+            getAllEvents = GetAllIslamicEventsUseCase(repository)
         )
     }
 }

@@ -3,13 +3,11 @@ package com.arshadshah.nimaz.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.data.local.database.dao.IslamicEventDao
-import com.arshadshah.nimaz.data.local.database.entity.IslamicEventEntity
 import com.arshadshah.nimaz.domain.model.CalendarDay
 import com.arshadshah.nimaz.domain.model.CalendarMonth
 import com.arshadshah.nimaz.domain.model.HijriDate
 import com.arshadshah.nimaz.domain.model.IslamicEvent
-import com.arshadshah.nimaz.domain.model.IslamicEventType
+import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -70,7 +68,7 @@ sealed interface CalendarEvent {
 
 @HiltViewModel
 class CalendarViewModel @Inject constructor(
-    private val islamicEventDao: IslamicEventDao
+    private val islamicEventUseCases: IslamicEventUseCases
 ) : ViewModel() {
 
     private var cachedEvents: List<IslamicEvent> = emptyList()
@@ -94,9 +92,7 @@ class CalendarViewModel @Inject constructor(
     private fun loadEventsFromDatabase() {
         viewModelScope.launch {
             try {
-                cachedEvents = islamicEventDao.getAllEvents()
-                    .first()
-                    .map { it.toDomainModel() }
+                cachedEvents = islamicEventUseCases.getAllEvents().first()
                 loadToday()
                 loadUpcomingEvents()
             } catch (e: Exception) {
@@ -373,25 +369,3 @@ class CalendarViewModel @Inject constructor(
     }
 }
 
-private fun IslamicEventEntity.toDomainModel(): IslamicEvent {
-    return IslamicEvent(
-        id = id.toString(),
-        nameArabic = nameArabic,
-        nameEnglish = nameEnglish,
-        description = description,
-        hijriMonth = hijriMonth,
-        hijriDay = hijriDay,
-        eventType = try {
-            IslamicEventType.valueOf(eventType.uppercase())
-        } catch (_: IllegalArgumentException) {
-            IslamicEventType.HOLIDAY
-        },
-        isHoliday = isHoliday == 1,
-        isFastingDay = eventType.equals("fast", ignoreCase = true),
-        isNightOfPower = eventType.equals("night", ignoreCase = true),
-        gregorianDate = null,
-        year = null,
-        notes = null,
-        priority = 0
-    )
-}

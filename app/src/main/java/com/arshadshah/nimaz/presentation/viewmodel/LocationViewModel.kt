@@ -13,7 +13,7 @@ import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
-import com.arshadshah.nimaz.domain.repository.PrayerRepository
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
@@ -88,7 +88,7 @@ sealed interface LocationEvent {
 class LocationViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val preferencesDataStore: PreferencesDataStore,
-    private val prayerRepository: PrayerRepository
+    private val prayerUseCases: PrayerUseCases
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(LocationUiState())
@@ -149,7 +149,7 @@ class LocationViewModel @Inject constructor(
     private fun loadRecentLocations() {
         viewModelScope.launch {
             try {
-                prayerRepository.getAllLocations().collect { locations ->
+                prayerUseCases.getAllLocations().collect { locations ->
                     val recentLocations = locations
                         .map { location ->
                             SearchLocation(
@@ -264,7 +264,7 @@ class LocationViewModel @Inject constructor(
                     fajrAngle = null,
                     ishaAngle = null
                 )
-                prayerRepository.insertLocation(domainLocation)
+                prayerUseCases.insertLocation(domainLocation)
 
                 // Update state
                 _state.update {

@@ -102,9 +102,6 @@ sealed interface Route {
     @Serializable
     data object FastingStats : Route
 
-    @Serializable
-    data object MakeupFasts : Route
-
     // Tasbih screens
     @Serializable
     data object TasbihHome : Route
