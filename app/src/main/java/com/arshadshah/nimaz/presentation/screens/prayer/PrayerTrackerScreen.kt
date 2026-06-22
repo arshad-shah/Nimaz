@@ -69,16 +69,17 @@ import com.arshadshah.nimaz.presentation.components.molecules.calendar.Indicator
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
+import com.arshadshah.nimaz.core.util.formatClock
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -535,7 +536,7 @@ private fun SelectedDayDetail(
                     }
 
                     val prayerTimeFormatted =
-                        prayerDateTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
+                        prayerDateTime?.formatClock(LocalUse24HourFormat.current)
 
                     // Determine if prayer should show as missed based on time
                     val isPrayerTimePassed = when {

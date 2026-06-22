@@ -64,6 +64,7 @@ class PrayerTimesWorker @AssistedInject constructor(
             val latitude = preferencesDataStore.latitude.first().takeIf { it != 0.0 } ?: 53.3498
             val longitude = preferencesDataStore.longitude.first().takeIf { it != 0.0 } ?: -6.2603
             val locationName = preferencesDataStore.locationName.first()
+            val use24Hour = preferencesDataStore.use24HourFormat.first()
                 .takeIf { it.isNotBlank() }
                 ?.split(",")
                 ?.firstOrNull()
@@ -91,7 +92,7 @@ class PrayerTimesWorker @AssistedInject constructor(
             fun formatPrayer(prayerTime: com.arshadshah.nimaz.domain.model.PrayerTime?): String =
                 prayerTime?.let {
                     val local = it.time.toLocalDateTime(timeZone)
-                    formatWidgetTime(local.hour, local.minute)
+                    formatWidgetTime(local.hour, local.minute, use24Hour = use24Hour)
                 } ?: "—"
 
             val nextPrayer = prayerTimes.firstOrNull { prayerTime ->

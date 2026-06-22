@@ -34,10 +34,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlinx.coroutines.delay
@@ -64,13 +66,16 @@ fun HomeHero(
     timeUntilNextPrayer: String,
     modifier: Modifier = Modifier
 ) {
+    val use24Hour = LocalUse24HourFormat.current
     var timeOfDay by remember { mutableFloatStateOf(minuteFractionNow()) }
-    var clock by remember { mutableStateOf(clockLabelNow()) }
-    LaunchedEffect(Unit) {
+    var clock by remember(use24Hour) {
+        mutableStateOf(LocalTime.now().let { formatClockTime(it.hour, it.minute, use24Hour) })
+    }
+    LaunchedEffect(use24Hour) {
         while (true) {
             val now = LocalTime.now()
             timeOfDay = (now.hour * 60 + now.minute) / 1440f
-            clock = formatClock12(now.hour, now.minute)
+            clock = formatClockTime(now.hour, now.minute, use24Hour)
             delay(30_000)
         }
     }
@@ -192,17 +197,6 @@ fun HomeHero(
 private fun minuteFractionNow(): Float {
     val now = LocalTime.now()
     return (now.hour * 60 + now.minute) / 1440f
-}
-
-private fun clockLabelNow(): String {
-    val now = LocalTime.now()
-    return formatClock12(now.hour, now.minute)
-}
-
-private fun formatClock12(hour: Int, minute: Int): String {
-    val h = if (hour % 12 == 0) 12 else hour % 12
-    val amPm = if (hour >= 12) "PM" else "AM"
-    return String.format("%d:%02d %s", h, minute, amPm)
 }
 
 /** Sky-banner height — matches the original hero's height. */

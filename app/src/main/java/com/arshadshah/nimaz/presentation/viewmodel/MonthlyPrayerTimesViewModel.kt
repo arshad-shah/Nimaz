@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -29,7 +30,9 @@ data class DayPrayerTimes(
     val dhuhr: String,
     val asr: String,
     val maghrib: String,
-    val isha: String
+    val isha: String,
+    /** Fasting length (Fajr → Maghrib) in minutes; null if unavailable. */
+    val fastMinutes: Int? = null
 )
 
 data class MonthlyPrayerTimesUiState(
@@ -67,8 +70,20 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
     private var highLatRule: HighLatitudeRule? = null
     private var adjustments = mapOf<PrayerType, Int>()
 
+    private var use24HourFormat: Boolean = false
+
     init {
         observeSettings()
+        observeTimeFormat()
+    }
+
+    private fun observeTimeFormat() {
+        viewModelScope.launch {
+            settingsRepository.use24HourFormat.collect { enabled ->
+                use24HourFormat = enabled
+                calculateMonth() // re-format the month's times in the new clock style
+            }
+        }
     }
 
     fun onEvent(event: MonthlyPrayerTimesEvent) {
@@ -215,10 +230,19 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         fun fmt(type: PrayerType): String {
             val instant = timesMap[type] ?: return "--:--"
             val local = instant.toLocalDateTime(tz)
-            val h =
-                if (local.hour > 12) local.hour - 12 else if (local.hour == 0) 12 else local.hour
-            val amPm = if (local.hour >= 12) "PM" else "AM"
-            return String.format("%d:%02d %s", h, local.minute, amPm)
+            return formatClockTime(local.hour, local.minute, use24HourFormat)
+        }
+        // Fasting length (Fajr → Maghrib), computed from the raw times so it is
+        // independent of the display clock format / locale.
+        val fajrLocal = timesMap[PrayerType.FAJR]?.toLocalDateTime(tz)
+        val maghribLocal = timesMap[PrayerType.MAGHRIB]?.toLocalDateTime(tz)
+        val fastMinutes = if (fajrLocal != null && maghribLocal != null) {
+            var mins = (maghribLocal.hour * 60 + maghribLocal.minute) -
+                (fajrLocal.hour * 60 + fajrLocal.minute)
+            if (mins < 0) mins += 24 * 60
+            mins
+        } else {
+            null
         }
         return DayPrayerTimes(
             date = date,
@@ -228,6 +252,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
             asr = fmt(PrayerType.ASR),
             maghrib = fmt(PrayerType.MAGHRIB),
             isha = fmt(PrayerType.ISHA),
+            fastMinutes = fastMinutes,
         )
     }
 

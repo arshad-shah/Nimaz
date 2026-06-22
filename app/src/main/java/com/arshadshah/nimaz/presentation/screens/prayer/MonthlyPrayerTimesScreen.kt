@@ -78,13 +78,10 @@ import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
 import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
-import java.time.Duration
+import com.arshadshah.nimaz.core.util.formatFastLength
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -104,6 +101,7 @@ fun MonthlyPrayerTimesScreen(
                 PrayerTimesPdfExporter.Row(
                     it.date,
                     listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
+                    fastMinutes = it.fastMinutes,
                 )
             }
             val file = PrayerTimesPdfExporter.export(
@@ -453,7 +451,7 @@ private fun DayPrayerCard(
     val event = IslamicEvents.events
         .filter { it.hijriMonth == hijri.month && it.hijriDay == hijri.day }
         .maxByOrNull { it.priority }
-    val fast = if (hijri.month == 9) fastDuration(dayTimes.fajr, dayTimes.maghrib) else null
+    val fast = if (hijri.month == 9) dayTimes.fastMinutes?.let { formatFastLength(it) } else null
 
     Surface(
         onClick = onClick,
@@ -593,17 +591,6 @@ private fun eventAccent(type: IslamicEventType): Color = when (type) {
     IslamicEventType.FAST -> NimazColors.Primary
     IslamicEventType.HISTORICAL -> NimazColors.PrayerColors.Fajr
 }
-
-/** Fast length from a formatted Fajr → Maghrib pair ("h:mm a"); null if unparseable. */
-private fun fastDuration(fajr: String, maghrib: String): String? = runCatching {
-    val f = LocalTime.parse(fajr.trim(), TIME_FMT)
-    val m = LocalTime.parse(maghrib.trim(), TIME_FMT)
-    var mins = Duration.between(f, m).toMinutes()
-    if (mins < 0) mins += 24 * 60
-    "${mins / 60}h ${"%02d".format(mins % 60)}m"
-}.getOrNull()
-
-private val TIME_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
 
 @Composable
 private fun DayBadge(

@@ -254,6 +254,16 @@ no deps). All third-party usage is isolated here.
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl` and (a deviation from the use-case rule) directly into several ViewModels, widget workers, and `PrayerNotificationScheduler`.
 
+**Display formatting.** Wall-clock times are rendered through `core/util/TimeFormatting.kt`
+(`formatClockTime(hour, minute, use24Hour)` + `LocalTime`/`LocalDateTime.formatClock(...)`),
+never via ad-hoc `String.format("%d:%02d %s", …, "AM"/"PM")` or `Locale.US`-pinned formatters.
+It uses the **default locale** (localized am/pm marker and digits — Nimaz is worldwide) and
+honors the user's `use24HourFormat` preference. In composables read the preference from
+`LocalUse24HourFormat.current`; in ViewModels collect `settingsRepository.use24HourFormat`
+(see `HomeViewModel.observeTimeFormat`) and recompute. Durations (e.g. fasting length) use
+`formatFastLength(minutes)` and are computed from **raw** times — never by re-parsing already
+formatted strings.
+
 ---
 
 ## 9. App initialization & monitoring

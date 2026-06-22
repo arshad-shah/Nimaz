@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
@@ -99,6 +100,7 @@ class PrayerTimesViewModel @Inject constructor(
 
     init {
         observeSettings()
+        observeTimeFormat()
         startTicker()
     }
 
@@ -370,11 +372,19 @@ class PrayerTimesViewModel @Inject constructor(
     }
 
     // ── formatting helpers ──────────────────────────────────────────────
-    private fun formatClock12(hour: Int, minute: Int): String {
-        val h = if (hour % 12 == 0) 12 else hour % 12
-        val amPm = if (hour >= 12) "PM" else "AM"
-        return String.format("%d:%02d %s", h, minute, amPm)
+    private var use24HourFormat: Boolean = false
+
+    private fun observeTimeFormat() {
+        viewModelScope.launch {
+            settingsRepository.use24HourFormat.collect { enabled ->
+                use24HourFormat = enabled
+                recomputeDay() // re-format the day's times in the new clock style
+            }
+        }
     }
+
+    private fun formatClock12(hour: Int, minute: Int): String =
+        formatClockTime(hour, minute, use24HourFormat)
 
     private fun formatCountdown(totalSeconds: Long): String {
         val s = if (totalSeconds < 0) 0 else totalSeconds

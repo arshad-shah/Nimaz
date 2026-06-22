@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
@@ -637,15 +638,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private fun formatTime(hour: Int, minute: Int): String {
-        return if (use24HourFormat) {
-            String.format("%02d:%02d", hour, minute)
-        } else {
-            val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-            val amPm = if (hour >= 12) "PM" else "AM"
-            String.format("%d:%02d %s", h, minute, amPm)
-        }
-    }
+    private fun formatTime(hour: Int, minute: Int): String =
+        formatClockTime(hour, minute, use24HourFormat)
 
     private fun calculateHijriDate(): String {
         val hijriDate = HijriDateCalculator.today()

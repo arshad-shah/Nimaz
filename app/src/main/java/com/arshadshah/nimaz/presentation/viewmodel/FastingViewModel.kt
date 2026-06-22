@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.util.formatClockTime
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
@@ -29,7 +30,6 @@ import java.time.Duration
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 
 data class FastingTrackerUiState(
@@ -155,7 +155,7 @@ class FastingViewModel @Inject constructor(
     private var makeupPendingJob: Job? = null
     private var makeupAllJob: Job? = null
 
-    private val timeFormatter = DateTimeFormatter.ofPattern("h:mm a")
+    private var use24HourFormat: Boolean = false
 
     companion object {
         // Default location: Dublin, Ireland (fallback)
@@ -176,9 +176,11 @@ class FastingViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 settingsRepository.latitude,
-                settingsRepository.longitude
-            ) { lat, lng -> Pair(lat, lng) }
-                .collect { (lat, lng) ->
+                settingsRepository.longitude,
+                settingsRepository.use24HourFormat
+            ) { lat, lng, h24 -> Triple(lat, lng, h24) }
+                .collect { (lat, lng, h24) ->
+                    use24HourFormat = h24
                     val latitude = if (lat != 0.0) lat else DEFAULT_LATITUDE
                     val longitude = if (lng != 0.0) lng else DEFAULT_LONGITUDE
                     loadPrayerTimes(latitude, longitude)
@@ -230,15 +232,8 @@ class FastingViewModel @Inject constructor(
         }
     }
 
-    private fun formatTime(hour: Int, minute: Int): String {
-        val amPm = if (hour < 12) "AM" else "PM"
-        val displayHour = when {
-            hour == 0 -> 12
-            hour > 12 -> hour - 12
-            else -> hour
-        }
-        return String.format("%d:%02d %s", displayHour, minute, amPm)
-    }
+    private fun formatTime(hour: Int, minute: Int): String =
+        formatClockTime(hour, minute, use24HourFormat)
 
     private fun calculateCountdown(
         now: LocalDateTime,

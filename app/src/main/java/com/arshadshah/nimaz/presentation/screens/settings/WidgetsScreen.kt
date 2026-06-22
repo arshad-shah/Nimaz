@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -928,11 +929,6 @@ private fun getShortPrayerName(name: String): String {
         "isha" -> "Isha"
         else -> name.take(5)
     }
-}
-
-private fun formatWidgetTime(hour: Int, minute: Int): String {
-    val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-    return String.format("%d:%02d", h, minute)
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Next Prayer Widget Preview")

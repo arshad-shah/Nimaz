@@ -1,20 +1,28 @@
 package com.arshadshah.nimaz.widget.core
 
+import com.arshadshah.nimaz.core.util.formatClockTime
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
+
 /**
- * 12-hour clock formatting shared by the prayer widgets.
+ * Clock formatting shared by the prayer widgets, rendered in the device's
+ * default locale (localized am/pm marker and digits — Nimaz is worldwide).
  *
- * @param includeAmPm when true, appends " AM"/" PM" (used by the next-prayer
- *        widget); when false, returns a bare "h:mm" (used by the prayer-times
- *        grid).
+ * @param includeAmPm when true, appends the locale's am/pm marker (used by the
+ *        next-prayer widget); when false, returns a bare "h:mm" (used by the
+ *        compact prayer-times grid). Ignored when [use24Hour] is true.
+ * @param use24Hour the user's 24-hour-clock preference; renders "HH:mm".
  */
-fun formatWidgetTime(hour: Int, minute: Int, includeAmPm: Boolean = false): String {
-    val displayHour = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-    return if (includeAmPm) {
-        val amPm = if (hour >= 12) "PM" else "AM"
-        String.format("%d:%02d %s", displayHour, minute, amPm)
-    } else {
-        String.format("%d:%02d", displayHour, minute)
-    }
+fun formatWidgetTime(
+    hour: Int,
+    minute: Int,
+    includeAmPm: Boolean = false,
+    use24Hour: Boolean = false,
+): String {
+    if (use24Hour || includeAmPm) return formatClockTime(hour, minute, use24Hour)
+    // 12-hour without the am/pm marker — the grid is too narrow for it.
+    return LocalTime.of(hour.coerceIn(0, 23), minute.coerceIn(0, 59))
+        .format(DateTimeFormatter.ofPattern("h:mm"))
 }
 
 /**
