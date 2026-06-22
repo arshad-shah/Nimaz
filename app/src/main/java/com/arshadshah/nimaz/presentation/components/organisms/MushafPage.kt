@@ -30,7 +30,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
@@ -50,11 +49,12 @@ import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val MushafFrameColor = Color(0xFF0F766E)
-private val MushafFrameColorLight = Color(0xFF14B8A6)
-private val MushafGoldAccent = Color(0xFFEAB308)
+private val MushafFrameColor = NimazColors.QuranColors.CardBorder
+private val MushafFrameColorLight = NimazColors.QuranColors.CardAccentTeal
+private val MushafGoldAccent = NimazColors.QuranColors.CardAccentGold
 
 /**
  * Main Mushaf page component.

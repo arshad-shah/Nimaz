@@ -40,6 +40,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -161,7 +162,10 @@ internal fun BottomActions(
                         .clip(RoundedCornerShape(14.dp))
                         .background(
                             Brush.linearGradient(
-                                colors = listOf(Color(0xFF14B8A6), Color(0xFF0F766E))
+                                colors = listOf(
+                                    NimazColors.QuranColors.CardAccentTeal,
+                                    NimazColors.QuranColors.CardBorder
+                                )
                             )
                         )
                         .clickable(onClick = onStartReading)

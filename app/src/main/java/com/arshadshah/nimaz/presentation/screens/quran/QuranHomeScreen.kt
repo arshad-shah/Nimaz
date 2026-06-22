@@ -88,6 +88,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.JuzGrid
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.computeJuzHeaderIndices
 import com.arshadshah.nimaz.presentation.components.organisms.pageGridItems
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
@@ -325,8 +326,8 @@ private fun HomeTabContent(
                             .background(
                                 brush = Brush.linearGradient(
                                     colors = listOf(
-                                        Color(0xFF115E59),
-                                        Color(0xFF042F2E)
+                                        NimazColors.QuranColors.CardGradientStart,
+                                        NimazColors.QuranColors.CardGradientEnd
                                     )
                                 ),
                                 shape = RoundedCornerShape(20.dp)

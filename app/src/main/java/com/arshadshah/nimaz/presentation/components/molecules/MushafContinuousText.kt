@@ -34,9 +34,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val MushafLineColor = Color(0xFF0F766E).copy(alpha = 0.5f)
+private val MushafLineColor = NimazColors.QuranColors.CardBorder.copy(alpha = 0.5f)
 
 /**
  * Core component that renders continuous Arabic text with clickable ayah spans.

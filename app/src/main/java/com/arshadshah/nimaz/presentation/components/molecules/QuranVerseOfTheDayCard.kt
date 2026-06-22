@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -63,15 +64,15 @@ internal fun VerseOfTheDayCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
+                            NimazColors.QuranColors.CardGradientStart,
+                            NimazColors.QuranColors.CardGradientEnd
                         )
                     ),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.CardBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -84,14 +85,14 @@ internal fun VerseOfTheDayCard(
                     Icon(
                         imageVector = Icons.Default.AutoStories,
                         contentDescription = null,
-                        tint = Color(0xFFEAB308),
+                        tint = NimazColors.QuranColors.CardAccentGold,
                         modifier = Modifier.size(16.dp)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = stringResource(R.string.quran_home_verse_of_the_day),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF2DD4BF),
+                        color = NimazColors.QuranColors.CardAccentCyan,
                         letterSpacing = 1.5.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -123,7 +124,7 @@ internal fun VerseOfTheDayCard(
                     text = reference,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFEAB308)
+                    color = NimazColors.QuranColors.CardAccentGold
                 )
             }
         }

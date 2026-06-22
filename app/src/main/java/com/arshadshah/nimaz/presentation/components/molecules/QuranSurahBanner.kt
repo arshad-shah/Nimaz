@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -49,10 +50,10 @@ internal fun SurahBanner(
             .clip(RoundedCornerShape(20.dp))
             .background(
                 Brush.linearGradient(
-                    listOf(Color(0xFF115E59), Color(0xFF042F2E))
+                    listOf(NimazColors.QuranColors.CardGradientStart, NimazColors.QuranColors.CardGradientEnd)
                 )
             )
-            .border(1.dp, Color(0xFF0F766E), RoundedCornerShape(20.dp))
+            .border(1.dp, NimazColors.QuranColors.CardBorder, RoundedCornerShape(20.dp))
             .padding(25.dp)
     ) {
         Column(
@@ -62,7 +63,7 @@ internal fun SurahBanner(
             ArabicText(
                 text = surahNameArabic,
                 size = ArabicTextSize.EXTRA_LARGE,
-                color = Color(0xFFEAB308)
+                color = NimazColors.QuranColors.CardAccentGold
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -71,13 +72,13 @@ internal fun SurahBanner(
                 text = surahNameEnglish,
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.SemiBold,
-                color = Color(0xFFEAB308)
+                color = NimazColors.QuranColors.CardAccentGold
             )
 
             Text(
                 text = surahMeaning,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFFEAB308).copy(alpha = 0.8f)
+                color = NimazColors.QuranColors.CardAccentGold.copy(alpha = 0.8f)
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -113,7 +114,7 @@ internal fun SurahBanner(
                 ArabicText(
                     text = "\u0628\u0650\u0633\u0652\u0645\u0650 \u0671\u0644\u0644\u0651\u064E\u0647\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0652\u0645\u064E\u0670\u0646\u0650 \u0671\u0644\u0631\u0651\u064E\u062D\u0650\u064A\u0645\u0650",
                     size = ArabicTextSize.LARGE,
-                    color = Color(0xFFEAB308)
+                    color = NimazColors.QuranColors.CardAccentGold
                 )
             }
         }

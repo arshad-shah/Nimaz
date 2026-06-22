@@ -44,6 +44,7 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.StatItem
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -58,7 +59,7 @@ internal fun HeroHeader(
             .background(
                 Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF115E59),
+                        NimazColors.QuranColors.CardGradientStart,
                         MaterialTheme.colorScheme.background
                     )
                 )

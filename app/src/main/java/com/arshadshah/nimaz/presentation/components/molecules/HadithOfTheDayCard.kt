@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -159,10 +160,10 @@ fun HadithOfTheDayCard(
 @Composable
 private fun GradeChip(grade: String) {
     val color = when (grade.trim().lowercase()) {
-        "sahih" -> Color(0xFF4CAF50)
-        "hasan" -> Color(0xFF8BC34A)
-        "da'if", "daif", "dai'f" -> Color(0xFFFF9800)
-        "mawdu", "mawdu'", "fabricated" -> Color(0xFFF44336)
+        "sahih" -> NimazColors.HadithGradeColors.Sahih
+        "hasan" -> NimazColors.HadithGradeColors.Hasan
+        "da'if", "daif", "dai'f" -> NimazColors.HadithGradeColors.Daif
+        "mawdu", "mawdu'", "fabricated" -> NimazColors.HadithGradeColors.Mawdu
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(

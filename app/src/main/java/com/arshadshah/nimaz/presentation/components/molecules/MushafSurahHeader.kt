@@ -28,13 +28,14 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-// Theme colors for Mushaf header (matching QuranReaderScreen patterns)
-private val MushafHeaderGradientStart = Color(0xFF115E59)
-private val MushafHeaderGradientEnd = Color(0xFF042F2E)
-private val MushafHeaderBorder = Color(0xFF0F766E)
-private val MushafGoldColor = Color(0xFFEAB308)
+// Theme colors for Mushaf header — shared Quran card palette (see NimazColors.QuranColors)
+private val MushafHeaderGradientStart = NimazColors.QuranColors.CardGradientStart
+private val MushafHeaderGradientEnd = NimazColors.QuranColors.CardGradientEnd
+private val MushafHeaderBorder = NimazColors.QuranColors.CardBorder
+private val MushafGoldColor = NimazColors.QuranColors.CardAccentGold
 
 /**
  * Decorative surah header shown when a new surah starts on a Mushaf page.

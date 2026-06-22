@@ -124,6 +124,25 @@ object NimazColors {
         val SajdaAyah = Color(0xFFE91E63)
         val BookmarkPrimary = Color(0xFFFFC107)
         val BookmarkSecondary = Color(0xFF00BCD4)
+
+        // Shared "dark teal" Quran card theme — used by the surah banners,
+        // verse-of-the-day, continue-reading, khatam and mushaf header/page cards.
+        // Centralised here so the whole Quran surface re-themes from one place.
+        val CardGradientStart = NimazColors.Primary800   // 0xFF115E59
+        val CardGradientEnd = NimazColors.Primary950     // 0xFF042F2E
+        val CardBorder = NimazColors.Primary700          // 0xFF0F766E
+        val CardAccentTeal = NimazColors.Primary         // 0xFF14B8A6
+        val CardAccentCyan = NimazColors.Primary400      // 0xFF2DD4BF
+        val CardAccentGold = NimazColors.Gold500         // 0xFFEAB308
+    }
+
+    // Hadith grade authenticity colours — shared by the reader grade chip and the
+    // hadith-of-the-day card so the same grade reads identically everywhere.
+    object HadithGradeColors {
+        val Sahih = Color(0xFF22C55E)
+        val Hasan = Color(0xFF0D9488)
+        val Daif = Color(0xFFF59E0B)
+        val Mawdu = Color(0xFFEF4444)
     }
 
     // Zakat Colors

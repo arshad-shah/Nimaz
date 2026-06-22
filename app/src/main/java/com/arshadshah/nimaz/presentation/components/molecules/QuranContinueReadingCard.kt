@@ -32,6 +32,7 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -64,15 +65,15 @@ internal fun ContinueReadingCard(
                 .background(
                     brush = Brush.linearGradient(
                         colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
+                            NimazColors.QuranColors.CardGradientStart,
+                            NimazColors.QuranColors.CardGradientEnd
                         )
                     ),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.CardBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -84,7 +85,7 @@ internal fun ContinueReadingCard(
                 Text(
                     text = stringResource(R.string.quran_home_continue_reading),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF2DD4BF),
+                    color = NimazColors.QuranColors.CardAccentCyan,
                     letterSpacing = 1.5.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -105,7 +106,7 @@ internal fun ContinueReadingCard(
                     ArabicText(
                         text = surahName.nameArabic,
                         size = ArabicTextSize.MEDIUM,
-                        color = Color(0xFFEAB308)
+                        color = NimazColors.QuranColors.CardAccentGold
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -149,7 +150,7 @@ internal fun ContinueReadingCard(
                                 .fillMaxWidth(progressFraction)
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Color(0xFFEAB308))
+                                .background(NimazColors.QuranColors.CardAccentGold)
                         )
                     }
 
