@@ -34,6 +34,7 @@ import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
+import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
@@ -89,6 +90,8 @@ private fun PrayerTimesContent(state: PrayerTimesWidgetState) {
     }
 }
 
+private enum class PrayerCellState { PAST, NEXT, UPCOMING }
+
 @Composable
 private fun PrayerTimesSuccessContent(
     data: PrayerTimesData,
@@ -97,145 +100,105 @@ private fun PrayerTimesSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
-    Box(
-        modifier = GlanceModifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .cornerRadius(16.dp)
-            .clickable(actionStartActivity<MainActivity>())
-            .padding(12.dp)
+    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
+        WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
+    } else {
+        data.timeUntilNext
+    }
+    val rightLine = buildString {
+        if (data.hijriDate.isNotEmpty()) append(data.hijriDate)
+        if (data.nextPrayerName.isNotEmpty() && liveCountdown.isNotEmpty() && liveCountdown != "—") {
+            if (isNotEmpty()) append(" · ")
+            append("${data.nextPrayerName} in $liveCountdown")
+        }
+    }.ifEmpty { "—" }
+
+    // Five (name, time, passed) cells in order; the next prayer is the first not-passed.
+    val cells = listOf(
+        Triple("Fajr", data.fajrTime, data.fajrPassed),
+        Triple("Dhuhr", data.dhuhrTime, data.dhuhrPassed),
+        Triple("Asr", data.asrTime, data.asrPassed),
+        Triple("Maghrib", data.maghribTime, data.maghribPassed),
+        Triple("Isha", data.ishaTime, data.ishaPassed),
+    )
+    val nextIndex = cells.indexOfFirst { !it.third }
+
+    WidgetCard(
+        background = backgroundColor,
+        onClick = actionStartActivity<MainActivity>(),
+        padding = 12.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
-            // Header
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = GlanceModifier.defaultWeight()) {
-                    Text(
-                        text = data.locationName.ifEmpty { "Location" },
-                        style = TextStyle(
-                            color = textColor,
-                            fontSize = 14.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                    Text(
-                        text = data.hijriDate.ifEmpty { "—" },
-                        style = TextStyle(color = textSecondary, fontSize = 11.sp)
-                    )
-                }
-
-                Column(horizontalAlignment = Alignment.End) {
-                    Text(
-                        text = data.nextPrayerName.ifEmpty { "—" },
-                        style = TextStyle(
-                            color = primaryColor,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    )
-                    // Compute countdown live from stored epoch for freshness
-                    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
-                        val cd = WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
-                        if (cd != "—") "in $cd" else "—"
-                    } else {
-                        if (data.timeUntilNext.isNotEmpty()) "in ${data.timeUntilNext}" else "—"
-                    }
-                    Text(
-                        text = liveCountdown,
-                        style = TextStyle(color = textSecondary, fontSize = 10.sp)
-                    )
-                }
+            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = data.locationName.ifEmpty { "Location" },
+                    style = TextStyle(color = textColor, fontSize = 13.sp, fontWeight = FontWeight.Bold),
+                    modifier = GlanceModifier.defaultWeight(),
+                )
+                Text(
+                    text = rightLine,
+                    style = TextStyle(color = textSecondary, fontSize = 10.sp),
+                    maxLines = 1,
+                )
             }
-
-            Spacer(modifier = GlanceModifier.height(10.dp))
-
-            // Prayer times row
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                PrayerTimeItem(
-                    "Fajr",
-                    data.fajrTime,
-                    data.fajrPassed,
-                    textColor,
-                    textSecondary,
-                    primaryColor,
-                    GlanceModifier.defaultWeight()
-                )
-                PrayerTimeItem(
-                    "Dhuhr",
-                    data.dhuhrTime,
-                    data.dhuhrPassed,
-                    textColor,
-                    textSecondary,
-                    primaryColor,
-                    GlanceModifier.defaultWeight()
-                )
-                PrayerTimeItem(
-                    "Asr",
-                    data.asrTime,
-                    data.asrPassed,
-                    textColor,
-                    textSecondary,
-                    primaryColor,
-                    GlanceModifier.defaultWeight()
-                )
-                PrayerTimeItem(
-                    "Mgrb",
-                    data.maghribTime,
-                    data.maghribPassed,
-                    textColor,
-                    textSecondary,
-                    primaryColor,
-                    GlanceModifier.defaultWeight()
-                )
-                PrayerTimeItem(
-                    "Isha",
-                    data.ishaTime,
-                    data.ishaPassed,
-                    textColor,
-                    textSecondary,
-                    primaryColor,
-                    GlanceModifier.defaultWeight()
-                )
+            Spacer(modifier = GlanceModifier.height(8.dp))
+            Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
+                cells.forEachIndexed { index, (name, time, passed) ->
+                    val state = when {
+                        passed -> PrayerCellState.PAST
+                        index == nextIndex -> PrayerCellState.NEXT
+                        else -> PrayerCellState.UPCOMING
+                    }
+                    PrayerPill(
+                        name = name,
+                        time = time.ifEmpty { "—" },
+                        state = state,
+                        textColor = textColor,
+                        textSecondary = textSecondary,
+                        primaryColor = primaryColor,
+                        modifier = GlanceModifier.defaultWeight(),
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun PrayerTimeItem(
+private fun PrayerPill(
     name: String,
     time: String,
-    isPassed: Boolean,
+    state: PrayerCellState,
     textColor: ColorProvider,
     textSecondary: ColorProvider,
     primaryColor: ColorProvider,
-    modifier: GlanceModifier = GlanceModifier
+    modifier: GlanceModifier = GlanceModifier,
 ) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            text = name,
-            style = TextStyle(
-                color = if (isPassed) textSecondary else textColor,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Medium
+    val onPrimary = ColorProvider(R.color.widget_on_primary)
+    val nameColor = if (state == PrayerCellState.NEXT) onPrimary else textSecondary
+    val timeColor = when (state) {
+        PrayerCellState.PAST -> textSecondary
+        PrayerCellState.NEXT -> onPrimary
+        PrayerCellState.UPCOMING -> textColor
+    }
+    val inner = GlanceModifier.let {
+        if (state == PrayerCellState.NEXT) {
+            it.background(primaryColor).cornerRadius(12.dp).padding(vertical = 6.dp, horizontal = 4.dp)
+        } else it
+    }
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+        Column(modifier = inner.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = name,
+                style = TextStyle(color = nameColor, fontSize = 10.sp, fontWeight = FontWeight.Medium),
+                maxLines = 1,
             )
-        )
-        Text(
-            text = time.ifEmpty { "—" },
-            style = TextStyle(
-                color = if (isPassed) textSecondary else primaryColor,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold
+            Text(
+                text = time,
+                style = TextStyle(color = timeColor, fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                maxLines = 1,
             )
-        )
+        }
     }
 }
 
