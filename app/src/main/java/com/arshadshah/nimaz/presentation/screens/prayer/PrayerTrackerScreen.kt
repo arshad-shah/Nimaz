@@ -73,6 +73,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -470,7 +471,7 @@ private fun SelectedDayDetail(
     prayerTimes: com.arshadshah.nimaz.domain.model.PrayerTimes?,
     onTogglePrayer: (PrayerName, PrayerStatus) -> Unit
 ) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
+    val formatter = FULL_DATE_FORMATTER
     val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
     val prayedCount = prayerRecords.count {
         it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA

@@ -77,6 +77,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalTime
@@ -142,7 +143,7 @@ fun MonthlyPrayerTimesScreen(
         ) {
             // Pinned month-navigation header — stays put while the list scrolls.
             MonthNavigationHeader(
-                monthYear = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                monthYear = state.currentMonth.format(MONTH_YEAR_FORMATTER),
                 hijriLabel = hijriRangeLabel(state.currentMonth),
                 locationName = state.locationName,
                 isRamadan = state.ramadanHijriYear != null,
@@ -190,7 +191,7 @@ fun MonthlyPrayerTimesScreen(
             contentPadding = PaddingValues(0.dp),
         ) {
             ExportSheet(
-                monthLabel = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                monthLabel = state.currentMonth.format(MONTH_YEAR_FORMATTER),
                 dayCount = state.dayPrayerTimes.size,
                 ramadanYear = state.ramadanHijriYear,
                 onThisMonth = {

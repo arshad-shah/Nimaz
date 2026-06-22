@@ -52,9 +52,9 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.StatsPeriod
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import java.time.Instant
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +111,7 @@ fun PrayerStatsScreen(
             item {
                 state.stats?.let { stats ->
                     val periodLabel = try {
-                        val formatter = DateTimeFormatter.ofPattern("MMMM yyyy")
+                        val formatter = MONTH_YEAR_FORMATTER
                         val startDate = Instant.ofEpochMilli(stats.startDate)
                             .atZone(ZoneId.systemDefault())
                             .toLocalDate()

@@ -64,7 +64,7 @@ import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 
 @Composable
 fun HomeScreen(
@@ -219,7 +219,7 @@ private fun HomeCompactContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))
+        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
     val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
@@ -336,7 +336,7 @@ private fun HomeTabletContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))
+        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
     val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
