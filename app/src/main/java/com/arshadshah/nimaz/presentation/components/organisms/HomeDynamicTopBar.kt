@@ -121,7 +121,7 @@ fun HomeDynamicTopBar(
                         .graphicsLayer { translationY = -SLIDE_DISTANCE_DP.toPx() * progress }
                 ) {
                     GlassPill(
-                        text = locationName,
+                        text = locationName.ifEmpty { stringResource(R.string.location_set_prompt) },
                         leadingIcon = Icons.Default.LocationOn,
                         tone = GlassPillTone.Solid,
                         backdrop = backdrop,

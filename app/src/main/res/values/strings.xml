@@ -59,6 +59,7 @@
     <string name="delete">Delete</string>
     <string name="search">Search</string>
     <string name="location">Location</string>
+    <string name="location_set_prompt">Set location</string>
     <string name="settings">Settings</string>
     <string name="notifications">Notifications</string>
     <string name="appearance">Appearance</string>
@@ -931,6 +932,7 @@
     <string name="cd_previous_page">Previous page</string>
     <string name="cd_preview">Preview</string>
     <string name="cd_play">Play</string>
+    <string name="cd_pause">Pause</string>
     <string name="cd_notes">Notes</string>
     <string name="cd_next_page">Next page</string>
     <string name="cd_new_calculation">New Calculation</string>

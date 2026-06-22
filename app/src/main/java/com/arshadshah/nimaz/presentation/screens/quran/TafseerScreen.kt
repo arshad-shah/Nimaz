@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.screens.quran
 
 import android.content.Intent
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -68,13 +69,28 @@ fun TafseerScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = state.surahName,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    Column {
+                        Text(
+                            text = state.surahName,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        val ayahNumber = state.ayahs.getOrNull(state.currentAyahIndex)?.ayahNumber
+                        if (ayahNumber != null && state.ayahs.isNotEmpty()) {
+                            Text(
+                                text = stringResource(
+                                    R.string.audio_position_ayah_format,
+                                    ayahNumber,
+                                    state.ayahs.size
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1
+                            )
+                        }
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
