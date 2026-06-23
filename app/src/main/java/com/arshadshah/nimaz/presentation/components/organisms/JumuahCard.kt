@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
@@ -129,12 +130,18 @@ fun JumuahCard(
                         .padding(horizontal = 13.dp, vertical = 11.dp)
                 ) {
                     if (isJumuahPassed) {
-                            Text(
-                                text = stringResource(R.string.jumuah_passed),
-                                style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = JumuahGreen
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ){
+                                Text(
+                                    text = stringResource(R.string.jumuah_passed),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = JumuahGreen,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
                     } else if (timeUntilJumuah.isNotEmpty()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
