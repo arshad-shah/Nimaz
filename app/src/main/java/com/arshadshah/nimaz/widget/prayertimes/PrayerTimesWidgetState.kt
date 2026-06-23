@@ -19,17 +19,16 @@ sealed interface PrayerTimesWidgetState {
 data class PrayerTimesData(
     val locationName: String = "",
     val hijriDate: String = "",
-    val nextPrayerName: String = "",
-    val timeUntilNext: String = "",
     val fajrTime: String = "",
     val dhuhrTime: String = "",
     val asrTime: String = "",
     val maghribTime: String = "",
     val ishaTime: String = "",
-    val fajrPassed: Boolean = false,
-    val dhuhrPassed: Boolean = false,
-    val asrPassed: Boolean = false,
-    val maghribPassed: Boolean = false,
-    val ishaPassed: Boolean = false,
-    val nextPrayerEpochMillis: Long = 0L
+    // Absolute prayer instants. The "next prayer" highlight and countdown are derived
+    // from these live at render time, so they stay correct between refresh-worker runs.
+    val fajrEpochMillis: Long = 0L,
+    val dhuhrEpochMillis: Long = 0L,
+    val asrEpochMillis: Long = 0L,
+    val maghribEpochMillis: Long = 0L,
+    val ishaEpochMillis: Long = 0L,
 )
