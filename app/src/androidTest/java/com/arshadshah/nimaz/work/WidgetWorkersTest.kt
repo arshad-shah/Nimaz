@@ -5,6 +5,7 @@ import androidx.hilt.work.HiltWorkerFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.work.Configuration
+import androidx.work.CoroutineWorker
 import androidx.work.ListenableWorker
 import androidx.work.testing.TestListenableWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
@@ -65,7 +66,9 @@ class WidgetWorkersTest {
         runBlocking { settings.updateLocation(21.4225, 39.8262, "Makkah") }
     }
 
-    private inline fun <reified T : ListenableWorker> runWorker(): ListenableWorker.Result {
+    // Bound to CoroutineWorker (not the generic ListenableWorker) so `doWork()` — the
+    // suspend entry point all of this app's workers implement — resolves.
+    private inline fun <reified T : CoroutineWorker> runWorker(): ListenableWorker.Result {
         val worker = TestListenableWorkerBuilder<T>(context)
             .setWorkerFactory(workerFactory)
             .build()
