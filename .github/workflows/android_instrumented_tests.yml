@@ -33,6 +33,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # The prepackaged Room DB (app/.../nimaz_prepopulated.db) and other *.db
+          # assets are stored via Git LFS (.gitattributes: *.db filter=lfs). Without
+          # this the APK packages the LFS pointer text instead of the real database,
+          # and every test that opens the DB fails with "no such table".
+          lfs: true
 
       - name: Setup JDK
         uses: actions/setup-java@v4
