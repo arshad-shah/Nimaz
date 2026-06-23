@@ -58,13 +58,6 @@ fun JumuahCard(
             .padding(top = 12.dp),
     ) {
         Row(modifier = Modifier.height(IntrinsicSize.Min)) {
-            // Green left accent marking the Friday highlight.
-            Box(
-                modifier = Modifier
-                    .width(3.dp)
-                    .fillMaxHeight()
-                    .background(JumuahGreen)
-            )
 
             Column(
                 modifier = Modifier
@@ -136,25 +129,12 @@ fun JumuahCard(
                         .padding(horizontal = 13.dp, vertical = 11.dp)
                 ) {
                     if (isJumuahPassed) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            NimazIcon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = JumuahGreen,
-                                size = NimazIconSize.SMALL
-                            )
-                            Spacer(modifier = Modifier.width(7.dp))
                             Text(
                                 text = stringResource(R.string.jumuah_passed),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = JumuahGreen
                             )
-                        }
                     } else if (timeUntilJumuah.isNotEmpty()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -191,7 +171,7 @@ fun JumuahCard(
                     text = stringResource(R.string.jumuah_hadith_quote),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Bold
                 )
             }
         }
