@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -45,6 +44,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -83,7 +84,8 @@ fun PrayerStatsChart(
     subtitle: String? = null,
     summaryItems: List<ChartStatItem>? = null
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface

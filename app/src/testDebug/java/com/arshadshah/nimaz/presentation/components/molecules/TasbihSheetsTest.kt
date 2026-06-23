@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.onNodeWithText
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
@@ -43,7 +44,9 @@ class TasbihSheetsTest {
             )
         }
         composeRule.waitForIdle()
-        composeRule.onRoot().assertExists()
+        // The modal bottom sheet renders in its own window, so onRoot() is
+        // ambiguous; assert a distinctive piece of the sheet's content instead.
+        composeRule.onNodeWithText("Left-handed").assertIsDisplayed()
     }
 
     @Test
@@ -60,7 +63,10 @@ class TasbihSheetsTest {
             )
         }
         composeRule.waitForIdle()
-        composeRule.onRoot().assertExists()
+        // The preset's translation and the always-present Change Dhikr action
+        // prove the sheet composed its preset branch and rendered.
+        composeRule.onNodeWithText("Glory be to Allah").assertIsDisplayed()
+        composeRule.onNodeWithText("Change Dhikr").assertIsDisplayed()
     }
 
     @Test
@@ -77,6 +83,9 @@ class TasbihSheetsTest {
             )
         }
         composeRule.waitForIdle()
-        composeRule.onRoot().assertExists()
+        // The "Free Count" label only appears when preset is null, proving the
+        // free-count branch composed.
+        composeRule.onNodeWithText("Free Count").assertIsDisplayed()
+        composeRule.onNodeWithText("Change Dhikr").assertIsDisplayed()
     }
 }

@@ -47,7 +47,7 @@ fun QaidaLetterTile(
             .semantics { contentDescription = desc }
             .clickable { onClick(letter) },
         shape = RoundedCornerShape(NimazCornerRadius.Large),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 1.dp,
     ) {
         Box(contentAlignment = Alignment.Center) {

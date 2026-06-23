@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -375,7 +374,8 @@ private fun InfoPageContent(
 
             Spacer(modifier = Modifier.height(sectionSpacing))
 
-            Card(
+            NimazCard(
+                style = NimazCardStyle.FILLED,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
                 colors = CardDefaults.cardColors(

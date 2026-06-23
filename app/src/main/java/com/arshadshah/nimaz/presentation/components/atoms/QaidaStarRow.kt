@@ -12,8 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -35,7 +35,11 @@ fun QaidaStarRow(
     emptyColor: Color = MaterialTheme.colorScheme.outline,
 ) {
     Row(
-        modifier = modifier.clearAndSetSemantics {
+        // Merge the children into a single accessibility node that announces the
+        // "$filled of $max stars" summary (rather than reading each star icon).
+        // Unlike clearAndSetSemantics this keeps the per-star testTags present in
+        // the unmerged semantics tree so the row stays inspectable in tests.
+        modifier = modifier.semantics(mergeDescendants = true) {
             contentDescription = "$filled of $max stars"
         },
         horizontalArrangement = Arrangement.spacedBy(2.dp),

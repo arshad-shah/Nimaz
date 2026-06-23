@@ -157,13 +157,11 @@ internal fun AudioBottomBar(
                         NimazBadge(
                             text = stringResource(R.string.audio_position_juz_format, juzNumber),
                             size = NimazBadgeSize.SMALL,
-                            backgroundColor = MaterialTheme.colorScheme.outline,
                             outlined = true
                         )
                         NimazBadge(
                             text = stringResource(R.string.audio_position_page_format, pageNumber),
                             size = NimazBadgeSize.SMALL,
-                            backgroundColor = MaterialTheme.colorScheme.outline,
                             outlined = true
                         )
                     }
@@ -174,7 +172,7 @@ internal fun AudioBottomBar(
                     progress = { shownProgress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
+                        .height(6.dp)
                         .clip(RoundedCornerShape(2.dp)),
                     color = if (isPreparing) MaterialTheme.colorScheme.tertiary
                     else MaterialTheme.colorScheme.primary,

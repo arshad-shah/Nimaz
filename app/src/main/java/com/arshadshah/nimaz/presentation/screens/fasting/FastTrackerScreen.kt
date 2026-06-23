@@ -24,8 +24,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +61,8 @@ import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -1241,12 +1241,10 @@ private fun MakeupPendingFastCard(
 
     val displayDate = makeupFast.originalHijriDate ?: missedDate
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(14.dp)
     ) {
         Column(
             modifier = Modifier
@@ -1381,12 +1379,10 @@ private fun MakeupCompletedFastItem(
         stringResource(R.string.fasting_originally, it)
     } ?: stringResource(R.string.fasting_originally, missedDate)
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.7f)
-        )
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier

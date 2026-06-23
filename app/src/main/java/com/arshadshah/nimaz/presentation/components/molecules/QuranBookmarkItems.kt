@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -40,7 +41,8 @@ internal fun BookmarkListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
@@ -101,7 +103,8 @@ internal fun BookmarkCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.width(160.dp),
         shape = RoundedCornerShape(12.dp),
@@ -152,7 +155,8 @@ internal fun FavoriteAyahItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),

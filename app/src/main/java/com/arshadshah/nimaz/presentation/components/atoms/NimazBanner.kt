@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -183,7 +182,8 @@ private fun UpdateVariant(
     onAction: (() -> Unit)? = null,
     isLoading: Boolean = false
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
@@ -206,7 +206,8 @@ private fun UpdateVariant(
             }
             if (actionLabel != null && onAction != null) {
                 Spacer(modifier = Modifier.width(12.dp))
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     onClick = onAction,
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primary

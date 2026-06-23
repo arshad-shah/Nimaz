@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -27,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.KhatamConstants
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Juz to page mapping (approximate start pages for each Juz)
@@ -83,7 +84,8 @@ internal fun JuzGrid(
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
                     val isSelected = selectedJuzNumber == juzNumber
 
-                    Card(
+                    NimazCard(
+                        style = NimazCardStyle.FILLED,
                         onClick = { onNavigateToJuz(juzNumber) },
                         modifier = Modifier
                             .weight(1f)

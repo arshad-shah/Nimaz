@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,6 +55,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -268,7 +269,8 @@ private fun RecentSearchItem(
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
@@ -340,7 +342,8 @@ private fun SurahSearchResultCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
@@ -451,7 +454,8 @@ private fun SearchResultCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),

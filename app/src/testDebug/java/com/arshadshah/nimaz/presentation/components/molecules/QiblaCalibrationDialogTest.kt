@@ -1,7 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.semantics.SemanticsActions
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performSemanticsAction
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationDialog
 import com.google.common.truth.Truth.assertThat
@@ -47,7 +50,12 @@ class QiblaCalibrationDialogTest {
         composeRule.setThemedContent {
             QiblaCalibrationDialog(accuracy = CompassAccuracy.LOW, onDismiss = { dismissed = true })
         }
-        composeRule.onNodeWithText("Got it").performClick()
+        // Invoke the button's OnClick semantics action rather than performClick():
+        // inside a Dialog sub-window Robolectric lays the action row out with zero
+        // height, so a geometry-based click would miss. The semantics action is
+        // geometry-independent and exercises the same onClick → onDismiss wiring.
+        composeRule.onNode(hasText("Got it") and hasClickAction())
+            .performSemanticsAction(SemanticsActions.OnClick)
         assertThat(dismissed).isTrue()
     }
 }

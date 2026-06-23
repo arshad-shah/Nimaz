@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -30,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -63,7 +64,8 @@ fun PrayerTimeCard(
     val isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED
     val isSunrise = prayer.type == PrayerType.SUNRISE || !showToggle
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (prayer.isPassed && !isActive) 0.6f else 1f),

@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wallet
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -60,6 +59,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
@@ -457,8 +458,9 @@ private fun ZakatResultSummaryCard(
         )
     )
 
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -574,15 +576,16 @@ private fun NisabOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
         onClick = onClick,
         modifier = modifier,
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 accentColor.copy(alpha = 0.15f)
             } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh
+                MaterialTheme.colorScheme.surfaceContainer
             }
         ),
         border = if (isSelected) {
@@ -622,12 +625,10 @@ private fun InputCard(
     suffix: String = "$",
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier
@@ -782,12 +783,10 @@ private fun BreakdownCard(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        Card(
+        NimazCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(14.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -851,9 +850,10 @@ private fun BreakdownCard(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Save button
-        Card(
+        NimazCard(
             onClick = onSaveClick,
             modifier = Modifier.fillMaxWidth(),
+            style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(14.dp),
             colors = CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.primary

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -46,6 +45,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -159,8 +160,9 @@ private fun TotalPaidSummaryCard(
         )
     )
 
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -212,12 +214,10 @@ private fun HistoryEntryCard(
     val dateFormat = SimpleDateFormat("MMM d, yyyy", LocalLocale.current.platformLocale)
     val dateString = dateFormat.format(Date(entry.calculatedAt))
 
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(14.dp)
     ) {
         Column(
             modifier = Modifier

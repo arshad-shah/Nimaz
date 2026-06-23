@@ -451,6 +451,12 @@ typed route object.
       CONTAINED` draws the glyph in a tinted container — the old `ContainedIcon`/`IconBadge` (a
       rounded-square contained icon is the reusable "badge"); `size`/`iconSize`/`containerSize`/
       `cornerRadius` give granular control. Tappable icons stay `NimazIconButton`.
+    - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
+      (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
+      `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`/`border`,
+      so existing call sites convert by swapping the constructor and adding `style`. Don't set a
+      `containerColor` of `MaterialTheme.colorScheme.surfaceContainerHigh` — omit `colors` and let
+      the card default stand (use `NimazSurfaceCard` for the flat outlined content-card look).
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 

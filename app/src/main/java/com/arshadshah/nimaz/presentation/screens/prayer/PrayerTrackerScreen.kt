@@ -16,6 +16,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
@@ -29,7 +31,6 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -354,8 +355,9 @@ private fun StreakCard(currentStreak: Int) {
     val goldDark = NimazColors.GoldDark
     val goldLight = NimazColors.Gold500
 
-    Card(
+    NimazCard(
         modifier = Modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.Transparent)
     ) {
@@ -484,12 +486,10 @@ private fun SelectedDayDetail(
     val isToday = selectedDate == today
     val isPastDate = selectedDate.isBefore(today)
 
-    Card(
+    NimazCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             // Header
@@ -648,7 +648,7 @@ private fun PrayerCheckItem(
                 color = when {
                     isCompleted -> NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
                     isMissed -> NimazColors.StatusColors.Missed.copy(alpha = 0.2f)
-                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    else -> MaterialTheme.colorScheme.surfaceContainer
                 }
             ) {
                 Text(

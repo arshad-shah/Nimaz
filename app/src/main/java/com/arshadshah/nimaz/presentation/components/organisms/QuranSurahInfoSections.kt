@@ -125,7 +125,7 @@ internal fun BottomActions(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable(onClick = onPlayAudio)
                             .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center

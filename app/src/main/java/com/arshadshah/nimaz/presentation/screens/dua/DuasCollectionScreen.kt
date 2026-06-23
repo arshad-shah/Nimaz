@@ -58,8 +58,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.WbTwilight
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -85,6 +83,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.DuaCategory
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -287,13 +287,11 @@ private fun CategoryGridCard(
 ) {
     val iconColor = getCategoryColor(category.id)
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -343,13 +341,11 @@ private fun AdhkarListItem(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier

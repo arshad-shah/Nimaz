@@ -28,7 +28,7 @@ class QaidaStarRowTest {
         composeRule.setThemedContent {
             QaidaStarRow(filled = 1)
         }
-        composeRule.onAllNodesWithTag("qaida_star").assertCountEquals(3)
+        composeRule.onAllNodesWithTag("qaida_star", useUnmergedTree = true).assertCountEquals(3)
     }
 
     @Test
@@ -37,6 +37,6 @@ class QaidaStarRowTest {
             QaidaStarRow(filled = 3, max = 5)
         }
         composeRule.onNodeWithContentDescription("3 of 5 stars").assertIsDisplayed()
-        composeRule.onAllNodesWithTag("qaida_star").assertCountEquals(5)
+        composeRule.onAllNodesWithTag("qaida_star", useUnmergedTree = true).assertCountEquals(5)
     }
 }

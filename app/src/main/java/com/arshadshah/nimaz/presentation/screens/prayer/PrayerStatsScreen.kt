@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -39,6 +38,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
@@ -283,8 +284,9 @@ private fun InsightCard(
     description: String,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer

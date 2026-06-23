@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -35,6 +34,8 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /** A curated surah recommendation paired with the reason it is worth reading. */
@@ -99,7 +100,8 @@ private fun RecommendedSurahCard(
     reason: String,
     onClick: () -> Unit
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = Modifier.width(160.dp),
         shape = RoundedCornerShape(16.dp),

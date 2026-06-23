@@ -26,8 +26,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButtonDefaults
@@ -52,6 +50,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
@@ -121,12 +121,10 @@ fun NimazCalendar(
         // the inner grid swaps with a horizontal slide when displayedMonth
         // changes so consumers get a "real" month transition without any
         // public API change.
-        Card(
+        NimazCard(
+            style = NimazCardStyle.FILLED,
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(
                 modifier = Modifier

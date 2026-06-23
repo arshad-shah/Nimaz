@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,6 +24,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -42,15 +43,16 @@ fun NimazMenuItem(
     trailingIcon: ImageVector? = Icons.AutoMirrored.Filled.ArrowForward,
     enabled: Boolean = true
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
+        enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(0.dp),
         colors = CardDefaults.cardColors(
             containerColor = Color.Transparent
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        enabled = enabled
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Row(
             modifier = Modifier
@@ -101,7 +103,8 @@ fun NimazMenuGroup(
     modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(

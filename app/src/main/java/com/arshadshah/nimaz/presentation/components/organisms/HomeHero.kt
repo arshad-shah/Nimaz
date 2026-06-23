@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,6 +42,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.StatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
@@ -149,7 +150,8 @@ fun HomeHero(
         }
 
         // Next-prayer card overlapping the sky's curved bottom.
-        Card(
+        NimazCard(
+            style = NimazCardStyle.FILLED,
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp)

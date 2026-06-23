@@ -186,8 +186,8 @@ fun DirectionMarkers(modifier: Modifier = Modifier) {
 fun CompassDialFace(modifier: Modifier = Modifier) {
     val dialBackground = Brush.radialGradient(
         colors = listOf(
-            MaterialTheme.colorScheme.surfaceContainerHigh,
-            MaterialTheme.colorScheme.surfaceContainer
+            MaterialTheme.colorScheme.surfaceContainer,
+            MaterialTheme.colorScheme.surfaceContainerLow
         )
     )
     // Bright majors + clearly-visible medium-grey minors, so the full ring of

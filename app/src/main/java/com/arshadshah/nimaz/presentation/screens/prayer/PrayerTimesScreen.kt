@@ -30,7 +30,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
@@ -56,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -145,7 +146,7 @@ fun PrayerTimesScreen(
             // A custom layout pulls the card up by `overlap` AND shrinks the
             // space it reserves by the same amount, so its bottom is flush with
             // the day list (offset alone would leave an equal-sized empty gap).
-            Card(
+            NimazCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
@@ -156,6 +157,7 @@ fun PrayerTimesScreen(
                             placeable.place(0, -overlap)
                         }
                     },
+                style = NimazCardStyle.FILLED,
                 shape = RoundedCornerShape(20.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -334,10 +336,11 @@ private fun DayList(
 
 @Composable
 private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, method: String) {
-    Card(
+    NimazCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {

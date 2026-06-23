@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +31,8 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -53,7 +54,8 @@ internal fun VerseOfTheDayCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),

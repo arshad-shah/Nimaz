@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -87,30 +88,18 @@ fun NimazReaderBottomBar(
         }
 
         if (hasPager) {
+
             if (pageCount <= 12) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(pageCount) { index ->
-                        val selected = index == currentPage
-                        Box(
-                            modifier = Modifier
-                                .height(6.dp)
-                                .width(if (selected) 20.dp else 6.dp)
-                                .background(
-                                    color = if (selected) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.outlineVariant,
-                                    shape = if (selected) RoundedCornerShape(3.dp) else CircleShape
-                                )
-                        )
-                    }
-                }
+
+                NimazPageIndicator(
+                    pageCount = pageCount,
+                    currentPage = currentPage
+                )
             } else {
                 Text(
                     text = "${currentPage + 1} / $pageCount",
                     style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.SemiBold,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }

@@ -49,6 +49,7 @@ fun NimazCard(
     modifier: Modifier = Modifier,
     style: NimazCardStyle = NimazCardStyle.FILLED,
     onClick: (() -> Unit)? = null,
+    enabled: Boolean = true,
     shape: Shape = RoundedCornerShape(16.dp),
     colors: CardColors? = null,
     elevation: CardElevation? = null,
@@ -64,6 +65,7 @@ fun NimazCard(
                 Card(
                     onClick = onClick,
                     modifier = modifier,
+                    enabled = enabled,
                     shape = shape,
                     colors = cardColors,
                     elevation = cardElevation,
@@ -87,6 +89,7 @@ fun NimazCard(
                 ElevatedCard(
                     onClick = onClick,
                     modifier = modifier,
+                    enabled = enabled,
                     shape = shape,
                     colors = cardColors,
                     elevation = cardElevation,
@@ -110,6 +113,7 @@ fun NimazCard(
                 OutlinedCard(
                     onClick = onClick,
                     modifier = modifier,
+                    enabled = enabled,
                     shape = shape,
                     colors = cardColors,
                     border = cardBorder,

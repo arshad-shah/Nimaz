@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +31,8 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -51,7 +52,8 @@ internal fun ContinueReadingCard(
     val progressFraction = (totalAyahsRead.toFloat() / totalAyahs).coerceIn(0f, 1f)
     val progressPercent = (progressFraction * 100).toInt()
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),

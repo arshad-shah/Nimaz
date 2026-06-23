@@ -16,8 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -31,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -59,12 +59,10 @@ fun NimazQadaPrayerItem(
 
     val prayerColor = prayer.prayerName.color()
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier

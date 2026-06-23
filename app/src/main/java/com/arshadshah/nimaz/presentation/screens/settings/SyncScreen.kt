@@ -35,7 +35,6 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +60,8 @@ import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.ActivityLogEntry
 import com.arshadshah.nimaz.presentation.viewmodel.SyncDataSummary
@@ -214,7 +215,8 @@ private fun RoleBadge(mode: SyncMode) {
     }
     val icon = if (mode == SyncMode.SEND) Icons.AutoMirrored.Filled.Send else Icons.Default.Download
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         colors = CardDefaults.cardColors(containerColor = containerColor),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -271,7 +273,8 @@ private fun ModeSelectionContent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(16.dp)
@@ -365,7 +368,8 @@ private fun AuthTokenContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -588,7 +592,8 @@ private fun ProgressContent(
     // Sender sees partner importing
     val partnerState = state.connectionState as? ConnectionState.PartnerImporting
     if (partnerState != null) {
-        Card(
+        NimazCard(
+            style = NimazCardStyle.FILLED,
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
@@ -645,7 +650,8 @@ private fun ProgressContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Card(
+            NimazCard(
+                style = NimazCardStyle.FILLED,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -708,7 +714,8 @@ private fun ProgressContent(
 
 @Composable
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
@@ -784,7 +791,8 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,6 +37,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -77,7 +78,8 @@ fun IslamicEventCard(
 ) {
     val (icon, color) = getEventTypeDetails(eventType)
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),

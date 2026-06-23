@@ -400,7 +400,7 @@ private fun HighlightColorRail(
     onDone: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {

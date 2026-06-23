@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,6 +43,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -225,7 +226,8 @@ private fun <T> PickerRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
@@ -234,7 +236,7 @@ private fun <T> PickerRow(
             containerColor = if (isSelected) {
                 MaterialTheme.colorScheme.primaryContainer
             } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
+                MaterialTheme.colorScheme.surfaceContainer
             }
         ),
         border = if (isSelected) {

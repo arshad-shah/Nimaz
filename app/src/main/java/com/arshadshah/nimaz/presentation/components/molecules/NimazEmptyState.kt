@@ -12,8 +12,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,6 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -42,12 +42,10 @@ fun NimazEmptyState(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -93,7 +91,7 @@ fun NimazEmptyState(
                 NimazButton(
                     text = actionLabel,
                     onClick = onAction,
-                    variant = NimazButtonVariant.TEXT
+                    variant = NimazButtonVariant.FILLED
                 )
             }
         }

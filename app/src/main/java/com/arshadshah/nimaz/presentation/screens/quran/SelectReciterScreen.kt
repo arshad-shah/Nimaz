@@ -25,10 +25,11 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -146,7 +147,8 @@ fun SelectReciterScreen(
             }
 
             item {
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(
@@ -232,7 +234,8 @@ fun SelectReciterScreen(
             ) { reciter ->
                 val isSelected = reciter.id == selectedReciterId
 
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     modifier = Modifier
                         .fillMaxWidth()
                         .then(

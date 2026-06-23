@@ -33,10 +33,11 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButton
@@ -313,7 +314,8 @@ private fun HomeTabContent(
 
             // No reading progress yet - show start reading prompt
             item(key = "start_reading") {
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
                     colors = CardDefaults.cardColors(

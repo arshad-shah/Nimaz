@@ -57,7 +57,7 @@ fun QaidaCellTile(
 ) {
     val container by animateColorAsState(
         if (isPlaying) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        else MaterialTheme.colorScheme.surfaceContainer,
         label = "cellContainer",
     )
     val elevation by animateDpAsState(if (isPlaying) 6.dp else 1.dp, label = "cellElevation")

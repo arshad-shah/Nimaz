@@ -55,7 +55,7 @@ fun QaidaLetterForms(
             Surface(
                 modifier = if (single) Modifier.width(96.dp) else Modifier.weight(1f),
                 shape = RoundedCornerShape(NimazCornerRadius.Medium),
-                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 tonalElevation = 1.dp,
             ) {
                 Column(

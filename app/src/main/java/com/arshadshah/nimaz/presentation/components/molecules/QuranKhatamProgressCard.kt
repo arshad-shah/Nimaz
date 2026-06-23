@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -33,6 +32,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -50,7 +51,8 @@ internal fun KhatamProgressCard(
 ) {
     if (activeKhatam != null) {
         val progressFraction = activeKhatam.progressPercent
-        Card(
+        NimazCard(
+            style = NimazCardStyle.FILLED,
             onClick = { onClickActive(activeKhatam.id) },
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
@@ -167,7 +169,8 @@ internal fun KhatamProgressCard(
             }
         }
     } else {
-        Card(
+        NimazCard(
+            style = NimazCardStyle.FILLED,
             onClick = onClickStart,
             modifier = modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),

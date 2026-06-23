@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
@@ -74,20 +75,25 @@ class NimazIconTest {
         composeRule.onNodeWithContentDescription("star").assertWidthIsEqualTo(18.dp)
     }
 
-    private fun assertVariantRenders(variant: NimazIconVariant) {
-        composeRule.setThemedContent {
-            NimazIcon(
-                imageVector = Icons.Default.Star,
-                contentDescription = "v",
-                variant = variant
-            )
-        }
-        composeRule.onNodeWithContentDescription("v").assertExists()
-    }
-
     @Test
     fun `every variant renders`() {
-        NimazIconVariant.entries.forEach { assertVariantRenders(it) }
+        // setContent may only be called once per test, so render one icon per
+        // variant in a single composition and assert each is present by its
+        // (unique-per-variant) content description.
+        composeRule.setThemedContent {
+            Column {
+                NimazIconVariant.entries.forEach { variant ->
+                    NimazIcon(
+                        imageVector = Icons.Default.Star,
+                        contentDescription = "v-${variant.name}",
+                        variant = variant
+                    )
+                }
+            }
+        }
+        NimazIconVariant.entries.forEach { variant ->
+            composeRule.onNodeWithContentDescription("v-${variant.name}").assertExists()
+        }
     }
 
     @Test
