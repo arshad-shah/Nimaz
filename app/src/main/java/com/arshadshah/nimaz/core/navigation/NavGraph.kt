@@ -665,7 +665,7 @@ fun NavGraph(
                 )
             }
 
-            taggedComposable<Route.TasbihCounter>(ScreenTags.TasbihCounter) { backStackEntry ->
+            taggedComposable<Route.TasbihCounter>(ScreenTags.TasbihCounterScreen) { backStackEntry ->
                 backStackEntry.toRoute<Route.TasbihCounter>()
                 TasbihScreen(
                     onNavigateToHistory = { navController.navigate(Route.TasbihStats) },
