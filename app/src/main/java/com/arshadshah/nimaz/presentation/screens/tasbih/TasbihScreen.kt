@@ -574,7 +574,7 @@ private fun CounterCircle(
             modifier = Modifier
                 .size(circleSize - 36.dp)
                 .scale(scale)
-                .testTag(ScreenTags.TasbihCounterScreen)
+                .testTag(ScreenTags.TasbihCounter)
                 .clickable(
                     interactionSource = interactionSource,
                     indication = null,
