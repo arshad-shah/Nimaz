@@ -97,6 +97,11 @@ jobs:
             model=Pixel2,version=30
           # Split across parallel shards to keep wall-clock time down.
           num-shards: 2
+          # Retry only the individual tests that fail, to absorb transient device-level
+          # flakes (e.g. "Failed to inject touch input" when a synthetic tap lands on a
+          # just-scrolled list item at the viewport edge). A genuine failure still fails
+          # after the retries.
+          num-flaky-test-attempts: 2
           timeout: 20m
           record-video: true
           outputs-dir: build/test-results
