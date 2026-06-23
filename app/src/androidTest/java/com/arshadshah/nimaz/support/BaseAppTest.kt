@@ -19,6 +19,9 @@ import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.testing.HiltAndroidRule
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Before
@@ -63,9 +66,33 @@ abstract class BaseAppTest {
     @Before
     fun setup() {
         hiltRule.inject()
-        // Make sure the app boots straight to Home, not onboarding.
-        runBlocking { settings.setOnboardingCompleted(true) }
+        runBlocking { seedState() }
     }
+
+    /**
+     * Seed DataStore before the activity launches. Defaults to marking onboarding
+     * complete so the app boots straight to Home; the onboarding flow test overrides
+     * this to exercise the first-run experience.
+     */
+    protected open suspend fun seedState() {
+        settings.setOnboardingCompleted(true)
+    }
+
+    /**
+     * Poll [flow] until it no longer equals [previous] (i.e. an async DataStore write
+     * has landed), returning the new value. Settings writes happen on a ViewModel
+     * coroutine that `waitForIdle` doesn't track, so behavior tests await the store.
+     */
+    protected fun <T> awaitSettingChange(flow: Flow<T>, previous: T, timeoutMs: Long = 5_000): T =
+        runBlocking {
+            val deadline = System.currentTimeMillis() + timeoutMs
+            var value = flow.first()
+            while (value == previous && System.currentTimeMillis() < deadline) {
+                delay(50)
+                value = flow.first()
+            }
+            value
+        }
 
     @After
     fun tearDownActivity() {
