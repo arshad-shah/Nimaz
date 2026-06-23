@@ -70,6 +70,34 @@ run with a warning — it never hard-fails for a missing token.
 | `navigation/`    | Launches `MainActivity` and asserts navigation **by `ScreenTags`**: all 5 bottom-nav tabs (`BottomNavigationTest`), every More-menu feature — daily practice, learning, tools, support (`FeatureNavigationTest`), every Settings sub-screen (`SettingsNavigationTest`), and back-navigation round-trips (`MoreMenuNavigationTest`). |
 | (root)           | `MigrationTest` (per-step) and `MigrationChainTest` (v7→current). |
 
+## Coverage audit (what's validated)
+
+| Layer / area | Covered by | Kind |
+|---|---|---|
+| Every DAO (prayer, fasting, tasbih, khatam, quran, dua, hadith, zakat, tafseer, qaida, names, location, events) | `db/*DaoTest`, `UserDataDaoTest` | CRUD + Flow round-trips on in-memory Room |
+| Shipped prepopulated DB seeds | `db/DatabaseAssetTest` | real DI database (LFS asset) |
+| Schema migrations (per-step + full v7→current) | `MigrationTest`, `MigrationChainTest` | `MigrationTestHelper` |
+| Settings **persistence** (DataStore) | `preferences/SettingsRepositoryTest` | flow round-trips + export/import |
+| Notification channels + schedule/cancel | `notifications/PrayerNotificationSchedulerTest` | Hilt singleton |
+| Every background worker | `work/WidgetWorkersTest` | `HiltWorkerFactory` + `WorkManagerTestInitHelper` |
+| App launch + all 5 bottom-nav tabs | `navigation/AppLaunchTest`, `BottomNavigationTest` | real `MainActivity`/`NavGraph`, by `ScreenTags` |
+| Every More-menu feature opens (16) | `navigation/FeatureNavigationTest` | tag-asserted, with back round-trips |
+| Every Settings sub-screen opens (8) | `navigation/SettingsNavigationTest` | tag-asserted |
+| **First-run / onboarding completes + persists** | `behavior/OnboardingFlowTest` | drives the real screen |
+| **Settings toggles actually work** (UI switch → DataStore) | `behavior/SettingsBehaviorTest` | Appearance haptic/24h/animations + notification vibration |
+| **Tasbih counter increments on tap** | `behavior/TasbihCounterTest` | tag-driven interaction |
+
+**Deliberately validated at the data/VM layer, not via UI** (UI input is brittle and the
+logic is unit-tested): Zakat calculation math (`ZakatDaoTest` + the Zakat ViewModel unit
+tests), prayer-tracker status changes (`PrayerDaoTest.updatePrayerStatus`), bookmark/
+favorite toggles for Quran/Hadith/Dua (the `*DaoTest` `toggle*` cases). The screens that
+surface these all render and navigate (covered above); the state transitions are proven
+on the layer that owns them.
+
+**Known UI-test exclusion:** the Qibla compass screen recomposes continuously from the
+sensor listener and never reaches Compose idle, so it is not driven by idling-based UI
+tests (its tab presence is asserted in `AppLaunchTest`).
+
 ## Conventions
 
 - **Selectors live in `support/Selectors.kt`.** Tests reference `Selectors.NavLabel.*`,

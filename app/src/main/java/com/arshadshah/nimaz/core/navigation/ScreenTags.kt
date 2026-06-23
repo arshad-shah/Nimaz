@@ -94,6 +94,12 @@ object ScreenTags {
     /** Scrollable lists on hub screens — let UI tests scroll to off-screen entries. */
     const val MoreList = "more_menu_list"
     const val SettingsList = "settings_list"
+    const val AppearanceList = "settings_appearance_list"
+    const val NotificationsList = "settings_notifications_list"
+
+    /** Interactive elements exercised by behavior tests. */
+    const val TasbihCounter = "tasbih_counter"
+    const val TasbihCount = "tasbih_count"
 
     /** Tag for a bottom-navigation tab, keyed by its label (e.g. "Home"). */
     fun bottomNav(label: String): String = "bottomnav_$label"
