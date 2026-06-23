@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -28,6 +27,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
@@ -59,15 +59,15 @@ fun QaidaHomeScreen(
                 title = { Text(stringResource(R.string.qaida)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
+                        NimazIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 },
                 actions = {
                     IconButton(onClick = onOpenLetters) {
-                        Icon(Icons.Filled.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
+                        NimazIcon(Icons.Filled.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
                     }
                     IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
+                        NimazIcon(
                             Icons.Filled.MoreVert,
                             contentDescription = stringResource(R.string.more)
                         )
@@ -79,7 +79,7 @@ fun QaidaHomeScreen(
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.qaida_reset_journey)) },
                             leadingIcon = {
-                                Icon(Icons.Filled.RestartAlt, contentDescription = null)
+                                NimazIcon(Icons.Filled.RestartAlt, contentDescription = null)
                             },
                             onClick = {
                                 menuExpanded = false

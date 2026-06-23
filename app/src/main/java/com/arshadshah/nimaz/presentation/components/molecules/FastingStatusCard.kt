@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,9 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,7 +26,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -47,16 +46,10 @@ fun FastingStatusCard(
     modifier: Modifier = Modifier,
     fillHeight: Boolean = false,
 ) {
-    Card(
+    NimazSurfaceCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         val statusText = if (fastingToday) {
             stringResource(R.string.today_fasting)
@@ -140,11 +133,11 @@ private fun FastingStateBadge(fastingToday: Boolean) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (fastingToday) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 tint = fg,
-                modifier = Modifier.size(14.dp)
+                iconSize = 14.dp
             )
             Spacer(modifier = Modifier.width(5.dp))
         }
@@ -161,10 +154,16 @@ private fun FastingStateBadge(fastingToday: Boolean) {
 
 @Composable
 private fun FastingIconChip() {
-    IconBadge(
+    NimazIcon(
         imageVector = Icons.Default.LightMode,
-        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-        iconColor = MaterialTheme.colorScheme.secondary,
+        contentDescription = null,
+        type = NimazIconType.CONTAINED,
+        containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+        tint = MaterialTheme.colorScheme.secondary,
+        containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+        containerSize = 44.dp,
+        iconSize = 22.dp,
+        cornerRadius = 12.dp,
     )
 }
 

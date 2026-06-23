@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -56,6 +55,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import android.os.Build
+import com.arshadshah.nimaz.presentation.theme.GlassColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -167,20 +167,20 @@ fun GlassPill(
             .padding(horizontal = hPad, vertical = vPad),
     ) {
         if (leadingIcon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(iconSize),
+                iconSize = iconSize,
             )
         }
         Text(text = text, style = style, color = tint)
         if (trailingIcon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = trailingIcon,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(iconSize),
+                iconSize = iconSize,
             )
         }
     }
@@ -312,11 +312,11 @@ fun GlassIconButton(
             .size(target)
             .glassSurface(tone = tone, tint = tint, shape = CircleShape, backdrop = backdrop, blurRadius = blurRadius),
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(iconSize),
+            iconSize = iconSize,
         )
     }
 }
@@ -341,16 +341,16 @@ private fun SkyPreview(
 }
 
 private val MiddaySky = listOf(
-    Color(0xFF0A2E7A), Color(0xFF1E62D6), Color(0xFF4F9BF5), Color(0xFFBFE0FB)
+    GlassColors.MiddayBlueDeep, GlassColors.MiddayBlueMid, GlassColors.MiddayBlueBright, GlassColors.MiddayBluePale
 )
 private val DuskSky = listOf(
-    Color(0xFF2B3A8C), Color(0xFF7C6AB0), Color(0xFFE59AB0), Color(0xFFFBB778)
+    GlassColors.DuskIndigo, GlassColors.DuskMauve, GlassColors.DuskRose, GlassColors.DuskPeach
 )
 private val NightSky = listOf(
-    Color(0xFF03060F), Color(0xFF0A0F26), Color(0xFF141A38), Color(0xFF33285E)
+    GlassColors.NightBlack, GlassColors.NightMidnight, GlassColors.NightIndigo, GlassColors.NightViolet
 )
 private val DawnSky = listOf(
-    Color(0xFF16204A), Color(0xFF3B3270), Color(0xFF8A4F6E), Color(0xFFD08A5E)
+    GlassColors.DawnNavy, GlassColors.DawnViolet, GlassColors.DawnPlum, GlassColors.DawnAmber
 )
 
 private val pillShadow = Shadow(Color.Black.copy(alpha = 0.35f), Offset(0f, 1f), 4f)
@@ -393,12 +393,12 @@ private fun GlassPill_Tints() {
                     "Completed",
                     leadingIcon = Icons.Filled.Check,
                     tone = GlassPillTone.Solid,
-                    tint = Color(0xFF7FE3A4),
+                    tint = GlassColors.TintMintGreen,
                 )
                 GlassPill(
                     "Starts soon",
                     leadingIcon = Icons.Filled.WbSunny,
-                    tint = Color(0xFFFFD27D),
+                    tint = GlassColors.TintGold,
                 )
                 GlassPill("Details", trailingIcon = Icons.Filled.KeyboardArrowDown)
             }
@@ -440,8 +440,8 @@ private fun GlassPill_BackdropBlur() {
     NimazTheme {
         val backdrop = rememberGlassBackdrop()
         val dots = listOf(
-            Color(0xFFFFB000), Color(0xFFFF5C5C), Color(0xFF4ADE80),
-            Color(0xFF38BDF8), Color(0xFFC084FC), Color(0xFFFF8FA3),
+            GlassColors.DotAmber, GlassColors.DotRed, GlassColors.DotGreen,
+            GlassColors.DotSky, GlassColors.DotPurple, GlassColors.DotPink,
         )
         Box(
             modifier = Modifier.size(width = 320.dp, height = 200.dp),

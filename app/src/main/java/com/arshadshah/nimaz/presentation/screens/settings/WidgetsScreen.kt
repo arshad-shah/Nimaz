@@ -1,8 +1,14 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,7 +31,8 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -38,8 +45,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -227,32 +233,35 @@ private fun WidgetSection(
         )
 
         // Widget preview container
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
-                        )
-                    )
-                )
-                .padding(20.dp),
-            contentAlignment = Alignment.Center
+        NimazCard(
+            modifier = Modifier.fillMaxWidth(),
+            style = NimazCardStyle.GRADIENT,
+            shape = RoundedCornerShape(24.dp),
+            gradient = listOf(
+                MaterialTheme.colorScheme.surfaceVariant,
+                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.8f)
+            )
         ) {
-            preview()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                preview()
+            }
         }
 
         // Widget info row
+        NimazCard(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
+            elevation = 0.dp
+        ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(14.dp)
-                )
                 .padding(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -265,11 +274,11 @@ private fun WidgetSection(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = infoIcon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 22.dp
                 )
             }
 
@@ -288,6 +297,7 @@ private fun WidgetSection(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+        }
         }
     }
 }
@@ -484,9 +494,6 @@ private fun HijriDateWidgetPreview(
 private fun PrayerTrackerWidgetPreview(
     modifier: Modifier = Modifier
 ) {
-    val checkedColor = NimazColors.Success // Green
-    val uncheckedColor = MaterialTheme.colorScheme.surfaceVariant
-
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -533,22 +540,13 @@ private fun PrayerTrackerWidgetPreview(
                     "I" to false
                 ).forEach { (name, isChecked) ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Box(
-                            modifier = Modifier
-                                .size(28.dp)
-                                .clip(CircleShape)
-                                .background(if (isChecked) checkedColor else uncheckedColor),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isChecked) {
-                                Text(
-                                    text = "\u2713",
-                                    color = Color.White,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
-                                )
-                            }
-                        }
+                        NimazCheckbox(
+                            checked = isChecked,
+                            onCheckedChange = null,
+                            variant = NimazCheckboxVariant.SUCCESS,
+                            size = NimazCheckboxSize.LARGE,
+                            type = NimazCheckboxType.CIRCLE
+                        )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
                             text = name,
@@ -737,13 +735,15 @@ private fun HijriCalendarWidgetPreview(
 
 @Composable
 private fun HowToAddCard(modifier: Modifier = Modifier) {
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
+        elevation = 0.dp
+    ) {
     Column(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(16.dp)
-            )
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -785,6 +785,7 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
                 )
             }
         }
+    }
     }
 }
 
@@ -928,11 +929,6 @@ private fun getShortPrayerName(name: String): String {
         "isha" -> "Isha"
         else -> name.take(5)
     }
-}
-
-private fun formatWidgetTime(hour: Int, minute: Int): String {
-    val h = if (hour > 12) hour - 12 else if (hour == 0) 12 else hour
-    return String.format("%d:%02d", h, minute)
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Next Prayer Widget Preview")

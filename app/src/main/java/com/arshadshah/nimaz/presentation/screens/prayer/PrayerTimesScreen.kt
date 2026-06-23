@@ -30,11 +30,9 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -57,6 +55,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
@@ -95,7 +98,7 @@ fun PrayerTimesScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
+                        NimazIcon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
                     }
                 },
             )
@@ -143,7 +146,7 @@ fun PrayerTimesScreen(
             // A custom layout pulls the card up by `overlap` AND shrinks the
             // space it reserves by the same amount, so its bottom is flush with
             // the day list (offset alone would leave an equal-sized empty gap).
-            Card(
+            NimazCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp)
@@ -154,9 +157,10 @@ fun PrayerTimesScreen(
                             placeable.place(0, -overlap)
                         }
                     },
+                style = NimazCardStyle.FILLED,
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
+                elevation = 4.dp,
             ) {
                 DayNavBar(
                     selectedDate = state.selectedDate,
@@ -257,7 +261,7 @@ private fun DayNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilledTonalIconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
+            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
         }
         Row(
             modifier = Modifier
@@ -283,19 +287,19 @@ private fun DayNavBar(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.CalendarMonth,
                         contentDescription = stringResource(R.string.cd_pick_date),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.SMALL,
                         modifier = Modifier
-                            .padding(start = 6.dp)
-                            .size(16.dp),
+                            .padding(start = 6.dp),
                     )
                 }
             }
         }
         FilledTonalIconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
+            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
         }
     }
 }
@@ -332,12 +336,13 @@ private fun DayList(
 
 @Composable
 private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, method: String) {
-    Card(
+    NimazCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

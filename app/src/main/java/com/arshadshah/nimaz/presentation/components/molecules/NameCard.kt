@@ -17,8 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,13 +30,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Shared "Refined Row" card for all three names screens. Accent is a parameter.
@@ -63,8 +66,8 @@ fun NameCard(
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
         onClick = onClick,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceContainerLow
         ),
     ) {
         Row(
@@ -163,7 +166,7 @@ fun NameCard(
                 }
 
                 IconButton(onClick = onFavoriteClick) {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
                         contentDescription = if (isFavorite) {
                             stringResource(R.string.remove_from_favorites)
@@ -175,5 +178,70 @@ fun NameCard(
                 }
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun NameCardShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Asma ul Husna variant (favorited)
+        NameCard(
+            number = 1,
+            arabicName = "الرَّحْمَٰن",
+            primaryLabel = "Ar-Rahman",
+            secondaryLabel = "The Most Compassionate",
+            isFavorite = true,
+            accent = NamesAccents.allah(),
+            onClick = {},
+            onFavoriteClick = {},
+        )
+        // Asma un Nabi variant (not favorited)
+        NameCard(
+            number = 12,
+            arabicName = "الْمُصْطَفَىٰ",
+            primaryLabel = "Al-Mustafa",
+            secondaryLabel = "The Chosen One",
+            isFavorite = false,
+            accent = NamesAccents.prophetNames(),
+            onClick = {},
+            onFavoriteClick = {},
+        )
+        // Prophets story variant (titleLabel + eraChip)
+        NameCard(
+            number = 3,
+            arabicName = "إِبْرَاهِيم",
+            primaryLabel = "Ibrahim",
+            secondaryLabel = "Abraham",
+            isFavorite = false,
+            accent = NamesAccents.prophets(),
+            onClick = {},
+            onFavoriteClick = {},
+            titleLabel = "Khalilullah — Friend of Allah",
+            eraChip = "Prophet",
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "NameCard — Light")
+@Composable
+private fun NameCardLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NameCardShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "NameCard — Dark")
+@Composable
+private fun NameCardDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NameCardShowcase()
     }
 }

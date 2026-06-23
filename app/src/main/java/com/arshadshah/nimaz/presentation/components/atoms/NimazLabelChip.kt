@@ -3,9 +3,7 @@ package com.arshadshah.nimaz.presentation.components.atoms
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -15,6 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Repeat
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * A small rounded, decorative label pill used across readers for occasion,
@@ -50,10 +57,10 @@ fun NimazLabelChip(
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             if (icon != null) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(14.dp),
+                    iconSize = 14.dp,
                     tint = foreground
                 )
             }
@@ -64,5 +71,44 @@ fun NimazLabelChip(
                 color = foreground
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+/**
+ * Shows the neutral vs. highlighted chip, with and without a leading icon.
+ */
+@Composable
+private fun NimazLabelChipShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        NimazLabelChip(text = "Sahih al-Bukhari")
+        NimazLabelChip(text = "Eid al-Fitr", highlighted = true)
+        NimazLabelChip(text = "Repeat 3×", icon = Icons.Default.Repeat)
+        NimazLabelChip(text = "Narrator: Abu Hurairah", icon = Icons.Default.Star, highlighted = true)
+    }
+}
+
+@Preview(showBackground = true, name = "Label Chip — Light")
+@Composable
+private fun NimazLabelChipLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NimazLabelChipShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Label Chip — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazLabelChipDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NimazLabelChipShowcase()
     }
 }

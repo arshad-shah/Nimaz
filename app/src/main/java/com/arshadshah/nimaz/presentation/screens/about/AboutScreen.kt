@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,6 +57,10 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import java.time.LocalDate
@@ -180,11 +183,11 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.Verified,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(13.dp)
+                variant = NimazIconVariant.PRIMARY,
+                iconSize = 13.dp
             )
             Text(
                 text = stringResource(
@@ -254,11 +257,11 @@ private fun QuickActionButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = fg,
-            modifier = Modifier.size(21.dp)
+            iconSize = 21.dp
         )
         Text(
             text = label,
@@ -281,11 +284,10 @@ private fun LinksCard(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -393,11 +395,11 @@ private fun UpdateStatusItem(
                     is UpdateState.Error -> Icons.Default.ErrorOutline
                     else -> Icons.Default.Refresh
                 }
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = if (actionable) MaterialTheme.colorScheme.onPrimary else accent,
-                    modifier = Modifier.size(18.dp)
+                    iconSize = 18.dp
                 )
             }
         }
@@ -417,12 +419,12 @@ private fun UpdateStatusItem(
             )
         }
         if (!busy) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = null,
                 tint = if (actionable) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(15.dp)
+                iconSize = 15.dp
             )
         }
     }
@@ -452,11 +454,11 @@ private fun LinkItem(
                     .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 18.dp
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -473,11 +475,11 @@ private fun LinkItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(
+            NimazIcon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(15.dp)
+                iconSize = 15.dp
             )
         }
         if (showDivider) {
@@ -495,11 +497,14 @@ private fun LinkItem(
 @Composable
 private fun DeveloperCard(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    Row(
-        modifier = modifier
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(13.dp)
@@ -533,6 +538,7 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
         }
         DeveloperSocial(Icons.Default.Code) { uriHandler.openUri("https://github.com/arshad-shah") }
         DeveloperSocial(Icons.Default.WorkOutline) { uriHandler.openUri("https://linkedin.com/in/arshadshah") }
+      }
     }
 }
 
@@ -546,11 +552,11 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(17.dp)
+            iconSize = 17.dp
         )
     }
 }
@@ -579,10 +585,13 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
 
 @Composable
 private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+    NimazCard(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Column(
+        modifier = Modifier
             .padding(12.dp)
     ) {
         Text(
@@ -597,6 +606,7 @@ private fun CreditCell(label: String, provider: String, modifier: Modifier = Mod
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
+      }
     }
 }
 
@@ -617,13 +627,12 @@ private fun FooterSection(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .size(14.dp)
-                    .padding(horizontal = 2.dp)
+                iconSize = 14.dp,
+                modifier = Modifier.padding(horizontal = 2.dp)
             )
             Text(
                 text = stringResource(R.string.for_the_ummah),

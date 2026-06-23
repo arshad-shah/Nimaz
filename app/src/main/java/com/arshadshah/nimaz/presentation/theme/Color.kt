@@ -1,262 +1,229 @@
 package com.arshadshah.nimaz.presentation.theme
 
-import androidx.compose.ui.graphics.Color
+import com.arshadshah.nimaz.presentation.theme.NimazPalette as P
 
+/**
+ * Tier 2 of the Nimaz colour system — **semantic tokens**.
+ *
+ * Every value here is a reference into the raw [NimazPalette]; this layer carries
+ * *meaning* (primary, success, "prayed", "ramadan") rather than literal hues, so a
+ * hue can be retuned in one place. Feature screens read these tokens (or
+ * `MaterialTheme.colorScheme.*`), never raw palette constants or `Color(0xFF…)`.
+ */
 object NimazColors {
-    // Primary - Teal (Updated to match prototype)
-    val Primary50 = Color(0xFFF0FDFA)
-    val Primary100 = Color(0xFFCCFBF1)
-    val Primary200 = Color(0xFF99F6E4)
-    val Primary400 = Color(0xFF2DD4BF)
-    val Primary = Color(0xFF14B8A6)  // Primary 500
-    val Primary600 = Color(0xFF0D9488)
-    val Primary700 = Color(0xFF0F766E)
-    val PrimaryDark = Primary700  // Legacy alias
-    val Primary800 = Color(0xFF115E59)
-    val Primary900 = Color(0xFF134E4A)
-    val Primary950 = Color(0xFF042F2E)
+    // ── Primary — Teal ────────────────────────────────────────────────────────
+    val Primary50 = P.Teal50
+    val Primary100 = P.Teal100
+    val Primary200 = P.Teal200
+    val Primary400 = P.Teal400
+    val Primary = P.Teal500              // Primary 500
+    val Primary600 = P.Teal600
+    val Primary700 = P.Teal700
+    val PrimaryDark = Primary700          // Legacy alias
+    val Primary800 = P.Teal800
+    val Primary900 = P.Teal900
+    val Primary950 = P.Teal950
 
-    // Legacy compatibility
+    // Material role aliases
     val PrimaryLight = Primary400
     val PrimaryContainer = Primary100
-    val OnPrimary = Color(0xFFFFFFFF)
+    val OnPrimary = P.White
     val OnPrimaryContainer = Primary950
 
-    // Secondary - Gold/Amber (Updated)
-    val Gold400 = Color(0xFFFACC15)
-    val Gold500 = Color(0xFFEAB308)
+    // ── Secondary — Gold / Amber ──────────────────────────────────────────────
+    val Gold400 = P.Yellow400
+    val Gold500 = P.Gold500
     val Secondary = Gold500
     val SecondaryLight = Gold400
-    val SecondaryDark = Color(0xFFFFA000)
-    val SecondaryContainer = Color(0xFFFFECB3)
+    val SecondaryDark = P.AmberDeep
+    val SecondaryContainer = P.AmberSoft
 
     /** Darker amber-gold accent (e.g. icon tints/labels on gold surfaces). */
-    val GoldDark = Color(0xFFCA8A04)
+    val GoldDark = P.GoldDark
 
-    // Semantic / categorical accents used across feature screens (Tailwind-derived).
-    val Success = Color(0xFF22C55E)
-    val Warning = Color(0xFFF59E0B)
-    val Info = Color(0xFF3B82F6)
-    val InfoSoft = Color(0xFF5B8DEF)
-    val Emerald = Color(0xFF10B981)
-    val Sky = Color(0xFF0EA5E9)
-    val Purple = Color(0xFFA855F7)
-    val Pink = Color(0xFFEC4899)
-    val Amber = Color(0xFFFBBF24)
-    val OrangeDark = Color(0xFFEA580C)
-    val IndigoLight = Color(0xFF818CF8)
-    val Gray300 = Color(0xFFD4D4D4)
+    // ── Semantic / categorical accents used across feature screens ────────────
+    val Success = P.Green500
+    val Warning = P.Amber500
+    val Info = P.Blue500
+    val InfoSoft = P.BlueSoft
+    val Emerald = P.Emerald500
+    val Sky = P.Sky500
+    val Purple = P.Purple500
+    val Pink = P.Pink500
+    val Amber = P.Amber400
+    val OrangeDark = P.Orange600
+    val IndigoLight = P.Indigo400
+    val Gray300 = P.Gray300
 
     // Onboarding illustration background (dark teal gradient).
-    val OnboardingBgTop = Color(0xFF061A1C)
-    val OnboardingBgBottom = Color(0xFF0A2A2A)
-    val OnSecondary = Color(0xFF000000)
-    val OnSecondaryContainer = Color(0xFF3E2723)
+    val OnboardingBgTop = P.OnboardingBgTop
+    val OnboardingBgBottom = P.OnboardingBgBottom
+    val OnSecondary = P.Black
+    val OnSecondaryContainer = P.BrownDeep
 
-    // Neutral Colors (Dark theme optimized)
-    val Neutral0 = Color(0xFFFFFFFF)
-    val Neutral50 = Color(0xFFFAFAF9)
-    val Neutral100 = Color(0xFFF5F5F4)
-    val Neutral200 = Color(0xFFE7E5E4)
-    val Neutral300 = Color(0xFFD6D3D1)
-    val Neutral400 = Color(0xFFA8A29E)
-    val Neutral500 = Color(0xFF78716C)
-    val Neutral600 = Color(0xFF57534E)
-    val Neutral700 = Color(0xFF44403C)
-    val Neutral800 = Color(0xFF292524)
-    val Neutral900 = Color(0xFF1C1917)
-    val Neutral950 = Color(0xFF0C0A09)
+    // ── Neutral ramp (dark-theme optimised) ───────────────────────────────────
+    val Neutral0 = P.White
+    val Neutral50 = P.Stone50
+    val Neutral100 = P.Stone100
+    val Neutral200 = P.Stone200
+    val Neutral300 = P.Stone300
+    val Neutral400 = P.Stone400
+    val Neutral500 = P.Stone500
+    val Neutral600 = P.Stone600
+    val Neutral700 = P.Stone700
+    val Neutral800 = P.Stone800
+    val Neutral900 = P.Stone900
+    val Neutral950 = P.Stone950
 
-    // Tertiary - Deep Purple (for accents)
-    val Tertiary = Color(0xFF7C4DFF)
-    val TertiaryContainer = Color(0xFFE8DAFF)
-    val OnTertiary = Color(0xFFFFFFFF)
-    val OnTertiaryContainer = Color(0xFF2E1065)
+    // ── Tertiary — Deep Purple (accents) ──────────────────────────────────────
+    val Tertiary = P.DeepPurple
+    val TertiaryContainer = P.PurpleSoft
+    val OnTertiary = P.White
+    val OnTertiaryContainer = P.PurpleDeep
 
-    // Background & Surface - Light Theme
-    val BackgroundLight = Color(0xFFFAFAFA)
-    val SurfaceLight = Color(0xFFFFFFFF)
-    val SurfaceVariantLight = Color(0xFFF5F5F5)
-    val OnBackgroundLight = Color(0xFF1C1C1C)
-    val OnSurfaceLight = Color(0xFF1C1C1C)
-    val OnSurfaceVariantLight = Color(0xFF757575)
+    // ── Background & Surface — Light ──────────────────────────────────────────
+    val BackgroundLight = P.GrayBg
+    val SurfaceLight = P.White
+    val SurfaceVariantLight = P.Gray100
+    val OnBackgroundLight = P.Ink
+    val OnSurfaceLight = P.Ink
+    val OnSurfaceVariantLight = P.Gray700
 
-    // Background & Surface - Dark Theme
-    val BackgroundDark = Color(0xFF0C0A09)
-    val SurfaceDark = Color(0xFF1C1917)
-    val SurfaceVariantDark = Color(0xFF292524)
-    val OnBackgroundDark = Color(0xFFE0E0E0)
-    val OnSurfaceDark = Color(0xFFE0E0E0)
-    val OnSurfaceVariantDark = Color(0xFFB0B0B0)
+    // ── Background & Surface — Dark ───────────────────────────────────────────
+    val BackgroundDark = P.Stone950
+    val SurfaceDark = P.Stone900
+    val SurfaceVariantDark = P.Stone800
+    val OnBackgroundDark = P.Gray200
+    val OnSurfaceDark = P.Gray200
+    val OnSurfaceVariantDark = P.Gray500
 
-    // Error
-    val Error = Color(0xFFB00020)
-    val ErrorLight = Color(0xFFCF6679)
-    val ErrorContainer = Color(0xFFFDE7E9)
-    val OnError = Color(0xFFFFFFFF)
-    val OnErrorContainer = Color(0xFF370B0E)
+    // ── Error ─────────────────────────────────────────────────────────────────
+    val Error = P.ErrorRed
+    val ErrorLight = P.ErrorPink
+    val ErrorContainer = P.ErrorContainer
+    val OnError = P.White
+    val OnErrorContainer = P.OnErrorContainer
 
-    // Outline
-    val OutlineLight = Color(0xFFE0E0E0)
-    val OutlineDark = Color(0xFF292524)
+    // ── Outline ───────────────────────────────────────────────────────────────
+    val OutlineLight = P.Gray200
+    val OutlineDark = P.Stone800
 
-    // Prayer Time Colors (Updated to match prototype)
+    // ── Prayer-time accents ───────────────────────────────────────────────────
     object PrayerColors {
-        val Fajr = Color(0xFF6366F1)           // Indigo
-        val FajrGradientEnd = Color(0xFF9FA8DA)
-        val Sunrise = Color(0xFFF59E0B)         // Amber
-        val SunriseGradientEnd = Color(0xFFFFE0B2)
-        val Dhuhr = Color(0xFFEAB308)           // Yellow
-        val DhuhrGradientEnd = Color(0xFFFFF9C4)
-        val Asr = Color(0xFFF97316)             // Orange
-        val AsrGradientEnd = Color(0xFFFFCCBC)
-        val Maghrib = Color(0xFFEF4444)         // Red
-        val MaghribGradientEnd = Color(0xFFFFCDD2)
-        val Isha = Color(0xFF8B5CF6)            // Purple
-        val IshaGradientEnd = Color(0xFFC5CAE9)
+        val Fajr = P.Indigo500
+        val Sunrise = P.Amber500
+        val Dhuhr = P.Gold500
+        val Asr = P.Orange500
+        val Maghrib = P.Red500
+        val Isha = P.Violet500
     }
 
-    // Status Colors
+    // ── Prayer-tracking status ────────────────────────────────────────────────
     object StatusColors {
-        val Prayed = Color(0xFF4CAF50)
-        val Missed = Color(0xFFF44336)
-        val Pending = Color(0xFFFFC107)
-        val Qada = Color(0xFF9C27B0)
-        val Jamaah = Color(0xFF2196F3)
-        val Late = Color(0xFFFF9800)         // Orange for late prayers
-        val Active = Color(0xFF4CAF50)        // Green for active state
-        val Partial = Color(0xFFFFA726)       // Orange for partial completion (some prayers prayed)
+        val Prayed = P.MatGreen
+        val Missed = P.MatRed
+        val Pending = P.MatAmber
+        val Qada = P.MatPurple
+        val Jamaah = P.MatBlue
+        val Active = P.MatGreen          // green for active state
+        val Partial = P.MatOrange400     // some prayers prayed
     }
 
-    // Fasting Colors
+    // ── Fasting ───────────────────────────────────────────────────────────────
     object FastingColors {
-        val Fasted = Color(0xFF4CAF50)
-        val NotFasted = Color(0xFFBDBDBD)
-        val Makeup = Color(0xFFFF9800)
-        val Exempted = Color(0xFF9E9E9E)
-        val Ramadan = Color(0xFF9C27B0)        // Purple for Ramadan fasts
-        val Voluntary = Color(0xFF2196F3)      // Blue for voluntary fasts
+        val Fasted = P.MatGreen
+        val NotFasted = P.Gray400
+        val Makeup = P.MatOrange
+        val Exempted = P.Gray600
+        val Ramadan = P.MatPurple
     }
 
-    // Quran Colors
+    // ── Quran ─────────────────────────────────────────────────────────────────
     object QuranColors {
-        val Meccan = Color(0xFF795548)
-        val Medinan = Color(0xFF00796B)
-        val SajdaAyah = Color(0xFFE91E63)
-        val BookmarkPrimary = Color(0xFFFFC107)
-        val BookmarkSecondary = Color(0xFF00BCD4)
+        val Meccan = P.Brown700
+        val Medinan = P.MatTeal700
+        val BookmarkPrimary = P.MatAmber
+
+        /**
+         * Teal "mushaf" gradient + accents shared by the Quran banners and cards
+         * (Verse-of-the-day, Continue-reading, Surah/Juz banners). Centralises the
+         * 115E59→042F2E gradient, 0F766E border and gold accent that were hardcoded
+         * (and copy-pasted) across each of them.
+         */
+        val BannerGradient = listOf(Primary800, Primary950)
+        val BannerBorder = Primary700
+        val BannerAccent = Gold500
     }
 
-    // Zakat Colors
+    // ── Zakat ─────────────────────────────────────────────────────────────────
     object ZakatColors {
-        val Gold = Color(0xFFFFD700)
-        val Silver = Color(0xFFC0C0C0)
-        val Cash = Color(0xFF4CAF50)
-        val Investment = Color(0xFF2196F3)
+        val Gold = P.GoldPure
+        val Silver = P.Silver
+        val Cash = P.MatGreen
+        val Investment = P.MatBlue
 
         /** Darker amber-gold accent used on zakat calculator/history surfaces. */
-        val GoldAccent = Color(0xFFCA8A04)
+        val GoldAccent = P.GoldDark
     }
 
-    // Per-collection gradient pairs for the Hadith book cards.
+    // ── Hadith book-card gradients (per collection) ───────────────────────────
     object HadithCollectionColors {
-        val Bukhari = listOf(Color(0xFF22C55E), Color(0xFF16A34A))
-        val Muslim = listOf(Color(0xFF3B82F6), Color(0xFF2563EB))
-        val Tirmidhi = listOf(Color(0xFFA855F7), Color(0xFF9333EA))
-        val Nasai = listOf(Color(0xFFF97316), Color(0xFFEA580C))
-        val AbuDawud = listOf(Color(0xFFEC4899), Color(0xFFDB2777))
-        val IbnMajah = listOf(Color(0xFF14B8A6), Color(0xFF0D9488))
+        val Bukhari = listOf(P.Green500, P.Green600)
+        val Muslim = listOf(P.Blue500, P.Blue600)
+        val Tirmidhi = listOf(P.Purple500, P.Purple600)
+        val Nasai = listOf(P.Orange500, P.Orange600)
+        val AbuDawud = listOf(P.Pink500, P.Pink600)
+        val IbnMajah = listOf(P.Teal500, P.Teal600)
         val Default = IbnMajah
     }
 
-    // Tasbih Colors
+    // ── Tasbih ────────────────────────────────────────────────────────────────
     object TasbihColors {
-        val Counter = Color(0xFF009688)
-        val Complete = Color(0xFF4CAF50)
-        val Milestone = Color(0xFFFFC107)
+        val Complete = P.MatGreen
+        val Milestone = P.MatAmber
     }
 
-    // Tajweed Colors — V2: distinct colour per sub-rule, matching printed mushaf coding
+    // ── Tajweed — distinct colour per sub-rule, matching printed-mushaf coding ─
+    // Each rule has a light and a dark (OLED-brighter) tone; pairs are consumed
+    // by TajweedParser.
     object TajweedColors {
         // ── Light theme ──
-
-        // Ghunnah (nasalisation)
-        val GhunnahLight = Color(0xFF059669)          // Green
-
-        // Ikhfa (concealment of noon sakinah)
-        val IkhfaLight = Color(0xFF0D9488)            // Teal
-
-        // Ikhfa Shafawi (labial concealment of meem sakinah)
-        val IkhfaShafawiLight = Color(0xFF0E7490)     // Cyan-700
-
-        // Idgham with Ghunnah
-        val IdghamGhunnahLight = Color(0xFFD97706)    // Amber
-
-        // Idgham without Ghunnah
-        val IdghamNoGhunnahLight = Color(0xFF92400E)  // Brown / Amber-800
-
-        // Idgham Shafawi (labial merging)
-        val IdghamShafawiLight = Color(0xFFB45309)    // Amber-700
-
-        // Idgham Mutajanisayn (homorganic)
-        val IdghamMutajanisaynLight = Color(0xFFC2410C) // Orange-700
-
-        // Idgham Mutaqaribayn (close articulation)
-        val IdghamMutaqaribayLight = Color(0xFFEA580C)  // Orange-600
-
-        // Qalqalah (echoing)
-        val QalqalahLight = Color(0xFF2563EB)         // Blue
-
-        // Madd Normal / Tabee'i (2 beats)
-        val MaddNormalLight = Color(0xFFE11D48)       // Rose-600
-
-        // Madd Jaiz / Permissible (2-4-5 beats)
-        val MaddPermissibleLight = Color(0xFFDB2777)  // Pink-600
-
-        // Madd Wajib / Obligatory (4-5 beats)
-        val MaddObligatoryLight = Color(0xFFDC2626)   // Red-600
-
-        // Madd Lazim / Necessary (6 beats)
-        val MaddNecessaryLight = Color(0xFF9F1239)    // Rose-800
-
-        // Iqlab (conversion noon → meem)
-        val IqlabLight = Color(0xFF7C3AED)            // Violet
-
-        // Lam Shamsiyyah (sun-letter assimilation)
-        val LamShamsiyyahLight = Color(0xFF4F46E5)    // Indigo
-
-        // Silent letters
-        val SilentLight = Color(0xFF64748B)           // Slate
-
-        // Hamza Al-Wasl
-        val HamzaWaslLight = Color(0xFF94A3B8)        // Slate-400
+        val GhunnahLight = P.Emerald600
+        val IkhfaLight = P.Teal600
+        val IkhfaShafawiLight = P.Cyan700
+        val IdghamGhunnahLight = P.Amber600
+        val IdghamNoGhunnahLight = P.Amber800
+        val IdghamShafawiLight = P.Amber700
+        val IdghamMutajanisaynLight = P.Orange700
+        val IdghamMutaqaribayLight = P.Orange600
+        val QalqalahLight = P.Blue600
+        val MaddNormalLight = P.Rose600
+        val MaddPermissibleLight = P.Pink600
+        val MaddObligatoryLight = P.Red600
+        val MaddNecessaryLight = P.Rose800
+        val IqlabLight = P.Violet600
+        val LamShamsiyyahLight = P.Indigo600
+        val SilentLight = P.Slate500
+        val HamzaWaslLight = P.Slate400
 
         // ── Dark theme (brighter for OLED readability) ──
-
-        val GhunnahDark = Color(0xFF34D399)
-
-        val IkhfaDark = Color(0xFF2DD4BF)
-        val IkhfaShafawiDark = Color(0xFF22D3EE)
-
-        val IdghamGhunnahDark = Color(0xFFFBBF24)
-        val IdghamNoGhunnahDark = Color(0xFFF59E0B)
-        val IdghamShafawiDark = Color(0xFFFCD34D)
-        val IdghamMutajanisaynDark = Color(0xFFFB923C)
-        val IdghamMutaqaribayDark = Color(0xFFFDBA74)
-
-        val QalqalahDark = Color(0xFF60A5FA)
-
-        val MaddNormalDark = Color(0xFFFB7185)
-        val MaddPermissibleDark = Color(0xFFF472B6)
-        val MaddObligatoryDark = Color(0xFFF87171)
-        val MaddNecessaryDark = Color(0xFFFDA4AF)
-
-        val IqlabDark = Color(0xFFA78BFA)
-
-        val LamShamsiyyahDark = Color(0xFF818CF8)
-
-        val SilentDark = Color(0xFF94A3B8)
-        val HamzaWaslDark = Color(0xFFCBD5E1)
+        val GhunnahDark = P.Emerald300
+        val IkhfaDark = P.Teal400
+        val IkhfaShafawiDark = P.Cyan400
+        val IdghamGhunnahDark = P.Amber400
+        val IdghamNoGhunnahDark = P.Amber500
+        val IdghamShafawiDark = P.Amber300
+        val IdghamMutajanisaynDark = P.Orange400
+        val IdghamMutaqaribayDark = P.Orange300
+        val QalqalahDark = P.Blue400
+        val MaddNormalDark = P.Rose400
+        val MaddPermissibleDark = P.Pink400
+        val MaddObligatoryDark = P.Red400
+        val MaddNecessaryDark = P.Rose300
+        val IqlabDark = P.Violet400
+        val LamShamsiyyahDark = P.Indigo400
+        val SilentDark = P.Slate400
+        val HamzaWaslDark = P.Slate300
     }
 }
 

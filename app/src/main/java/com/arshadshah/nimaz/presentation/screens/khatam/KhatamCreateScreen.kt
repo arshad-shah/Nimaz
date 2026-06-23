@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -30,6 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
@@ -154,25 +156,20 @@ fun KhatamCreateScreen(
 
             // Create button
             item {
-                Button(
+                NimazButton(
+                    text = if (state.isCreating) stringResource(R.string.khatam_creating) else stringResource(
+                        R.string.khatam_start
+                    ),
                     onClick = {
                         viewModel.onEvent(KhatamEvent.CreateKhatam)
                         onNavigateBack()
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    enabled = state.name.isNotBlank() && !state.isCreating
-                ) {
-                    Text(
-                        text = if (state.isCreating) stringResource(R.string.khatam_creating) else stringResource(
-                            R.string.khatam_start
-                        ),
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
+                    variant = NimazButtonVariant.FILLED,
+                    size = NimazButtonSize.LARGE,
+                    enabled = state.name.isNotBlank() && !state.isCreating,
+                    loading = state.isCreating,
+                    fullWidth = true
+                )
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }

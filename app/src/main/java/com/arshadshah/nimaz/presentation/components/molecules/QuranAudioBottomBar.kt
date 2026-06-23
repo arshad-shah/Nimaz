@@ -24,13 +24,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +45,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -81,15 +85,12 @@ internal fun AudioBottomBar(
     val isBusy = isDownloading || isPreparing
     val shownProgress = if (isPreparing && totalToDownload > 0) downloadProgress else readingProgress
 
-    Surface(
+    NimazCard(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 12.dp, vertical = 10.dp),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        tonalElevation = 3.dp,
-        shadowElevation = 8.dp,
+        style = NimazCardStyle.ELEVATED,
     ) {
         Row(
             modifier = Modifier
@@ -107,11 +108,11 @@ internal fun AudioBottomBar(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = stringResource(if (isPlaying) R.string.cd_pause else R.string.cd_play),
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(26.dp)
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 26.dp
                     )
                 }
             }
@@ -156,13 +157,11 @@ internal fun AudioBottomBar(
                         NimazBadge(
                             text = stringResource(R.string.audio_position_juz_format, juzNumber),
                             size = NimazBadgeSize.SMALL,
-                            backgroundColor = MaterialTheme.colorScheme.outline,
                             outlined = true
                         )
                         NimazBadge(
                             text = stringResource(R.string.audio_position_page_format, pageNumber),
                             size = NimazBadgeSize.SMALL,
-                            backgroundColor = MaterialTheme.colorScheme.outline,
                             outlined = true
                         )
                     }
@@ -173,7 +172,7 @@ internal fun AudioBottomBar(
                     progress = { shownProgress },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(4.dp)
+                        .height(6.dp)
                         .clip(RoundedCornerShape(2.dp)),
                     color = if (isPreparing) MaterialTheme.colorScheme.tertiary
                     else MaterialTheme.colorScheme.primary,
@@ -183,11 +182,11 @@ internal fun AudioBottomBar(
 
             if (isAudioActive || isPreparing) {
                 IconButton(onClick = onStopClick, modifier = Modifier.size(40.dp)) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.cd_stop_audio),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }
@@ -199,7 +198,7 @@ internal fun AudioBottomBar(
 @Composable
 private fun PlayingEqualizer(color: Color, modifier: Modifier = Modifier) {
     val transition = rememberInfiniteTransition(label = "equalizer")
-    val durations = listOf(420, 560, 480)
+    val durations = listOf(420, 560, 480, 420, 560, 480, 420, 560, 480)
     Row(
         modifier = modifier.height(14.dp),
         verticalAlignment = Alignment.Bottom,

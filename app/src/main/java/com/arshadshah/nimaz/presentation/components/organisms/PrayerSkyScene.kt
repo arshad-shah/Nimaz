@@ -61,7 +61,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.glassBackdropSource
 import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.SkyColors
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.cos
@@ -268,9 +270,9 @@ private fun DrawScope.drawSunAt(td: Float, alt: Float, sunAlpha: Float) {
     val radius = size.minDimension * 0.085f
     val warm = (1f - alt).coerceIn(0f, 1f) // warmer near the horizon
 
-    val diskMid = lerp(Color(0xFFFFF1A8), Color(0xFFFFCF87), warm)
-    val diskRim = lerp(Color(0xFFFACC15), Color(0xFFF97316), warm)
-    val coronaIn = lerp(Color(0xFFFFF6C2), Color(0xFFFFE0A0), warm)
+    val diskMid = lerp(SkyColors.SunDiskCoreDay, SkyColors.SunDiskCoreWarm, warm)
+    val diskRim = lerp(SkyColors.SunDiskRimDay, SkyColors.SunDiskRimWarm, warm)
+    val coronaIn = lerp(SkyColors.SunCoronaDay, SkyColors.SunCoronaWarm, warm)
 
     drawSun(
         center = Offset(sunX, sunY),
@@ -300,7 +302,7 @@ private fun DrawScope.drawNight(nf: Float) {
     drawIntoCanvas { c ->
         val paint = Paint().apply {
             isAntiAlias = true
-            color = Color(0xFF7E8AD6).copy(alpha = 0.1f * nf).toArgb()
+            color = SkyColors.NightAurora.copy(alpha = 0.1f * nf).toArgb()
             maskFilter = BlurMaskFilter(size.minDimension * 0.08f, BlurMaskFilter.Blur.NORMAL)
         }
         c.nativeCanvas.save()
@@ -336,9 +338,9 @@ private fun DrawScope.drawCloudLayer() {
     // White→grey luminance so a per-phase ColorFilter.tint shades them correctly.
     val w = size.width
     val h = size.height
-    drawCloud(w * 0.25f, h * 0.49f, scale(), Color.White, Color(0xFFAFAFAF), 0.95f, CloudShape.Classic)
-    drawCloud(w * 0.6f, h * 0.37f, scale() * 0.8f, Color.White, Color(0xFFAFAFAF), 0.9f, CloudShape.Puffy)
-    drawCloud(w * 0.78f, h * 0.63f, scale() * 0.7f, Color.White, Color(0xFFAFAFAF), 0.85f, CloudShape.Wide)
+    drawCloud(w * 0.25f, h * 0.49f, scale(), Color.White, SkyColors.CloudShadow, 0.95f, CloudShape.Classic)
+    drawCloud(w * 0.6f, h * 0.37f, scale() * 0.8f, Color.White, SkyColors.CloudShadow, 0.9f, CloudShape.Puffy)
+    drawCloud(w * 0.78f, h * 0.63f, scale() * 0.7f, Color.White, SkyColors.CloudShadow, 0.85f, CloudShape.Wide)
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -351,90 +353,90 @@ private val SKY_KEYS = listOf(
     SkyKey(
         0.00f,
         listOf(
-            Color(0xFF03060F),
-            Color(0xFF0A0F26),
-            Color(0xFF141A38),
-            Color(0xFF1B1F4A),
-            Color(0xFF33285E)
+            SkyColors.MidnightZenith,
+            SkyColors.MidnightUpper,
+            SkyColors.MidnightMid,
+            SkyColors.MidnightLower,
+            SkyColors.MidnightHorizon
         ),
-        Color(0xFF2A2F52)
+        SkyColors.MidnightCloud
     ),
     SkyKey(
         0.20f,
         listOf(
-            Color(0xFF060A1C),
-            Color(0xFF16204A),
-            Color(0xFF3B3270),
-            Color(0xFF8A4F6E),
-            Color(0xFFD08A5E)
+            SkyColors.PreDawnZenith,
+            SkyColors.PreDawnUpper,
+            SkyColors.PreDawnMid,
+            SkyColors.PreDawnLower,
+            SkyColors.PreDawnHorizon
         ),
-        Color(0xFF7A5A72)
+        SkyColors.PreDawnCloud
     ),
     SkyKey(
         0.28f,
         listOf(
-            Color(0xFF2B3A8C),
-            Color(0xFF7C6AB0),
-            Color(0xFFE59AB0),
-            Color(0xFFFBB778),
-            Color(0xFFFFE0A3)
+            SkyColors.SunriseZenith,
+            SkyColors.SunriseUpper,
+            SkyColors.SunriseMid,
+            SkyColors.SunriseLower,
+            SkyColors.SunriseHorizon
         ),
-        Color(0xFFFCE0CE)
+        SkyColors.SunriseCloud
     ),
     SkyKey(
         0.50f,
         listOf(
-            Color(0xFF0A2E7A),
-            Color(0xFF1E62D6),
-            Color(0xFF4F9BF5),
-            Color(0xFFBFE0FB),
-            Color(0xFFEAF6FF)
+            SkyColors.MiddayZenith,
+            SkyColors.MiddayUpper,
+            SkyColors.MiddayMid,
+            SkyColors.MiddayLower,
+            SkyColors.MiddayHorizon
         ),
-        Color(0xFFF2F7FF)
+        SkyColors.MiddayCloud
     ),
     SkyKey(
         0.67f,
         listOf(
-            Color(0xFF15407F),
-            Color(0xFF3E78C9),
-            Color(0xFF8FB6E8),
-            Color(0xFFF2D9A8),
-            Color(0xFFFBE3B0)
+            SkyColors.AfternoonZenith,
+            SkyColors.AfternoonUpper,
+            SkyColors.AfternoonMid,
+            SkyColors.AfternoonLower,
+            SkyColors.AfternoonHorizon
         ),
-        Color(0xFFFBEBCF)
+        SkyColors.AfternoonCloud
     ),
     SkyKey(
         0.80f,
         listOf(
-            Color(0xFF241056),
-            Color(0xFF7A1E83),
-            Color(0xFFD6356B),
-            Color(0xFFF9733A),
-            Color(0xFFFBD34D)
+            SkyColors.SunsetZenith,
+            SkyColors.SunsetUpper,
+            SkyColors.SunsetMid,
+            SkyColors.SunsetLower,
+            SkyColors.SunsetHorizon
         ),
-        Color(0xFFF2B488)
+        SkyColors.SunsetCloud
     ),
     SkyKey(
         0.87f,
         listOf(
-            Color(0xFF04060F),
-            Color(0xFF0E1330),
-            Color(0xFF241A45),
-            Color(0xFF33285E),
-            Color(0xFF3A2A55)
+            SkyColors.DuskZenith,
+            SkyColors.DuskUpper,
+            SkyColors.DuskMid,
+            SkyColors.MidnightHorizon,
+            SkyColors.DuskHorizon
         ),
-        Color(0xFF3A3F66)
+        SkyColors.DuskCloud
     ),
     SkyKey(
         1.00f,
         listOf(
-            Color(0xFF03060F),
-            Color(0xFF0A0F26),
-            Color(0xFF141A38),
-            Color(0xFF1B1F4A),
-            Color(0xFF33285E)
+            SkyColors.MidnightZenith,
+            SkyColors.MidnightUpper,
+            SkyColors.MidnightMid,
+            SkyColors.MidnightLower,
+            SkyColors.MidnightHorizon
         ),
-        Color(0xFF2A2F52)
+        SkyColors.MidnightCloud
     ),
 )
 
@@ -612,16 +614,16 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
 
     drawCircle(
         Brush.radialGradient(
-            0f to Color(0xFFC7D2FE).copy(alpha = 0.38f * alpha),
-            1f to Color(0x00C7D2FE),
+            0f to SkyColors.MoonGlow.copy(alpha = 0.38f * alpha),
+            1f to SkyColors.MoonGlowTransparent,
             center = center,
             radius = r * 1.5f
         ), radius = r * 1.5f, center = center
     )
     drawCircle(
         Brush.radialGradient(
-            0f to Color(0xFF262C4C),
-            1f to Color(0xFF10142C),
+            0f to SkyColors.MoonDiscTop,
+            1f to SkyColors.MoonDiscBottom,
             center = Offset(cx, cy - r * 0.05f),
             radius = r
         ), radius = r, center = center
@@ -641,10 +643,10 @@ private fun DrawScope.drawMoon(center: Offset, radius: Float, fraction: Float, a
                 shader = RadialGradient(
                     cx - r * 0.3f, cy - r * 0.34f, r * 1.4f,
                     intArrayOf(
-                        Color(0xFFFFFFFF).toArgb(),
-                        Color(0xFFE9EDF6).toArgb(),
-                        Color(0xFFC5CCDE).toArgb(),
-                        Color(0xFFAAB2CC).toArgb()
+                        NimazPalette.White.toArgb(),
+                        SkyColors.MoonLitHighlight.toArgb(),
+                        SkyColors.MoonLitMid.toArgb(),
+                        SkyColors.MoonLitEdge.toArgb()
                     ),
                     floatArrayOf(0f, 0.55f, 0.85f, 1f),
                     Shader.TileMode.CLAMP,

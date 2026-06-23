@@ -13,10 +13,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -27,7 +28,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -68,11 +72,16 @@ fun NimazSettingsItem(
             val resolvedTint =
                 if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
 
-            IconBadge(
+            NimazIcon(
                 imageVector = icon,
-                backgroundColor = resolvedBackground,
-                iconColor = resolvedTint,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = resolvedTint,
+                containerColor = resolvedBackground,
                 containerSize = 42.dp,
+                iconSize = 22.dp,
+                cornerRadius = 12.dp,
             )
             Spacer(modifier = Modifier.width(15.dp))
         }
@@ -99,16 +108,42 @@ fun NimazSettingsItem(
             checked != null && onCheckedChange != null -> {
                 Switch(
                     checked = checked,
-                    onCheckedChange = onCheckedChange
+                    onCheckedChange = onCheckedChange,
+                    thumbContent = {
+                        if(checked){
+                            NimazIcon(
+                               imageVector =  Icons.Default.Check,
+                                size = NimazIconSize.SMALL,
+                            )
+                        }
+                    },
+                    colors = SwitchColors(
+                        checkedThumbColor = MaterialTheme.colorScheme.surface,
+                        checkedTrackColor = MaterialTheme.colorScheme.primary,
+                        checkedBorderColor = MaterialTheme.colorScheme.outline,
+                        checkedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.surface,
+                        uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                        uncheckedIconColor = MaterialTheme.colorScheme.onSurface,
+                        disabledCheckedThumbColor = MaterialTheme.colorScheme.surface,
+                        disabledCheckedTrackColor = MaterialTheme.colorScheme.surface,
+                        disabledCheckedBorderColor = MaterialTheme.colorScheme.surface,
+                        disabledCheckedIconColor = MaterialTheme.colorScheme.surface,
+                        disabledUncheckedThumbColor = MaterialTheme.colorScheme.surface,
+                        disabledUncheckedTrackColor = MaterialTheme.colorScheme.surface,
+                        disabledUncheckedBorderColor = MaterialTheme.colorScheme.surface,
+                        disabledUncheckedIconColor = MaterialTheme.colorScheme.surface
+                    )
                 )
             }
 
             showArrow || (onClick != null && checked == null) -> {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }
@@ -134,12 +169,20 @@ private fun NimazSettingsItemNavPreview() {
 @Composable
 private fun NimazSettingsItemTogglePreview() {
     NimazTheme {
-        NimazSettingsItem(
-            title = "Haptic Feedback",
-            subtitle = "Vibration on interactions",
-            checked = true,
-            onCheckedChange = {}
-        )
+        Column{
+            NimazSettingsItem(
+                title = "Haptic Feedback",
+                subtitle = "Vibration on interactions",
+                checked = true,
+                onCheckedChange = {}
+            )
+            NimazSettingsItem(
+                title = "Haptic Feedback",
+                subtitle = "Vibration on interactions",
+                checked = false,
+                onCheckedChange = {}
+            )
+        }
     }
 }
 

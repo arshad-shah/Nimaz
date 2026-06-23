@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.theme.MiscArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -41,7 +42,7 @@ internal fun StatItem(
         Text(
             text = label,
             style = MaterialTheme.typography.labelSmall,
-            color = Color(0xFF737373)
+            color = MiscArtColors.MutedTextGray
         )
     }
 }

@@ -17,9 +17,7 @@ import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
 import java.io.File
 import java.io.FileOutputStream
-import java.time.Duration
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 import kotlin.math.abs
@@ -41,7 +39,12 @@ import kotlin.math.abs
 object PrayerTimesPdfExporter {
 
     /** One day's row. [times] in column order: Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha. */
-    data class Row(val date: LocalDate, val times: List<String>)
+    data class Row(
+        val date: LocalDate,
+        val times: List<String>,
+        /** Fasting length (Fajr → Maghrib) in minutes, for Ramadan stats; null if N/A. */
+        val fastMinutes: Int? = null,
+    )
 
     /** A table column: which [idx] of Row.times, titles, accent, Ramadan emphasis. */
     private data class Col(
@@ -67,7 +70,6 @@ object PrayerTimesPdfExporter {
     private const val PAGE_W = 595
     private const val PAGE_H = 842
     private const val MARGIN = 32f
-    private val TIME_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.ENGLISH)
 
     fun export(
         context: Context,
@@ -319,7 +321,7 @@ object PrayerTimesPdfExporter {
                 }
 
                 hijri.month == 9 -> {
-                    val fast = fastDuration(row.times.getOrNull(0), row.times.getOrNull(4))
+                    val fast = row.fastMinutes?.let { formatFastLength(it) }
                     if (fast != null) {
                         subP.typeface = bodyBold; subP.color = TEAL_DARK; c.drawText(
                             "· $fast fast",
@@ -436,31 +438,13 @@ object PrayerTimesPdfExporter {
         c.drawText(text, x + 7f, topY + 10f, p)
     }
 
-    private fun fastDuration(fajr: String?, maghrib: String?): String? {
-        if (fajr == null || maghrib == null) return null
-        return runCatching {
-            val f = LocalTime.parse(fajr.trim(), TIME_FMT)
-            val m = LocalTime.parse(maghrib.trim(), TIME_FMT)
-            var mins = Duration.between(f, m).toMinutes()
-            if (mins < 0) mins += 24 * 60
-            "${mins / 60}h ${"%02d".format(mins % 60)}m"
-        }.getOrNull()
-    }
-
     private fun averageFast(rows: List<Row>): String? {
         val mins = rows.mapNotNull { r ->
-            if (HijriDateCalculator.toHijri(r.date).month != 9) return@mapNotNull null
-            val f =
-                runCatching { LocalTime.parse(r.times.getOrNull(0)?.trim(), TIME_FMT) }.getOrNull()
-            val m =
-                runCatching { LocalTime.parse(r.times.getOrNull(4)?.trim(), TIME_FMT) }.getOrNull()
-            if (f == null || m == null) null else {
-                var d = Duration.between(f, m).toMinutes(); if (d < 0) d += 24 * 60; d
-            }
+            if (HijriDateCalculator.toHijri(r.date).month != 9) null else r.fastMinutes
         }
         if (mins.isEmpty()) return null
         val avg = mins.average().toInt()
-        return "${avg / 60}h ${"%02d".format(avg % 60)}m"
+        return formatFastLength(avg)
     }
 
     private fun formatCoord(value: Double, pos: Char, neg: Char) =

@@ -7,6 +7,8 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import com.arshadshah.nimaz.presentation.screens.tasbih.BeadDesigns.Default
 import com.arshadshah.nimaz.presentation.screens.tasbih.BeadDesigns.all
+import com.arshadshah.nimaz.presentation.theme.BeadColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 
 /**
  * A pluggable look for the [TasbihBeads] strand. The strand mechanics (hidden
@@ -79,51 +81,51 @@ fun DrawScope.roundBead(center: Offset, r: Float, colors: List<Color>) {
 /** Registry of available bead designs. Add new looks here and to [all]. */
 object BeadDesigns {
     /** The loose crossing bead always warms to gold, whatever the material. */
-    val GoldActive = listOf(Color(0xFFFBE38A), Color(0xFFEAB308), Color(0xFFA87908))
+    val GoldActive = listOf(BeadColors.GoldHighlight, NimazPalette.Gold500, BeadColors.GoldShadow)
 
     /** The imame (lap marker) is jade-green across designs. */
-    val JadeImame = listOf(Color(0xFF3A7D5C), Color(0xFF1F5A3C), Color(0xFF123C28))
+    val JadeImame = listOf(BeadColors.JadeHighlight, BeadColors.JadeMid, BeadColors.JadeShadow)
 
     val Wood = BeadDesign(
         key = "wood",
         label = "Wood",
-        cord = Color(0xFF5A4226),
-        resting = listOf(Color(0xFFC8893B), Color(0xFF8A4F1E), Color(0xFF5A3212)),
+        cord = BeadColors.WoodCord,
+        resting = listOf(BeadColors.WoodHighlight, BeadColors.WoodMid, BeadColors.WoodShadow),
     )
 
     val Marble = BeadDesign(
         key = "marble",
         label = "Marble",
-        cord = Color(0xFF5C7682),
-        resting = listOf(Color(0xFFEAF2F5), Color(0xFF8FB0BE), Color(0xFF51707E)),
+        cord = BeadColors.MarbleCord,
+        resting = listOf(BeadColors.MarbleHighlight, BeadColors.MarbleMid, BeadColors.MarbleShadow),
     )
 
     val Amethyst = BeadDesign(
         key = "amethyst",
         label = "Amethyst",
-        cord = Color(0xFF4A3360),
-        resting = listOf(Color(0xFFD9B6F0), Color(0xFF8E54B8), Color(0xFF5A2E80)),
+        cord = BeadColors.AmethystCord,
+        resting = listOf(BeadColors.AmethystHighlight, BeadColors.AmethystMid, BeadColors.AmethystShadow),
     )
 
     val Onyx = BeadDesign(
         key = "onyx",
         label = "Onyx",
-        cord = Color(0xFF3A3A44),
-        resting = listOf(Color(0xFF9A9AA6), Color(0xFF4C4C58), Color(0xFF1C1C24)),
+        cord = BeadColors.OnyxCord,
+        resting = listOf(BeadColors.OnyxHighlight, BeadColors.OnyxMid, BeadColors.OnyxShadow),
     )
 
     val Pearl = BeadDesign(
         key = "pearl",
         label = "Pearl",
-        cord = Color(0xFFB8AE92),
-        resting = listOf(Color(0xFFFFFDF8), Color(0xFFE7DEC8), Color(0xFFC8BC9C)),
+        cord = BeadColors.PearlCord,
+        resting = listOf(BeadColors.PearlHighlight, BeadColors.PearlMid, BeadColors.PearlShadow),
     )
 
     val Jade = BeadDesign(
         key = "jade",
         label = "Jade",
-        cord = Color(0xFF2C5240),
-        resting = listOf(Color(0xFFBFE6CC), Color(0xFF4FA776), Color(0xFF2C6E49)),
+        cord = BeadColors.JadeCord,
+        resting = listOf(BeadColors.JadeRestHighlight, BeadColors.JadeRestMid, BeadColors.JadeRestShadow),
         // jade beads would hide a jade imame — mark the lap in gold instead
         imame = GoldActive,
     )

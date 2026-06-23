@@ -37,6 +37,7 @@ import com.arshadshah.nimaz.widget.WidgetUpdateScheduler
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
+import com.arshadshah.nimaz.widget.core.nextPrayerIndex
 
 class PrayerTimesWidget : GlanceAppWidget() {
 
@@ -100,28 +101,30 @@ private fun PrayerTimesSuccessContent(
     textSecondary: ColorProvider,
     primaryColor: ColorProvider
 ) {
-    val liveCountdown = if (data.nextPrayerEpochMillis > 0L) {
-        WidgetUpdateScheduler.computeCountdown(data.nextPrayerEpochMillis)
-    } else {
-        data.timeUntilNext
-    }
+    // Five (name, time, epochMillis) cells in chronological order. The "next" prayer and
+    // its countdown are derived live from the wall clock at render time (the widget redraws
+    // every minute), so the highlight never lags behind the refresh worker.
+    val cells = listOf(
+        Triple("Fajr", data.fajrTime, data.fajrEpochMillis),
+        Triple("Dhuhr", data.dhuhrTime, data.dhuhrEpochMillis),
+        Triple("Asr", data.asrTime, data.asrEpochMillis),
+        Triple("Maghrib", data.maghribTime, data.maghribEpochMillis),
+        Triple("Isha", data.ishaTime, data.ishaEpochMillis),
+    )
+    val nextIndex = nextPrayerIndex(cells.map { it.third }, System.currentTimeMillis())
+
+    val nextCell = cells.getOrNull(nextIndex)
+    val liveCountdown = nextCell?.third
+        ?.takeIf { it > 0L }
+        ?.let { WidgetUpdateScheduler.computeCountdown(it) }
+        ?: "—"
     val rightLine = buildString {
         if (data.hijriDate.isNotEmpty()) append(data.hijriDate)
-        if (data.nextPrayerName.isNotEmpty() && liveCountdown.isNotEmpty() && liveCountdown != "—") {
+        if (nextCell != null && liveCountdown.isNotEmpty() && liveCountdown != "—") {
             if (isNotEmpty()) append(" · ")
-            append("${data.nextPrayerName} in $liveCountdown")
+            append("${nextCell.first} in $liveCountdown")
         }
     }.ifEmpty { "—" }
-
-    // Five (name, time, passed) cells in order; the next prayer is the first not-passed.
-    val cells = listOf(
-        Triple("Fajr", data.fajrTime, data.fajrPassed),
-        Triple("Dhuhr", data.dhuhrTime, data.dhuhrPassed),
-        Triple("Asr", data.asrTime, data.asrPassed),
-        Triple("Maghrib", data.maghribTime, data.maghribPassed),
-        Triple("Isha", data.ishaTime, data.ishaPassed),
-    )
-    val nextIndex = cells.indexOfFirst { !it.third }
 
     WidgetCard(
         background = backgroundColor,
@@ -143,10 +146,10 @@ private fun PrayerTimesSuccessContent(
             }
             Spacer(modifier = GlanceModifier.height(8.dp))
             Row(modifier = GlanceModifier.fillMaxWidth().defaultWeight()) {
-                cells.forEachIndexed { index, (name, time, passed) ->
+                cells.forEachIndexed { index, (name, time, _) ->
                     val state = when {
-                        passed -> PrayerCellState.PAST
                         index == nextIndex -> PrayerCellState.NEXT
+                        nextIndex == -1 || index < nextIndex -> PrayerCellState.PAST
                         else -> PrayerCellState.UPCOMING
                     }
                     PrayerPill(

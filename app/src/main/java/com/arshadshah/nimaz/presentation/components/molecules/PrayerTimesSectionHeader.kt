@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,6 +20,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -75,10 +76,10 @@ fun PrayerTimesSectionHeader(
             ),
             modifier = Modifier.size(40.dp)
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Tune,
                 contentDescription = stringResource(R.string.settings),
-                modifier = Modifier.size(20.dp)
+                size = NimazIconSize.MEDIUM
             )
         }
     }

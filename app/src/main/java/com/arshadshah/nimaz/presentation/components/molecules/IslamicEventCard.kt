@@ -20,8 +20,6 @@ import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Nightlight
 import androidx.compose.material.icons.filled.Restaurant
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,11 +34,15 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.ContainedIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -76,12 +78,13 @@ fun IslamicEventCard(
 ) {
     val (icon, color) = getEventTypeDetails(eventType)
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -92,12 +95,14 @@ fun IslamicEventCard(
             verticalAlignment = Alignment.Top
         ) {
             // Event type icon
-            ContainedIcon(
+            NimazIcon(
                 imageVector = icon,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
                 size = NimazIconSize.LARGE,
                 containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                backgroundColor = color.copy(alpha = 0.15f),
-                iconColor = color
+                tint = color,
+                containerColor = color.copy(alpha = 0.15f)
             )
 
             Spacer(modifier = Modifier.width(16.dp))

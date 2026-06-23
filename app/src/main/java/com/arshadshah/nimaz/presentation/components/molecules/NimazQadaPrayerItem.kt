@@ -16,9 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -26,14 +23,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.color
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.Instant
 import java.time.ZoneId
@@ -56,14 +57,12 @@ fun NimazQadaPrayerItem(
         stringResource(R.string.unknown_date)
     }
 
-    val prayerColor = getPrayerColor(prayer.prayerName)
+    val prayerColor = prayer.prayerName.color()
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier
@@ -111,11 +110,11 @@ fun NimazQadaPrayerItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = NimazColors.StatusColors.Prayed,
-                        modifier = Modifier.size(16.dp)
+                        size = NimazIconSize.SMALL
                     )
                     Text(
                         text = actionText,
@@ -126,17 +125,6 @@ fun NimazQadaPrayerItem(
                 }
             }
         }
-    }
-}
-
-private fun getPrayerColor(prayerName: PrayerName): Color {
-    return when (prayerName) {
-        PrayerName.FAJR -> NimazColors.PrayerColors.Fajr
-        PrayerName.SUNRISE -> NimazColors.PrayerColors.Sunrise
-        PrayerName.DHUHR -> NimazColors.PrayerColors.Dhuhr
-        PrayerName.ASR -> NimazColors.PrayerColors.Asr
-        PrayerName.MAGHRIB -> NimazColors.PrayerColors.Maghrib
-        PrayerName.ISHA -> NimazColors.PrayerColors.Isha
     }
 }
 

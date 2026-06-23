@@ -26,6 +26,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.LocalDate
 import java.time.YearMonth
@@ -44,8 +45,8 @@ import java.util.Locale
 /** Which calendar system is rendered as the large, centered number in a cell. */
 private enum class PrimaryCalendar { GREGORIAN, HIJRI }
 
-private val EVENT_GOLD = Color(0xFFEAB308)
-private val EVENT_GREEN = Color(0xFF22C55E)
+private val EVENT_GOLD = NimazColors.Gold500
+private val EVENT_GREEN = NimazColors.Success
 
 /** Sample event dots for the showcase month (June 2026). */
 private val SAMPLE_EVENTS: Map<LocalDate, Color> = mapOf(

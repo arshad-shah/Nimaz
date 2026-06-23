@@ -20,11 +20,8 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,7 +39,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
@@ -86,14 +86,7 @@ fun ProphetDetailScreen(
         }
     ) { paddingValues ->
         if (state.isLoading || state.prophet == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
             val prophet = state.prophet!!
             LazyColumn(
@@ -143,8 +136,8 @@ fun ProphetDetailScreen(
                         NimazCard(
                             modifier = Modifier.fillMaxWidth(),
                             style = NimazCardStyle.FILLED,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                            colors = NimazCardDefaults.colors(
+                                container = MaterialTheme.colorScheme.surfaceContainerLow
                             )
                         ) {
                             Column(
@@ -187,8 +180,8 @@ fun ProphetDetailScreen(
                     NimazCard(
                         modifier = Modifier.fillMaxWidth(),
                         style = NimazCardStyle.FILLED,
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                        colors = NimazCardDefaults.colors(
+                            container = MaterialTheme.colorScheme.surfaceContainerLow
                         )
                     ) {
                         Column(
@@ -265,8 +258,8 @@ private fun BulletListCard(
     NimazCard(
         modifier = Modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceContainerLow
         )
     ) {
         Column(
@@ -284,12 +277,11 @@ private fun BulletListCard(
                     verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Filled.Circle,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(8.dp)
-                            .padding(top = 6.dp),
+                        modifier = Modifier.padding(top = 6.dp),
+                        iconSize = 8.dp,
                         tint = accent.contentTint
                     )
                     Text(

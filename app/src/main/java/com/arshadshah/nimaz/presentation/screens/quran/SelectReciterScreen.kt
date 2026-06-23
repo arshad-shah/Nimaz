@@ -3,7 +3,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,11 +24,14 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -144,11 +146,12 @@ fun SelectReciterScreen(
             }
 
             item {
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    colors = NimazCardDefaults.colors(
+                        container = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                     )
                 ) {
                     Row(
@@ -164,11 +167,11 @@ fun SelectReciterScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Mic,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
+                                variant = NimazIconVariant.PRIMARY,
+                                iconSize = 28.dp
                             )
                         }
 
@@ -230,23 +233,16 @@ fun SelectReciterScreen(
             ) { reciter ->
                 val isSelected = reciter.id == selectedReciterId
 
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (isSelected) Modifier.border(
-                                2.dp,
-                                MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(14.dp)
-                            ) else Modifier
-                        ),
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        }
+                    selected = isSelected,
+                    colors = NimazCardDefaults.selectable(
+                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        activeBorder = MaterialTheme.colorScheme.primary,
+                        activeBorderWidth = 2.dp,
                     ),
                     onClick = {
                         viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))
@@ -268,12 +264,12 @@ fun SelectReciterScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = if (isSelected) Icons.Default.Check else Icons.Default.Mic,
                                 contentDescription = null,
                                 tint = if (isSelected) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(24.dp)
+                                size = NimazIconSize.LARGE
                             )
                         }
 
@@ -347,18 +343,18 @@ fun SelectReciterScreen(
                                 }
 
                                 previewingReciterId == reciter.id && audioState.isPlaying -> {
-                                    Icon(
+                                    NimazIcon(
                                         imageVector = Icons.Default.Stop,
                                         contentDescription = stringResource(R.string.cd_stop_preview),
-                                        tint = MaterialTheme.colorScheme.primary
+                                        variant = NimazIconVariant.PRIMARY
                                     )
                                 }
 
                                 else -> {
-                                    Icon(
+                                    NimazIcon(
                                         imageVector = Icons.Default.PlayArrow,
                                         contentDescription = stringResource(R.string.cd_preview),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        variant = NimazIconVariant.MUTED
                                     )
                                 }
                             }

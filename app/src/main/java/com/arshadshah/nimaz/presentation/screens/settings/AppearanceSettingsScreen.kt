@@ -5,7 +5,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +16,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -220,44 +221,35 @@ private fun ThemePreviewOption(
         modifier = modifier.clickable(onClick = onClick),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
+        NimazCard(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.6f)
-                .clip(RoundedCornerShape(12.dp))
-                .then(
-                    if (isSelected) {
-                        Modifier.border(
-                            3.dp,
-                            MaterialTheme.colorScheme.primary,
-                            RoundedCornerShape(12.dp)
-                        )
-                    } else {
-                        Modifier.border(
-                            1.dp,
-                            MaterialTheme.colorScheme.outlineVariant,
-                            RoundedCornerShape(12.dp)
-                        )
-                    }
-                )
+                .aspectRatio(0.6f),
+            style = NimazCardStyle.OUTLINED,
+            selected = isSelected,
+            shape = RoundedCornerShape(12.dp),
+            colors = NimazCardDefaults.selectable(
+                container = Color.Transparent,
+                border = MaterialTheme.colorScheme.outlineVariant,
+                borderWidth = 1.dp,
+                activeContainer = Color.Transparent,
+                activeBorder = MaterialTheme.colorScheme.primary,
+                activeBorderWidth = 3.dp,
+            ),
         ) {
-            previewContent()
-            // Checkmark for selected
-            if (isSelected) {
-                Box(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .size(20.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .align(Alignment.TopEnd),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(12.dp)
+            Box(modifier = Modifier.fillMaxSize()) {
+                previewContent()
+                // Selected indicator — display-only circular check.
+                if (isSelected) {
+                    NimazCheckbox(
+                        checked = true,
+                        onCheckedChange = null,
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .align(Alignment.TopEnd),
+                        variant = NimazCheckboxVariant.PRIMARY,
+                        size = NimazCheckboxSize.SMALL,
+                        type = NimazCheckboxType.CIRCLE,
                     )
                 }
             }

@@ -9,18 +9,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
@@ -30,12 +26,10 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
@@ -65,8 +59,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.JuzPageBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.SurahBanner
@@ -270,7 +268,7 @@ fun QuranReaderScreen(
         } else {
             initialPageForPager - 1
         }
-        rememberPagerState(
+        rememberNimazPagerState(
             initialPage = initialIndex,
             pageCount = { pagerPageCount }
         )
@@ -347,7 +345,7 @@ fun QuranReaderScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
                         )
@@ -380,14 +378,14 @@ fun QuranReaderScreen(
                     }
                     if (usePageView || state.readingMode == ReadingMode.SURAH || state.readingMode == ReadingMode.JUZ) {
                         IconButton(onClick = { usePageView = !usePageView }) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
                                 contentDescription = if (usePageView) stringResource(R.string.cd_switch_to_list_view) else stringResource(R.string.cd_switch_to_page_view)
                             )
                         }
                     }
                     IconButton(onClick = onNavigateToQuranSettings) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.cd_settings)
                         )
@@ -541,7 +539,7 @@ fun QuranReaderScreen(
 
                     // RTL HorizontalPager — page 1 on the right, swipe left for next
                     CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
-                        HorizontalPager(
+                        NimazPager(
                             state = pagerState,
                             modifier = Modifier.fillMaxSize(),
                             beyondViewportPageCount = 1,
@@ -834,49 +832,32 @@ fun QuranReaderScreen(
                                     ) {
                                         if (allRead) {
                                             if (surahWithAyahs.surah.number < 114) {
-                                                TextButton(
+                                                NimazButton(
+                                                    text = stringResource(R.string.quran_continue_next_surah),
                                                     onClick = {
                                                         onNavigateToNextSurah(surahWithAyahs.surah.number + 1)
-                                                    }
-                                                ) {
-                                                    Icon(
-                                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                                        contentDescription = null,
-                                                        modifier = Modifier.size(18.dp)
-                                                    )
-                                                    Spacer(modifier = Modifier.width(6.dp))
-                                                    Text(stringResource(R.string.quran_continue_next_surah))
-                                                }
+                                                    },
+                                                    variant = NimazButtonVariant.TEXT,
+                                                    leadingIcon = Icons.AutoMirrored.Filled.ArrowForward
+                                                )
                                             }
                                         } else {
-                                            TextButton(
+                                            NimazButton(
+                                                text = stringResource(R.string.quran_mark_all_read),
                                                 onClick = {
                                                     viewModel.onEvent(
                                                         QuranEvent.MarkSurahAsReadForKhatam(
                                                             surahWithAyahs.surah.number
                                                         )
                                                     )
-                                                }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Filled.CheckCircle,
-                                                    contentDescription = null,
-                                                    modifier = Modifier.size(18.dp)
-                                                )
-                                                Spacer(modifier = Modifier.width(6.dp))
-                                                Text(stringResource(R.string.quran_mark_all_read))
-                                            }
+                                                },
+                                                variant = NimazButtonVariant.TEXT,
+                                                leadingIcon = Icons.Filled.CheckCircle
+                                            )
                                         }
                                     }
                                 }
                             }
-                        }
-                    } else {
-                        item(key = "banner") {
-                            JuzPageBanner(
-                                title = state.title,
-                                subtitle = state.subtitle
-                            )
                         }
                     }
 

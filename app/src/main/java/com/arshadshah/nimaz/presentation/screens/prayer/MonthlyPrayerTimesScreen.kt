@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +68,11 @@ import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -77,13 +81,11 @@ import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
-import java.time.Duration
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
+import com.arshadshah.nimaz.core.util.formatFastLength
 import java.time.LocalDate
-import java.time.LocalTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
-import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,6 +105,7 @@ fun MonthlyPrayerTimesScreen(
                 PrayerTimesPdfExporter.Row(
                     it.date,
                     listOf(it.fajr, it.sunrise, it.dhuhr, it.asr, it.maghrib, it.isha),
+                    fastMinutes = it.fastMinutes,
                 )
             }
             val file = PrayerTimesPdfExporter.export(
@@ -129,7 +132,7 @@ fun MonthlyPrayerTimesScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
-                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
+                        NimazIcon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
                     }
                 }
             )
@@ -142,7 +145,7 @@ fun MonthlyPrayerTimesScreen(
         ) {
             // Pinned month-navigation header — stays put while the list scrolls.
             MonthNavigationHeader(
-                monthYear = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                monthYear = state.currentMonth.format(MONTH_YEAR_FORMATTER),
                 hijriLabel = hijriRangeLabel(state.currentMonth),
                 locationName = state.locationName,
                 isRamadan = state.ramadanHijriYear != null,
@@ -190,7 +193,7 @@ fun MonthlyPrayerTimesScreen(
             contentPadding = PaddingValues(0.dp),
         ) {
             ExportSheet(
-                monthLabel = state.currentMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                monthLabel = state.currentMonth.format(MONTH_YEAR_FORMATTER),
                 dayCount = state.dayPrayerTimes.size,
                 ramadanYear = state.ramadanHijriYear,
                 onThisMonth = {
@@ -270,10 +273,12 @@ private fun ExportOption(
     onClick: () -> Unit,
     highlight: Boolean = false,
 ) {
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+        colors = NimazCardDefaults.colors(
+            container = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest
+        ),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -287,7 +292,7 @@ private fun ExportOption(
                     .background(tint.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+                NimazIcon(icon, contentDescription = null, tint = tint, size = NimazIconSize.MEDIUM)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -303,10 +308,10 @@ private fun ExportOption(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Icon(
+            NimazIcon(
                 Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                variant = NimazIconVariant.MUTED
             )
         }
     }
@@ -345,7 +350,7 @@ private fun MonthNavigationHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.ChevronLeft,
                         contentDescription = stringResource(R.string.cd_previous_month),
                         tint = MaterialTheme.colorScheme.onSurface
@@ -372,11 +377,11 @@ private fun MonthNavigationHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 1.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(12.dp)
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.EXTRA_SMALL
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
@@ -396,7 +401,7 @@ private fun MonthNavigationHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.ChevronRight,
                         contentDescription = stringResource(R.string.cd_next_month),
                         tint = MaterialTheme.colorScheme.onSurface
@@ -452,12 +457,16 @@ private fun DayPrayerCard(
     val event = IslamicEvents.events
         .filter { it.hijriMonth == hijri.month && it.hijriDay == hijri.day }
         .maxByOrNull { it.priority }
-    val fast = if (hijri.month == 9) fastDuration(dayTimes.fajr, dayTimes.maghrib) else null
+    val fast = if (hijri.month == 9) dayTimes.fastMinutes?.let { formatFastLength(it) } else null
 
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(NimazCornerRadius.Large),
-        color = if (isToday) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer,
+        selected = isToday,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceContainer,
+            activeContainer = Color.Transparent
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
         val background = if (isToday) {
@@ -556,7 +565,7 @@ private fun DayMetaRow(
             }
         }
 
-        Icon(
+        NimazIcon(
             imageVector = Icons.Default.ExpandMore,
             contentDescription = if (isExpanded) "Collapse" else "Expand",
             tint = onColor.copy(alpha = 0.6f),
@@ -592,17 +601,6 @@ private fun eventAccent(type: IslamicEventType): Color = when (type) {
     IslamicEventType.FAST -> NimazColors.Primary
     IslamicEventType.HISTORICAL -> NimazColors.PrayerColors.Fajr
 }
-
-/** Fast length from a formatted Fajr → Maghrib pair ("h:mm a"); null if unparseable. */
-private fun fastDuration(fajr: String, maghrib: String): String? = runCatching {
-    val f = LocalTime.parse(fajr.trim(), TIME_FMT)
-    val m = LocalTime.parse(maghrib.trim(), TIME_FMT)
-    var mins = Duration.between(f, m).toMinutes()
-    if (mins < 0) mins += 24 * 60
-    "${mins / 60}h ${"%02d".format(mins % 60)}m"
-}.getOrNull()
-
-private val TIME_FMT: DateTimeFormatter = DateTimeFormatter.ofPattern("h:mm a", Locale.US)
 
 @Composable
 private fun DayBadge(

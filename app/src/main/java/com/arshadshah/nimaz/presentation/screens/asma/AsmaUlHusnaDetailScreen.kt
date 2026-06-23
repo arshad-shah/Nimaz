@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -38,7 +36,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailSectionCard
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
@@ -81,14 +81,7 @@ fun AsmaUlHusnaDetailScreen(
         }
     ) { paddingValues ->
         if (state.isLoading || state.name == null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
             val name = state.name!!
             LazyColumn(
@@ -142,8 +135,8 @@ fun AsmaUlHusnaDetailScreen(
                         NimazCard(
                             modifier = Modifier.fillMaxWidth(),
                             style = NimazCardStyle.FILLED,
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+                            colors = NimazCardDefaults.colors(
+                                container = MaterialTheme.colorScheme.surfaceContainerLow
                             )
                         ) {
                             Column(

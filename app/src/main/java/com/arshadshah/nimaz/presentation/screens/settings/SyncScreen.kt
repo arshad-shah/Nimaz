@@ -34,20 +34,19 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncDisabled
-import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,6 +58,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.ActivityLogEntry
 import com.arshadshah.nimaz.presentation.viewmodel.SyncDataSummary
@@ -212,8 +215,9 @@ private fun RoleBadge(mode: SyncMode) {
     }
     val icon = if (mode == SyncMode.SEND) Icons.AutoMirrored.Filled.Send else Icons.Default.Download
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = containerColor),
+    NimazCard(
+        style = NimazCardStyle.FILLED,
+        colors = NimazCardDefaults.colors(container = containerColor),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
@@ -221,10 +225,10 @@ private fun RoleBadge(mode: SyncMode) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(16.dp),
+                size = NimazIconSize.SMALL,
                 tint = contentColor
             )
             Text(
@@ -244,11 +248,11 @@ private fun ModeSelectionContent(
 ) {
     Spacer(modifier = Modifier.height(32.dp))
 
-    Icon(
+    NimazIcon(
         imageVector = Icons.Default.Sync,
         contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.primary
+        iconSize = 64.dp,
+        variant = NimazIconVariant.PRIMARY
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -269,28 +273,23 @@ private fun ModeSelectionContent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Button(
+            NimazButton(
+                text = stringResource(R.string.sync_send_data),
                 onClick = onSendClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(
-                    Icons.AutoMirrored.Filled.Send,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.sync_send_data))
-            }
+                variant = NimazButtonVariant.FILLED,
+                leadingIcon = Icons.AutoMirrored.Filled.Send,
+                fullWidth = true
+            )
 
             Text(
                 text = stringResource(R.string.sync_send_subtitle),
@@ -302,19 +301,13 @@ private fun ModeSelectionContent(
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            OutlinedButton(
+            NimazButton(
+                text = stringResource(R.string.sync_receive_data),
                 onClick = onReceiveClick,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Icon(
-                    Icons.Default.Download,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.sync_receive_data))
-            }
+                variant = NimazButtonVariant.OUTLINED,
+                leadingIcon = Icons.Default.Download,
+                fullWidth = true
+            )
 
             Text(
                 text = stringResource(R.string.sync_receive_subtitle),
@@ -337,11 +330,11 @@ private fun AuthTokenContent(
 ) {
     Spacer(modifier = Modifier.height(16.dp))
 
-    Icon(
+    NimazIcon(
         imageVector = Icons.Default.PhoneAndroid,
         contentDescription = null,
-        modifier = Modifier.size(48.dp),
-        tint = MaterialTheme.colorScheme.primary
+        iconSize = 48.dp,
+        variant = NimazIconVariant.PRIMARY
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -375,8 +368,9 @@ private fun AuthTokenContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+    NimazCard(
+        style = NimazCardStyle.FILLED,
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.primaryContainer),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -411,26 +405,21 @@ private fun AuthTokenContent(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        OutlinedButton(
+        NimazButton(
+            text = stringResource(R.string.sync_reject),
             onClick = onReject,
             modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Icon(Icons.Default.Close, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(R.string.sync_reject))
-        }
+            variant = NimazButtonVariant.DESTRUCTIVE,
+            leadingIcon = Icons.Default.Close
+        )
 
-        Button(
+        NimazButton(
+            text = stringResource(R.string.sync_accept),
             onClick = onAccept,
             modifier = Modifier.weight(1f),
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(stringResource(R.string.sync_accept))
-        }
+            variant = NimazButtonVariant.FILLED,
+            leadingIcon = Icons.Default.Check
+        )
     }
 }
 
@@ -467,12 +456,11 @@ private fun WaitingForPartnerContent(
 
     Spacer(modifier = Modifier.height(32.dp))
 
-    OutlinedButton(
+    NimazButton(
+        text = stringResource(R.string.cancel),
         onClick = onCancel,
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Text(stringResource(R.string.cancel))
-    }
+        variant = NimazButtonVariant.OUTLINED
+    )
 }
 
 @Composable
@@ -504,11 +492,11 @@ private fun CancelledContent(
         )
     }
 
-    Icon(
+    NimazIcon(
         imageVector = icon,
         contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.onSurfaceVariant
+        iconSize = 64.dp,
+        variant = NimazIconVariant.MUTED
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -534,18 +522,16 @@ private fun CancelledContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(
+        NimazButton(
+            text = stringResource(R.string.close),
             onClick = onClose,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(stringResource(R.string.close))
-        }
-        Button(
+            variant = NimazButtonVariant.OUTLINED
+        )
+        NimazButton(
+            text = stringResource(R.string.try_again),
             onClick = onTryAgain,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(stringResource(R.string.try_again))
-        }
+            variant = NimazButtonVariant.FILLED
+        )
     }
 }
 
@@ -606,8 +592,9 @@ private fun ProgressContent(
     // Sender sees partner importing
     val partnerState = state.connectionState as? ConnectionState.PartnerImporting
     if (partnerState != null) {
-        Card(
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+        NimazCard(
+            style = NimazCardStyle.FILLED,
+            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.tertiaryContainer),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -620,10 +607,10 @@ private fun ProgressContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp),
+                        size = NimazIconSize.MEDIUM,
                         tint = MaterialTheme.colorScheme.onTertiaryContainer
                     )
                     Text(
@@ -663,8 +650,9 @@ private fun ProgressContent(
             modifier = Modifier.fillMaxWidth()
         ) {
             Spacer(modifier = Modifier.height(8.dp))
-            Card(
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+            NimazCard(
+                style = NimazCardStyle.FILLED,
+                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -717,15 +705,18 @@ private fun ProgressContent(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    TextButton(onClick = onCancel) {
-        Text(stringResource(R.string.cancel))
-    }
+    NimazButton(
+        text = stringResource(R.string.cancel),
+        onClick = onCancel,
+        variant = NimazButtonVariant.TEXT
+    )
 }
 
 @Composable
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    NimazCard(
+        style = NimazCardStyle.FILLED,
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -745,11 +736,11 @@ private fun ActivityLog(entries: List<ActivityLogEntry>) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        iconSize = 14.dp,
+                        variant = NimazIconVariant.PRIMARY
                     )
                     Text(
                         text = entry.label,
@@ -800,8 +791,9 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
-    Card(
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+    NimazCard(
+        style = NimazCardStyle.FILLED,
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -881,11 +873,11 @@ private fun CompletedContent(
 ) {
     Spacer(modifier = Modifier.height(32.dp))
 
-    Icon(
+    NimazIcon(
         imageVector = Icons.Default.CheckCircle,
         contentDescription = null,
-        modifier = Modifier.size(72.dp),
-        tint = MaterialTheme.colorScheme.primary
+        iconSize = 72.dp,
+        variant = NimazIconVariant.PRIMARY
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -919,12 +911,11 @@ private fun CompletedContent(
 
     Spacer(modifier = Modifier.height(24.dp))
 
-    Button(
+    NimazButton(
+        text = stringResource(R.string.done),
         onClick = onDone,
-        shape = RoundedCornerShape(12.dp)
-    ) {
-        Text(stringResource(R.string.done))
-    }
+        variant = NimazButtonVariant.FILLED
+    )
 }
 
 @Composable
@@ -936,11 +927,11 @@ private fun ErrorContent(
 ) {
     Spacer(modifier = Modifier.height(48.dp))
 
-    Icon(
+    NimazIcon(
         imageVector = Icons.Default.Close,
         contentDescription = null,
-        modifier = Modifier.size(64.dp),
-        tint = MaterialTheme.colorScheme.error
+        iconSize = 64.dp,
+        variant = NimazIconVariant.ERROR
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -967,17 +958,15 @@ private fun ErrorContent(
     Spacer(modifier = Modifier.height(32.dp))
 
     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        OutlinedButton(
+        NimazButton(
+            text = stringResource(R.string.close),
             onClick = onDismiss,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(stringResource(R.string.close))
-        }
-        Button(
+            variant = NimazButtonVariant.OUTLINED
+        )
+        NimazButton(
+            text = stringResource(R.string.try_again),
             onClick = onRetry,
-            shape = RoundedCornerShape(12.dp)
-        ) {
-            Text(stringResource(R.string.try_again))
-        }
+            variant = NimazButtonVariant.FILLED
+        )
     }
 }

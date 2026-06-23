@@ -57,7 +57,7 @@ fun rememberQaidaPalette(): QaidaPalette {
             trailLocked = c.outline,
             gold = c.secondary,
             surface = c.surface,
-            surfaceContainer = c.surfaceContainerHigh,
+            surfaceContainer = c.surfaceContainer,
             onSurface = c.onSurface,
             onSurfaceVariant = c.onSurfaceVariant,
             outline = c.outline,

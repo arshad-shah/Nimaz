@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -28,8 +28,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
 import com.arshadshah.nimaz.domain.model.PageAyahRange
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Pre-computes the LazyColumn item index for each Juz header (1..30).
@@ -169,11 +175,11 @@ internal fun LazyListScope.pageGridItems(
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(14.dp)
+                                variant = NimazIconVariant.PRIMARY,
+                                iconSize = 14.dp
                             )
                         }
                         // End page cutout badge
@@ -328,5 +334,54 @@ internal fun LazyListScope.pageGridItems(
                 i = j
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+/**
+ * Showcase of [pageGridItems] rendered inside a [LazyColumn]. The sample
+ * [surahStartPageMap] forces both layout branches to appear: full-width cards
+ * with surah chips for pages with badges, and the compact wrapping grid of plain
+ * page tiles for runs of no-badge pages. Rendered in both light and dark themes
+ * by the previews below.
+ */
+@Composable
+private fun QuranPageGridShowcase() {
+    val surahStartPageMap = mapOf(
+        1 to listOf("Al-Fatihah"),
+        2 to listOf("Al-Baqarah")
+    )
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        pageGridItems(
+            onNavigateToPage = {},
+            selectedPageNumber = 3,
+            surahStartPageMap = surahStartPageMap
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Quran Page Grid — Light", heightDp = 700)
+@Composable
+private fun QuranPageGridLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QuranPageGridShowcase()
+    }
+}
+
+@Preview(
+    showBackground = true, name = "Quran Page Grid — Dark", heightDp = 700,
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun QuranPageGridDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QuranPageGridShowcase()
     }
 }

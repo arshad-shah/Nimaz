@@ -20,12 +20,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,6 +45,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
@@ -293,11 +296,11 @@ fun QuranSettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(20.dp)
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.MEDIUM
                         )
                     }
                     // Continuous reading also controls auto-play of next verse in audio mode
@@ -367,9 +370,12 @@ private fun PreviewCard(
             // Transliteration - styled like reader
             if (showTransliteration) {
                 Spacer(modifier = Modifier.height(12.dp))
-                Surface(
+                NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
+                    colors = NimazCardDefaults.colors(
+                        container = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
+                        content = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
                 ) {
                     Text(
                         text = stringResource(R.string.quran_settings_preview_transliteration),
@@ -384,9 +390,12 @@ private fun PreviewCard(
             // Translation - styled like reader
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(10.dp))
-                Surface(
+                NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                    colors = NimazCardDefaults.colors(
+                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+                        content = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 ) {
                     Text(
                         text = stringResource(R.string.quran_settings_preview_translation),
@@ -455,11 +464,11 @@ private fun TranslationItem(
                 )
             }
             if (isSelected) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(14.dp)
+                    variant = NimazIconVariant.ON_ACCENT,
+                    iconSize = 14.dp
                 )
             }
         }

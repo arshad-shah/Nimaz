@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -58,6 +57,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -66,6 +66,10 @@ import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -74,6 +78,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightab
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Represents a page of tafseer content with its character range in the full text.
@@ -394,7 +400,7 @@ private fun HighlightColorRail(
     onDone: () -> Unit
 ) {
     Surface(
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+        color = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 2.dp,
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -420,21 +426,21 @@ private fun HighlightColorRail(
                         .clickable { onColorSelected(hex) }
                 ) {
                     if (isSelected) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.cd_item_selected, name),
                             tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(18.dp)
+                            iconSize = 18.dp
                         )
                     }
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onDone) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_disable_highlighting),
-                    tint = MaterialTheme.colorScheme.primary
+                    variant = NimazIconVariant.PRIMARY
                 )
             }
         }
@@ -518,26 +524,24 @@ private fun HighlightDetailSheetContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-            }
+            NimazButton(
+                text = stringResource(R.string.delete),
+                onClick = onDelete,
+                variant = NimazButtonVariant.DESTRUCTIVE,
+                leadingIcon = Icons.Default.Delete
+            )
 
             Row {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel))
-                }
-                TextButton(
-                    onClick = { onNoteSaved(noteText) }
-                ) {
-                    Text(stringResource(R.string.save))
-                }
+                NimazButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = onDismiss,
+                    variant = NimazButtonVariant.TEXT
+                )
+                NimazButton(
+                    text = stringResource(R.string.save),
+                    onClick = { onNoteSaved(noteText) },
+                    variant = NimazButtonVariant.TEXT
+                )
             }
         }
     }
@@ -659,10 +663,91 @@ private fun TafseerEmptyState(
             textAlign = TextAlign.Center
         )
         if (alternate != null) {
-            TextButton(onClick = { onSourceSwitch(alternate) }) {
-                Text(stringResource(R.string.tafseer_read_in_format, alternate.displayName))
-            }
+            NimazButton(
+                text = stringResource(R.string.tafseer_read_in_format, alternate.displayName),
+                onClick = { onSourceSwitch(alternate) },
+                variant = NimazButtonVariant.TEXT
+            )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private val previewAyah = Ayah(
+    id = 255,
+    surahNumber = 2,
+    ayahNumber = 255,
+    textArabic = "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
+    textSimple = "Allahu la ilaha illa huwa al-hayyu al-qayyum",
+    juzNumber = 3,
+    hizbNumber = 5,
+    rubNumber = 20,
+    pageNumber = 42,
+    sajdaType = null,
+    sajdaNumber = null,
+    translation = "Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence."
+)
+
+private val previewTafseer = TafseerText(
+    id = 1L,
+    ayahId = 255,
+    surahNumber = 2,
+    ayahNumber = 255,
+    tafseerId = "ibn_kathir_en",
+    text = "This is Ayat al-Kursi, and great virtues have been narrated about it. " +
+            "It contains the greatest name of Allah, by which when He is called, He " +
+            "responds, and when He is asked, He gives. The ayah affirms the oneness " +
+            "of Allah and His perfect, eternal attributes: He is the Ever-Living who " +
+            "never dies, and the Sustainer who maintains all of creation. Neither " +
+            "drowsiness nor sleep overtakes Him, for these are signs of imperfection " +
+            "from which He is free."
+)
+
+private val previewHighlights = listOf(
+    TafseerHighlight(
+        id = 1L,
+        ayahId = 255,
+        tafseerId = "ibn_kathir_en",
+        startOffset = 0,
+        endOffset = 16,
+        color = "#FDE68A",
+        note = "Ayat al-Kursi",
+        createdAt = 0L,
+        updatedAt = 0L
+    )
+)
+
+@Composable
+private fun TafseerPageContentShowcase() {
+    TafseerPageContent(
+        ayah = previewAyah,
+        tafseer = previewTafseer,
+        highlights = previewHighlights,
+        selectedSource = TafseerSource.IBN_KATHIR,
+        availableSources = setOf(TafseerSource.IBN_KATHIR, TafseerSource.MAARIFUL_QURAN),
+        onSourceSwitch = {},
+        onHighlightCreated = { _, _, _ -> },
+        onHighlightDeleted = {},
+        onHighlightNoteUpdated = { _, _ -> },
+        onShare = {}
+    )
+}
+
+@Preview(showBackground = true, name = "TafseerPageContent — Light")
+@Composable
+private fun TafseerPageContentLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        TafseerPageContentShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "TafseerPageContent — Dark")
+@Composable
+private fun TafseerPageContentDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        TafseerPageContentShowcase()
     }
 }
 

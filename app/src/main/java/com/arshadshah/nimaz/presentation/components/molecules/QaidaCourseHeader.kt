@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -22,10 +19,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Pinned header for the Qaida course map: the Arabic journey title, an overall
@@ -84,11 +88,11 @@ fun QaidaCourseHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(18.dp),
+                    iconSize = 18.dp,
                 )
                 Text(
                     text = " $totalStars",
@@ -100,25 +104,52 @@ fun QaidaCourseHeader(
         }
 
         if (continueLabel != null) {
-            Button(
+            NimazButton(
+                text = "Continue · $continueLabel",
                 onClick = onContinue,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(top = NimazSpacing.ExtraSmall)
                     .testTag("qaida_continue"),
-                shape = RoundedCornerShape(percent = 50),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = "  Continue · $continueLabel",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+                variant = NimazButtonVariant.FILLED,
+                type = NimazButtonType.PILL,
+                leadingIcon = Icons.Filled.PlayArrow,
+                fullWidth = true,
+            )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun QaidaCourseHeaderShowcase() {
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
+        QaidaCourseHeader(
+            titleArabic = "القاعدة النورانية",
+            titleEnglish = "Noorani Qaida",
+            lessonIndex = 4,
+            totalLessons = 17,
+            totalStars = 9,
+            overallFraction = 0.35f,
+            continueLabel = "Lesson 4",
+            onContinue = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Course Header — Light")
+@Composable
+private fun QaidaCourseHeaderLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaCourseHeaderShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Course Header — Dark")
+@Composable
+private fun QaidaCourseHeaderDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaCourseHeaderShowcase()
     }
 }

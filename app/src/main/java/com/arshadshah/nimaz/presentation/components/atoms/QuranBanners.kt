@@ -23,48 +23,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-@Composable
-internal fun JuzPageBanner(
-    title: String,
-    subtitle: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(15.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    listOf(Color(0xFF115E59), Color(0xFF042F2E))
-                )
-            )
-            .border(1.dp, Color(0xFF0F766E), RoundedCornerShape(20.dp))
-            .padding(25.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFFEAB308)
-            )
-            if (subtitle.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color(0xFFEAB308).copy(alpha = 0.8f)
-                )
-            }
-        }
-    }
-}
 
 @Composable
 internal fun PageSurahSeparator(
@@ -84,7 +44,7 @@ internal fun PageSurahSeparator(
                 .fillMaxWidth()
                 .background(
                     Brush.linearGradient(
-                        listOf(Color(0xFF115E59), Color(0xFF042F2E))
+                        NimazColors.QuranColors.BannerGradient
                     )
                 )
                 .padding(vertical = 14.dp, horizontal = 18.dp)
@@ -124,7 +84,7 @@ internal fun PageSurahSeparator(
                     ArabicText(
                         text = surahNameArabic,
                         size = ArabicTextSize.MEDIUM,
-                        color = Color(0xFFEAB308)
+                        color = NimazColors.QuranColors.BannerAccent
                     )
                 }
             }
@@ -144,14 +104,6 @@ internal fun PageSurahSeparator(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Juz Page Banner")
-@Composable
-private fun JuzPageBannerPreview() {
-    NimazTheme {
-        JuzPageBanner(title = "Juz 1", subtitle = "Al-Fatihah - Al-Baqarah")
     }
 }
 

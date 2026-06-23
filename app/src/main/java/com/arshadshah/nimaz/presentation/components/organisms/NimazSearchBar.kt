@@ -38,10 +38,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -70,8 +67,15 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -134,11 +138,11 @@ fun NimazSearchBar(
     onClear: () -> Unit = {},
     onSearch: (String) -> Unit = {},
     leadingIcon: @Composable (() -> Unit)? = {
-        Icon(
+        NimazIcon(
             imageVector = Icons.Default.Search,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
+            variant = NimazIconVariant.MUTED,
+            size = NimazIconSize.MEDIUM
         )
     },
     trailing: @Composable (RowScope.() -> Unit)? = null,
@@ -266,11 +270,11 @@ fun NimazSearchBar(
                     },
                     modifier = Modifier.size(40.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = stringResource(R.string.cd_clear_search),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(18.dp)
+                        variant = NimazIconVariant.MUTED,
+                        iconSize = 18.dp
                     )
                 }
             }
@@ -326,10 +330,10 @@ fun ExpandableSearchBar(
                     .padding(horizontal = 16.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Search,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    variant = NimazIconVariant.MUTED
                 )
 
                 Spacer(modifier = Modifier.width(12.dp))
@@ -383,10 +387,10 @@ fun ExpandableSearchBar(
                         },
                         modifier = Modifier.size(24.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Clear,
                             contentDescription = stringResource(R.string.cd_clear),
-                            modifier = Modifier.size(20.dp)
+                            size = NimazIconSize.MEDIUM
                         )
                     }
                 }
@@ -399,12 +403,13 @@ fun ExpandableSearchBar(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            Card(
+            NimazCard(
+                style = NimazCardStyle.FILLED,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                colors = NimazCardDefaults.colors(
+                    container = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -446,11 +451,11 @@ fun ExpandableSearchBar(
                                     .padding(vertical = 8.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
+                                NimazIcon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp)
+                                    variant = NimazIconVariant.MUTED,
+                                    size = NimazIconSize.MEDIUM
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
@@ -468,11 +473,11 @@ fun ExpandableSearchBar(
                         }
 
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                                variant = NimazIconVariant.PRIMARY,
+                                size = NimazIconSize.MEDIUM
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -510,12 +515,13 @@ fun ExpandableSearchBar(
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            Card(
+            NimazCard(
+                style = NimazCardStyle.FILLED,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                colors = NimazCardDefaults.colors(
+                    container = MaterialTheme.colorScheme.surface
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
@@ -534,11 +540,11 @@ fun ExpandableSearchBar(
                                     .padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Icon(
+                                NimazIcon(
                                     imageVector = Icons.Default.Search,
                                     contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.size(20.dp)
+                                    variant = NimazIconVariant.MUTED,
+                                    size = NimazIconSize.MEDIUM
                                 )
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Text(
@@ -566,10 +572,11 @@ private fun SearchResultCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(12.dp),
         onClick = onClick
@@ -631,12 +638,12 @@ private fun SearchResultCard(
 
 private fun getSearchResultTypeColor(type: SearchResultType): Color {
     return when (type) {
-        SearchResultType.QURAN -> Color(0xFF795548)
-        SearchResultType.HADITH -> Color(0xFF00796B)
-        SearchResultType.DUA -> Color(0xFF7C4DFF)
-        SearchResultType.SURAH -> Color(0xFF795548)
-        SearchResultType.CHAPTER -> Color(0xFF00796B)
-        SearchResultType.CATEGORY -> Color(0xFF7C4DFF)
+        SearchResultType.QURAN -> NimazColors.QuranColors.Meccan
+        SearchResultType.HADITH -> NimazColors.QuranColors.Medinan
+        SearchResultType.DUA -> NimazColors.Tertiary
+        SearchResultType.SURAH -> NimazColors.QuranColors.Meccan
+        SearchResultType.CHAPTER -> NimazColors.QuranColors.Medinan
+        SearchResultType.CATEGORY -> NimazColors.Tertiary
     }
 }
 
@@ -707,11 +714,11 @@ private fun NimazSearchBar_Showcase_Preview() {
                     trailing = {
                         Spacer(modifier = Modifier.width(4.dp))
                         IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                                 contentDescription = stringResource(R.string.cd_filter),
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(20.dp)
+                                variant = NimazIconVariant.PRIMARY,
+                                size = NimazIconSize.MEDIUM
                             )
                         }
                     },
@@ -800,11 +807,11 @@ private fun NimazSearchBar_Trailing_Preview() {
             trailing = {
                 Spacer(modifier = Modifier.width(4.dp))
                 IconButton(onClick = {}, modifier = Modifier.size(40.dp)) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.TrendingUp,
                         contentDescription = stringResource(R.string.cd_filter),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
+                        variant = NimazIconVariant.PRIMARY,
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             },

@@ -23,6 +23,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -39,14 +40,14 @@ enum class NimazBadgeSize(val height: Dp, val horizontalPadding: Dp) {
  */
 sealed class BadgeType(val label: String, val color: Color) {
     // Hadith grades
-    object Sahih : BadgeType("Sahih", Color(0xFF4CAF50))
-    object Hasan : BadgeType("Hasan", Color(0xFF8BC34A))
-    object Daif : BadgeType("Da'if", Color(0xFFFF9800))
-    object Mawdu : BadgeType("Mawdu'", Color(0xFFF44336))
+    object Sahih : BadgeType("Sahih", NimazPalette.MatGreen)
+    object Hasan : BadgeType("Hasan", NimazPalette.LightGreen)
+    object Daif : BadgeType("Da'if", NimazPalette.MatOrange)
+    object Mawdu : BadgeType("Mawdu'", NimazPalette.MatRed)
 
     // Quran revelation types
-    object Meccan : BadgeType("Meccan", Color(0xFF795548))
-    object Medinan : BadgeType("Medinan", Color(0xFF00796B))
+    object Meccan : BadgeType("Meccan", NimazColors.QuranColors.Meccan)
+    object Medinan : BadgeType("Medinan", NimazColors.QuranColors.Medinan)
 
     // Prayer status
     object Prayed : BadgeType("Prayed", NimazColors.StatusColors.Prayed)

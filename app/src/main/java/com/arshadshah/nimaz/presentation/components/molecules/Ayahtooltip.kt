@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -45,7 +44,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -288,7 +290,7 @@ private fun TooltipCard(
             TooltipIconButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = stringResource(R.string.cd_favorite),
-                tint = if (isFavorite) Color(0xFFEF4444) else contentColor,
+                tint = if (isFavorite) NimazPalette.Red500 else contentColor,
                 onClick = onFavoriteClick
             )
 
@@ -318,7 +320,7 @@ private fun TooltipCard(
                     icon = if (isKhatamRead) Icons.Filled.CheckCircle
                     else Icons.Outlined.RadioButtonUnchecked,
                     contentDescription = if (isKhatamRead) "Mark unread" else "Mark read",
-                    tint = if (isKhatamRead) Color(0xFF22C55E) else contentColor,
+                    tint = if (isKhatamRead) NimazColors.Success else contentColor,
                     onClick = onKhatamToggle
                 )
             }
@@ -358,11 +360,11 @@ private fun TooltipIconButton(
         modifier = modifier.size(40.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = tint,
-                modifier = Modifier.size(20.dp)
+                size = NimazIconSize.MEDIUM
             )
         }
     }

@@ -1,10 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,26 +7,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -60,26 +57,22 @@ fun PrayerTimeCard(
     val isPrayed = prayer.prayerStatus == PrayerStatus.PRAYED
     val isSunrise = prayer.type == PrayerType.SUNRISE || !showToggle
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier
             .fillMaxWidth()
             .alpha(if (prayer.isPassed && !isActive) 0.6f else 1f),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isActive) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        ),
+        selected = isActive,
         // Active prayers get a coloured left accent bar (drawn via the Row
-        // below) plus a soft outline; no border on inactive cards so the list
-        // reads quietly until the next prayer pops.
-        border = if (isActive) {
-            BorderStroke(1.dp, prayerColor.copy(alpha = 0.4f))
-        } else {
-            BorderStroke(1.dp, prayerColor.copy(alpha = 0.4f))
-        },
+        // below) plus a soft outline; the same prayer-tinted border on both
+        // states keeps the list reading quietly until the next prayer pops.
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceVariant,
+            activeContainer = MaterialTheme.colorScheme.primaryContainer,
+            border = prayerColor.copy(alpha = 0.4f),
+            activeBorder = prayerColor.copy(alpha = 0.4f)
+        ),
         onClick = onClick
     ) {
         Row(
@@ -94,14 +87,18 @@ fun PrayerTimeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Prayer Icon
-                IconBadge(
+                NimazIcon(
                     imageVector = getPrayerIcon(prayer.type),
-                    backgroundColor = prayerColor.copy(
+                    contentDescription = null,
+                    type = NimazIconType.CONTAINED,
+                    containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    containerColor = prayerColor.copy(
                         alpha = if (prayer.isPassed && !isActive) 0.12f else 0.2f
                     ),
-                    iconColor = MaterialTheme.colorScheme.onSurface,
                     containerSize = 44.dp,
                     iconSize = 26.dp,
+                    cornerRadius = 12.dp,
                 )
 
                 Spacer(modifier = Modifier.width(14.dp))
@@ -134,33 +131,14 @@ fun PrayerTimeCard(
                 Spacer(modifier = Modifier.width(14.dp))
 
                 if (!isSunrise) {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .clickable(onClick = onToggle)
-                            .then(
-                                if (isPrayed) {
-                                    Modifier.background(MaterialTheme.colorScheme.primary)
-                                } else {
-                                    Modifier.border(
-                                        2.dp,
-                                        MaterialTheme.colorScheme.outline,
-                                        CircleShape
-                                    )
-                                }
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (isPrayed) {
-                            Icon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = stringResource(R.string.prayed),
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(16.dp)
-                            )
-                        }
-                    }
+                    NimazCheckbox(
+                        checked = isPrayed,
+                        onCheckedChange = { onToggle() },
+                        variant = NimazCheckboxVariant.SUCCESS,
+                        size = NimazCheckboxSize.LARGE,
+                        type = NimazCheckboxType.CIRCLE,
+                        contentDescription = stringResource(R.string.prayed)
+                    )
                 } else {
                     Spacer(modifier = Modifier.size(28.dp))
                 }

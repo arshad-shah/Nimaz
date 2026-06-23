@@ -31,11 +31,9 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wallet
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -61,6 +59,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -89,13 +91,13 @@ fun ZakatCalculatorScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(ZakatEvent.ClearAll) }) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = stringResource(R.string.cd_reset)
                         )
                     }
                     IconButton(onClick = onNavigateToHistory) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.History,
                             contentDescription = stringResource(R.string.cd_history)
                         )
@@ -456,10 +458,11 @@ private fun ZakatResultSummaryCard(
         )
     )
 
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        colors = NimazCardDefaults.colors(container = Color.Transparent)
     ) {
         Box(
             modifier = Modifier
@@ -573,20 +576,17 @@ private fun NisabOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
         onClick = onClick,
         modifier = modifier,
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                accentColor.copy(alpha = 0.15f)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHigh
-            }
-        ),
-        border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(1.5.dp, accentColor.copy(alpha = 0.5f))
-        } else null
+        selected = isSelected,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceContainer,
+            activeContainer = accentColor.copy(alpha = 0.15f),
+            activeBorder = accentColor.copy(alpha = 0.5f),
+        )
     ) {
         Column(
             modifier = Modifier.padding(15.dp)
@@ -621,12 +621,10 @@ private fun InputCard(
     suffix: String = "$",
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier
@@ -642,11 +640,11 @@ private fun InputCard(
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
+                    NimazIcon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconTint,
-                        modifier = Modifier.size(20.dp)
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }
@@ -781,12 +779,10 @@ private fun BreakdownCard(
             modifier = Modifier.padding(bottom = 12.dp)
         )
 
-        Card(
+        NimazCard(
             modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            )
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(14.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -850,12 +846,13 @@ private fun BreakdownCard(
         Spacer(modifier = Modifier.height(12.dp))
 
         // Save button
-        Card(
+        NimazCard(
             onClick = onSaveClick,
             modifier = Modifier.fillMaxWidth(),
+            style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary
+            colors = NimazCardDefaults.colors(
+                container = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(

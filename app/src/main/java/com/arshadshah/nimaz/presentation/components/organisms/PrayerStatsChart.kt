@@ -19,8 +19,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,8 +43,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.color
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -81,10 +84,11 @@ fun PrayerStatsChart(
     subtitle: String? = null,
     summaryItems: List<ChartStatItem>? = null
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface
         ),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -268,7 +272,7 @@ private fun BarChart(
                 prayedCount = prayed,
                 totalCount = total,
                 maxValue = maxValue,
-                prayerColor = getPrayerColor(prayer)
+                prayerColor = prayer.color()
             )
         }
     }
@@ -452,7 +456,7 @@ private fun RadialChart(
                 val y = center.y + radius * sin(angle).toFloat()
 
                 drawCircle(
-                    color = getPrayerColor(prayer),
+                    color = prayer.color(),
                     radius = 6.dp.toPx(),
                     center = Offset(x, y)
                 )
@@ -487,7 +491,7 @@ private fun RadialChart(
                     modifier = Modifier
                         .size(8.dp)
                         .clip(CircleShape)
-                        .background(getPrayerColor(prayer))
+                        .background(prayer.color())
                 )
                 Text(
                     text = prayer.displayName().take(3),
@@ -603,15 +607,6 @@ private fun LegendItem(
     }
 }
 
-private fun getPrayerColor(prayerName: PrayerName) = when (prayerName) {
-    PrayerName.FAJR -> NimazColors.PrayerColors.Fajr
-    PrayerName.SUNRISE -> NimazColors.PrayerColors.Sunrise
-    PrayerName.DHUHR -> NimazColors.PrayerColors.Dhuhr
-    PrayerName.ASR -> NimazColors.PrayerColors.Asr
-    PrayerName.MAGHRIB -> NimazColors.PrayerColors.Maghrib
-    PrayerName.ISHA -> NimazColors.PrayerColors.Isha
-}
-
 private val samplePrayerStats = PrayerStats(
     totalPrayed = 120,
     totalMissed = 30,
@@ -653,7 +648,7 @@ private fun PrayerStatsChartDonutPreview() {
                 ChartStatItem("30", "Missed", NimazColors.StatusColors.Missed),
                 ChartStatItem("15", "Perfect\nDays", NimazColors.PrayerColors.Maghrib),
                 ChartStatItem("7", "Current\nStreak", NimazColors.StatusColors.Prayed),
-                ChartStatItem("21", "Longest\nStreak", Color(0xFF6366F1))
+                ChartStatItem("21", "Longest\nStreak", NimazPalette.Indigo500)
             ),
             modifier = Modifier.padding(16.dp)
         )

@@ -17,10 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +38,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val SurahNumberSlotWidth = 40.dp
@@ -75,7 +77,7 @@ internal fun SurahListItem(
     modifier: Modifier = Modifier
 ) {
     val isComplete = isKhatamActive && khatamTotalAyahs > 0 && khatamReadCount == khatamTotalAyahs
-    Card(
+    NimazCard(
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
@@ -86,14 +88,14 @@ internal fun SurahListItem(
                     shape = RoundedCornerShape(14.dp)
                 ) else Modifier
             ),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-            else
-                MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        selected = isSelected,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+        elevation = 0.dp
     ) {
         Column {
             // Top row: number + English name + Arabic name + info button
@@ -109,11 +111,11 @@ internal fun SurahListItem(
                     contentAlignment = Alignment.Center
                 ) {
                     if (isComplete) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = stringResource(R.string.quran_home_completed),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(36.dp)
+                            variant = NimazIconVariant.PRIMARY,
+                            iconSize = 36.dp
                         )
                     } else {
                         Box(
@@ -161,11 +163,11 @@ internal fun SurahListItem(
                         onClick = onInfoClick,
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Info,
                             contentDescription = stringResource(R.string.quran_home_surah_info),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
+                            variant = NimazIconVariant.MUTED,
+                            iconSize = 18.dp
                         )
                     }
                 }

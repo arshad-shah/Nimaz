@@ -41,6 +41,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.getPrayerColor
 import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
+import com.arshadshah.nimaz.presentation.theme.MiscArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -217,8 +218,7 @@ private fun TopBar_AtRest_Preview() {
     NimazTheme {
         Box(
             modifier = Modifier.background(
-                Color(0xFF3E86C9)
-
+                MiscArtColors.TopBarBlue
             )
         ) {
             HomeDynamicTopBar(

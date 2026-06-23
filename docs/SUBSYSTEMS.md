@@ -83,7 +83,8 @@ Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent 
 
 **Update mechanism — three layers.**
 - **Periodic WorkManager** via `widget/core/WidgetWork.kt` (`enqueuePeriodic`/`enqueueImmediate`/`cancel`), enqueued in each receiver's `onEnabled`.
-- **Per-minute AlarmManager tick** via `widget/WidgetUpdateScheduler.kt` (WorkManager's 15-min floor is too coarse for a live countdown). `setInexactRepeating(ELAPSED_REALTIME, …, 60_000)` fires `WidgetTickReceiver`, which just calls `updateAll(context)` on the two countdown widgets — it does **not** recompute prayer times; the composable recomputes the countdown string from the stored `nextPrayerEpochMillis`.
+- **Per-minute AlarmManager tick** via `widget/WidgetUpdateScheduler.kt` (WorkManager's 15-min floor is too coarse for a live countdown). `setInexactRepeating(ELAPSED_REALTIME, …, 60_000)` fires `WidgetTickReceiver`, which just calls `updateAll(context)` on the two countdown widgets — it does **not** recompute prayer times; the composable recomputes the live values from the stored absolute prayer instants.
+  - **Prayer Times "next prayer" highlight is render-time, not worker-time.** The worker stores each prayer's absolute `…EpochMillis` (not pre-computed "passed" flags). The composable picks which pill to highlight via `widget/core/PrayerHighlight.kt#nextPrayerIndex(epochs, now)` — the first prayer whose instant is still in the future, or `-1` (none) after Isha — and derives the header "X in Ym" from the same index. So every redraw tracks the wall clock; the highlight no longer lags behind the 15-min worker or gets stuck on a passed prayer under Doze throttling. (Pure function, unit-tested in `PrayerHighlightTest`.)
 - **Immediate refresh** on prayer-status change, from the tracker toggle and from `HomeViewModel` (keeps the widget in sync with in-app tracking).
 
 **Shared `widget/core/`.** `JsonGlanceStateDefinition.kt` (generic JSON-over-DataStore `GlanceStateDefinition`, one DataStore per file via a process-wide map), `WidgetStateUpdater.kt` (`updateWidgetState(...)`), `WidgetFormatters.kt` (time/countdown), `WidgetUi.kt` (`WidgetPalette`, `WidgetMessageBox`, `WidgetLoadingBox`, plus the redesign atoms `WidgetCard`, `WidgetIcon`, `WidgetLabel`, `WidgetPill`, `prayerIconRes`), `WidgetWork.kt`.
@@ -263,6 +264,16 @@ no deps). All third-party usage is isolated here.
 **Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`).
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl` and (a deviation from the use-case rule) directly into several ViewModels, widget workers, and `PrayerNotificationScheduler`.
+
+**Display formatting.** Wall-clock times are rendered through `core/util/TimeFormatting.kt`
+(`formatClockTime(hour, minute, use24Hour)` + `LocalTime`/`LocalDateTime.formatClock(...)`),
+never via ad-hoc `String.format("%d:%02d %s", …, "AM"/"PM")` or `Locale.US`-pinned formatters.
+It uses the **default locale** (localized am/pm marker and digits — Nimaz is worldwide) and
+honors the user's `use24HourFormat` preference. In composables read the preference from
+`LocalUse24HourFormat.current`; in ViewModels collect `settingsRepository.use24HourFormat`
+(see `HomeViewModel.observeTimeFormat`) and recompute. Durations (e.g. fasting length) use
+`formatFastLength(minutes)` and are computed from **raw** times — never by re-parsing already
+formatted strings.
 
 ---
 

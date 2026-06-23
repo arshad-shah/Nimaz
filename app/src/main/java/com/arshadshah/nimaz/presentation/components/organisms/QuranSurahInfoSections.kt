@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +39,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -123,7 +125,7 @@ internal fun BottomActions(
                         modifier = Modifier
                             .weight(1f)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                            .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable(onClick = onPlayAudio)
                             .padding(vertical = 16.dp),
                         contentAlignment = Alignment.Center
@@ -132,11 +134,11 @@ internal fun BottomActions(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
+                                size = NimazIconSize.MEDIUM
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
@@ -163,11 +165,11 @@ internal fun BottomActions(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.MenuBook,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(20.dp)
+                            variant = NimazIconVariant.ON_ACCENT,
+                            size = NimazIconSize.MEDIUM
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
@@ -288,11 +290,11 @@ private fun SurahAudioControlBar(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Resume",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 28.dp
                     )
                 }
             }
@@ -308,11 +310,11 @@ private fun SurahAudioControlBar(
                     .clickable(onClick = onStopClick),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_stop),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }

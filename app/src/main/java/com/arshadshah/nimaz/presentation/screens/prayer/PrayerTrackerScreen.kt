@@ -16,8 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,10 +32,8 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -50,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -69,15 +71,17 @@ import com.arshadshah.nimaz.presentation.components.molecules.calendar.Indicator
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.SelectionStyle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
+import com.arshadshah.nimaz.core.util.formatClock
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
-import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -88,7 +92,7 @@ fun PrayerTrackerScreen(
     viewModel: PrayerTrackerViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val pagerState = rememberPagerState(initialPage = initialTab) { 2 }
+    val pagerState = rememberNimazPagerState(initialPage = initialTab) { 2 }
     val coroutineScope = rememberCoroutineScope()
 
     val tabs = listOf(
@@ -105,7 +109,7 @@ fun PrayerTrackerScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.BarChart,
                             contentDescription = stringResource(R.string.view_statistics)
                         )
@@ -133,10 +137,10 @@ fun PrayerTrackerScreen(
                         },
                         text = { Text(title) },
                         icon = {
-                            Icon(
+                            NimazIcon(
                                 imageVector = icon,
                                 contentDescription = title,
-                                modifier = Modifier.size(18.dp)
+                                iconSize = 18.dp
                             )
                         }
                     )
@@ -144,7 +148,7 @@ fun PrayerTrackerScreen(
             }
 
             // Pager Content
-            HorizontalPager(
+            NimazPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
@@ -282,18 +286,12 @@ private fun QadaSummaryCard(totalMissed: Int) {
     val warningOrange = NimazColors.PrayerColors.Asr
     val warningOrangeDark = NimazColors.OrangeDark
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(warningOrange, warningOrangeDark)
-                )
-            )
-            .padding(20.dp)
+    GradientCard(
+        modifier = Modifier.fillMaxWidth(),
+        gradientColors = listOf(warningOrange, warningOrangeDark)
     ) {
         Row(
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -304,11 +302,11 @@ private fun QadaSummaryCard(totalMissed: Int) {
                     .background(Color.Black.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    iconSize = 28.dp
                 )
             }
 
@@ -351,20 +349,13 @@ private fun StreakCard(currentStreak: Int) {
     val goldDark = NimazColors.GoldDark
     val goldLight = NimazColors.Gold500
 
-    Card(
+    GradientCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        gradientColors = listOf(goldLight, goldDark)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(goldLight, goldDark)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
                 .padding(20.dp)
         ) {
             Column {
@@ -379,11 +370,11 @@ private fun StreakCard(currentStreak: Int) {
                             .background(Color.Black.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.LocalFireDepartment,
                             contentDescription = null,
                             tint = NimazColors.Neutral900,
-                            modifier = Modifier.size(24.dp)
+                            size = NimazIconSize.LARGE
                         )
                     }
                     Text(
@@ -470,7 +461,7 @@ private fun SelectedDayDetail(
     prayerTimes: com.arshadshah.nimaz.domain.model.PrayerTimes?,
     onTogglePrayer: (PrayerName, PrayerStatus) -> Unit
 ) {
-    val formatter = DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy")
+    val formatter = FULL_DATE_FORMATTER
     val prayers = PrayerName.entries.filter { it != PrayerName.SUNRISE }
     val prayedCount = prayerRecords.count {
         it.status == PrayerStatus.PRAYED || it.status == PrayerStatus.LATE || it.status == PrayerStatus.QADA
@@ -481,12 +472,10 @@ private fun SelectedDayDetail(
     val isToday = selectedDate == today
     val isPastDate = selectedDate.isBefore(today)
 
-    Card(
+    NimazCard(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-        )
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(16.dp)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
             // Header
@@ -534,7 +523,7 @@ private fun SelectedDayDetail(
                     }
 
                     val prayerTimeFormatted =
-                        prayerDateTime?.format(DateTimeFormatter.ofPattern("h:mm a"))
+                        prayerDateTime?.formatClock(LocalUse24HourFormat.current)
 
                     // Determine if prayer should show as missed based on time
                     val isPrayerTimePassed = when {
@@ -582,10 +571,10 @@ private fun PrayerCheckItem(
     statusText: String,
     onClick: () -> Unit
 ) {
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         Row(
             modifier = Modifier
@@ -612,11 +601,11 @@ private fun PrayerCheckItem(
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(14.dp)
+                        iconSize = 14.dp
                     )
                 }
             }
@@ -645,7 +634,7 @@ private fun PrayerCheckItem(
                 color = when {
                     isCompleted -> NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
                     isMissed -> NimazColors.StatusColors.Missed.copy(alpha = 0.2f)
-                    else -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    else -> MaterialTheme.colorScheme.surfaceContainer
                 }
             ) {
                 Text(

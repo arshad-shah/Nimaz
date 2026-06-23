@@ -13,10 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +30,12 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -51,27 +54,23 @@ internal fun VerseOfTheDayCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        colors = NimazCardDefaults.colors(container = Color.Transparent)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
-                        )
-                    ),
+                    brush = Brush.linearGradient(NimazColors.QuranColors.BannerGradient),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.BannerBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -81,17 +80,17 @@ internal fun VerseOfTheDayCard(
                     .padding(20.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.AutoStories,
                         contentDescription = null,
-                        tint = Color(0xFFEAB308),
-                        modifier = Modifier.size(16.dp)
+                        tint = NimazColors.QuranColors.BannerAccent,
+                        size = NimazIconSize.SMALL
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
                         text = stringResource(R.string.quran_home_verse_of_the_day),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF2DD4BF),
+                        color = NimazColors.Primary400,
                         letterSpacing = 1.5.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -111,7 +110,7 @@ internal fun VerseOfTheDayCard(
                     Text(
                         text = translation,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFD4D4D4),
+                        color = NimazColors.Gray300,
                         maxLines = 5,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -123,7 +122,7 @@ internal fun VerseOfTheDayCard(
                     text = reference,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFFEAB308)
+                    color = NimazColors.QuranColors.BannerAccent
                 )
             }
         }

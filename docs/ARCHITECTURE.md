@@ -139,7 +139,7 @@ com.arshadshah.nimaz/
 │   │   ├── atoms/           # Smallest reusable UI (NimazCard, NimazBadge, ArabicText…)
 │   │   ├── molecules/       # Composed (PrayerTimeCard, NimazDialog, NimazCalendar…)
 │   │   └── organisms/       # Complex (TopAppBar, MushafPage, HomeHero…)
-│   └── theme/               # NimazTheme, Color.kt (NimazColors), Type, Shape
+│   └── theme/               # NimazTheme, Palette.kt (NimazPalette) → Color.kt (NimazColors), Type, Shape
 │
 └── widget/                  # Glance home-screen widgets (nextprayer, prayertracker, hijridate)
 ```
@@ -406,18 +406,79 @@ typed route object.
 
 ## 8. Theming & components
 
-- **Colors:** `presentation/theme/Color.kt` exposes the `NimazColors` object (primary teal,
-  gold accent, per-prayer colors, semantic statuses, tajweed colors, etc.). Use
-  `MaterialTheme.colorScheme.*` for themed surfaces, or `NimazColors.*` for brand/semantic
-  values. **Do not** write `Color(0xFF…)` literals in screens — if a needed value is missing,
-  add it to `NimazColors`.
+- **Colors — every literal lives in the `theme/` package, never in a component/screen:**
+    - **Tier 1 — `presentation/theme/Palette.kt` (`NimazPalette`):** the source of the brand/semantic
+      hues. Hue ramps named `Family + shade` (e.g. `Teal500`, `Stone900`, `Amber500`). Don't
+      reference `NimazPalette.*` from screens — it carries no meaning.
+    - **Tier 2 — `presentation/theme/Color.kt` (`NimazColors`):** semantic tokens that *reference*
+      the palette (primary teal, gold accent, per-prayer colors, semantic statuses, tajweed
+      colors, feature sub-objects like `PrayerColors`/`StatusColors`/`QuranColors`/…). Screens read
+      these.
+    - **Bespoke art sets** (single-use decorative palettes) also live in `theme/`, not in the
+      component: `SkyColors` (prayer sky scene), `BeadColors` (tasbih bead materials),
+      `GlassColors` (glass-morphism auroras), and `ArtColors.kt` (`CardArtColors`,
+      `CompassArtColors`, `NamesArtColors`, `OnboardingArtColors`, `MiscArtColors`, …). They
+      reuse `NimazPalette` where a hue already exists.
+  - Use `MaterialTheme.colorScheme.*` for themed surfaces, or `NimazColors.*` for brand/semantic
+    values. **Never** write a `Color(0xFF…)` literal in a component or screen file — define it in
+    the `theme/` package (a `NimazPalette`/`NimazColors` token, or the relevant art object) and
+    reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
+    from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
-  components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`, `NimazEmptyState`,
-  `NimazCalendar`) rather than re-rolling generic UI. Screen-local private composables are
-  fine for **feature-specific** layout that isn't reused elsewhere; promote anything reused
-  across screens into `components/`.
+  components (e.g. `NimazCard`, `NimazSurfaceCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
+  `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
+  In particular:
+    - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
+      **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
+    - a flat, outlined "content card" (surface container + 0 elevation + 1.dp `outline`
+      border + 16.dp corners) is `NimazSurfaceCard { … }`, not a hand-rolled `Card(...)` with
+      those four params repeated;
+    - a per-prayer accent colour is `prayerName.color()`
+      (`presentation/theme/PrayerColorExtensions.kt`), not a local `when (prayerName) { … }`.
+    - a horizontal pager is `NimazPager(state = rememberNimazPagerState { count }) { page → … }`
+      (`components/atoms/NimazPager.kt`) — a thin wrapper over `HorizontalPager` that exposes the
+      reader knobs (`reverseLayout`, `beyondViewportPageCount`, `key`, `contentPadding`,
+      `pageSize`) as pass-throughs — **not** a raw `HorizontalPager`/`rememberPagerState`. The
+      caller still owns any page⇄ViewModel sync. Paired with it, page dots are the canonical pill
+      `NimazPageIndicator(state)` (`components/atoms/NimazPageIndicator.kt`); it is a *page*
+      indicator, **not** a progress tracker (for "N of M completed" use `QaidaLineProgressDots`).
+    - an icon is `NimazIcon(imageVector, variant = …, size = …)` (`components/atoms/NimazIcon.kt`),
+      **not** a raw Material 3 `Icon(...)`. `variant` is a semantic tint role
+      (`DEFAULT`=inherits `LocalContentColor`, `MUTED`, `PRIMARY`, `ON_ACCENT`, `ERROR`, `SUCCESS`);
+      pass `tint =` to escape it (brand `NimazColors.*` / per-prayer / runtime colours). `type =
+      CONTAINED` draws the glyph in a tinted container — the old `ContainedIcon`/`IconBadge` (a
+      rounded-square contained icon is the reusable "badge"); `size`/`iconSize`/`containerSize`/
+      `cornerRadius` give granular control. Tappable icons stay `NimazIconButton`.
+    - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
+      (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
+      `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`/`border`,
+      so existing call sites convert by swapping the constructor and adding `style`. Don't set a
+      `containerColor` of `MaterialTheme.colorScheme.surfaceContainerHigh` — omit `colors` and let
+      the card default stand (use `NimazSurfaceCard` for the flat outlined content-card look).
+    - a minus/value/plus number control is `NimazNumberStepper(value, onValueChange, variant = …,
+      size = …, type = …)` (`components/molecules/NimazNumberStepper.kt`), **not** a hand-rolled
+      row of `IconButton`s around a `Text`. `variant` is the layout: `INLINE` (a `label` on the
+      left + compact grouped controls — the settings-row look) or `SPREAD` (full-width tonal card,
+      edge buttons, large centred value — the tasbih target-dial look; `label` is ignored).
+      `size` (`SMALL`/`MEDIUM`/`LARGE`) scales the buttons and value typography; `type`
+      (`DEFAULT`/`ACCENT`) sets the value colour (`ACCENT` = `NimazColors.TasbihColors.Milestone`).
+      `minValue`/`maxValue`/`step`/`formatValue` clamp and format. It absorbed the old tasbih
+      `TargetStepper`/`TargetCountStepper`.
+    - a boolean check-toggle is `NimazCheckbox(checked, onCheckedChange, variant = …, size = …,
+      type = …)` (`components/atoms/NimazCheckbox.kt`), **not** a hand-built `Box`/`Surface` with a
+      `.border(...)` that shows an `Icon(Icons.Default.Check)` when selected. `variant` is the
+      semantic colour role (`DEFAULT`/`PRIMARY` = `primary`, `SUCCESS` = `NimazColors.Success` for
+      completion, `ERROR`); `size` (`SMALL`/`MEDIUM`/`LARGE`) sets the box/check/stroke/corner
+      preset; `type` is `SQUARE` (rounded Material-style) or `CIRCLE` (the prayer/fast-completion
+      look). Pass `onCheckedChange = null` for a **display-only indicator** (no click semantics) —
+      the drop-in for selected-card/list rows where the parent owns the click; `tint =` escapes the
+      variant. **Not** for `Switch` (on/off settings) or genuine single-choice `RadioButton` pickers
+      — those stay as-is. It centralised the prayer/fast trackers, the settings/Quran pickers and
+      the dropdown/list selection check indicators.
+  Screen-local private composables are fine for **feature-specific** layout that isn't reused
+  elsewhere; promote anything reused across screens into `components/`.
 
 ---
 
@@ -445,6 +506,7 @@ copy anything listed as Open.
 | Domain→data leak (`PageAyahRange`) | Added a `PageAyahRange` domain model; the Room projection is `PageAyahRangeRow` (mapped in `QuranRepositoryImpl`). `domain/` no longer imports anything from `data/`. |
 | Home daily-content DAO coupling | `HomeViewModel` no longer injects `FastingDao`/`HadithDao`/`DuaDao`. Daily hadith/dua logic extracted to `GetDailyHadithUseCase`/`GetDailyDuaUseCase`; seeding moved into the repositories. No presentation ViewModel injects a DAO or `RepositoryImpl` anymore. |
 | Theming (screens) | Raw `Color(0xFF…)` literals removed from ~20 feature screens into `NimazColors` tokens (exact hex; added `Success`/`Warning`/`Info`/etc. and `HadithCollectionColors`). Only bespoke design-token files remain (`tasbih/BeadDesign.kt`, `TasbihBeads.kt`, `onboarding/OnboardingArt.kt`). |
+| Colour system (two-tier + centralised art) | Split colour into **Tier 1 `Palette.kt` (`NimazPalette`)** — the brand/semantic hue ramps (`Family+shade`) — and **Tier 2 `Color.kt` (`NimazColors`)** — semantic tokens that *reference* the palette. Removed 11 dead props (6 prayer `*GradientEnd`, `SajdaAyah`, `BookmarkSecondary`, `Voluntary`, `Late`, `Counter`); collapsed ~20 duplicate-hex groups to one palette entry each; migrated ~29 duplicate inline literals to pixel-exact tokens. Then **centralised ALL remaining art literals** out of component/screen files into the `theme/` package: `SkyColors.kt` (sky scene), `BeadColors.kt` (tasbih beads), `GlassColors.kt` (glass auroras), and `ArtColors.kt` (card/compass/names/onboarding/misc). **Zero static `Color(0xFF…)` literals remain outside `theme/`** (grep-verified; only computed-ARGB `Color(0x… or rgbLong)` forms remain). **No pixel changed** — structure/naming/dedup only; hues preserved verbatim. |
 | Preferences abstraction | ViewModels no longer inject the `PreferencesDataStore` data class — they depend on the `domain/repository/SettingsRepository` interface (implemented by `PreferencesDataStore`, bound via `@Binds`). `UserPreferences` moved to `domain/model`. |
 
 ### Open (still to do — do not copy)

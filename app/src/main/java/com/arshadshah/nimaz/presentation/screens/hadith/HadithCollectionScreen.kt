@@ -22,9 +22,7 @@ import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -53,6 +51,8 @@ import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -88,13 +88,13 @@ fun HadithCollectionScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToSearch) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Search,
                             contentDescription = stringResource(R.string.search)
                         )
                     }
                     IconButton(onClick = onNavigateToBookmarks) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.BookmarkBorder,
                             contentDescription = stringResource(R.string.bookmarks)
                         )
@@ -104,14 +104,7 @@ fun HadithCollectionScreen(
         }
     ) { paddingValues ->
         if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-            }
+            NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -232,11 +225,11 @@ private fun HadithOfTheDayCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Star,
                             contentDescription = null,
                             tint = NimazColors.GoldDark,
-                            modifier = Modifier.size(14.dp)
+                            iconSize = 14.dp
                         )
                         Text(
                             text = stringResource(R.string.hadith_of_the_day),
@@ -353,11 +346,11 @@ private fun BookCard(
                     .background(brush = Brush.linearGradient(bookGradient)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.AutoMirrored.Filled.MenuBook,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(26.dp)
+                    iconSize = 26.dp
                 )
             }
 

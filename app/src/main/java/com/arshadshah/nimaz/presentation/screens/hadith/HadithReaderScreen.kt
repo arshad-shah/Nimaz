@@ -27,8 +27,10 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -44,7 +46,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -101,7 +102,7 @@ fun HadithReaderScreen(
     val hadiths = state.hadiths
     val scope = rememberCoroutineScope()
 
-    val pagerState = rememberPagerState(
+    val pagerState = rememberNimazPagerState(
         initialPage = state.currentHadithIndex.coerceAtLeast(0),
         pageCount = { hadiths.size }
     )
@@ -133,10 +134,10 @@ fun HadithReaderScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.hadith_settings),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            variant = NimazIconVariant.MUTED
                         )
                     }
                 }
@@ -171,7 +172,7 @@ fun HadithReaderScreen(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        HorizontalPager(
+                        NimazPager(
                             state = pagerState,
                             modifier = Modifier
                                 .weight(1f)
@@ -332,10 +333,10 @@ private fun ChainOfNarrationSection(
                 fontWeight = FontWeight.SemiBold,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                variant = NimazIconVariant.PRIMARY,
                 modifier = Modifier.rotate(rotation)
             )
         }

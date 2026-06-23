@@ -20,10 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Calligraphic on-surface header for the names detail screens. Large Amiri Arabic
@@ -95,5 +98,49 @@ fun NameDetailHeader(
                 .height(3.dp)
                 .background(accent.rail, RoundedCornerShape(3.dp))
         )
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun NameDetailHeaderShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Full header with number medallion + labels
+        NameDetailHeader(
+            arabicName = "الرَّحِيم",
+            accent = NamesAccents.allah(),
+            number = 2,
+            primaryLabel = "Ar-Raheem",
+            secondaryLabel = "The Most Merciful",
+        )
+        // Minimal header (no number, no secondary)
+        NameDetailHeader(
+            arabicName = "مُوسَىٰ",
+            accent = NamesAccents.prophets(),
+            primaryLabel = "Musa (Moses)",
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "NameDetailHeader — Light")
+@Composable
+private fun NameDetailHeaderLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NameDetailHeaderShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "NameDetailHeader — Dark")
+@Composable
+private fun NameDetailHeaderDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NameDetailHeaderShowcase()
     }
 }

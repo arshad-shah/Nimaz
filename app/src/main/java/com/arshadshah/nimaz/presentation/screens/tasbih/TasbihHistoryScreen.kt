@@ -23,9 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -49,6 +47,11 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
@@ -91,14 +94,7 @@ fun TasbihHistoryScreen(
         }
     ) { paddingValues ->
         if (historyState.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            NimazLoadingState(modifier = Modifier.padding(paddingValues))
         } else {
             LazyColumn(
                 modifier = Modifier
@@ -140,11 +136,11 @@ fun TasbihHistoryScreen(
                             contentAlignment = Alignment.Center
                         ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
+                                NimazIcon(
                                     imageVector = Icons.Default.History,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f),
-                                    modifier = Modifier.size(56.dp)
+                                    iconSize = 56.dp
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
                                 Text(
@@ -173,10 +169,13 @@ private fun StatsSummaryCard(
     totalThisWeek: Int,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -300,11 +299,14 @@ private fun SessionCard(
     session: TasbihSession,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface,
+            border = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -313,12 +315,12 @@ private fun SessionCard(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Completion indicator
-            Icon(
+            NimazIcon(
                 imageVector = if (session.isCompleted) Icons.Default.CheckCircle else Icons.Default.Schedule,
                 contentDescription = null,
                 tint = if (session.isCompleted) NimazColors.TasbihColors.Complete
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(26.dp)
+                iconSize = 26.dp
             )
 
             Spacer(modifier = Modifier.width(14.dp))

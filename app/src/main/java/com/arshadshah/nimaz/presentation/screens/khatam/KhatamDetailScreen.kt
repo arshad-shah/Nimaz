@@ -23,11 +23,8 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.CalendarToday
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -48,6 +45,14 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
@@ -77,14 +82,7 @@ fun KhatamDetailScreen(
         }
     ) { paddingValues ->
         if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
+            NimazLoadingState(modifier = Modifier.padding(paddingValues))
             return@Scaffold
         }
 
@@ -107,26 +105,13 @@ fun KhatamDetailScreen(
             val nextAyah = state.nextUnreadAyah
             if (nextSurah != null && nextAyah != null) {
                 item {
-                    Button(
+                    NimazButton(
+                        text = stringResource(R.string.khatam_continue_reading),
                         onClick = { onNavigateToRead(nextSurah, nextAyah) },
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                            contentDescription = null,
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Text(
-                            text = stringResource(R.string.khatam_continue_reading),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+                        variant = NimazButtonVariant.FILLED,
+                        leadingIcon = Icons.AutoMirrored.Filled.MenuBook,
+                        fullWidth = true
+                    )
                 }
             }
 
@@ -259,21 +244,22 @@ private fun StatCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(12.dp)
-            )
+    NimazCard(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Column(
+        modifier = Modifier
             .padding(12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
+            variant = NimazIconVariant.PRIMARY,
+            size = NimazIconSize.MEDIUM
         )
         Text(
             text = value,
@@ -287,6 +273,7 @@ private fun StatCard(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
         )
+      }
     }
 }
 
@@ -352,13 +339,14 @@ private fun DailyReadingSection(
 ) {
     val recentLogs = dailyLogs.take(7)
 
-    Column(
-        modifier = modifier
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(16.dp)
-            )
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
@@ -382,5 +370,6 @@ private fun DailyReadingSection(
                 )
             }
         }
+      }
     }
 }

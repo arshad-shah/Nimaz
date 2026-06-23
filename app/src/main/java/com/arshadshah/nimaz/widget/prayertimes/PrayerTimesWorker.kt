@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.Duration
-import kotlin.time.Clock
 
 @HiltWorker
 class PrayerTimesWorker @AssistedInject constructor(
@@ -68,11 +67,10 @@ class PrayerTimesWorker @AssistedInject constructor(
                 ?.split(",")
                 ?.firstOrNull()
                 ?.trim() ?: "Dublin"
+            val use24Hour = preferencesDataStore.use24HourFormat.first()
 
             val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
-            val currentTime = Clock.System.now()
             val timeZone = TimeZone.currentSystemDefault()
-            val localTime = currentTime.toLocalDateTime(timeZone)
 
             val prayerMap = prayerTimes.associate { it.type to it }
 
@@ -82,53 +80,30 @@ class PrayerTimesWorker @AssistedInject constructor(
             val maghrib = prayerMap[PrayerType.MAGHRIB]
             val isha = prayerMap[PrayerType.ISHA]
 
-            fun isPassed(prayerTime: com.arshadshah.nimaz.domain.model.PrayerTime?): Boolean {
-                if (prayerTime == null) return false
-                val prayerLocalTime = prayerTime.time.toLocalDateTime(timeZone)
-                return prayerLocalTime.time < localTime.time
-            }
-
             fun formatPrayer(prayerTime: com.arshadshah.nimaz.domain.model.PrayerTime?): String =
                 prayerTime?.let {
                     val local = it.time.toLocalDateTime(timeZone)
-                    formatWidgetTime(local.hour, local.minute)
+                    formatWidgetTime(local.hour, local.minute, use24Hour = use24Hour)
                 } ?: "—"
 
-            val nextPrayer = prayerTimes.firstOrNull { prayerTime ->
-                prayerTime.type != PrayerType.SUNRISE &&
-                        prayerTime.time.toLocalDateTime(timeZone).time > localTime.time
-            }
-
-            val nextPrayerEpochMillis = nextPrayer?.time?.toEpochMilliseconds() ?: 0L
-            val timeUntilNext = if (nextPrayer != null) {
-                val diff: kotlin.time.Duration = nextPrayer.time - currentTime
-                val totalMinutes = diff.inWholeMinutes
-                val hours = totalMinutes / 60
-                val minutes = totalMinutes % 60
-                when {
-                    hours > 0 -> "${hours}h ${minutes}m"
-                    else -> "${minutes}m"
-                }
-            } else "—"
+            fun epochOf(prayerTime: com.arshadshah.nimaz.domain.model.PrayerTime?): Long =
+                prayerTime?.time?.toEpochMilliseconds() ?: 0L
 
             val hijriDate = HijriDateCalculator.today()
 
             val data = PrayerTimesData(
                 locationName = locationName,
                 hijriDate = "${hijriDate.day} ${hijriDate.monthName}",
-                nextPrayerName = nextPrayer?.type?.displayName ?: "—",
-                timeUntilNext = timeUntilNext,
                 fajrTime = formatPrayer(fajr),
                 dhuhrTime = formatPrayer(dhuhr),
                 asrTime = formatPrayer(asr),
                 maghribTime = formatPrayer(maghrib),
                 ishaTime = formatPrayer(isha),
-                fajrPassed = isPassed(fajr),
-                dhuhrPassed = isPassed(dhuhr),
-                asrPassed = isPassed(asr),
-                maghribPassed = isPassed(maghrib),
-                ishaPassed = isPassed(isha),
-                nextPrayerEpochMillis = nextPrayerEpochMillis
+                fajrEpochMillis = epochOf(fajr),
+                dhuhrEpochMillis = epochOf(dhuhr),
+                asrEpochMillis = epochOf(asr),
+                maghribEpochMillis = epochOf(maghrib),
+                ishaEpochMillis = epochOf(isha),
             )
 
             setWidgetState(glanceIds, PrayerTimesWidgetState.Success(data))

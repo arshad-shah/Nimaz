@@ -69,7 +69,7 @@ import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import java.time.format.DateTimeFormatter
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 
 @Composable
 fun HomeScreen(
@@ -128,23 +128,6 @@ fun HomeScreen(
                 }
             }
         }
-    }
-
-    // Status-bar icon contrast: white over the living-sky hero, switching to
-    // theme-appropriate (dark icons in a light theme, white in dark) once the
-    // top bar solidifies on scroll. Tablet has no sky hero, so it always uses
-    // the theme-appropriate contrast. (isAppearanceLightStatusBars == true means
-    // a light status-bar background, i.e. dark icons.)
-    val view = LocalView.current
-    val isLightTheme = MaterialTheme.colorScheme.surface.luminance() > 0.5f
-    val overSkyHero = windowSizeClass.isCompact && topBarProgress < 0.5f
-    val appearanceLightStatusBars = if (overSkyHero) false else isLightTheme
-    DisposableEffect(view, appearanceLightStatusBars) {
-        val window = (view.context as Activity).window
-        val controller = WindowCompat.getInsetsController(window, view)
-        val previous = controller.isAppearanceLightStatusBars
-        controller.isAppearanceLightStatusBars = appearanceLightStatusBars
-        onDispose { controller.isAppearanceLightStatusBars = previous }
     }
 
     val nextPrayerTimeText = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
@@ -241,7 +224,7 @@ private fun HomeCompactContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))
+        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
     val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
@@ -357,7 +340,7 @@ private fun HomeTabletContent(
     viewModel: HomeViewModel,
 ) {
     val gregorianDate = remember {
-        java.time.LocalDate.now().format(DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy"))
+        java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
     val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 

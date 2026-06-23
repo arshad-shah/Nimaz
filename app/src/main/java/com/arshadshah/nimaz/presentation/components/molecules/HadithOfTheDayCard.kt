@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -18,9 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,7 +31,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -56,19 +57,13 @@ fun HadithOfTheDayCard(
     fillHeight: Boolean = false,
     maxLines: Int = Int.MAX_VALUE,
 ) {
-    Card(
+    NimazSurfaceCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier)
             // Tapping opens this exact hadith in the reader (issue #161). Kept on
             // the whole card so the large surface is the tap target, not a tiny link.
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
     ) {
         Column(
             modifier = Modifier
@@ -77,12 +72,16 @@ fun HadithOfTheDayCard(
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconBadge(
+                NimazIcon(
                     imageVector = Icons.Default.Book,
-                    backgroundColor = HadithAccent.copy(alpha = 0.2f),
-                    iconColor = HadithAccent,
+                    contentDescription = null,
+                    type = NimazIconType.CONTAINED,
+                    containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                    tint = HadithAccent,
+                    containerColor = HadithAccent.copy(alpha = 0.2f),
                     containerSize = 32.dp,
                     iconSize = 18.dp,
+                    cornerRadius = 12.dp,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -103,13 +102,13 @@ fun HadithOfTheDayCard(
                         fontWeight = FontWeight.SemiBold,
                         color = HadithAccent
                     )
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = null,
                         tint = HadithAccent,
+                        iconSize = 14.dp,
                         modifier = Modifier
                             .padding(start = 2.dp)
-                            .size(14.dp)
                     )
                 }
             }
@@ -159,10 +158,10 @@ fun HadithOfTheDayCard(
 @Composable
 private fun GradeChip(grade: String) {
     val color = when (grade.trim().lowercase()) {
-        "sahih" -> Color(0xFF4CAF50)
-        "hasan" -> Color(0xFF8BC34A)
-        "da'if", "daif", "dai'f" -> Color(0xFFFF9800)
-        "mawdu", "mawdu'", "fabricated" -> Color(0xFFF44336)
+        "sahih" -> NimazPalette.MatGreen
+        "hasan" -> NimazPalette.LightGreen
+        "da'if", "daif", "dai'f" -> NimazPalette.MatOrange
+        "mawdu", "mawdu'", "fabricated" -> NimazPalette.MatRed
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(
@@ -178,7 +177,7 @@ private fun GradeChip(grade: String) {
     )
 }
 
-private val HadithAccent = Color(0xFF3B82F6)
+private val HadithAccent = NimazColors.Info
 
 private const val SAMPLE_HADITH =
     "The Prophet (peace be upon him) said: \"The best of you are those who learn the Quran and teach it.\" — Sahih al-Bukhari"

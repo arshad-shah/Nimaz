@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -54,6 +53,8 @@ import com.arshadshah.nimaz.domain.model.HelpStep
 import com.arshadshah.nimaz.domain.model.HelpTopic
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 
 fun helpIcon(key: String?): ImageVector = when (key) {
     "schedule" -> Icons.Filled.Schedule
@@ -90,11 +91,11 @@ fun HelpIconBox(iconKey: String?, tint: Color, boxSize: Dp = 38.dp) {
             .background(tint.copy(alpha = 0.12f)),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
+        NimazIcon(
             imageVector = helpIcon(iconKey),
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(boxSize * 0.55f)
+            iconSize = boxSize * 0.55f
         )
     }
 }
@@ -141,7 +142,7 @@ fun HelpQuestionRow(question: HelpItem.HelpQuestion, modifier: Modifier = Modifi
                 fontWeight = FontWeight.SemiBold,
                 modifier = Modifier.weight(1f)
             )
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.ExpandMore,
                 contentDescription = null,
                 tint = if (expanded) MaterialTheme.colorScheme.primary
@@ -189,10 +190,10 @@ fun HelpGuideRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                variant = NimazIconVariant.MUTED
             )
         }
     }
@@ -297,11 +298,11 @@ private fun HelpPathChip(
                 fontWeight = FontWeight.SemiBold
             )
             if (i != labels.lastIndex) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Filled.ChevronRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(14.dp)
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 14.dp
                 )
             }
         }

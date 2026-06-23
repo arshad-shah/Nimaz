@@ -3,7 +3,9 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -25,10 +27,15 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.HighlightArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 val highlightColors = listOf(
     "#FDE68A" to "Yellow",
@@ -43,7 +50,7 @@ private const val HIGHLIGHT_TAG = "HIGHLIGHT"
 // Highlight backgrounds are light pastels, so highlighted text needs a dark
 // foreground to stay legible in both light and dark themes (the default
 // onSurface colour is near-white in dark mode and disappears on the pastel).
-private val HighlightedTextColor = Color(0xFF1C1C1C)
+private val HighlightedTextColor = NimazColors.OnSurfaceLight
 
 @Composable
 fun TafseerHighlightableText(
@@ -325,9 +332,77 @@ fun parseColor(hex: String): Color {
         when (cleanHex.length) {
             6 -> Color(0xFF000000 or colorLong)
             8 -> Color(colorLong)
-            else -> Color(0xFFFDE68A) // fallback yellow
+            else -> HighlightArtColors.FallbackYellow // fallback yellow
         }
     } catch (e: Exception) {
-        Color(0xFFFDE68A)
+        HighlightArtColors.FallbackYellow
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private val sampleHighlightText =
+    "And remember when your Lord said to the angels, 'Indeed, I will make upon " +
+            "the earth a successive authority.' بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ " +
+            "They said, 'Will You place upon it one who causes corruption therein?'"
+
+private val sampleHighlights = listOf(
+    TafseerHighlight(
+        id = 1L,
+        ayahId = 30,
+        tafseerId = "ibn_kathir_en",
+        startOffset = 0,
+        endOffset = 35,
+        color = "#FDE68A",
+        note = "Key theme: stewardship",
+        createdAt = 0L,
+        updatedAt = 0L
+    ),
+    TafseerHighlight(
+        id = 2L,
+        ayahId = 30,
+        tafseerId = "ibn_kathir_en",
+        startOffset = 120,
+        endOffset = 160,
+        color = "#BBF7D0",
+        note = null,
+        createdAt = 0L,
+        updatedAt = 0L
+    )
+)
+
+@Composable
+private fun TafseerHighlightableTextShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        TafseerHighlightableText(
+            text = sampleHighlightText,
+            highlights = sampleHighlights,
+            isHighlightMode = false,
+            selectedColor = highlightColors.first().first,
+            onHighlightCreated = { _, _, _ -> },
+            onHighlightTapped = {}
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "HighlightableText — Light")
+@Composable
+private fun TafseerHighlightableTextLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        TafseerHighlightableTextShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "HighlightableText — Dark")
+@Composable
+private fun TafseerHighlightableTextDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        TafseerHighlightableTextShowcase()
     }
 }

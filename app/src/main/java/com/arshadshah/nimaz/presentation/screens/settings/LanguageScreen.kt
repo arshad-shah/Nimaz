@@ -14,15 +14,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -79,11 +80,12 @@ fun LanguageScreen(
 
             // Language Card
             item {
-                Card(
+                NimazCard(
+                    style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    colors = NimazCardDefaults.colors(
+                        container = MaterialTheme.colorScheme.surfaceVariant
                     )
                 ) {
                     Column {
@@ -183,24 +185,13 @@ private fun LanguageItem(
             )
         }
 
-        // Check Mark
-        if (isSelected) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
+        // Selection indicator
+        NimazCheckbox(
+            checked = isSelected,
+            onCheckedChange = null,
+            variant = NimazCheckboxVariant.PRIMARY,
+            size = NimazCheckboxSize.LARGE,
+            type = NimazCheckboxType.CIRCLE
+        )
     }
 }

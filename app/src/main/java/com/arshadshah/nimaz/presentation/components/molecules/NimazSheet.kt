@@ -25,14 +25,10 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.BottomSheetDefaults
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -49,6 +45,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.BottomSheetHandle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -181,11 +183,11 @@ fun NimazSheetHeader(
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(22.dp)
+                    iconSize = 22.dp
                 )
             }
             Spacer(Modifier.width(12.dp))
@@ -228,13 +230,13 @@ fun NimazSheetHeader(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.6f)
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 18.dp,
                     modifier = Modifier
                         .padding(7.dp)
-                        .size(18.dp)
                 )
             }
         }
@@ -346,11 +348,11 @@ private fun ActionPill(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = action.icon,
                     contentDescription = action.label,
                     tint = tint,
-                    modifier = Modifier.size(24.dp)
+                    size = NimazIconSize.LARGE
                 )
             }
             Spacer(Modifier.height(4.dp))
@@ -405,44 +407,30 @@ fun NimazSheetFooterButtons(
     primaryEnabled: Boolean = true,
     isDestructive: Boolean = false
 ) {
-    val pill = RoundedCornerShape(NimazCornerFull)
     Row(
         modifier = modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (secondaryText != null && onSecondary != null) {
-            OutlinedButton(
+            NimazButton(
+                text = secondaryText,
                 onClick = onSecondary,
-                shape = pill,
+                variant = NimazButtonVariant.OUTLINED,
+                type = NimazButtonType.PILL,
                 modifier = Modifier.weight(1f)
-            ) {
-                Text(secondaryText, fontWeight = FontWeight.Medium)
-            }
+            )
         }
-        FilledTonalButton(
+        NimazButton(
+            text = primaryText,
             onClick = onPrimary,
             enabled = primaryEnabled,
-            shape = pill,
-            colors = if (isDestructive) {
-                ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                )
-            } else {
-                ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            },
+            variant = if (isDestructive) NimazButtonVariant.DESTRUCTIVE else NimazButtonVariant.TONAL,
+            type = NimazButtonType.PILL,
             modifier = Modifier.weight(1f)
-        ) {
-            Text(primaryText, fontWeight = FontWeight.SemiBold)
-        }
+        )
     }
 }
-
-private val NimazCornerFull = 100.dp
 
 // ==================== PREVIEWS ====================
 

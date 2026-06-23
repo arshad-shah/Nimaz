@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -15,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -27,11 +27,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.arshadshah.nimaz.domain.model.QaidaCell
+import com.arshadshah.nimaz.domain.model.TokenType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HarakatArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * A single tappable Qaida cell (one sound) in the lesson reader. Shows the
@@ -50,7 +57,7 @@ fun QaidaCellTile(
 ) {
     val container by animateColorAsState(
         if (isPlaying) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceContainerHigh,
+        else MaterialTheme.colorScheme.surfaceContainer,
         label = "cellContainer",
     )
     val elevation by animateDpAsState(if (isPlaying) 6.dp else 1.dp, label = "cellElevation")
@@ -106,17 +113,83 @@ fun QaidaCellTile(
 
         // "Heard" check badge in the top-end corner (hidden while playing).
         if (isCompleted && !isPlaying) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.CheckCircle,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                variant = NimazIconVariant.PRIMARY,
+                size = NimazIconSize.SMALL,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .size(16.dp),
+                    .background(MaterialTheme.colorScheme.surface),
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private fun sampleQaidaCell(
+    id: Int = 1,
+    textArabic: String = "بَ",
+    transliteration: String = "ba",
+) = QaidaCell(
+    id = id,
+    lineId = 1,
+    lessonId = 1,
+    position = id,
+    textArabic = textArabic,
+    transliteration = transliteration,
+    tokenType = TokenType.SYLLABLE,
+    audioKey = "ba",
+    audioPath = "",
+    highlightGroup = "fatha",
+    letterId = 2,
+    notes = null,
+)
+
+@Composable
+private fun QaidaCellTileShowcase() {
+    Row(
+        modifier = Modifier.padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        QaidaCellTile(
+            cell = sampleQaidaCell(id = 1, textArabic = "بَ", transliteration = "ba"),
+            isPlaying = false,
+            showTransliteration = true,
+            onTap = {},
+        )
+        QaidaCellTile(
+            cell = sampleQaidaCell(id = 2, textArabic = "بِ", transliteration = "bi"),
+            isPlaying = true,
+            showTransliteration = true,
+            onTap = {},
+        )
+        QaidaCellTile(
+            cell = sampleQaidaCell(id = 3, textArabic = "بُ", transliteration = "bu"),
+            isPlaying = false,
+            showTransliteration = true,
+            onTap = {},
+            isCompleted = true,
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Cell Tile — Light")
+@Composable
+private fun QaidaCellTileLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaCellTileShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Cell Tile — Dark")
+@Composable
+private fun QaidaCellTileDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaCellTileShowcase()
     }
 }

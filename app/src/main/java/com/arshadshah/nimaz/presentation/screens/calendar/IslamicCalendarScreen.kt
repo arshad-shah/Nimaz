@@ -13,7 +13,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -40,6 +39,7 @@ import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
@@ -70,7 +70,7 @@ fun IslamicCalendarScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(CalendarEvent.LoadToday) }) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Today,
                             contentDescription = stringResource(R.string.today)
                         )

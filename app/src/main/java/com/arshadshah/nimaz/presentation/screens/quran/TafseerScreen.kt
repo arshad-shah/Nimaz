@@ -6,13 +6,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -93,7 +93,7 @@ fun TafseerScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.cd_back)
                         )
@@ -125,7 +125,7 @@ fun TafseerScreen(
                     )
                 }
             } else if (state.ayahs.isNotEmpty()) {
-                val pagerState = rememberPagerState(
+                val pagerState = rememberNimazPagerState(
                     initialPage = state.currentAyahIndex,
                     pageCount = { state.ayahs.size }
                 )
@@ -137,7 +137,7 @@ fun TafseerScreen(
                     }
                 }
 
-                HorizontalPager(
+                NimazPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->

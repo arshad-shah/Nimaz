@@ -13,23 +13,6 @@ class QuranBannersTest {
     val composeRule = createComponentComposeRule()
 
     @Test
-    fun `juz banner renders title and subtitle`() {
-        composeRule.setThemedContent {
-            JuzPageBanner(title = "Juz 1", subtitle = "Al-Fatihah - Al-Baqarah")
-        }
-        composeRule.onNodeWithText("Juz 1").assertExists()
-        composeRule.onNodeWithText("Al-Fatihah - Al-Baqarah").assertExists()
-    }
-
-    @Test
-    fun `juz banner renders without subtitle`() {
-        composeRule.setThemedContent {
-            JuzPageBanner(title = "Juz 30", subtitle = "")
-        }
-        composeRule.onNodeWithText("Juz 30").assertExists()
-    }
-
-    @Test
     fun `page surah separator renders full content with bismillah`() {
         composeRule.setThemedContent {
             PageSurahSeparator(

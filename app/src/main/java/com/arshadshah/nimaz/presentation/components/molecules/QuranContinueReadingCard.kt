@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,6 +30,10 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -50,29 +52,25 @@ internal fun ContinueReadingCard(
     val progressFraction = (totalAyahsRead.toFloat() / totalAyahs).coerceIn(0f, 1f)
     val progressPercent = (progressFraction * 100).toInt()
 
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent
+        colors = NimazCardDefaults.colors(
+            container = Color.Transparent
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            Color(0xFF115E59),
-                            Color(0xFF042F2E)
-                        )
-                    ),
+                    brush = Brush.linearGradient(NimazColors.QuranColors.BannerGradient),
                     shape = RoundedCornerShape(20.dp)
                 )
                 .border(
                     width = 1.dp,
-                    color = Color(0xFF0F766E),
+                    color = NimazColors.QuranColors.BannerBorder,
                     shape = RoundedCornerShape(20.dp)
                 )
         ) {
@@ -84,7 +82,7 @@ internal fun ContinueReadingCard(
                 Text(
                     text = stringResource(R.string.quran_home_continue_reading),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF2DD4BF),
+                    color = NimazColors.Primary400,
                     letterSpacing = 1.5.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -105,7 +103,7 @@ internal fun ContinueReadingCard(
                     ArabicText(
                         text = surahName.nameArabic,
                         size = ArabicTextSize.MEDIUM,
-                        color = Color(0xFFEAB308)
+                        color = NimazColors.QuranColors.BannerAccent
                     )
                     Spacer(modifier = Modifier.height(12.dp))
                 }
@@ -116,17 +114,17 @@ internal fun ContinueReadingCard(
                     Text(
                         text = stringResource(R.string.quran_home_verse_format, ayahNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                     Text(
                         text = stringResource(R.string.quran_home_juz_format, juzNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                     Text(
                         text = stringResource(R.string.quran_home_page_format, pageNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                 }
 
@@ -149,14 +147,14 @@ internal fun ContinueReadingCard(
                                 .fillMaxWidth(progressFraction)
                                 .height(6.dp)
                                 .clip(RoundedCornerShape(3.dp))
-                                .background(Color(0xFFEAB308))
+                                .background(NimazColors.QuranColors.BannerAccent)
                         )
                     }
 
                     Text(
                         text = "$progressPercent%",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                 }
             }

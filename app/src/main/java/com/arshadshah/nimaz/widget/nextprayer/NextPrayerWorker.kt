@@ -63,6 +63,7 @@ class NextPrayerWorker @AssistedInject constructor(
         return try {
             val latitude = preferencesDataStore.latitude.first().takeIf { it != 0.0 } ?: 53.3498
             val longitude = preferencesDataStore.longitude.first().takeIf { it != 0.0 } ?: -6.2603
+            val use24Hour = preferencesDataStore.use24HourFormat.first()
 
             val prayerTimes = prayerTimeCalculator.getPrayerTimes(latitude, longitude)
             val currentTime = Clock.System.now()
@@ -84,7 +85,8 @@ class NextPrayerWorker @AssistedInject constructor(
                     prayerTime = formatWidgetTime(
                         prayerLocalTime.hour,
                         prayerLocalTime.minute,
-                        includeAmPm = true
+                        includeAmPm = true,
+                        use24Hour = use24Hour
                     ),
                     countdown = countdown,
                     isValid = true,

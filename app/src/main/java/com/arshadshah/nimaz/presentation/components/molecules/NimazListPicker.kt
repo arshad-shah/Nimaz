@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,13 +19,9 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +40,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -223,21 +228,18 @@ private fun <T> PickerRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    Card(
+    NimazCard(
+        style = NimazCardStyle.FILLED,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                MaterialTheme.colorScheme.primaryContainer
-            } else {
-                MaterialTheme.colorScheme.surfaceContainerHighest
-            }
-        ),
-        border = if (isSelected) {
-            BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary)
-        } else null
+        selected = isSelected,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceContainer,
+            activeContainer = MaterialTheme.colorScheme.primaryContainer,
+            activeBorder = MaterialTheme.colorScheme.primary
+        )
     ) {
         Row(
             modifier = Modifier
@@ -254,11 +256,11 @@ private fun <T> PickerRow(
                         .background(tint.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = item.icon,
                         contentDescription = null,
                         tint = tint,
-                        modifier = Modifier.size(20.dp)
+                        size = NimazIconSize.MEDIUM
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -291,20 +293,13 @@ private fun <T> PickerRow(
 
             if (isSelected) {
                 Spacer(modifier = Modifier.width(10.dp))
-                Box(
-                    modifier = Modifier
-                        .size(24.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(14.dp)
-                    )
-                }
+                NimazCheckbox(
+                    checked = true,
+                    onCheckedChange = null,
+                    variant = NimazCheckboxVariant.PRIMARY,
+                    size = NimazCheckboxSize.LARGE,
+                    type = NimazCheckboxType.CIRCLE
+                )
             }
         }
     }
@@ -337,11 +332,11 @@ private fun EmptyState(text: String, modifier: Modifier = Modifier) {
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(28.dp)
+                variant = NimazIconVariant.MUTED,
+                iconSize = 28.dp
             )
         }
         Spacer(modifier = Modifier.height(12.dp))

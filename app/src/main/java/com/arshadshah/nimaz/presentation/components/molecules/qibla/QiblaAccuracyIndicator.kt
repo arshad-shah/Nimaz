@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,7 +33,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
+import com.arshadshah.nimaz.presentation.theme.CompassArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /** Resolved presentation data for a [CompassAccuracy] level. */
@@ -50,7 +56,7 @@ private fun accuracyVisuals(accuracy: CompassAccuracy): AccuracyVisuals = when (
 
     CompassAccuracy.MEDIUM -> AccuracyVisuals(
         stringResource(R.string.accuracy_medium),
-        Color(0xFFFACC15),
+        NimazColors.Gold400,
         stringResource(R.string.accuracy_medium_hint)
     )
 
@@ -141,11 +147,11 @@ fun QiblaAccuracyBar(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = if (calibrate) Icons.Default.Warning else Icons.Default.CheckCircle,
                     contentDescription = null,
                     tint = color,
-                    modifier = Modifier.size(14.dp)
+                    iconSize = 14.dp
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
@@ -155,22 +161,12 @@ fun QiblaAccuracyBar(
                     modifier = Modifier.weight(1f)
                 )
                 if (calibrate) {
-                    Button(
+                    NimazButton(
+                        text = stringResource(R.string.calibrate),
                         onClick = onCalibrate,
-                        shape = RoundedCornerShape(8.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = color,
-                            contentColor = Color.White
-                        ),
-                        contentPadding = PaddingValues(horizontal = 14.dp, vertical = 0.dp),
-                        modifier = Modifier.height(32.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.calibrate),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
+                        variant = NimazButtonVariant.FILLED,
+                        size = NimazButtonSize.SMALL
+                    )
                 }
             }
         }
@@ -194,16 +190,16 @@ fun QiblaAccuracyPill(
     Row(
         modifier = modifier
             .clip(shape)
-            .background(Color(0xFF120F0A).copy(alpha = 0.78f))
+            .background(CompassArtColors.DialBackground.copy(alpha = 0.78f))
             .border(1.dp, Color.White.copy(alpha = 0.15f), shape)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
+        NimazIcon(
             imageVector = if (calibrate) Icons.Default.Warning else Icons.Default.CheckCircle,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(16.dp)
+            size = NimazIconSize.SMALL
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(

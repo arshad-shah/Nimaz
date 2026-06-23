@@ -15,10 +15,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /** Child-friendly label for where a letter is articulated. */
 @Composable
@@ -78,5 +81,41 @@ fun QaidaMakhrajHelper(
                 }
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun QaidaMakhrajHelperShowcase() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        QaidaMakhrajHelper(
+            area = MakhrajArea.SHAFATAIN,
+            detail = "Pressing the lips together gently.",
+        )
+        QaidaMakhrajHelper(
+            area = MakhrajArea.LISAN,
+            detail = "Tip of the tongue behind the front teeth.",
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Makhraj Helper — Light")
+@Composable
+private fun QaidaMakhrajHelperLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaMakhrajHelperShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Makhraj Helper — Dark")
+@Composable
+private fun QaidaMakhrajHelperDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaMakhrajHelperShowcase()
     }
 }

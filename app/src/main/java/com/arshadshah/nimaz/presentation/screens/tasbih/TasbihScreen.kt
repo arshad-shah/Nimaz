@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,6 +70,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
@@ -276,11 +281,11 @@ private fun TasbihTopBar(
         Spacer(Modifier.weight(1f))
         if (beadsMode) {
             IconButton(onClick = onOpenDesign) {
-                Icon(Icons.Default.Palette, stringResource(R.string.tasbih_bead_design))
+                NimazIcon(Icons.Default.Palette, contentDescription = stringResource(R.string.tasbih_bead_design))
             }
         }
         IconButton(onClick = onNavigateToHistory) {
-            Icon(Icons.Default.History, stringResource(R.string.history))
+            NimazIcon(Icons.Default.History, contentDescription = stringResource(R.string.history))
         }
     }
 }
@@ -333,11 +338,19 @@ private fun TasbihCountCapsule(
     val accent = if (goalReached) NimazColors.TasbihColors.Complete
     else NimazColors.TasbihColors.Milestone
 
-    Surface(
+    NimazCard(
         modifier = modifier,
+        style = NimazCardStyle.OUTLINED,
+        selected = goalReached,
         shape = RoundedCornerShape(percent = 50),
-        color = accent.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f))
+        colors = NimazCardDefaults.selectable(
+            container = NimazColors.TasbihColors.Milestone.copy(alpha = 0.12f),
+            content = NimazColors.TasbihColors.Milestone,
+            border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.45f),
+            activeContainer = NimazColors.TasbihColors.Complete.copy(alpha = 0.12f),
+            activeContent = NimazColors.TasbihColors.Complete,
+            activeBorder = NimazColors.TasbihColors.Complete.copy(alpha = 0.45f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -373,14 +386,17 @@ private fun CurrentTasbihPeek(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
+        onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        )
     ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Box(
@@ -431,10 +447,10 @@ private fun CurrentTasbihPeek(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    variant = NimazIconVariant.MUTED
                 )
             }
         }
@@ -450,15 +466,18 @@ private fun CurrentTasbihInfoCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        border = BorderStroke(1.dp, NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f))
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f)
+        )
     ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -642,11 +661,11 @@ private fun ControlButtons(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onReset, modifier = Modifier.size(44.dp)) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Refresh,
-                    stringResource(R.string.reset_action),
+                    contentDescription = stringResource(R.string.reset_action),
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
             VerticalDivider(
@@ -654,18 +673,18 @@ private fun ControlButtons(
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
             IconButton(onClick = onToggleSound, modifier = Modifier.size(44.dp)) {
-                Icon(
+                NimazIcon(
                     if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
-                    stringResource(R.string.toggle_sound),
+                    contentDescription = stringResource(R.string.toggle_sound),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (soundEnabled) 0.9f else 0.35f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
             IconButton(onClick = onToggleVibration, modifier = Modifier.size(44.dp)) {
-                Icon(
-                    Icons.Default.PhoneAndroid, stringResource(R.string.toggle_vibration),
+                NimazIcon(
+                    Icons.Default.PhoneAndroid, contentDescription = stringResource(R.string.toggle_vibration),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.9f else 0.35f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }

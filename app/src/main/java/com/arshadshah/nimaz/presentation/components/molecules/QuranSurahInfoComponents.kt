@@ -23,7 +23,6 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
@@ -45,6 +44,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -73,11 +75,11 @@ internal fun HeroHeader(
                     ),
                     modifier = Modifier.size(40.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = stringResource(R.string.cd_back),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }
@@ -189,11 +191,11 @@ internal fun DetailCard(
             .padding(15.dp)
     ) {
         Column {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(22.dp)
+                variant = NimazIconVariant.MUTED,
+                iconSize = 22.dp
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
@@ -317,11 +319,11 @@ internal fun SurahAudioControlBar(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Pause" else "Resume",
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(28.dp)
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 28.dp
                     )
                 }
             }
@@ -337,11 +339,11 @@ internal fun SurahAudioControlBar(
                     .clickable(onClick = onStopClick),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_stop),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }

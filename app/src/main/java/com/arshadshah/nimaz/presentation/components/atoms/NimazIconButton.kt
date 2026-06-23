@@ -8,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonColors
 import androidx.compose.material3.IconButtonDefaults
@@ -56,8 +55,6 @@ fun NimazIconButton(
     enabled: Boolean = true,
     colors: IconButtonColors? = null
 ) {
-    val iconModifier = Modifier.size(size.iconSize)
-
     when (style) {
         NimazIconButtonStyle.STANDARD -> {
             IconButton(
@@ -66,10 +63,10 @@ fun NimazIconButton(
                 enabled = enabled,
                 colors = colors ?: IconButtonDefaults.iconButtonColors()
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = contentDescription,
-                    modifier = iconModifier
+                    iconSize = size.iconSize
                 )
             }
         }
@@ -81,10 +78,10 @@ fun NimazIconButton(
                 enabled = enabled,
                 colors = colors ?: IconButtonDefaults.filledIconButtonColors()
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = contentDescription,
-                    modifier = iconModifier
+                    iconSize = size.iconSize
                 )
             }
         }
@@ -96,10 +93,10 @@ fun NimazIconButton(
                 enabled = enabled,
                 colors = colors ?: IconButtonDefaults.filledTonalIconButtonColors()
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = contentDescription,
-                    modifier = iconModifier
+                    iconSize = size.iconSize
                 )
             }
         }
@@ -111,10 +108,10 @@ fun NimazIconButton(
                 enabled = enabled,
                 colors = colors ?: IconButtonDefaults.outlinedIconButtonColors()
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = contentDescription,
-                    modifier = iconModifier
+                    iconSize = size.iconSize
                 )
             }
         }
