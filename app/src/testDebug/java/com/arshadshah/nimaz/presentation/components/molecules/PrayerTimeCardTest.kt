@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -108,7 +109,8 @@ class PrayerTimeCardTest {
             )
         }
 
-        composeRule.onNodeWithContentDescription("Prayed").assertDoesNotExist()
+        // The checkbox node is always present for accessibility; when not prayed it is unchecked.
+        composeRule.onNodeWithContentDescription("Prayed").assertIsOff()
     }
 
     @Test
