@@ -19,7 +19,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,6 +29,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -110,7 +110,7 @@ internal fun MushafPageBar(
                         imageVector = if (allPageRead) Icons.Filled.CheckCircle
                         else Icons.Outlined.RadioButtonUnchecked,
                         contentDescription = if (allPageRead) "Page read" else "Mark page as read",
-                        tint = if (allPageRead) Color(0xFF22C55E)
+                        tint = if (allPageRead) NimazColors.Success
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         iconSize = 22.dp
                     )

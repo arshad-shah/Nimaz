@@ -27,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.CardArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -239,7 +240,7 @@ private fun NimazCardShowcase() {
             Text(text = "Outlined Card", modifier = Modifier.padding(16.dp))
         }
         GradientCard(
-            gradientColors = listOf(Color(0xFF5C6BC0), Color(0xFF9FA8DA))
+            gradientColors = listOf(CardArtColors.IndigoGradientStart, CardArtColors.IndigoGradientEnd)
         ) {
             Text(
                 text = "Gradient Card",
@@ -248,8 +249,8 @@ private fun NimazCardShowcase() {
             )
         }
         PrayerCard(
-            primaryColor = Color(0xFFFFB74D),
-            secondaryColor = Color(0xFFFFE0B2)
+            primaryColor = CardArtColors.AmberPrimary,
+            secondaryColor = CardArtColors.AmberSecondary
         ) {
             Text(
                 text = "Prayer Card",

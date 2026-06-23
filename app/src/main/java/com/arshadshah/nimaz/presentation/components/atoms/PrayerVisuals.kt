@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -33,12 +34,12 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
 @Composable
 fun getPrayerColor(prayerType: PrayerType?): Color {
     return when (prayerType) {
-        PrayerType.FAJR -> Color(0xFF6366F1)      // Indigo
-        PrayerType.SUNRISE -> Color(0xFFF59E0B)    // Amber
-        PrayerType.DHUHR -> Color(0xFFEAB308)       // Yellow
-        PrayerType.ASR -> Color(0xFFF97316)          // Orange
-        PrayerType.MAGHRIB -> Color(0xFFEF4444)    // Red
-        PrayerType.ISHA -> Color(0xFF8B5CF6)        // Violet
+        PrayerType.FAJR -> NimazColors.PrayerColors.Fajr      // Indigo
+        PrayerType.SUNRISE -> NimazColors.PrayerColors.Sunrise    // Amber
+        PrayerType.DHUHR -> NimazColors.PrayerColors.Dhuhr       // Yellow
+        PrayerType.ASR -> NimazColors.PrayerColors.Asr          // Orange
+        PrayerType.MAGHRIB -> NimazColors.PrayerColors.Maghrib    // Red
+        PrayerType.ISHA -> NimazColors.PrayerColors.Isha        // Violet
         else -> MaterialTheme.colorScheme.primary
     }
 }

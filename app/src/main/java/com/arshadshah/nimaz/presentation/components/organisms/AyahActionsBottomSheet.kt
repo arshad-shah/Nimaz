@@ -48,6 +48,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetActionRo
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetPreviewCard
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -226,7 +227,7 @@ private fun buildAyahActions(
             icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
             label = stringResource(R.string.action_favorite),
             onClick = { onFavoriteClick(ayah) },
-            tint = if (isFavorite) Color(0xFFEF4444) else null,
+            tint = if (isFavorite) NimazPalette.Red500 else null,
             selected = isFavorite
         )
     )
@@ -256,7 +257,7 @@ private fun buildAyahActions(
                 icon = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
                 label = if (isKhatamRead) stringResource(R.string.unread) else stringResource(R.string.read),
                 onClick = { onKhatamToggle(ayah) },
-                tint = if (isKhatamRead) Color(0xFF22C55E) else null,
+                tint = if (isKhatamRead) NimazColors.Success else null,
                 selected = isKhatamRead
             )
         )
@@ -287,14 +288,14 @@ internal fun SajdaIndicator(
     }
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = Color(0xFFDC2626).copy(alpha = 0.15f),
+        color = NimazPalette.Red600.copy(alpha = 0.15f),
         modifier = modifier
     ) {
         Text(
             text = if (withGlyph) "۩ $label" else label,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
-            color = Color(0xFFDC2626),
+            color = NimazPalette.Red600,
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
         )
     }

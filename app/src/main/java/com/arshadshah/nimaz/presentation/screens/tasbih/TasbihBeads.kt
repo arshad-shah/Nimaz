@@ -29,6 +29,7 @@ import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
+import com.arshadshah.nimaz.presentation.theme.BeadColors
 import kotlinx.coroutines.launch
 import kotlin.math.abs
 import kotlin.math.floor
@@ -282,7 +283,7 @@ private fun blend(a: Color, b: Color, t: Float) = androidx.compose.ui.graphics.l
 private fun TasbihBeadsPreview() {
     var count by remember { mutableIntStateOf(7) }
     Box(modifier = Modifier
-        .background(Color(0xFF0B100E))
+        .background(BeadColors.TrayBackground)
         .size(320.dp, 300.dp)) {
         TasbihBeads(
             count = count,

@@ -20,7 +20,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -31,6 +30,7 @@ import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -170,7 +170,7 @@ internal fun FavoriteAyahItem(
             NimazIcon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
-                tint = Color(0xFFEF4444),
+                tint = NimazPalette.Red500,
                 size = NimazIconSize.LARGE
             )
             Spacer(modifier = Modifier.width(14.dp))

@@ -47,6 +47,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -289,7 +290,7 @@ private fun TooltipCard(
             TooltipIconButton(
                 icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = stringResource(R.string.cd_favorite),
-                tint = if (isFavorite) Color(0xFFEF4444) else contentColor,
+                tint = if (isFavorite) NimazPalette.Red500 else contentColor,
                 onClick = onFavoriteClick
             )
 
@@ -319,7 +320,7 @@ private fun TooltipCard(
                     icon = if (isKhatamRead) Icons.Filled.CheckCircle
                     else Icons.Outlined.RadioButtonUnchecked,
                     contentDescription = if (isKhatamRead) "Mark unread" else "Mark read",
-                    tint = if (isKhatamRead) Color(0xFF22C55E) else contentColor,
+                    tint = if (isKhatamRead) NimazColors.Success else contentColor,
                     onClick = onKhatamToggle
                 )
             }

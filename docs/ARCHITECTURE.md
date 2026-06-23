@@ -139,7 +139,7 @@ com.arshadshah.nimaz/
 │   │   ├── atoms/           # Smallest reusable UI (NimazCard, NimazBadge, ArabicText…)
 │   │   ├── molecules/       # Composed (PrayerTimeCard, NimazDialog, NimazCalendar…)
 │   │   └── organisms/       # Complex (TopAppBar, MushafPage, HomeHero…)
-│   └── theme/               # NimazTheme, Color.kt (NimazColors), Type, Shape
+│   └── theme/               # NimazTheme, Palette.kt (NimazPalette) → Color.kt (NimazColors), Type, Shape
 │
 └── widget/                  # Glance home-screen widgets (nextprayer, prayertracker, hijridate)
 ```
@@ -406,11 +406,24 @@ typed route object.
 
 ## 8. Theming & components
 
-- **Colors:** `presentation/theme/Color.kt` exposes the `NimazColors` object (primary teal,
-  gold accent, per-prayer colors, semantic statuses, tajweed colors, etc.). Use
-  `MaterialTheme.colorScheme.*` for themed surfaces, or `NimazColors.*` for brand/semantic
-  values. **Do not** write `Color(0xFF…)` literals in screens — if a needed value is missing,
-  add it to `NimazColors`.
+- **Colors — every literal lives in the `theme/` package, never in a component/screen:**
+    - **Tier 1 — `presentation/theme/Palette.kt` (`NimazPalette`):** the source of the brand/semantic
+      hues. Hue ramps named `Family + shade` (e.g. `Teal500`, `Stone900`, `Amber500`). Don't
+      reference `NimazPalette.*` from screens — it carries no meaning.
+    - **Tier 2 — `presentation/theme/Color.kt` (`NimazColors`):** semantic tokens that *reference*
+      the palette (primary teal, gold accent, per-prayer colors, semantic statuses, tajweed
+      colors, feature sub-objects like `PrayerColors`/`StatusColors`/`QuranColors`/…). Screens read
+      these.
+    - **Bespoke art sets** (single-use decorative palettes) also live in `theme/`, not in the
+      component: `SkyColors` (prayer sky scene), `BeadColors` (tasbih bead materials),
+      `GlassColors` (glass-morphism auroras), and `ArtColors.kt` (`CardArtColors`,
+      `CompassArtColors`, `NamesArtColors`, `OnboardingArtColors`, `MiscArtColors`, …). They
+      reuse `NimazPalette` where a hue already exists.
+  - Use `MaterialTheme.colorScheme.*` for themed surfaces, or `NimazColors.*` for brand/semantic
+    values. **Never** write a `Color(0xFF…)` literal in a component or screen file — define it in
+    the `theme/` package (a `NimazPalette`/`NimazColors` token, or the relevant art object) and
+    reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
+    from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`.
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
@@ -467,6 +480,7 @@ copy anything listed as Open.
 | Domain→data leak (`PageAyahRange`) | Added a `PageAyahRange` domain model; the Room projection is `PageAyahRangeRow` (mapped in `QuranRepositoryImpl`). `domain/` no longer imports anything from `data/`. |
 | Home daily-content DAO coupling | `HomeViewModel` no longer injects `FastingDao`/`HadithDao`/`DuaDao`. Daily hadith/dua logic extracted to `GetDailyHadithUseCase`/`GetDailyDuaUseCase`; seeding moved into the repositories. No presentation ViewModel injects a DAO or `RepositoryImpl` anymore. |
 | Theming (screens) | Raw `Color(0xFF…)` literals removed from ~20 feature screens into `NimazColors` tokens (exact hex; added `Success`/`Warning`/`Info`/etc. and `HadithCollectionColors`). Only bespoke design-token files remain (`tasbih/BeadDesign.kt`, `TasbihBeads.kt`, `onboarding/OnboardingArt.kt`). |
+| Colour system (two-tier + centralised art) | Split colour into **Tier 1 `Palette.kt` (`NimazPalette`)** — the brand/semantic hue ramps (`Family+shade`) — and **Tier 2 `Color.kt` (`NimazColors`)** — semantic tokens that *reference* the palette. Removed 11 dead props (6 prayer `*GradientEnd`, `SajdaAyah`, `BookmarkSecondary`, `Voluntary`, `Late`, `Counter`); collapsed ~20 duplicate-hex groups to one palette entry each; migrated ~29 duplicate inline literals to pixel-exact tokens. Then **centralised ALL remaining art literals** out of component/screen files into the `theme/` package: `SkyColors.kt` (sky scene), `BeadColors.kt` (tasbih beads), `GlassColors.kt` (glass auroras), and `ArtColors.kt` (card/compass/names/onboarding/misc). **Zero static `Color(0xFF…)` literals remain outside `theme/`** (grep-verified; only computed-ARGB `Color(0x… or rgbLong)` forms remain). **No pixel changed** — structure/naming/dedup only; hues preserved verbatim. |
 | Preferences abstraction | ViewModels no longer inject the `PreferencesDataStore` data class — they depend on the `domain/repository/SettingsRepository` interface (implemented by `PreferencesDataStore`, bound via `@Binds`). `UserPreferences` moved to `domain/model`. |
 
 ### Open (still to do — do not copy)

@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.color
 import kotlin.math.cos
@@ -645,7 +646,7 @@ private fun PrayerStatsChartDonutPreview() {
                 ChartStatItem("30", "Missed", NimazColors.StatusColors.Missed),
                 ChartStatItem("15", "Perfect\nDays", NimazColors.PrayerColors.Maghrib),
                 ChartStatItem("7", "Current\nStreak", NimazColors.StatusColors.Prayed),
-                ChartStatItem("21", "Longest\nStreak", Color(0xFF6366F1))
+                ChartStatItem("21", "Longest\nStreak", NimazPalette.Indigo500)
             ),
             modifier = Modifier.padding(16.dp)
         )

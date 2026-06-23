@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import com.arshadshah.nimaz.presentation.theme.HighlightArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -48,7 +50,7 @@ private const val HIGHLIGHT_TAG = "HIGHLIGHT"
 // Highlight backgrounds are light pastels, so highlighted text needs a dark
 // foreground to stay legible in both light and dark themes (the default
 // onSurface colour is near-white in dark mode and disappears on the pastel).
-private val HighlightedTextColor = Color(0xFF1C1C1C)
+private val HighlightedTextColor = NimazColors.OnSurfaceLight
 
 @Composable
 fun TafseerHighlightableText(
@@ -330,10 +332,10 @@ fun parseColor(hex: String): Color {
         when (cleanHex.length) {
             6 -> Color(0xFF000000 or colorLong)
             8 -> Color(colorLong)
-            else -> Color(0xFFFDE68A) // fallback yellow
+            else -> HighlightArtColors.FallbackYellow // fallback yellow
         }
     } catch (e: Exception) {
-        Color(0xFFFDE68A)
+        HighlightArtColors.FallbackYellow
     }
 }
 

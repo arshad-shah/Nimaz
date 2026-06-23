@@ -63,6 +63,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -137,7 +138,7 @@ internal fun AyahItem(
                         NimazIcon(
                             imageVector = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
                             contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread) else stringResource(R.string.cd_mark_as_read),
-                            tint = if (isKhatamRead) Color(0xFF22C55E) else MaterialTheme.colorScheme.onSurfaceVariant,
+                            tint = if (isKhatamRead) NimazColors.Success else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = NimazIconSize.MEDIUM
                         )
                     }
@@ -150,7 +151,7 @@ internal fun AyahItem(
                     contentDescription = stringResource(R.string.cd_favorite),
                     onClick = onFavoriteClick,
                     active = isFavorite,
-                    activeColor = Color(0xFFEF4444),
+                    activeColor = NimazPalette.Red500,
                 )
                 NimazPillActionButton(
                     icon = if (ayah.isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
@@ -282,13 +283,13 @@ internal fun AyahItem(
                 if (ayah.sajdaType != null) {
                     Surface(
                         shape = RoundedCornerShape(6.dp),
-                        color = Color(0xFFDC2626).copy(alpha = 0.15f)
+                        color = NimazPalette.Red600.copy(alpha = 0.15f)
                     ) {
                         Text(
                             text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(R.string.sajdah),
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFFDC2626),
+                            color = NimazPalette.Red600,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                         )
                     }

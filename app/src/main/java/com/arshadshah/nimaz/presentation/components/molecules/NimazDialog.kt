@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -426,7 +427,7 @@ private fun NimazDialog_PrayerAccent_Preview() {
         // Asr-orange accent — illustrates how the accentColor stripe can
         // carry semantic colour from elsewhere in the app (prayer colour,
         // category colour, etc.) into the dialog header.
-        val asrOrange = Color(0xFFF97316)
+        val asrOrange = NimazColors.PrayerColors.Asr
         NimazDialog(
             title = "Asr reminder set",
             subtitle = "Notifying 10 minutes before prayer time",

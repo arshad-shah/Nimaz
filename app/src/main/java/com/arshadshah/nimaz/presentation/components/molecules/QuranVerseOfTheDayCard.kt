@@ -88,7 +88,7 @@ internal fun VerseOfTheDayCard(
                     Text(
                         text = stringResource(R.string.quran_home_verse_of_the_day),
                         style = MaterialTheme.typography.labelSmall,
-                        color = Color(0xFF2DD4BF),
+                        color = NimazColors.Primary400,
                         letterSpacing = 1.5.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -108,7 +108,7 @@ internal fun VerseOfTheDayCard(
                     Text(
                         text = translation,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color(0xFFD4D4D4),
+                        color = NimazColors.Gray300,
                         maxLines = 5,
                         overflow = TextOverflow.Ellipsis
                     )

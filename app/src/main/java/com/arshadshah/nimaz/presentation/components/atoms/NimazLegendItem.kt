@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -49,6 +50,6 @@ fun NimazLegendItem(
 @Composable
 private fun NimazLegendItemPreview() {
     NimazTheme {
-        NimazLegendItem(color = Color(0xFF22C55E), label = "Fasted")
+        NimazLegendItem(color = NimazColors.Success, label = "Fasted")
     }
 }

@@ -26,7 +26,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,6 +36,7 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -145,8 +145,8 @@ internal fun KhatamProgressCard(
                             .background(
                                 brush = Brush.horizontalGradient(
                                     colors = listOf(
-                                        Color(0xFF14B8A6),
-                                        Color(0xFFEAB308)
+                                        NimazColors.Primary,
+                                        NimazColors.Gold500
                                     )
                                 )
                             )

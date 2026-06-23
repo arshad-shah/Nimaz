@@ -25,7 +25,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,6 +40,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -164,7 +164,7 @@ fun DuaOfTheMomentCard(
     }
 }
 
-private val DuaAccent = Color(0xFF14B8A6)
+private val DuaAccent = NimazColors.Primary
 
 /**
  * Picks a time-of-day icon for the dua's adhkar category (replacing the old

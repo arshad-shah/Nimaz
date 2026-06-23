@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.arshadshah.nimaz.presentation.theme.NamesArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
@@ -32,7 +33,7 @@ object NamesAccents {
     @Composable
     fun prophetNames(): NamesAccent = NamesAccent(
         rail = MaterialTheme.colorScheme.tertiary,
-        medallion = listOf(Color(0xFF9575FF), NimazColors.Tertiary),
+        medallion = listOf(NamesArtColors.MedallionGradientStart, NimazColors.Tertiary),
         onMedallion = Color.White,
         contentTint = MaterialTheme.colorScheme.tertiary,
         chipContainer = MaterialTheme.colorScheme.tertiaryContainer,
@@ -43,7 +44,7 @@ object NamesAccents {
     fun prophets(): NamesAccent = NamesAccent(
         rail = MaterialTheme.colorScheme.secondary,
         medallion = listOf(NimazColors.Gold400, NimazColors.Gold500),
-        onMedallion = Color(0xFF1C1917),
+        onMedallion = NimazColors.Neutral900,
         contentTint = MaterialTheme.colorScheme.secondary,
         chipContainer = MaterialTheme.colorScheme.secondaryContainer,
         onChipContainer = MaterialTheme.colorScheme.onSecondaryContainer,

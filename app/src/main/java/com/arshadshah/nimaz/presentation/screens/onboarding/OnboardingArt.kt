@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.OnboardingArtColors
 import kotlin.math.min
 
 /**
@@ -26,14 +28,14 @@ import kotlin.math.min
  * Material light/dark scheme): the intro should feel the same for everyone.
  */
 
-val IllumGold = Color(0xFFEAB308)
-val IllumGoldDeep = Color(0xFFB8860B)
-val IllumCream = Color(0xFFF5E6B8)
-val IllumTextSoft = Color(0xFFCFE3DF)
-private val IllumNiche = Color(0xFF0C2F2C)
-private val IllumTealTop = Color(0xFF14463F)
-private val IllumTealMid = Color(0xFF0A2A2A)
-private val IllumTealDeep = Color(0xFF061A1C)
+val IllumGold = NimazColors.Gold500
+val IllumGoldDeep = OnboardingArtColors.GoldDeep
+val IllumCream = OnboardingArtColors.Cream
+val IllumTextSoft = OnboardingArtColors.TextSoft
+private val IllumNiche = OnboardingArtColors.Niche
+private val IllumTealTop = OnboardingArtColors.TealTop
+private val IllumTealMid = NimazColors.OnboardingBgBottom
+private val IllumTealDeep = NimazColors.OnboardingBgTop
 
 /** The deep-teal field behind every onboarding page. */
 val illuminatedBackground: Brush = Brush.verticalGradient(

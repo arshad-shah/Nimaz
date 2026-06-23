@@ -25,6 +25,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.MiscArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -139,7 +140,7 @@ private fun NimazPageIndicatorShowcase() {
         NimazPageIndicator(
             pageCount = 4,
             currentPage = 1,
-            activeColor = Color(0xFFE0B057),
+            activeColor = MiscArtColors.PageIndicatorGold,
             inactiveColor = Color.White.copy(alpha = 0.28f),
         )
     }

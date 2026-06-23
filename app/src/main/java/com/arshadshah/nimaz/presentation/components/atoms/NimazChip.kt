@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -304,9 +305,9 @@ fun RevelationTypeChip(
     modifier: Modifier = Modifier
 ) {
     val (label, color) = if (isMeccan) {
-        stringResource(R.string.quran_meccan) to Color(0xFF795548)
+        stringResource(R.string.quran_meccan) to NimazColors.QuranColors.Meccan
     } else {
-        stringResource(R.string.quran_medinan) to Color(0xFF00796B)
+        stringResource(R.string.quran_medinan) to NimazColors.QuranColors.Medinan
     }
 
     FilterChip(

@@ -27,6 +27,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QiblaCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.theme.CompassArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.abs
 import kotlin.math.roundToInt
@@ -59,11 +61,11 @@ fun QiblaStatusCapsule(
     val containerModifier = when {
         isFacingQibla -> Modifier
             .clip(shape)
-            .background(Brush.horizontalGradient(listOf(Color(0xFF16A34A), QiblaGreen)))
+            .background(Brush.horizontalGradient(listOf(NimazPalette.Green600, QiblaGreen)))
 
         onCamera -> Modifier
             .clip(shape)
-            .background(Color(0xFF1A160B).copy(alpha = 0.82f))
+            .background(CompassArtColors.GoldCapsuleBackground.copy(alpha = 0.82f))
             .border(1.dp, QiblaGold.copy(alpha = 0.4f), shape)
 
         else -> Modifier

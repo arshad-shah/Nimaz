@@ -36,6 +36,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.theme.CompassArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import kotlin.math.cos
 import kotlin.math.sin
@@ -50,13 +53,13 @@ import kotlin.math.sin
  */
 
 /** Accent used for the Qibla arrow / highlights. */
-val QiblaGold = Color(0xFFEAB308)
+val QiblaGold = NimazColors.Gold500
 
 /** Accent used when the user is facing the Qibla. */
-val QiblaGreen = Color(0xFF22C55E)
+val QiblaGreen = NimazColors.Success
 
 /** Red used to mark North across the compass. */
-val CompassNorthColor = Color(0xFFEF4444)
+val CompassNorthColor = NimazPalette.Red500
 
 /**
  * Shared Kaaba glyph — a small isometric cube with the dark kiswah body and a
@@ -98,9 +101,9 @@ fun DrawScope.drawKaabaGlyph(
 
     val bandDark = lerp(color, Color.Black, 0.28f)
     // cube faces (constant dark kiswah)
-    drawPath(quad(p(20f, 18f), p(34f, 11f), p(52f, 16f), p(38f, 23f)), Color(0xFF23252B)) // top
-    drawPath(quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)), Color(0xFF101115)) // side
-    drawPath(quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)), Color(0xFF181A1F)) // front
+    drawPath(quad(p(20f, 18f), p(34f, 11f), p(52f, 16f), p(38f, 23f)), CompassArtColors.NeedleTop) // top
+    drawPath(quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)), CompassArtColors.NeedleSide) // side
+    drawPath(quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)), CompassArtColors.NeedleFront) // front
     // hizam band (front + side) + door, in the accent colour
     drawPath(
         quad(p(20f, 26f), p(38f, 31f), p(38f, 38f), p(20f, 33f)),

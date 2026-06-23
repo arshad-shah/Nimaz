@@ -80,7 +80,7 @@ internal fun ContinueReadingCard(
                 Text(
                     text = stringResource(R.string.quran_home_continue_reading),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFF2DD4BF),
+                    color = NimazColors.Primary400,
                     letterSpacing = 1.5.sp,
                     fontWeight = FontWeight.Medium
                 )
@@ -112,17 +112,17 @@ internal fun ContinueReadingCard(
                     Text(
                         text = stringResource(R.string.quran_home_verse_format, ayahNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                     Text(
                         text = stringResource(R.string.quran_home_juz_format, juzNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                     Text(
                         text = stringResource(R.string.quran_home_page_format, pageNumber),
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                 }
 
@@ -152,7 +152,7 @@ internal fun ContinueReadingCard(
                     Text(
                         text = "$progressPercent%",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFFD4D4D4)
+                        color = NimazColors.Gray300
                     )
                 }
             }

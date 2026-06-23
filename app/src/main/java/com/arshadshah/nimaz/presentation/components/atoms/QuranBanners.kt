@@ -27,47 +27,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
-internal fun JuzPageBanner(
-    title: String,
-    subtitle: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(15.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    NimazColors.QuranColors.BannerGradient
-                )
-            )
-            .border(1.dp, NimazColors.QuranColors.BannerBorder, RoundedCornerShape(20.dp))
-            .padding(25.dp)
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
-                color = NimazColors.QuranColors.BannerAccent
-            )
-            if (subtitle.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = NimazColors.QuranColors.BannerAccent.copy(alpha = 0.8f)
-                )
-            }
-        }
-    }
-}
-
-@Composable
 internal fun PageSurahSeparator(
     surahNumber: Int,
     surahNameArabic: String,
@@ -145,14 +104,6 @@ internal fun PageSurahSeparator(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Juz Page Banner")
-@Composable
-private fun JuzPageBannerPreview() {
-    NimazTheme {
-        JuzPageBanner(title = "Juz 1", subtitle = "Al-Fatihah - Al-Baqarah")
     }
 }
 

@@ -56,6 +56,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import java.time.LocalDate
 import java.time.YearMonth
@@ -549,9 +550,9 @@ private fun NimazCalendarDefaultPreview() {
 @Preview(showBackground = true, name = "NimazCalendar - Islamic Events")
 @Composable
 private fun NimazCalendarIslamicPreview() {
-    val eidColor = Color(0xFFEAB308)
-    val holyColor = Color(0xFF22C55E)
-    val fastColor = Color(0xFFA855F7)
+    val eidColor = NimazColors.Gold500
+    val holyColor = NimazColors.Success
+    val fastColor = NimazColors.Purple
 
     // Simulate some event days
     val eventDays = mapOf(
@@ -656,7 +657,7 @@ private fun NimazCalendarFastingTrackerPreview() {
                         CalendarDayState(
                             indicatorColor = when {
                                 day in fastedDays -> NimazColors.FastingColors.Fasted
-                                day in missedDays -> Color(0xFFEF4444)
+                                day in missedDays -> NimazPalette.Red500
                                 else -> null
                             },
                             backgroundColor = if (isRamadan)
@@ -673,7 +674,7 @@ private fun NimazCalendarFastingTrackerPreview() {
                 },
                 legendItems = listOf(
                     CalendarLegendItem(NimazColors.FastingColors.Fasted, "Fasted"),
-                    CalendarLegendItem(Color(0xFFEF4444), "Missed"),
+                    CalendarLegendItem(NimazPalette.Red500, "Missed"),
                     CalendarLegendItem(NimazColors.FastingColors.Ramadan, "Ramadan")
                 )
             )

@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 enum class NimazBannerVariant {
@@ -150,7 +151,7 @@ private fun WarningVariant(
     actionLabel: String? = null,
     onAction: (() -> Unit)? = null
 ) {
-    val warningColor = Color(0xFFF59E0B)
+    val warningColor = NimazColors.Warning
 
     BannerSurface(
         modifier = modifier,

@@ -35,6 +35,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -156,10 +158,10 @@ fun HadithOfTheDayCard(
 @Composable
 private fun GradeChip(grade: String) {
     val color = when (grade.trim().lowercase()) {
-        "sahih" -> Color(0xFF4CAF50)
-        "hasan" -> Color(0xFF8BC34A)
-        "da'if", "daif", "dai'f" -> Color(0xFFFF9800)
-        "mawdu", "mawdu'", "fabricated" -> Color(0xFFF44336)
+        "sahih" -> NimazPalette.MatGreen
+        "hasan" -> NimazPalette.LightGreen
+        "da'if", "daif", "dai'f" -> NimazPalette.MatOrange
+        "mawdu", "mawdu'", "fabricated" -> NimazPalette.MatRed
         else -> MaterialTheme.colorScheme.onSurfaceVariant
     }
     Text(
@@ -175,7 +177,7 @@ private fun GradeChip(grade: String) {
     )
 }
 
-private val HadithAccent = Color(0xFF3B82F6)
+private val HadithAccent = NimazColors.Info
 
 private const val SAMPLE_HADITH =
     "The Prophet (peace be upon him) said: \"The best of you are those who learn the Quran and teach it.\" — Sahih al-Bukhari"

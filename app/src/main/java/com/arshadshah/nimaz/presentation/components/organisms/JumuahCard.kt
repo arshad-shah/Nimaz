@@ -34,9 +34,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val JumuahGreen = Color(0xFF2E7D32)
+private val JumuahGreen = NimazPalette.GreenDeep
 
 /**
  * Friday-only highlight card for Jumu'ah, shown above the home "Today" section.

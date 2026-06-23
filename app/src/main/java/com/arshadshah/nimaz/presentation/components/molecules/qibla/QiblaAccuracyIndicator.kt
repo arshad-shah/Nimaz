@@ -39,6 +39,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
+import com.arshadshah.nimaz.presentation.theme.CompassArtColors
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /** Resolved presentation data for a [CompassAccuracy] level. */
@@ -54,7 +56,7 @@ private fun accuracyVisuals(accuracy: CompassAccuracy): AccuracyVisuals = when (
 
     CompassAccuracy.MEDIUM -> AccuracyVisuals(
         stringResource(R.string.accuracy_medium),
-        Color(0xFFFACC15),
+        NimazColors.Gold400,
         stringResource(R.string.accuracy_medium_hint)
     )
 
@@ -188,7 +190,7 @@ fun QiblaAccuracyPill(
     Row(
         modifier = modifier
             .clip(shape)
-            .background(Color(0xFF120F0A).copy(alpha = 0.78f))
+            .background(CompassArtColors.DialBackground.copy(alpha = 0.78f))
             .border(1.dp, Color.White.copy(alpha = 0.15f), shape)
             .padding(horizontal = 16.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically

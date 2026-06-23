@@ -74,6 +74,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -633,12 +634,12 @@ private fun SearchResultCard(
 
 private fun getSearchResultTypeColor(type: SearchResultType): Color {
     return when (type) {
-        SearchResultType.QURAN -> Color(0xFF795548)
-        SearchResultType.HADITH -> Color(0xFF00796B)
-        SearchResultType.DUA -> Color(0xFF7C4DFF)
-        SearchResultType.SURAH -> Color(0xFF795548)
-        SearchResultType.CHAPTER -> Color(0xFF00796B)
-        SearchResultType.CATEGORY -> Color(0xFF7C4DFF)
+        SearchResultType.QURAN -> NimazColors.QuranColors.Meccan
+        SearchResultType.HADITH -> NimazColors.QuranColors.Medinan
+        SearchResultType.DUA -> NimazColors.Tertiary
+        SearchResultType.SURAH -> NimazColors.QuranColors.Meccan
+        SearchResultType.CHAPTER -> NimazColors.QuranColors.Medinan
+        SearchResultType.CATEGORY -> NimazColors.Tertiary
     }
 }
 
