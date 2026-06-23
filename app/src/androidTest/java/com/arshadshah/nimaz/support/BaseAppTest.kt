@@ -9,8 +9,10 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
+import androidx.compose.ui.test.performSemanticsAction
 import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.test.core.app.ActivityScenario
 import com.arshadshah.nimaz.MainActivity
@@ -125,12 +127,24 @@ abstract class BaseAppTest {
         onTag(tag).assertExists()
     }
 
-    /** Scroll the list tagged [listTag] until a node with [text] is composed, then tap it. */
+    /**
+     * Scroll the list tagged [listTag] until a node with [text] is composed, then tap it.
+     *
+     * Clicks coordinate-free via the row's `OnClick` semantics action rather than
+     * injecting a touch: a list row scrolled just into view can sit at the viewport
+     * edge / under the gesture-nav inset, where a synthetic tap is rejected with
+     * "Failed to inject touch input". The menu/settings rows are Material3 `Card(onClick)`s,
+     * which expose `SemanticsActions.OnClick`.
+     */
     protected fun scrollListToAndTap(listTag: String, text: String) {
+        // Exact match (not substring): the row titles are full strings, and substring
+        // would make e.g. "Prayer Times" also match "Monthly Prayer Times".
         compose.onNodeWithTag(listTag)
-            .performScrollToNode(hasText(text, substring = true))
+            .performScrollToNode(hasText(text))
         compose.waitForIdle()
-        clickText(text)
+        compose.onNodeWithText(text, useUnmergedTree = false)
+            .performSemanticsAction(SemanticsActions.OnClick)
+        compose.waitForIdle()
     }
 
     /** Convenience: scroll-and-tap within the More menu's list. */
