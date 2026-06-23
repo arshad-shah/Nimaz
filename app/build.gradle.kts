@@ -53,6 +53,14 @@ android {
         }
     }
 
+    // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can
+    // load them on-device (it looks for `<DatabaseClass>/<version>.json` under assets).
+    sourceSets {
+        getByName("androidTest") {
+            assets.srcDir(layout.projectDirectory.dir("schemas"))
+        }
+    }
+
     signingConfigs {
         create("release") {
             storeFile = file(System.getenv("KEYSTORE_FILE") ?: "keystore.jks")
