@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.WbSunny
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -167,20 +166,20 @@ fun GlassPill(
             .padding(horizontal = hPad, vertical = vPad),
     ) {
         if (leadingIcon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = leadingIcon,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(iconSize),
+                iconSize = iconSize,
             )
         }
         Text(text = text, style = style, color = tint)
         if (trailingIcon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = trailingIcon,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(iconSize),
+                iconSize = iconSize,
             )
         }
     }
@@ -312,11 +311,11 @@ fun GlassIconButton(
             .size(target)
             .glassSurface(tone = tone, tint = tint, shape = CircleShape, backdrop = backdrop, blurRadius = blurRadius),
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(iconSize),
+            iconSize = iconSize,
         )
     }
 }

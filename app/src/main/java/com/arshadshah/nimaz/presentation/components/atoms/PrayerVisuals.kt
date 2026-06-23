@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,10 +94,10 @@ private fun PrayerVisualsShowcase() {
                         .clip(CircleShape)
                         .background(color)
                 )
-                Icon(
+                NimazIcon(
                     imageVector = getPrayerIcon(prayer),
                     contentDescription = prayer.displayName,
-                    modifier = Modifier.size(28.dp),
+                    iconSize = 28.dp,
                     tint = color
                 )
                 Text(

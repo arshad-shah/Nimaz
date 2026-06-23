@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -44,13 +42,12 @@ fun QaidaStarRow(
     ) {
         repeat(max) { i ->
             val isFilled = i < filled
-            Icon(
+            NimazIcon(
                 imageVector = if (isFilled) Icons.Filled.Star else Icons.Outlined.StarOutline,
                 contentDescription = null,
                 tint = if (isFilled) filledColor else emptyColor,
-                modifier = Modifier
-                    .size(starSize)
-                    .testTag("qaida_star"),
+                iconSize = starSize,
+                modifier = Modifier.testTag("qaida_star"),
             )
         }
     }

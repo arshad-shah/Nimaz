@@ -35,7 +35,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -61,6 +60,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.NisabType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -89,13 +90,13 @@ fun ZakatCalculatorScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(ZakatEvent.ClearAll) }) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Refresh,
                             contentDescription = stringResource(R.string.cd_reset)
                         )
                     }
                     IconButton(onClick = onNavigateToHistory) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.History,
                             contentDescription = stringResource(R.string.cd_history)
                         )
@@ -642,11 +643,11 @@ private fun InputCard(
                 modifier = Modifier.size(40.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
+                    NimazIcon(
                         imageVector = icon,
                         contentDescription = null,
                         tint = iconTint,
-                        modifier = Modifier.size(20.dp)
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }

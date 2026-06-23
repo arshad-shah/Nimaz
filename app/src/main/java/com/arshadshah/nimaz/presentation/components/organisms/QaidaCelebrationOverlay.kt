@@ -18,10 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,6 +38,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaCelebrationBurst
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaStarRow
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
@@ -147,7 +147,7 @@ fun QaidaCelebrationOverlay(
                                 horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
-                                Icon(
+                                NimazIcon(
                                     imageVector = Icons.Filled.LockOpen,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -171,14 +171,18 @@ fun QaidaCelebrationOverlay(
                             .padding(top = NimazSpacing.Small),
                         horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Medium),
                     ) {
-                        OutlinedButton(
+                        NimazButton(
+                            text = stringResource(R.string.qaida_map),
                             onClick = onMap,
                             modifier = Modifier.weight(1f),
-                        ) { Text(stringResource(R.string.qaida_map)) }
-                        Button(
+                            variant = NimazButtonVariant.OUTLINED,
+                        )
+                        NimazButton(
+                            text = stringResource(R.string.qaida_next_lesson),
                             onClick = onNext,
                             modifier = Modifier.weight(1f),
-                        ) { Text(stringResource(R.string.qaida_next_lesson)) }
+                            variant = NimazButtonVariant.FILLED,
+                        )
                     }
                 }
             }

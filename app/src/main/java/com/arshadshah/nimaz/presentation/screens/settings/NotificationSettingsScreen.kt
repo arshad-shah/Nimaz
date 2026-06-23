@@ -33,11 +33,12 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
@@ -66,6 +67,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.audio.DownloadState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -403,61 +406,40 @@ fun NotificationSettingsScreen(
                             modifier = Modifier.padding(16.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
-                            Button(
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_test),
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestNotification)
                                     Toast.makeText(context, testSentMsg, Toast.LENGTH_SHORT).show()
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.notification_settings_test))
-                            }
+                                variant = NimazButtonVariant.FILLED,
+                                leadingIcon = Icons.Default.Notifications,
+                                fullWidth = true
+                            )
 
-                            Button(
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_test_all),
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.TestAllNotifications)
                                     Toast.makeText(context, testAllSentMsg, Toast.LENGTH_SHORT)
                                         .show()
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondary
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Notifications,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.notification_settings_test_all))
-                            }
+                                variant = NimazButtonVariant.TONAL,
+                                leadingIcon = Icons.Default.Notifications,
+                                fullWidth = true
+                            )
 
-                            OutlinedButton(
+                            NimazButton(
+                                text = stringResource(R.string.notification_settings_reset),
                                 onClick = {
                                     viewModel.onEvent(SettingsEvent.ResetNotifications)
                                     Toast.makeText(context, resetSuccessMsg, Toast.LENGTH_SHORT)
                                         .show()
                                 },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Refresh,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(stringResource(R.string.notification_settings_reset))
-                            }
+                                variant = NimazButtonVariant.OUTLINED,
+                                leadingIcon = Icons.Default.Refresh,
+                                fullWidth = true
+                            )
                         }
                     }
                 }
@@ -497,11 +479,11 @@ fun NotificationSettingsScreen(
                                     )
                                 }
                                 if (isExempted) {
-                                    Icon(
+                                    NimazIcon(
                                         imageVector = Icons.Default.Check,
                                         contentDescription = stringResource(R.string.notification_settings_battery_exempted),
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
+                                        variant = NimazIconVariant.PRIMARY,
+                                        size = NimazIconSize.LARGE
                                     )
                                 }
                             }
@@ -513,21 +495,16 @@ fun NotificationSettingsScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(modifier = Modifier.height(12.dp))
-                                Button(
+                                NimazButton(
+                                    text = stringResource(R.string.notification_settings_disable_battery),
                                     onClick = {
                                         val intent =
                                             Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                                         context.startActivity(intent)
                                     },
-                                    modifier = Modifier.fillMaxWidth(),
-                                    shape = RoundedCornerShape(12.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = NimazColors.Warning,
-                                        contentColor = Color.White
-                                    )
-                                ) {
-                                    Text(stringResource(R.string.notification_settings_disable_battery))
-                                }
+                                    variant = NimazButtonVariant.FILLED,
+                                    fullWidth = true
+                                )
                             }
                         }
                     }
@@ -601,7 +578,7 @@ private fun PrayerNotificationRow(
                     MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f)
             )
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = if (prayer.isSoundOn) Icons.AutoMirrored.Filled.VolumeUp
                 else Icons.AutoMirrored.Filled.VolumeOff,
                 contentDescription = if (prayer.isSoundOn) stringResource(R.string.notification_settings_sound_on) else stringResource(
@@ -612,7 +589,7 @@ private fun PrayerNotificationRow(
                     prayer.isSoundOn -> MaterialTheme.colorScheme.primary
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                modifier = Modifier.size(18.dp)
+                iconSize = 18.dp
             )
         }
 
@@ -676,11 +653,11 @@ private fun AdhanOptionRow(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 if (isDownloaded) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = stringResource(R.string.notification_settings_downloaded),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(12.dp)
+                        variant = NimazIconVariant.PRIMARY,
+                        size = NimazIconSize.EXTRA_SMALL
                     )
                 }
             }
@@ -706,29 +683,29 @@ private fun AdhanOptionRow(
                 }
 
                 isPlaying -> {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Stop,
                         contentDescription = stringResource(R.string.notification_settings_stop),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp)
+                        variant = NimazIconVariant.PRIMARY,
+                        size = NimazIconSize.SMALL
                     )
                 }
 
                 !isDownloaded -> {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Download,
                         contentDescription = stringResource(R.string.notification_settings_download_play),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.SMALL
                     )
                 }
 
                 else -> {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.PlayArrow,
                         contentDescription = stringResource(R.string.notification_settings_preview),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(16.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.SMALL
                     )
                 }
             }

@@ -23,16 +23,11 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +41,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -133,11 +132,11 @@ fun NimazDialog(
                                 .background(resolvedAccent.copy(alpha = 0.15f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = titleIcon,
                                 contentDescription = null,
                                 tint = resolvedAccent,
-                                modifier = Modifier.size(22.dp)
+                                iconSize = 22.dp
                             )
                         }
                         Spacer(modifier = Modifier.width(14.dp))
@@ -161,10 +160,10 @@ fun NimazDialog(
 
                     if (showCloseButton) {
                         IconButton(onClick = onDismiss) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.cd_close),
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                variant = NimazIconVariant.MUTED
                             )
                         }
                     }
@@ -226,19 +225,21 @@ fun NimazDialog(
 // Use these in the [NimazDialog.actions] slot to keep button hierarchy
 // consistent across every dialog in the app.
 
-/** Neutral dismiss / cancel button. Always rendered as a TextButton. */
+/** Neutral dismiss / cancel button. Always rendered as a text-variant button. */
 @Composable
 fun NimazDialogCancelButton(
     text: String = "Cancel",
     onClick: () -> Unit,
 ) {
-    TextButton(onClick = onClick) {
-        Text(text, fontWeight = FontWeight.Medium)
-    }
+    NimazButton(
+        text = text,
+        onClick = onClick,
+        variant = NimazButtonVariant.TEXT
+    )
 }
 
 /**
- * Primary affirmative action. Uses [FilledTonalButton] so it reads as the
+ * Primary affirmative action. Uses the tonal variant so it reads as the
  * preferred action without dominating the dialog like a high-emphasis
  * filled button would.
  */
@@ -247,35 +248,27 @@ fun NimazDialogConfirmButton(
     text: String,
     onClick: () -> Unit,
 ) {
-    FilledTonalButton(
+    NimazButton(
+        text = text,
         onClick = onClick,
-        colors = ButtonDefaults.filledTonalButtonColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        )
-    ) {
-        Text(text, fontWeight = FontWeight.SemiBold)
-    }
+        variant = NimazButtonVariant.TONAL
+    )
 }
 
 /**
  * Destructive primary action (delete, reset, sign out). Filled with the
- * error container so the colour itself warns the user.
+ * error colour so the colour itself warns the user.
  */
 @Composable
 fun NimazDialogDestructiveButton(
     text: String,
     onClick: () -> Unit,
 ) {
-    Button(
+    NimazButton(
+        text = text,
         onClick = onClick,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.error,
-            contentColor = MaterialTheme.colorScheme.onError,
-        )
-    ) {
-        Text(text, fontWeight = FontWeight.SemiBold)
-    }
+        variant = NimazButtonVariant.DESTRUCTIVE
+    )
 }
 
 // ──── Convenience wrappers ───────────────────────────────────────────────────

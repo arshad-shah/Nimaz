@@ -2,17 +2,10 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -20,7 +13,9 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -43,25 +38,15 @@ fun QaidaPlayLineButton(
     enabled: Boolean = true,
     label: String = stringResource(R.string.qaida_play_line),
 ) {
-    FilledTonalButton(
+    NimazButton(
+        text = label,
         onClick = onClick,
-        enabled = enabled,
-        shape = RoundedCornerShape(percent = 50),
         modifier = modifier.semantics { contentDescription = label },
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-            )
-            Text(
-                text = label,
-                modifier = Modifier.padding(start = NimazSpacing.ExtraSmall),
-                style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
-            )
-        }
-    }
+        variant = NimazButtonVariant.TONAL,
+        type = NimazButtonType.PILL,
+        leadingIcon = Icons.Filled.PlayArrow,
+        enabled = enabled,
+    )
 }
 
 

@@ -24,12 +24,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NightsStay
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
@@ -63,7 +60,14 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
@@ -999,10 +1003,16 @@ private fun RecommendedFastCard(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(15.dp)
     ) {
-        IconBadge(
+        NimazIcon(
             imageVector = icon,
-            backgroundColor = iconBgColor,
-            iconColor = MaterialTheme.colorScheme.onSurfaceVariant
+            contentDescription = null,
+            type = NimazIconType.CONTAINED,
+            containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            containerColor = iconBgColor,
+            containerSize = 44.dp,
+            iconSize = 22.dp,
+            cornerRadius = 12.dp,
         )
 
         Column(modifier = Modifier.weight(1f)) {
@@ -1020,13 +1030,16 @@ private fun RecommendedFastCard(
         }
 
         if (isFasted) {
-            IconBadge(
+            NimazIcon(
                 imageVector = Icons.Default.Check,
-                backgroundColor = GreenAccent.copy(alpha = 0.2f),
-                iconColor = GreenAccent,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = GreenAccent,
+                containerColor = GreenAccent.copy(alpha = 0.2f),
                 containerSize = 28.dp,
                 iconSize = 16.dp,
-                cornerRadius = 14.dp
+                cornerRadius = 14.dp,
             )
         } else {
             Box(
@@ -1050,28 +1063,15 @@ private fun LogFastButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Button(
+    NimazButton(
+        text = stringResource(R.string.fasting_log_today),
         onClick = onClick,
-        modifier = modifier
-            .fillMaxWidth()
-            .height(52.dp),
-        shape = RoundedCornerShape(14.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        )
-    ) {
-        Icon(
-            imageVector = Icons.Default.Add,
-            contentDescription = null,
-            modifier = Modifier.size(20.dp)
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-        Text(
-            text = stringResource(R.string.fasting_log_today),
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.SemiBold
-        )
-    }
+        modifier = modifier,
+        variant = NimazButtonVariant.FILLED,
+        size = NimazButtonSize.LARGE,
+        leadingIcon = Icons.Default.Add,
+        fullWidth = true
+    )
 }
 
 // Makeup Fasts Content Components
@@ -1306,11 +1306,11 @@ private fun MakeupPendingFastCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(16.dp)
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.SMALL
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
@@ -1333,11 +1333,11 @@ private fun MakeupPendingFastCard(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                            variant = NimazIconVariant.PRIMARY,
+                            size = NimazIconSize.SMALL
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
@@ -1396,13 +1396,16 @@ private fun MakeupCompletedFastItem(
             horizontalArrangement = Arrangement.spacedBy(15.dp)
         ) {
             // Green check icon
-            IconBadge(
+            NimazIcon(
                 imageVector = Icons.Default.Check,
-                backgroundColor = GreenAccent.copy(alpha = 0.2f),
-                iconColor = GreenAccent,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = GreenAccent,
+                containerColor = GreenAccent.copy(alpha = 0.2f),
                 containerSize = 32.dp,
                 iconSize = 18.dp,
-                cornerRadius = 10.dp
+                cornerRadius = 10.dp,
             )
 
             Column(modifier = Modifier.weight(1f)) {

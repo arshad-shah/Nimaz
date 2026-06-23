@@ -13,7 +13,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -232,7 +232,7 @@ fun NavGraph(
 
                 item(
                     modifier = Modifier.testTag(ScreenTags.bottomNav(navItem.label)),
-                    icon = { Icon(navItem.icon, contentDescription = navItem.label) },
+                    icon = { NimazIcon(navItem.icon, contentDescription = navItem.label) },
                     label = { Text(navItem.label) },
                     selected = selected,
                     onClick = {

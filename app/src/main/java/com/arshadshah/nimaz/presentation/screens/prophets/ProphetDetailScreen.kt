@@ -23,7 +23,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -42,6 +41,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
 import com.arshadshah.nimaz.presentation.components.molecules.NameDetailHeader
@@ -277,12 +277,11 @@ private fun BulletListCard(
                     verticalAlignment = Alignment.Top,
                     horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Filled.Circle,
                         contentDescription = null,
-                        modifier = Modifier
-                            .size(8.dp)
-                            .padding(top = 6.dp),
+                        modifier = Modifier.padding(top = 6.dp),
+                        iconSize = 8.dp,
                         tint = accent.contentTint
                     )
                     Text(

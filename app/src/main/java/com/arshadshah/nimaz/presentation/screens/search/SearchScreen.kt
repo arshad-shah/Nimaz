@@ -29,7 +29,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -57,6 +56,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -159,10 +161,10 @@ fun SearchScreen(
                         IconButton(
                             onClick = { viewModel.onEvent(SearchEvent.ClearRecentSearches) }
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Close,
                                 contentDescription = stringResource(R.string.clear_recent),
-                                modifier = Modifier.size(20.dp)
+                                size = NimazIconSize.MEDIUM
                             )
                         }
                     }
@@ -280,11 +282,11 @@ private fun RecentSearchItem(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.History,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(20.dp)
+                variant = NimazIconVariant.MUTED,
+                size = NimazIconSize.MEDIUM
             )
             Spacer(modifier = Modifier.width(12.dp))
             Text(
@@ -296,10 +298,10 @@ private fun RecentSearchItem(
                 onClick = onRemove,
                 modifier = Modifier.size(24.dp)
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.remove),
-                    modifier = Modifier.size(16.dp)
+                    size = NimazIconSize.SMALL
                 )
             }
         }
@@ -464,11 +466,11 @@ private fun SearchResultCard(
                 .padding(12.dp),
             verticalAlignment = Alignment.Top
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconColor,
-                modifier = Modifier.size(24.dp)
+                size = NimazIconSize.LARGE
             )
 
             Spacer(modifier = Modifier.width(12.dp))

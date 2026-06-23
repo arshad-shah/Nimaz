@@ -13,7 +13,6 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -29,6 +28,8 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -105,13 +106,13 @@ internal fun MushafPageBar(
                     enabled = !allPageRead,
                     modifier = Modifier.size(40.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (allPageRead) Icons.Filled.CheckCircle
                         else Icons.Outlined.RadioButtonUnchecked,
                         contentDescription = if (allPageRead) "Page read" else "Mark page as read",
                         tint = if (allPageRead) Color(0xFF22C55E)
                         else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(22.dp)
+                        iconSize = 22.dp
                     )
                 }
             }
@@ -151,12 +152,12 @@ private fun PageNavChevron(
         modifier = Modifier.size(44.dp)
     ) {
         Box(contentAlignment = Alignment.Center) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = contentDescription,
                 tint = if (enabled) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.outlineVariant,
-                modifier = Modifier.size(24.dp)
+                size = NimazIconSize.LARGE
             )
         }
     }

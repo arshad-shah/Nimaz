@@ -39,7 +39,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.organisms.ChartStatItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerChartType
@@ -292,13 +294,16 @@ private fun InsightCard(
             modifier = Modifier.padding(15.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            IconBadge(
+            NimazIcon(
                 imageVector = icon,
-                backgroundColor = iconBackgroundColor,
-                iconColor = iconTint,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = iconTint,
+                containerColor = iconBackgroundColor,
                 containerSize = 40.dp,
                 iconSize = 20.dp,
-                cornerRadius = 10.dp
+                cornerRadius = 10.dp,
             )
             Column(modifier = Modifier.weight(1f)) {
                 Text(

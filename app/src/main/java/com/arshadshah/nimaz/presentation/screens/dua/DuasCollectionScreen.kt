@@ -61,7 +61,6 @@ import androidx.compose.material.icons.filled.WbTwilight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -86,6 +85,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.DuaCategory
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
@@ -118,7 +120,7 @@ fun DuasCollectionScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = { viewModel.onEvent(DuaEvent.ToggleCategoriesSort) }) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.SortByAlpha,
                             contentDescription = stringResource(
                                 if (state.sortAlphabetical) R.string.sort_categories_default
@@ -132,13 +134,13 @@ fun DuasCollectionScreen(
                         )
                     }
                     IconButton(onClick = onNavigateToSearch) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Search,
                             contentDescription = stringResource(R.string.search_title)
                         )
                     }
                     IconButton(onClick = onNavigateToBookmarks) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Bookmark,
                             contentDescription = stringResource(R.string.bookmarks)
                         )
@@ -306,11 +308,11 @@ private fun CategoryGridCard(
                     .background(iconColor.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = getCategoryIcon(category.iconName),
                     contentDescription = null,
                     tint = iconColor,
-                    modifier = Modifier.size(24.dp)
+                    size = NimazIconSize.LARGE
                 )
             }
 
@@ -363,11 +365,11 @@ private fun AdhkarListItem(
                     .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = getCategoryIcon(category.iconName),
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(22.dp)
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 22.dp
                 )
             }
 

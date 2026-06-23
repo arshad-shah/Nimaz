@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -41,6 +40,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val SurahNumberSlotWidth = 40.dp
@@ -109,11 +110,11 @@ internal fun SurahListItem(
                     contentAlignment = Alignment.Center
                 ) {
                     if (isComplete) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Filled.CheckCircle,
                             contentDescription = stringResource(R.string.quran_home_completed),
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(36.dp)
+                            variant = NimazIconVariant.PRIMARY,
+                            iconSize = 36.dp
                         )
                     } else {
                         Box(
@@ -161,11 +162,11 @@ internal fun SurahListItem(
                         onClick = onInfoClick,
                         modifier = Modifier.size(36.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Info,
                             contentDescription = stringResource(R.string.quran_home_surah_info),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
+                            variant = NimazIconVariant.MUTED,
+                            iconSize = 18.dp
                         )
                     }
                 }

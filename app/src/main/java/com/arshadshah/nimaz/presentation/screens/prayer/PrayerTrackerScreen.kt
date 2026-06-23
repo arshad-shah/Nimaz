@@ -16,8 +16,10 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,7 +32,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -90,7 +91,7 @@ fun PrayerTrackerScreen(
     viewModel: PrayerTrackerViewModel = hiltViewModel()
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
-    val pagerState = rememberPagerState(initialPage = initialTab) { 2 }
+    val pagerState = rememberNimazPagerState(initialPage = initialTab) { 2 }
     val coroutineScope = rememberCoroutineScope()
 
     val tabs = listOf(
@@ -107,7 +108,7 @@ fun PrayerTrackerScreen(
                 scrollBehavior = scrollBehavior,
                 actions = {
                     IconButton(onClick = onNavigateToStats) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.BarChart,
                             contentDescription = stringResource(R.string.view_statistics)
                         )
@@ -135,10 +136,10 @@ fun PrayerTrackerScreen(
                         },
                         text = { Text(title) },
                         icon = {
-                            Icon(
+                            NimazIcon(
                                 imageVector = icon,
                                 contentDescription = title,
-                                modifier = Modifier.size(18.dp)
+                                iconSize = 18.dp
                             )
                         }
                     )
@@ -146,7 +147,7 @@ fun PrayerTrackerScreen(
             }
 
             // Pager Content
-            HorizontalPager(
+            NimazPager(
                 state = pagerState,
                 modifier = Modifier.fillMaxSize()
             ) { page ->
@@ -306,11 +307,11 @@ private fun QadaSummaryCard(totalMissed: Int) {
                     .background(Color.Black.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Warning,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(28.dp)
+                    iconSize = 28.dp
                 )
             }
 
@@ -381,11 +382,11 @@ private fun StreakCard(currentStreak: Int) {
                             .background(Color.Black.copy(alpha = 0.15f)),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.LocalFireDepartment,
                             contentDescription = null,
                             tint = NimazColors.Neutral900,
-                            modifier = Modifier.size(24.dp)
+                            size = NimazIconSize.LARGE
                         )
                     }
                     Text(
@@ -614,11 +615,11 @@ private fun PrayerCheckItem(
                 contentAlignment = Alignment.Center
             ) {
                 if (isCompleted) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(14.dp)
+                        iconSize = 14.dp
                     )
                 }
             }

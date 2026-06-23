@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -77,11 +76,11 @@ fun NimazPillActionButton(
         onClick = onClick,
         modifier = modifier.size(48.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = contentDescription,
             tint = tint,
-            modifier = Modifier.size(22.dp)
+            iconSize = 22.dp
         )
     }
 }

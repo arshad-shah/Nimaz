@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Book
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,7 +31,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -69,12 +70,16 @@ fun HadithOfTheDayCard(
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 4.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconBadge(
+                NimazIcon(
                     imageVector = Icons.Default.Book,
-                    backgroundColor = HadithAccent.copy(alpha = 0.2f),
-                    iconColor = HadithAccent,
+                    contentDescription = null,
+                    type = NimazIconType.CONTAINED,
+                    containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                    tint = HadithAccent,
+                    containerColor = HadithAccent.copy(alpha = 0.2f),
                     containerSize = 32.dp,
                     iconSize = 18.dp,
+                    cornerRadius = 12.dp,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
@@ -95,13 +100,13 @@ fun HadithOfTheDayCard(
                         fontWeight = FontWeight.SemiBold,
                         color = HadithAccent
                     )
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                         contentDescription = null,
                         tint = HadithAccent,
+                        iconSize = 14.dp,
                         modifier = Modifier
                             .padding(start = 2.dp)
-                            .size(14.dp)
                     )
                 }
             }

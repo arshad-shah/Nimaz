@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.EditNote
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -67,6 +66,10 @@ import com.arshadshah.nimaz.domain.model.TafseerSource
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -423,21 +426,21 @@ private fun HighlightColorRail(
                         .clickable { onColorSelected(hex) }
                 ) {
                     if (isSelected) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.cd_item_selected, name),
                             tint = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(18.dp)
+                            iconSize = 18.dp
                         )
                     }
                 }
             }
             Spacer(modifier = Modifier.weight(1f))
             IconButton(onClick = onDone) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_disable_highlighting),
-                    tint = MaterialTheme.colorScheme.primary
+                    variant = NimazIconVariant.PRIMARY
                 )
             }
         }
@@ -521,26 +524,24 @@ private fun HighlightDetailSheetContent(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            TextButton(onClick = onDelete) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
-            }
+            NimazButton(
+                text = stringResource(R.string.delete),
+                onClick = onDelete,
+                variant = NimazButtonVariant.DESTRUCTIVE,
+                leadingIcon = Icons.Default.Delete
+            )
 
             Row {
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.cancel))
-                }
-                TextButton(
-                    onClick = { onNoteSaved(noteText) }
-                ) {
-                    Text(stringResource(R.string.save))
-                }
+                NimazButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = onDismiss,
+                    variant = NimazButtonVariant.TEXT
+                )
+                NimazButton(
+                    text = stringResource(R.string.save),
+                    onClick = { onNoteSaved(noteText) },
+                    variant = NimazButtonVariant.TEXT
+                )
             }
         }
     }
@@ -662,9 +663,11 @@ private fun TafseerEmptyState(
             textAlign = TextAlign.Center
         )
         if (alternate != null) {
-            TextButton(onClick = { onSourceSwitch(alternate) }) {
-                Text(stringResource(R.string.tafseer_read_in_format, alternate.displayName))
-            }
+            NimazButton(
+                text = stringResource(R.string.tafseer_read_in_format, alternate.displayName),
+                onClick = { onSourceSwitch(alternate) },
+                variant = NimazButtonVariant.TEXT
+            )
         }
     }
 }

@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,7 +68,7 @@ fun QaidaMedallion(
         contentAlignment = Alignment.Center,
     ) {
         if (state == QaidaMedallionState.LOCKED) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.Lock,
                 contentDescription = null,
                 tint = content,

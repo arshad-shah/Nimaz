@@ -18,11 +18,9 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -186,18 +184,15 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = destructiveColors(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error,
+                contentColor = MaterialTheme.colorScheme.onError
+            ),
             contentPadding = contentPadding,
             content = content
         )
     }
 }
-
-@Composable
-private fun destructiveColors(): ButtonColors = ButtonDefaults.buttonColors(
-    containerColor = MaterialTheme.colorScheme.error,
-    contentColor = MaterialTheme.colorScheme.onError
-)
 
 @Composable
 private fun outlinedBorder(enabled: Boolean): BorderStroke {
@@ -230,10 +225,10 @@ private fun RowScope.ButtonContent(
     }
 
     leadingIcon?.let {
-        Icon(
+        NimazIcon(
             imageVector = it,
             contentDescription = null,
-            modifier = Modifier.size(size.iconSize)
+            iconSize = size.iconSize
         )
         Spacer(Modifier.width(size.gap))
     }
@@ -245,10 +240,10 @@ private fun RowScope.ButtonContent(
     )
     trailingIcon?.let {
         Spacer(Modifier.width(size.gap))
-        Icon(
+        NimazIcon(
             imageVector = it,
             contentDescription = null,
-            modifier = Modifier.size(size.iconSize)
+            iconSize = size.iconSize
         )
     }
 }

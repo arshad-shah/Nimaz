@@ -29,7 +29,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -164,11 +166,11 @@ fun SelectReciterScreen(
                                 .background(MaterialTheme.colorScheme.surfaceVariant),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Mic,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(28.dp)
+                                variant = NimazIconVariant.PRIMARY,
+                                iconSize = 28.dp
                             )
                         }
 
@@ -268,12 +270,12 @@ fun SelectReciterScreen(
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = if (isSelected) Icons.Default.Check else Icons.Default.Mic,
                                 contentDescription = null,
                                 tint = if (isSelected) MaterialTheme.colorScheme.primary
                                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                                modifier = Modifier.size(24.dp)
+                                size = NimazIconSize.LARGE
                             )
                         }
 
@@ -347,18 +349,18 @@ fun SelectReciterScreen(
                                 }
 
                                 previewingReciterId == reciter.id && audioState.isPlaying -> {
-                                    Icon(
+                                    NimazIcon(
                                         imageVector = Icons.Default.Stop,
                                         contentDescription = stringResource(R.string.cd_stop_preview),
-                                        tint = MaterialTheme.colorScheme.primary
+                                        variant = NimazIconVariant.PRIMARY
                                     )
                                 }
 
                                 else -> {
-                                    Icon(
+                                    NimazIcon(
                                         imageVector = Icons.Default.PlayArrow,
                                         contentDescription = stringResource(R.string.cd_preview),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        variant = NimazIconVariant.MUTED
                                     )
                                 }
                             }

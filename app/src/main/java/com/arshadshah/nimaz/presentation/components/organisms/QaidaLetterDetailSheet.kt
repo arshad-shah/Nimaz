@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,6 +31,7 @@ import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.QAIDA_AUDIO_UI_ENABLED
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaLetterForms
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaMakhrajHelper
@@ -112,11 +112,11 @@ fun QaidaLetterDetailSheet(
                         .clickable { onPlay(letter) },
                     contentAlignment = Alignment.Center,
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Filled.PlayArrow,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSecondary,
-                        modifier = Modifier.size(28.dp),
+                        iconSize = 28.dp,
                     )
                 }
             }

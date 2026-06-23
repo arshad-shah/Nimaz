@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -58,6 +57,8 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import java.time.LocalDate
@@ -180,11 +181,11 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.Verified,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(13.dp)
+                variant = NimazIconVariant.PRIMARY,
+                iconSize = 13.dp
             )
             Text(
                 text = stringResource(
@@ -254,11 +255,11 @@ private fun QuickActionButton(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = fg,
-            modifier = Modifier.size(21.dp)
+            iconSize = 21.dp
         )
         Text(
             text = label,
@@ -393,11 +394,11 @@ private fun UpdateStatusItem(
                     is UpdateState.Error -> Icons.Default.ErrorOutline
                     else -> Icons.Default.Refresh
                 }
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
                     tint = if (actionable) MaterialTheme.colorScheme.onPrimary else accent,
-                    modifier = Modifier.size(18.dp)
+                    iconSize = 18.dp
                 )
             }
         }
@@ -417,12 +418,12 @@ private fun UpdateStatusItem(
             )
         }
         if (!busy) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = null,
                 tint = if (actionable) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(15.dp)
+                iconSize = 15.dp
             )
         }
     }
@@ -452,11 +453,11 @@ private fun LinkItem(
                     .background(MaterialTheme.colorScheme.surface),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    variant = NimazIconVariant.MUTED,
+                    iconSize = 18.dp
                 )
             }
             Spacer(modifier = Modifier.width(12.dp))
@@ -473,11 +474,11 @@ private fun LinkItem(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(
+            NimazIcon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowForwardIos,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                modifier = Modifier.size(15.dp)
+                iconSize = 15.dp
             )
         }
         if (showDivider) {
@@ -546,11 +547,11 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.size(17.dp)
+            iconSize = 17.dp
         )
     }
 }
@@ -617,13 +618,12 @@ private fun FooterSection(modifier: Modifier = Modifier) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
             )
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Favorite,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
-                modifier = Modifier
-                    .size(14.dp)
-                    .padding(horizontal = 2.dp)
+                iconSize = 14.dp,
+                modifier = Modifier.padding(horizontal = 2.dp)
             )
             Text(
                 text = stringResource(R.string.for_the_ummah),

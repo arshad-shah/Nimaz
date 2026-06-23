@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +32,9 @@ import com.arshadshah.nimaz.domain.model.QaidaCell
 import com.arshadshah.nimaz.domain.model.TokenType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HarakatArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -111,16 +113,16 @@ fun QaidaCellTile(
 
         // "Heard" check badge in the top-end corner (hidden while playing).
         if (isCompleted && !isPlaying) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Filled.CheckCircle,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
+                variant = NimazIconVariant.PRIMARY,
+                size = NimazIconSize.SMALL,
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(4.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.surface)
-                    .size(16.dp),
+                    .background(MaterialTheme.colorScheme.surface),
             )
         }
     }

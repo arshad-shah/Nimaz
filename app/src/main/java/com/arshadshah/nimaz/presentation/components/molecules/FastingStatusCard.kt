@@ -15,7 +15,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LightMode
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +26,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -132,11 +133,11 @@ private fun FastingStateBadge(fastingToday: Boolean) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (fastingToday) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Check,
                 contentDescription = null,
                 tint = fg,
-                modifier = Modifier.size(14.dp)
+                iconSize = 14.dp
             )
             Spacer(modifier = Modifier.width(5.dp))
         }
@@ -153,10 +154,16 @@ private fun FastingStateBadge(fastingToday: Boolean) {
 
 @Composable
 private fun FastingIconChip() {
-    IconBadge(
+    NimazIcon(
         imageVector = Icons.Default.LightMode,
-        backgroundColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-        iconColor = MaterialTheme.colorScheme.secondary,
+        contentDescription = null,
+        type = NimazIconType.CONTAINED,
+        containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+        tint = MaterialTheme.colorScheme.secondary,
+        containerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
+        containerSize = 44.dp,
+        iconSize = 22.dp,
+        cornerRadius = 12.dp,
     )
 }
 

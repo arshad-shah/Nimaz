@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Bedtime
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material.icons.filled.WbTwilight
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,7 +35,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -72,12 +73,16 @@ fun DuaOfTheMomentCard(
                 .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconBadge(
+                NimazIcon(
                     imageVector = iconForCategory(categoryLabel),
-                    backgroundColor = DuaAccent.copy(alpha = 0.2f),
-                    iconColor = DuaAccent,
+                    contentDescription = null,
+                    type = NimazIconType.CONTAINED,
+                    containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                    tint = DuaAccent,
+                    containerColor = DuaAccent.copy(alpha = 0.2f),
                     containerSize = 32.dp,
                     iconSize = 18.dp,
+                    cornerRadius = 12.dp,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Column(modifier = Modifier.weight(1f)) {

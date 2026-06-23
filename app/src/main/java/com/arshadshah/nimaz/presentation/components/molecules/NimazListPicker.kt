@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,6 +44,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -254,11 +256,11 @@ private fun <T> PickerRow(
                         .background(tint.copy(alpha = 0.15f)),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = item.icon,
                         contentDescription = null,
                         tint = tint,
-                        modifier = Modifier.size(20.dp)
+                        size = NimazIconSize.MEDIUM
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
@@ -298,11 +300,11 @@ private fun <T> PickerRow(
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(14.dp)
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 14.dp
                     )
                 }
             }
@@ -337,11 +339,11 @@ private fun EmptyState(text: String, modifier: Modifier = Modifier) {
                 .background(MaterialTheme.colorScheme.surfaceContainerHighest),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Search,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(28.dp)
+                variant = NimazIconVariant.MUTED,
+                iconSize = 28.dp
             )
         }
         Spacer(modifier = Modifier.height(12.dp))

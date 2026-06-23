@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -44,6 +43,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.screens.tasbih.BeadDesigns
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -247,7 +247,7 @@ fun CurrentTasbihSheet(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.CompareArrows,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
@@ -288,7 +288,7 @@ private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             IconButton(onClick = { onChange((target - 1).coerceAtLeast(1)) }) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Remove,
                     contentDescription = stringResource(R.string.tasbih_decrease_target)
                 )
@@ -300,7 +300,7 @@ private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
                 color = MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = { onChange((target + 1).coerceAtMost(9999)) }) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.tasbih_increase_target)
                 )

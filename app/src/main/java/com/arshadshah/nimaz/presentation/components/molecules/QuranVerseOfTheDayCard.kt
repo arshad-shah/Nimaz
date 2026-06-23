@@ -16,7 +16,6 @@ import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,6 +32,8 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -77,11 +78,11 @@ internal fun VerseOfTheDayCard(
                     .padding(20.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.AutoStories,
                         contentDescription = null,
                         tint = NimazColors.QuranColors.BannerAccent,
-                        modifier = Modifier.size(16.dp)
+                        size = NimazIconSize.SMALL
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(

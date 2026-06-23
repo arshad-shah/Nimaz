@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -32,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.color
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -111,11 +112,11 @@ fun NimazQadaPrayerItem(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Check,
                         contentDescription = null,
                         tint = NimazColors.StatusColors.Prayed,
-                        modifier = Modifier.size(16.dp)
+                        size = NimazIconSize.SMALL
                     )
                     Text(
                         text = actionText,

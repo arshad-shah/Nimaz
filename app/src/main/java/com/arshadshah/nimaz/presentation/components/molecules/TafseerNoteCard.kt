@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -24,6 +23,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TafseerNote
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import java.text.SimpleDateFormat
@@ -61,22 +62,22 @@ fun TafseerNoteCard(
                         onClick = { onEdit(note) },
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(R.string.cd_edit),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(18.dp)
+                            variant = NimazIconVariant.MUTED,
+                            iconSize = 18.dp
                         )
                     }
                     IconButton(
                         onClick = { onDelete(note.id) },
                         modifier = Modifier.size(32.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Delete,
                             contentDescription = stringResource(R.string.cd_delete),
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(18.dp)
+                            variant = NimazIconVariant.ERROR,
+                            iconSize = 18.dp
                         )
                     }
                 }

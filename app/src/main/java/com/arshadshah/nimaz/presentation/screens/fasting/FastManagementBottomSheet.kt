@@ -18,7 +18,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -44,6 +43,9 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
@@ -91,32 +93,23 @@ fun FastManagementBottomSheet(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 if (existingRecord != null) {
-                    OutlinedButton(
+                    NimazButton(
+                        text = stringResource(R.string.fasting_sheet_delete),
                         onClick = onDelete,
-                        shape = RoundedCornerShape(100.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        ),
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(4.dp))
-                        Text(stringResource(R.string.fasting_sheet_delete))
-                    }
+                        modifier = Modifier.weight(1f),
+                        variant = NimazButtonVariant.DESTRUCTIVE,
+                        type = NimazButtonType.PILL,
+                        leadingIcon = Icons.Default.Delete
+                    )
                 }
-                FilledTonalButton(
+                NimazButton(
+                    text = stringResource(R.string.fasting_sheet_save),
                     onClick = { onSave(selectedStatus, selectedFastType, selectedExemptionReason, note) },
-                    shape = RoundedCornerShape(100.dp),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(Modifier.width(4.dp))
-                    Text(stringResource(R.string.fasting_sheet_save))
-                }
+                    modifier = Modifier.weight(1f),
+                    variant = NimazButtonVariant.TONAL,
+                    type = NimazButtonType.PILL,
+                    leadingIcon = Icons.Default.Save
+                )
             }
         }
     ) {
@@ -256,7 +249,8 @@ fun MakeupFastEditBottomSheet(
         title = stringResource(R.string.fasting_sheet_edit_makeup),
         subtitle = stringResource(R.string.fasting_originally, hijriDate),
         footer = {
-            FilledTonalButton(
+            NimazButton(
+                text = stringResource(R.string.fasting_sheet_save),
                 onClick = {
                     if (selectedStatus == MakeupFastStatus.FIDYA_PAID) {
                         val amount = fidyaAmount.toDoubleOrNull() ?: 0.0
@@ -274,17 +268,11 @@ fun MakeupFastEditBottomSheet(
                     }
                     onDismiss()
                 },
-                shape = RoundedCornerShape(100.dp),
-                colors = ButtonDefaults.filledTonalButtonColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(Icons.Default.Save, contentDescription = null, modifier = Modifier.size(18.dp))
-                Spacer(Modifier.width(4.dp))
-                Text(stringResource(R.string.fasting_sheet_save))
-            }
+                variant = NimazButtonVariant.TONAL,
+                type = NimazButtonType.PILL,
+                leadingIcon = Icons.Default.Save,
+                fullWidth = true
+            )
         }
     ) {
         Column(

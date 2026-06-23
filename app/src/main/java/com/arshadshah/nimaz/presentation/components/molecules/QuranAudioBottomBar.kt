@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -46,6 +45,9 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -107,11 +109,11 @@ internal fun AudioBottomBar(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Icon(
+                    NimazIcon(
                         imageVector = if (isPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
                         contentDescription = stringResource(if (isPlaying) R.string.cd_pause else R.string.cd_play),
-                        tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.size(26.dp)
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 26.dp
                     )
                 }
             }
@@ -183,11 +185,11 @@ internal fun AudioBottomBar(
 
             if (isAudioActive || isPreparing) {
                 IconButton(onClick = onStopClick, modifier = Modifier.size(40.dp)) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Close,
                         contentDescription = stringResource(R.string.cd_stop_audio),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }

@@ -18,8 +18,8 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -64,6 +63,8 @@ import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
@@ -89,7 +90,7 @@ fun DuaReaderScreen(
     val duas = state.duas
     val scope = rememberCoroutineScope()
 
-    val pagerState = rememberPagerState(
+    val pagerState = rememberNimazPagerState(
         initialPage = state.initialIndex.coerceAtLeast(0),
         pageCount = { duas.size }
     )
@@ -114,10 +115,10 @@ fun DuaReaderScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.dua_settings),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            variant = NimazIconVariant.MUTED
                         )
                     }
                 }
@@ -152,7 +153,7 @@ fun DuaReaderScreen(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        HorizontalPager(
+                        NimazPager(
                             state = pagerState,
                             modifier = Modifier
                                 .weight(1f)

@@ -1,15 +1,11 @@
 package com.arshadshah.nimaz.presentation.screens.onboarding
 
-import android.app.Activity
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 import android.Manifest
+import android.app.Activity
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.BorderStroke
@@ -26,8 +22,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -38,19 +32,16 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -59,17 +50,27 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingEvent
@@ -174,7 +175,7 @@ fun OnboardingScreen(
     )
 
     val totalPages = infoPages.size + 1 // +1 for permissions page
-    val pagerState = rememberPagerState(pageCount = { totalPages })
+    val pagerState = rememberNimazPagerState(pageCount = { totalPages })
 
     Scaffold(
         containerColor = NimazColors.OnboardingBgTop,
@@ -206,20 +207,19 @@ fun OnboardingScreen(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     if (pagerState.currentPage < totalPages - 1) {
-                        TextButton(onClick = {
-                            viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
-                            onComplete()
-                        }) {
-                            Text(
-                                stringResource(R.string.onboarding_skip),
-                                color = IllumTextSoft
-                            )
-                        }
+                        NimazButton(
+                            text = stringResource(R.string.onboarding_skip),
+                            onClick = {
+                                viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
+                                onComplete()
+                            },
+                            variant = NimazButtonVariant.DESTRUCTIVE
+                        )
                     }
                 }
 
                 // Pager
-                HorizontalPager(
+                NimazPager(
                     state = pagerState,
                     modifier = Modifier.weight(1f)
                 ) { page ->
@@ -264,30 +264,13 @@ fun OnboardingScreen(
                         .padding(horizontal = 24.dp, vertical = 16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    // Page Indicators
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        repeat(totalPages) { index ->
-                            val isSelected = index == pagerState.currentPage
-                            val scale by animateFloatAsState(
-                                targetValue = if (isSelected) 1f else 0.8f,
-                                label = "indicator_scale"
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .size(if (isSelected) 10.dp else 8.dp)
-                                    .scale(scale)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSelected) IllumGold
-                                        else Color.White.copy(alpha = 0.28f)
-                                    )
-                            )
-                        }
-                    }
+                    // Page Indicators — canonical pill indicator tinted to the
+                    // illuminated palette (gold active dot on the dark background).
+                    NimazPageIndicator(
+                        state = pagerState,
+                        activeColor = IllumGold,
+                        inactiveColor = Color.White.copy(alpha = 0.28f),
+                    )
 
                     Spacer(modifier = Modifier.height(16.dp))
 
@@ -301,26 +284,26 @@ fun OnboardingScreen(
                             enter = fadeIn(),
                             exit = fadeOut()
                         ) {
-                            OutlinedButton(
+                            NimazButton(
+                                text = stringResource(R.string.onboarding_back),
                                 onClick = {
                                     scope.launch {
                                         pagerState.animateScrollToPage(pagerState.currentPage - 1)
                                     }
                                 },
-                                border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.6f)),
-                                colors = ButtonDefaults.outlinedButtonColors(
-                                    contentColor = IllumGold
-                                )
-                            ) {
-                                Text(stringResource(R.string.onboarding_back))
-                            }
+                                variant = NimazButtonVariant.OUTLINED
+                            )
                         }
 
                         if (pagerState.currentPage == 0) {
                             Spacer(modifier = Modifier.width(1.dp))
                         }
 
-                        Button(
+                        NimazButton(
+                            text = if (pagerState.currentPage == totalPages - 1)
+                                stringResource(R.string.onboarding_get_started)
+                            else
+                                stringResource(R.string.onboarding_next),
                             onClick = {
                                 if (pagerState.currentPage == totalPages - 1) {
                                     viewModel.onEvent(OnboardingEvent.CompleteOnboarding)
@@ -331,26 +314,11 @@ fun OnboardingScreen(
                                     }
                                 }
                             },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = IllumGold,
-                                contentColor = NimazColors.OnboardingBgBottom
-                            )
-                        ) {
-                            Text(
-                                if (pagerState.currentPage == totalPages - 1)
-                                    stringResource(R.string.onboarding_get_started)
-                                else
-                                    stringResource(R.string.onboarding_next)
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Icon(
-                                imageVector = if (pagerState.currentPage == totalPages - 1)
-                                    Icons.Default.Check
-                                else Icons.AutoMirrored.Filled.ArrowForward,
-                                contentDescription = null,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
+                            variant = NimazButtonVariant.TONAL,
+                            trailingIcon = if (pagerState.currentPage == totalPages - 1)
+                                Icons.Default.Check
+                            else Icons.AutoMirrored.Filled.ArrowForward
+                        )
                     }
                 }
             }
@@ -539,17 +507,16 @@ private fun PermissionCard(
     modifier: Modifier = Modifier
 ) {
     val green = NimazColors.StatusColors.Active
-    Card(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isGranted) green.copy(alpha = 0.12f)
-            else Color.White.copy(alpha = 0.05f)
+
+    NimazCard(
+        style = NimazCardStyle.OUTLINED,
+        colors = CardColors(
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.onSurface,
+            disabledContainerColor = Color.Transparent,
+            disabledContentColor = MaterialTheme.colorScheme.onSurface
         ),
-        border = BorderStroke(
-            1.dp,
-            if (isGranted) green.copy(alpha = 0.45f) else IllumGold.copy(alpha = 0.22f)
-        )
+        border = BorderStroke(1.dp, if(isGranted) green else MaterialTheme.colorScheme.secondary)
     ) {
         Row(
             modifier = Modifier
@@ -568,11 +535,11 @@ private fun PermissionCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = if (isGranted) Icons.Default.Check else icon,
                     contentDescription = null,
                     tint = if (isGranted) green else IllumGold,
-                    modifier = Modifier.size(if (compact) 20.dp else 24.dp)
+                    iconSize = if (compact) 20.dp else 24.dp
                 )
             }
 
@@ -598,20 +565,12 @@ private fun PermissionCard(
             // Action
             if (!isGranted) {
                 Spacer(modifier = Modifier.width(8.dp))
-                Button(
+                NimazButton(
+                    text = stringResource(R.string.onboarding_grant),
                     onClick = onRequest,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = IllumGold,
-                        contentColor = NimazColors.OnboardingBgBottom
-                    ),
-                    modifier = Modifier.height(if (compact) 36.dp else 40.dp),
-                    contentPadding = ButtonDefaults.ContentPadding
-                ) {
-                    Text(
-                        text = stringResource(R.string.onboarding_grant),
-                        style = MaterialTheme.typography.labelMedium
-                    )
-                }
+                    variant = NimazButtonVariant.TONAL,
+                    size = NimazButtonSize.SMALL
+                )
             }
         }
     }

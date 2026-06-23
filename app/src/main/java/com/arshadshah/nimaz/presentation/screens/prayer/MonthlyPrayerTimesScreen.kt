@@ -34,7 +34,6 @@ import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +68,9 @@ import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -128,7 +130,7 @@ fun MonthlyPrayerTimesScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
-                        Icon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
+                        NimazIcon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
                     }
                 }
             )
@@ -286,7 +288,7 @@ private fun ExportOption(
                     .background(tint.copy(alpha = 0.18f)),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(20.dp))
+                NimazIcon(icon, contentDescription = null, tint = tint, size = NimazIconSize.MEDIUM)
             }
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -302,10 +304,10 @@ private fun ExportOption(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
-            Icon(
+            NimazIcon(
                 Icons.Default.ChevronRight,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                variant = NimazIconVariant.MUTED
             )
         }
     }
@@ -344,7 +346,7 @@ private fun MonthNavigationHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.ChevronLeft,
                         contentDescription = stringResource(R.string.cd_previous_month),
                         tint = MaterialTheme.colorScheme.onSurface
@@ -371,11 +373,11 @@ private fun MonthNavigationHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(top = 1.dp)
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.LocationOn,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(12.dp)
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.EXTRA_SMALL
                         )
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(
@@ -395,7 +397,7 @@ private fun MonthNavigationHeader(
                         .size(40.dp)
                         .clip(CircleShape)
                 ) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.ChevronRight,
                         contentDescription = stringResource(R.string.cd_next_month),
                         tint = MaterialTheme.colorScheme.onSurface
@@ -555,7 +557,7 @@ private fun DayMetaRow(
             }
         }
 
-        Icon(
+        NimazIcon(
             imageVector = Icons.Default.ExpandMore,
             contentDescription = if (isExpanded) "Collapse" else "Expand",
             tint = onColor.copy(alpha = 0.6f),

@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -57,6 +56,7 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
@@ -143,7 +143,7 @@ fun ChooseDhikrScreen(
                 title = { Text(stringResource(R.string.tasbih_choose_dhikr)) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.cd_back))
+                        NimazIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
                     }
                 }
             )
@@ -159,7 +159,7 @@ fun ChooseDhikrScreen(
                     .fillMaxWidth()
                     .padding(horizontal = 12.dp, vertical = 4.dp),
                 placeholder = { Text(stringResource(R.string.tasbih_search_dhikr)) },
-                leadingIcon = { Icon(Icons.Default.Search, null) },
+                leadingIcon = { NimazIcon(Icons.Default.Search, contentDescription = null) },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp)
             )
@@ -220,9 +220,9 @@ fun ChooseDhikrScreen(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
+                    NimazIcon(
                         Icons.Default.Add,
-                        null,
+                        contentDescription = null,
                         tint = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
@@ -285,7 +285,7 @@ private fun SwipeableDhikrRow(
                     .padding(horizontal = 20.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Delete,
                     contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onErrorContainer
@@ -317,7 +317,7 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
+            NimazIcon(
                 Icons.Default.Calculate,
                 contentDescription = null,
                 tint = NimazColors.TasbihColors.Milestone
@@ -407,12 +407,12 @@ private fun DhikrRow(
                 }
             }
             IconButton(onClick = onToggleFavorite, modifier = Modifier.size(36.dp)) {
-                Icon(
+                NimazIcon(
                     imageVector = if (isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
                     contentDescription = stringResource(R.string.add_to_favorites),
                     tint = if (isFavorite) NimazColors.TasbihColors.Milestone
                     else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp)
+                    iconSize = 18.dp
                 )
             }
             Box(

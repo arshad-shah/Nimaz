@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -71,6 +70,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
@@ -276,11 +278,11 @@ private fun TasbihTopBar(
         Spacer(Modifier.weight(1f))
         if (beadsMode) {
             IconButton(onClick = onOpenDesign) {
-                Icon(Icons.Default.Palette, stringResource(R.string.tasbih_bead_design))
+                NimazIcon(Icons.Default.Palette, contentDescription = stringResource(R.string.tasbih_bead_design))
             }
         }
         IconButton(onClick = onNavigateToHistory) {
-            Icon(Icons.Default.History, stringResource(R.string.history))
+            NimazIcon(Icons.Default.History, contentDescription = stringResource(R.string.history))
         }
     }
 }
@@ -431,10 +433,10 @@ private fun CurrentTasbihPeek(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.KeyboardArrowUp,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    variant = NimazIconVariant.MUTED
                 )
             }
         }
@@ -642,11 +644,11 @@ private fun ControlButtons(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onReset, modifier = Modifier.size(44.dp)) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Refresh,
-                    stringResource(R.string.reset_action),
+                    contentDescription = stringResource(R.string.reset_action),
                     tint = MaterialTheme.colorScheme.error.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
             VerticalDivider(
@@ -654,18 +656,18 @@ private fun ControlButtons(
                 color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
             )
             IconButton(onClick = onToggleSound, modifier = Modifier.size(44.dp)) {
-                Icon(
+                NimazIcon(
                     if (soundEnabled) Icons.AutoMirrored.Filled.VolumeUp else Icons.AutoMirrored.Filled.VolumeOff,
-                    stringResource(R.string.toggle_sound),
+                    contentDescription = stringResource(R.string.toggle_sound),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (soundEnabled) 0.9f else 0.35f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
             IconButton(onClick = onToggleVibration, modifier = Modifier.size(44.dp)) {
-                Icon(
-                    Icons.Default.PhoneAndroid, stringResource(R.string.toggle_vibration),
+                NimazIcon(
+                    Icons.Default.PhoneAndroid, contentDescription = stringResource(R.string.toggle_vibration),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.9f else 0.35f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }

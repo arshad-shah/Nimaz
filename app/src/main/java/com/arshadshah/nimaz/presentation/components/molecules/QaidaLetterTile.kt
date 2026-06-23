@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -25,6 +24,7 @@ import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -57,14 +57,14 @@ fun QaidaLetterTile(
                 color = MaterialTheme.colorScheme.onSurface,
             )
             if (heard) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
+                    iconSize = 14.dp,
                     modifier = Modifier
                         .align(Alignment.TopStart)
-                        .padding(6.dp)
-                        .size(14.dp),
+                        .padding(6.dp),
                 )
             }
         }

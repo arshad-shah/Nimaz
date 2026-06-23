@@ -36,7 +36,6 @@ import androidx.compose.material.icons.filled.Timeline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -63,6 +62,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -101,7 +103,7 @@ fun KhatamListScreen(
                 onClick = onNavigateToCreate,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(
+                NimazIcon(
                     Icons.Default.Add,
                     contentDescription = stringResource(R.string.khatam_start_new)
                 )
@@ -205,10 +207,10 @@ fun KhatamListScreen(
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.khatam_set_active)) },
                         leadingContent = {
-                            Icon(
+                            NimazIcon(
                                 Icons.Default.Star,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                variant = NimazIconVariant.PRIMARY
                             )
                         },
                         modifier = Modifier.clickable {
@@ -222,10 +224,10 @@ fun KhatamListScreen(
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.khatam_abandon)) },
                         leadingContent = {
-                            Icon(
+                            NimazIcon(
                                 Icons.Default.DoNotDisturb,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
+                                variant = NimazIconVariant.ERROR
                             )
                         },
                         modifier = Modifier.clickable {
@@ -239,10 +241,10 @@ fun KhatamListScreen(
                     ListItem(
                         headlineContent = { Text(stringResource(R.string.khatam_reactivate)) },
                         leadingContent = {
-                            Icon(
+                            NimazIcon(
                                 Icons.Default.Refresh,
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary
+                                variant = NimazIconVariant.PRIMARY
                             )
                         },
                         modifier = Modifier.clickable {
@@ -260,10 +262,10 @@ fun KhatamListScreen(
                         )
                     },
                     leadingContent = {
-                        Icon(
+                        NimazIcon(
                             Icons.Default.Delete,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error
+                            variant = NimazIconVariant.ERROR
                         )
                     },
                     modifier = Modifier.clickable {
@@ -445,11 +447,11 @@ private fun StatItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = tint,
-            modifier = Modifier.size(20.dp)
+            size = NimazIconSize.MEDIUM
         )
         Text(
             text = value,
@@ -501,11 +503,11 @@ private fun ActiveKhatamCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.Star,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                modifier = Modifier.size(14.dp)
+                iconSize = 14.dp
             )
             Text(
                 text = stringResource(R.string.khatam_active),
@@ -592,11 +594,11 @@ private fun ActiveKhatamPill(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        Icon(
+        NimazIcon(
             imageVector = icon,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            modifier = Modifier.size(14.dp)
+            iconSize = 14.dp
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
@@ -652,25 +654,25 @@ private fun KhatamCard(
                 contentAlignment = Alignment.Center
             ) {
                 when (khatam.status) {
-                    KhatamStatus.COMPLETED -> Icon(
+                    KhatamStatus.COMPLETED -> NimazIcon(
                         imageVector = Icons.Default.CheckCircle,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
+                        variant = NimazIconVariant.PRIMARY,
+                        size = NimazIconSize.LARGE
                     )
 
-                    KhatamStatus.ABANDONED -> Icon(
+                    KhatamStatus.ABANDONED -> NimazIcon(
                         imageVector = Icons.Default.DoNotDisturb,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(24.dp)
+                        variant = NimazIconVariant.ERROR,
+                        size = NimazIconSize.LARGE
                     )
 
-                    else -> Icon(
+                    else -> NimazIcon(
                         imageVector = Icons.AutoMirrored.Filled.MenuBook,
                         contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(24.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.LARGE
                     )
                 }
             }
@@ -745,11 +747,11 @@ private fun EmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(
+        NimazIcon(
             imageVector = Icons.AutoMirrored.Filled.MenuBook,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            modifier = Modifier.size(64.dp)
+            iconSize = 64.dp
         )
         Text(
             text = stringResource(R.string.khatam_no_started),

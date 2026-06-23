@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +38,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -130,12 +130,12 @@ fun <T> NimazDropdownField(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (selectedItem?.leadingIcon != null) {
-                    Icon(
+                    NimazIcon(
                         imageVector = selectedItem.leadingIcon,
                         contentDescription = null,
                         tint = if (expanded) MaterialTheme.colorScheme.onPrimaryContainer
                         else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        iconSize = 20.dp
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
@@ -152,7 +152,7 @@ fun <T> NimazDropdownField(
                     modifier = Modifier.weight(1f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.ArrowDropDown,
                     contentDescription = null,
                     tint = if (expanded) MaterialTheme.colorScheme.onPrimaryContainer

@@ -16,12 +16,9 @@ import androidx.compose.material.icons.filled.BatteryAlert
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -128,11 +125,11 @@ private fun InfoContent(
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         if (icon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                variant = NimazIconVariant.PRIMARY,
+                size = NimazIconSize.MEDIUM
             )
         }
         Text(
@@ -170,7 +167,7 @@ private fun WarningVariant(
             titleColor = MaterialTheme.colorScheme.onSurface,
             titleBottomSpacing = 4.dp,
             message = message,
-            accent = warningColor,
+            actionVariant = NimazButtonVariant.TONAL,
             actionLabel = actionLabel,
             onAction = onAction
         )
@@ -262,7 +259,7 @@ private fun ErrorVariant(
             titleColor = errorColor,
             titleBottomSpacing = 2.dp,
             message = message,
-            accent = errorColor,
+            actionVariant = NimazButtonVariant.DESTRUCTIVE,
             actionLabel = actionLabel,
             onAction = onAction
         )
@@ -324,7 +321,7 @@ private fun BannerContentRow(
     titleColor: Color,
     titleBottomSpacing: Dp,
     message: String,
-    accent: Color,
+    actionVariant: NimazButtonVariant,
     actionLabel: String?,
     onAction: (() -> Unit)?
 ) {
@@ -333,11 +330,11 @@ private fun BannerContentRow(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (icon != null) {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = iconTint,
-                modifier = Modifier.size(24.dp)
+                size = NimazIconSize.LARGE
             )
             Spacer(modifier = Modifier.width(iconSpacing))
         }
@@ -359,37 +356,14 @@ private fun BannerContentRow(
         }
 
         if (actionLabel != null && onAction != null) {
-            Spacer(modifier = Modifier.height(10.dp))
-            BannerActionButton(
-                label = actionLabel,
+            Spacer(modifier = Modifier.width(10.dp))
+            NimazButton(
+                text = actionLabel,
                 onClick = onAction,
-                containerColor = accent
+                variant = actionVariant,
+                size = NimazButtonSize.SMALL
             )
         }
-    }
-}
-
-/** Solid accent-coloured action button shared by the warning and error variants. */
-@Composable
-private fun BannerActionButton(
-    label: String,
-    onClick: () -> Unit,
-    containerColor: Color
-) {
-    Button(
-        onClick = onClick,
-        shape = RoundedCornerShape(10.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = containerColor,
-            contentColor = Color.White
-        ),
-        modifier = Modifier.height(36.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold
-        )
     }
 }
 

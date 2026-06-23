@@ -18,7 +18,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +30,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -94,14 +97,18 @@ fun PrayerTimeCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Prayer Icon
-                IconBadge(
+                NimazIcon(
                     imageVector = getPrayerIcon(prayer.type),
-                    backgroundColor = prayerColor.copy(
+                    contentDescription = null,
+                    type = NimazIconType.CONTAINED,
+                    containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                    tint = MaterialTheme.colorScheme.onSurface,
+                    containerColor = prayerColor.copy(
                         alpha = if (prayer.isPassed && !isActive) 0.12f else 0.2f
                     ),
-                    iconColor = MaterialTheme.colorScheme.onSurface,
                     containerSize = 44.dp,
                     iconSize = 26.dp,
+                    cornerRadius = 12.dp,
                 )
 
                 Spacer(modifier = Modifier.width(14.dp))
@@ -153,11 +160,11 @@ fun PrayerTimeCard(
                         contentAlignment = Alignment.Center
                     ) {
                         if (isPrayed) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = stringResource(R.string.prayed),
-                                tint = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.size(16.dp)
+                                variant = NimazIconVariant.ON_ACCENT,
+                                size = NimazIconSize.SMALL
                             )
                         }
                     }

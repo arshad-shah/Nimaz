@@ -38,7 +38,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -135,13 +137,16 @@ private fun QadaSummaryCard(totalMissed: Int) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            IconBadge(
+            NimazIcon(
                 imageVector = Icons.Default.Warning,
-                backgroundColor = Color.Black.copy(alpha = 0.15f),
-                iconColor = Color.White,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = Color.White,
+                containerColor = Color.Black.copy(alpha = 0.15f),
                 containerSize = 48.dp,
                 iconSize = 28.dp,
-                cornerRadius = 12.dp
+                cornerRadius = 12.dp,
             )
 
             Column(modifier = Modifier.weight(1f)) {

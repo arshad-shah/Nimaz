@@ -36,11 +36,12 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.ContainedIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -92,12 +93,14 @@ fun IslamicEventCard(
             verticalAlignment = Alignment.Top
         ) {
             // Event type icon
-            ContainedIcon(
+            NimazIcon(
                 imageVector = icon,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
                 size = NimazIconSize.LARGE,
                 containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                backgroundColor = color.copy(alpha = 0.15f),
-                iconColor = color
+                tint = color,
+                containerColor = color.copy(alpha = 0.15f)
             )
 
             Spacer(modifier = Modifier.width(16.dp))

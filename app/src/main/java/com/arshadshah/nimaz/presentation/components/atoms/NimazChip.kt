@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -17,7 +16,6 @@ import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
@@ -121,20 +119,20 @@ fun NimazFilterChip(
     val leadingIconContent: (@Composable () -> Unit)? = when {
         showSelectedIcon && selected -> {
             {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    size = NimazIconSize.SMALL
                 )
             }
         }
 
         leadingIcon != null -> {
             {
-                Icon(
+                NimazIcon(
                     imageVector = leadingIcon,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    size = NimazIconSize.SMALL
                 )
             }
         }
@@ -180,10 +178,10 @@ fun NimazAssistChip(
 ) {
     val leadingIconContent: (@Composable () -> Unit)? = leadingIcon?.let { icon ->
         {
-            Icon(
+            NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                size = NimazIconSize.SMALL
             )
         }
     }
@@ -232,20 +230,20 @@ fun NimazInputChip(
         enabled = enabled,
         leadingIcon = leadingIcon?.let { icon ->
             {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = null,
-                    modifier = Modifier.size(18.dp)
+                    size = NimazIconSize.SMALL
                 )
             }
         },
         avatar = avatar,
         trailingIcon = onDismiss?.let {
             {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Close,
                     contentDescription = stringResource(R.string.cd_dismiss),
-                    modifier = Modifier.size(18.dp)
+                    size = NimazIconSize.SMALL
                 )
             }
         },
@@ -268,10 +266,10 @@ fun NimazSuggestionChip(
 ) {
     val iconContent: (@Composable () -> Unit)? = icon?.let {
         {
-            Icon(
+            NimazIcon(
                 imageVector = it,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp)
+                size = NimazIconSize.SMALL
             )
         }
     }

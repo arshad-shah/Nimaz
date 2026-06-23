@@ -29,7 +29,9 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -254,11 +256,11 @@ private fun CurrentLocationCard(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.LocationOn,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.size(24.dp)
+                    size = NimazIconSize.LARGE
                 )
             }
 
@@ -351,11 +353,11 @@ private fun UseCurrentLocationButton(
                 strokeWidth = 2.dp
             )
         } else {
-            Icon(
+            NimazIcon(
                 imageVector = Icons.Default.MyLocation,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(20.dp)
+                variant = NimazIconVariant.PRIMARY,
+                size = NimazIconSize.MEDIUM
             )
         }
         Spacer(modifier = Modifier.width(10.dp))
@@ -399,12 +401,12 @@ private fun LocationListItem(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
+            NimazIcon(
                 imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
                 contentDescription = null,
                 tint = if (isSelected) MaterialTheme.colorScheme.primary
                 else MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp)
+                iconSize = 18.dp
             )
         }
 
@@ -440,11 +442,11 @@ private fun LocationListItem(
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Check,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimary,
-                    modifier = Modifier.size(14.dp)
+                    variant = NimazIconVariant.ON_ACCENT,
+                    iconSize = 14.dp
                 )
             }
         }

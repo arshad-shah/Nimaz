@@ -8,12 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -26,6 +23,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -87,11 +88,11 @@ fun QaidaCourseHeader(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Filled.Star,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(18.dp),
+                    iconSize = 18.dp,
                 )
                 Text(
                     text = " $totalStars",
@@ -103,25 +104,17 @@ fun QaidaCourseHeader(
         }
 
         if (continueLabel != null) {
-            Button(
+            NimazButton(
+                text = "Continue · $continueLabel",
                 onClick = onContinue,
                 modifier = Modifier
-                    .fillMaxWidth()
                     .padding(top = NimazSpacing.ExtraSmall)
                     .testTag("qaida_continue"),
-                shape = RoundedCornerShape(percent = 50),
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.PlayArrow,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = "  Continue · $continueLabel",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
+                variant = NimazButtonVariant.FILLED,
+                type = NimazButtonType.PILL,
+                leadingIcon = Icons.Filled.PlayArrow,
+                fullWidth = true,
+            )
         }
     }
 }

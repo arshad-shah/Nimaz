@@ -19,7 +19,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -44,6 +43,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -195,21 +198,14 @@ fun AddPresetScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Create button (completion green tint)
-            Button(
+            // Create button (primary CTA)
+            NimazButton(
+                text = stringResource(R.string.create_tasbih),
                 onClick = { submit() },
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(14.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = NimazColors.TasbihColors.Complete
-                )
-            ) {
-                Text(
-                    text = stringResource(R.string.create_tasbih),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-            }
+                variant = NimazButtonVariant.FILLED,
+                size = NimazButtonSize.LARGE,
+                fullWidth = true
+            )
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -251,7 +247,7 @@ private fun TargetCountStepper(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Remove,
                     contentDescription = stringResource(R.string.tasbih_decrease_target),
                     tint = MaterialTheme.colorScheme.onSurface
@@ -271,7 +267,7 @@ private fun TargetCountStepper(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(R.string.tasbih_increase_target),
                     tint = MaterialTheme.colorScheme.onSurface

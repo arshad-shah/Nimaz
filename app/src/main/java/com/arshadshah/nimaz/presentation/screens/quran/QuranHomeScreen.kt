@@ -37,7 +37,8 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -127,7 +128,7 @@ fun QuranHomeScreen(
                 actions = {
                     // Search icon
                     IconButton(onClick = onNavigateToSearch) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Search,
                             contentDescription = stringResource(R.string.quran_home_search)
                         )
@@ -146,14 +147,14 @@ fun QuranHomeScreen(
                                 }
                             }
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Bookmark,
                                 contentDescription = stringResource(R.string.quran_home_bookmarks)
                             )
                         }
                     }
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Settings,
                             contentDescription = stringResource(R.string.quran_home_quran_settings)
                         )
@@ -338,11 +339,11 @@ private fun HomeTabContent(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.PlayArrow,
                                 contentDescription = null,
                                 tint = NimazColors.Gold500,
-                                modifier = Modifier.size(48.dp)
+                                iconSize = 48.dp
                             )
                             Spacer(modifier = Modifier.height(12.dp))
                             Text(
@@ -540,10 +541,10 @@ private fun BrowseTabContent(
                             }
                         }
                     ) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
                             contentDescription = stringResource(R.string.quran_home_go_to_page),
-                            tint = MaterialTheme.colorScheme.primary
+                            variant = NimazIconVariant.PRIMARY
                         )
                     }
                 },
@@ -677,11 +678,11 @@ private fun FavoritesTabContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Favorite,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(48.dp)
+                            iconSize = 48.dp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(
@@ -733,11 +734,11 @@ private fun BookmarksTabContent(
                     contentAlignment = Alignment.Center
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
+                        NimazIcon(
                             imageVector = Icons.Default.Bookmark,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            modifier = Modifier.size(48.dp)
+                            iconSize = 48.dp
                         )
                         Spacer(modifier = Modifier.height(12.dp))
                         Text(

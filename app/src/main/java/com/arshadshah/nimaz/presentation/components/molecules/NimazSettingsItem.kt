@@ -14,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -27,7 +26,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.components.atoms.IconBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -68,11 +70,16 @@ fun NimazSettingsItem(
             val resolvedTint =
                 if (tintIcon) iconTint else MaterialTheme.colorScheme.onSurfaceVariant
 
-            IconBadge(
+            NimazIcon(
                 imageVector = icon,
-                backgroundColor = resolvedBackground,
-                iconColor = resolvedTint,
+                contentDescription = null,
+                type = NimazIconType.CONTAINED,
+                containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                tint = resolvedTint,
+                containerColor = resolvedBackground,
                 containerSize = 42.dp,
+                iconSize = 22.dp,
+                cornerRadius = 12.dp,
             )
             Spacer(modifier = Modifier.width(15.dp))
         }
@@ -104,11 +111,11 @@ fun NimazSettingsItem(
             }
 
             showArrow || (onClick != null && checked == null) -> {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    modifier = Modifier.size(20.dp)
+                    size = NimazIconSize.MEDIUM
                 )
             }
         }

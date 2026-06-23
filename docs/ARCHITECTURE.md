@@ -424,6 +424,20 @@ typed route object.
       those four params repeated;
     - a per-prayer accent colour is `prayerName.color()`
       (`presentation/theme/PrayerColorExtensions.kt`), not a local `when (prayerName) { … }`.
+    - a horizontal pager is `NimazPager(state = rememberNimazPagerState { count }) { page → … }`
+      (`components/atoms/NimazPager.kt`) — a thin wrapper over `HorizontalPager` that exposes the
+      reader knobs (`reverseLayout`, `beyondViewportPageCount`, `key`, `contentPadding`,
+      `pageSize`) as pass-throughs — **not** a raw `HorizontalPager`/`rememberPagerState`. The
+      caller still owns any page⇄ViewModel sync. Paired with it, page dots are the canonical pill
+      `NimazPageIndicator(state)` (`components/atoms/NimazPageIndicator.kt`); it is a *page*
+      indicator, **not** a progress tracker (for "N of M completed" use `QaidaLineProgressDots`).
+    - an icon is `NimazIcon(imageVector, variant = …, size = …)` (`components/atoms/NimazIcon.kt`),
+      **not** a raw Material 3 `Icon(...)`. `variant` is a semantic tint role
+      (`DEFAULT`=inherits `LocalContentColor`, `MUTED`, `PRIMARY`, `ON_ACCENT`, `ERROR`, `SUCCESS`);
+      pass `tint =` to escape it (brand `NimazColors.*` / per-prayer / runtime colours). `type =
+      CONTAINED` draws the glyph in a tinted container — the old `ContainedIcon`/`IconBadge` (a
+      rounded-square contained icon is the reusable "badge"); `size`/`iconSize`/`containerSize`/
+      `cornerRadius` give granular control. Tappable icons stay `NimazIconButton`.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 

@@ -12,8 +12,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -141,11 +139,11 @@ private fun PrayerStageIconsShowcase() {
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = icon,
                     contentDescription = label,
-                    modifier = Modifier.size(32.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    size = NimazIconSize.EXTRA_LARGE,
+                    variant = NimazIconVariant.PRIMARY
                 )
                 Text(text = label, style = MaterialTheme.typography.bodyLarge)
             }

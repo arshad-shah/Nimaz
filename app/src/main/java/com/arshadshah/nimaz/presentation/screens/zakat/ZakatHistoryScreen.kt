@@ -25,7 +25,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -47,6 +46,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -81,7 +83,7 @@ fun ZakatHistoryScreen(
                 onClick = onNavigateToCalculator,
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Add,
                     contentDescription = stringResource(R.string.cd_new_calculation)
                 )
@@ -331,11 +333,11 @@ private fun HistoryEntryCard(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
                                 tint = NimazColors.StatusColors.Prayed,
-                                modifier = Modifier.size(16.dp)
+                                size = NimazIconSize.SMALL
                             )
                             Text(
                                 text = stringResource(R.string.zakat_mark_as_paid),
@@ -349,10 +351,10 @@ private fun HistoryEntryCard(
                 }
 
                 IconButton(onClick = onDelete) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = stringResource(R.string.cd_delete),
-                        tint = MaterialTheme.colorScheme.error
+                        variant = NimazIconVariant.ERROR
                     )
                 }
             }

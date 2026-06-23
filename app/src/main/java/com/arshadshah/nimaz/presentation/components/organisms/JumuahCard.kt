@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mosque
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -32,6 +31,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -85,11 +86,11 @@ fun JumuahCard(
                                 .background(JumuahGreen.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Mosque,
                                 contentDescription = null,
                                 tint = JumuahGreen,
-                                modifier = Modifier.size(20.dp)
+                                size = NimazIconSize.MEDIUM
                             )
                         }
                         Column {
@@ -139,11 +140,11 @@ fun JumuahCard(
                             horizontalArrangement = Arrangement.Center,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(
+                            NimazIcon(
                                 imageVector = Icons.Default.Check,
                                 contentDescription = null,
                                 tint = JumuahGreen,
-                                modifier = Modifier.size(16.dp)
+                                size = NimazIconSize.SMALL
                             )
                             Spacer(modifier = Modifier.width(7.dp))
                             Text(

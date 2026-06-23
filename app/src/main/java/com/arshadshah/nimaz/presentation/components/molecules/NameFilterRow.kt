@@ -11,12 +11,12 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -53,10 +53,10 @@ fun NameFilterRow(
             onClick = { if (!showFavoritesOnly) onShowFavorites() },
             label = { Text(favoritesLabel) },
             leadingIcon = {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Filled.Favorite,
                     contentDescription = null,
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                    iconSize = FilterChipDefaults.IconSize
                 )
             },
             colors = FilterChipDefaults.filterChipColors(

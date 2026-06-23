@@ -34,7 +34,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -57,6 +56,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
@@ -95,7 +97,7 @@ fun PrayerTimesScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
+                        NimazIcon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
                     }
                 },
             )
@@ -257,7 +259,7 @@ private fun DayNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilledTonalIconButton(onClick = onPrev) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
+            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
         }
         Row(
             modifier = Modifier
@@ -283,19 +285,19 @@ private fun DayNavBar(
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.CalendarMonth,
                         contentDescription = stringResource(R.string.cd_pick_date),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.SMALL,
                         modifier = Modifier
-                            .padding(start = 6.dp)
-                            .size(16.dp),
+                            .padding(start = 6.dp),
                     )
                 }
             }
         }
         FilledTonalIconButton(onClick = onNext) {
-            Icon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
+            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
         }
     }
 }

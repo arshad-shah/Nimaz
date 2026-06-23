@@ -31,7 +31,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -71,6 +70,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetAction
@@ -332,7 +334,7 @@ private fun SwipeableBookmarkCard(
                     .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.CenterEnd
             ) {
-                Icon(
+                NimazIcon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onErrorContainer
@@ -388,11 +390,11 @@ private fun BookmarkCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 IconButton(onClick = onMore, modifier = Modifier.size(36.dp)) {
-                    Icon(
+                    NimazIcon(
                         imageVector = Icons.Default.MoreVert,
                         contentDescription = stringResource(R.string.cd_more_options),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.size(20.dp)
+                        variant = NimazIconVariant.MUTED,
+                        size = NimazIconSize.MEDIUM
                     )
                 }
             }
