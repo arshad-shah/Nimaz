@@ -9,6 +9,12 @@ Navigation is **type-safe**: a `@Serializable sealed interface Route`
 `core/navigation/NavGraph.kt`. Typed arguments are read with
 `backStackEntry.toRoute<Route.X>()`. Bottom navigation is the `BottomNavDestination` enum.
 
+> **Test hooks:** each destination is wired via the local `taggedComposable<Route.X>`
+> helper, which wraps the screen in a container carrying a stable
+> `ScreenTags.X` tag (`core/navigation/ScreenTags.kt`); bottom-nav items carry
+> `ScreenTags.bottomNav(label)`. Instrumented UI tests assert navigation by these tags
+> rather than on-screen text. Keep `ScreenTags` in sync when adding a `Route`.
+
 ## Graph
 
 ```mermaid

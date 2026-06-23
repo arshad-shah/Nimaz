@@ -1,0 +1,122 @@
+name: Android Instrumentation Tests (emulator.wtf)
+
+# Builds the app + instrumentation test APKs, then runs the androidTest suite
+# (DB / notifications / workers / preferences / navigation flows) on emulator.wtf.
+#
+# Triggers:
+#  - push to main           → the canonical lane.
+#  - pull_request (any base) → so it validates this branch's PR (and every future PR).
+#
+# The debug build needs no secrets: google-services.json is only required for the
+# release/deploy lane, and the app's Firebase calls are guarded to no-op without it.
+# The emulator.wtf step requires the EW_API_TOKEN repo secret; if it is missing the
+# workflow still builds + uploads the APKs and simply skips the cloud test run (with a
+# warning) instead of failing.
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: ew-instrumentation-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write          # mikepenz/action-junit-report publishes a check run
+  pull-requests: write   # …and annotates the PR
+
+jobs:
+  instrumentation-tests:
+    name: emulator.wtf instrumentation tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # The prepackaged Room DB (app/.../nimaz_prepopulated.db) and other *.db
+          # assets are stored via Git LFS (.gitattributes: *.db filter=lfs). Without
+          # this the APK packages the LFS pointer text instead of the real database,
+          # and every test that opens the DB fails with "no such table".
+          lfs: true
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set execution flag for gradlew
+        run: chmod +x gradlew
+
+      # ── Artifacts: build the app APK and the instrumentation test APK ────────
+      # assembleDebugAndroidTest also compiles + KSP-processes the entire
+      # androidTest source set, so this step doubles as the compile check for the
+      # Hilt test components and Room/Compose test wiring.
+      - name: Build app and test APKs
+        run: ./gradlew :app:assembleDebug :app:assembleDebugAndroidTest --stacktrace
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: instrumentation-apks
+          path: |
+            app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          if-no-files-found: error
+
+      # ── Gate on the API token so the lane never hard-fails when it's unset ───
+      # (the `secrets` context can't be used directly in an `if:`, so resolve it
+      # into a step output here; the value is masked in logs).
+      - name: Check emulator.wtf token
+        id: ew
+        env:
+          EW_API_TOKEN: ${{ secrets.EW_API_TOKEN }}
+        run: |
+          if [ -n "$EW_API_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::warning title=emulator.wtf skipped::EW_API_TOKEN secret is not set. Add it in repo Settings → Secrets to run the cloud instrumentation tests."
+          fi
+
+      # ── Route the built APKs to emulator.wtf and run the suite ───────────────
+      - name: Run instrumentation tests on emulator.wtf
+        if: steps.ew.outputs.enabled == 'true'
+        uses: emulator-wtf/actions/run-tests@v1.0.1
+        with:
+          api-token: ${{ secrets.EW_API_TOKEN }}
+          app: app/build/outputs/apk/debug/app-debug.apk
+          test: app/build/outputs/apk/androidTest/debug/app-debug-androidTest.apk
+          # minSdk is 29, so the default Pixel2/api27 device would fail to install.
+          # Pin a supported API level (>= 29).
+          devices: |
+            model=Pixel2,version=30
+          # Split across parallel shards to keep wall-clock time down.
+          num-shards: 2
+          # Retry only the individual tests that fail, to absorb transient device-level
+          # flakes (e.g. "Failed to inject touch input" when a synthetic tap lands on a
+          # just-scrolled list item at the viewport edge). A genuine failure still fails
+          # after the retries.
+          num-flaky-test-attempts: 2
+          timeout: 20m
+          record-video: true
+          outputs-dir: build/test-results
+
+      - name: Publish test report
+        uses: mikepenz/action-junit-report@v6
+        if: always() && steps.ew.outputs.enabled == 'true'
+        with:
+          report_paths: 'build/test-results/**/*.xml'
+          check_name: emulator.wtf instrumentation results
+
+      - name: Upload emulator.wtf outputs
+        uses: actions/upload-artifact@v4
+        if: always() && steps.ew.outputs.enabled == 'true'
+        with:
+          name: emulator-wtf-results
+          path: build/test-results
+          if-no-files-found: ignore

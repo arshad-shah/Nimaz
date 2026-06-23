@@ -70,9 +70,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Keep splash visible until AppInitializer finishes (max 5s timeout)
-        val appInitializer = (application as NimazApp).appInitializer
-        splashScreen.setKeepOnScreenCondition { !appInitializer.isReady.value }
+        // Keep splash visible until AppInitializer finishes (max 5s timeout).
+        // Guard the cast: under instrumented tests the host Application is
+        // HiltTestApplication, not NimazApp, so there is no initializer to await —
+        // lift the splash immediately so the UI is visible to the test harness.
+        val appInitializer = (application as? NimazApp)?.appInitializer
+        splashScreen.setKeepOnScreenCondition { appInitializer?.isReady?.value == false }
 
         // Check if opened from prayer notification - stop adhan if so
         handleIntent(intent)
