@@ -32,6 +32,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -149,8 +151,15 @@ fun NimazCheckbox(
         Modifier
     }
 
+    val descriptionModifier = if (contentDescription != null) {
+        Modifier.semantics { this.contentDescription = contentDescription }
+    } else {
+        Modifier
+    }
+
     Box(
         modifier = modifier
+            .then(descriptionModifier)
             .alpha(if (enabled) 1f else DISABLED_ALPHA)
             .then(interactionModifier)
             .size(size.box)
@@ -166,7 +175,7 @@ fun NimazCheckbox(
         ) {
             NimazIcon(
                 imageVector = Icons.Default.Check,
-                contentDescription = contentDescription,
+                contentDescription = null,
                 iconSize = size.check,
                 tint = onFill
             )
