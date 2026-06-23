@@ -31,7 +31,7 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wallet
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -462,7 +462,7 @@ private fun ZakatResultSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        colors = NimazCardDefaults.colors(container = Color.Transparent)
     ) {
         Box(
             modifier = Modifier
@@ -581,16 +581,12 @@ private fun NisabOptionCard(
         modifier = modifier,
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) {
-                accentColor.copy(alpha = 0.15f)
-            } else {
-                MaterialTheme.colorScheme.surfaceContainer
-            }
-        ),
-        border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(1.5.dp, accentColor.copy(alpha = 0.5f))
-        } else null
+        selected = isSelected,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceContainer,
+            activeContainer = accentColor.copy(alpha = 0.15f),
+            activeBorder = accentColor.copy(alpha = 0.5f),
+        )
     ) {
         Column(
             modifier = Modifier.padding(15.dp)
@@ -855,8 +851,8 @@ private fun BreakdownCard(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(14.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primary
+            colors = NimazCardDefaults.colors(
+                container = MaterialTheme.colorScheme.primary
             )
         ) {
             Text(

@@ -3,7 +3,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,7 +24,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Stop
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -151,8 +150,8 @@ fun SelectReciterScreen(
                     style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                    colors = NimazCardDefaults.colors(
+                        container = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                     )
                 ) {
                     Row(
@@ -236,22 +235,14 @@ fun SelectReciterScreen(
 
                 NimazCard(
                     style = NimazCardStyle.FILLED,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .then(
-                            if (isSelected) Modifier.border(
-                                2.dp,
-                                MaterialTheme.colorScheme.primary,
-                                RoundedCornerShape(14.dp)
-                            ) else Modifier
-                        ),
+                    modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(14.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = if (isSelected) {
-                            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        } else {
-                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                        }
+                    selected = isSelected,
+                    colors = NimazCardDefaults.selectable(
+                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
+                        activeBorder = MaterialTheme.colorScheme.primary,
+                        activeBorderWidth = 2.dp,
                     ),
                     onClick = {
                         viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))

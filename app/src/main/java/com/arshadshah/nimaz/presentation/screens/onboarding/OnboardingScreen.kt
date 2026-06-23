@@ -8,7 +8,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -32,8 +31,6 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.CardColors
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -65,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
@@ -378,10 +376,10 @@ private fun InfoPageContent(
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color.White.copy(alpha = 0.05f)
-                ),
-                border = BorderStroke(1.dp, IllumGold.copy(alpha = 0.18f))
+                colors = NimazCardDefaults.colors(
+                    container = Color.White.copy(alpha = 0.05f),
+                    border = IllumGold.copy(alpha = 0.18f)
+                )
             ) {
                 Column(
                     modifier = Modifier.padding(
@@ -510,13 +508,11 @@ private fun PermissionCard(
 
     NimazCard(
         style = NimazCardStyle.OUTLINED,
-        colors = CardColors(
-            containerColor = Color.Transparent,
-            contentColor = MaterialTheme.colorScheme.onSurface,
-            disabledContainerColor = Color.Transparent,
-            disabledContentColor = MaterialTheme.colorScheme.onSurface
-        ),
-        border = BorderStroke(1.dp, if(isGranted) green else MaterialTheme.colorScheme.secondary)
+        colors = NimazCardDefaults.colors(
+            container = Color.Transparent,
+            content = MaterialTheme.colorScheme.onSurface,
+            border = if (isGranted) green else MaterialTheme.colorScheme.secondary
+        )
     ) {
         Row(
             modifier = Modifier

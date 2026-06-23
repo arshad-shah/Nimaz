@@ -130,23 +130,6 @@ fun HomeScreen(
         }
     }
 
-    // Status-bar icon contrast: white over the living-sky hero, switching to
-    // theme-appropriate (dark icons in a light theme, white in dark) once the
-    // top bar solidifies on scroll. Tablet has no sky hero, so it always uses
-    // the theme-appropriate contrast. (isAppearanceLightStatusBars == true means
-    // a light status-bar background, i.e. dark icons.)
-    val view = LocalView.current
-    val isLightTheme = MaterialTheme.colorScheme.surface.luminance() > 0.5f
-    val overSkyHero = windowSizeClass.isCompact && topBarProgress < 0.5f
-    val appearanceLightStatusBars = if (overSkyHero) false else isLightTheme
-    DisposableEffect(view, appearanceLightStatusBars) {
-        val window = (view.context as Activity).window
-        val controller = WindowCompat.getInsetsController(window, view)
-        val previous = controller.isAppearanceLightStatusBars
-        controller.isAppearanceLightStatusBars = appearanceLightStatusBars
-        onDispose { controller.isAppearanceLightStatusBars = previous }
-    }
-
     val nextPrayerTimeText = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
 
     // Draw edge-to-edge: the compact hero's living sky extends behind the

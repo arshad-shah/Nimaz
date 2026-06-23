@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.fasting
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -42,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -61,8 +58,14 @@ import com.arshadshah.nimaz.domain.model.MakeupFastStatus
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -328,21 +331,15 @@ private fun RamadanBanner(
     currentDay: Int,
     modifier: Modifier = Modifier
 ) {
-    val purpleGradient = Brush.linearGradient(
-        colors = listOf(
+    GradientCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        gradientColors = listOf(
             NimazColors.FastingColors.Ramadan,
             NimazColors.FastingColors.Ramadan.copy(alpha = 0.85f)
         )
-    )
-
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(purpleGradient)
-            .padding(20.dp)
     ) {
-        Column {
+        Column(modifier = Modifier.padding(20.dp)) {
             Text(
                 text = stringResource(R.string.fasting_current),
                 style = MaterialTheme.typography.labelSmall,
@@ -394,23 +391,19 @@ private fun RamadanCountdownCard(
     val ramadanStart = HijriDateCalculator.getFirstDayOfRamadan(targetYear)
     val dateFormatter = DateTimeFormatter.ofPattern("MMMM d, yyyy")
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(
-                        NimazColors.FastingColors.Ramadan,
-                        NimazColors.FastingColors.Ramadan.copy(alpha = 0.8f)
-                    )
-                )
-            )
-            .padding(24.dp)
+    GradientCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        gradientColors = listOf(
+            NimazColors.FastingColors.Ramadan,
+            NimazColors.FastingColors.Ramadan.copy(alpha = 0.8f)
+        )
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp)
         ) {
             Text(
                 text = stringResource(R.string.fasting_ramadan_starts_in),
@@ -466,11 +459,15 @@ private fun RamadanMissedFastsTracker(
     val unloggedDays = (pastDaysInRamadan - recordedDays).coerceAtLeast(0)
 
     if (unloggedDays > 0) {
-        Surface(
+        NimazCard(
             modifier = modifier.fillMaxWidth(),
+            style = NimazCardStyle.OUTLINED,
             shape = RoundedCornerShape(14.dp),
-            color = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.1f),
-            border = BorderStroke(1.dp, NimazColors.PrayerColors.Maghrib.copy(alpha = 0.3f))
+            colors = NimazCardDefaults.colors(
+                container = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.1f),
+                border = NimazColors.PrayerColors.Maghrib.copy(alpha = 0.3f),
+                borderWidth = 1.dp
+            )
         ) {
             Row(
                 modifier = Modifier.padding(15.dp),
@@ -536,14 +533,13 @@ private fun TodayFastSection(
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(12.dp))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .padding(20.dp)
+        NimazCard(
+            modifier = Modifier.fillMaxWidth(),
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(16.dp),
+            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
         ) {
-            Column {
+            Column(modifier = Modifier.padding(20.dp)) {
                 // Header with date and status
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -620,16 +616,17 @@ private fun TodayFastSection(
                     horizontalArrangement = Arrangement.spacedBy(15.dp)
                 ) {
                     // Suhoor card
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(15.dp)
+                    NimazCard(
+                        modifier = Modifier.weight(1f),
+                        style = NimazCardStyle.FILLED,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(15.dp)
                         ) {
                             Text(
                                 text = stringResource(R.string.fasting_suhoor_ends),
@@ -655,16 +652,17 @@ private fun TodayFastSection(
                     }
 
                     // Iftar card
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.surface)
-                            .padding(15.dp)
+                    NimazCard(
+                        modifier = Modifier.weight(1f),
+                        style = NimazCardStyle.FILLED,
+                        shape = RoundedCornerShape(12.dp),
+                        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(15.dp)
                         ) {
                             Text(
                                 text = stringResource(R.string.fasting_iftar),
@@ -993,66 +991,66 @@ private fun RecommendedFastCard(
     onClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .clickable(onClick = onClick)
-            .padding(15.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(15.dp)
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        onClick = onClick,
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(14.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = null,
-            type = NimazIconType.CONTAINED,
-            containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            containerColor = iconBgColor,
-            containerSize = 44.dp,
-            iconSize = 22.dp,
-            cornerRadius = 12.dp,
-        )
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        if (isFasted) {
+        Row(
+            modifier = Modifier.padding(15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(15.dp)
+        ) {
             NimazIcon(
-                imageVector = Icons.Default.Check,
+                imageVector = icon,
                 contentDescription = null,
                 type = NimazIconType.CONTAINED,
                 containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                tint = GreenAccent,
-                containerColor = GreenAccent.copy(alpha = 0.2f),
-                containerSize = 28.dp,
-                iconSize = 16.dp,
-                cornerRadius = 14.dp,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                containerColor = iconBgColor,
+                containerSize = 44.dp,
+                iconSize = 22.dp,
+                cornerRadius = 12.dp,
             )
-        } else {
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
+
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = nextDate,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary
+                    text = name,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (isFasted) {
+                NimazCheckbox(
+                    checked = true,
+                    onCheckedChange = null,
+                    variant = NimazCheckboxVariant.SUCCESS,
+                    size = NimazCheckboxSize.LARGE,
+                    type = NimazCheckboxType.CIRCLE,
+                    contentDescription = null,
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = nextDate,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
     }
@@ -1190,18 +1188,12 @@ private fun MakeupSummaryCard(
     pendingCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(OrangeAccent, OrangeDark)
-                )
-            )
-            .padding(25.dp)
+    GradientCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        gradientColors = listOf(OrangeAccent, OrangeDark)
     ) {
-        Column {
+        Column(modifier = Modifier.padding(25.dp)) {
             Text(
                 text = stringResource(R.string.fasting_fasts_to_makeup),
                 style = MaterialTheme.typography.labelMedium,
@@ -1293,10 +1285,10 @@ private fun MakeupPendingFastCard(
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 // Edit button
-                Surface(
+                NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest),
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
@@ -1320,10 +1312,10 @@ private fun MakeupPendingFastCard(
                 }
 
                 // Mark Complete button
-                Surface(
+                NimazCard(
                     onClick = onComplete,
                     shape = RoundedCornerShape(10.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
+                    colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

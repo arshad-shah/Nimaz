@@ -56,6 +56,9 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -207,16 +210,21 @@ fun ChooseDhikrScreen(
                 }
             }
 
-            Surface(
+            NimazCard(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(12.dp)
-                    .clickable { onNavigateToAddPreset() },
+                    .padding(12.dp),
+                style = NimazCardStyle.FILLED,
+                onClick = { onNavigateToAddPreset() },
                 shape = RoundedCornerShape(14.dp),
-                color = MaterialTheme.colorScheme.primaryContainer
+                colors = NimazCardDefaults.colors(
+                    container = MaterialTheme.colorScheme.primaryContainer
+                )
             ) {
                 Row(
-                    modifier = Modifier.padding(vertical = 14.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 14.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -299,18 +307,20 @@ private fun SwipeableDhikrRow(
 
 @Composable
 private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
-    Surface(
+    NimazCard(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 12.dp)
-            .clickable(onClick = onClick),
+            .padding(horizontal = 12.dp),
+        style = if (selected) NimazCardStyle.OUTLINED else NimazCardStyle.FILLED,
+        selected = selected,
+        onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        border = if (selected) BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        ) else null
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            border = null,
+            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -368,16 +378,18 @@ private fun DhikrRow(
     onClick: () -> Unit,
     onToggleFavorite: () -> Unit,
 ) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),
+    NimazCard(
+        modifier = Modifier.fillMaxWidth(),
+        style = if (selected) NimazCardStyle.OUTLINED else NimazCardStyle.FILLED,
+        selected = selected,
+        onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = if (selected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f) else MaterialTheme.colorScheme.surface,
-        border = if (selected) BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-        ) else null
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surface,
+            border = null,
+            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+        )
     ) {
         Row(
             modifier = Modifier

@@ -68,6 +68,8 @@ import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -271,10 +273,12 @@ private fun ExportOption(
     onClick: () -> Unit,
     highlight: Boolean = false,
 ) {
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(14.dp),
-        color = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest,
+        colors = NimazCardDefaults.colors(
+            container = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest
+        ),
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
@@ -455,10 +459,14 @@ private fun DayPrayerCard(
         .maxByOrNull { it.priority }
     val fast = if (hijri.month == 9) dayTimes.fastMinutes?.let { formatFastLength(it) } else null
 
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(NimazCornerRadius.Large),
-        color = if (isToday) Color.Transparent else MaterialTheme.colorScheme.surfaceContainer,
+        selected = isToday,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surfaceContainer,
+            activeContainer = Color.Transparent
+        ),
         modifier = Modifier.fillMaxWidth()
     ) {
         val background = if (isToday) {

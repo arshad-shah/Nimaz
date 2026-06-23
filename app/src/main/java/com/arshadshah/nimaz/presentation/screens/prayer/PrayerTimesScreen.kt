@@ -30,7 +30,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.IconButton
@@ -159,8 +159,8 @@ fun PrayerTimesScreen(
                     },
                 style = NimazCardStyle.FILLED,
                 shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
+                elevation = 4.dp,
             ) {
                 DayNavBar(
                     selectedDate = state.selectedDate,
@@ -342,7 +342,7 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
             .padding(top = 4.dp),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

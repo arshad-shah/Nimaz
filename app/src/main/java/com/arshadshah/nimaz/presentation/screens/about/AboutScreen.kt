@@ -57,6 +57,8 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
@@ -282,11 +284,10 @@ private fun LinksCard(
 ) {
     val uriHandler = LocalUriHandler.current
 
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -496,11 +497,14 @@ private fun LinkItem(
 @Composable
 private fun DeveloperCard(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
-    Row(
-        modifier = modifier
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Row(
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(13.dp)
@@ -534,6 +538,7 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
         }
         DeveloperSocial(Icons.Default.Code) { uriHandler.openUri("https://github.com/arshad-shah") }
         DeveloperSocial(Icons.Default.WorkOutline) { uriHandler.openUri("https://linkedin.com/in/arshadshah") }
+      }
     }
 }
 
@@ -580,10 +585,13 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
 
 @Composable
 private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
+    NimazCard(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Column(
+        modifier = Modifier
             .padding(12.dp)
     ) {
         Text(
@@ -598,6 +606,7 @@ private fun CreditCell(label: String, provider: String, modifier: Modifier = Mod
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface
         )
+      }
     }
 }
 

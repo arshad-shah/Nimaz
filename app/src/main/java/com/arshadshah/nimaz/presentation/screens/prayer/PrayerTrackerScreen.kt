@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -31,7 +32,7 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +53,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -286,18 +286,12 @@ private fun QadaSummaryCard(totalMissed: Int) {
     val warningOrange = NimazColors.PrayerColors.Asr
     val warningOrangeDark = NimazColors.OrangeDark
 
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                Brush.linearGradient(
-                    colors = listOf(warningOrange, warningOrangeDark)
-                )
-            )
-            .padding(20.dp)
+    GradientCard(
+        modifier = Modifier.fillMaxWidth(),
+        gradientColors = listOf(warningOrange, warningOrangeDark)
     ) {
         Row(
+            modifier = Modifier.padding(20.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
@@ -355,21 +349,13 @@ private fun StreakCard(currentStreak: Int) {
     val goldDark = NimazColors.GoldDark
     val goldLight = NimazColors.Gold500
 
-    NimazCard(
+    GradientCard(
         modifier = Modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent)
+        gradientColors = listOf(goldLight, goldDark)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(
-                        colors = listOf(goldLight, goldDark)
-                    ),
-                    shape = RoundedCornerShape(16.dp)
-                )
                 .padding(20.dp)
         ) {
             Column {
@@ -585,10 +571,10 @@ private fun PrayerCheckItem(
     statusText: String,
     onClick: () -> Unit
 ) {
-    Surface(
+    NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest)
     ) {
         Row(
             modifier = Modifier

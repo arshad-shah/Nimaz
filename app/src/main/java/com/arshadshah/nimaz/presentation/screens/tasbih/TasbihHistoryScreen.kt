@@ -47,6 +47,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -166,10 +169,13 @@ private fun StatsSummaryCard(
     totalThisWeek: Int,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        )
     ) {
         Row(
             modifier = Modifier
@@ -293,11 +299,14 @@ private fun SessionCard(
     session: TasbihSession,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f))
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface,
+            border = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+        )
     ) {
         Row(
             modifier = Modifier

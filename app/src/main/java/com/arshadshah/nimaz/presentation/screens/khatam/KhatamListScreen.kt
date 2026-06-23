@@ -52,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -62,6 +61,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -402,35 +404,37 @@ private fun KhatamStatsCard(
     val totalAyahsRead = (state.completedKhatams + state.inProgressKhatams + state.abandonedKhatams)
         .sumOf { it.totalAyahsRead }
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
     ) {
-        StatItem(
-            icon = Icons.Default.CheckCircle,
-            value = completedCount.toString(),
-            label = stringResource(R.string.khatam_completed),
-            tint = MaterialTheme.colorScheme.primary
-        )
-        StatItem(
-            icon = Icons.AutoMirrored.Filled.TrendingUp,
-            value = inProgressCount.toString(),
-            label = stringResource(R.string.khatam_in_progress),
-            tint = MaterialTheme.colorScheme.tertiary
-        )
-        StatItem(
-            icon = Icons.Default.AutoStories,
-            value = formatAyahCount(totalAyahsRead),
-            label = stringResource(R.string.khatam_ayahs_read),
-            tint = MaterialTheme.colorScheme.secondary
-        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            StatItem(
+                icon = Icons.Default.CheckCircle,
+                value = completedCount.toString(),
+                label = stringResource(R.string.khatam_completed),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            StatItem(
+                icon = Icons.AutoMirrored.Filled.TrendingUp,
+                value = inProgressCount.toString(),
+                label = stringResource(R.string.khatam_in_progress),
+                tint = MaterialTheme.colorScheme.tertiary
+            )
+            StatItem(
+                icon = Icons.Default.AutoStories,
+                value = formatAyahCount(totalAyahsRead),
+                label = stringResource(R.string.khatam_ayahs_read),
+                tint = MaterialTheme.colorScheme.secondary
+            )
+        }
     }
 }
 
@@ -482,19 +486,18 @@ private fun ActiveKhatamCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val gradientBrush = Brush.linearGradient(
-        colors = listOf(
+    GradientCard(
+        modifier = modifier.fillMaxWidth(),
+        gradientColors = listOf(
             MaterialTheme.colorScheme.primaryContainer,
             MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-        )
-    )
-
-    Column(
-        modifier = modifier
+        ),
+        onClick = onClick,
+        shape = RoundedCornerShape(16.dp)
+    ) {
+      Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(brush = gradientBrush)
-            .clickable(onClick = onClick)
             .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -575,6 +578,7 @@ private fun ActiveKhatamCard(
                 modifier = Modifier.weight(1f)
             )
         }
+      }
     }
 }
 
@@ -620,14 +624,14 @@ private fun KhatamCard(
     onLongClick: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+      Column(
+        modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(16.dp)
-            )
-            .clip(RoundedCornerShape(16.dp))
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
@@ -725,6 +729,7 @@ private fun KhatamCard(
             trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
             strokeCap = StrokeCap.Round
         )
+      }
     }
 }
 

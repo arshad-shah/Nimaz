@@ -20,13 +20,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.CompareArrows
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -45,6 +41,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperSize
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.screens.tasbih.BeadDesigns
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 
@@ -213,7 +212,14 @@ fun CurrentTasbihSheet(
             // Free count: let the user dial in any target.
             if (preset == null) {
                 Spacer(Modifier.height(12.dp))
-                TargetStepper(target = targetCount, onChange = onTargetChange)
+                NimazNumberStepper(
+                    value = targetCount,
+                    onValueChange = onTargetChange,
+                    variant = NimazNumberStepperVariant.SPREAD,
+                    size = NimazNumberStepperSize.MEDIUM,
+                    minValue = 1,
+                    maxValue = 9999
+                )
             }
 
             preset?.reference?.takeIf { it.isNotBlank() }?.let { ref ->
@@ -273,40 +279,6 @@ private fun beadDesignLabel(key: String): String = when (key) {
     "pearl" -> stringResource(R.string.tasbih_bead_pearl)
     "jade" -> stringResource(R.string.tasbih_bead_jade)
     else -> key
-}
-
-@Composable
-private fun TargetStepper(target: Int, onChange: (Int) -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            IconButton(onClick = { onChange((target - 1).coerceAtLeast(1)) }) {
-                NimazIcon(
-                    Icons.Default.Remove,
-                    contentDescription = stringResource(R.string.tasbih_decrease_target)
-                )
-            }
-            Text(
-                text = stringResource(R.string.tasbih_target_value, target),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            IconButton(onClick = { onChange((target + 1).coerceAtMost(9999)) }) {
-                NimazIcon(
-                    Icons.Default.Add,
-                    contentDescription = stringResource(R.string.tasbih_increase_target)
-                )
-            }
-        }
-    }
 }
 
 @Composable

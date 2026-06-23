@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncDisabled
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -217,7 +217,7 @@ private fun RoleBadge(mode: SyncMode) {
 
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = CardDefaults.cardColors(containerColor = containerColor),
+        colors = NimazCardDefaults.colors(container = containerColor),
         shape = RoundedCornerShape(20.dp)
     ) {
         Row(
@@ -276,7 +276,7 @@ private fun ModeSelectionContent(
     NimazCard(
         style = NimazCardStyle.FILLED,
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -370,7 +370,7 @@ private fun AuthTokenContent(
 
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.primaryContainer),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -594,7 +594,7 @@ private fun ProgressContent(
     if (partnerState != null) {
         NimazCard(
             style = NimazCardStyle.FILLED,
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.tertiaryContainer),
+            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.tertiaryContainer),
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -652,7 +652,7 @@ private fun ProgressContent(
             Spacer(modifier = Modifier.height(8.dp))
             NimazCard(
                 style = NimazCardStyle.FILLED,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -716,7 +716,7 @@ private fun ProgressContent(
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -793,7 +793,7 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
+        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {

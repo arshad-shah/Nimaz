@@ -457,6 +457,26 @@ typed route object.
       so existing call sites convert by swapping the constructor and adding `style`. Don't set a
       `containerColor` of `MaterialTheme.colorScheme.surfaceContainerHigh` — omit `colors` and let
       the card default stand (use `NimazSurfaceCard` for the flat outlined content-card look).
+    - a minus/value/plus number control is `NimazNumberStepper(value, onValueChange, variant = …,
+      size = …, type = …)` (`components/molecules/NimazNumberStepper.kt`), **not** a hand-rolled
+      row of `IconButton`s around a `Text`. `variant` is the layout: `INLINE` (a `label` on the
+      left + compact grouped controls — the settings-row look) or `SPREAD` (full-width tonal card,
+      edge buttons, large centred value — the tasbih target-dial look; `label` is ignored).
+      `size` (`SMALL`/`MEDIUM`/`LARGE`) scales the buttons and value typography; `type`
+      (`DEFAULT`/`ACCENT`) sets the value colour (`ACCENT` = `NimazColors.TasbihColors.Milestone`).
+      `minValue`/`maxValue`/`step`/`formatValue` clamp and format. It absorbed the old tasbih
+      `TargetStepper`/`TargetCountStepper`.
+    - a boolean check-toggle is `NimazCheckbox(checked, onCheckedChange, variant = …, size = …,
+      type = …)` (`components/atoms/NimazCheckbox.kt`), **not** a hand-built `Box`/`Surface` with a
+      `.border(...)` that shows an `Icon(Icons.Default.Check)` when selected. `variant` is the
+      semantic colour role (`DEFAULT`/`PRIMARY` = `primary`, `SUCCESS` = `NimazColors.Success` for
+      completion, `ERROR`); `size` (`SMALL`/`MEDIUM`/`LARGE`) sets the box/check/stroke/corner
+      preset; `type` is `SQUARE` (rounded Material-style) or `CIRCLE` (the prayer/fast-completion
+      look). Pass `onCheckedChange = null` for a **display-only indicator** (no click semantics) —
+      the drop-in for selected-card/list rows where the parent owns the click; `tint =` escapes the
+      variant. **Not** for `Switch` (on/off settings) or genuine single-choice `RadioButton` pickers
+      — those stay as-is. It centralised the prayer/fast trackers, the settings/Quran pickers and
+      the dropdown/list selection check indicators.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 

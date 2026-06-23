@@ -121,4 +121,94 @@ class NimazNumberStepperTest {
         composeRule.onNodeWithContentDescription("Decrease").assertIsEnabled()
         composeRule.onNodeWithContentDescription("Increase").assertIsEnabled()
     }
+
+    // --- SPREAD variant ---------------------------------------------------
+
+    @Test
+    fun `spread renders plain value and ignores label`() {
+        composeRule.setThemedContent {
+            NimazNumberStepper(
+                value = 33,
+                onValueChange = {},
+                variant = NimazNumberStepperVariant.SPREAD,
+                label = "ignored"
+            )
+        }
+
+        // SPREAD's default formatter shows the plain number (no "+" prefix).
+        composeRule.onNodeWithText("33").assertExists()
+        composeRule.onNodeWithText("ignored").assertDoesNotExist()
+    }
+
+    @Test
+    fun `spread buttons fire callbacks`() {
+        var captured = -1
+        composeRule.setThemedContent {
+            NimazNumberStepper(
+                value = 33,
+                onValueChange = { captured = it },
+                variant = NimazNumberStepperVariant.SPREAD
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Increase").performClick()
+        assertThat(captured).isEqualTo(34)
+
+        composeRule.onNodeWithContentDescription("Decrease").performClick()
+        assertThat(captured).isEqualTo(32)
+    }
+
+    @Test
+    fun `spread respects min bound`() {
+        composeRule.setThemedContent {
+            NimazNumberStepper(
+                value = 1,
+                onValueChange = {},
+                variant = NimazNumberStepperVariant.SPREAD,
+                minValue = 1,
+                maxValue = 9999
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Decrease").assertIsNotEnabled()
+        composeRule.onNodeWithContentDescription("Increase").assertIsEnabled()
+    }
+
+    // --- step clamping ----------------------------------------------------
+
+    @Test
+    fun `increment coerces to maxValue when step would overshoot`() {
+        var captured = -1
+        composeRule.setThemedContent {
+            NimazNumberStepper(
+                label = "Daily Target",
+                value = 198,
+                onValueChange = { captured = it },
+                minValue = 1,
+                maxValue = 200,
+                step = 5
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Increase").performClick()
+        assertThat(captured).isEqualTo(200)
+    }
+
+    @Test
+    fun `decrement coerces to minValue when step would undershoot`() {
+        var captured = -1
+        composeRule.setThemedContent {
+            NimazNumberStepper(
+                label = "Daily Target",
+                value = 3,
+                onValueChange = { captured = it },
+                minValue = 1,
+                maxValue = 200,
+                step = 5
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Decrease").performClick()
+        assertThat(captured).isEqualTo(1)
+    }
 }

@@ -70,6 +70,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -335,11 +338,19 @@ private fun TasbihCountCapsule(
     val accent = if (goalReached) NimazColors.TasbihColors.Complete
     else NimazColors.TasbihColors.Milestone
 
-    Surface(
+    NimazCard(
         modifier = modifier,
+        style = NimazCardStyle.OUTLINED,
+        selected = goalReached,
         shape = RoundedCornerShape(percent = 50),
-        color = accent.copy(alpha = 0.12f),
-        border = BorderStroke(1.dp, accent.copy(alpha = 0.45f))
+        colors = NimazCardDefaults.selectable(
+            container = NimazColors.TasbihColors.Milestone.copy(alpha = 0.12f),
+            content = NimazColors.TasbihColors.Milestone,
+            border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.45f),
+            activeContainer = NimazColors.TasbihColors.Complete.copy(alpha = 0.12f),
+            activeContent = NimazColors.TasbihColors.Complete,
+            activeBorder = NimazColors.TasbihColors.Complete.copy(alpha = 0.45f)
+        )
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
@@ -375,14 +386,17 @@ private fun CurrentTasbihPeek(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.FILLED,
+        onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+        )
     ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .padding(horizontal = 16.dp, vertical = 10.dp)
         ) {
             Box(
@@ -452,15 +466,18 @@ private fun CurrentTasbihInfoCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        onClick = onClick,
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-        border = BorderStroke(1.dp, NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f))
+        colors = NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f)
+        )
     ) {
         Column(
             modifier = Modifier
-                .clickable(onClick = onClick)
                 .padding(horizontal = 20.dp, vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(12.dp)
