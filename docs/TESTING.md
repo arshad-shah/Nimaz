@@ -22,6 +22,22 @@ Two on-device/JVM test surfaces exist:
 
 Requires JDK 21 + Android SDK (`local.properties` `sdk.dir` or `ANDROID_HOME`).
 
+## CI (emulator.wtf)
+
+`.github/workflows/android_instrumented_tests.yml` runs the instrumented suite in the
+cloud on every push to `main` and on every pull request. It:
+
+1. builds `:app:assembleDebug` + `:app:assembleDebugAndroidTest` (this also serves as
+   the compile check for the androidTest sources / Hilt test components),
+2. uploads both APKs as the `instrumentation-apks` artifact,
+3. routes them to the [`emulator-wtf/actions/run-tests`](https://github.com/emulator-wtf/actions)
+   action (sharded, Pixel2 / API 30 — note minSdk 29 rules out the default API 27 device),
+4. publishes the JUnit results as a check.
+
+**Setup:** add an `EW_API_TOKEN` repository secret (Settings → Secrets and variables →
+Actions). Without it the workflow still builds and uploads the APKs but skips the cloud
+run with a warning — it never hard-fails for a missing token.
+
 ## How it's wired
 
 - **Runner:** `support/HiltTestRunner` swaps in `HiltTestApplication` so tests run on
