@@ -19,15 +19,19 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.LessonStatus
+import com.arshadshah.nimaz.domain.model.QaidaLesson
 import com.arshadshah.nimaz.domain.model.QaidaLessonState
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaMedallion
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaMedallionState
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaStarRow
 import com.arshadshah.nimaz.presentation.components.atoms.rememberQaidaPalette
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import kotlin.math.roundToInt
 
 /**
@@ -146,5 +150,68 @@ fun QaidaCoursePath(
                 }
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private fun sampleLessonState(
+    id: Int,
+    status: LessonStatus,
+    stars: Int,
+): QaidaLessonState {
+    val lesson = QaidaLesson(
+        id = id,
+        lessonNumber = id,
+        titleEnglish = "Lesson $id",
+        titleArabic = "الدرس",
+        titleTransliteration = "Dars $id",
+        description = "",
+        conceptTags = emptyList(),
+        icon = "",
+        displayOrder = id,
+    )
+    return QaidaLessonState(
+        lesson = lesson,
+        status = status,
+        stars = stars,
+        completedCells = if (status == LessonStatus.COMPLETED) 10 else 0,
+        totalCells = 10,
+        completionFraction = if (status == LessonStatus.COMPLETED) 1f else 0f,
+        lastCellId = null,
+    )
+}
+
+@Composable
+private fun QaidaCoursePathShowcase() {
+    val lessons = listOf(
+        sampleLessonState(1, LessonStatus.COMPLETED, 3),
+        sampleLessonState(2, LessonStatus.COMPLETED, 2),
+        sampleLessonState(3, LessonStatus.IN_PROGRESS, 0),
+        sampleLessonState(4, LessonStatus.LOCKED, 0),
+        sampleLessonState(5, LessonStatus.LOCKED, 0),
+    )
+    QaidaCoursePath(
+        lessons = lessons,
+        currentLessonId = 3,
+        onLessonClick = {},
+        modifier = Modifier.height(600.dp),
+    )
+}
+
+@Preview(showBackground = true, name = "Qaida Course Path — Light", heightDp = 600)
+@Composable
+private fun QaidaCoursePathLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaCoursePathShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Course Path — Dark", heightDp = 600)
+@Composable
+private fun QaidaCoursePathDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaCoursePathShowcase()
     }
 }

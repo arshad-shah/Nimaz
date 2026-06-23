@@ -22,10 +22,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Pinned header for the Qaida course map: the Arabic journey title, an overall
@@ -120,5 +123,40 @@ fun QaidaCourseHeader(
                 )
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun QaidaCourseHeaderShowcase() {
+    Column(modifier = Modifier.padding(vertical = 16.dp)) {
+        QaidaCourseHeader(
+            titleArabic = "القاعدة النورانية",
+            titleEnglish = "Noorani Qaida",
+            lessonIndex = 4,
+            totalLessons = 17,
+            totalStars = 9,
+            overallFraction = 0.35f,
+            continueLabel = "Lesson 4",
+            onContinue = {},
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Course Header — Light")
+@Composable
+private fun QaidaCourseHeaderLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaCourseHeaderShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Course Header — Dark")
+@Composable
+private fun QaidaCourseHeaderDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaCourseHeaderShowcase()
     }
 }

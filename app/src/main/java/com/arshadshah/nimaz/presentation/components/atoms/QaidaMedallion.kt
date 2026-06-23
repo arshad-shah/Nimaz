@@ -4,7 +4,10 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -16,8 +19,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * A circular lesson node on the Qaida course map. Gold (done), teal (current) or
@@ -75,5 +81,54 @@ fun QaidaMedallion(
                 color = content,
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun QaidaMedallionShowcase() {
+    val palette = rememberQaidaPalette()
+    Row(
+        modifier = Modifier.padding(16.dp),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        QaidaMedallion(
+            label = "١",
+            state = QaidaMedallionState.DONE,
+            contentDescription = "Lesson 1, complete",
+            palette = palette,
+            onClick = {},
+        )
+        QaidaMedallion(
+            label = "٢",
+            state = QaidaMedallionState.CURRENT,
+            contentDescription = "Lesson 2, current",
+            palette = palette,
+            onClick = {},
+        )
+        QaidaMedallion(
+            label = "٣",
+            state = QaidaMedallionState.LOCKED,
+            contentDescription = "Lesson 3, locked",
+            palette = palette,
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Medallion — Light")
+@Composable
+private fun QaidaMedallionLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaMedallionShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Medallion — Dark")
+@Composable
+private fun QaidaMedallionDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaMedallionShowcase()
     }
 }

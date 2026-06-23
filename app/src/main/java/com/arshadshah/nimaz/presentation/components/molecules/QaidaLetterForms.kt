@@ -14,12 +14,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * The letter's positional shapes. Connecting letters show all four
@@ -72,5 +76,71 @@ fun QaidaLetterForms(
                 }
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private fun sampleConnectingLetter() = QaidaLetter(
+    id = 2,
+    letterArabic = "ب",
+    nameArabic = "باء",
+    nameTransliteration = "Ba",
+    isolatedForm = "ب",
+    initialForm = "بـ",
+    medialForm = "ـبـ",
+    finalForm = "ـب",
+    isConnecting = true,
+    makhrajArea = MakhrajArea.SHAFATAIN,
+    makhrajDetail = "From the lips",
+    phoneticHint = "like 'b' in 'book'",
+    audioKey = "ba",
+    audioPath = "",
+    displayOrder = 2,
+)
+
+private fun sampleNonConnectingLetter() = QaidaLetter(
+    id = 1,
+    letterArabic = "ا",
+    nameArabic = "ألف",
+    nameTransliteration = "Alif",
+    isolatedForm = "ا",
+    initialForm = null,
+    medialForm = null,
+    finalForm = "ـا",
+    isConnecting = false,
+    makhrajArea = MakhrajArea.JAWF,
+    makhrajDetail = "From the empty space of the mouth",
+    phoneticHint = "like 'a' in 'father'",
+    audioKey = "alif",
+    audioPath = "",
+    displayOrder = 1,
+)
+
+@Composable
+private fun QaidaLetterFormsShowcase() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        QaidaLetterForms(letter = sampleConnectingLetter())
+        QaidaLetterForms(letter = sampleNonConnectingLetter())
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Letter Forms — Light")
+@Composable
+private fun QaidaLetterFormsLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaLetterFormsShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Letter Forms — Dark")
+@Composable
+private fun QaidaLetterFormsDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaLetterFormsShowcase()
     }
 }

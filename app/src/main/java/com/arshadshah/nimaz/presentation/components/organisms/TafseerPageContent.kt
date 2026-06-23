@@ -58,6 +58,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -74,6 +75,8 @@ import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightab
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Represents a page of tafseer content with its character range in the full text.
@@ -663,6 +666,85 @@ private fun TafseerEmptyState(
                 Text(stringResource(R.string.tafseer_read_in_format, alternate.displayName))
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+private val previewAyah = Ayah(
+    id = 255,
+    surahNumber = 2,
+    ayahNumber = 255,
+    textArabic = "اللَّهُ لَا إِلَٰهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ",
+    textSimple = "Allahu la ilaha illa huwa al-hayyu al-qayyum",
+    juzNumber = 3,
+    hizbNumber = 5,
+    rubNumber = 20,
+    pageNumber = 42,
+    sajdaType = null,
+    sajdaNumber = null,
+    translation = "Allah - there is no deity except Him, the Ever-Living, the Sustainer of existence."
+)
+
+private val previewTafseer = TafseerText(
+    id = 1L,
+    ayahId = 255,
+    surahNumber = 2,
+    ayahNumber = 255,
+    tafseerId = "ibn_kathir_en",
+    text = "This is Ayat al-Kursi, and great virtues have been narrated about it. " +
+            "It contains the greatest name of Allah, by which when He is called, He " +
+            "responds, and when He is asked, He gives. The ayah affirms the oneness " +
+            "of Allah and His perfect, eternal attributes: He is the Ever-Living who " +
+            "never dies, and the Sustainer who maintains all of creation. Neither " +
+            "drowsiness nor sleep overtakes Him, for these are signs of imperfection " +
+            "from which He is free."
+)
+
+private val previewHighlights = listOf(
+    TafseerHighlight(
+        id = 1L,
+        ayahId = 255,
+        tafseerId = "ibn_kathir_en",
+        startOffset = 0,
+        endOffset = 16,
+        color = "#FDE68A",
+        note = "Ayat al-Kursi",
+        createdAt = 0L,
+        updatedAt = 0L
+    )
+)
+
+@Composable
+private fun TafseerPageContentShowcase() {
+    TafseerPageContent(
+        ayah = previewAyah,
+        tafseer = previewTafseer,
+        highlights = previewHighlights,
+        selectedSource = TafseerSource.IBN_KATHIR,
+        availableSources = setOf(TafseerSource.IBN_KATHIR, TafseerSource.MAARIFUL_QURAN),
+        onSourceSwitch = {},
+        onHighlightCreated = { _, _, _ -> },
+        onHighlightDeleted = {},
+        onHighlightNoteUpdated = { _, _ -> },
+        onShare = {}
+    )
+}
+
+@Preview(showBackground = true, name = "TafseerPageContent — Light")
+@Composable
+private fun TafseerPageContentLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        TafseerPageContentShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "TafseerPageContent — Dark")
+@Composable
+private fun TafseerPageContentDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        TafseerPageContentShowcase()
     }
 }
 

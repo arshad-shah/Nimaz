@@ -1,11 +1,14 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import android.content.res.Configuration
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -25,6 +28,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Card style variants
@@ -45,92 +49,77 @@ fun NimazCard(
     style: NimazCardStyle = NimazCardStyle.FILLED,
     onClick: (() -> Unit)? = null,
     shape: Shape = RoundedCornerShape(16.dp),
-    colors: CardColors = CardDefaults.cardColors(),
-    elevation: CardElevation = CardDefaults.cardElevation(),
+    colors: CardColors? = null,
+    elevation: CardElevation? = null,
     border: BorderStroke? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     when (style) {
-        NimazCardStyle.FILLED -> {
+        NimazCardStyle.FILLED, NimazCardStyle.GRADIENT -> {
+            // GRADIENT uses a filled card as its base; the gradient is applied in content.
+            val cardColors = colors ?: CardDefaults.cardColors()
+            val cardElevation = elevation ?: CardDefaults.cardElevation()
             if (onClick != null) {
                 Card(
                     onClick = onClick,
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    elevation = elevation,
+                    colors = cardColors,
+                    elevation = cardElevation,
                     content = content
                 )
             } else {
                 Card(
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    elevation = elevation,
+                    colors = cardColors,
+                    elevation = cardElevation,
                     content = content
                 )
             }
         }
 
         NimazCardStyle.ELEVATED -> {
+            val cardColors = colors ?: CardDefaults.elevatedCardColors()
+            val cardElevation = elevation ?: CardDefaults.elevatedCardElevation()
             if (onClick != null) {
                 ElevatedCard(
                     onClick = onClick,
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    elevation = elevation,
+                    colors = cardColors,
+                    elevation = cardElevation,
                     content = content
                 )
             } else {
                 ElevatedCard(
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    elevation = elevation,
+                    colors = cardColors,
+                    elevation = cardElevation,
                     content = content
                 )
             }
         }
 
         NimazCardStyle.OUTLINED -> {
+            val cardColors = colors ?: CardDefaults.outlinedCardColors()
+            val cardBorder = border ?: BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
             if (onClick != null) {
                 OutlinedCard(
                     onClick = onClick,
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    border = border ?: BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                    colors = cardColors,
+                    border = cardBorder,
                     content = content
                 )
             } else {
                 OutlinedCard(
                     modifier = modifier,
                     shape = shape,
-                    colors = colors,
-                    border = border ?: BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                    content = content
-                )
-            }
-        }
-
-        NimazCardStyle.GRADIENT -> {
-            // Use FILLED as base, gradient should be applied in content
-            if (onClick != null) {
-                Card(
-                    onClick = onClick,
-                    modifier = modifier,
-                    shape = shape,
-                    colors = colors,
-                    elevation = elevation,
-                    content = content
-                )
-            } else {
-                Card(
-                    modifier = modifier,
-                    shape = shape,
-                    colors = colors,
-                    elevation = elevation,
+                    colors = cardColors,
+                    border = cardBorder,
                     content = content
                 )
             }
@@ -227,60 +216,29 @@ fun PrayerCard(
 
 // ==================== PREVIEWS ====================
 
-@Preview(showBackground = true, name = "Filled Card")
+/**
+ * Showcase of every [NimazCardStyle] plus [GradientCard]/[PrayerCard] so each
+ * variant is visually distinct (filled vs. elevated vs. outlined). Rendered in
+ * both light and dark themes by the previews below.
+ */
 @Composable
-private fun NimazCardFilledPreview() {
-    NimazTheme {
-        NimazCard(
-            modifier = Modifier.padding(16.dp),
-            style = NimazCardStyle.FILLED
-        ) {
-            Text(
-                text = "Filled Card Content",
-                modifier = Modifier.padding(16.dp)
-            )
+private fun NimazCardShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        NimazCard(style = NimazCardStyle.FILLED) {
+            Text(text = "Filled Card", modifier = Modifier.padding(16.dp))
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Elevated Card")
-@Composable
-private fun NimazCardElevatedPreview() {
-    NimazTheme {
-        NimazCard(
-            modifier = Modifier.padding(16.dp),
-            style = NimazCardStyle.ELEVATED
-        ) {
-            Text(
-                text = "Elevated Card Content",
-                modifier = Modifier.padding(16.dp)
-            )
+        NimazCard(style = NimazCardStyle.ELEVATED) {
+            Text(text = "Elevated Card", modifier = Modifier.padding(16.dp))
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Outlined Card")
-@Composable
-private fun NimazCardOutlinedPreview() {
-    NimazTheme {
-        NimazCard(
-            modifier = Modifier.padding(16.dp),
-            style = NimazCardStyle.OUTLINED
-        ) {
-            Text(
-                text = "Outlined Card Content",
-                modifier = Modifier.padding(16.dp)
-            )
+        NimazCard(style = NimazCardStyle.OUTLINED) {
+            Text(text = "Outlined Card", modifier = Modifier.padding(16.dp))
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Gradient Card")
-@Composable
-private fun GradientCardPreview() {
-    NimazTheme {
         GradientCard(
-            modifier = Modifier.padding(16.dp),
             gradientColors = listOf(Color(0xFF5C6BC0), Color(0xFF9FA8DA))
         ) {
             Text(
@@ -289,24 +247,34 @@ private fun GradientCardPreview() {
                 modifier = Modifier.padding(16.dp)
             )
         }
-    }
-}
-
-@Preview(showBackground = true, name = "Prayer Card")
-@Composable
-private fun PrayerCardPreview() {
-    NimazTheme {
         PrayerCard(
-            modifier = Modifier.padding(16.dp),
             primaryColor = Color(0xFFFFB74D),
             secondaryColor = Color(0xFFFFE0B2)
         ) {
             Text(
-                text = "Fajr Prayer",
+                text = "Prayer Card",
                 color = Color.Black,
                 modifier = Modifier.padding(16.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true, name = "Cards — Light")
+@Composable
+private fun NimazCardLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NimazCardShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Cards — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazCardDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NimazCardShowcase()
     }
 }
 

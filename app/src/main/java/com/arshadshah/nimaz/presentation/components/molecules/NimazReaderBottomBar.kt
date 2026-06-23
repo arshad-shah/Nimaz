@@ -17,6 +17,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -26,8 +28,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * The shared reader bottom bar used by the Dua and Hadith readers: prev/next
@@ -144,5 +149,72 @@ private fun NavChevron(
                 modifier = Modifier.size(24.dp)
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun NimazReaderBottomBarShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // Middle page of a short pager (dots indicator)
+        NimazReaderBottomBar(
+            currentPage = 1,
+            pageCount = 4,
+            onPrev = {},
+            onNext = {},
+            prevContentDescription = "Previous page",
+            nextContentDescription = "Next page"
+        ) {
+            com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton(
+                icon = androidx.compose.material.icons.Icons.Default.Edit,
+                contentDescription = "Highlight",
+                onClick = {},
+                active = true
+            )
+            com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton(
+                icon = androidx.compose.material.icons.Icons.Default.Share,
+                contentDescription = "Share",
+                onClick = {}
+            )
+        }
+
+        // Long pager (counter indicator instead of dots)
+        NimazReaderBottomBar(
+            currentPage = 7,
+            pageCount = 30,
+            onPrev = {},
+            onNext = {},
+            prevContentDescription = "Previous page",
+            nextContentDescription = "Next page"
+        ) {
+            com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton(
+                icon = androidx.compose.material.icons.Icons.Default.Share,
+                contentDescription = "Share",
+                onClick = {}
+            )
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "ReaderBottomBar — Light")
+@Composable
+private fun NimazReaderBottomBarLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NimazReaderBottomBarShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "ReaderBottomBar — Dark")
+@Composable
+private fun NimazReaderBottomBarDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NimazReaderBottomBarShowcase()
     }
 }

@@ -17,11 +17,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Favourite-toggle FAB shared by the three "names" detail screens
@@ -88,5 +92,57 @@ fun NameDetailSectionCard(
                 )
             }
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun NameDetailComponentsShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        FavoriteFab(
+            isFavorite = true,
+            accent = NamesAccents.allah(),
+            onClick = {},
+        )
+        FavoriteFab(
+            isFavorite = false,
+            accent = NamesAccents.prophets(),
+            onClick = {},
+        )
+        NameDetailSectionCard(
+            title = "Meaning",
+            content = "Ar-Rahman is one of the most beautiful names of Allah, " +
+                "denoting the boundless mercy and compassion that encompasses " +
+                "all of creation, believers and non-believers alike.",
+            titleColor = NamesAccents.allah().contentTint,
+        )
+        NameDetailSectionCard(
+            title = "Benefits",
+            content = "Reciting this name frequently fills the heart with " +
+                "gratitude and softens it toward all of creation.",
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "NameDetailComponents — Light")
+@Composable
+private fun NameDetailComponentsLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NameDetailComponentsShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "NameDetailComponents — Dark")
+@Composable
+private fun NameDetailComponentsDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NameDetailComponentsShowcase()
     }
 }

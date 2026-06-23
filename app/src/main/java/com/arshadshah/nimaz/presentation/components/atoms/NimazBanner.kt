@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -29,13 +28,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 enum class NimazBannerVariant {
@@ -104,39 +104,17 @@ private fun InfoVariant(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
-    if (showBorder) {
-        Surface(
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(14.dp),
-            color = primaryColor.copy(alpha = 0.1f),
-            border = BorderStroke(1.dp, primaryColor.copy(alpha = 0.3f))
-        ) {
-            InfoContent(message = message, icon = icon)
+    BannerSurface(
+        modifier = modifier,
+        shape = RoundedCornerShape(if (showBorder) 14.dp else 12.dp),
+        color = primaryColor.copy(alpha = 0.1f),
+        border = if (showBorder) {
+            BorderStroke(1.dp, primaryColor.copy(alpha = 0.3f))
+        } else {
+            null
         }
-    } else {
-        Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(12.dp))
-                .background(primaryColor.copy(alpha = 0.1f))
-                .padding(15.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = primaryColor,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.2
-            )
-        }
+    ) {
+        InfoContent(message = message, icon = icon)
     }
 }
 
@@ -145,8 +123,6 @@ private fun InfoContent(
     message: String,
     icon: ImageVector? = null
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-
     Row(
         modifier = Modifier.padding(15.dp),
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -155,7 +131,7 @@ private fun InfoContent(
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = primaryColor,
+                tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
         }
@@ -163,7 +139,7 @@ private fun InfoContent(
             text = message,
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            lineHeight = 20.sp
+            lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.2
         )
     }
 }
@@ -179,58 +155,25 @@ private fun WarningVariant(
 ) {
     val warningColor = Color(0xFFF59E0B)
 
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(warningColor.copy(alpha = 0.1f))
-            .padding(16.dp),
-        verticalAlignment = Alignment.Top
+    BannerSurface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        color = warningColor.copy(alpha = 0.1f)
     ) {
-        if (icon != null) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = warningColor,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(14.dp))
-        }
-
-        Column(modifier = Modifier.weight(1f)) {
-            if (title != null) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-            Text(
-                text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            if (actionLabel != null && onAction != null) {
-                Spacer(modifier = Modifier.height(10.dp))
-                Button(
-                    onClick = onAction,
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = warningColor,
-                        contentColor = Color.White
-                    ),
-                    modifier = Modifier.height(36.dp)
-                ) {
-                    Text(
-                        text = actionLabel,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                }
-            }
-        }
+        BannerContentRow(
+            modifier = Modifier.padding(16.dp),
+            icon = icon,
+            iconTint = warningColor,
+            iconSpacing = 14.dp,
+            title = title,
+            titleStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            titleColor = MaterialTheme.colorScheme.onSurface,
+            titleBottomSpacing = 4.dp,
+            message = message,
+            accent = warningColor,
+            actionLabel = actionLabel,
+            onAction = onAction
+        )
     }
 }
 
@@ -282,9 +225,9 @@ private fun UpdateVariant(
                 }
             } else if (isLoading) {
                 CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
+                    modifier = Modifier.size(32.dp),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    strokeWidth = 2.dp
+                    strokeWidth = 3.dp
                 )
             }
         }
@@ -302,72 +245,150 @@ private fun ErrorVariant(
     onClick: (() -> Unit)? = null
 ) {
     val errorColor = MaterialTheme.colorScheme.error
-    val content: @Composable () -> Unit = {
-        Row(
+
+    BannerSurface(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+        onClick = onClick
+    ) {
+        BannerContentRow(
             modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.Top
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = errorColor,
-                    modifier = Modifier.size(24.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                if (title != null) {
-                    Text(
-                        text = title,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = errorColor
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                }
-                Text(
-                    text = message,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (actionLabel != null && onAction != null) {
-                    Spacer(modifier = Modifier.height(10.dp))
-                    Button(
-                        onClick = onAction,
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = errorColor,
-                            contentColor = Color.White
-                        ),
-                        modifier = Modifier.height(36.dp)
-                    ) {
-                        Text(
-                            text = actionLabel,
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
-        }
+            icon = icon,
+            iconTint = errorColor,
+            iconSpacing = 8.dp,
+            title = title,
+            titleStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            titleColor = errorColor,
+            titleBottomSpacing = 2.dp,
+            message = message,
+            accent = errorColor,
+            actionLabel = actionLabel,
+            onAction = onAction
+        )
     }
+}
 
+/**
+ * The rounded container shell shared by every variant: a full-width [Surface] with
+ * the given [shape], [color] and optional [border]. Passing [onClick] makes the
+ * whole banner tappable — this is the one place the clickable-vs-static branch lives,
+ * so individual variants never repeat it.
+ */
+@Composable
+private fun BannerSurface(
+    modifier: Modifier,
+    shape: Shape,
+    color: Color,
+    border: BorderStroke? = null,
+    onClick: (() -> Unit)? = null,
+    content: @Composable () -> Unit
+) {
     if (onClick != null) {
         Surface(
-            modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
             onClick = onClick,
+            modifier = modifier.fillMaxWidth(),
+            shape = shape,
+            color = color,
+            border = border,
             content = content
         )
     } else {
         Surface(
             modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(12.dp),
-            color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+            shape = shape,
+            color = color,
+            border = border,
             content = content
+        )
+    }
+}
+
+/**
+ * Shared icon · title/message · action layout behind the [NimazBannerVariant.WARNING]
+ * and [NimazBannerVariant.ERROR] variants. The action button sits to the right of the
+ * weighted text column (not below it), matching both variants' original layout.
+ *
+ * Container styling (background, shape, border, click) is supplied by [BannerSurface];
+ * this composable only lays out the content, taking the inner-padding [modifier] plus
+ * the per-variant accent, icon spacing and title style.
+ */
+@Composable
+private fun BannerContentRow(
+    modifier: Modifier,
+    icon: ImageVector?,
+    iconTint: Color,
+    iconSpacing: Dp,
+    title: String?,
+    titleStyle: TextStyle,
+    titleColor: Color,
+    titleBottomSpacing: Dp,
+    message: String,
+    accent: Color,
+    actionLabel: String?,
+    onAction: (() -> Unit)?
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = iconTint,
+                modifier = Modifier.size(24.dp)
+            )
+            Spacer(modifier = Modifier.width(iconSpacing))
+        }
+
+        Column(modifier = Modifier.weight(1f)) {
+            if (title != null) {
+                Text(
+                    text = title,
+                    style = titleStyle,
+                    color = titleColor
+                )
+                Spacer(modifier = Modifier.height(titleBottomSpacing))
+            }
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+
+        if (actionLabel != null && onAction != null) {
+            Spacer(modifier = Modifier.height(10.dp))
+            BannerActionButton(
+                label = actionLabel,
+                onClick = onAction,
+                containerColor = accent
+            )
+        }
+    }
+}
+
+/** Solid accent-coloured action button shared by the warning and error variants. */
+@Composable
+private fun BannerActionButton(
+    label: String,
+    onClick: () -> Unit,
+    containerColor: Color
+) {
+    Button(
+        onClick = onClick,
+        shape = RoundedCornerShape(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = containerColor,
+            contentColor = Color.White
+        ),
+        modifier = Modifier.height(36.dp)
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold
         )
     }
 }

@@ -6,6 +6,22 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.addPathNodes
 import androidx.compose.ui.unit.dp
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * Custom prayer icons that show the sun at its stage over a horizon line, so
@@ -94,5 +110,63 @@ val PrayerIconIsha: ImageVector by lazy {
     prayerIcon("PrayerIsha") {
         fillPath("M16.8 13 A6.6 6.6 0 1 1 9.2 5.4 A5.1 5.1 0 0 0 16.8 13 Z")
         fillPath("M5.4 4.6 L6.05 6.1 L7.55 6.75 L6.05 7.4 L5.4 8.9 L4.75 7.4 L2.75 7.4 L4.25 6.75 Z")
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+/**
+ * Shows every prayer-stage icon (sun-over-horizon / crescent geometry) tinted
+ * with the theme primary so the per-stage differences are visible.
+ */
+@Composable
+private fun PrayerStageIconsShowcase() {
+    val icons = listOf(
+        "Fajr" to PrayerIconFajr,
+        "Sunrise" to PrayerIconSunrise,
+        "Dhuhr" to PrayerIconDhuhr,
+        "Asr" to PrayerIconAsr,
+        "Maghrib" to PrayerIconMaghrib,
+        "Isha" to PrayerIconIsha,
+    )
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        icons.forEach { (label, icon) ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    modifier = Modifier.size(32.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Text(text = label, style = MaterialTheme.typography.bodyLarge)
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, name = "Prayer Stage Icons — Light")
+@Composable
+private fun PrayerStageIconsLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        PrayerStageIconsShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Prayer Stage Icons — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun PrayerStageIconsDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        PrayerStageIconsShowcase()
     }
 }

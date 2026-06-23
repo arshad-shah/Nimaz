@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,14 +18,19 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * A single reusable horizontal carousel: an edge-peeking [HorizontalPager] with
@@ -117,5 +123,68 @@ fun PageIndicators(
                     .background(color)
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+/**
+ * Showcase of [NimazCarousel] (edge-peeking pager with indicator dots) and a
+ * standalone [PageIndicators] row. Rendered in both light and dark themes by the
+ * previews below.
+ */
+@Composable
+private fun NimazCarouselShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        NimazCarousel(
+            count = 3,
+            pageHeight = 120.dp,
+        ) { page ->
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(120.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Card ${page + 1}",
+                    style = MaterialTheme.typography.titleLarge,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+
+        PageIndicators(
+            count = 5,
+            current = 2,
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Carousel — Light")
+@Composable
+private fun NimazCarouselLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        NimazCarouselShowcase()
+    }
+}
+
+@Preview(
+    showBackground = true, name = "Carousel — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazCarouselDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        NimazCarouselShowcase()
     }
 }

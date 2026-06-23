@@ -15,6 +15,15 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.LayoutDirection
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /** Arabic combining marks (harakat) we tint: tanween/fatha/damma/kasra/shadda/sukoon + superscript alef. */
 private fun Char.isHarakah(): Boolean = this.code in 0x064B..0x0652 || this.code == 0x0670
@@ -70,5 +79,46 @@ fun HarakatArabicText(
                 textDirection = TextDirection.Rtl,
             ),
         )
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+/**
+ * Shows the same Arabic word with each [highlightGroup] so the fatha/damma (teal)
+ * vs. kasra (gold) tinting is visible, plus the [playing] state.
+ */
+@Composable
+private fun HarakatArabicTextShowcase() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        HarakatArabicText(text = "بَ", highlightGroup = "fatha")
+        HarakatArabicText(text = "بُ", highlightGroup = "damma")
+        HarakatArabicText(text = "بِ", highlightGroup = "kasra")
+        HarakatArabicText(text = "بَا", highlightGroup = null)
+        HarakatArabicText(text = "بَ", highlightGroup = "fatha", playing = true)
+    }
+}
+
+@Preview(showBackground = true, name = "Harakat Arabic Text — Light")
+@Composable
+private fun HarakatArabicTextLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        HarakatArabicTextShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Harakat Arabic Text — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun HarakatArabicTextDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        HarakatArabicTextShowcase()
     }
 }

@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
@@ -14,8 +16,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * A small row of stars showing [filled] out of [max] earned, used under lesson
@@ -48,5 +53,37 @@ fun QaidaStarRow(
                     .testTag("qaida_star"),
             )
         }
+    }
+}
+
+
+// ==================== PREVIEWS ====================
+
+@Composable
+private fun QaidaStarRowShowcase() {
+    Column(
+        modifier = Modifier.padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        QaidaStarRow(filled = 0, starSize = 20.dp)
+        QaidaStarRow(filled = 1, starSize = 20.dp)
+        QaidaStarRow(filled = 2, starSize = 20.dp)
+        QaidaStarRow(filled = 3, starSize = 20.dp)
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Star Row — Light")
+@Composable
+private fun QaidaStarRowLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        QaidaStarRowShowcase()
+    }
+}
+
+@Preview(showBackground = true, name = "Qaida Star Row — Dark")
+@Composable
+private fun QaidaStarRowDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        QaidaStarRowShowcase()
     }
 }
