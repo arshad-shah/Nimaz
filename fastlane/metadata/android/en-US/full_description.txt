@@ -4,7 +4,7 @@ Nimaz brings together every essential Islamic tool in one beautiful, privacy-foc
 
 ━━━━━━━━━━━━━━━━━━━━━━━━
 
-🕌 ACCURATE PRAYER TIMES & ATHAN
+🕌 ACCURATE PRAYER TIMES & ADHAN
 • Precise salah times for Fajr, Dhuhr, Asr, Maghrib, and Isha based on your location
 • Multiple calculation methods (MWL, ISNA, Egypt, Makkah, Karachi, and more)
 • Customisable prayer time notifications and Adhan reminders
