@@ -4,15 +4,12 @@ import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -36,10 +33,8 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 @Composable
 internal fun SurahBanner(
     surahNameArabic: String,
-    surahNameEnglish: String,
     surahMeaning: String,
     revelationType: RevelationType,
-    ayahCount: Int,
     showBismillah: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -67,40 +62,23 @@ internal fun SurahBanner(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = surahNameEnglish,
-                style = MaterialTheme.typography.titleLarge,
+                text = surahMeaning,
+                style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = NimazColors.QuranColors.BannerAccent
             )
 
-            Text(
-                text = surahMeaning,
-                style = MaterialTheme.typography.bodySmall,
-                color = NimazColors.QuranColors.BannerAccent.copy(alpha = 0.8f)
-            )
-
             Spacer(modifier = Modifier.height(8.dp))
 
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+            Surface(
+                shape = RoundedCornerShape(8.dp),
+                color = Color.White.copy(alpha = 0.15f)
             ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = Color.White.copy(alpha = 0.15f)
-                ) {
-                    Text(
-                        text = if (revelationType == RevelationType.MECCAN) stringResource(R.string.quran_meccan) else stringResource(R.string.quran_medinan),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color.White,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = stringResource(R.string.quran_ayahs_count_format, ayahCount),
+                    text = if (revelationType == RevelationType.MECCAN) stringResource(R.string.quran_meccan) else stringResource(R.string.quran_medinan),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.8f)
+                    color = Color.White,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
                 )
             }
 
@@ -125,10 +103,8 @@ internal fun SurahBannerPreview() {
     NimazTheme {
         SurahBanner(
             surahNameArabic = "\u0627\u0644\u0641\u0627\u062A\u062D\u0629",
-            surahNameEnglish = "Al-Fatihah",
             surahMeaning = "The Opening",
             revelationType = RevelationType.MECCAN,
-            ayahCount = 7,
             showBismillah = true
         )
     }

@@ -18,18 +18,14 @@ class QuranSurahBannerTest {
         composeRule.setThemedContent {
             SurahBanner(
                 surahNameArabic = "ArabicName",
-                surahNameEnglish = "Al-Fatihah",
                 surahMeaning = "The Opening",
                 revelationType = RevelationType.MECCAN,
-                ayahCount = 7,
                 showBismillah = true
             )
         }
         composeRule.onNodeWithText("ArabicName").assertExists()
-        composeRule.onNodeWithText("Al-Fatihah").assertExists()
         composeRule.onNodeWithText("The Opening").assertExists()
         composeRule.onNodeWithText("Meccan").assertExists()
-        composeRule.onNodeWithText("7 Ayahs").assertExists()
     }
 
     @Test
@@ -37,16 +33,13 @@ class QuranSurahBannerTest {
         composeRule.setThemedContent {
             SurahBanner(
                 surahNameArabic = "ArabicName2",
-                surahNameEnglish = "Al-Baqarah",
                 surahMeaning = "The Cow",
                 revelationType = RevelationType.MEDINAN,
-                ayahCount = 286,
                 showBismillah = false
             )
         }
-        composeRule.onNodeWithText("Al-Baqarah").assertExists()
+        composeRule.onNodeWithText("The Cow").assertExists()
         composeRule.onNodeWithText("Medinan").assertExists()
-        composeRule.onNodeWithText("286 Ayahs").assertExists()
         // Meccan label must not be present for a medinan surah
         composeRule.onNodeWithText("Meccan").assertDoesNotExist()
     }
