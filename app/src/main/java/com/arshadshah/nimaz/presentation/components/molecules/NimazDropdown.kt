@@ -1,10 +1,11 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import android.content.res.Configuration
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -46,6 +48,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -55,6 +60,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShap
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /**
  * The app's anchored dropdown/menu system, in one place. Three public entry points,
@@ -318,56 +324,69 @@ fun <T> NimazDropdownField(
                 else -> MaterialTheme.colorScheme.primary
             }
 
-            Row(
+            // Built from the shared NimazCard primitive (OUTLINED), so the trigger inherits
+            // the app's card shape/elevation handling rather than a hand-rolled border box.
+            NimazCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { fieldWidthPx = it.width }
-                    .alpha(if (enabled) 1f else 0.55f)
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(MaterialTheme.colorScheme.surface)
-                    .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(14.dp))
-                    .clickable(enabled = enabled) { expanded = true }
-                    .padding(horizontal = 14.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .alpha(if (enabled) 1f else 0.55f),
+                style = NimazCardStyle.OUTLINED,
+                onClick = { expanded = true },
+                enabled = enabled,
+                shape = RoundedCornerShape(14.dp),
+                colors = NimazCardDefaults.colors(
+                    container = MaterialTheme.colorScheme.surface,
+                    content = MaterialTheme.colorScheme.onSurface,
+                    border = borderColor,
+                    borderWidth = 1.5.dp,
+                ),
             ) {
-                if (selectedItem?.leadingIcon != null) {
-                    NimazIcon(
-                        imageVector = selectedItem.leadingIcon,
-                        contentDescription = null,
-                        type = NimazIconType.CONTAINED,
-                        containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
-                        tint = MaterialTheme.colorScheme.primary,
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        containerSize = 32.dp,
-                        iconSize = 18.dp,
-                        cornerRadius = 9.dp,
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
-                Text(
-                    text = selectedItem?.label ?: placeholder,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Medium,
-                    fontFamily = selectedItem?.textFontFamily,
-                    color = if (isEmpty) MaterialTheme.colorScheme.onSurfaceVariant
-                    else MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.weight(1f)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Box(
+                Row(
                     modifier = Modifier
-                        .size(26.dp)
-                        .clip(CircleShape)
-                        .background(chevronCircleColor),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    NimazIcon(
-                        imageVector = Icons.Default.KeyboardArrowDown,
-                        contentDescription = null,
-                        tint = chevronTint,
-                        iconSize = 16.dp,
-                        modifier = Modifier.rotate(chevronRotation)
+                    if (selectedItem?.leadingIcon != null) {
+                        NimazIcon(
+                            imageVector = selectedItem.leadingIcon,
+                            contentDescription = null,
+                            type = NimazIconType.CONTAINED,
+                            containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                            tint = MaterialTheme.colorScheme.primary,
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                            containerSize = 32.dp,
+                            iconSize = 18.dp,
+                            cornerRadius = 9.dp,
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                    }
+                    Text(
+                        text = selectedItem?.label ?: placeholder,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        fontFamily = selectedItem?.textFontFamily,
+                        color = if (isEmpty) MaterialTheme.colorScheme.onSurfaceVariant
+                        else MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Box(
+                        modifier = Modifier
+                            .size(26.dp)
+                            .clip(CircleShape)
+                            .background(chevronCircleColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = null,
+                            tint = chevronTint,
+                            iconSize = 16.dp,
+                            modifier = Modifier.rotate(chevronRotation)
+                        )
+                    }
                 }
             }
 
@@ -399,43 +418,121 @@ fun <T> NimazDropdownField(
 
 // ──── Previews ───────────────────────────────────────────────────────────────
 
-@Preview(showBackground = true, widthDp = 320, name = "NimazDropdownRow — selection · action")
 @Composable
-private fun NimazDropdownRowPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(8.dp)) {
-            NimazDropdownRow(text = "Amiri", selected = true, onClick = {})
-            NimazDropdownRow(
-                text = "Scheherazade New",
-                selected = false,
-                description = "Classic naskh typeface",
-                onClick = {}
-            )
-            NimazDropdownRow(text = "Share", leadingIcon = Icons.Filled.Share, onClick = {})
-            NimazDropdownRow(
-                text = "Reset Journey",
-                leadingIcon = Icons.Filled.RestartAlt,
-                destructive = true,
-                onClick = {}
-            )
+private fun PreviewLabel(text: String) {
+    Text(
+        text = text,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 8.dp, bottom = 2.dp)
+    )
+}
+
+/** Every [NimazDropdownRow] flavour: selection, description, leading icon, action, destructive, disabled. */
+@Composable
+private fun NimazDropdownRowShowcase() {
+    Column {
+        NimazDropdownRow(text = "Amiri", selected = false, onClick = {})
+        NimazDropdownRow(text = "Amiri", selected = true, onClick = {})
+        NimazDropdownRow(
+            text = "Scheherazade New",
+            selected = true,
+            description = "Classic naskh typeface",
+            onClick = {}
+        )
+        NimazDropdownRow(
+            text = "Standard",
+            selected = false,
+            leadingIcon = Icons.Default.WbSunny,
+            onClick = {}
+        )
+        NimazDropdownRow(text = "Share", leadingIcon = Icons.Filled.Share, onClick = {})
+        NimazDropdownRow(
+            text = "Reset Journey",
+            leadingIcon = Icons.Filled.RestartAlt,
+            destructive = true,
+            onClick = {}
+        )
+        NimazDropdownRow(text = "Unavailable", enabled = false, onClick = {})
+    }
+}
+
+/** A faux open menu — the real popup can't render in an isolated preview, so the rows are
+ *  shown on a [NimazDropdownDefaults] surface to represent the dropped menu. */
+@Composable
+private fun NimazDropdownMenuShowcase() {
+    Surface(
+        shape = NimazDropdownDefaults.MenuShape,
+        color = NimazDropdownDefaults.menuContainerColor,
+        tonalElevation = NimazDropdownDefaults.MenuTonalElevation,
+        border = NimazDropdownDefaults.menuBorder,
+        modifier = Modifier.width(260.dp)
+    ) {
+        Column(modifier = Modifier.padding(6.dp)) {
+            NimazDropdownRow(text = "Standard", selected = true, onClick = {})
+            NimazDropdownRow(text = "Hanafi", selected = false, onClick = {})
         }
     }
 }
 
-@Preview(showBackground = true, widthDp = 360, name = "NimazDropdownField")
+/** [NimazDropdownField] in each state: resting (selected), leading icon, placeholder, disabled. */
 @Composable
-private fun NimazDropdownFieldPreview() {
-    NimazTheme {
-        Column(modifier = Modifier.padding(16.dp)) {
-            NimazDropdownField(
-                label = "Asr Calculation",
-                items = listOf(
-                    NimazDropdownItem("standard", "Standard", leadingIcon = Icons.Default.WbSunny),
-                    NimazDropdownItem("hanafi", "Hanafi"),
-                ),
-                selected = "standard",
-                onSelected = {},
-            )
-        }
+private fun NimazDropdownFieldShowcase() {
+    val fonts = listOf(
+        NimazDropdownItem("amiri", "Amiri"),
+        NimazDropdownItem("scheherazade", "Scheherazade New"),
+    )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        NimazDropdownField(label = "Arabic Font", items = fonts, selected = "amiri", onSelected = {})
+        NimazDropdownField(
+            label = "Asr Calculation",
+            items = listOf(
+                NimazDropdownItem("standard", "Standard", leadingIcon = Icons.Default.WbSunny),
+                NimazDropdownItem("hanafi", "Hanafi"),
+            ),
+            selected = "standard",
+            onSelected = {},
+        )
+        NimazDropdownField(
+            label = "Exemption Reason",
+            items = fonts,
+            selected = null,
+            placeholder = "Select reason",
+            onSelected = {},
+        )
+        NimazDropdownField(
+            label = "High Latitude Rule",
+            items = fonts,
+            selected = "amiri",
+            enabled = false,
+            onSelected = {},
+        )
     }
+}
+
+@Composable
+private fun NimazDropdownShowcase() {
+    Column(modifier = Modifier.padding(16.dp)) {
+        PreviewLabel("Field — resting · leading icon · placeholder · disabled")
+        NimazDropdownFieldShowcase()
+        PreviewLabel("Menu (open) — selected + unselected rows")
+        NimazDropdownMenuShowcase()
+        PreviewLabel("Rows — every flavour")
+        NimazDropdownRowShowcase()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 360, name = "NimazDropdown — Light")
+@Composable
+private fun NimazDropdownLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) { NimazDropdownShowcase() }
+}
+
+@Preview(
+    showBackground = true, widthDp = 360, name = "NimazDropdown — Dark",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun NimazDropdownDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) { NimazDropdownShowcase() }
 }
