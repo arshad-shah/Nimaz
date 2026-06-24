@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -165,10 +164,11 @@ fun <T> NimazDropdownField(
             DropdownMenu(
                 expanded = expanded,
                 onDismissRequest = { expanded = false },
-                shape = RoundedCornerShape(16.dp),
-                containerColor = MaterialTheme.colorScheme.surface,
-                shadowElevation = 8.dp,
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
+                shape = NimazDropdownDefaults.MenuShape,
+                containerColor = NimazDropdownDefaults.menuContainerColor,
+                tonalElevation = NimazDropdownDefaults.MenuTonalElevation,
+                shadowElevation = NimazDropdownDefaults.MenuShadowElevation,
+                border = NimazDropdownDefaults.menuBorder,
                 modifier = Modifier.width(
                     with(density) { fieldWidthPx.toDp() }.coerceAtLeast(0.dp)
                 )

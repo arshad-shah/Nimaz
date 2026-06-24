@@ -477,6 +477,19 @@ typed route object.
       variant. **Not** for `Switch` (on/off settings) or genuine single-choice `RadioButton` pickers
       — those stay as-is. It centralised the prayer/fast trackers, the settings/Quran pickers and
       the dropdown/list selection check indicators.
+    - a **choose-one / act** surface picks from three components by list shape, **never** a raw
+      Material `DropdownMenu`/`ExposedDropdownMenuBox`/`DropdownMenuItem`. The rule:
+      - **short simple option list (≤ ~7)** → inline `NimazDropdownField(items, selected, onSelected,
+        …)` (`components/molecules/NimazDropdownField.kt`) — a filled trigger that pops an anchored
+        menu of `NimazDropdownMenuItem` rows (accent fill + circular check on the selected one).
+      - **long / searchable / grouped list** → the modal `NimazListPicker(title, items, selected,
+        onSelected, onDismiss, searchable = …)` (`components/molecules/NimazListPicker.kt`), opened
+        from a `NimazSettingsItem` that shows the current value (the prayer-settings pattern).
+      - **action / overflow menu** (icon-triggered commands, not a value) → `NimazDropdownMenu(expanded,
+        onDismissRequest) { … }` with `NimazDropdownAction(text, onClick, leadingIcon, destructive)`
+        rows (`components/molecules/NimazDropdownMenu.kt`).
+      All three share one popover surface via `NimazDropdownDefaults` (16dp `surface` card, tonal
+      elevation, faint outline — **not** Material's heavy drop-shadow menu).
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 
