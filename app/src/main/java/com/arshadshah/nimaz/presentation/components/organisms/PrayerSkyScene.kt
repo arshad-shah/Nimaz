@@ -78,6 +78,12 @@ import kotlin.math.sin
  * so the sun sits exactly where it should at any moment, not just at the
  * prayer anchors. Clouds drift slowly across.
  *
+ * The sun is locked to the *real* sun: [sunriseFraction]/[sunsetFraction]
+ * (today's sunrise/sunset, each as a fraction of the day) time-warp the scene
+ * so daybreak and dusk land on the user's actual sun times for their location
+ * and season — not fixed clock anchors. With the defaults the scene falls back
+ * to a generic ~6:30am/~7:12pm day.
+ *
  * Performance: the heavy work — gradients, blurred corona/rays, the moon's
  * [PathOperation] and soft terminator — is baked once into a small
  * [ImageBitmap] (via [drawWithCache], keyed on [timeOfDay]/[moonFraction]) and
@@ -89,6 +95,8 @@ import kotlin.math.sin
  * @param timeOfDay fraction through a 24h day, 0f→1f.
  * @param moonFraction synodic phase 0f→1f (see [MoonPhase]); used at night.
  * @param cloudsEnabled set false to freeze cloud motion (e.g. battery saver).
+ * @param sunriseFraction today's sunrise as a fraction of the day (0f→1f).
+ * @param sunsetFraction today's sunset (Maghrib) as a fraction of the day.
  */
 @Composable
 fun SkyBackground(
@@ -97,6 +105,8 @@ fun SkyBackground(
     modifier: Modifier = Modifier,
     shape: Shape = RoundedCornerShape(20.dp),
     cloudsEnabled: Boolean = true,
+    sunriseFraction: Float = SUNRISE_T,
+    sunsetFraction: Float = SUNSET_T,
 ) {
     val drift = rememberInfiniteTransition(label = "sky")
     val cloudPhase by drift.animateFloat(
@@ -118,11 +128,16 @@ fun SkyBackground(
                 val sw = (size.width * SPRITE_SCALE).roundToInt().coerceAtLeast(1)
                 val sh = (size.height * SPRITE_SCALE).roundToInt().coerceAtLeast(1)
 
-                // Baked once per (timeOfDay, moonFraction, size) change — not per frame.
+                // Warp real time so the actual sunrise/sunset land on the
+                // scene's canonical anchors — the sun, day/night ramp and sky
+                // gradient then all track the real sun, not fixed clock times.
+                val warped = remapDayFraction(timeOfDay, sunriseFraction, sunsetFraction)
+
+                // Baked once per (warped, moonFraction, size) change — not per frame.
                 val scene =
-                    bakeLayer(sw, sh, this, layoutDirection) { drawScene(timeOfDay, moonFraction) }
+                    bakeLayer(sw, sh, this, layoutDirection) { drawScene(warped, moonFraction) }
                 val clouds = bakeLayer(sw, sh, this, layoutDirection) { drawCloudLayer() }
-                val cloudTint = ColorFilter.tint(sampleCloud(timeOfDay), BlendMode.Modulate)
+                val cloudTint = ColorFilter.tint(sampleCloud(warped), BlendMode.Modulate)
                 val full = IntSize(w, h)
 
                 onDrawBehind {
@@ -158,6 +173,8 @@ fun PrayerSkyScene(
     moonFraction: Float = 0.5f,
     shape: Shape = RoundedCornerShape(20.dp),
     cloudsEnabled: Boolean = true,
+    sunriseFraction: Float = SUNRISE_T,
+    sunsetFraction: Float = SUNSET_T,
 ) {
     val backdrop = rememberGlassBackdrop()
     Box(modifier = modifier) {
@@ -169,6 +186,8 @@ fun PrayerSkyScene(
                 .glassBackdropSource(backdrop),
             shape = shape,
             cloudsEnabled = cloudsEnabled,
+            sunriseFraction = sunriseFraction,
+            sunsetFraction = sunsetFraction,
         )
         Column(
             modifier = Modifier.padding(16.dp),
@@ -200,6 +219,25 @@ fun PrayerSkyScene(
 private const val SPRITE_SCALE = 0.6f
 private const val SUNRISE_T = 0.27f
 private const val SUNSET_T = 0.80f
+
+/**
+ * Piecewise-linear time-warp from a real day-fraction [t] onto the scene's
+ * canonical timeline, so the real [sunrise]/[sunset] (each 0f→1f of the day)
+ * land exactly on [SUNRISE_T]/[SUNSET_T]. Midnight stays at 0f/1f. This keeps
+ * the sun arc, the day/night ramp and the sky gradient locked to the user's
+ * actual sun — the sun only dips below the horizon at real Maghrib, not at a
+ * fixed 7:12pm. Degenerate or polar inputs are clamped to a sane day.
+ */
+internal fun remapDayFraction(t: Float, sunrise: Float, sunset: Float): Float {
+    val tt = t.coerceIn(0f, 1f)
+    val sr = sunrise.coerceIn(0.02f, 0.96f)
+    val ss = sunset.coerceIn(sr + 0.02f, 0.98f)
+    return when {
+        tt <= sr -> lerpF(0f, SUNRISE_T, tt / sr)
+        tt <= ss -> lerpF(SUNRISE_T, SUNSET_T, (tt - sr) / (ss - sr))
+        else -> lerpF(SUNSET_T, 1f, (tt - ss) / (1f - ss))
+    }
+}
 
 /**
  * Moon phase from the date, after Jean Meeus, *Astronomical Algorithms*.

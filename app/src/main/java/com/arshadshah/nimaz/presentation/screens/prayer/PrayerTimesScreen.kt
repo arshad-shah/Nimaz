@@ -117,6 +117,8 @@ fun PrayerTimesScreen(
                     timeLabel = state.skyTimeLabel,
                     statusLabel = state.skyStatusLabel,
                     moonFraction = state.moonFraction,
+                    sunriseFraction = state.sunriseFraction,
+                    sunsetFraction = state.sunsetFraction,
                     shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
                     modifier = Modifier
                         .fillMaxWidth()

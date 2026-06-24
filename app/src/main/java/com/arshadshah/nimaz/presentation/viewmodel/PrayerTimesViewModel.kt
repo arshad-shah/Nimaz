@@ -53,6 +53,8 @@ data class PrayerTimesUiState(
     // Living-sky inputs
     val timeOfDay: Float = 0.5f,        // minute-quantised fraction of the day
     val moonFraction: Float = 0.5f,     // moon phase for the selected date
+    val sunriseFraction: Float = 0.27f, // sunrise as a fraction of the day (sun arc)
+    val sunsetFraction: Float = 0.80f,  // sunset (Maghrib) as a fraction of the day
     val skyTimeLabel: String = "",
     val skyStatusLabel: String = "",
     // Day-info card
@@ -232,6 +234,14 @@ class PrayerTimesViewModel @Inject constructor(
             val mins = (maghribInstant - sunriseInstant).inWholeMinutes
             "${mins / 60}h ${mins % 60}m"
         } else ""
+        // Day-fractions for the living sky's sun arc — anchors the scene to the
+        // real sunrise/sunset for this location & date instead of fixed clock anchors.
+        val sunriseFraction = sunriseInstant?.let {
+            val l = it.toLocalDateTime(tz); (l.hour * 60 + l.minute) / 1440f
+        } ?: 0.27f
+        val sunsetFraction = maghribInstant?.let {
+            val l = it.toLocalDateTime(tz); (l.hour * 60 + l.minute) / 1440f
+        } ?: 0.80f
         val moon = MoonPhase.fractionForEpochMillis(
             date.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli(),
         )
@@ -243,6 +253,8 @@ class PrayerTimesViewModel @Inject constructor(
                 daylight = daylightStr,
                 methodLabel = "${calcMethod.shortName()} · ${asrCalc.shortName()}",
                 moonFraction = moon,
+                sunriseFraction = sunriseFraction,
+                sunsetFraction = sunsetFraction,
             )
         }
 

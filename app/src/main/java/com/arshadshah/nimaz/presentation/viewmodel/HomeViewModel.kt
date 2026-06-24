@@ -70,6 +70,10 @@ data class HomeUiState(
     // 0f→1f position of "now" along the Fajr→Isha timeline (drives the progress
     // card's fill); recomputed each tick so it advances with the clock.
     val prayerTimelineProgress: Float = 0f,
+    // Today's sunrise/sunset as fractions of the day — anchor the living sky's
+    // sun arc to the real sun instead of fixed clock times.
+    val sunriseFraction: Float = 0.27f,
+    val sunsetFraction: Float = 0.80f,
     val dailyDua: DailyDua? = null,
     val isFriday: Boolean = false,
     val jumuahTime: String = "",
@@ -565,6 +569,14 @@ class HomeViewModel @Inject constructor(
                     }
                 }
 
+                // Sunrise/sunset as day-fractions for the living sky's sun arc.
+                val sunriseFraction = prayerTimes.find { it.type == PrayerType.SUNRISE }?.time
+                    ?.toLocalDateTime(timeZone)
+                    ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.27f
+                val sunsetFraction = prayerTimes.find { it.type == PrayerType.MAGHRIB }?.time
+                    ?.toLocalDateTime(timeZone)
+                    ?.let { (it.hour * 60 + it.minute) / 1440f } ?: 0.80f
+
                 // Apply prayer records to displays
                 val records = _prayerRecords.value
                 val displaysWithStatus = updatedDisplays.map { display ->
@@ -598,6 +610,8 @@ class HomeViewModel @Inject constructor(
                     it.copy(
                         prayerTimes = displaysWithStatus,
                         prayerTimelineProgress = timelineProgress,
+                        sunriseFraction = sunriseFraction,
+                        sunsetFraction = sunsetFraction,
                         currentPrayer = if (currentPrayerIndex >= 0) sortedPrayers[currentPrayerIndex].type else null,
                         nextPrayer = nextPrayer,
                         timeUntilNextPrayer = timeUntilNext,
