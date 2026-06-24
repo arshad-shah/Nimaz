@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +13,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.WbSunny
@@ -29,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
@@ -47,7 +51,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -294,26 +300,47 @@ fun <T> NimazDropdownField(
 
         Box(modifier = Modifier.fillMaxWidth()) {
             // ── Trigger field ──────────────────────────────────────────────
+            // Outlined field: teal outline when a value is set (neutral when empty /
+            // disabled); on open the chevron flips up and its circle fills solid teal.
+            val isEmpty = selectedItem == null
+            val borderColor = when {
+                !enabled -> MaterialTheme.colorScheme.outlineVariant
+                expanded -> MaterialTheme.colorScheme.primary
+                isEmpty -> MaterialTheme.colorScheme.outlineVariant
+                else -> MaterialTheme.colorScheme.primary
+            }
+            val chevronCircleColor = if (expanded) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
+            val chevronTint = when {
+                !enabled -> MaterialTheme.colorScheme.onSurfaceVariant
+                expanded -> MaterialTheme.colorScheme.onPrimary
+                isEmpty -> MaterialTheme.colorScheme.onSurfaceVariant
+                else -> MaterialTheme.colorScheme.primary
+            }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .onSizeChanged { fieldWidthPx = it.width }
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        if (expanded) MaterialTheme.colorScheme.primaryContainer
-                        else MaterialTheme.colorScheme.surfaceContainerHighest
-                    )
+                    .alpha(if (enabled) 1f else 0.55f)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+                    .border(BorderStroke(1.5.dp, borderColor), RoundedCornerShape(14.dp))
                     .clickable(enabled = enabled) { expanded = true }
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (selectedItem?.leadingIcon != null) {
                     NimazIcon(
                         imageVector = selectedItem.leadingIcon,
                         contentDescription = null,
-                        tint = if (expanded) MaterialTheme.colorScheme.onPrimaryContainer
-                        else MaterialTheme.colorScheme.onSurfaceVariant,
-                        iconSize = 20.dp
+                        type = NimazIconType.CONTAINED,
+                        containerShape = NimazIconContainerShape.ROUNDED_SQUARE,
+                        tint = MaterialTheme.colorScheme.primary,
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
+                        containerSize = 32.dp,
+                        iconSize = 18.dp,
+                        cornerRadius = 9.dp,
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                 }
@@ -322,21 +349,26 @@ fun <T> NimazDropdownField(
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = FontWeight.Medium,
                     fontFamily = selectedItem?.textFontFamily,
-                    color = when {
-                        expanded -> MaterialTheme.colorScheme.onPrimaryContainer
-                        selectedItem == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                        else -> MaterialTheme.colorScheme.onSurface
-                    },
+                    color = if (isEmpty) MaterialTheme.colorScheme.onSurfaceVariant
+                    else MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                NimazIcon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    tint = if (expanded) MaterialTheme.colorScheme.onPrimaryContainer
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.rotate(chevronRotation)
-                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Box(
+                    modifier = Modifier
+                        .size(26.dp)
+                        .clip(CircleShape)
+                        .background(chevronCircleColor),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NimazIcon(
+                        imageVector = Icons.Default.KeyboardArrowDown,
+                        contentDescription = null,
+                        tint = chevronTint,
+                        iconSize = 16.dp,
+                        modifier = Modifier.rotate(chevronRotation)
+                    )
+                }
             }
 
             // ── Anchored popup (the shared menu + row) ─────────────────────
