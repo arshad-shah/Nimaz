@@ -11,6 +11,9 @@ import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -63,6 +66,9 @@ sealed interface SearchEvent {
     data object ClearRecentSearches : SearchEvent
 }
 
+/** Idle time after the last keystroke before a search-as-you-type lookup fires. */
+private const val SEARCH_DEBOUNCE_MS = 300L
+
 @HiltViewModel
 class SearchViewModel @Inject constructor(
     private val quranUseCases: QuranUseCases,
@@ -78,6 +84,10 @@ class SearchViewModel @Inject constructor(
 
     private val recentSearchesList = mutableListOf<String>()
     private val pendingSearchCount = AtomicInteger(0)
+
+    // The in-flight search (debounce + the per-source lookups it launches as children).
+    // Cancelled and replaced on each new query so stale results never clobber newer ones.
+    private var searchJob: Job? = null
 
     fun onEvent(event: SearchEvent) {
         // Record the search action with its filter and query length only — never
@@ -102,10 +112,15 @@ class SearchViewModel @Inject constructor(
     private fun updateQuery(query: String) {
         _searchState.update { it.copy(query = query) }
 
-        // Only clear results when query is emptied, don't auto-search
-        if (query.isEmpty()) {
+        val trimmed = query.trim()
+        if (trimmed.isBlank()) {
+            searchJob?.cancel()
             clearResults()
+            return
         }
+        // Search-as-you-type, debounced. The recent-searches list is only touched on an
+        // explicit submit (enter / recent tap), not on every keystroke.
+        launchSearch(trimmed, addToRecent = false, debounceMillis = SEARCH_DEBOUNCE_MS)
     }
 
     private fun setFilter(filter: SearchFilter) {
@@ -131,25 +146,36 @@ class SearchViewModel @Inject constructor(
     private fun executeSearch() {
         val query = _searchState.value.query.trim()
         if (query.isBlank()) {
+            searchJob?.cancel()
             clearResults()
             return
         }
+        // Explicit submit (enter / recent search): search immediately and remember it.
+        launchSearch(query, addToRecent = true, debounceMillis = 0L)
+    }
 
+    /**
+     * Cancel any in-flight search and start a new one. [isSearching] flips on synchronously
+     * (before the debounce delay) so the screen's "no results" state can never show while a
+     * lookup is still pending. The per-source lookups are launched as children of [searchJob],
+     * so cancelling it cancels them too.
+     */
+    private fun launchSearch(query: String, addToRecent: Boolean, debounceMillis: Long) {
+        searchJob?.cancel()
         _searchState.update { it.copy(isSearching = true, error = null) }
-
-        // Add to recent searches
-        addToRecentSearches(query)
-
-        // Search based on filter
-        when (_searchState.value.selectedFilter) {
-            SearchFilter.ALL -> searchAll(query)
-            SearchFilter.QURAN -> searchQuranOnly(query)
-            SearchFilter.HADITH -> searchHadithOnly(query)
-            SearchFilter.DUA -> searchDuaOnly(query)
+        if (addToRecent) addToRecentSearches(query)
+        searchJob = viewModelScope.launch {
+            if (debounceMillis > 0) delay(debounceMillis)
+            when (_searchState.value.selectedFilter) {
+                SearchFilter.ALL -> searchAll(query, this)
+                SearchFilter.QURAN -> searchQuranOnly(query, this)
+                SearchFilter.HADITH -> searchHadithOnly(query, this)
+                SearchFilter.DUA -> searchDuaOnly(query, this)
+            }
         }
     }
 
-    private fun searchAll(query: String) {
+    private fun searchAll(query: String, scope: CoroutineScope) {
         val totalSearches = 4
         pendingSearchCount.set(totalSearches)
 
@@ -160,7 +186,7 @@ class SearchViewModel @Inject constructor(
         }
 
         // Search Quran (include translations for English search terms)
-        viewModelScope.launch {
+        scope.launch {
             quranUseCases.searchQuran(query, "sahih_international").collect { results ->
                 _searchState.update { state ->
                     val unified =
@@ -178,7 +204,7 @@ class SearchViewModel @Inject constructor(
         }
 
         // Search Surahs by name
-        viewModelScope.launch {
+        scope.launch {
             quranUseCases.getSurahList.search(query).collect { surahs ->
                 _searchState.update { state ->
                     val unified =
@@ -196,7 +222,7 @@ class SearchViewModel @Inject constructor(
         }
 
         // Search Hadith
-        viewModelScope.launch {
+        scope.launch {
             hadithUseCases.searchHadiths(query).collect { results ->
                 _searchState.update { state ->
                     val unified =
@@ -214,7 +240,7 @@ class SearchViewModel @Inject constructor(
         }
 
         // Search Duas
-        viewModelScope.launch {
+        scope.launch {
             duaUseCases.searchDuas(query).collect { results ->
                 _searchState.update { state ->
                     val unified =
@@ -232,7 +258,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun searchQuranOnly(query: String) {
+    private fun searchQuranOnly(query: String, scope: CoroutineScope) {
         val totalSearches = 2
         pendingSearchCount.set(totalSearches)
 
@@ -242,7 +268,7 @@ class SearchViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
+        scope.launch {
             quranUseCases.searchQuran(query, "sahih_international").collect { results ->
                 val unified = results.map { UnifiedSearchResult.QuranResult(it) }
                 _searchState.update {
@@ -257,7 +283,7 @@ class SearchViewModel @Inject constructor(
             }
         }
 
-        viewModelScope.launch {
+        scope.launch {
             quranUseCases.getSurahList.search(query).collect { surahs ->
                 _searchState.update { state ->
                     val surahResults = surahs.map { UnifiedSearchResult.SurahResult(it) }
@@ -274,8 +300,8 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun searchHadithOnly(query: String) {
-        viewModelScope.launch {
+    private fun searchHadithOnly(query: String, scope: CoroutineScope) {
+        scope.launch {
             hadithUseCases.searchHadiths(query).collect { results ->
                 val unified = results.map { UnifiedSearchResult.HadithResult(it) }
                 _searchState.update {
@@ -291,8 +317,8 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun searchDuaOnly(query: String) {
-        viewModelScope.launch {
+    private fun searchDuaOnly(query: String, scope: CoroutineScope) {
+        scope.launch {
             duaUseCases.searchDuas(query).collect { results ->
                 val unified = results.map { UnifiedSearchResult.DuaResult(it) }
                 _searchState.update {
