@@ -540,7 +540,7 @@ private fun HighlightDetailSheetContent(
                 NimazButton(
                     text = stringResource(R.string.save),
                     onClick = { onNoteSaved(noteText) },
-                    variant = NimazButtonVariant.TEXT
+                    variant = NimazButtonVariant.FILLED
                 )
             }
         }
