@@ -474,6 +474,24 @@ typed route object.
       preset; `type` is `SQUARE` (rounded Material-style) or `CIRCLE` (the prayer/fast-completion
       look). Pass `onCheckedChange = null` for a **display-only indicator** (no click semantics) —
       the drop-in for selected-card/list rows where the parent owns the click; `tint =` escapes the
+      variant. **Not** for `Switch` (on/off settings) or genuine single-choice `RadioButton` pickers
+      — those stay as-is. It centralised the prayer/fast trackers, the settings/Quran pickers and
+      the dropdown/list selection check indicators.
+    - a **choose-one / act** surface picks by list shape, **never** a raw Material
+      `DropdownMenu`/`ExposedDropdownMenuBox`/`DropdownMenuItem`. The whole anchored-dropdown system
+      lives in one file, `components/molecules/NimazDropdown.kt`. The rule:
+      - **short simple option list (≤ ~7)** → inline `NimazDropdownField(items, selected, onSelected,
+        …)` — a filled trigger that pops an anchored menu.
+      - **long / searchable / grouped list** → the modal `NimazListPicker(title, items, selected,
+        onSelected, onDismiss, searchable = …)` (`components/molecules/NimazListPicker.kt`), opened
+        from a `NimazSettingsItem` that shows the current value (the prayer-settings pattern).
+      - **action / overflow menu** (icon-triggered commands, not a value) → `NimazDropdownMenu(expanded,
+        onDismissRequest) { … }`.
+      Both `NimazDropdownField` and `NimazDropdownMenu` are built from the **single**
+      `NimazDropdownRow(text, onClick, selected = …, leadingIcon = …, destructive = …)` row — pass
+      `selected` for a value choice (accent fill + circular check) or `destructive` for an
+      irreversible command — and render on one popover surface via `NimazDropdownDefaults` (16dp
+      `surface` card, tonal elevation, faint outline — **not** Material's heavy drop-shadow menu).
       variant. **Not** for on/off toggles (use `NimazSwitch`) or genuine single-choice `RadioButton`
       pickers (those stay as-is). It centralised the prayer/fast trackers, the settings/Quran pickers
       and the dropdown/list selection check indicators.

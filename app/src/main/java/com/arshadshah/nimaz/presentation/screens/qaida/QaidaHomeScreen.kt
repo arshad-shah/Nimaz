@@ -9,8 +9,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Translate
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
@@ -72,15 +72,14 @@ fun QaidaHomeScreen(
                             contentDescription = stringResource(R.string.more)
                         )
                     }
-                    DropdownMenu(
+                    NimazDropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                     ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.qaida_reset_journey)) },
-                            leadingIcon = {
-                                NimazIcon(Icons.Filled.RestartAlt, contentDescription = null)
-                            },
+                        NimazDropdownRow(
+                            text = stringResource(R.string.qaida_reset_journey),
+                            leadingIcon = Icons.Filled.RestartAlt,
+                            destructive = true,
                             onClick = {
                                 menuExpanded = false
                                 showResetDialog = true
