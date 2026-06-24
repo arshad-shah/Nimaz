@@ -21,14 +21,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
@@ -55,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -75,9 +71,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetAction
-import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetActionRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
@@ -102,10 +98,11 @@ fun BookmarksScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // The bookmark whose overflow menu is open, and the bookmark whose note is
-    // being edited. Both null = nothing showing.
-    var optionsTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+    // The bookmark whose note is being edited (null = no editor showing). The
+    // overflow menu is now an anchored dropdown owned by each card.
     var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
+    val context = LocalContext.current
+    val shareChooser = stringResource(R.string.share)
 
     // Drive the Undo snackbar off the most recently deleted bookmark.
     val removedMessage = stringResource(R.string.bookmark_removed)
@@ -192,59 +189,18 @@ fun BookmarksScreen(
                             bookmark = bookmark,
                             onClick = { bookmark.navigate(onNavigateToQuranAyah, onNavigateToHadith, onNavigateToDua) },
                             onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
-                            onMore = { optionsTarget = bookmark }
+                            onEditNote = { noteTarget = bookmark },
+                            onShare = {
+                                context.startActivity(
+                                    Intent.createChooser(bookmark.shareIntent(), shareChooser)
+                                )
+                            },
                         )
                     }
 
                     item { Spacer(modifier = Modifier.height(8.dp)) }
                 }
             }
-        }
-    }
-
-    // Overflow options sheet: Edit note · Share · Delete.
-    optionsTarget?.let { target ->
-        val context = LocalContext.current
-        val shareChooser = stringResource(R.string.share)
-        NimazBottomSheet(
-            onDismissRequest = { optionsTarget = null },
-            title = target.title,
-            subtitle = target.subtitle,
-            icon = target.type.icon(),
-            onClose = { optionsTarget = null }
-        ) {
-            NimazSheetActionRow(
-                actions = listOf(
-                    NimazSheetAction(
-                        icon = Icons.Default.Edit,
-                        label = stringResource(R.string.edit_note),
-                        onClick = {
-                            noteTarget = target
-                            optionsTarget = null
-                        }
-                    ),
-                    NimazSheetAction(
-                        icon = Icons.Default.Share,
-                        label = stringResource(R.string.share),
-                        onClick = {
-                            context.startActivity(
-                                Intent.createChooser(target.shareIntent(), shareChooser)
-                            )
-                            optionsTarget = null
-                        }
-                    ),
-                    NimazSheetAction(
-                        icon = Icons.Default.Delete,
-                        label = stringResource(R.string.delete),
-                        tint = MaterialTheme.colorScheme.error,
-                        onClick = {
-                            viewModel.onEvent(BookmarksEvent.DeleteBookmark(target.id))
-                            optionsTarget = null
-                        }
-                    )
-                )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 
@@ -306,7 +262,8 @@ private fun SwipeableBookmarkCard(
     bookmark: UnifiedBookmark,
     onClick: () -> Unit,
     onDelete: () -> Unit,
-    onMore: () -> Unit,
+    onEditNote: () -> Unit,
+    onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     // Swipe end→start to delete; the deletion fires immediately and the Undo
@@ -343,7 +300,13 @@ private fun SwipeableBookmarkCard(
             }
         }
     ) {
-        BookmarkCard(bookmark = bookmark, onClick = onClick, onMore = onMore)
+        BookmarkCard(
+            bookmark = bookmark,
+            onClick = onClick,
+            onEditNote = onEditNote,
+            onShare = onShare,
+            onDelete = onDelete,
+        )
     }
 }
 
@@ -351,9 +314,12 @@ private fun SwipeableBookmarkCard(
 private fun BookmarkCard(
     bookmark: UnifiedBookmark,
     onClick: () -> Unit,
-    onMore: () -> Unit,
+    onEditNote: () -> Unit,
+    onShare: () -> Unit,
+    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var menuExpanded by remember { mutableStateOf(false) }
     val typeColor = bookmark.type.color()
     val onTypeColor = bookmark.type.onColor()
     val typeLabel = bookmark.type.label()
@@ -390,13 +356,45 @@ private fun BookmarkCard(
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                IconButton(onClick = onMore, modifier = Modifier.size(36.dp)) {
-                    NimazIcon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.cd_more_options),
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.MEDIUM
-                    )
+                Box {
+                    IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(36.dp)) {
+                        NimazIcon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = stringResource(R.string.cd_more_options),
+                            variant = NimazIconVariant.MUTED,
+                            size = NimazIconSize.MEDIUM
+                        )
+                    }
+                    NimazDropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                    ) {
+                        NimazDropdownRow(
+                            text = stringResource(R.string.edit_note),
+                            leadingIcon = Icons.Default.Edit,
+                            onClick = {
+                                menuExpanded = false
+                                onEditNote()
+                            },
+                        )
+                        NimazDropdownRow(
+                            text = stringResource(R.string.share),
+                            leadingIcon = Icons.Default.Share,
+                            onClick = {
+                                menuExpanded = false
+                                onShare()
+                            },
+                        )
+                        NimazDropdownRow(
+                            text = stringResource(R.string.delete),
+                            leadingIcon = Icons.Default.Delete,
+                            destructive = true,
+                            onClick = {
+                                menuExpanded = false
+                                onDelete()
+                            },
+                        )
+                    }
                 }
             }
 
@@ -509,12 +507,6 @@ private fun BookmarkType.label(): String = when (this) {
     BookmarkType.QURAN -> stringResource(R.string.quran_type)
     BookmarkType.HADITH -> stringResource(R.string.hadith_type)
     BookmarkType.DUA -> stringResource(R.string.dua_type)
-}
-
-private fun BookmarkType.icon(): ImageVector = when (this) {
-    BookmarkType.QURAN -> Icons.Default.Book
-    BookmarkType.HADITH -> Icons.Default.Description
-    BookmarkType.DUA -> Icons.Default.VolunteerActivism
 }
 
 private fun UnifiedBookmark.navigate(

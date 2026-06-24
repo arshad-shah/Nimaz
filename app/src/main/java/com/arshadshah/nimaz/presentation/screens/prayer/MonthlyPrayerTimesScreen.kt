@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,7 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
@@ -73,7 +70,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
@@ -95,7 +93,7 @@ fun MonthlyPrayerTimesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
-    var showExportSheet by remember { mutableStateOf(false) }
+    var exportMenuExpanded by remember { mutableStateOf(false) }
     val canExport = !state.isLoading && state.dayPrayerTimes.isNotEmpty()
 
     fun shareRows(rows: List<DayPrayerTimes>) {
@@ -131,8 +129,34 @@ fun MonthlyPrayerTimesScreen(
                 title = stringResource(R.string.monthly_prayer_times),
                 onBackClick = onNavigateBack,
                 actions = {
-                    IconButton(onClick = { showExportSheet = true }, enabled = canExport) {
+                    IconButton(onClick = { exportMenuExpanded = true }, enabled = canExport) {
                         NimazIcon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
+                    }
+                    // Short export chooser → anchored dropdown menu (was a bottom sheet).
+                    NimazDropdownMenu(
+                        expanded = exportMenuExpanded,
+                        onDismissRequest = { exportMenuExpanded = false },
+                    ) {
+                        NimazDropdownRow(
+                            text = stringResource(R.string.monthly_this_month),
+                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${state.dayPrayerTimes.size} days",
+                            leadingIcon = Icons.Default.CalendarMonth,
+                            onClick = {
+                                exportMenuExpanded = false
+                                shareRows(state.dayPrayerTimes)
+                            },
+                        )
+                        state.ramadanHijriYear?.let { ramadanYear ->
+                            NimazDropdownRow(
+                                text = stringResource(R.string.ramadan_year_format, ramadanYear),
+                                description = stringResource(R.string.monthly_full_month_subtitle),
+                                leadingIcon = Icons.Default.DarkMode,
+                                onClick = {
+                                    exportMenuExpanded = false
+                                    shareRows(viewModel.ramadanDays())
+                                },
+                            )
+                        }
                     }
                 }
             )
@@ -183,30 +207,6 @@ fun MonthlyPrayerTimesScreen(
             }
         }
     }
-
-    if (showExportSheet) {
-        val sheetState = rememberModalBottomSheetState()
-        NimazBottomSheet(
-            onDismissRequest = { showExportSheet = false },
-            sheetState = sheetState,
-            scrollable = false,
-            contentPadding = PaddingValues(0.dp),
-        ) {
-            ExportSheet(
-                monthLabel = state.currentMonth.format(MONTH_YEAR_FORMATTER),
-                dayCount = state.dayPrayerTimes.size,
-                ramadanYear = state.ramadanHijriYear,
-                onThisMonth = {
-                    shareRows(state.dayPrayerTimes)
-                    showExportSheet = false
-                },
-                onRamadan = {
-                    shareRows(viewModel.ramadanDays())
-                    showExportSheet = false
-                },
-            )
-        }
-    }
 }
 
 /** A Gregorian month spans ~two Hijri months — describe the span compactly. */
@@ -218,102 +218,6 @@ private fun hijriRangeLabel(month: YearMonth): String {
         "$firstName ${first.year}"
     } else {
         "${firstName.take(3)} – ${HijriDateCalculator.getHijriMonthName(last.month)} ${last.year}"
-    }
-}
-
-@Composable
-private fun ExportSheet(
-    monthLabel: String,
-    dayCount: Int,
-    ramadanYear: Int?,
-    onThisMonth: () -> Unit,
-    onRamadan: () -> Unit,
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .navigationBarsPadding()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.export_as_pdf),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp, bottom = 12.dp),
-        )
-        ExportOption(
-            icon = Icons.Default.CalendarMonth,
-            tint = MaterialTheme.colorScheme.primary,
-            title = stringResource(R.string.monthly_this_month),
-            subtitle = "$monthLabel · $dayCount days",
-            onClick = onThisMonth,
-        )
-        if (ramadanYear != null) {
-            Spacer(modifier = Modifier.height(8.dp))
-            ExportOption(
-                icon = Icons.Default.DarkMode,
-                tint = NimazColors.Secondary,
-                title = stringResource(R.string.ramadan_year_format, ramadanYear),
-                subtitle = stringResource(R.string.monthly_full_month_subtitle),
-                onClick = onRamadan,
-                highlight = true,
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExportOption(
-    icon: ImageVector,
-    tint: Color,
-    title: String,
-    subtitle: String,
-    onClick: () -> Unit,
-    highlight: Boolean = false,
-) {
-    NimazCard(
-        onClick = onClick,
-        shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(
-            container = if (highlight) tint.copy(alpha = 0.10f) else MaterialTheme.colorScheme.surfaceContainerHighest
-        ),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(38.dp)
-                    .clip(RoundedCornerShape(11.dp))
-                    .background(tint.copy(alpha = 0.18f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                NimazIcon(icon, contentDescription = null, tint = tint, size = NimazIconSize.MEDIUM)
-            }
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-            NimazIcon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                variant = NimazIconVariant.MUTED
-            )
-        }
     }
 }
 
