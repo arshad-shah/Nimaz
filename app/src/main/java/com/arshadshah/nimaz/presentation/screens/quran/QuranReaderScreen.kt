@@ -809,10 +809,8 @@ fun QuranReaderScreen(
                             item(key = "banner") {
                                 SurahBanner(
                                     surahNameArabic = surahWithAyahs.surah.nameArabic,
-                                    surahNameEnglish = surahWithAyahs.surah.nameEnglish,
                                     surahMeaning = surahWithAyahs.surah.nameTransliteration,
                                     revelationType = surahWithAyahs.surah.revelationType,
-                                    ayahCount = surahWithAyahs.surah.numberOfAyahs,
                                     showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
                                         ?: 0) != 1
                                 )
