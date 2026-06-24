@@ -101,9 +101,7 @@ fun DuaCategoryScreen(
                     item {
                         CategoryHeaderCard(
                             nameArabic = category.nameArabic,
-                            nameEnglish = category.nameEnglish,
-                            description = category.description,
-                            duaCount = category.duaCount
+                            description = category.description
                         )
                     }
                 }
@@ -131,9 +129,7 @@ fun DuaCategoryScreen(
 @Composable
 private fun CategoryHeaderCard(
     nameArabic: String,
-    nameEnglish: String,
     description: String?,
-    duaCount: Int,
     modifier: Modifier = Modifier
 ) {
     NimazCard(
@@ -160,22 +156,15 @@ private fun CategoryHeaderCard(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Arabic name
-                Text(
+                // Arabic name (rendered with the dedicated Arabic text component
+                // for correct font + RTL shaping). The English name and dua count
+                // live in the top app bar, not here.
+                ArabicText(
                     text = nameArabic,
-                    style = MaterialTheme.typography.headlineMedium,
+                    size = ArabicTextSize.LARGE,
                     color = Color.White,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // English name
-                Text(
-                    text = nameEnglish,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color.White.copy(alpha = 0.9f),
-                    fontWeight = FontWeight.SemiBold
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 // Description
@@ -187,22 +176,6 @@ private fun CategoryHeaderCard(
                         color = Color.White.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center,
                         lineHeight = 22.sp
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Dua count badge
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .padding(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = "$duaCount duas in this collection",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Color.White
                     )
                 }
             }
