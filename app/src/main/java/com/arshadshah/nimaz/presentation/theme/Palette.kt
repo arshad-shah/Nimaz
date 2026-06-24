@@ -21,6 +21,7 @@ object NimazPalette {
 
     // ── Neutrals ──────────────────────────────────────────────────────────────
     val White = Color(0xFFFFFFFF)
+    val OffWhite = Color(0xFFFDFDFD)     // softened white — the standard light card surface
     val Black = Color(0xFF000000)
 
     // Stone ramp — the app's true neutral scale (warm gray).
@@ -39,6 +40,7 @@ object NimazPalette {
     // Cool/Material grays used by surfaces, outlines and disabled states.
     val GrayBg = Color(0xFFFAFAFA)       // light background
     val Gray100 = Color(0xFFF5F5F5)      // light surface-variant
+    val Gray150 = Color(0xFFEEEEEE)      // light surface-container (visible card on GrayBg)
     val Gray200 = Color(0xFFE0E0E0)      // outline / dark on-surface text
     val Gray300 = Color(0xFFD4D4D4)
     val Gray400 = Color(0xFFBDBDBD)

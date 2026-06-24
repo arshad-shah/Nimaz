@@ -38,7 +38,8 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
 /**
  * Card style variants.
  *
- * - [FILLED] — solid container (the default).
+ * - [FILLED] — solid container + a subtle 1.dp resting shadow (the default). The
+ *   standard "content card": a softened-white surface lifted off the background.
  * - [ELEVATED] — solid container + a tonal shadow, no border.
  * - [OUTLINED] — solid container + a border (defaults to the theme outline).
  * - [GRADIENT] — the container is a linear gradient ([NimazCard]'s `gradient` param).
@@ -157,7 +158,8 @@ object NimazCardDefaults {
  * @param colors container/content/border, via [NimazCardDefaults.colors] /
  *   [NimazCardDefaults.selectable].
  * @param gradient gradient stops for [NimazCardStyle.GRADIENT].
- * @param elevation overrides the resting elevation (default: Material's per-style).
+ * @param elevation overrides the resting elevation (FILLED defaults to 1.dp; pass
+ *   0.dp for a flat card).
  */
 @Composable
 fun NimazCard(
@@ -242,8 +244,11 @@ fun NimazCard(
                 containerColor = containerColor,
                 contentColor = contentColor,
             )
-            val cardElevation = elevation?.let { CardDefaults.cardElevation(defaultElevation = it) }
-                ?: CardDefaults.cardElevation()
+            // Filled is the standard "content card": a softened-white `surface`
+            // lifted off the background by a subtle 1.dp resting shadow (the look
+            // shared by the More screen). Callers can override via `elevation`
+            // (e.g. 0.dp for a flat card, or NimazSurfaceCard for outlined-flat).
+            val cardElevation = CardDefaults.cardElevation(defaultElevation = elevation ?: 1.dp)
             if (onClick != null) {
                 Card(
                     onClick = onClick, modifier = modifier, enabled = enabled, shape = shape,

@@ -83,11 +83,20 @@ object NimazColors {
 
     // ── Background & Surface — Light ──────────────────────────────────────────
     val BackgroundLight = P.GrayBg
-    val SurfaceLight = P.White
+    val SurfaceLight = P.OffWhite        // softened white card/surface, lifted off GrayBg by elevation
     val SurfaceVariantLight = P.Gray100
     val OnBackgroundLight = P.Ink
     val OnSurfaceLight = P.Ink
     val OnSurfaceVariantLight = P.Gray700
+
+    // Tonal surface-container ladder — light. Steps up from the GrayBg background so
+    // cards read as distinct surfaces (M3 leaves these undefined, which fell back to a
+    // purple baseline and left `surface` cards invisible on the near-white background).
+    val SurfaceContainerLowestLight = P.White
+    val SurfaceContainerLowLight = P.Gray100
+    val SurfaceContainerLight = P.Gray150
+    val SurfaceContainerHighLight = P.Gray200
+    val SurfaceContainerHighestLight = P.Gray300
 
     // ── Background & Surface — Dark ───────────────────────────────────────────
     val BackgroundDark = P.Stone950
@@ -96,6 +105,13 @@ object NimazColors {
     val OnBackgroundDark = P.Gray200
     val OnSurfaceDark = P.Gray200
     val OnSurfaceVariantDark = P.Gray500
+
+    // Tonal surface-container ladder — dark (Stone steps above the near-black background).
+    val SurfaceContainerLowestDark = P.Stone950
+    val SurfaceContainerLowDark = P.Stone900
+    val SurfaceContainerDark = P.Stone800
+    val SurfaceContainerHighDark = P.Stone700
+    val SurfaceContainerHighestDark = P.Stone700
 
     // ── Error ─────────────────────────────────────────────────────────────────
     val Error = P.ErrorRed
@@ -250,6 +266,11 @@ val md_theme_light_surface = NimazColors.SurfaceLight
 val md_theme_light_onSurface = NimazColors.OnSurfaceLight
 val md_theme_light_surfaceVariant = NimazColors.SurfaceVariantLight
 val md_theme_light_onSurfaceVariant = NimazColors.OnSurfaceVariantLight
+val md_theme_light_surfaceContainerLowest = NimazColors.SurfaceContainerLowestLight
+val md_theme_light_surfaceContainerLow = NimazColors.SurfaceContainerLowLight
+val md_theme_light_surfaceContainer = NimazColors.SurfaceContainerLight
+val md_theme_light_surfaceContainerHigh = NimazColors.SurfaceContainerHighLight
+val md_theme_light_surfaceContainerHighest = NimazColors.SurfaceContainerHighestLight
 val md_theme_light_outline = NimazColors.OutlineLight
 
 // Dark Theme Colors
@@ -275,4 +296,9 @@ val md_theme_dark_surface = NimazColors.SurfaceDark
 val md_theme_dark_onSurface = NimazColors.OnSurfaceDark
 val md_theme_dark_surfaceVariant = NimazColors.SurfaceVariantDark
 val md_theme_dark_onSurfaceVariant = NimazColors.OnSurfaceVariantDark
+val md_theme_dark_surfaceContainerLowest = NimazColors.SurfaceContainerLowestDark
+val md_theme_dark_surfaceContainerLow = NimazColors.SurfaceContainerLowDark
+val md_theme_dark_surfaceContainer = NimazColors.SurfaceContainerDark
+val md_theme_dark_surfaceContainerHigh = NimazColors.SurfaceContainerHighDark
+val md_theme_dark_surfaceContainerHighest = NimazColors.SurfaceContainerHighestDark
 val md_theme_dark_outline = NimazColors.OutlineDark

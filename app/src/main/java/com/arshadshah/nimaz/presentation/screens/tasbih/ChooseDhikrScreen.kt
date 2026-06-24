@@ -387,7 +387,7 @@ private fun DhikrRow(
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surface,
             border = null,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
+            activeContainer = MaterialTheme.colorScheme.primaryContainer,
             activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
         )
     ) {

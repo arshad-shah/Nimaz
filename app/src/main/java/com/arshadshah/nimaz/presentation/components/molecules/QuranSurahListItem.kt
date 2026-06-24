@@ -92,10 +92,9 @@ internal fun SurahListItem(
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-        ),
-        elevation = 0.dp
+            container = MaterialTheme.colorScheme.surface,
+            activeContainer = MaterialTheme.colorScheme.primaryContainer
+        )
     ) {
         Column {
             // Top row: number + English name + Arabic name + info button
