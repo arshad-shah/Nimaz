@@ -511,7 +511,7 @@
 		},
 		{
 			"ID": 15,
-			"TITLE": "What to say upon hearing the Athan (call to prayer)",
+			"TITLE": "What to say upon hearing the Adhan (call to prayer)",
 			"AUDIO_URL": "http://www.hisnmuslim.com/audio/ar/ar_7esn_AlMoslem_by_Doors_016.mp3",
 			"TEXT": [
 		{
@@ -550,7 +550,7 @@
 			"ID": 26,
 			"ARABIC_TEXT": "((يَدْعُو لِنَفسِهِ بَيْنَ الْأَذَانِ وَالْإِقَامَةِ فَإِنَّ الدُّعَاءَ حِينَئِذٍ لاَ يُرَدُّ)).", 
   		    "LANGUAGE_ARABIC_TRANSLATED_TEXT":"", 
- 		    "TRANSLATED_TEXT":"One should also supplicate for himself during the time between the athan and the iqamah as supplication at such time is not rejected.", 
+ 		    "TRANSLATED_TEXT":"One should also supplicate for himself during the time between the adhan and the iqamah as supplication at such time is not rejected.", 
  		    "REPEAT": 1, 
             "AUDIO":"http://www.hisnmuslim.com/audio/ar/26.mp3" 
  		}
@@ -1446,7 +1446,7 @@
 			"ID": 142,
 			"ARABIC_TEXT": "الْأَذَانُ", 
   		    "LANGUAGE_ARABIC_TRANSLATED_TEXT":"", 
- 		    "TRANSLATED_TEXT":"The Adhaan [call to prayer].", 
+ 		    "TRANSLATED_TEXT":"The Adhan [call to prayer].", 
  		    "REPEAT": 1, 
             "AUDIO":"http://www.hisnmuslim.com/audio/ar/142.mp3" 
  		},
@@ -1454,7 +1454,7 @@
 			"ID": 143,
 			"ARABIC_TEXT": "((الْأَذْكَارُ وَقِرَاءَةُ الْقُرْآنِ)).", 
   		    "LANGUAGE_ARABIC_TRANSLATED_TEXT":"", 
- 		    "TRANSLATED_TEXT":"(Recitation of the Quran and the authentic texts of remembrance and supplications.)(e.g. ‘Do not make your homes like the graveyards, indeed the devils flee from the house in which soorat Al-Baqarah has been read’ related by Muslim 1/539, also supplication and remembrance for the morning & evening, before sleep, when getting up, entering and leaving the toilet, entering and leaving the mosque, the recitation of ayat Al-kursiyy and the last two verses of soorat Al-Baqarah before sleeping, the athan…etc.)", 
+ 		    "TRANSLATED_TEXT":"(Recitation of the Quran and the authentic texts of remembrance and supplications.)(e.g. ‘Do not make your homes like the graveyards, indeed the devils flee from the house in which soorat Al-Baqarah has been read’ related by Muslim 1/539, also supplication and remembrance for the morning & evening, before sleep, when getting up, entering and leaving the toilet, entering and leaving the mosque, the recitation of ayat Al-kursiyy and the last two verses of soorat Al-Baqarah before sleeping, the adhan…etc.)", 
  		    "REPEAT": 1, 
             "AUDIO":"http://www.hisnmuslim.com/audio/ar/143.mp3" 
  		}
