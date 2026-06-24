@@ -202,9 +202,9 @@ private fun outlinedBorder(enabled: Boolean): BorderStroke {
 
 @Composable
 private fun textStyleFor(size: NimazButtonSize): TextStyle = when (size) {
-    NimazButtonSize.SMALL -> MaterialTheme.typography.labelMedium
-    NimazButtonSize.MEDIUM -> MaterialTheme.typography.labelLarge
-    NimazButtonSize.LARGE -> MaterialTheme.typography.titleSmall
+    NimazButtonSize.SMALL -> MaterialTheme.typography.titleSmall
+    NimazButtonSize.MEDIUM -> MaterialTheme.typography.titleMedium
+    NimazButtonSize.LARGE -> MaterialTheme.typography.titleLarge
 }
 
 @Composable
