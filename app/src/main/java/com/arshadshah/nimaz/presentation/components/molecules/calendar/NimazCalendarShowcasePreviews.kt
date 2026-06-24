@@ -12,7 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Switch
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -217,7 +217,7 @@ private fun CalendarShowcase() {
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.weight(1f)
             )
-            Switch(checked = showDual, onCheckedChange = { showDual = it })
+            NimazSwitch(checked = showDual, onCheckedChange = { showDual = it })
         }
 
         Spacer(Modifier.height(16.dp))

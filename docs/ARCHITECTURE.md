@@ -492,6 +492,21 @@ typed route object.
       `selected` for a value choice (accent fill + circular check) or `destructive` for an
       irreversible command — and render on one popover surface via `NimazDropdownDefaults` (16dp
       `surface` card, tonal elevation, faint outline — **not** Material's heavy drop-shadow menu).
+      variant. **Not** for on/off toggles (use `NimazSwitch`) or genuine single-choice `RadioButton`
+      pickers (those stay as-is). It centralised the prayer/fast trackers, the settings/Quran pickers
+      and the dropdown/list selection check indicators.
+    - an on/off toggle is `NimazSwitch(checked, onCheckedChange, variant = …)`
+      (`components/atoms/NimazSwitch.kt`), **not** a raw Material 3 `Switch`. It wraps Material's
+      `Switch` (keeping the drag gesture, `Role.Switch` semantics and thumb animation) and bakes in
+      the house look from the original enhanced switch: a brand-tinted checked track with a light
+      thumb + check glyph, and a clearly contrasted outlined pill (raised thumb on a `surface` track)
+      when off. Only the **disabled** colours are left to `SwitchDefaults` (the old hand-styled
+      switch hard-coded every disabled colour to `surface`, so it vanished when disabled —
+      `NimazSwitch` fixes that). `variant` is the checked-track colour role (`DEFAULT`/`PRIMARY` =
+      `primary`, `SUCCESS`, `ERROR`); `trackTint =` escapes it, `thumbIcon = null` drops the glyph.
+      Pass `onCheckedChange = null` when an enclosing clickable row owns the toggle (the
+      `NimazSettingsItem` pattern — the row toggles, the switch just renders state). It centralised
+      the settings/notification toggles, the tasbih left-handed switch and the calendar preview.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 

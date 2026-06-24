@@ -13,11 +13,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -32,6 +29,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -106,35 +104,11 @@ fun NimazSettingsItem(
         when {
             trailingContent != null -> trailingContent()
             checked != null && onCheckedChange != null -> {
-                Switch(
+                // The enclosing Row already toggles via clickModifier, so the switch
+                // itself defers its click (onCheckedChange = null) to avoid a double-fire.
+                NimazSwitch(
                     checked = checked,
-                    onCheckedChange = onCheckedChange,
-                    thumbContent = {
-                        if(checked){
-                            NimazIcon(
-                               imageVector =  Icons.Default.Check,
-                                size = NimazIconSize.SMALL,
-                            )
-                        }
-                    },
-                    colors = SwitchColors(
-                        checkedThumbColor = MaterialTheme.colorScheme.surface,
-                        checkedTrackColor = MaterialTheme.colorScheme.primary,
-                        checkedBorderColor = MaterialTheme.colorScheme.outline,
-                        checkedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        uncheckedThumbColor = MaterialTheme.colorScheme.surfaceContainerHighest,
-                        uncheckedTrackColor = MaterialTheme.colorScheme.surface,
-                        uncheckedBorderColor = MaterialTheme.colorScheme.outline,
-                        uncheckedIconColor = MaterialTheme.colorScheme.onSurface,
-                        disabledCheckedThumbColor = MaterialTheme.colorScheme.surface,
-                        disabledCheckedTrackColor = MaterialTheme.colorScheme.surface,
-                        disabledCheckedBorderColor = MaterialTheme.colorScheme.surface,
-                        disabledCheckedIconColor = MaterialTheme.colorScheme.surface,
-                        disabledUncheckedThumbColor = MaterialTheme.colorScheme.surface,
-                        disabledUncheckedTrackColor = MaterialTheme.colorScheme.surface,
-                        disabledUncheckedBorderColor = MaterialTheme.colorScheme.surface,
-                        disabledUncheckedIconColor = MaterialTheme.colorScheme.surface
-                    )
+                    onCheckedChange = null
                 )
             }
 
