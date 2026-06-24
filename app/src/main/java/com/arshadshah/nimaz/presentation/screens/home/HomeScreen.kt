@@ -251,7 +251,9 @@ private fun HomeCompactContent(
                 gregorianDate = gregorianDate,
                 nextPrayer = state.nextPrayer,
                 nextPrayerTime = nextPrayerTime,
-                timeUntilNextPrayer = state.timeUntilNextPrayer
+                timeUntilNextPrayer = state.timeUntilNextPrayer,
+                sunriseFraction = state.sunriseFraction,
+                sunsetFraction = state.sunsetFraction,
             )
         }
 

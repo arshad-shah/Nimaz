@@ -72,7 +72,9 @@ fun HomeHero(
     nextPrayer: PrayerType?,
     nextPrayerTime: String,
     timeUntilNextPrayer: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sunriseFraction: Float = 0.27f,
+    sunsetFraction: Float = 0.80f,
 ) {
     val use24Hour = LocalUse24HourFormat.current
     var timeOfDay by remember { mutableFloatStateOf(minuteFractionNow()) }
@@ -115,6 +117,8 @@ fun HomeHero(
                     bottomStart = HERO_BOTTOM_RADIUS,
                     bottomEnd = HERO_BOTTOM_RADIUS
                 ),
+                sunriseFraction = sunriseFraction,
+                sunsetFraction = sunsetFraction,
             )
             Column(
                 // Centre within the *visible* sky (below the status-bar band),
