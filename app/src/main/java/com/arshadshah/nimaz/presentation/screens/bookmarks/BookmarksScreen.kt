@@ -66,7 +66,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -327,9 +326,6 @@ private fun BookmarkCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceContainer
-        ),
         elevation = 0.dp
     ) {
         Column(modifier = Modifier.padding(16.dp)) {

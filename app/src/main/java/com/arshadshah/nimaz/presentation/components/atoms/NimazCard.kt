@@ -111,7 +111,7 @@ object NimazCardDefaults {
      */
     @Composable
     fun selectable(
-        container: Color = MaterialTheme.colorScheme.surfaceVariant,
+        container: Color = MaterialTheme.colorScheme.surface,
         content: Color = onColorFor(container),
         border: Color? = null,
         borderWidth: Dp = 1.dp,

@@ -419,16 +419,21 @@ typed route object.
       `GlassColors` (glass-morphism auroras), and `ArtColors.kt` (`CardArtColors`,
       `CompassArtColors`, `NamesArtColors`, `OnboardingArtColors`, `MiscArtColors`, …). They
       reuse `NimazPalette` where a hue already exists.
-    - **Card surface = softened white + a subtle shadow.** The standard content card is a solid
-      `surface` (light: `OffWhite` `#FDFDFD`, a hair off pure white; dark: `Stone900`) lifted off the
+    - **Card surface = solid white + a subtle shadow.** The standard content card is a solid
+      `surface` (light: pure `White` `#FFFFFF`; dark: `Stone900`) lifted off the
       `background` (`GrayBg` `#FAFAFA`) by a **1.dp resting shadow** — `NimazCardStyle.FILLED` applies
       this elevation by default, so card readability is controlled from the single `NimazCard` atom
       (callers pass `elevation = 0.dp` for a flat card, or use `NimazSurfaceCard` for outlined-flat).
-      Do **not** reach for grey `surfaceContainer` fills to make a card read; keep it solid and let the
-      shadow separate it. `Theme.kt` still defines the full neutral `surfaceContainer*` ladder
-      (light: `White → Gray100 → Gray150 → Gray200 → Gray300`; dark: stepped `Stone`) — M3 leaves
-      these undefined, falling back to a purple baseline — for the few surfaces that genuinely want a
-      tonal step (e.g. the outlined `NimazDropdownField`).
+      **Cards are white by default — do not pass a `colors`/`container` override to tint a content
+      card grey.** `NimazCardDefaults.colors()` and `.selectable()` both default the (inactive)
+      container to `surface`, so a plain `NimazCard { … }` is already the right solid-white card; the
+      shadow (not a grey fill) separates it from the background. Reserve container overrides for genuine
+      *semantic* tints (selected = `primaryContainer`, accent/category colours, gradients). `Theme.kt`
+      still defines the full neutral `surfaceContainer*` ladder (light: `White → Gray100 → Gray150 →
+      Gray200 → Gray300`; dark: stepped `Stone`) — M3 leaves these undefined, falling back to a purple
+      baseline — for the few surfaces that genuinely want a tonal step (e.g. the outlined
+      `NimazDropdownField`, or a small icon chip *inside* a white card, which uses
+      `surfaceContainerHighest`).
   - Use `MaterialTheme.colorScheme.*` for themed surfaces, or `NimazColors.*` for brand/semantic
     values. **Never** write a `Color(0xFF…)` literal in a component or screen file — define it in
     the `theme/` package (a `NimazPalette`/`NimazColors` token, or the relevant art object) and

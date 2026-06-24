@@ -236,7 +236,7 @@ private fun <T> PickerRow(
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = MaterialTheme.colorScheme.primaryContainer,
             activeBorder = MaterialTheme.colorScheme.primary
         )

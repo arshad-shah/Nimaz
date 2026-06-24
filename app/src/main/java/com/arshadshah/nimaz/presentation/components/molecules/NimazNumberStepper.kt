@@ -245,9 +245,6 @@ private fun SpreadStepper(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(size.corner),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
     ) {
         Row(
             modifier = Modifier

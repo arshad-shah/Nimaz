@@ -285,11 +285,7 @@ private fun DuaPreviewCard(
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(10.dp))
                 NimazCard(
-                    shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    shape = RoundedCornerShape(10.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.dua_settings_preview_translation),

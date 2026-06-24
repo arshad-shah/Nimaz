@@ -368,7 +368,7 @@ private fun DayPrayerCard(
         shape = RoundedCornerShape(NimazCornerRadius.Large),
         selected = isToday,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = Color.Transparent
         ),
         modifier = Modifier.fillMaxWidth()

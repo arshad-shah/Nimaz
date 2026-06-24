@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
@@ -135,9 +134,6 @@ fun AsmaUlHusnaDetailScreen(
                         NimazCard(
                             modifier = Modifier.fillMaxWidth(),
                             style = NimazCardStyle.FILLED,
-                            colors = NimazCardDefaults.colors(
-                                container = MaterialTheme.colorScheme.surfaceContainerLow
-                            )
                         ) {
                             Column(
                                 modifier = Modifier.padding(NimazSpacing.Large),

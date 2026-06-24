@@ -32,7 +32,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -55,10 +54,7 @@ internal fun KhatamProgressCard(
             style = NimazCardStyle.FILLED,
             onClick = { onClickActive(activeKhatam.id) },
             modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = NimazCardDefaults.colors(
-                container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(
                 modifier = Modifier
@@ -173,10 +169,7 @@ internal fun KhatamProgressCard(
             style = NimazCardStyle.FILLED,
             onClick = onClickStart,
             modifier = modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            colors = NimazCardDefaults.colors(
-                container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            shape = RoundedCornerShape(16.dp)
         ) {
             Row(
                 modifier = Modifier

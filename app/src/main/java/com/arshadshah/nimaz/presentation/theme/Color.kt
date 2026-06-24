@@ -83,7 +83,7 @@ object NimazColors {
 
     // ── Background & Surface — Light ──────────────────────────────────────────
     val BackgroundLight = P.GrayBg
-    val SurfaceLight = P.OffWhite        // softened white card/surface, lifted off GrayBg by elevation
+    val SurfaceLight = P.White           // solid white card/surface, lifted off GrayBg by the card's resting shadow
     val SurfaceVariantLight = P.Gray100
     val OnBackgroundLight = P.Ink
     val OnSurfaceLight = P.Ink

@@ -68,7 +68,7 @@ fun PrayerTimeCard(
         // below) plus a soft outline; the same prayer-tinted border on both
         // states keeps the list reading quietly until the next prayer pops.
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = MaterialTheme.colorScheme.primaryContainer,
             border = prayerColor.copy(alpha = 0.4f),
             activeBorder = prayerColor.copy(alpha = 0.4f)

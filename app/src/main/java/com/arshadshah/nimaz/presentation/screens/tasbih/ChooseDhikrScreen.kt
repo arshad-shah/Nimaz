@@ -316,7 +316,7 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
+            container = MaterialTheme.colorScheme.surface,
             border = null,
             activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
             activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)

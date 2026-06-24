@@ -58,7 +58,6 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
@@ -286,8 +285,7 @@ private fun LinksCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(16.dp)
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -451,7 +449,7 @@ private fun LinkItem(
                 modifier = Modifier
                     .size(34.dp)
                     .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.surface),
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest),
                 contentAlignment = Alignment.Center
             ) {
                 NimazIcon(
@@ -488,7 +486,7 @@ private fun LinkItem(
                     .fillMaxWidth()
                     .height(1.dp)
                     .padding(horizontal = 14.dp)
-                    .background(MaterialTheme.colorScheme.surface)
+                    .background(MaterialTheme.colorScheme.outline)
             )
         }
     }
@@ -499,8 +497,7 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(16.dp)
     ) {
       Row(
         modifier = Modifier
@@ -548,7 +545,7 @@ private fun DeveloperSocial(icon: ImageVector, onClick: () -> Unit) {
         modifier = Modifier
             .size(34.dp)
             .clip(RoundedCornerShape(10.dp))
-            .background(MaterialTheme.colorScheme.surface)
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
@@ -587,8 +584,7 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
 private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(12.dp)
     ) {
       Column(
         modifier = Modifier

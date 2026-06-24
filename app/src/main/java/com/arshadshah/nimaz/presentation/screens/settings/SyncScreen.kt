@@ -276,7 +276,6 @@ private fun ModeSelectionContent(
     NimazCard(
         style = NimazCardStyle.FILLED,
         modifier = Modifier.fillMaxWidth(),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -652,7 +651,6 @@ private fun ProgressContent(
             Spacer(modifier = Modifier.height(8.dp))
             NimazCard(
                 style = NimazCardStyle.FILLED,
-                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -716,7 +714,6 @@ private fun ProgressContent(
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -793,7 +790,6 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {

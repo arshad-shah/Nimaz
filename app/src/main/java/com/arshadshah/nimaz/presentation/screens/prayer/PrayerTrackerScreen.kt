@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -573,8 +572,7 @@ private fun PrayerCheckItem(
 ) {
     NimazCard(
         onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest)
+        shape = RoundedCornerShape(12.dp)
     ) {
         Row(
             modifier = Modifier

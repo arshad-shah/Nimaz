@@ -48,7 +48,6 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -246,8 +245,7 @@ private fun StatCard(
 ) {
     NimazCard(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(12.dp)
     ) {
       Column(
         modifier = Modifier
@@ -341,8 +339,7 @@ private fun DailyReadingSection(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(16.dp)
     ) {
       Column(
         modifier = Modifier

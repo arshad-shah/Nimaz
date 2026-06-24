@@ -239,7 +239,7 @@ fun SelectReciterScreen(
                     shape = RoundedCornerShape(14.dp),
                     selected = isSelected,
                     colors = NimazCardDefaults.selectable(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                        container = MaterialTheme.colorScheme.surface,
                         activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
                         activeBorder = MaterialTheme.colorScheme.primary,
                         activeBorderWidth = 2.dp,

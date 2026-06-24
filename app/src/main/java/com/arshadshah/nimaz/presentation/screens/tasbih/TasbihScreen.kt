@@ -391,9 +391,6 @@ private fun CurrentTasbihPeek(
         style = NimazCardStyle.FILLED,
         onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
     ) {
         Column(
             modifier = Modifier
@@ -472,7 +469,6 @@ private fun CurrentTasbihInfoCard(
         onClick = onClick,
         shape = RoundedCornerShape(20.dp),
         colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
             border = NimazColors.TasbihColors.Milestone.copy(alpha = 0.25f)
         )
     ) {

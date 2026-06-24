@@ -173,9 +173,6 @@ private fun StatsSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
     ) {
         Row(
             modifier = Modifier

@@ -536,8 +536,7 @@ private fun TodayFastSection(
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
-            shape = RoundedCornerShape(16.dp),
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+            shape = RoundedCornerShape(16.dp)
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 // Header with date and status
@@ -995,8 +994,7 @@ private fun RecommendedFastCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier.padding(15.dp),
@@ -1288,7 +1286,6 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest),
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

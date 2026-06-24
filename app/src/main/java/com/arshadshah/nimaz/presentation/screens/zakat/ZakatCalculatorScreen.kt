@@ -583,7 +583,7 @@ private fun NisabOptionCard(
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = accentColor.copy(alpha = 0.15f),
             activeBorder = accentColor.copy(alpha = 0.5f),
         )

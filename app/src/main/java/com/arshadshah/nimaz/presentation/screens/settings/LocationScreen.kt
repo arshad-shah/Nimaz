@@ -336,7 +336,6 @@ private fun UseCurrentLocationButton(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
         elevation = 0.dp,
         enabled = !isLoading,
         onClick = onClick
@@ -386,7 +385,7 @@ private fun LocationListItem(
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
         ),
         elevation = 0.dp,
