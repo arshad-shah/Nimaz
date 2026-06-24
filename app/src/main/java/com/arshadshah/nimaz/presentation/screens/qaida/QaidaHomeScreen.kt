@@ -27,8 +27,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownAction
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
@@ -76,7 +76,7 @@ fun QaidaHomeScreen(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
                     ) {
-                        NimazDropdownAction(
+                        NimazDropdownRow(
                             text = stringResource(R.string.qaida_reset_journey),
                             leadingIcon = Icons.Filled.RestartAlt,
                             destructive = true,
