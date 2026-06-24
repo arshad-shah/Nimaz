@@ -42,7 +42,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -189,7 +189,7 @@ fun NotificationSettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
                         }
-                        Switch(
+                        NimazSwitch(
                             checked = notificationState.notificationsEnabled,
                             onCheckedChange = {
                                 viewModel.onEvent(SettingsEvent.SetNotificationsEnabled(!notificationState.notificationsEnabled))
@@ -271,7 +271,7 @@ fun NotificationSettingsScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            Switch(
+                            NimazSwitch(
                                 checked = notificationState.adhanEnabled,
                                 onCheckedChange = {
                                     viewModel.onEvent(SettingsEvent.SetAdhanEnabled(!notificationState.adhanEnabled))
@@ -596,7 +596,7 @@ private fun PrayerNotificationRow(
         Spacer(modifier = Modifier.width(15.dp))
 
         // Toggle
-        Switch(
+        NimazSwitch(
             checked = prayer.isEnabled,
             onCheckedChange = { onToggle() }
         )
