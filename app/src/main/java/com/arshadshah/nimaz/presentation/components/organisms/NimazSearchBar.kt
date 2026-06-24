@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -152,19 +151,15 @@ fun NimazSearchBar(
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
 
-    // Animate the border to communicate focus state. M3 OutlinedTextField does
-    // the same thing; we replicate it here so this primitive matches.
+    // Outlined-field language (matches NimazDropdownField): a neutral hairline at rest that
+    // animates to the primary tint on focus. Always outlined — no fill swap.
     val borderColor by animateColorAsState(
         targetValue = if (isFocused) {
             MaterialTheme.colorScheme.primary
         } else {
-            Color.Transparent
+            MaterialTheme.colorScheme.outlineVariant
         },
         label = "search_focus_border"
-    )
-    val borderWidth: Dp by animateDpAsState(
-        targetValue = if (isFocused) 1.5.dp else 0.dp,
-        label = "search_focus_border_width"
     )
 
     LaunchedEffect(autoFocus) {
@@ -179,12 +174,10 @@ fun NimazSearchBar(
                 else Modifier
             )
             .fillMaxWidth(),
-        shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        tonalElevation = 1.dp,
-        border = if (borderWidth > 0.dp) {
-            androidx.compose.foundation.BorderStroke(borderWidth, borderColor)
-        } else null,
+        shape = RoundedCornerShape(14.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        border = androidx.compose.foundation.BorderStroke(1.5.dp, borderColor),
     ) {
         Row(
             modifier = Modifier
@@ -270,12 +263,20 @@ fun NimazSearchBar(
                     },
                     modifier = Modifier.size(40.dp)
                 ) {
-                    NimazIcon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(R.string.cd_clear_search),
-                        variant = NimazIconVariant.MUTED,
-                        iconSize = 18.dp
-                    )
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.cd_clear_search),
+                            tint = MaterialTheme.colorScheme.primary,
+                            iconSize = 16.dp
+                        )
+                    }
                 }
             }
 
