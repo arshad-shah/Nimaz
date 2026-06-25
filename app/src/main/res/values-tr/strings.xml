@@ -1054,14 +1054,11 @@
     <string name="cd_mark_as_unread">Okunmadı olarak işaretle</string>
     <string name="tafseer_highlight">Vurgula</string>
     <string name="tafseer_highlight_notes">Vurgu Notları</string>
-    <string name="tafseer_no_notes">Henüz not yok. Not eklemek için bir vurguya dokunun.</string>
+    <string name="tafseer_no_notes">Henüz not yok. Vurgulamak ve not eklemek için yoruma basılı tutun.</string>
     <string name="tafseer_read_in_format">%1$s dilinde oku</string>
     <string name="tafseer_no_commentary_format">Bu ayet için %1$s tefsiri yok</string>
     <string name="tafseer_page_format">Sayfa %1$d / %2$d</string>
     <string name="tafseer_add_note">Not ekle…</string>
-    <string name="tafseer_edit_note">Notu düzenle</string>
-    <string name="cd_disable_highlighting">Vurgulamayı devre dışı bırak</string>
-    <string name="cd_enable_highlighting">Vurgulamayı etkinleştir</string>
     <string name="prayer_sunrise">Güneş Doğuşu</string>
     <string name="high_latitude_method">Yüksek Enlem Yöntemi</string>
     <string name="middle_of_night">Gecenin Ortası</string>
@@ -1178,7 +1175,6 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Açık Kaynak Lisansları</string>
     <string name="quran_juz_number_format">Cüz %1$d</string>
-    <string name="tafseer_tap_end">Vurgulamak için bitiş konumuna dokunun</string>
     <string name="makhraj_jawf">ağız &amp; boğaz (uzun sesler)</string>
     <string name="makhraj_halq">boğaz</string>
     <string name="makhraj_lisan">dil</string>
@@ -1233,4 +1229,19 @@
     <string name="all_categories_az">Tüm Kategoriler (A–Z)</string>
     <string name="sort_categories_alphabetically">Kategorileri alfabetik sırala</string>
     <string name="sort_categories_default">Varsayılan sıralamaya geç</string>
+    <string name="tafseer_highlight_hint">Vurgulamak için yoruma basılı tutun</string>
+    <string name="tafseer_add_highlight">Vurgu ekle</string>
+    <string name="tafseer_selection_active">Metin seçildi</string>
+    <string name="tafseer_clear">Temizle</string>
+    <string name="tafseer_colour">Renk</string>
+    <string name="tafseer_note_optional">Not (isteğe bağlı)</string>
+    <string name="tafseer_delete_highlight_title">Vurgu silinsin mi?</string>
+    <string name="tafseer_delete_highlight_message">Bu, vurguyu ve ona ekli notu kaldırır. Bu işlem geri alınamaz.</string>
+    <string name="cd_share_tafseer">Tefsiri paylaş</string>
+    <string name="tafseer_share_chooser">Tefsiri paylaş</string>
+    <string name="tafseer_pdf_header">TEFSİR</string>
+    <string name="tafseer_pdf_commentary">Yorum</string>
+    <string name="tafseer_pdf_notes">Notlarım</string>
+    <string name="tafseer_pdf_footer">Nimaz tarafından oluşturuldu</string>
+    <string name="tafseer_pdf_ayah">Ayet %1$d</string>
 </resources>

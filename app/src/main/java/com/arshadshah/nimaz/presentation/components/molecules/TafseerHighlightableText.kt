@@ -1,25 +1,25 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.AnnotatedString
@@ -28,6 +28,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.domain.model.TafseerHighlight
@@ -36,6 +37,7 @@ import com.arshadshah.nimaz.presentation.theme.HighlightArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import kotlin.math.roundToInt
 
 val highlightColors = listOf(
     "#FDE68A" to "Yellow",
@@ -52,31 +54,48 @@ private const val HIGHLIGHT_TAG = "HIGHLIGHT"
 // onSurface colour is near-white in dark mode and disappears on the pastel).
 private val HighlightedTextColor = NimazColors.OnSurfaceLight
 
+/** Which of the two selection handles the user is currently dragging. */
+private enum class ActiveHandle { START, END }
+
+/**
+ * Tafseer commentary text with **gesture-first** highlighting:
+ *
+ * - **Long-press** anywhere in the text selects the word under the finger and
+ *   reveals two drag handles.
+ * - **Drag either handle** to grow or shrink the selection one character at a
+ *   time — select anything from a single word to a whole paragraph.
+ * - **Tap an existing highlight** to open it for editing.
+ *
+ * Selection is reported up via [onSelectionChange] (page-local character offsets,
+ * or `-1, -1` when cleared); the parent decides what to do with it (show the
+ * "Add highlight" action, open the editor sheet, …). The parent clears the live
+ * selection by bumping [clearSelectionToken].
+ *
+ * This deliberately avoids `SelectionContainer`/`BasicTextField` so the only
+ * affordance is *our* highlight flow — no competing system copy/paste toolbar —
+ * and so we get the exact character offsets the highlight model needs.
+ */
 @Composable
 fun TafseerHighlightableText(
     text: String,
     highlights: List<TafseerHighlight>,
-    isHighlightMode: Boolean,
-    selectedColor: String,
-    onHighlightCreated: (startOffset: Int, endOffset: Int, color: String) -> Unit,
+    selectionStart: Int,
+    selectionEnd: Int,
+    onSelectionChange: (start: Int, end: Int) -> Unit,
     onHighlightTapped: (TafseerHighlight) -> Unit,
+    clearSelectionToken: Int,
     modifier: Modifier = Modifier
 ) {
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    var selectionStart by remember { mutableIntStateOf(-1) }
-    var selectionEnd by remember { mutableIntStateOf(-1) }
+    val selectionColor = MaterialTheme.colorScheme.primary
 
-    // Build annotated string with highlights, Arabic font detection, and selection preview
+    val hasSelection = selectionStart in 0..text.length &&
+            selectionEnd in 0..text.length &&
+            selectionStart < selectionEnd
+
     val annotatedString =
-        remember(text, highlights, selectionStart, selectionEnd, selectedColor, isHighlightMode) {
-            buildStyledText(
-                text,
-                highlights,
-                selectionStart,
-                selectionEnd,
-                selectedColor,
-                isHighlightMode
-            )
+        remember(text, highlights, selectionStart, selectionEnd, selectionColor) {
+            buildStyledText(text, highlights, selectionStart, selectionEnd, selectionColor)
         }
 
     Box(modifier = modifier.fillMaxWidth()) {
@@ -89,68 +108,116 @@ fun TafseerHighlightableText(
             onTextLayout = { textLayoutResult = it },
             modifier = Modifier
                 .fillMaxWidth()
-                .pointerInput(isHighlightMode, selectedColor, highlights) {
-                    detectTapGestures { tapOffset ->
-                        val layout = textLayoutResult ?: return@detectTapGestures
-                        val charOffset = layout.getOffsetForPosition(tapOffset)
-
-                        if (isHighlightMode) {
-                            handleHighlightModeTap(
-                                charOffset = charOffset,
-                                text = text,
-                                selectionStart = selectionStart,
-                                selectedColor = selectedColor,
-                                onSelectionStartSet = { selectionStart = it },
-                                onHighlightCreated = { start, end ->
-                                    onHighlightCreated(start, end, selectedColor)
-                                    selectionStart = -1
-                                    selectionEnd = -1
+                .pointerInput(text, highlights, clearSelectionToken) {
+                    detectTapGestures(
+                        onTap = { tapOffset ->
+                            val layout = textLayoutResult
+                            if (layout != null) {
+                                val charOffset = layout.getOffsetForPosition(tapOffset)
+                                val tapped = findTappedHighlight(charOffset, highlights, text)
+                                if (tapped != null) {
+                                    onHighlightTapped(tapped)
+                                } else if (hasSelection) {
+                                    // Tapping outside the selection dismisses it.
+                                    onSelectionChange(-1, -1)
                                 }
-                            )
-                        } else {
-                            // Check if tapped on existing highlight
-                            val tappedHighlight = findTappedHighlight(charOffset, highlights, text)
-                            if (tappedHighlight != null) {
-                                onHighlightTapped(tappedHighlight)
+                            }
+                        },
+                        onLongPress = { pressOffset ->
+                            val layout = textLayoutResult
+                            if (layout != null) {
+                                val charOffset = layout.getOffsetForPosition(pressOffset)
+                                val (start, end) = wordRangeAt(charOffset, text)
+                                if (start < end) onSelectionChange(start, end)
                             }
                         }
-                    }
+                    )
                 }
         )
 
-        // Selection indicator when first tap placed
-        if (isHighlightMode && selectionStart >= 0) {
-            Surface(
-                shape = RoundedCornerShape(4.dp),
-                color = MaterialTheme.colorScheme.primaryContainer,
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(top = 2.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.tafseer_tap_end),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
+        // Selection handles — only while a range is selected and we have a layout.
+        val layout = textLayoutResult
+        if (hasSelection && layout != null) {
+            SelectionHandle(
+                handle = ActiveHandle.START,
+                caret = layout.getCursorRect(selectionStart.coerceIn(0, text.length)),
+                color = selectionColor,
+                onDrag = { delta, dragPos ->
+                    val newStart = layout.getOffsetForPosition(dragPos)
+                        .coerceIn(0, (selectionEnd - 1).coerceAtLeast(0))
+                    if (newStart != selectionStart) onSelectionChange(newStart, selectionEnd)
+                }
+            )
+            SelectionHandle(
+                handle = ActiveHandle.END,
+                caret = layout.getCursorRect(selectionEnd.coerceIn(0, text.length)),
+                color = selectionColor,
+                onDrag = { delta, dragPos ->
+                    val newEnd = layout.getOffsetForPosition(dragPos)
+                        .coerceIn((selectionStart + 1).coerceAtMost(text.length), text.length)
+                    if (newEnd != selectionEnd) onSelectionChange(selectionStart, newEnd)
+                }
+            )
         }
     }
 }
 
 /**
- * Build annotated string with:
- * - Existing highlights as colored backgrounds with HIGHLIGHT tag annotations
- * - Arabic text ranges rendered with Amiri font
- * - Live selection preview between start and end taps
+ * A single draggable selection handle. Renders a small circle that hangs just
+ * below the caret at [caret]; dragging it reports the new absolute pointer
+ * position (in the text's coordinate space) back via [onDrag] so the caller can
+ * map it to a character offset. Deltas are translation-invariant, so we seed the
+ * tracked position from the caret on drag-start and accumulate from there.
+ */
+@Composable
+private fun SelectionHandle(
+    handle: ActiveHandle,
+    caret: androidx.compose.ui.geometry.Rect,
+    color: Color,
+    onDrag: (delta: Offset, dragPos: Offset) -> Unit
+) {
+    val handleSize = 22.dp
+    var tracked by remember(handle) { mutableStateOf(Offset.Zero) }
+
+    Box(
+        modifier = Modifier
+            .offset {
+                // Centre the handle on the caret x, hanging just below the line.
+                IntOffset(
+                    x = (caret.left - handleSize.toPx() / 2f).roundToInt(),
+                    y = caret.bottom.roundToInt()
+                )
+            }
+            .size(handleSize)
+            .pointerInput(handle) {
+                detectDragGestures(
+                    onDragStart = {
+                        // Seed from the caret centre in text-space.
+                        tracked = Offset(caret.left, (caret.top + caret.bottom) / 2f)
+                    },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        tracked += dragAmount
+                        onDrag(dragAmount, tracked)
+                    }
+                )
+            }
+            .background(color, CircleShape)
+    )
+}
+
+/**
+ * Build the annotated string with:
+ * - Existing highlights as coloured backgrounds (tagged for hit-testing).
+ * - Arabic text ranges rendered with the Amiri font.
+ * - The live selection rendered with a translucent primary tint.
  */
 private fun buildStyledText(
     text: String,
     highlights: List<TafseerHighlight>,
     selectionStart: Int,
     selectionEnd: Int,
-    selectedColor: String,
-    isHighlightMode: Boolean
+    selectionColor: Color
 ): AnnotatedString {
     return buildAnnotatedString {
         append(text)
@@ -180,27 +247,13 @@ private fun buildStyledText(
             }
         }
 
-        // Show live selection preview
-        if (isHighlightMode && selectionStart >= 0) {
-            val previewStart = selectionStart.coerceIn(0, text.length)
-            val previewEnd = if (selectionEnd >= 0) {
-                selectionEnd.coerceIn(0, text.length)
-            } else {
-                // Show a small marker at the start position
-                (previewStart + 1).coerceAtMost(text.length)
-            }
-
-            if (previewStart != previewEnd) {
-                val actualStart = minOf(previewStart, previewEnd)
-                val actualEnd = maxOf(previewStart, previewEnd)
-                addStyle(
-                    style = SpanStyle(
-                        background = parseColor(selectedColor).copy(alpha = 0.35f)
-                    ),
-                    start = actualStart,
-                    end = actualEnd
-                )
-            }
+        // Live selection preview
+        if (selectionStart in 0..text.length && selectionEnd in 0..text.length && selectionStart < selectionEnd) {
+            addStyle(
+                style = SpanStyle(background = selectionColor.copy(alpha = 0.30f)),
+                start = selectionStart,
+                end = selectionEnd
+            )
         }
     }
 }
@@ -255,59 +308,26 @@ private fun isArabicChar(c: Char): Boolean {
 
 private fun isPunctuation(c: Char): Boolean {
     return c == ',' || c == '.' || c == ':' || c == ';' || c == '(' || c == ')' ||
-            c == '-' || c == '\u060C' || c == '\u061B' || c == '\u061F' // Arabic comma, semicolon, question mark
+            c == '-' || c == '،' || c == '؛' || c == '؟' // Arabic comma, semicolon, question mark
 }
 
 /**
- * Handle tap in highlight mode: first tap sets start, second tap creates highlight.
- * Snaps to word boundaries for cleaner selections.
+ * Return the [start, end) character range of the word containing [offset]. Used
+ * to seed the selection from a long-press, so the user starts with a whole word
+ * and refines from there with the handles.
  */
-private fun handleHighlightModeTap(
-    charOffset: Int,
-    text: String,
-    selectionStart: Int,
-    selectedColor: String,
-    onSelectionStartSet: (Int) -> Unit,
-    onHighlightCreated: (Int, Int) -> Unit
-) {
-    val snappedOffset = snapToWordBoundary(charOffset, text, isStart = selectionStart < 0)
-
-    if (selectionStart < 0) {
-        // First tap - set start
-        onSelectionStartSet(snappedOffset)
-    } else {
-        // Second tap - create highlight
-        val start = minOf(selectionStart, snappedOffset)
-        val end = maxOf(selectionStart, snappedOffset)
-        if (start < end && end <= text.length) {
-            onHighlightCreated(start, end)
-        } else {
-            // Reset if invalid
-            onSelectionStartSet(-1)
-        }
+private fun wordRangeAt(offset: Int, text: String): Pair<Int, Int> {
+    if (text.isEmpty()) return 0 to 0
+    val clamped = offset.coerceIn(0, text.length - 1)
+    if (text[clamped].isWhitespace()) {
+        // Long-pressed a gap — select the single position so handles still appear.
+        return clamped to (clamped + 1).coerceAtMost(text.length)
     }
-}
-
-/**
- * Snap a character offset to the nearest word boundary.
- */
-private fun snapToWordBoundary(offset: Int, text: String, isStart: Boolean): Int {
-    if (text.isEmpty() || offset < 0 || offset >= text.length) return offset.coerceIn(
-        0,
-        text.length
-    )
-
-    return if (isStart) {
-        // Snap to start of word
-        var i = offset
-        while (i > 0 && !text[i - 1].isWhitespace()) i--
-        i
-    } else {
-        // Snap to end of word
-        var i = offset
-        while (i < text.length && !text[i].isWhitespace()) i++
-        i
-    }
+    var start = clamped
+    while (start > 0 && !text[start - 1].isWhitespace()) start--
+    var end = clamped
+    while (end < text.length && !text[end].isWhitespace()) end++
+    return start to end
 }
 
 /**
@@ -383,10 +403,11 @@ private fun TafseerHighlightableTextShowcase() {
         TafseerHighlightableText(
             text = sampleHighlightText,
             highlights = sampleHighlights,
-            isHighlightMode = false,
-            selectedColor = highlightColors.first().first,
-            onHighlightCreated = { _, _, _ -> },
-            onHighlightTapped = {}
+            selectionStart = 49,
+            selectionEnd = 85,
+            onSelectionChange = { _, _ -> },
+            onHighlightTapped = {},
+            clearSelectionToken = 0
         )
     }
 }
