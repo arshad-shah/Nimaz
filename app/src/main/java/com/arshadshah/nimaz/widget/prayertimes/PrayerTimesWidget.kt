@@ -178,17 +178,32 @@ private fun PrayerPill(
     modifier: GlanceModifier = GlanceModifier,
 ) {
     val onPrimary = ColorProvider(R.color.widget_on_primary)
-    val nameColor = if (state == PrayerCellState.NEXT) onPrimary else textSecondary
+    val goldContainer = ColorProvider(R.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
+
+    // Each state pairs an explicit container with an on-container colour, so the
+    // text stays legible in both light and dark mode. Past prayers get a gold
+    // tint, the next prayer keeps the teal highlight, upcoming ones stay plain.
+    val container = when (state) {
+        PrayerCellState.PAST -> goldContainer
+        PrayerCellState.NEXT -> primaryColor
+        PrayerCellState.UPCOMING -> null
+    }
+    val nameColor = when (state) {
+        PrayerCellState.PAST -> onGoldContainer
+        PrayerCellState.NEXT -> onPrimary
+        PrayerCellState.UPCOMING -> textSecondary
+    }
     val timeColor = when (state) {
-        PrayerCellState.PAST -> textSecondary
+        PrayerCellState.PAST -> onGoldContainer
         PrayerCellState.NEXT -> onPrimary
         PrayerCellState.UPCOMING -> textColor
     }
-    val inner = GlanceModifier.let {
-        if (state == PrayerCellState.NEXT) {
-            it.background(primaryColor).cornerRadius(12.dp).padding(vertical = 6.dp, horizontal = 4.dp)
-        } else it
-    }
+    // Pad every pill identically so all five stay vertically aligned; only the
+    // tinted states actually paint a background behind that padding.
+    val inner = GlanceModifier
+        .let { if (container != null) it.background(container).cornerRadius(12.dp) else it }
+        .padding(vertical = 6.dp, horizontal = 4.dp)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
         Column(modifier = inner.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
             Text(

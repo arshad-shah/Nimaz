@@ -9,4 +9,7 @@
     <color name="widget_checked">#22C55E</color>
     <color name="widget_unchecked">#3F3F46</color>
     <color name="widget_on_primary">#FFFFFF</color>
+    <!-- Gold tint used for prayers that have already passed -->
+    <color name="widget_gold_container">#3D300E</color>
+    <color name="widget_on_gold_container">#F5C84B</color>
 </resources>
