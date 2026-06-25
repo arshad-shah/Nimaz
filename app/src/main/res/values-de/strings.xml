@@ -1050,14 +1050,11 @@
     <string name="cd_mark_as_unread">Als ungelesen markieren</string>
     <string name="tafseer_highlight">Hervorheben</string>
     <string name="tafseer_highlight_notes">Hervorhebungsnotizen</string>
-    <string name="tafseer_no_notes">Noch keine Notizen. Tippen Sie auf eine Hervorhebung, um eine Notiz hinzuzufügen.</string>
+    <string name="tafseer_no_notes">Noch keine Notizen. Tippen und halten Sie den Kommentar, um ihn hervorzuheben und eine Notiz hinzuzufügen.</string>
     <string name="tafseer_read_in_format">Lesen in %1$s</string>
     <string name="tafseer_no_commentary_format">Kein %1$s-Kommentar für diese Ayah</string>
     <string name="tafseer_page_format">Seite %1$d von %2$d</string>
     <string name="tafseer_add_note">Notiz hinzufügen…</string>
-    <string name="tafseer_edit_note">Notiz bearbeiten</string>
-    <string name="cd_disable_highlighting">Hervorhebung deaktivieren</string>
-    <string name="cd_enable_highlighting">Hervorhebung aktivieren</string>
     <string name="prayer_sunrise">Sonnenaufgang</string>
     <string name="high_latitude_method">Methode für hohe Breitengrade</string>
     <string name="middle_of_night">Mitte der Nacht</string>
@@ -1174,7 +1171,6 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Open-Source-Lizenzen</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
-    <string name="tafseer_tap_end">Tippen Sie auf die Endposition zum Hervorheben</string>
     <string name="makhraj_jawf">Mund &amp; Rachen (lange Laute)</string>
     <string name="makhraj_halq">der Rachen</string>
     <string name="makhraj_lisan">die Zunge</string>
@@ -1229,4 +1225,19 @@
     <string name="all_categories_az">Alle Kategorien (A–Z)</string>
     <string name="sort_categories_alphabetically">Kategorien alphabetisch sortieren</string>
     <string name="sort_categories_default">Zur Standardreihenfolge wechseln</string>
+    <string name="tafseer_highlight_hint">Kommentar gedrückt halten, um ihn hervorzuheben</string>
+    <string name="tafseer_add_highlight">Hervorhebung hinzufügen</string>
+    <string name="tafseer_selection_active">Text ausgewählt</string>
+    <string name="tafseer_clear">Aufheben</string>
+    <string name="tafseer_colour">Farbe</string>
+    <string name="tafseer_note_optional">Notiz (optional)</string>
+    <string name="tafseer_delete_highlight_title">Hervorhebung löschen?</string>
+    <string name="tafseer_delete_highlight_message">Dadurch werden die Hervorhebung und die zugehörige Notiz entfernt. Dies kann nicht rückgängig gemacht werden.</string>
+    <string name="cd_share_tafseer">Tafseer teilen</string>
+    <string name="tafseer_share_chooser">Tafseer teilen</string>
+    <string name="tafseer_pdf_header">TAFSEER</string>
+    <string name="tafseer_pdf_commentary">Kommentar</string>
+    <string name="tafseer_pdf_notes">Meine Notizen</string>
+    <string name="tafseer_pdf_footer">Erstellt mit Nimaz</string>
+    <string name="tafseer_pdf_ayah">Vers %1$d</string>
 </resources>

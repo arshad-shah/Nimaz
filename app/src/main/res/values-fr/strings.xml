@@ -1051,14 +1051,11 @@
     <string name="cd_mark_as_unread">Marquer comme non lu</string>
     <string name="tafseer_highlight">Surligner</string>
     <string name="tafseer_highlight_notes">Notes de surlignage</string>
-    <string name="tafseer_no_notes">Aucune note pour le moment. Touchez un surlignage pour ajouter une note.</string>
+    <string name="tafseer_no_notes">Aucune note pour le moment. Appuyez longuement sur le commentaire pour le surligner et ajouter une note.</string>
     <string name="tafseer_read_in_format">Lire en %1$s</string>
     <string name="tafseer_no_commentary_format">Aucun commentaire %1$s pour ce verset</string>
     <string name="tafseer_page_format">Page %1$d sur %2$d</string>
     <string name="tafseer_add_note">Ajouter une note…</string>
-    <string name="tafseer_edit_note">Modifier la note</string>
-    <string name="cd_disable_highlighting">Désactiver le surlignage</string>
-    <string name="cd_enable_highlighting">Activer le surlignage</string>
     <string name="prayer_sunrise">Lever du soleil</string>
     <string name="high_latitude_method">Méthode pour hautes latitudes</string>
     <string name="middle_of_night">Milieu de la nuit</string>
@@ -1175,7 +1172,6 @@
     <string name="dua_label">Dua</string>
     <string name="licenses_title">Licences open source</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
-    <string name="tafseer_tap_end">Touchez la position de fin pour surligner</string>
     <string name="makhraj_jawf">la bouche &amp; la gorge (sons longs)</string>
     <string name="makhraj_halq">la gorge</string>
     <string name="makhraj_lisan">la langue</string>
@@ -1230,4 +1226,19 @@
     <string name="all_categories_az">Toutes les catégories (A–Z)</string>
     <string name="sort_categories_alphabetically">Trier les catégories par ordre alphabétique</string>
     <string name="sort_categories_default">Revenir à l\'ordre par défaut</string>
+    <string name="tafseer_highlight_hint">Appuyez longuement sur le commentaire pour le surligner</string>
+    <string name="tafseer_add_highlight">Ajouter un surlignage</string>
+    <string name="tafseer_selection_active">Texte sélectionné</string>
+    <string name="tafseer_clear">Effacer</string>
+    <string name="tafseer_colour">Couleur</string>
+    <string name="tafseer_note_optional">Note (facultatif)</string>
+    <string name="tafseer_delete_highlight_title">Supprimer le surlignage ?</string>
+    <string name="tafseer_delete_highlight_message">Cela supprime le surlignage et la note qui y est associée. Cette action est irréversible.</string>
+    <string name="cd_share_tafseer">Partager le tafsir</string>
+    <string name="tafseer_share_chooser">Partager le tafsir</string>
+    <string name="tafseer_pdf_header">TAFSIR</string>
+    <string name="tafseer_pdf_commentary">Commentaire</string>
+    <string name="tafseer_pdf_notes">Mes notes</string>
+    <string name="tafseer_pdf_footer">Généré par Nimaz</string>
+    <string name="tafseer_pdf_ayah">Verset %1$d</string>
 </resources>

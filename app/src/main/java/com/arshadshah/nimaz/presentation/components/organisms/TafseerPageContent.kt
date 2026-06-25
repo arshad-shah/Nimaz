@@ -27,24 +27,20 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.EditNote
+import androidx.compose.material.icons.outlined.TouchApp
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -67,12 +63,15 @@ import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
-import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
+import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
+import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerBookFrame
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightableText
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
@@ -89,6 +88,15 @@ private data class TafseerPage(
     val globalStartOffset: Int,
     val globalEndOffset: Int
 )
+
+/**
+ * What the highlight editor sheet is currently working on: a brand-new highlight
+ * from a fresh text selection, or an existing highlight being edited.
+ */
+private sealed interface EditorTarget {
+    data class New(val globalStart: Int, val globalEnd: Int, val snippet: String) : EditorTarget
+    data class Existing(val highlight: TafseerHighlight, val snippet: String) : EditorTarget
+}
 
 private const val MAX_CHARS_PER_PAGE = 800
 
@@ -165,17 +173,21 @@ fun TafseerPageContent(
     selectedSource: TafseerSource,
     availableSources: Set<TafseerSource>,
     onSourceSwitch: (TafseerSource) -> Unit,
-    onHighlightCreated: (startOffset: Int, endOffset: Int, color: String) -> Unit,
+    onHighlightCreated: (startOffset: Int, endOffset: Int, color: String, note: String?) -> Unit,
+    onHighlightUpdated: (highlightId: Long, color: String, note: String?) -> Unit,
     onHighlightDeleted: (highlightId: Long) -> Unit,
-    onHighlightNoteUpdated: (highlightId: Long, note: String?) -> Unit,
     onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var isHighlightMode by remember { mutableStateOf(false) }
-    var selectedColor by remember { mutableStateOf(highlightColors.first().first) }
     var showNotesSheet by remember { mutableStateOf(false) }
     var currentContentPage by remember { mutableIntStateOf(0) }
-    var tappedHighlightId by remember { mutableStateOf<Long?>(null) }
+    var editorTarget by remember { mutableStateOf<EditorTarget?>(null) }
+
+    // Live text selection (page-local to [currentContentPage]); -1 means none.
+    var selStart by remember { mutableIntStateOf(-1) }
+    var selEnd by remember { mutableIntStateOf(-1) }
+    // Bumped to tell the text layer to drop its current selection.
+    var clearSelectionToken by remember { mutableIntStateOf(0) }
 
     val tafseerPages = remember(tafseer?.text) {
         if (tafseer != null && tafseer.text.isNotBlank()) splitTafseerIntoPages(tafseer.text) else emptyList()
@@ -185,8 +197,19 @@ fun TafseerPageContent(
 
     remember(tafseer?.id) { currentContentPage = 0; true }
 
+    fun clearSelection() {
+        selStart = -1
+        selEnd = -1
+        clearSelectionToken++
+    }
+
+    // Dismiss any in-progress selection when the page or ayah changes.
+    LaunchedEffect(currentContentPage, tafseer?.id) { clearSelection() }
+
     val highlightsWithNotes =
         remember(highlights) { highlights.filter { !it.note.isNullOrBlank() } }
+
+    val hasSelection = selStart in 0..tafseerFullText.length && selEnd > selStart
 
     val sources = TafseerSource.entries
 
@@ -265,22 +288,34 @@ fun TafseerPageContent(
                                 val animPage =
                                     tafseerPages[pageIndex.coerceIn(0, tafseerPages.lastIndex)]
                                 val animHighlights = highlightsForPage(highlights, animPage)
+                                val isActivePage = pageIndex == currentContentPage
 
                                 TafseerHighlightableText(
                                     text = animPage.text,
                                     highlights = animHighlights,
-                                    isHighlightMode = isHighlightMode,
-                                    selectedColor = selectedColor,
-                                    onHighlightCreated = { localStart, localEnd, color ->
-                                        onHighlightCreated(
-                                            localStart + animPage.globalStartOffset,
-                                            localEnd + animPage.globalStartOffset,
-                                            color
-                                        )
+                                    selectionStart = if (isActivePage) selStart else -1,
+                                    selectionEnd = if (isActivePage) selEnd else -1,
+                                    onSelectionChange = { start, end ->
+                                        if (start < 0) {
+                                            selStart = -1; selEnd = -1
+                                        } else {
+                                            selStart = start; selEnd = end
+                                        }
                                     },
-                                    onHighlightTapped = { highlight ->
-                                        tappedHighlightId = highlight.id
-                                    }
+                                    onHighlightTapped = { tapped ->
+                                        // Remapped to page-local; resolve the full highlight by id.
+                                        val full = highlights.find { it.id == tapped.id }
+                                        if (full != null) {
+                                            val s = full.startOffset.coerceIn(0, tafseerFullText.length)
+                                            val e = full.endOffset.coerceIn(s, tafseerFullText.length)
+                                            editorTarget = EditorTarget.Existing(
+                                                highlight = full,
+                                                snippet = tafseerFullText.substring(s, e)
+                                            )
+                                            clearSelection()
+                                        }
+                                    },
+                                    clearSelectionToken = clearSelectionToken
                                 )
                             }
                         } else {
@@ -290,6 +325,11 @@ fun TafseerPageContent(
                                 onSourceSwitch = onSourceSwitch
                             )
                         }
+
+                        // Discoverability hint for the long-press gesture.
+                        if (tafseerPages.isNotEmpty() && highlights.isEmpty() && !hasSelection) {
+                            TafseerHighlightHint()
+                        }
                     }
                 }
 
@@ -297,16 +337,28 @@ fun TafseerPageContent(
             }
         }
 
-        // ── Highlight colour rail (shown while in highlight mode) ──
+        // ── Contextual selection action (replaces the old colour rail) ──
         AnimatedVisibility(
-            visible = isHighlightMode,
+            visible = hasSelection,
             enter = expandVertically() + fadeIn(),
             exit = shrinkVertically() + fadeOut()
         ) {
-            HighlightColorRail(
-                selectedColor = selectedColor,
-                onColorSelected = { selectedColor = it },
-                onDone = { isHighlightMode = false }
+            SelectionActionBar(
+                onAddHighlight = {
+                    val page = tafseerPages.getOrNull(currentContentPage)
+                    if (page != null) {
+                        val localStart = selStart.coerceIn(0, page.text.length)
+                        val localEnd = selEnd.coerceIn(localStart, page.text.length)
+                        if (localStart < localEnd) {
+                            editorTarget = EditorTarget.New(
+                                globalStart = localStart + page.globalStartOffset,
+                                globalEnd = localEnd + page.globalStartOffset,
+                                snippet = page.text.substring(localStart, localEnd)
+                            )
+                        }
+                    }
+                },
+                onClear = { clearSelection() }
             )
         }
 
@@ -320,84 +372,136 @@ fun TafseerPageContent(
             nextContentDescription = stringResource(R.string.cd_next_page)
         ) {
             NimazPillActionButton(
-                icon = Icons.Default.Edit,
-                contentDescription = if (isHighlightMode) stringResource(R.string.cd_disable_highlighting)
-                else stringResource(R.string.cd_enable_highlighting),
-                onClick = { isHighlightMode = !isHighlightMode },
-                active = isHighlightMode
-            )
-            NimazPillActionButton(
                 icon = Icons.Outlined.EditNote,
                 contentDescription = stringResource(R.string.cd_notes),
                 onClick = { showNotesSheet = true }
             )
             NimazPillActionButton(
                 icon = Icons.Default.Share,
-                contentDescription = stringResource(R.string.cd_export_annotations),
+                contentDescription = stringResource(R.string.cd_share_tafseer),
                 onClick = onShare
             )
         }
     }
 
-    // Highlight detail bottom sheet
-    tappedHighlightId?.let { highlightId ->
-        val highlight = highlights.find { it.id == highlightId }
-        if (highlight != null) {
-            val sheetState = rememberModalBottomSheetState()
-            NimazBottomSheet(
-                onDismissRequest = { tappedHighlightId = null },
-                sheetState = sheetState,
-                containerColor = MaterialTheme.colorScheme.surface,
-                scrollable = false,
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                HighlightDetailSheetContent(
-                    highlight = highlight,
-                    tafseerText = tafseerFullText,
-                    onNoteSaved = { note ->
-                        onHighlightNoteUpdated(highlightId, note.ifBlank { null })
-                        tappedHighlightId = null
-                    },
-                    onDelete = {
-                        onHighlightDeleted(highlightId)
-                        tappedHighlightId = null
-                    },
-                    onDismiss = { tappedHighlightId = null }
-                )
-            }
+    // ── Unified highlight editor sheet (create + edit in one step) ──
+    editorTarget?.let { target ->
+        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val isEditing = target is EditorTarget.Existing
+        val snippet = when (target) {
+            is EditorTarget.New -> target.snippet
+            is EditorTarget.Existing -> target.snippet
+        }
+        val initialColor = when (target) {
+            is EditorTarget.New -> highlightColors.first().first
+            is EditorTarget.Existing -> target.highlight.color
+        }
+        val initialNote = when (target) {
+            is EditorTarget.New -> ""
+            is EditorTarget.Existing -> target.highlight.note.orEmpty()
+        }
+
+        NimazBottomSheet(
+            onDismissRequest = { editorTarget = null },
+            sheetState = sheetState,
+            title = stringResource(R.string.tafseer_highlight),
+            icon = Icons.Outlined.EditNote,
+            onClose = { editorTarget = null },
+            scrollable = true
+        ) {
+            HighlightEditorSheetContent(
+                snippet = snippet,
+                initialColor = initialColor,
+                initialNote = initialNote,
+                isEditing = isEditing,
+                onSave = { color, note ->
+                    when (target) {
+                        is EditorTarget.New -> onHighlightCreated(
+                            target.globalStart,
+                            target.globalEnd,
+                            color,
+                            note.ifBlank { null }
+                        )
+
+                        is EditorTarget.Existing -> onHighlightUpdated(
+                            target.highlight.id,
+                            color,
+                            note.ifBlank { null }
+                        )
+                    }
+                    editorTarget = null
+                    clearSelection()
+                },
+                onDelete = (target as? EditorTarget.Existing)?.let { existing ->
+                    {
+                        onHighlightDeleted(existing.highlight.id)
+                        editorTarget = null
+                    }
+                },
+                onCancel = { editorTarget = null }
+            )
         }
     }
 
-    // Notes list bottom sheet
+    // ── Notes list bottom sheet ──
     if (showNotesSheet) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         NimazBottomSheet(
             onDismissRequest = { showNotesSheet = false },
             sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surface,
-            scrollable = false,
-            contentPadding = PaddingValues(0.dp)
+            title = stringResource(R.string.tafseer_highlight_notes),
+            icon = Icons.Outlined.EditNote,
+            onClose = { showNotesSheet = false },
+            scrollable = true
         ) {
             HighlightNotesListContent(
                 highlights = highlightsWithNotes,
                 tafseerText = tafseerFullText,
                 onHighlightTapped = { highlight ->
                     showNotesSheet = false
-                    tappedHighlightId = highlight.id
-                },
-                modifier = Modifier.padding(horizontal = 16.dp)
+                    val s = highlight.startOffset.coerceIn(0, tafseerFullText.length)
+                    val e = highlight.endOffset.coerceIn(s, tafseerFullText.length)
+                    editorTarget = EditorTarget.Existing(
+                        highlight = highlight,
+                        snippet = tafseerFullText.substring(s, e)
+                    )
+                }
             )
         }
     }
 }
 
-// ── Highlight colour rail ───────────────────────────────────────────────────────
+// ── Long-press discoverability hint ───────────────────────────────────────────
 
 @Composable
-private fun HighlightColorRail(
-    selectedColor: String,
-    onColorSelected: (String) -> Unit,
-    onDone: () -> Unit
+private fun TafseerHighlightHint() {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 12.dp)
+    ) {
+        NimazIcon(
+            imageVector = Icons.Outlined.TouchApp,
+            contentDescription = null,
+            variant = NimazIconVariant.MUTED,
+            iconSize = 16.dp
+        )
+        Text(
+            text = stringResource(R.string.tafseer_highlight_hint),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+// ── Contextual selection action bar ───────────────────────────────────────────
+
+@Composable
+private fun SelectionActionBar(
+    onAddHighlight: () -> Unit,
+    onClear: () -> Unit
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
@@ -408,7 +512,75 @@ private fun HighlightColorRail(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(R.string.tafseer_selection_active),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.weight(1f)
+            )
+            NimazButton(
+                text = stringResource(R.string.tafseer_clear),
+                onClick = onClear,
+                variant = NimazButtonVariant.TEXT
+            )
+            NimazButton(
+                text = stringResource(R.string.tafseer_add_highlight),
+                onClick = onAddHighlight,
+                variant = NimazButtonVariant.FILLED,
+                type = NimazButtonType.PILL
+            )
+        }
+    }
+}
+
+// ── Highlight editor (one-step colour + note) ─────────────────────────────────
+
+@Composable
+private fun HighlightEditorSheetContent(
+    snippet: String,
+    initialColor: String,
+    initialNote: String,
+    isEditing: Boolean,
+    onSave: (color: String, note: String) -> Unit,
+    onDelete: (() -> Unit)?,
+    onCancel: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var selectedColor by remember(initialColor) { mutableStateOf(initialColor) }
+    var noteText by remember(initialNote) { mutableStateOf(initialNote) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 12.dp)
+    ) {
+        // Highlighted snippet preview, tinted with the chosen colour.
+        Surface(
+            shape = RoundedCornerShape(12.dp),
+            color = parseColor(selectedColor).copy(alpha = 0.25f),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = if (snippet.length > 200) snippet.take(200) + "…" else snippet,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 5,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(12.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Colour picker (the previously-separate step, now inline).
+        NimazSheetSectionLabel(text = stringResource(R.string.tafseer_colour))
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             highlightColors.forEach { (hex, name) ->
@@ -416,134 +588,91 @@ private fun HighlightColorRail(
                 Box(
                     contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .size(36.dp)
+                        .size(40.dp)
                         .clip(CircleShape)
                         .background(parseColor(hex))
                         .then(
-                            if (isSelected) Modifier.border(2.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                            else Modifier
+                            if (isSelected) Modifier.border(
+                                3.dp,
+                                MaterialTheme.colorScheme.primary,
+                                CircleShape
+                            ) else Modifier
                         )
-                        .clickable { onColorSelected(hex) }
+                        .clickable { selectedColor = hex }
                 ) {
                     if (isSelected) {
                         NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = stringResource(R.string.cd_item_selected, name),
                             tint = MaterialTheme.colorScheme.onSurface,
-                            iconSize = 18.dp
+                            iconSize = 20.dp
                         )
                     }
                 }
             }
-            Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = onDone) {
-                NimazIcon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.cd_disable_highlighting),
-                    variant = NimazIconVariant.PRIMARY
-                )
-            }
-        }
-    }
-}
-
-// ── Bottom Sheet Contents ───────────────────────────────────────────────────────
-
-@Composable
-private fun HighlightDetailSheetContent(
-    highlight: TafseerHighlight,
-    tafseerText: String,
-    onNoteSaved: (String) -> Unit,
-    onDelete: () -> Unit,
-    onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var noteText by remember(highlight.id) { mutableStateOf(highlight.note ?: "") }
-
-    val start = highlight.startOffset.coerceIn(0, tafseerText.length)
-    val end = highlight.endOffset.coerceIn(start, tafseerText.length)
-    val snippet = if (start < end) tafseerText.substring(start, end) else ""
-
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 24.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(14.dp)
-                    .clip(CircleShape)
-                    .background(parseColor(highlight.color))
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = stringResource(R.string.tafseer_highlight),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
         }
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        Surface(
-            shape = RoundedCornerShape(8.dp),
-            color = parseColor(highlight.color).copy(alpha = 0.2f),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = if (snippet.length > 150) snippet.take(150) + "..." else snippet,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 4,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier.padding(12.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
+        // Note (optional).
+        NimazSheetSectionLabel(text = stringResource(R.string.tafseer_note_optional))
         OutlinedTextField(
             value = noteText,
             onValueChange = { noteText = it },
-            label = { Text(if (highlight.note.isNullOrBlank()) stringResource(R.string.tafseer_add_note) else stringResource(R.string.tafseer_edit_note)) },
+            placeholder = { Text(stringResource(R.string.tafseer_add_note)) },
             modifier = Modifier.fillMaxWidth(),
-            minLines = 2,
-            maxLines = 5
+            minLines = 3,
+            maxLines = 6,
+            shape = RoundedCornerShape(12.dp)
         )
 
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
+        // Actions: a high-emphasis primary "Save" (issue #208), plus delete when editing.
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            NimazButton(
-                text = stringResource(R.string.delete),
-                onClick = onDelete,
-                variant = NimazButtonVariant.DESTRUCTIVE,
-                leadingIcon = Icons.Default.Delete
-            )
-
-            Row {
+            if (onDelete != null) {
+                NimazButton(
+                    text = stringResource(R.string.delete),
+                    onClick = { showDeleteConfirm = true },
+                    variant = NimazButtonVariant.DESTRUCTIVE,
+                    type = NimazButtonType.PILL,
+                    leadingIcon = Icons.Default.Delete,
+                    modifier = Modifier.weight(1f)
+                )
+            } else {
                 NimazButton(
                     text = stringResource(R.string.cancel),
-                    onClick = onDismiss,
-                    variant = NimazButtonVariant.TEXT
-                )
-                NimazButton(
-                    text = stringResource(R.string.save),
-                    onClick = { onNoteSaved(noteText) },
-                    variant = NimazButtonVariant.TEXT
+                    onClick = onCancel,
+                    variant = NimazButtonVariant.OUTLINED,
+                    type = NimazButtonType.PILL,
+                    modifier = Modifier.weight(1f)
                 )
             }
+            NimazButton(
+                text = stringResource(R.string.save),
+                onClick = { onSave(selectedColor, noteText) },
+                variant = NimazButtonVariant.FILLED,
+                type = NimazButtonType.PILL,
+                modifier = Modifier.weight(1f)
+            )
         }
+    }
+
+    if (showDeleteConfirm && onDelete != null) {
+        NimazConfirmDialog(
+            title = stringResource(R.string.tafseer_delete_highlight_title),
+            message = stringResource(R.string.tafseer_delete_highlight_message),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            titleIcon = Icons.Default.Delete,
+            isDestructive = true,
+            onConfirm = onDelete,
+            onDismiss = { showDeleteConfirm = false }
+        )
     }
 }
 
@@ -557,21 +686,12 @@ private fun HighlightNotesListContent(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(bottom = 24.dp)
+            .padding(bottom = 12.dp)
     ) {
-        Text(
-            text = stringResource(R.string.tafseer_highlight_notes),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
         if (highlights.isEmpty()) {
             Text(
                 text = stringResource(R.string.tafseer_no_notes),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(vertical = 16.dp)
             )
@@ -597,7 +717,7 @@ private fun HighlightNotesListContent(
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
-                                text = if (snippet.length > 80) snippet.take(80) + "..." else snippet,
+                                text = if (snippet.length > 80) snippet.take(80) + "…" else snippet,
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 maxLines = 2,
@@ -728,9 +848,9 @@ private fun TafseerPageContentShowcase() {
         selectedSource = TafseerSource.IBN_KATHIR,
         availableSources = setOf(TafseerSource.IBN_KATHIR, TafseerSource.MAARIFUL_QURAN),
         onSourceSwitch = {},
-        onHighlightCreated = { _, _, _ -> },
+        onHighlightCreated = { _, _, _, _ -> },
+        onHighlightUpdated = { _, _, _ -> },
         onHighlightDeleted = {},
-        onHighlightNoteUpdated = { _, _ -> },
         onShare = {}
     )
 }
@@ -750,4 +870,3 @@ private fun TafseerPageContentDarkPreview() {
         TafseerPageContentShowcase()
     }
 }
-

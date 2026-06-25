@@ -42,11 +42,18 @@ sealed interface TafseerEvent {
     data class AddHighlight(
         val startOffset: Int,
         val endOffset: Int,
-        val color: String
+        val color: String,
+        val note: String? = null
     ) : TafseerEvent
 
     data class DeleteHighlight(val highlightId: Long) : TafseerEvent
-    data class UpdateHighlightNote(val highlightId: Long, val note: String?) : TafseerEvent
+
+    /** Update an existing highlight's colour and/or note in a single step. */
+    data class UpdateHighlight(
+        val highlightId: Long,
+        val color: String,
+        val note: String?
+    ) : TafseerEvent
     data class AddNote(val text: String) : TafseerEvent
     data class UpdateNote(val note: TafseerNote) : TafseerEvent
     data class DeleteNote(val noteId: Long) : TafseerEvent
@@ -81,12 +88,14 @@ class TafseerViewModel @Inject constructor(
             is TafseerEvent.AddHighlight -> addHighlight(
                 event.startOffset,
                 event.endOffset,
-                event.color
+                event.color,
+                event.note
             )
 
             is TafseerEvent.DeleteHighlight -> deleteHighlight(event.highlightId)
-            is TafseerEvent.UpdateHighlightNote -> updateHighlightNote(
+            is TafseerEvent.UpdateHighlight -> updateHighlight(
                 event.highlightId,
+                event.color,
                 event.note
             )
 
@@ -166,7 +175,7 @@ class TafseerViewModel @Inject constructor(
         }
     }
 
-    private fun addHighlight(startOffset: Int, endOffset: Int, color: String) {
+    private fun addHighlight(startOffset: Int, endOffset: Int, color: String, note: String?) {
         val currentState = _state.value
         val ayahs = currentState.ayahs
         if (ayahs.isEmpty()) return
@@ -178,7 +187,8 @@ class TafseerViewModel @Inject constructor(
                 tafseerId = currentState.selectedSource.id,
                 startOffset = startOffset,
                 endOffset = endOffset,
-                color = color
+                color = color,
+                note = note?.takeIf { it.isNotBlank() }
             )
         }
     }
@@ -189,12 +199,13 @@ class TafseerViewModel @Inject constructor(
         }
     }
 
-    private fun updateHighlightNote(highlightId: Long, note: String?) {
+    private fun updateHighlight(highlightId: Long, color: String, note: String?) {
         val highlight = _state.value.highlights.find { it.id == highlightId } ?: return
         viewModelScope.launch {
             tafseerUseCases.updateHighlight(
                 highlight.copy(
-                    note = note,
+                    color = color,
+                    note = note?.takeIf { it.isNotBlank() },
                     updatedAt = System.currentTimeMillis()
                 )
             )

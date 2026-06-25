@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,9 +33,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.util.TafseerPdfExporter
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,21 +52,41 @@ fun TafseerScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(surahNumber, ayahNumber) {
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber, ayahNumber))
     }
 
-    // Handle export
-    LaunchedEffect(state.exportedText) {
-        state.exportedText?.let { text ->
-            val sendIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_TEXT, text)
-                type = "text/plain"
-            }
-            context.startActivity(Intent.createChooser(sendIntent, "Share Annotations"))
-            viewModel.onEvent(TafseerEvent.ClearExport)
+    // Build a branded, print/share-ready PDF of the current ayah's tafseer and
+    // hand it to the system share sheet. Generation runs off the main thread.
+    fun shareTafseerPdf() {
+        val ayah = state.ayahs.getOrNull(state.currentAyahIndex) ?: return
+        val tafseer = state.currentTafseer
+        if (tafseer == null || tafseer.text.isBlank()) return
+        val surahName = state.surahName
+        val sourceLabel = state.selectedSource.displayName
+        val highlights = state.highlights
+        scope.launch(Dispatchers.Default) {
+            runCatching {
+                val file = TafseerPdfExporter.export(
+                    context = context,
+                    surahName = surahName,
+                    ayah = ayah,
+                    sourceLabel = sourceLabel,
+                    tafseerText = tafseer.text,
+                    highlights = highlights
+                )
+                val intent = TafseerPdfExporter.buildShareIntent(context, file)
+                withContext(Dispatchers.Main) {
+                    context.startActivity(
+                        Intent.createChooser(
+                            intent,
+                            context.getString(R.string.tafseer_share_chooser)
+                        )
+                    )
+                }
+            }.onFailure { CrashReporter.recordException(it) }
         }
     }
 
@@ -153,16 +179,16 @@ fun TafseerScreen(
                         onSourceSwitch = { source ->
                             viewModel.onEvent(TafseerEvent.SwitchSource(source))
                         },
-                        onHighlightCreated = { start, end, color ->
-                            viewModel.onEvent(TafseerEvent.AddHighlight(start, end, color))
+                        onHighlightCreated = { start, end, color, note ->
+                            viewModel.onEvent(TafseerEvent.AddHighlight(start, end, color, note))
+                        },
+                        onHighlightUpdated = { id, color, note ->
+                            viewModel.onEvent(TafseerEvent.UpdateHighlight(id, color, note))
                         },
                         onHighlightDeleted = { id ->
                             viewModel.onEvent(TafseerEvent.DeleteHighlight(id))
                         },
-                        onHighlightNoteUpdated = { id, note ->
-                            viewModel.onEvent(TafseerEvent.UpdateHighlightNote(id, note))
-                        },
-                        onShare = { viewModel.onEvent(TafseerEvent.ExportAnnotations) }
+                        onShare = { shareTafseerPdf() }
                     )
                 }
             } else {

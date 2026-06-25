@@ -1052,14 +1052,11 @@
     <string name="cd_mark_as_unread">Tandai belum dibaca</string>
     <string name="tafseer_highlight">Sorot</string>
     <string name="tafseer_highlight_notes">Catatan Sorotan</string>
-    <string name="tafseer_no_notes">Belum ada catatan. Ketuk sorotan untuk menambahkan catatan.</string>
+    <string name="tafseer_no_notes">Belum ada catatan. Tekan lama tafsir untuk menyorot dan menambahkan catatan.</string>
     <string name="tafseer_read_in_format">Baca dalam %1$s</string>
     <string name="tafseer_no_commentary_format">Tidak ada tafsir %1$s untuk ayat ini</string>
     <string name="tafseer_page_format">Halaman %1$d dari %2$d</string>
     <string name="tafseer_add_note">Tambahkan catatan…</string>
-    <string name="tafseer_edit_note">Edit catatan</string>
-    <string name="cd_disable_highlighting">Nonaktifkan penyorotan</string>
-    <string name="cd_enable_highlighting">Aktifkan penyorotan</string>
     <string name="prayer_sunrise">Matahari Terbit</string>
     <string name="high_latitude_method">Metode Lintang Tinggi</string>
     <string name="middle_of_night">Tengah Malam</string>
@@ -1176,7 +1173,6 @@
     <string name="dua_label">Doa</string>
     <string name="licenses_title">Lisensi Sumber Terbuka</string>
     <string name="quran_juz_number_format">Juz %1$d</string>
-    <string name="tafseer_tap_end">Ketuk posisi akhir untuk menyorot</string>
     <string name="makhraj_jawf">mulut &amp; tenggorokan (bunyi panjang)</string>
     <string name="makhraj_halq">tenggorokan</string>
     <string name="makhraj_lisan">lidah</string>
@@ -1230,4 +1226,19 @@
     <string name="all_categories_az">Semua Kategori (A–Z)</string>
     <string name="sort_categories_alphabetically">Urutkan kategori menurut abjad</string>
     <string name="sort_categories_default">Beralih ke urutan default</string>
+    <string name="tafseer_highlight_hint">Tekan lama tafsir untuk menyorot</string>
+    <string name="tafseer_add_highlight">Tambah sorotan</string>
+    <string name="tafseer_selection_active">Teks dipilih</string>
+    <string name="tafseer_clear">Bersihkan</string>
+    <string name="tafseer_colour">Warna</string>
+    <string name="tafseer_note_optional">Catatan (opsional)</string>
+    <string name="tafseer_delete_highlight_title">Hapus sorotan?</string>
+    <string name="tafseer_delete_highlight_message">Ini menghapus sorotan dan catatan yang menyertainya. Tindakan ini tidak dapat dibatalkan.</string>
+    <string name="cd_share_tafseer">Bagikan tafsir</string>
+    <string name="tafseer_share_chooser">Bagikan tafsir</string>
+    <string name="tafseer_pdf_header">TAFSIR</string>
+    <string name="tafseer_pdf_commentary">Tafsir</string>
+    <string name="tafseer_pdf_notes">Catatan saya</string>
+    <string name="tafseer_pdf_footer">Dibuat oleh Nimaz</string>
+    <string name="tafseer_pdf_ayah">Ayat %1$d</string>
 </resources>
