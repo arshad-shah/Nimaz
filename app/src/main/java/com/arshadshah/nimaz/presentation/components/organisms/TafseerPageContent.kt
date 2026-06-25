@@ -304,14 +304,16 @@ fun TafseerPageContent(
                                     },
                                     onHighlightTapped = { tapped ->
                                         // Remapped to page-local; resolve the full highlight by id.
-                                        val full = highlights.find { it.id == tapped.id } ?: return@TafseerHighlightableText
-                                        val s = full.startOffset.coerceIn(0, tafseerFullText.length)
-                                        val e = full.endOffset.coerceIn(s, tafseerFullText.length)
-                                        editorTarget = EditorTarget.Existing(
-                                            highlight = full,
-                                            snippet = tafseerFullText.substring(s, e)
-                                        )
-                                        clearSelection()
+                                        val full = highlights.find { it.id == tapped.id }
+                                        if (full != null) {
+                                            val s = full.startOffset.coerceIn(0, tafseerFullText.length)
+                                            val e = full.endOffset.coerceIn(s, tafseerFullText.length)
+                                            editorTarget = EditorTarget.Existing(
+                                                highlight = full,
+                                                snippet = tafseerFullText.substring(s, e)
+                                            )
+                                            clearSelection()
+                                        }
                                     },
                                     clearSelectionToken = clearSelectionToken
                                 )
@@ -343,15 +345,17 @@ fun TafseerPageContent(
         ) {
             SelectionActionBar(
                 onAddHighlight = {
-                    val page = tafseerPages.getOrNull(currentContentPage) ?: return@SelectionActionBar
-                    val localStart = selStart.coerceIn(0, page.text.length)
-                    val localEnd = selEnd.coerceIn(localStart, page.text.length)
-                    if (localStart < localEnd) {
-                        editorTarget = EditorTarget.New(
-                            globalStart = localStart + page.globalStartOffset,
-                            globalEnd = localEnd + page.globalStartOffset,
-                            snippet = page.text.substring(localStart, localEnd)
-                        )
+                    val page = tafseerPages.getOrNull(currentContentPage)
+                    if (page != null) {
+                        val localStart = selStart.coerceIn(0, page.text.length)
+                        val localEnd = selEnd.coerceIn(localStart, page.text.length)
+                        if (localStart < localEnd) {
+                            editorTarget = EditorTarget.New(
+                                globalStart = localStart + page.globalStartOffset,
+                                globalEnd = localEnd + page.globalStartOffset,
+                                snippet = page.text.substring(localStart, localEnd)
+                            )
+                        }
                     }
                 },
                 onClear = { clearSelection() }
