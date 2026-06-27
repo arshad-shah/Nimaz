@@ -96,7 +96,9 @@ are monochrome vector drawables in `res/drawable/ic_widget_*.xml` drawn via `Wid
 widget picks a celestial icon per prayer via `prayerIconRes`; the Tracker uses a teal
 disc + `ic_widget_check` when prayed and a two-disc outline ring when not (Glance has no
 stroke modifier); Prayer Times is a clean 5-cell pill row with the next prayer filled
-teal and past prayers dimmed. A JVM regression test (`WidgetGlyphGuardTest`) fails the
+teal, past prayers tinted gold (`widget_gold_container` / `widget_on_gold_container`),
+and upcoming ones plain; every state pairs an explicit container with an on-container
+text colour so the text stays legible in both light and dark mode. A JVM regression test (`WidgetGlyphGuardTest`) fails the
 build if any widget source reintroduces a glyph.
 
 **Manifest/res.** Five `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
