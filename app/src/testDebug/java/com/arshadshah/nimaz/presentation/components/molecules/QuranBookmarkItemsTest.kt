@@ -118,37 +118,4 @@ class QuranBookmarkItemsTest {
         composeRule.onNodeWithText("Al-Fatihah").performClick()
         assertThat(clicked).isTrue()
     }
-
-    // ----- FavoriteAyahItem -----
-
-    @Test
-    fun favoriteAyahItem_showsNameAndVerse() {
-        composeRule.setThemedContent {
-            FavoriteAyahItem(
-                surahName = "An-Nas",
-                ayahNumber = 6,
-                surahNumber = 114,
-                onClick = {}
-            )
-        }
-
-        composeRule.onNodeWithText("An-Nas").assertExists()
-        composeRule.onNodeWithText("Verse 6").assertExists()
-    }
-
-    @Test
-    fun favoriteAyahItem_click_invokesCallback() {
-        var clicked = false
-        composeRule.setThemedContent {
-            FavoriteAyahItem(
-                surahName = "An-Nas",
-                ayahNumber = 6,
-                surahNumber = 114,
-                onClick = { clicked = true }
-            )
-        }
-
-        composeRule.onNodeWithText("An-Nas").performClick()
-        assertThat(clicked).isTrue()
-    }
 }

@@ -1,21 +1,15 @@
 package com.arshadshah.nimaz.presentation.screens.bookmarks
 
 import android.content.Intent
-import android.text.format.DateUtils
-import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -24,11 +18,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -36,12 +28,8 @@ import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
-import androidx.compose.material3.SwipeToDismissBox
-import androidx.compose.material3.SwipeToDismissBoxDefaults
-import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -55,30 +43,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
-import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
-import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarkType
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksEvent
 import com.arshadshah.nimaz.presentation.viewmodel.BookmarksViewModel
@@ -99,7 +76,7 @@ fun BookmarksScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // The bookmark whose note is being edited (null = no editor showing). The
-    // overflow menu is now an anchored dropdown owned by each card.
+    // overflow menu is an anchored dropdown owned by each card.
     var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
     val context = LocalContext.current
     val shareChooser = stringResource(R.string.share)
@@ -185,7 +162,7 @@ fun BookmarksScreen(
                         items = state.filteredBookmarks,
                         key = { it.id }
                     ) { bookmark ->
-                        SwipeableBookmarkCard(
+                        BookmarkSavedCard(
                             bookmark = bookmark,
                             onClick = { bookmark.navigate(onNavigateToQuranAyah, onNavigateToHadith, onNavigateToDua) },
                             onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
@@ -256,9 +233,8 @@ private fun BookmarkFilterTabs(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeableBookmarkCard(
+private fun BookmarkSavedCard(
     bookmark: UnifiedBookmark,
     onClick: () -> Unit,
     onDelete: () -> Unit,
@@ -266,188 +242,49 @@ private fun SwipeableBookmarkCard(
     onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Swipe end→start to delete; the deletion fires immediately and the Undo
-    // snackbar lets the user reverse it. Reset so the row settles before the
-    // list flow removes it.
-    val dismissState = rememberSwipeToDismissBoxState(
-        initialValue = SwipeToDismissBoxValue.Settled,
-        positionalThreshold = SwipeToDismissBoxDefaults.positionalThreshold
-    )
-    LaunchedEffect(dismissState.currentValue) {
-        if (dismissState.currentValue == SwipeToDismissBoxValue.EndToStart) {
-            onDelete()
-            dismissState.reset()
-        }
-    }
-    SwipeToDismissBox(
-        state = dismissState,
-        modifier = modifier,
-        enableDismissFromStartToEnd = false,
-        enableDismissFromEndToStart = true,
-        backgroundContent = {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(16.dp))
-                    .padding(horizontal = 24.dp),
-                contentAlignment = Alignment.CenterEnd
-            ) {
-                NimazIcon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete),
-                    tint = MaterialTheme.colorScheme.onErrorContainer
-                )
-            }
-        }
-    ) {
-        BookmarkCard(
-            bookmark = bookmark,
-            onClick = onClick,
-            onEditNote = onEditNote,
-            onShare = onShare,
-            onDelete = onDelete,
-        )
-    }
-}
-
-@Composable
-private fun BookmarkCard(
-    bookmark: UnifiedBookmark,
-    onClick: () -> Unit,
-    onEditNote: () -> Unit,
-    onShare: () -> Unit,
-    onDelete: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    var menuExpanded by remember { mutableStateOf(false) }
     val typeColor = bookmark.type.color()
     val onTypeColor = bookmark.type.onColor()
     val typeLabel = bookmark.type.label()
-
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
+    SwipeableSavedCard(
+        title = bookmark.title,
+        timestamp = bookmark.createdAt,
+        // Source / subtitle — only when it adds information beyond the badge.
+        subtitle = bookmark.subtitle.takeIf {
+            it.isNotBlank() && !it.equals(typeLabel, ignoreCase = true)
+        },
+        arabicText = bookmark.arabicText,
+        note = bookmark.note,
         onClick = onClick,
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceContainer
+        onDelete = onDelete,
+        menuActions = listOf(
+            NimazMenuAction(
+                text = stringResource(R.string.edit_note),
+                icon = Icons.Default.Edit,
+                onClick = onEditNote,
+            ),
+            NimazMenuAction(
+                text = stringResource(R.string.share),
+                icon = Icons.Default.Share,
+                onClick = onShare,
+            ),
+            NimazMenuAction(
+                text = stringResource(R.string.delete),
+                icon = Icons.Default.Delete,
+                onClick = onDelete,
+                destructive = true,
+            ),
         ),
-        elevation = 0.dp
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Header: type badge + time + overflow.
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                NimazBadge(
-                    text = typeLabel,
-                    backgroundColor = typeColor,
-                    textColor = onTypeColor,
-                    size = NimazBadgeSize.SMALL,
-                    shape = RoundedCornerShape(50)
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = stringResource(
-                        R.string.added_format,
-                        DateUtils.getRelativeTimeSpanString(
-                            bookmark.createdAt,
-                            System.currentTimeMillis(),
-                            DateUtils.DAY_IN_MILLIS,
-                            DateUtils.FORMAT_ABBREV_RELATIVE
-                        )
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Box {
-                    IconButton(onClick = { menuExpanded = true }, modifier = Modifier.size(36.dp)) {
-                        NimazIcon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = stringResource(R.string.cd_more_options),
-                            variant = NimazIconVariant.MUTED,
-                            size = NimazIconSize.MEDIUM
-                        )
-                    }
-                    NimazDropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false },
-                    ) {
-                        NimazDropdownRow(
-                            text = stringResource(R.string.edit_note),
-                            leadingIcon = Icons.Default.Edit,
-                            onClick = {
-                                menuExpanded = false
-                                onEditNote()
-                            },
-                        )
-                        NimazDropdownRow(
-                            text = stringResource(R.string.share),
-                            leadingIcon = Icons.Default.Share,
-                            onClick = {
-                                menuExpanded = false
-                                onShare()
-                            },
-                        )
-                        NimazDropdownRow(
-                            text = stringResource(R.string.delete),
-                            leadingIcon = Icons.Default.Delete,
-                            destructive = true,
-                            onClick = {
-                                menuExpanded = false
-                                onDelete()
-                            },
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Title (locator) — bold.
-            Text(
-                text = bookmark.title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+        modifier = modifier,
+        leading = {
+            NimazBadge(
+                text = typeLabel,
+                backgroundColor = typeColor,
+                textColor = onTypeColor,
+                size = NimazBadgeSize.SMALL,
+                shape = RoundedCornerShape(50)
             )
-
-            // Source / subtitle — only when it adds information beyond the badge.
-            if (bookmark.subtitle.isNotBlank() && !bookmark.subtitle.equals(typeLabel, ignoreCase = true)) {
-                Text(
-                    text = bookmark.subtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Arabic preview, set off by a gold ornamental divider.
-            bookmark.arabicText?.let { arabic ->
-                TafseerOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
-                ArabicText(
-                    text = arabic,
-                    size = ArabicTextSize.SMALL,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            // Note preview.
-            bookmark.note?.let { note ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = note,
-                    style = MaterialTheme.typography.bodySmall,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
         }
-    }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
