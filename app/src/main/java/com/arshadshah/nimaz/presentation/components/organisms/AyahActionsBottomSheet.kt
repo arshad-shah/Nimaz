@@ -170,6 +170,7 @@ fun AyahActionsContent(
                 actions = buildAyahActions(
                     ayah = ayah,
                     context = context,
+                    copiedMessage = stringResource(R.string.ayah_copied_to_clipboard),
                     isBookmarked = isBookmarked,
                     isFavorite = isFavorite,
                     isKhatamActive = isKhatamActive,
@@ -193,6 +194,7 @@ fun AyahActionsContent(
 private fun buildAyahActions(
     ayah: Ayah,
     context: Context,
+    copiedMessage: String,
     isBookmarked: Boolean,
     isFavorite: Boolean,
     isKhatamActive: Boolean,
@@ -236,7 +238,7 @@ private fun buildAyahActions(
             icon = Icons.Default.ContentCopy,
             label = stringResource(R.string.action_copy),
             onClick = {
-                copyAyahToClipboard(context, ayah)
+                copyAyahToClipboard(context, ayah, copiedMessage)
                 onCopyClick(ayah)
             }
         )
@@ -304,7 +306,7 @@ internal fun SajdaIndicator(
 /**
  * Copy ayah text to clipboard.
  */
-private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
+private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: String) {
     val textToCopy = buildString {
         appendLine(ayah.textArabic)
         if (!ayah.translation.isNullOrBlank()) {
@@ -319,11 +321,7 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     val clip = ClipData.newPlainText("Quran Ayah", textToCopy)
     clipboard.setPrimaryClip(clip)
 
-    Toast.makeText(
-        context,
-        context.getString(R.string.ayah_copied_to_clipboard),
-        Toast.LENGTH_SHORT
-    ).show()
+    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
 }
 
 /**
