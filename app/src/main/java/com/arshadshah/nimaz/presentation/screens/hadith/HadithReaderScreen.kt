@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.hadith
 
 import android.annotation.SuppressLint
 import android.content.ClipData
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -77,6 +76,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
@@ -424,7 +425,6 @@ private fun HadithReaderBottomBar(
     val bookmarkFlow = remember(hadith.id) { viewModel.isHadithBookmarked(hadith.id) }
     val isBookmarked by bookmarkFlow.collectAsState(initial = hadith.isBookmarked)
 
-    val shareLabel = stringResource(R.string.share)
     val copiedMsg = stringResource(R.string.hadith_copied)
     // Resolve the template in composable scope (stringResource can't be called from the
     // non-composable text builder below), then format it per narrator name.
@@ -472,12 +472,12 @@ private fun HadithReaderBottomBar(
             icon = Icons.Default.Share,
             contentDescription = stringResource(R.string.cd_share),
             onClick = {
-                val sendIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, buildHadithText())
-                    type = "text/plain"
+                clipboardScope.launch {
+                    ContentShareManager.shareBranded(
+                        context,
+                        Shareables.hadith(context, hadith)
+                    )
                 }
-                context.startActivity(Intent.createChooser(sendIntent, shareLabel))
             }
         )
         NimazPillActionButton(

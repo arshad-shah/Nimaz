@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import android.content.Intent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -40,7 +39,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
+import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -89,6 +92,7 @@ internal fun AyahItem(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val shareScope = rememberCoroutineScope()
     val isDarkTheme = isSystemInDarkTheme()
 
     val bgColor by animateColorAsState(
@@ -164,14 +168,12 @@ internal fun AyahItem(
                     icon = Icons.Default.Share,
                     contentDescription = stringResource(R.string.cd_share),
                     onClick = {
-                        val textToShare =
-                            "${ayah.textArabic}\n\n${ayah.translation ?: ""}\n\n- Surah ${ayah.surahNumber}, Ayah ${ayah.numberInSurah}"
-                        val sendIntent = Intent().apply {
-                            action = Intent.ACTION_SEND
-                            putExtra(Intent.EXTRA_TEXT, textToShare)
-                            type = "text/plain"
+                        shareScope.launch {
+                            ContentShareManager.shareBranded(
+                                context,
+                                Shareables.ayah(context, ayah)
+                            )
                         }
-                        context.startActivity(Intent.createChooser(sendIntent, "Share Ayah"))
                     },
                 )
                 NimazPillActionButton(

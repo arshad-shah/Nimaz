@@ -4,7 +4,6 @@ import androidx.compose.ui.res.stringResource
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +29,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -38,6 +38,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -50,6 +52,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetPreviewC
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import kotlinx.coroutines.launch
 
 /**
  * Bottom sheet displayed when user taps an ayah in Mushaf view.
@@ -207,6 +210,7 @@ private fun buildAyahActions(
     onKhatamToggle: (Ayah) -> Unit,
     onTafseerClick: (Ayah) -> Unit
 ): List<NimazSheetAction> = buildList {
+    val shareScope = rememberCoroutineScope()
     add(
         NimazSheetAction(
             icon = Icons.Default.PlayArrow,
@@ -248,7 +252,9 @@ private fun buildAyahActions(
             icon = Icons.Default.Share,
             label = stringResource(R.string.share),
             onClick = {
-                shareAyah(context, ayah)
+                shareScope.launch {
+                    ContentShareManager.shareBranded(context, Shareables.ayah(context, ayah))
+                }
                 onShareClick(ayah)
             }
         )
@@ -322,28 +328,6 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: Str
     clipboard.setPrimaryClip(clip)
 
     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
-}
-
-/**
- * Share ayah via intent.
- */
-private fun shareAyah(context: Context, ayah: Ayah) {
-    val textToShare = buildString {
-        appendLine(ayah.textArabic)
-        if (!ayah.translation.isNullOrBlank()) {
-            appendLine()
-            appendLine(ayah.translation)
-        }
-        appendLine()
-        append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
-    }
-
-    val sendIntent = Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, textToShare)
-        type = "text/plain"
-    }
-    context.startActivity(Intent.createChooser(sendIntent, "Share Ayah"))
 }
 
 // ==================== PREVIEWS ====================

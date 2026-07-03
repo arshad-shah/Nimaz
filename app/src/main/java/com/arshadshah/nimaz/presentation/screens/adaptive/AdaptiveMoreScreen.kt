@@ -17,7 +17,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
@@ -43,14 +46,7 @@ fun AdaptiveMoreScreen(
     }
 
     val shareApp = {
-        val shareIntent = Intent(Intent.ACTION_SEND).apply {
-            type = "text/plain"
-            putExtra(
-                Intent.EXTRA_TEXT,
-                "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-            )
-        }
-        context.startActivity(Intent.createChooser(shareIntent, "Share Nimaz"))
+        ContentShareManager.shareText(context, Shareables.appInvite(context))
     }
 
     val rateApp = {
@@ -169,11 +165,11 @@ fun AdaptiveMoreScreen(
                                 onRateApp = rateApp,
                                 onShareApp = shareApp,
                                 onContactUs = {
-                                    val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                        data = Uri.parse("mailto:arshad@arshadshah.com")
-                                        putExtra(Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
-                                    }
-                                    context.startActivity(intent)
+                                    ContentShareManager.sendEmail(
+                                        context,
+                                        address = context.getString(R.string.contact_email),
+                                        subject = context.getString(R.string.contact_email_subject),
+                                    )
                                 }
                             )
 
@@ -188,15 +184,10 @@ fun AdaptiveMoreScreen(
                                         navController.navigate(Route.HelpTopicDetail(topicId))
                                     },
                                     onContact = {
-                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                            data = Uri.parse("mailto:$supportEmail")
-                                            putExtra(Intent.EXTRA_SUBJECT, supportSubject)
-                                        }
-                                        context.startActivity(
-                                            Intent.createChooser(
-                                                intent,
-                                                supportEmail
-                                            )
+                                        ContentShareManager.sendEmail(
+                                            context,
+                                            address = supportEmail,
+                                            subject = supportSubject,
                                         )
                                     }
                                 )

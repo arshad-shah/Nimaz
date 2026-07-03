@@ -44,6 +44,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
@@ -834,28 +836,14 @@ fun NavGraph(
                         }
                     },
                     onShareApp = {
-                        val shareIntent =
-                            Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(
-                                    Intent.EXTRA_TEXT,
-                                    "Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz"
-                                )
-                            }
-                        context.startActivity(
-                            Intent.createChooser(
-                                shareIntent,
-                                "Share Nimaz"
-                            )
-                        )
+                        ContentShareManager.shareText(context, Shareables.appInvite(context))
                     },
                     onContactUs = {
-                        val intent =
-                            Intent(Intent.ACTION_SENDTO).apply {
-                                data = android.net.Uri.parse("mailto:arshad@arshadshah.com")
-                                putExtra(Intent.EXTRA_SUBJECT, "Nimaz App Feedback")
-                            }
-                        context.startActivity(intent)
+                        ContentShareManager.sendEmail(
+                            context,
+                            address = context.getString(com.arshadshah.nimaz.R.string.contact_email),
+                            subject = context.getString(com.arshadshah.nimaz.R.string.contact_email_subject),
+                        )
                     }
                 )
             }
@@ -967,16 +955,10 @@ fun NavGraph(
                         )
                     },
                     onContact = {
-                        val intent =
-                            Intent(Intent.ACTION_SENDTO).apply {
-                                data = android.net.Uri.parse("mailto:$supportEmail")
-                                putExtra(Intent.EXTRA_SUBJECT, supportSubject)
-                            }
-                        context.startActivity(
-                            Intent.createChooser(
-                                intent,
-                                supportEmail
-                            )
+                        ContentShareManager.sendEmail(
+                            context,
+                            address = supportEmail,
+                            subject = supportSubject,
                         )
                     }
                 )

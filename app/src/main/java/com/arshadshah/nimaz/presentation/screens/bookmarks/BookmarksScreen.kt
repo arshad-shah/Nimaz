@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.bookmarks
 
-import android.content.Intent
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -46,6 +45,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
@@ -79,7 +80,6 @@ fun BookmarksScreen(
     // overflow menu is an anchored dropdown owned by each card.
     var noteTarget by remember { mutableStateOf<UnifiedBookmark?>(null) }
     val context = LocalContext.current
-    val shareChooser = stringResource(R.string.share)
 
     // Drive the Undo snackbar off the most recently deleted bookmark.
     val removedMessage = stringResource(R.string.bookmark_removed)
@@ -168,8 +168,14 @@ fun BookmarksScreen(
                             onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
                             onEditNote = { noteTarget = bookmark },
                             onShare = {
-                                context.startActivity(
-                                    Intent.createChooser(bookmark.shareIntent(), shareChooser)
+                                ContentShareManager.shareText(
+                                    context,
+                                    Shareables.bookmark(
+                                        context,
+                                        title = bookmark.title,
+                                        arabicText = bookmark.arabicText,
+                                        note = bookmark.note,
+                                    )
                                 )
                             },
                         )
@@ -364,15 +370,3 @@ private fun UnifiedBookmark.navigate(
     }
 }
 
-private fun UnifiedBookmark.shareIntent(): Intent {
-    val body = buildString {
-        append(title)
-        arabicText?.let { append("\n\n$it") }
-        note?.let { append("\n\n$it") }
-    }
-    return Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, body)
-        type = "text/plain"
-    }
-}

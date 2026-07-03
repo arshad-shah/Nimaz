@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
-import android.content.Intent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.TafseerPdfExporter
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerEvent
@@ -53,9 +53,6 @@ fun TafseerScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    // Resolved in composable scope so the share intent doesn't query resources off
-    // LocalContext.current from the (non-composable) coroutine below.
-    val shareChooserLabel = stringResource(R.string.tafseer_share_chooser)
 
     LaunchedEffect(surahNumber, ayahNumber) {
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber, ayahNumber))
@@ -80,10 +77,11 @@ fun TafseerScreen(
                     tafseerText = tafseer.text,
                     highlights = highlights
                 )
-                val intent = TafseerPdfExporter.buildShareIntent(context, file)
                 withContext(Dispatchers.Main) {
-                    context.startActivity(
-                        Intent.createChooser(intent, shareChooserLabel)
+                    ContentShareManager.shareFile(
+                        context,
+                        file,
+                        mimeType = "application/pdf",
                     )
                 }
             }.onFailure { CrashReporter.recordException(it) }

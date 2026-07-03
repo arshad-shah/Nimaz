@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.dua
 
-import android.content.Intent
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +56,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -351,16 +352,12 @@ private fun DuaReaderBottomBar(
     onNext: () -> Unit
 ) {
     val context = LocalContext.current
+    val shareScope = rememberCoroutineScope()
     val favoriteFlow = remember(dua.id) { viewModel.isDuaFavorite(dua.id) }
     val isFavorite by favoriteFlow.collectAsState(initial = false)
 
     val addedToTasbihMsg = stringResource(R.string.dua_reader_added_tasbih)
     val shareLabel = stringResource(R.string.dua_reader_share)
-    val sourceLabel = if (!dua.reference.isNullOrEmpty()) {
-        stringResource(R.string.dua_reader_source_label, dua.reference)
-    } else {
-        ""
-    }
     NimazReaderBottomBar(
         currentPage = currentPage,
         pageCount = pageCount,
@@ -388,27 +385,9 @@ private fun DuaReaderBottomBar(
             icon = Icons.Default.Share,
             contentDescription = shareLabel,
             onClick = {
-                val textToShare = buildString {
-                    appendLine(dua.titleEnglish)
-                    appendLine()
-                    appendLine(dua.textArabic)
-                    appendLine()
-                    if (!dua.textTransliteration.isNullOrEmpty()) {
-                        appendLine(dua.textTransliteration)
-                        appendLine()
-                    }
-                    appendLine(dua.textEnglish)
-                    if (sourceLabel.isNotEmpty()) {
-                        appendLine()
-                        appendLine(sourceLabel)
-                    }
+                shareScope.launch {
+                    ContentShareManager.shareBranded(context, Shareables.dua(context, dua))
                 }
-                val sendIntent = Intent().apply {
-                    action = Intent.ACTION_SEND
-                    putExtra(Intent.EXTRA_TEXT, textToShare)
-                    type = "text/plain"
-                }
-                context.startActivity(Intent.createChooser(sendIntent, shareLabel))
             }
         )
     }

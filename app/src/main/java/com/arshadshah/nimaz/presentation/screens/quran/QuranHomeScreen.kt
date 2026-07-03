@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -84,6 +83,8 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
@@ -718,7 +719,7 @@ private fun FavoritesTabContent(
     }
 
     val context = LocalContext.current
-    val shareChooser = stringResource(R.string.share)
+    val shareScope = rememberCoroutineScope()
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -742,12 +743,17 @@ private fun FavoritesTabContent(
                         text = stringResource(R.string.share),
                         icon = Icons.Default.Share,
                         onClick = {
-                            context.startActivity(
-                                Intent.createChooser(
-                                    favoriteShareIntent(surahName, verseLabel, favorite.arabicText),
-                                    shareChooser
+                            shareScope.launch {
+                                ContentShareManager.shareBranded(
+                                    context,
+                                    Shareables.favorite(
+                                        context,
+                                        surahName = surahName,
+                                        verseLabel = verseLabel,
+                                        arabicText = favorite.arabicText,
+                                    )
                                 )
-                            )
+                            }
                         },
                     ),
                     NimazMenuAction(
@@ -768,24 +774,6 @@ private fun FavoritesTabContent(
                 }
             )
         }
-    }
-}
-
-private fun favoriteShareIntent(
-    surahName: String,
-    verseLabel: String,
-    arabicText: String?
-): Intent {
-    val body = buildString {
-        append(surahName)
-        append(" · ")
-        append(verseLabel)
-        arabicText?.let { append("\n\n$it") }
-    }
-    return Intent().apply {
-        action = Intent.ACTION_SEND
-        putExtra(Intent.EXTRA_TEXT, body)
-        type = "text/plain"
     }
 }
 

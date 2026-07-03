@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.core.util
 
 import android.content.Context
-import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.LinearGradient
@@ -9,7 +8,6 @@ import android.graphics.Paint
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.graphics.pdf.PdfDocument
-import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
@@ -381,15 +379,6 @@ object PrayerTimesPdfExporter {
         FileOutputStream(file).use { doc.writeTo(it) }
         doc.close()
         return file
-    }
-
-    fun buildShareIntent(context: Context, file: File): Intent {
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-        return Intent(Intent.ACTION_SEND).apply {
-            type = "application/pdf"
-            putExtra(Intent.EXTRA_STREAM, uri)
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        }
     }
 
     // ── helpers ────────────────────────────────────────────────────────

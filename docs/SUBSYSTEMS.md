@@ -24,7 +24,8 @@ Source root: `app/src/main/java/com/arshadshah/nimaz/`
 8. [Prayer-time calculation](#8-prayer-time-calculation)
 9. [App initialization & monitoring](#9-app-initialization--monitoring)
 10. [Device-to-device sync](#10-device-to-device-sync)
-11. [Keeping this doc updated](#keeping-this-doc-updated)
+11. [Content sharing](#11-content-sharing)
+12. [Keeping this doc updated](#keeping-this-doc-updated)
 
 ---
 
@@ -333,6 +334,42 @@ receives.
 - `P2P_POINT_TO_POINT` is strictly one-to-one; the manager's single-slot callbacks assume one sync at a time.
 - The 31 KB BYTES threshold and the `0x1F` data/signal prefix are load-bearing — changing compression breaks disambiguation.
 - `appVersion = 11` is hardcoded in the exporter and not validated on import (skew tolerated via `ignoreUnknownKeys` + field-level merge).
+
+---
+
+## 11. Content sharing
+
+`core/share/` — the **single, branded path** every feature uses to share content through the
+system share sheet. Before this existed, ~13 call sites each hand-rolled their own
+`Intent(ACTION_SEND)`, rebuilt the share-body string, and passed a hardcoded chooser title;
+now no screen constructs a share `Intent` directly (enforceable: `grep -rn "ACTION_SEND\|createChooser\|ACTION_SENDTO" app/src/main/java` should only hit `core/share/`).
+
+| File | Role |
+|---|---|
+| `core/share/Shareable.kt` | `data class Shareable(plainText, subject?, card?)` — domain-agnostic description of something to share. `ShareCard` is the structured payload (eyebrow / arabic / body / transliteration / attribution) for the branded image. |
+| `core/share/Shareables.kt` | `object` factory — the **one** place each content type's share-body string is built (`ayah`, `favorite`, `hadith`, `dua`, `bookmark`, `appInvite`, `text`). Takes `Context` so bodies/attribution stay localized. |
+| `core/share/ContentShareManager.kt` | `object` entry point. `shareText` (text/plain), `shareFile` (FileProvider + grant flag; PDFs & images), `sendEmail` (`ACTION_SENDTO` `mailto:`), and `shareBranded` (suspend — render card → PNG → `shareFile`, text fallback). Owns MIME, `EXTRA_SUBJECT/TEXT`, and the localized chooser title (`R.string.share_chooser_title`). |
+| `core/share/ShareCardRenderer.kt` | Draws a `ShareCard` into a teal/gold **Nimaz-branded PNG** (Amiri Arabic, wordmark, app-icon monogram) via `Canvas`, written to the `exports/` cache dir. Deliberately mirrors the PDF exporters' visual language. |
+
+**Branded image path.** `ayah`, `favorite`, `hadith` and `dua` carry a `ShareCard`, so their
+share button calls `ContentShareManager.shareBranded(...)` from a `rememberCoroutineScope()` —
+the bitmap is rendered on `Dispatchers.Default`, then shared as `image/png` with `plainText` as
+the caption/fallback; if rendering fails it degrades to `shareText`. Bookmarks, the app-invite and
+the contact-us email are text/`mailto:` only.
+
+**File sharing.** `shareFile` centralizes the `FileProvider.getUriForFile(context, "${packageName}.fileprovider", file)` + `FLAG_GRANT_READ_URI_PERMISSION` wiring that
+`TafseerPdfExporter` and `PrayerTimesPdfExporter` used to each duplicate in their own
+`buildShareIntent`. Those exporters now only *produce the `File`*; the caller passes it to
+`ContentShareManager.shareFile(context, file, "application/pdf")`. All shared files (PDF + share
+PNGs) live under the `exports/` cache dir exposed by `res/xml/file_paths.xml`.
+
+**Wiring.** Plain `object`s (no DI), matching the existing `core/util` exporters — call sites use
+`LocalContext.current`. `shareBranded` is `suspend`; every branded call site launches it from a
+composable coroutine scope.
+
+**Gotchas.**
+- `ShareCardRenderer` measures then draws in one `draw(canvas)` walk (null canvas = measure pass) so the bitmap height can't drift from the content; Arabic/body text is length-capped for the card, but the full text always survives in the `plainText` fallback.
+- Chooser title is a single shared `R.string.share_chooser_title` — the old per-feature titles (`share_hadith`, `dua_reader_share`, `tafseer_share_chooser`) are no longer wired to the chooser.
 
 ---
 

@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.hadith
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -31,6 +30,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +46,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
@@ -64,6 +66,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,6 +81,7 @@ fun HadithCollectionScreen(
     val bookmarksState by viewModel.bookmarksState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val context = LocalContext.current
+    val shareScope = rememberCoroutineScope()
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -131,7 +135,6 @@ fun HadithCollectionScreen(
                     val fallbackArabic = stringResource(R.string.hadith_fallback_arabic)
                     val fallbackEnglish = stringResource(R.string.hadith_fallback_english)
                     val fallbackSource = stringResource(R.string.hadith_fallback_source)
-                    val shareHadithLabel = stringResource(R.string.share_hadith)
                     HadithOfTheDayCard(
                         hadith = hadithOfTheDay,
                         onBookmarkClick = {
@@ -146,27 +149,26 @@ fun HadithCollectionScreen(
                             }
                         },
                         onShareClick = {
-                            val shareText = buildString {
+                            shareScope.launch {
                                 if (hadithOfTheDay != null) {
-                                    appendLine(hadithOfTheDay.textArabic)
-                                    appendLine()
-                                    appendLine(hadithOfTheDay.textEnglish)
-                                    appendLine()
-                                    appendLine(hadithOfTheDay.reference ?: "")
+                                    ContentShareManager.shareBranded(
+                                        context,
+                                        Shareables.hadith(context, hadithOfTheDay)
+                                    )
                                 } else {
-                                    appendLine(fallbackArabic)
-                                    appendLine()
-                                    appendLine(fallbackEnglish)
-                                    appendLine()
-                                    appendLine(fallbackSource)
+                                    val fallbackBody = buildString {
+                                        appendLine(fallbackArabic)
+                                        appendLine()
+                                        appendLine(fallbackEnglish)
+                                        appendLine()
+                                        append(fallbackSource)
+                                    }
+                                    ContentShareManager.shareText(
+                                        context,
+                                        Shareables.text(fallbackBody)
+                                    )
                                 }
                             }
-                            val sendIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, shareText)
-                                type = "text/plain"
-                            }
-                            context.startActivity(Intent.createChooser(sendIntent, shareHadithLabel))
                         },
                         modifier = Modifier.padding(horizontal = 20.dp)
                     )

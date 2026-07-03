@@ -681,6 +681,16 @@
     <!-- Share -->
     <string name="share_message">Check out Nimaz - Prayer Times App: https://play.google.com/store/apps/details?id=com.arshadshah.nimaz</string>
     <string name="share_chooser_title">Share Nimaz</string>
+    <!-- Centralized content-sharing system (ContentShareManager / Shareables) -->
+    <string name="share_text_footer">Shared with Nimaz</string>
+    <string name="share_card_footer">Shared with Nimaz</string>
+    <string name="share_card_tagline">Islamic Companion</string>
+    <string name="share_eyebrow_quran">Quran</string>
+    <string name="share_eyebrow_hadith">Hadith</string>
+    <string name="share_eyebrow_dua">Dua</string>
+    <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
+    <string name="share_reference_hadith">Hadith #%1$d</string>
+    <string name="contact_email_subject">Nimaz App Feedback</string>
 
     <!-- Quran Home Screen -->
     <string name="quran_home_title">Quran</string>
