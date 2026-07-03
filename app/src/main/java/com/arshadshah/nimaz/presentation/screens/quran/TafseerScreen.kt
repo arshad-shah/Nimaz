@@ -53,6 +53,9 @@ fun TafseerScreen(
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    // Resolved in composable scope so the share intent doesn't query resources off
+    // LocalContext.current from the (non-composable) coroutine below.
+    val shareChooserLabel = stringResource(R.string.tafseer_share_chooser)
 
     LaunchedEffect(surahNumber, ayahNumber) {
         viewModel.onEvent(TafseerEvent.LoadSurah(surahNumber, ayahNumber))
@@ -80,10 +83,7 @@ fun TafseerScreen(
                 val intent = TafseerPdfExporter.buildShareIntent(context, file)
                 withContext(Dispatchers.Main) {
                     context.startActivity(
-                        Intent.createChooser(
-                            intent,
-                            context.getString(R.string.tafseer_share_chooser)
-                        )
+                        Intent.createChooser(intent, shareChooserLabel)
                     )
                 }
             }.onFailure { CrashReporter.recordException(it) }

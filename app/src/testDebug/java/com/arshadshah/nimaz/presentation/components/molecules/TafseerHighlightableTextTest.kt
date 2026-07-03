@@ -33,15 +33,16 @@ class TafseerHighlightableTextTest {
     )
 
     @Test
-    fun rendersPlainText_inViewMode() {
+    fun rendersPlainText_withoutSelection() {
         composeRule.setThemedContent {
             TafseerHighlightableText(
                 text = "Hello tafseer world",
                 highlights = emptyList(),
-                isHighlightMode = false,
-                selectedColor = "#FDE68A",
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightTapped = {}
+                selectionStart = -1,
+                selectionEnd = -1,
+                onSelectionChange = { _, _ -> },
+                onHighlightTapped = {},
+                clearSelectionToken = 0
             )
         }
 
@@ -54,10 +55,11 @@ class TafseerHighlightableTextTest {
             TafseerHighlightableText(
                 text = "Hello tafseer world",
                 highlights = listOf(highlight(startOffset = 0, endOffset = 5)),
-                isHighlightMode = false,
-                selectedColor = "#BBF7D0",
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightTapped = {}
+                selectionStart = -1,
+                selectionEnd = -1,
+                onSelectionChange = { _, _ -> },
+                onHighlightTapped = {},
+                clearSelectionToken = 0
             )
         }
 
@@ -71,10 +73,11 @@ class TafseerHighlightableTextTest {
             TafseerHighlightableText(
                 text = "Bismillah بسم الله الرحمن الرحيم end",
                 highlights = emptyList(),
-                isHighlightMode = false,
-                selectedColor = "#FDE68A",
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightTapped = {}
+                selectionStart = -1,
+                selectionEnd = -1,
+                onSelectionChange = { _, _ -> },
+                onHighlightTapped = {},
+                clearSelectionToken = 0
             )
         }
 
@@ -82,21 +85,20 @@ class TafseerHighlightableTextTest {
     }
 
     @Test
-    fun highlightMode_rendersText_withoutSelectionIndicatorInitially() {
+    fun rendersText_withActiveSelectionRange() {
         composeRule.setThemedContent {
             TafseerHighlightableText(
                 text = "Highlight me please",
                 highlights = emptyList(),
-                isHighlightMode = true,
-                selectedColor = "#BFDBFE",
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightTapped = {}
+                selectionStart = 0,
+                selectionEnd = 9,
+                onSelectionChange = { _, _ -> },
+                onHighlightTapped = {},
+                clearSelectionToken = 0
             )
         }
 
         composeRule.onNodeWithText("Highlight me please").assertExists()
-        // No tap yet -> selectionStart < 0 -> indicator hidden
-        composeRule.onNodeWithText("Tap end position to highlight").assertDoesNotExist()
     }
 
     @Test
@@ -106,10 +108,11 @@ class TafseerHighlightableTextTest {
             TafseerHighlightableText(
                 text = "short",
                 highlights = listOf(highlight(startOffset = 0, endOffset = 999)),
-                isHighlightMode = false,
-                selectedColor = "#FED7AA",
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightTapped = {}
+                selectionStart = -1,
+                selectionEnd = -1,
+                onSelectionChange = { _, _ -> },
+                onHighlightTapped = {},
+                clearSelectionToken = 0
             )
         }
 

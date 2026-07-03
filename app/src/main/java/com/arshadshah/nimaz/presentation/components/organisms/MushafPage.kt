@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -91,6 +92,7 @@ fun MushafPage(
 ) {
     val context = LocalContext.current
     val density = LocalDensity.current
+    val copiedMessage = stringResource(R.string.ayah_copied_to_clipboard)
 
     // Tooltip state
     var tooltipAyah by remember { mutableStateOf<Ayah?>(null) }
@@ -215,7 +217,7 @@ fun MushafPage(
                     onFavoriteClick(ayah)
                 },
                 onCopyClick = {
-                    copyAyahToClipboard(context, ayah)
+                    copyAyahToClipboard(context, ayah, copiedMessage)
                     onCopyClick(ayah)
                     tooltipAyah = null
                 },
@@ -310,7 +312,7 @@ private fun MushafOrnamentalLine(modifier: Modifier = Modifier) {
     }
 }
 
-private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
+private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: String) {
     val textToCopy = buildString {
         appendLine(ayah.textArabic)
         if (!ayah.translation.isNullOrBlank()) {
@@ -321,11 +323,7 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah) {
     }
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
     clipboard.setPrimaryClip(ClipData.newPlainText("Quran Ayah", textToCopy))
-    Toast.makeText(
-        context,
-        context.getString(R.string.ayah_copied_to_clipboard),
-        Toast.LENGTH_SHORT
-    ).show()
+    Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
 }
 
 private fun shareAyah(context: Context, ayah: Ayah) {

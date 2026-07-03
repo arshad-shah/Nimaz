@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -27,10 +28,12 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Bookmark
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
@@ -46,10 +49,15 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,6 +72,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -76,22 +85,27 @@ import java.time.LocalDate
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
-import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkCard
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkListItem
 import com.arshadshah.nimaz.presentation.components.molecules.ContinueReadingCard
-import com.arshadshah.nimaz.presentation.components.molecules.FavoriteAyahItem
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamProgressCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.QuranQuickActions
 import com.arshadshah.nimaz.presentation.components.molecules.QuranRecommendedSurahs
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.VerseOfTheDayCard
 import com.arshadshah.nimaz.presentation.components.organisms.JuzGrid
+import com.arshadshah.nimaz.presentation.components.organisms.NimazMenuAction
 import com.arshadshah.nimaz.presentation.components.organisms.NimazTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.SwipeableSavedCard
 import com.arshadshah.nimaz.presentation.components.organisms.computeJuzHeaderIndices
 import com.arshadshah.nimaz.presentation.components.organisms.pageGridItems
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.viewmodel.FavoriteAyahUi
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranHomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -119,9 +133,30 @@ fun QuranHomeScreen(
     val state by viewModel.homeState.collectAsState()
     val bookmarksState by viewModel.bookmarksState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Drive the Undo snackbar off the most recently removed favourite.
+    val favoriteRemovedMessage = stringResource(R.string.favorite_removed)
+    val undoLabel = stringResource(R.string.undo)
+    val removedFavoriteId = state.recentlyRemovedFavorite?.ayahId
+    LaunchedEffect(removedFavoriteId) {
+        if (removedFavoriteId != null) {
+            val result = snackbarHostState.showSnackbar(
+                message = favoriteRemovedMessage,
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Short
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                viewModel.onEvent(QuranEvent.UndoRemoveFavorite)
+            } else {
+                viewModel.onEvent(QuranEvent.DismissFavoriteUndo)
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             NimazTopAppBar(
                 title = stringResource(R.string.quran_home_title),
@@ -230,7 +265,8 @@ fun QuranHomeScreen(
                     2 -> FavoritesTabContent(
                         favorites = state.favorites,
                         surahs = state.surahs,
-                        onNavigateToQuranAyah = onNavigateToQuranAyah
+                        onNavigateToQuranAyah = onNavigateToQuranAyah,
+                        onRemoveFavorite = { viewModel.onEvent(QuranEvent.RemoveFavorite(it)) }
                     )
                 }
             }
@@ -663,58 +699,93 @@ private fun BrowseTabContent(
 
 @Composable
 private fun FavoritesTabContent(
-    favorites: List<QuranFavorite>,
+    favorites: List<FavoriteAyahUi>,
     surahs: List<Surah>,
-    onNavigateToQuranAyah: (Int, Int) -> Unit
+    onNavigateToQuranAyah: (Int, Int) -> Unit,
+    onRemoveFavorite: (FavoriteAyahUi) -> Unit
 ) {
+    if (favorites.isEmpty()) {
+        NimazEmptyState(
+            title = stringResource(R.string.quran_home_no_favorite_ayahs),
+            message = stringResource(R.string.quran_home_favorite_hint),
+            icon = Icons.Default.Favorite,
+            iconTint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
+        )
+        return
+    }
+
+    val context = LocalContext.current
+    val shareChooser = stringResource(R.string.share)
     LazyColumn(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        if (favorites.isEmpty()) {
-            item(key = "no_favorites") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 32.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Favorite,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                            iconSize = 48.dp
-                        )
-                        Spacer(modifier = Modifier.height(12.dp))
-                        Text(
-                            text = stringResource(R.string.quran_home_no_favorite_ayahs),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Text(
-                            text = stringResource(R.string.quran_home_favorite_hint),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                        )
-                    }
+        items(
+            items = favorites,
+            key = { "fav_${it.ayahId}" }
+        ) { favorite ->
+            val surahName = surahs.find { it.number == favorite.surahNumber }?.nameEnglish
+                ?: stringResource(R.string.quran_home_surah_fallback, favorite.surahNumber)
+            val verseLabel = stringResource(R.string.quran_home_verse_format, favorite.ayahNumber)
+            SwipeableSavedCard(
+                title = surahName,
+                subtitle = verseLabel,
+                timestamp = favorite.createdAt,
+                arabicText = favorite.arabicText,
+                onClick = { onNavigateToQuranAyah(favorite.surahNumber, favorite.ayahNumber) },
+                onDelete = { onRemoveFavorite(favorite) },
+                menuActions = listOf(
+                    NimazMenuAction(
+                        text = stringResource(R.string.share),
+                        icon = Icons.Default.Share,
+                        onClick = {
+                            context.startActivity(
+                                Intent.createChooser(
+                                    favoriteShareIntent(surahName, verseLabel, favorite.arabicText),
+                                    shareChooser
+                                )
+                            )
+                        },
+                    ),
+                    NimazMenuAction(
+                        text = stringResource(R.string.remove_from_favorites),
+                        icon = Icons.Default.Delete,
+                        onClick = { onRemoveFavorite(favorite) },
+                        destructive = true,
+                    ),
+                ),
+                leading = {
+                    NimazBadge(
+                        text = stringResource(R.string.favorite_type),
+                        backgroundColor = NimazPalette.Red500,
+                        textColor = Color.White,
+                        size = NimazBadgeSize.SMALL,
+                        shape = RoundedCornerShape(50)
+                    )
                 }
-            }
-        } else {
-            items(
-                items = favorites,
-                key = { "fav_${it.ayahId}" }
-            ) { favorite ->
-                val surahName = surahs.find { it.number == favorite.surahNumber }?.nameEnglish
-                    ?: stringResource(R.string.quran_home_surah_fallback, favorite.surahNumber)
-                FavoriteAyahItem(
-                    surahName = surahName,
-                    ayahNumber = favorite.ayahNumber,
-                    surahNumber = favorite.surahNumber,
-                    onClick = { onNavigateToQuranAyah(favorite.surahNumber, favorite.ayahNumber) }
-                )
-            }
+            )
         }
+    }
+}
+
+private fun favoriteShareIntent(
+    surahName: String,
+    verseLabel: String,
+    arabicText: String?
+): Intent {
+    val body = buildString {
+        append(surahName)
+        append(" · ")
+        append(verseLabel)
+        arabicText?.let { append("\n\n$it") }
+    }
+    return Intent().apply {
+        action = Intent.ACTION_SEND
+        putExtra(Intent.EXTRA_TEXT, body)
+        type = "text/plain"
     }
 }
 

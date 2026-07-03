@@ -64,9 +64,9 @@ class TafseerPageContentTest {
                     TafseerSource.MAARIFUL_QURAN
                 ),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
@@ -85,9 +85,9 @@ class TafseerPageContentTest {
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
@@ -105,9 +105,9 @@ class TafseerPageContentTest {
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
@@ -125,9 +125,9 @@ class TafseerPageContentTest {
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
@@ -148,9 +148,9 @@ class TafseerPageContentTest {
                     TafseerSource.MAARIFUL_QURAN
                 ),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
@@ -173,36 +173,15 @@ class TafseerPageContentTest {
                     TafseerSource.MAARIFUL_QURAN
                 ),
                 onSourceSwitch = { switchedTo = it },
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }
 
         composeRule.onNodeWithText("Ma'arif al-Qur'an").performClick()
         assertThat(switchedTo).isEqualTo(TafseerSource.MAARIFUL_QURAN)
-    }
-
-    @Test
-    fun `enable highlighting control is present`() {
-        composeRule.setThemedContent {
-            TafseerPageContent(
-                ayah = ayah(),
-                tafseer = tafseer("Short commentary."),
-                highlights = emptyList(),
-                selectedSource = TafseerSource.IBN_KATHIR,
-                availableSources = setOf(TafseerSource.IBN_KATHIR),
-                onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
-                onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
-                onShare = {}
-            )
-        }
-
-        // Floating control toggle uses this contentDescription when off
-        composeRule.onNodeWithContentDescription("Enable highlighting").assertExists()
     }
 
     @Test
@@ -227,9 +206,9 @@ class TafseerPageContentTest {
                 selectedSource = TafseerSource.IBN_KATHIR,
                 availableSources = setOf(TafseerSource.IBN_KATHIR),
                 onSourceSwitch = {},
-                onHighlightCreated = { _, _, _ -> },
+                onHighlightCreated = { _, _, _, _ -> },
                 onHighlightDeleted = {},
-                onHighlightNoteUpdated = { _, _ -> },
+                onHighlightUpdated = { _, _, _ -> },
                 onShare = {}
             )
         }

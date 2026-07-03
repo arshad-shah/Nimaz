@@ -46,6 +46,19 @@ import javax.inject.Inject
 
 enum class ReadingMode { SURAH, JUZ, PAGE }
 
+/**
+ * A Quran favourite enriched for the Favourites tab — the stored [QuranFavorite] plus the
+ * ayah's Arabic text, so the tab can show the same rich card (badge, timestamp, Arabic
+ * preview, overflow menu) as the Bookmarks screen.
+ */
+data class FavoriteAyahUi(
+    val ayahId: Int,
+    val surahNumber: Int,
+    val ayahNumber: Int,
+    val arabicText: String?,
+    val createdAt: Long,
+)
+
 data class QuranHomeUiState(
     val surahs: List<Surah> = emptyList(),
     val filteredSurahs: List<Surah> = emptyList(),
@@ -53,7 +66,10 @@ data class QuranHomeUiState(
     val topTab: Int = 0, // 0 = Home, 1 = Browse, 2 = Favorites, 3 = Bookmarks
     val selectedTab: Int = 0, // Browse sub-tab: 0=Surah, 1=Juz, 2=Page
     val readingProgress: ReadingProgress? = null,
-    val favorites: List<QuranFavorite> = emptyList(),
+    val favorites: List<FavoriteAyahUi> = emptyList(),
+    // Holds the most recently removed favourite so the tab can offer an Undo snackbar;
+    // cleared on undo, dismiss, or a subsequent removal.
+    val recentlyRemovedFavorite: FavoriteAyahUi? = null,
     val activeKhatam: Khatam? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
@@ -110,6 +126,11 @@ sealed interface QuranEvent {
 
     data class ToggleFavorite(val ayahId: Int, val surahNumber: Int, val ayahNumber: Int) :
         QuranEvent
+
+    /** Remove a favourite from the Favourites tab; captures it for an Undo snackbar. */
+    data class RemoveFavorite(val favorite: FavoriteAyahUi) : QuranEvent
+    data object UndoRemoveFavorite : QuranEvent
+    data object DismissFavoriteUndo : QuranEvent
 
     data class UpdateReadingPosition(val surah: Int, val ayah: Int, val page: Int, val juz: Int) :
         QuranEvent
@@ -215,6 +236,11 @@ class QuranViewModel @Inject constructor(
                 event.surahNumber,
                 event.ayahNumber
             )
+
+            is QuranEvent.RemoveFavorite -> removeFavorite(event.favorite)
+            QuranEvent.UndoRemoveFavorite -> undoRemoveFavorite()
+            QuranEvent.DismissFavoriteUndo ->
+                _homeState.update { it.copy(recentlyRemovedFavorite = null) }
 
             is QuranEvent.UpdateReadingPosition -> updateReadingPosition(
                 event.surah,
@@ -599,9 +625,45 @@ class QuranViewModel @Inject constructor(
         viewModelScope.launch {
             quranUseCases.getFavorites()
                 .collect { favorites ->
-                    _homeState.update { it.copy(favorites = favorites) }
+                    // Enrich each favourite with its Arabic text so the Favourites tab can
+                    // render the same rich card as the Bookmarks screen.
+                    val enriched = favorites.map { fav ->
+                        FavoriteAyahUi(
+                            ayahId = fav.ayahId,
+                            surahNumber = fav.surahNumber,
+                            ayahNumber = fav.ayahNumber,
+                            arabicText = quranUseCases.getAyahById(fav.ayahId)?.textArabic,
+                            createdAt = fav.createdAt,
+                        )
+                    }
+                    _homeState.update { it.copy(favorites = enriched) }
                 }
         }
+    }
+
+    // toggleFavorite both removes and (on undo) re-adds, so the same call drives the
+    // swipe-to-delete removal and its Undo restore.
+    private fun removeFavorite(favorite: FavoriteAyahUi) {
+        viewModelScope.launch {
+            quranUseCases.toggleFavorite(
+                favorite.ayahId,
+                favorite.surahNumber,
+                favorite.ayahNumber
+            )
+        }
+        _homeState.update { it.copy(recentlyRemovedFavorite = favorite) }
+    }
+
+    private fun undoRemoveFavorite() {
+        val favorite = _homeState.value.recentlyRemovedFavorite ?: return
+        viewModelScope.launch {
+            quranUseCases.toggleFavorite(
+                favorite.ayahId,
+                favorite.surahNumber,
+                favorite.ayahNumber
+            )
+        }
+        _homeState.update { it.copy(recentlyRemovedFavorite = null) }
     }
 
     private fun loadFavoriteAyahIds() {

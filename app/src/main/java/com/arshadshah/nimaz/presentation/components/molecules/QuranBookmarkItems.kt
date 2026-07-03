@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,7 +30,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -146,55 +144,6 @@ internal fun BookmarkCard(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-internal fun FavoriteAyahItem(
-    surahName: String,
-    ayahNumber: Int,
-    surahNumber: Int,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        elevation = 0.dp
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.Favorite,
-                contentDescription = null,
-                tint = NimazPalette.Red500,
-                size = NimazIconSize.LARGE
-            )
-            Spacer(modifier = Modifier.width(14.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = surahName,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(R.string.quran_home_verse_format, ayahNumber),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-        }
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 private fun BookmarkListItemPreview() {
@@ -234,19 +183,6 @@ private fun BookmarkCardPreview() {
                 createdAt = 0,
                 updatedAt = 0
             ),
-            onClick = {}
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FavoriteAyahItemPreview() {
-    NimazTheme {
-        FavoriteAyahItem(
-            surahName = "Al-Fatihah",
-            ayahNumber = 1,
-            surahNumber = 1,
             onClick = {}
         )
     }

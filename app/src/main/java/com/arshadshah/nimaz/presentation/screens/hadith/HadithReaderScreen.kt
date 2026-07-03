@@ -426,11 +426,10 @@ private fun HadithReaderBottomBar(
 
     val shareLabel = stringResource(R.string.share)
     val copiedMsg = stringResource(R.string.hadith_copied)
-    // stringResource is a @Composable call; avoid calling it from non-composable lambdas.
-    // Use Context.getString instead to build strings in non-composable helpers.
-    val narratedByFmt = { name: String ->
-        context.getString(R.string.hadith_narrated_by_format, name)
-    }
+    // Resolve the template in composable scope (stringResource can't be called from the
+    // non-composable text builder below), then format it per narrator name.
+    val narratedByTemplate = stringResource(R.string.hadith_narrated_by_format)
+    val narratedByFmt = { name: String -> String.format(narratedByTemplate, name) }
 
     fun buildHadithText(): String = buildString {
         appendLine(hadith.textArabic)
