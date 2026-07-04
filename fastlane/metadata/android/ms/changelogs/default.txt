@@ -1,7 +1,7 @@
-Apa yang baharu sejak 3.0.25:
+Yang baharu sejak 3.0.31:
 
-• Langit Hidup di Laman Utama — langit masa nyata yang mengikut perjalanan matahari dan memaparkan fasa bulan pada waktu malam.
-• Skrin Waktu Solat baharu — semak mana-mana hari, dengan kalendar bulanan dan penjejakan harian.
-• Eksport jadual solat bulanan anda sebagai PDF kemas (mod Ramadan, dengan acara Islam).
-• Pilih fon Arab al-Quran — Amiri atau Scheherazade New — dengan pratonton langsung.
-• Menu Lagi yang diperbaharui, serta pembaikan.
+• Tafsir, direka semula — pembaca yang diperbaharui, penyerlahan berasaskan gerak isyarat, nota pantas yang boleh anda cipta, edit dan padam, penukar sumber serta perkongsian PDF berjenama.
+• Pemain Al-Quran terapung dan cara berjenama baharu untuk berkongsi ayat dan doa di mana-mana.
+• Carian kini dikemas kini semasa anda menaip, dengan bar carian yang direka bentuk semula.
+• Jejaki tempoh puasa anda dan nikmati "Living Sky" yang lebih tepat mengikut waktu matahari terbit dan terbenam sebenar.
+• Skrin Lokasi direka bentuk semula, tab Kegemaran Al-Quran dibina semula, pengepala surah lebih kemas dan perhalusan widget.

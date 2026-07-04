@@ -1,7 +1,7 @@
-Nouveautés depuis la 3.0.25 :
+Nouveautés depuis la 3.0.31 :
 
-• Ciel vivant sur l'accueil — un ciel en temps réel qui suit la course du soleil et montre la phase de la lune la nuit.
-• Nouvel écran des heures de prière — parcourez n'importe quel jour, avec calendrier mensuel et suivi quotidien.
-• Exportez votre planning mensuel de prières en PDF soigné (mode Ramadan, avec événements islamiques).
-• Choisissez la police arabe du Coran — Amiri ou Scheherazade New — avec aperçu en direct.
-• Menu Plus rafraîchi et corrections.
+• Le Tafseer repensé — lecteur rafraîchi, surlignage gestuel, notes rapides à créer, modifier et supprimer, sélecteur de sources et partage en PDF personnalisé.
+• Un lecteur de Coran flottant et une nouvelle façon personnalisée de partager versets et duas partout.
+• La recherche se met à jour à mesure que vous tapez, avec une barre de recherche repensée.
+• Suivez la durée de votre jeûne et profitez d'un « Living Sky » plus précis, aligné sur les vrais lever et coucher du soleil.
+• Écran de localisation repensé, onglet Favoris du Coran reconstruit, en-têtes de sourate épurés et améliorations du widget.
