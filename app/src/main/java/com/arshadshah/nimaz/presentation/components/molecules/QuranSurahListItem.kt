@@ -45,7 +45,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val SurahNumberSlotWidth = 40.dp
+private val SurahNumberSlotWidth = 50.dp
 private val SurahNumberSlotSpacing = 12.dp
 private val ChipShape = RoundedCornerShape(50)
 
@@ -88,14 +88,8 @@ internal fun SurahListItem(
                     shape = RoundedCornerShape(14.dp)
                 ) else Modifier
             ),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(14.dp),
+        style = NimazCardStyle.OUTLINED,
         selected = isSelected,
-        colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-        ),
-        elevation = 0.dp
     ) {
         Column {
             // Top row: number + English name + Arabic name + info button
@@ -266,7 +260,7 @@ private fun SurahListItemLongNamePreview() {
     NimazTheme {
         SurahListItem(
             surah = Surah(
-                number = 58,
+                number = 400,
                 nameArabic = "\u0627\u0644\u0645\u062C\u0627\u062F\u0644\u0629",
                 nameEnglish = "Al-Mujadilah",
                 nameTransliteration = "The Pleading Woman",

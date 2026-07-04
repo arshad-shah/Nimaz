@@ -305,8 +305,8 @@ private fun MushafFrame(
             ) {
                 ShamsaMedallion(
                     number = pageNumber,
-//                    size = 30.dp,
-                    numberStyle = MaterialTheme.typography.labelMedium
+                    size = 45.dp,
+                    numberStyle = MaterialTheme.typography.labelSmall
                 )
             }
         }
@@ -363,7 +363,7 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: Str
 private fun MushafPagePreview() {
     NimazTheme {
         MushafPage(
-            pageNumber = 1,
+            pageNumber = 604,
             ayahs = sampleFatihahAyahs,
             surahMap = mapOf(1 to sampleSurahFatihah),
             arabicFontSize = 28f
