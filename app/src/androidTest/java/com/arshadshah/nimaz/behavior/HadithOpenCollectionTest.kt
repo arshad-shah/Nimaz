@@ -13,8 +13,10 @@ import org.junit.runner.RunWith
  * collection opens its book screen. Collections ship in the prepackaged asset DB, so
  * no seeding is needed. Read-only.
  *
- * The Hadith home renders `hadith_books.name_english` behind an `isLoading` gate, so
- * the tiles appear only after the async DB load — wait for the collection before tapping.
+ * The Hadith home renders `hadith_books.name_english` behind an `isLoading` gate, and the
+ * collections grid sits below the tall stats + hadith-of-the-day cards in the scrolling
+ * list — so the tiles both load async and start off-screen (uncomposed). Scroll the tagged
+ * list to the collection before tapping it.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -25,10 +27,10 @@ class HadithOpenCollectionTest : BaseAppTest() {
         launchApp()
         openFeatureFromMore(Selectors.More.hadith, ScreenTags.HadithHome)
 
-        // The collection tiles load async behind the isLoading gate; wait for the
-        // first collection (shipped as "Sahih al-Bukhari") before opening it.
-        waitForText("Sahih al-Bukhari")
-        clickText("Sahih al-Bukhari")
+        // The collection tiles load async behind the isLoading gate and start below the
+        // fold; scroll the tagged list to the first collection (shipped as
+        // "Sahih al-Bukhari") and open it via its card's OnClick semantics.
+        scrollListToAndTap(ScreenTags.HadithBookList, "Sahih al-Bukhari")
 
         assertScreen(ScreenTags.HadithBook)
     }
