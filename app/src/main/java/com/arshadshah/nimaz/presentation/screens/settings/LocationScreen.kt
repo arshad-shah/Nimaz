@@ -58,10 +58,18 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
+import com.arshadshah.nimaz.presentation.viewmodel.CityRegion
 import com.arshadshah.nimaz.presentation.viewmodel.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.LocationEvent
 import com.arshadshah.nimaz.presentation.viewmodel.LocationViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SearchLocation
+import com.arshadshah.nimaz.presentation.viewmodel.citiesForRegion
+import com.arshadshah.nimaz.presentation.viewmodel.formatCoordinates
+import com.arshadshah.nimaz.presentation.viewmodel.groupCitiesByRegion
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -191,16 +199,51 @@ fun LocationScreen(
                 }
             }
 
-            // Popular Cities
-            item {
-                NimazSectionTitle(text = stringResource(R.string.location_popular_cities))
-            }
-            items(state.popularCities) { location ->
-                LocationListItem(
-                    location = location,
-                    isSelected = isLocationSelected(state.currentLocation, location),
-                    onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
-                )
+            // Browse by region (hidden while showing live search results)
+            if (state.searchResults.isEmpty()) {
+                item {
+                    NimazSectionTitle(text = stringResource(R.string.location_browse_by_region))
+                }
+                item {
+                    RegionFilterRow(
+                        selectedRegion = state.selectedRegion,
+                        onSelect = { viewModel.onEvent(LocationEvent.SelectRegion(it)) }
+                    )
+                }
+
+                if (state.selectedRegion == null) {
+                    // "All" → grouped, with a region sub-header before each group
+                    groupCitiesByRegion(state.popularCities).forEach { (region, cities) ->
+                        item(key = "region-${region.name}") {
+                            Text(
+                                text = region.label,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(start = 6.dp, top = 8.dp, bottom = 2.dp)
+                            )
+                        }
+                        items(cities, key = { "${it.name}-${it.country}" }) { location ->
+                            LocationListItem(
+                                location = location,
+                                isSelected = isLocationSelected(state.currentLocation, location),
+                                onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                            )
+                        }
+                    }
+                } else {
+                    // Single region → flat list
+                    items(
+                        citiesForRegion(state.popularCities, state.selectedRegion),
+                        key = { "${it.name}-${it.country}" }
+                    ) { location ->
+                        LocationListItem(
+                            location = location,
+                            isSelected = isLocationSelected(state.currentLocation, location),
+                            onClick = { viewModel.onEvent(LocationEvent.SelectLocation(location)) }
+                        )
+                    }
+                }
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
@@ -274,12 +317,10 @@ private fun CurrentLocationCard(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
                         Text(
-                            text = "${
-                                String.format(
-                                    "%.4f",
-                                    currentLocation.latitude
-                                )
-                            }\u00B0 N, ${String.format("%.4f", currentLocation.longitude)}\u00B0 W",
+                            text = formatCoordinates(
+                                currentLocation.latitude,
+                                currentLocation.longitude
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                         )
@@ -374,6 +415,35 @@ private fun UseCurrentLocationButton(
 }
 
 @Composable
+private fun RegionFilterRow(
+    selectedRegion: CityRegion?,
+    onSelect: (CityRegion?) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        NimazChip(
+            text = stringResource(R.string.location_region_all),
+            onClick = { onSelect(null) },
+            variant = NimazChipVariant.FILTER,
+            selected = selectedRegion == null
+        )
+        CityRegion.entries.sortedBy { it.order }.forEach { region ->
+            NimazChip(
+                text = region.label,
+                onClick = { onSelect(region) },
+                variant = NimazChipVariant.FILTER,
+                selected = selectedRegion == region
+            )
+        }
+    }
+}
+
+@Composable
 private fun LocationListItem(
     location: SearchLocation,
     isSelected: Boolean,
@@ -398,7 +468,7 @@ private fun LocationListItem(
                 .padding(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-        // Icon
+        // Icon (country flag for curated cities, glyph otherwise)
         Box(
             modifier = Modifier
                 .size(40.dp)
@@ -409,13 +479,17 @@ private fun LocationListItem(
                 ),
             contentAlignment = Alignment.Center
         ) {
-            NimazIcon(
-                imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
-                contentDescription = null,
-                tint = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurfaceVariant,
-                iconSize = 18.dp
-            )
+            if (location.flag != null) {
+                Text(text = location.flag, style = MaterialTheme.typography.titleMedium)
+            } else {
+                NimazIcon(
+                    imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
+                    contentDescription = null,
+                    tint = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurfaceVariant,
+                    iconSize = 18.dp
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(15.dp))
