@@ -114,7 +114,8 @@ com.arshadshah.nimaz/
 │   │   ├── DataStoreModule.kt       # @Provides PreferencesDataStore
 │   │   └── RepositoryModule.kt      # @Binds repos  +  object UseCaseModule { @Provides XxxUseCases }
 │   ├── navigation/          # Routes.kt (sealed Route), NavGraph.kt, deep links
-│   ├── util/                # Extensions, mappers (e.g. mapItems), date utils
+│   ├── util/                # Extensions, mappers (e.g. mapItems), date utils, PDF exporters
+│   ├── share/               # ContentShareManager + Shareable/Shareables + branded ShareCardRenderer
 │   ├── init/                # AppInitializer
 │   └── monitoring/          # AppAnalytics, CrashReporter
 │
@@ -437,6 +438,10 @@ typed route object.
       those four params repeated;
     - a per-prayer accent colour is `prayerName.color()`
       (`presentation/theme/PrayerColorExtensions.kt`), not a local `when (prayerName) { … }`.
+    - sharing content (ayah/hadith/dua/bookmark/prayer-times PDF/app-invite/feedback email) goes
+      through `ContentShareManager` + `Shareables` in `core/share/` — **never** a hand-built
+      `Intent(ACTION_SEND)`/`createChooser` in a screen. See §11 of
+      [`SUBSYSTEMS.md`](SUBSYSTEMS.md#11-content-sharing).
     - a horizontal pager is `NimazPager(state = rememberNimazPagerState { count }) { page → … }`
       (`components/atoms/NimazPager.kt`) — a thin wrapper over `HorizontalPager` that exposes the
       reader knobs (`reverseLayout`, `beyondViewportPageCount`, `key`, `contentPadding`,
