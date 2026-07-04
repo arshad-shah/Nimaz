@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +27,8 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -90,7 +93,7 @@ fun VoiceOptionCard(
             container = MaterialTheme.colorScheme.surface,
             border = MaterialTheme.colorScheme.outlineVariant,
             borderWidth = 1.dp,
-            activeContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+            activeContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
             activeBorder = MaterialTheme.colorScheme.primary,
             activeBorderWidth = 1.5.dp,
         ),
@@ -111,7 +114,6 @@ fun VoiceOptionCard(
                     text = name,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -131,7 +133,7 @@ fun VoiceOptionCard(
                             text = secondaryTag,
                             size = NimazBadgeSize.SMALL,
                             shape = ChipShape,
-                            backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
+                            backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
                             textColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -159,17 +161,21 @@ private fun VoiceAvatar(monogram: String, isSelected: Boolean, isPlaying: Boolea
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)),
+                .border(
+                    width = if (isSelected) 2.dp else 1.dp,
+                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant,
+                    shape = CircleShape,
+                )
+                .background(MaterialTheme.colorScheme.primary),
             contentAlignment = Alignment.Center,
         ) {
             if (isPlaying) {
-                EqualizerBars(color = MaterialTheme.colorScheme.primary)
+                EqualizerBars(color = MaterialTheme.colorScheme.onPrimaryContainer)
             } else {
                 Text(
                     text = monogram,
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -240,43 +246,41 @@ private fun PreviewButton(
     onClick: () -> Unit,
     contentDescription: String?,
 ) {
-    val container = if (isPlaying) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-    Box(
-        modifier = Modifier
-            .size(40.dp)
-            .clip(CircleShape)
-            .background(container)
-            .clickable(enabled = !isDownloading, onClick = onClick),
-        contentAlignment = Alignment.Center,
+    FilledIconButton(
+        onClick = onClick,
+        modifier = Modifier.size(36.dp),
     ) {
-        when {
-            isDownloading -> CircularProgressIndicator(
-                modifier = Modifier.size(18.dp),
-                strokeWidth = 2.dp,
-                color = MaterialTheme.colorScheme.primary,
-            )
-
-            isPlaying -> NimazIcon(
-                imageVector = Icons.Filled.Pause,
-                contentDescription = contentDescription,
-                variant = NimazIconVariant.ON_ACCENT,
-                iconSize = 20.dp,
-            )
-
-            !isDownloaded -> NimazIcon(
-                imageVector = Icons.Filled.Download,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                iconSize = 20.dp,
-            )
-
-            else -> NimazIcon(
-                imageVector = Icons.Filled.PlayArrow,
-                contentDescription = contentDescription,
-                tint = MaterialTheme.colorScheme.primary,
-                iconSize = 20.dp,
-            )
+        Box(
+            modifier = Modifier
+                .size(36.dp)
+                .clip(CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            when {
+                isDownloading -> CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                )
+                isPlaying -> NimazIcon(
+                    imageVector = Icons.Filled.Pause,
+                    contentDescription = contentDescription,
+                    variant = NimazIconVariant.ON_ACCENT,
+                    iconSize = 18.dp,
+                )
+                isDownloaded -> NimazIcon(
+                    imageVector = Icons.Filled.PlayArrow,
+                    contentDescription = contentDescription,
+                    variant = NimazIconVariant.ON_ACCENT,
+                    iconSize = 18.dp,
+                )
+                else -> NimazIcon(
+                    imageVector = Icons.Filled.Download,
+                    contentDescription = contentDescription,
+                    variant = NimazIconVariant.ON_ACCENT,
+                    iconSize = 18.dp,
+                )
+            }
         }
     }
 }
