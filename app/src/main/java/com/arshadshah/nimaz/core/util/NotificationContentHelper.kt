@@ -58,10 +58,12 @@ object NotificationContentHelper {
         "Let your last act of the day be worship."
     )
 
+    // Reflections shown *below* the short "sun has risen" line — keep them distinct
+    // from notif_short_sunrise so the expanded notification doesn't repeat itself.
     private val sunriseMessages = listOf(
-        "The sun has risen. Time for Ishraq if you've prayed Fajr.",
-        "A new day of mercy and opportunity begins.",
-        "The prohibited time for prayer is ending soon."
+        "Whoever prays Fajr, then remembers Allah until sunrise and prays two rak'ahs, earns the reward of a Hajj and Umrah.",
+        "A new day of mercy and opportunity begins — seize its blessings.",
+        "The Duha prayer is a charity due for every joint of the body."
     )
 
     // Pre-reminder messages
