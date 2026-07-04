@@ -1,7 +1,7 @@
-Neu seit 3.0.25:
+Neu seit 3.0.31:
 
-• Lebendiger Himmel auf der Startseite — ein ruhiger Echtzeit-Himmel, der dem Lauf der Sonne folgt und nachts die Mondphase zeigt.
-• Neuer Gebetszeiten-Bildschirm — beliebige Tage durchblättern, mit Monatskalender und Verfolgung pro Tag.
-• Exportiere deinen monatlichen Gebetsplan als PDF (Ramadan-fähig, mit islamischen Ereignissen).
-• Wähle deine arabische Koran-Schrift — Amiri oder Scheherazade New — mit Live-Vorschau.
-• Überarbeitetes „Mehr“-Menü, dazu Fehlerbehebungen.
+• Tafseer, neu gedacht — überarbeiteter Reader, Hervorheben per Geste, schnelle Notizen zum Erstellen, Bearbeiten und Löschen, Quellenwechsler und Teilen als gebrandetes PDF.
+• Ein schwebender Koran-Player und eine neue, gebrandete Art, Verse und Bittgebete überall zu teilen.
+• Die Suche aktualisiert sich jetzt während der Eingabe, mit neu gestalteter Suchleiste.
+• Erfasse deine Fastendauer und genieße einen genaueren „Living Sky“, der echten Sonnenauf- und -untergängen folgt.
+• Neu gestalteter Standort-Bildschirm, neu aufgebaute Koran-Favoriten, klarere Sura-Köpfe und Widget-Feinschliff.

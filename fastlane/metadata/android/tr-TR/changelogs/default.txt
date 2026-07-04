@@ -1,7 +1,7 @@
-3.0.25'ten beri yenilikler:
+3.0.31 sonrası yenilikler:
 
-• Ana ekranda Canlı Gökyüzü — güneşin gün boyu hareketini izleyen ve gece ayın evresini gösteren gerçek zamanlı bir gökyüzü.
-• Yeni Namaz Vakitleri ekranı — aylık takvim ve güne özel takip ile istediğiniz günü görüntüleyin.
-• Aylık namaz vakti çizelgenizi şık bir PDF olarak dışa aktarın (Ramazan moduyla, İslami günlerle).
-• Kur'an Arapça yazı tipini seçin — Amiri veya Scheherazade New — canlı önizlemeyle.
-• Yenilenen Daha Fazla menüsü ve düzeltmeler.
+• Yeniden tasarlanan Tefsir — yenilenen okuyucu, hareketle vurgulama, oluşturup düzenleyip silebileceğiniz hızlı notlar, kaynak değiştirici ve markalı PDF paylaşımı.
+• Yüzen bir Kur'an oynatıcı ve ayetleri ile duaları her yerde paylaşmanın yeni, markalı bir yolu.
+• Arama artık siz yazdıkça güncelleniyor; arama çubuğu yeniden tasarlandı.
+• Oruç sürenizi takip edin ve gerçek gün doğumu ile batımını izleyen daha isabetli bir "Canlı Gökyüzü" keyfini çıkarın.
+• Yeniden tasarlanan Konum ekranı, yeniden oluşturulan Kur'an Favorileri, sade sure başlıkları ve widget rötuşları.

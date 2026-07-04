@@ -1,7 +1,7 @@
-What's new since 3.0.25:
+What's new since 3.0.31:
 
-• Living Sky on Home — a calm, real-time sky that follows the sun through the day and shows the moon's phase at night.
-• New Prayer Times screen — browse any day, with a month calendar and per-day tracking.
-• Export your monthly prayer timetable as a polished PDF (Ramadan-aware, with Islamic events).
-• Choose your Qur'an Arabic font — Amiri or Scheherazade New — with a live preview.
-• Refreshed More menu, plus fixes and polish.
+• Tafseer, reimagined — refreshed reader, gesture highlighting, editable notes, a source switcher and branded PDF sharing.
+• A floating Qur'an player and a new branded way to share verses and duas anywhere.
+• Search now updates as you type, with a new search bar.
+• Track how long you fast, plus a more accurate Living Sky following real sunrise and sunset.
+• Redesigned Location screen, rebuilt Qur'an Favourites, cleaner surah headers and widget polish.
