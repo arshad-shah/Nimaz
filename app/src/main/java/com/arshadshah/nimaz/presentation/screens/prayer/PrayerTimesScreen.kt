@@ -9,6 +9,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
@@ -16,12 +17,15 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -29,13 +33,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.Settings
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -63,7 +64,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerSkyScene
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimesEvent
@@ -91,131 +91,128 @@ fun PrayerTimesScreen(
     val today = remember { LocalDate.now() }
     var showMonthSheet by remember { mutableStateOf(false) }
 
-    Scaffold(
-        topBar = {
-            NimazBackTopAppBar(
-                title = state.locationName,
-                onBackClick = onNavigateBack,
-                actions = {
-                    IconButton(onClick = onNavigateToSettings) {
-                        NimazIcon(Icons.Default.Settings, contentDescription = stringResource(R.string.cd_prayer_settings))
-                    }
-                },
+    // Edge-to-edge: the living sky reaches the very top, behind the status bar,
+    // so grow the hero by the status-bar inset. The pill-based glass topbar
+    // (back · settings · location) is drawn by PrayerSkyScene below that band.
+    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.surface)
+            .navigationBarsPadding(),
+    ) {
+        // Living sky hero (pinned) — square top, rounded bottom, with a
+        // "Today" shortcut when browsing.
+        Box(modifier = Modifier.fillMaxWidth()) {
+            PrayerSkyScene(
+                timeOfDay = state.timeOfDay,
+                timeLabel = state.skyTimeLabel,
+                statusLabel = state.skyStatusLabel,
+                moonFraction = state.moonFraction,
+                sunriseFraction = state.sunriseFraction,
+                sunsetFraction = state.sunsetFraction,
+                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                locationName = state.locationName,
+                onBack = onNavigateBack,
+                onSettings = onNavigateToSettings,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(260.dp + statusBarTop),
             )
-        },
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .fillMaxSize(),
-        ) {
-            // Living sky banner (pinned) — square top, rounded bottom, with a
-            // "Today" shortcut when browsing.
-            Box(modifier = Modifier.fillMaxWidth()) {
-                PrayerSkyScene(
-                    timeOfDay = state.timeOfDay,
-                    timeLabel = state.skyTimeLabel,
-                    statusLabel = state.skyStatusLabel,
-                    moonFraction = state.moonFraction,
-                    sunriseFraction = state.sunriseFraction,
-                    sunsetFraction = state.sunsetFraction,
-                    shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            if (!state.isToday) {
+                // Sits below the settings pill (status bar + topbar height) so it
+                // doesn't collide with the glass topbar actions.
+                Surface(
+                    color = MaterialTheme.colorScheme.primary,
+                    shape = RoundedCornerShape(50),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(240.dp),
-                )
-                if (!state.isToday) {
-                    Surface(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(50),
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(12.dp)
-                            .clickable { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
-                    ) {
-                        Text(
-                            text = stringResource(R.string.today),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                        )
-                    }
-                }
-            }
-
-            // Day navigation, in a card overlapping the sky's curved bottom.
-            // A custom layout pulls the card up by `overlap` AND shrinks the
-            // space it reserves by the same amount, so its bottom is flush with
-            // the day list (offset alone would leave an equal-sized empty gap).
-            NimazCard(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp)
-                    .layout { measurable, constraints ->
-                        val placeable = measurable.measure(constraints)
-                        val overlap = 28.dp.roundToPx()
-                        layout(placeable.width, (placeable.height - overlap).coerceAtLeast(0)) {
-                            placeable.place(0, -overlap)
-                        }
-                    },
-                style = NimazCardStyle.FILLED,
-                shape = RoundedCornerShape(20.dp),
-                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
-                elevation = 4.dp,
-            ) {
-                DayNavBar(
-                    selectedDate = state.selectedDate,
-                    isToday = state.isToday,
-                    onPrev = { viewModel.onEvent(PrayerTimesEvent.PreviousDay) },
-                    onNext = { viewModel.onEvent(PrayerTimesEvent.NextDay) },
-                    onPickDate = { showMonthSheet = true },
-                )
-            }
-
-            // Day content: swipe horizontally to change day; list scrolls within.
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth()
-                    .pointerInput(Unit) {
-                        var total = 0f
-                        detectHorizontalDragGestures(
-                            onDragStart = { total = 0f },
-                            onDragEnd = {
-                                val threshold = 64.dp.toPx()
-                                if (total > threshold) {
-                                    viewModel.onEvent(PrayerTimesEvent.PreviousDay)
-                                } else if (total < -threshold) {
-                                    viewModel.onEvent(PrayerTimesEvent.NextDay)
-                                }
-                            },
-                        ) { _, dragAmount -> total += dragAmount }
-                    },
-            ) {
-                AnimatedContent(
-                    targetState = state.selectedDate,
-                    transitionSpec = {
-                        val dir = if (targetState.isAfter(initialState)) 1 else -1
-                        (slideInHorizontally(tween(260)) { w -> dir * w } + fadeIn(tween(260))) togetherWith
-                                (slideOutHorizontally(tween(260)) { w -> -dir * w } + fadeOut(
-                                    tween(
-                                        260
-                                    )
-                                ))
-                    },
-                    label = "day",
-                ) { date ->
-                    DayList(
-                        prayers = state.prayers,
-                        isFuture = date.isAfter(today),
-                        sunrise = state.sunrise,
-                        sunset = state.sunset,
-                        daylight = state.daylight,
-                        method = state.methodLabel,
-                        onToggle = { viewModel.onEvent(PrayerTimesEvent.TogglePrayer(it)) },
+                        .align(Alignment.TopEnd)
+                        .padding(top = statusBarTop + 60.dp, end = 16.dp)
+                        .clickable { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
+                ) {
+                    Text(
+                        text = stringResource(R.string.today),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
                     )
                 }
+            }
+        }
+
+        // Day navigation, in a card overlapping the sky's curved bottom.
+        // A custom layout pulls the card up by `overlap` AND shrinks the
+        // space it reserves by the same amount, so its bottom is flush with
+        // the day list (offset alone would leave an equal-sized empty gap).
+        NimazCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+                .layout { measurable, constraints ->
+                    val placeable = measurable.measure(constraints)
+                    val overlap = 28.dp.roundToPx()
+                    layout(placeable.width, (placeable.height - overlap).coerceAtLeast(0)) {
+                        placeable.place(0, -overlap)
+                    }
+                },
+            style = NimazCardStyle.FILLED,
+            shape = RoundedCornerShape(20.dp),
+            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
+            elevation = 4.dp,
+        ) {
+            DayNavBar(
+                selectedDate = state.selectedDate,
+                isToday = state.isToday,
+                onPrev = { viewModel.onEvent(PrayerTimesEvent.PreviousDay) },
+                onNext = { viewModel.onEvent(PrayerTimesEvent.NextDay) },
+                onPickDate = { showMonthSheet = true },
+            )
+        }
+
+        // Day content: swipe horizontally to change day; list scrolls within.
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .fillMaxWidth()
+                .pointerInput(Unit) {
+                    var total = 0f
+                    detectHorizontalDragGestures(
+                        onDragStart = { total = 0f },
+                        onDragEnd = {
+                            val threshold = 64.dp.toPx()
+                            if (total > threshold) {
+                                viewModel.onEvent(PrayerTimesEvent.PreviousDay)
+                            } else if (total < -threshold) {
+                                viewModel.onEvent(PrayerTimesEvent.NextDay)
+                            }
+                        },
+                    ) { _, dragAmount -> total += dragAmount }
+                },
+        ) {
+            AnimatedContent(
+                targetState = state.selectedDate,
+                transitionSpec = {
+                    val dir = if (targetState.isAfter(initialState)) 1 else -1
+                    (slideInHorizontally(tween(260)) { w -> dir * w } + fadeIn(tween(260))) togetherWith
+                            (slideOutHorizontally(tween(260)) { w -> -dir * w } + fadeOut(
+                                tween(
+                                    260
+                                )
+                            ))
+                },
+                label = "day",
+            ) { date ->
+                DayList(
+                    prayers = state.prayers,
+                    isFuture = date.isAfter(today),
+                    sunrise = state.sunrise,
+                    sunset = state.sunset,
+                    daylight = state.daylight,
+                    method = state.methodLabel,
+                    onToggle = { viewModel.onEvent(PrayerTimesEvent.TogglePrayer(it)) },
+                )
             }
         }
     }
