@@ -47,7 +47,7 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
 import com.arshadshah.nimaz.presentation.components.molecules.MushafContinuousText
-import com.arshadshah.nimaz.presentation.components.molecules.MushafSurahHeader
+import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
 import kotlinx.coroutines.launch
@@ -155,8 +155,9 @@ fun MushafPage(
                     val isNewSurah = surahAyahs.firstOrNull()?.ayahNumber == 1
 
                     if (isNewSurah && surah != null) {
-                        MushafSurahHeader(
+                        SurahHeaderCartouche(
                             surah = surah,
+                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                             showBismillah = surahNumber != 1 && surahNumber != 9
                         )
                     }
