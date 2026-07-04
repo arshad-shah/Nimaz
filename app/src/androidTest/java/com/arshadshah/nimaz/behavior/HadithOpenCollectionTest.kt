@@ -13,8 +13,8 @@ import org.junit.runner.RunWith
  * collection opens its book screen. Collections ship in the prepackaged asset DB, so
  * no seeding is needed. Read-only.
  *
- * NOT YET RUN on a device — if it fails, confirm the collection title contains
- * "Bukhari" (substring match) on the shipped Hadith home.
+ * The Hadith home renders `hadith_books.name_english` behind an `isLoading` gate, so
+ * the tiles appear only after the async DB load — wait for the collection before tapping.
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -25,9 +25,10 @@ class HadithOpenCollectionTest : BaseAppTest() {
         launchApp()
         openFeatureFromMore(Selectors.More.hadith, ScreenTags.HadithHome)
 
-        // Sahih al-Bukhari ships in the asset DB; match on a substring so a
-        // "Sahih al-Bukhari" / "Bukhari" label variation still resolves.
-        clickText("Bukhari")
+        // The collection tiles load async behind the isLoading gate; wait for the
+        // first collection (shipped as "Sahih al-Bukhari") before opening it.
+        waitForText("Sahih al-Bukhari")
+        clickText("Sahih al-Bukhari")
 
         assertScreen(ScreenTags.HadithBook)
     }

@@ -17,6 +17,7 @@ import androidx.compose.ui.test.waitUntilAtLeastOneExists
 import androidx.test.core.app.ActivityScenario
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.core.navigation.ScreenTags
+import com.arshadshah.nimaz.data.local.database.dao.TasbihDao
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.testing.HiltAndroidRule
 import kotlinx.coroutines.delay
@@ -60,6 +61,9 @@ abstract class BaseAppTest {
     @Inject
     lateinit var settings: SettingsRepository
 
+    @Inject
+    lateinit var tasbihDao: TasbihDao
+
     /** The launched activity scenario; closed automatically after each test. */
     private var scenario: ActivityScenario<MainActivity>? = null
 
@@ -76,6 +80,17 @@ abstract class BaseAppTest {
      */
     protected open suspend fun seedState() {
         settings.setOnboardingCompleted(true)
+    }
+
+    /**
+     * Clear all tasbih sessions so the dhikr counter starts at 0. The count lives in
+     * the Room `tasbih_sessions` table and survives an [ActivityScenario] relaunch, and
+     * the suite runs without `clearPackageData`, so counter tests must reset it in
+     * [seedState] to stay hermetic — otherwise a previous test's (or run's) count leaks
+     * in and a fresh-start assertion fails.
+     */
+    protected suspend fun clearTasbih() {
+        tasbihDao.deleteAllSessions()
     }
 
     /**
@@ -164,6 +179,11 @@ abstract class BaseAppTest {
      * which expose `SemanticsActions.OnClick`.
      */
     protected fun scrollListToAndTap(listTag: String, text: String) {
+        // The list often loads its rows async from Room after the screen container is
+        // already on screen (e.g. the Quran surah list, the Hadith collections). Wait
+        // for the tagged list itself to compose before scrolling, so we don't race the
+        // DB load and fail with "could not find node with TestTag".
+        waitForTag(listTag)
         // Exact match (not substring): the row titles are full strings, and substring
         // would make e.g. "Prayer Times" also match "Monthly Prayer Times".
         compose.onNodeWithTag(listTag)

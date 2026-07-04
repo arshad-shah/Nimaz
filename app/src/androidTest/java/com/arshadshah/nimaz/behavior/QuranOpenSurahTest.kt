@@ -13,8 +13,7 @@ import org.junit.runner.RunWith
  * must land on the reader. Content (surah names) ships in the prepackaged asset DB,
  * so no seeding is needed. Read-only — writes no user data.
  *
- * NOT YET RUN on a device — verify the surah-name literal ("Al-Fatihah") matches the
- * shipped `surah_info` English name if this fails.
+ * The shipped `surahs.name_english` for chapter 1 is "Al-Fatiha" (no trailing 'h').
  */
 @HiltAndroidTest
 @RunWith(AndroidJUnit4::class)
@@ -27,8 +26,8 @@ class QuranOpenSurahTest : BaseAppTest() {
         assertScreen(ScreenTags.Quran)
 
         // Browse (Surah) is the default tab; scroll the tagged surah list to
-        // Al-Fatihah and open it via its card's OnClick semantics.
-        scrollListToAndTap(ScreenTags.QuranSurahList, "Al-Fatihah")
+        // Al-Fatiha and open it via its card's OnClick semantics.
+        scrollListToAndTap(ScreenTags.QuranSurahList, "Al-Fatiha")
 
         assertScreen(ScreenTags.QuranReader)
     }
