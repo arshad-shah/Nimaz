@@ -20,8 +20,13 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Calculate
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Explore
@@ -67,6 +72,12 @@ fun helpIcon(key: String?): ImageVector = when (key) {
     "more_time" -> Icons.Filled.MoreTime
     "rocket_launch" -> Icons.Filled.RocketLaunch
     "calculate" -> Icons.Filled.Calculate
+    "favorite" -> Icons.Filled.Favorite
+    "auto_stories" -> Icons.Filled.AutoStories
+    "widgets" -> Icons.Filled.Widgets
+    "language" -> Icons.Filled.Language
+    "dark_mode" -> Icons.Filled.DarkMode
+    "import_contacts" -> Icons.AutoMirrored.Filled.MenuBook
     else -> Icons.AutoMirrored.Filled.HelpOutline
 }
 

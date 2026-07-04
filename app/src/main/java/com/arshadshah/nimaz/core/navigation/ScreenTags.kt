@@ -101,6 +101,12 @@ object ScreenTags {
     const val TasbihCounter = "tasbih_counter"
     const val TasbihCount = "tasbih_count"
 
+    /** Quran browse — the scrollable surah list (behavior tests scroll-to a surah). */
+    const val QuranSurahList = "quran_surah_list"
+
+    /** Hadith home — the scrollable list holding the collections grid (scroll-to a book). */
+    const val HadithBookList = "hadith_book_list"
+
     /** Tag for a bottom-navigation tab, keyed by its label (e.g. "Home"). */
     fun bottomNav(label: String): String = "bottomnav_$label"
 }

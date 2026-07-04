@@ -24,11 +24,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -50,11 +46,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -256,17 +252,17 @@ private fun CalendarNavigationHeader(
                     modifier = Modifier.weight(1f)
                 )
                 NavButton(
-                    Icons.AutoMirrored.Filled.ArrowBack,
+                    NavArrowDirection.PREVIOUS,
                     R.string.cd_previous_month,
                     onPrevious
                 )
-                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
+                NavButton(NavArrowDirection.NEXT, R.string.cd_next_month, onNext)
             }
 
             CalendarHeaderAlignment.CENTER -> {
                 // Arrows flank a centered title.
                 NavButton(
-                    Icons.AutoMirrored.Filled.ArrowBack,
+                    NavArrowDirection.PREVIOUS,
                     R.string.cd_previous_month,
                     onPrevious
                 )
@@ -277,17 +273,17 @@ private fun CalendarNavigationHeader(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.weight(1f)
                 )
-                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
+                NavButton(NavArrowDirection.NEXT, R.string.cd_next_month, onNext)
             }
 
             CalendarHeaderAlignment.END -> {
                 // Both arrows left, title right-aligned.
                 NavButton(
-                    Icons.AutoMirrored.Filled.ArrowBack,
+                    NavArrowDirection.PREVIOUS,
                     R.string.cd_previous_month,
                     onPrevious
                 )
-                NavButton(Icons.AutoMirrored.Filled.ArrowForward, R.string.cd_next_month, onNext)
+                NavButton(NavArrowDirection.NEXT, R.string.cd_next_month, onNext)
                 HeaderTitleBlock(
                     title = title,
                     subtitle = subtitle,
@@ -324,28 +320,21 @@ private fun HeaderTitleBlock(
 }
 
 /**
- * Tonal arrow button used in the navigation header. Stands out against both the
- * page background and the calendar card without being heavy.
+ * Month-navigation arrow. Delegates to the shared [NimazNavArrowButton] so the
+ * calendar header reads the same as every other prev/next control (issue #227).
  */
 @Composable
 private fun NavButton(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    direction: NavArrowDirection,
     contentDescriptionRes: Int,
     onClick: () -> Unit
 ) {
-    FilledTonalIconButton(
+    NimazNavArrowButton(
+        direction = direction,
         onClick = onClick,
-        colors = IconButtonDefaults.filledTonalIconButtonColors(
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-        )
-    ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = stringResource(contentDescriptionRes),
-            size = NimazIconSize.MEDIUM
-        )
-    }
+        contentDescription = stringResource(contentDescriptionRes),
+        size = 44.dp
+    )
 }
 
 @Composable

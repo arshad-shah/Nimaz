@@ -1,5 +1,5 @@
 {
-  "contentVersion": 6,
+  "contentVersion": 7,
   "topics": [
     {
       "id": "getting_started", "order": 0, "icon": "rocket_launch", "color": "sky",
@@ -690,7 +690,7 @@
             "fr": "Puis-je suivre mes prières ?", "de": "Kann ich meine Gebete verfolgen?"
           },
           "answer": {
-            "en": "Yes — mark a prayer from the Home card, or open More → Prayer Tracker for a calendar, daily progress and streaks.",
+            "en": "Yes — mark a prayer from the Home card, or open More → Daily Practice → Prayer Tracker for a calendar, daily progress and streaks.",
             "tr": "Evet — Ana Sayfa kartından bir namazı işaretleyin ya da takvim, günlük ilerleme ve seriler için Daha Fazla → Namaz Takibi'ni açın.",
             "id": "Ya — tandai salat dari kartu Beranda, atau buka Lainnya → Pelacak Salat untuk kalender, progres harian, dan rangkaian.",
             "ms": "Ya — tanda solat dari kad Laman Utama, atau buka Lagi → Penjejak Solat untuk kalendar, kemajuan harian dan rentetan.",
@@ -704,7 +704,7 @@
             "fr": "Comment suivre les prières manquées (Qada) ?", "de": "Wie verfolge ich verpasste (Qada) Gebete?"
           },
           "answer": {
-            "en": "In More → Prayer Tracker, switch to the Qada tab to see missed prayers by month and mark each one completed when you make it up.",
+            "en": "In More → Daily Practice → Prayer Tracker, switch to the Qada tab to see missed prayers by month and mark each one completed when you make it up.",
             "tr": "Daha Fazla → Namaz Takibi'nde Kaza sekmesine geçin; kaçırılan namazları aya göre görün ve kaza ettikçe her birini tamamlandı olarak işaretleyin.",
             "id": "Di Lainnya → Pelacak Salat, beralih ke tab Qada untuk melihat salat terlewat per bulan dan tandai selesai saat Anda mengqadanya.",
             "ms": "Di Lagi → Penjejak Solat, tukar ke tab Qada untuk lihat solat tertinggal mengikut bulan dan tanda setiap satu selesai apabila anda qada.",
@@ -760,12 +760,14 @@
           },
           "steps": [
             { "id": "tt_g_qada_s1", "order": 1,
+              "deeplink": "prayer_tracker",
+              "pathLabels": ["More", "Daily Practice", "Prayer Tracker"],
               "title": {
                 "en": "Open Prayer Tracker", "tr": "Namaz Takibi'ni aç", "id": "Buka Pelacak Salat",
                 "ms": "Buka Penjejak Solat", "fr": "Ouvrir le suivi des prières", "de": "Gebets-Tracker öffnen"
               },
               "body": {
-                "en": "Go to More → Prayer Tracker and switch to the Qada tab.",
+                "en": "Go to More → Daily Practice → Prayer Tracker and switch to the Qada tab.",
                 "tr": "Daha Fazla → Namaz Takibi'ne gidin ve Kaza sekmesine geçin.",
                 "id": "Buka Lainnya → Pelacak Salat dan beralih ke tab Qada.",
                 "ms": "Pergi ke Lagi → Penjejak Solat dan tukar ke tab Qada.",
@@ -793,6 +795,8 @@
           },
           "steps": [
             { "id": "tt_g_zakat_s1", "order": 1,
+              "deeplink": "zakat",
+              "pathLabels": ["More", "Tools", "Zakat"],
               "title": {
                 "en": "Open the Zakat calculator", "tr": "Zekât hesaplayıcıyı aç", "id": "Buka kalkulator Zakat",
                 "ms": "Buka kalkulator Zakat", "fr": "Ouvrir le calculateur de Zakat", "de": "Zakat-Rechner öffnen"
@@ -923,7 +927,121 @@
                 "fr": "Activez la vibration et le son, réinitialisez à tout moment, et consultez l'historique des sessions.",
                 "de": "Schalte Vibration und Ton ein, setze jederzeit zurück und sieh frühere Sitzungen im Verlauf."
               } }
-          ] }
+          ] },
+        {
+          "id": "tt_q_khatam",
+          "type": "question",
+          "order": 8,
+          "question": {
+            "en": "Can I track a Quran completion (Khatam)?",
+            "tr": "Bir Kur'an hatmini (Khatam) takip edebilir miyim?",
+            "id": "Bisakah saya melacak khataman Quran (Khatam)?",
+            "ms": "Bolehkah saya menjejak khatam Quran (Khatam)?",
+            "fr": "Puis-je suivre une lecture complète du Quran (Khatam) ?",
+            "de": "Kann ich eine Quran-Vollendung (Khatam) verfolgen?"
+          },
+          "answer": {
+            "en": "Yes. Set a goal to finish the Quran and log your progress from More → Daily Practice → Khatam Quran.",
+            "tr": "Evet. Kur'an'ı bitirmek için bir hedef belirleyin ve ilerlemenizi More → Daily Practice → Khatam Quran bölümünden kaydedin.",
+            "id": "Ya. Tetapkan target untuk mengkhatamkan Quran dan catat kemajuan Anda dari More → Daily Practice → Khatam Quran.",
+            "ms": "Ya. Tetapkan sasaran untuk mengkhatamkan Quran dan catat kemajuan anda dari More → Daily Practice → Khatam Quran.",
+            "fr": "Oui. Fixez un objectif pour terminer le Quran et enregistrez votre progression depuis More → Daily Practice → Khatam Quran.",
+            "de": "Ja. Setzen Sie sich ein Ziel, den Quran zu vollenden, und protokollieren Sie Ihren Fortschritt über More → Daily Practice → Khatam Quran."
+          }
+        },
+        {
+          "id": "tt_g_khatam",
+          "type": "guide",
+          "order": 9,
+          "icon": "import_contacts",
+          "estimatedMinutes": 2,
+          "title": {
+            "en": "Track a Quran Khatam",
+            "tr": "Bir Kur'an hatmini takip edin",
+            "id": "Lacak Khatam Quran",
+            "ms": "Jejak Khatam Quran",
+            "fr": "Suivre un Khatam du Quran",
+            "de": "Ein Quran-Khatam verfolgen"
+          },
+          "steps": [
+            {
+              "id": "tt_g_khatam_s1",
+              "order": 1,
+              "deeplink": "khatam",
+              "pathLabels": [
+                "More",
+                "Daily Practice",
+                "Khatam Quran"
+              ],
+              "title": {
+                "en": "Open Khatam Quran",
+                "tr": "Khatam Quran'ı açın",
+                "id": "Buka Khatam Quran",
+                "ms": "Buka Khatam Quran",
+                "fr": "Ouvrir Khatam Quran",
+                "de": "Khatam Quran öffnen"
+              },
+              "body": {
+                "en": "Go to More → Daily Practice → Khatam Quran.",
+                "tr": "More → Daily Practice → Khatam Quran bölümüne gidin.",
+                "id": "Buka More → Daily Practice → Khatam Quran.",
+                "ms": "Pergi ke More → Daily Practice → Khatam Quran.",
+                "fr": "Allez dans More → Daily Practice → Khatam Quran.",
+                "de": "Gehen Sie zu More → Daily Practice → Khatam Quran."
+              }
+            },
+            {
+              "id": "tt_g_khatam_s2",
+              "order": 2,
+              "pathLabels": [
+                "More",
+                "Daily Practice",
+                "Khatam Quran"
+              ],
+              "title": {
+                "en": "Create a khatam",
+                "tr": "Bir hatim oluşturun",
+                "id": "Buat khataman",
+                "ms": "Cipta khatam",
+                "fr": "Créer un khatam",
+                "de": "Ein Khatam erstellen"
+              },
+              "body": {
+                "en": "Create a new khatam and set a target completion date.",
+                "tr": "Yeni bir hatim oluşturun ve bir hedef bitiş tarihi belirleyin.",
+                "id": "Buat khataman baru dan tetapkan tanggal target penyelesaian.",
+                "ms": "Cipta khatam baharu dan tetapkan tarikh sasaran selesai.",
+                "fr": "Créez un nouveau khatam et fixez une date d'achèvement cible.",
+                "de": "Erstellen Sie ein neues Khatam und legen Sie ein Zieldatum fest."
+              }
+            },
+            {
+              "id": "tt_g_khatam_s3",
+              "order": 3,
+              "pathLabels": [
+                "More",
+                "Daily Practice",
+                "Khatam Quran"
+              ],
+              "title": {
+                "en": "Log your reading",
+                "tr": "Okumanızı kaydedin",
+                "id": "Catat bacaan Anda",
+                "ms": "Catat bacaan anda",
+                "fr": "Enregistrez votre lecture",
+                "de": "Ihre Lesung protokollieren"
+              },
+              "body": {
+                "en": "Mark pages or juz as you read to see your progress.",
+                "tr": "İlerlemenizi görmek için okudukça sayfaları veya cüzleri işaretleyin.",
+                "id": "Tandai halaman atau juz saat membaca untuk melihat kemajuan Anda.",
+                "ms": "Tandakan halaman atau juz semasa anda membaca untuk melihat kemajuan anda.",
+                "fr": "Marquez les pages ou juz au fur et à mesure de votre lecture pour suivre votre progression.",
+                "de": "Markieren Sie beim Lesen Seiten oder Juz, um Ihren Fortschritt zu sehen."
+              }
+            }
+          ]
+        }
       ]
     },
     {
@@ -1201,10 +1319,11 @@
           },
           "steps": [
             { "id": "qaida_g_start_s1", "order": 1,
-              "pathLabels": ["More", "Qaida"],
+              "deeplink": "qaida",
+              "pathLabels": ["More", "Learning", "Qaida"],
               "title": {
-                "en": "Open Qaida from the More menu", "tr": "Daha Fazla menüsünden Kaide'yi aç", "id": "Buka Qaida dari menu Lainnya",
-                "ms": "Buka Qaida dari menu Lagi", "fr": "Ouvrir Qaida depuis le menu Plus", "de": "Qaida im Menü Mehr öffnen"
+                "en": "Open the Qaida reader", "tr": "Kaide okuyucuyu aç", "id": "Buka pembaca Qaida",
+                "ms": "Buka pembaca Qaida", "fr": "Ouvrir le lecteur Qaida", "de": "Den Qaida-Leser öffnen"
               } },
             { "id": "qaida_g_start_s2", "order": 2,
               "title": {
@@ -1261,6 +1380,531 @@
             "fr": "Ouvrez le menu (⋮) sur l'écran Qaida et choisissez Réinitialiser le parcours. Cela efface toutes les étoiles et la progression et recommence à la leçon 1, pour qu'un autre enfant puisse repartir de zéro.",
             "de": "Öffne das Menü (⋮) im Qaida-Bildschirm und wähle Reise zurücksetzen. Das löscht alle Sterne und den Fortschritt und beginnt wieder bei Lektion 1, sodass ein anderes Kind neu starten kann."
           } }
+      ]
+    },
+    {
+      "id": "duas_tafseer",
+      "order": 9,
+      "icon": "menu_book",
+      "color": "violet",
+      "title": {
+        "en": "Duas & Tafseer",
+        "tr": "Dualar ve Tefsir",
+        "id": "Doa & Tafsir",
+        "ms": "Doa & Tafsir",
+        "fr": "Duas et Tafseer",
+        "de": "Duas und Tafseer"
+      },
+      "subtitle": {
+        "en": "Browse Duas and read Quran commentary",
+        "tr": "Dualara göz atın ve Kur'an tefsirini okuyun",
+        "id": "Jelajahi Doa dan baca tafsir Quran",
+        "ms": "Semak imbas Doa dan baca tafsir Quran",
+        "fr": "Parcourez les Duas et lisez le commentaire du Quran",
+        "de": "Duas durchsuchen und Quran-Kommentar lesen"
+      },
+      "items": [
+        {
+          "id": "dt_q_find_duas",
+          "type": "question",
+          "order": 1,
+          "question": {
+            "en": "How do I find and save Duas?",
+            "tr": "Duaları nasıl bulup kaydederim?",
+            "id": "Bagaimana cara menemukan dan menyimpan Doa?",
+            "ms": "Bagaimana saya mencari dan menyimpan Doa?",
+            "fr": "Comment trouver et enregistrer des Duas ?",
+            "de": "Wie finde und speichere ich Duas?"
+          },
+          "answer": {
+            "en": "Browse Duas by category or search for one, then tap the heart to favourite it. Adjust display options in Dua settings.",
+            "tr": "Duaları kategoriye göre bulun veya arayın, ardından favorilere eklemek için kalbe dokunun. Görüntüleme seçeneklerini Dua ayarlarından değiştirin.",
+            "id": "Jelajahi Doa berdasarkan kategori atau cari, lalu ketuk hati untuk memfavoritkan. Sesuaikan opsi tampilan di pengaturan Doa.",
+            "ms": "Semak imbas Doa mengikut kategori atau cari, kemudian ketik hati untuk menjadikan kegemaran. Laraskan pilihan paparan dalam tetapan Doa.",
+            "fr": "Parcourez les Duas par catégorie ou recherchez-en une, puis appuyez sur le cœur pour l'ajouter aux favoris. Ajustez l'affichage dans les paramètres Dua.",
+            "de": "Durchsuchen Sie Duas nach Kategorie oder suchen Sie eine, tippen Sie dann auf das Herz, um sie zu den Favoriten hinzuzufügen. Passen Sie die Anzeige in den Dua-Einstellungen an."
+          }
+        },
+        {
+          "id": "dt_g_read_dua",
+          "type": "guide",
+          "order": 2,
+          "icon": "favorite",
+          "estimatedMinutes": 1,
+          "title": {
+            "en": "Read and favourite a Dua",
+            "tr": "Bir duayı okuyun ve favorilere ekleyin",
+            "id": "Baca dan favoritkan sebuah Doa",
+            "ms": "Baca dan jadikan Doa kegemaran",
+            "fr": "Lire et ajouter une Dua aux favoris",
+            "de": "Eine Dua lesen und zu Favoriten hinzufügen"
+          },
+          "steps": [
+            {
+              "id": "dt_g_read_dua_s1",
+              "order": 1,
+              "deeplink": "dua",
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Duas"
+              ],
+              "title": {
+                "en": "Open Duas",
+                "tr": "Duaları açın",
+                "id": "Buka Doa",
+                "ms": "Buka Doa",
+                "fr": "Ouvrir les Duas",
+                "de": "Duas öffnen"
+              },
+              "body": {
+                "en": "Go to More → Learning → Duas.",
+                "tr": "More → Learning → Duas bölümüne gidin.",
+                "id": "Buka More → Learning → Duas.",
+                "ms": "Pergi ke More → Learning → Duas.",
+                "fr": "Allez dans More → Learning → Duas.",
+                "de": "Gehen Sie zu More → Learning → Duas."
+              }
+            },
+            {
+              "id": "dt_g_read_dua_s2",
+              "order": 2,
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Duas"
+              ],
+              "title": {
+                "en": "Pick a category and a Dua",
+                "tr": "Bir kategori ve bir dua seçin",
+                "id": "Pilih kategori dan sebuah Doa",
+                "ms": "Pilih kategori dan sebuah Doa",
+                "fr": "Choisissez une catégorie et une Dua",
+                "de": "Wählen Sie eine Kategorie und eine Dua"
+              },
+              "body": {
+                "en": "Choose a category, then open the Dua you want to read.",
+                "tr": "Bir kategori seçin, ardından okumak istediğiniz duayı açın.",
+                "id": "Pilih kategori, lalu buka Doa yang ingin Anda baca.",
+                "ms": "Pilih kategori, kemudian buka Doa yang anda mahu baca.",
+                "fr": "Choisissez une catégorie, puis ouvrez la Dua que vous souhaitez lire.",
+                "de": "Wählen Sie eine Kategorie und öffnen Sie dann die Dua, die Sie lesen möchten."
+              }
+            },
+            {
+              "id": "dt_g_read_dua_s3",
+              "order": 3,
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Duas"
+              ],
+              "title": {
+                "en": "Favourite it",
+                "tr": "Favorilere ekleyin",
+                "id": "Favoritkan",
+                "ms": "Jadikan kegemaran",
+                "fr": "Ajoutez-la aux favoris",
+                "de": "Zu Favoriten hinzufügen"
+              },
+              "body": {
+                "en": "Tap the heart to save the Dua, and adjust display options in Dua settings.",
+                "tr": "Duayı kaydetmek için kalbe dokunun ve görüntüleme seçeneklerini Dua ayarlarından değiştirin.",
+                "id": "Ketuk hati untuk menyimpan Doa, dan sesuaikan opsi tampilan di pengaturan Doa.",
+                "ms": "Ketik hati untuk menyimpan Doa, dan laraskan pilihan paparan dalam tetapan Doa.",
+                "fr": "Appuyez sur le cœur pour enregistrer la Dua, et ajustez l'affichage dans les paramètres Dua.",
+                "de": "Tippen Sie auf das Herz, um die Dua zu speichern, und passen Sie die Anzeige in den Dua-Einstellungen an."
+              }
+            }
+          ]
+        },
+        {
+          "id": "dt_q_what_is_tafseer",
+          "type": "question",
+          "order": 3,
+          "question": {
+            "en": "What is Tafseer?",
+            "tr": "Tefsir nedir?",
+            "id": "Apa itu Tafsir?",
+            "ms": "Apakah itu Tafsir?",
+            "fr": "Qu'est-ce que le Tafseer ?",
+            "de": "Was ist Tafseer?"
+          },
+          "answer": {
+            "en": "Tafseer is verse-by-verse commentary that explains the meaning of the Quran. Open it from More → Learning → Tafseer.",
+            "tr": "Tefsir, Kur'an'ın anlamını açıklayan ayet ayet açıklamadır. More → Learning → Tafseer bölümünden açın.",
+            "id": "Tafsir adalah penjelasan ayat demi ayat yang menerangkan makna Quran. Buka dari More → Learning → Tafseer.",
+            "ms": "Tafsir ialah huraian ayat demi ayat yang menerangkan makna Quran. Buka dari More → Learning → Tafseer.",
+            "fr": "Le Tafseer est un commentaire verset par verset qui explique le sens du Quran. Ouvrez-le depuis More → Learning → Tafseer.",
+            "de": "Tafseer ist ein Vers-für-Vers-Kommentar, der die Bedeutung des Quran erklärt. Öffnen Sie ihn über More → Learning → Tafseer."
+          }
+        },
+        {
+          "id": "dt_g_open_tafseer",
+          "type": "guide",
+          "order": 4,
+          "icon": "auto_stories",
+          "estimatedMinutes": 2,
+          "title": {
+            "en": "Open Tafseer for a surah",
+            "tr": "Bir sure için tefsiri açın",
+            "id": "Buka Tafsir untuk sebuah surah",
+            "ms": "Buka Tafsir untuk sesuatu surah",
+            "fr": "Ouvrir le Tafseer d'une surah",
+            "de": "Tafseer für eine Surah öffnen"
+          },
+          "steps": [
+            {
+              "id": "dt_g_open_tafseer_s1",
+              "order": 1,
+              "deeplink": "tafseer",
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Tafseer"
+              ],
+              "title": {
+                "en": "Open Tafseer",
+                "tr": "Tefsiri açın",
+                "id": "Buka Tafsir",
+                "ms": "Buka Tafsir",
+                "fr": "Ouvrir le Tafseer",
+                "de": "Tafseer öffnen"
+              },
+              "body": {
+                "en": "Go to More → Learning → Tafseer.",
+                "tr": "More → Learning → Tafseer bölümüne gidin.",
+                "id": "Buka More → Learning → Tafseer.",
+                "ms": "Pergi ke More → Learning → Tafseer.",
+                "fr": "Allez dans More → Learning → Tafseer.",
+                "de": "Gehen Sie zu More → Learning → Tafseer."
+              }
+            },
+            {
+              "id": "dt_g_open_tafseer_s2",
+              "order": 2,
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Tafseer"
+              ],
+              "title": {
+                "en": "Pick a surah",
+                "tr": "Bir sure seçin",
+                "id": "Pilih sebuah surah",
+                "ms": "Pilih sesuatu surah",
+                "fr": "Choisissez une surah",
+                "de": "Wählen Sie eine Surah"
+              },
+              "body": {
+                "en": "Choose the surah or chapter you want to study.",
+                "tr": "İncelemek istediğiniz sureyi veya bölümü seçin.",
+                "id": "Pilih surah atau bab yang ingin Anda pelajari.",
+                "ms": "Pilih surah atau bab yang anda mahu kaji.",
+                "fr": "Choisissez la surah ou le chapitre que vous souhaitez étudier.",
+                "de": "Wählen Sie die Surah oder das Kapitel, das Sie studieren möchten."
+              }
+            },
+            {
+              "id": "dt_g_open_tafseer_s3",
+              "order": 3,
+              "pathLabels": [
+                "More",
+                "Learning",
+                "Tafseer"
+              ],
+              "title": {
+                "en": "Read the commentary",
+                "tr": "Tefsiri okuyun",
+                "id": "Baca tafsirnya",
+                "ms": "Baca huraiannya",
+                "fr": "Lisez le commentaire",
+                "de": "Lesen Sie den Kommentar"
+              },
+              "body": {
+                "en": "Read the verse-by-verse commentary, and switch the tafseer book if another one is offered.",
+                "tr": "Ayet ayet tefsiri okuyun ve başka bir tefsir kitabı sunuluyorsa değiştirin.",
+                "id": "Baca tafsir ayat demi ayat, dan ganti kitab tafsir jika tersedia pilihan lain.",
+                "ms": "Baca huraian ayat demi ayat, dan tukar kitab tafsir jika ada pilihan lain ditawarkan.",
+                "fr": "Lisez le commentaire verset par verset, et changez de livre de tafseer si un autre est proposé.",
+                "de": "Lesen Sie den Vers-für-Vers-Kommentar und wechseln Sie das Tafseer-Buch, falls ein anderes angeboten wird."
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "widgets_personalisation",
+      "order": 10,
+      "icon": "tune",
+      "color": "sky",
+      "title": {
+        "en": "Widgets & Personalisation",
+        "tr": "Widget'lar ve Kişiselleştirme",
+        "id": "Widget & Personalisasi",
+        "ms": "Widget & Pemperibadian",
+        "fr": "Widgets et personnalisation",
+        "de": "Widgets und Personalisierung"
+      },
+      "subtitle": {
+        "en": "Add widgets and make the app your own",
+        "tr": "Widget'lar ekleyin ve uygulamayı kendinize göre ayarlayın",
+        "id": "Tambahkan widget dan sesuaikan aplikasi",
+        "ms": "Tambah widget dan sesuaikan aplikasi",
+        "fr": "Ajoutez des widgets et personnalisez l'application",
+        "de": "Widgets hinzufügen und die App anpassen"
+      },
+      "items": [
+        {
+          "id": "wp_q_widget",
+          "type": "question",
+          "order": 1,
+          "question": {
+            "en": "Can I add a home-screen widget?",
+            "tr": "Ana ekrana widget ekleyebilir miyim?",
+            "id": "Bisakah saya menambahkan widget layar beranda?",
+            "ms": "Bolehkah saya menambah widget skrin utama?",
+            "fr": "Puis-je ajouter un widget à l'écran d'accueil ?",
+            "de": "Kann ich ein Startbildschirm-Widget hinzufügen?"
+          },
+          "answer": {
+            "en": "Yes. Long-press the home screen → Widgets → Nimaz to add prayer times, next prayer, tracker or Hijri date widgets. Configure them in More → Settings → Widgets.",
+            "tr": "Evet. Ana ekrana uzun basın → Widgets → Nimaz ile namaz vakitleri, sonraki namaz, takip veya Hicri tarih widget'ları ekleyin. Bunları More → Settings → Widgets bölümünden yapılandırın.",
+            "id": "Ya. Tekan lama layar beranda → Widgets → Nimaz untuk menambahkan widget waktu salat, salat berikutnya, pelacak, atau tanggal Hijriah. Konfigurasikan di More → Settings → Widgets.",
+            "ms": "Ya. Tekan lama skrin utama → Widgets → Nimaz untuk menambah widget waktu solat, solat seterusnya, penjejak atau tarikh Hijrah. Konfigurasikan di More → Settings → Widgets.",
+            "fr": "Oui. Appuyez longuement sur l'écran d'accueil → Widgets → Nimaz pour ajouter les widgets des heures de prière, prochaine prière, suivi ou date Hijri. Configurez-les dans More → Settings → Widgets.",
+            "de": "Ja. Halten Sie den Startbildschirm gedrückt → Widgets → Nimaz, um Gebetszeiten-, Nächstes-Gebet-, Tracker- oder Hijri-Datum-Widgets hinzuzufügen. Konfigurieren Sie sie unter More → Settings → Widgets."
+          }
+        },
+        {
+          "id": "wp_g_widget",
+          "type": "guide",
+          "order": 2,
+          "icon": "widgets",
+          "estimatedMinutes": 2,
+          "title": {
+            "en": "Set up a widget",
+            "tr": "Bir widget kurun",
+            "id": "Siapkan widget",
+            "ms": "Sediakan widget",
+            "fr": "Configurer un widget",
+            "de": "Ein Widget einrichten"
+          },
+          "steps": [
+            {
+              "id": "wp_g_widget_s1",
+              "order": 1,
+              "pathLabels": [
+                "Home screen",
+                "Widgets"
+              ],
+              "title": {
+                "en": "Open the widget picker",
+                "tr": "Widget seçiciyi açın",
+                "id": "Buka pemilih widget",
+                "ms": "Buka pemilih widget",
+                "fr": "Ouvrir le sélecteur de widgets",
+                "de": "Widget-Auswahl öffnen"
+              },
+              "body": {
+                "en": "Long-press an empty area of your home screen and choose Widgets.",
+                "tr": "Ana ekranınızın boş bir alanına uzun basın ve Widgets seçeneğini seçin.",
+                "id": "Tekan lama area kosong di layar beranda dan pilih Widgets.",
+                "ms": "Tekan lama kawasan kosong pada skrin utama dan pilih Widgets.",
+                "fr": "Appuyez longuement sur une zone vide de votre écran d'accueil et choisissez Widgets.",
+                "de": "Halten Sie einen leeren Bereich Ihres Startbildschirms gedrückt und wählen Sie Widgets."
+              }
+            },
+            {
+              "id": "wp_g_widget_s2",
+              "order": 2,
+              "pathLabels": [
+                "Home screen",
+                "Widgets",
+                "Nimaz"
+              ],
+              "title": {
+                "en": "Add a Nimaz widget",
+                "tr": "Bir Nimaz widget'ı ekleyin",
+                "id": "Tambahkan widget Nimaz",
+                "ms": "Tambah widget Nimaz",
+                "fr": "Ajouter un widget Nimaz",
+                "de": "Ein Nimaz-Widget hinzufügen"
+              },
+              "body": {
+                "en": "Find Nimaz and drag the widget you want onto the home screen.",
+                "tr": "Nimaz'ı bulun ve istediğiniz widget'ı ana ekrana sürükleyin.",
+                "id": "Temukan Nimaz dan seret widget yang Anda inginkan ke layar beranda.",
+                "ms": "Cari Nimaz dan seret widget yang anda mahu ke skrin utama.",
+                "fr": "Trouvez Nimaz et faites glisser le widget souhaité sur l'écran d'accueil.",
+                "de": "Suchen Sie Nimaz und ziehen Sie das gewünschte Widget auf den Startbildschirm."
+              }
+            },
+            {
+              "id": "wp_g_widget_s3",
+              "order": 3,
+              "deeplink": "widgets",
+              "pathLabels": [
+                "More",
+                "Settings",
+                "Widgets"
+              ],
+              "title": {
+                "en": "Tune the widget",
+                "tr": "Widget'ı ayarlayın",
+                "id": "Sesuaikan widget",
+                "ms": "Laraskan widget",
+                "fr": "Régler le widget",
+                "de": "Widget anpassen"
+              },
+              "body": {
+                "en": "Open More → Settings → Widgets to adjust its options.",
+                "tr": "Seçeneklerini ayarlamak için More → Settings → Widgets bölümüne gidin.",
+                "id": "Buka More → Settings → Widgets untuk menyesuaikan opsinya.",
+                "ms": "Buka More → Settings → Widgets untuk melaraskan pilihannya.",
+                "fr": "Ouvrez More → Settings → Widgets pour ajuster ses options.",
+                "de": "Öffnen Sie More → Settings → Widgets, um die Optionen anzupassen."
+              }
+            }
+          ]
+        },
+        {
+          "id": "wp_g_language",
+          "type": "guide",
+          "order": 3,
+          "icon": "language",
+          "estimatedMinutes": 1,
+          "title": {
+            "en": "Change the app language",
+            "tr": "Uygulama dilini değiştirin",
+            "id": "Ubah bahasa aplikasi",
+            "ms": "Tukar bahasa aplikasi",
+            "fr": "Changer la langue de l'application",
+            "de": "App-Sprache ändern"
+          },
+          "steps": [
+            {
+              "id": "wp_g_language_s1",
+              "order": 1,
+              "deeplink": "language",
+              "pathLabels": [
+                "More",
+                "Settings",
+                "Language"
+              ],
+              "title": {
+                "en": "Open Language settings",
+                "tr": "Dil ayarlarını açın",
+                "id": "Buka pengaturan Bahasa",
+                "ms": "Buka tetapan Bahasa",
+                "fr": "Ouvrir les paramètres de langue",
+                "de": "Spracheinstellungen öffnen"
+              },
+              "body": {
+                "en": "Go to More → Settings → Language.",
+                "tr": "More → Settings → Language bölümüne gidin.",
+                "id": "Buka More → Settings → Language.",
+                "ms": "Pergi ke More → Settings → Language.",
+                "fr": "Allez dans More → Settings → Language.",
+                "de": "Gehen Sie zu More → Settings → Language."
+              }
+            },
+            {
+              "id": "wp_g_language_s2",
+              "order": 2,
+              "pathLabels": [
+                "More",
+                "Settings",
+                "Language"
+              ],
+              "title": {
+                "en": "Pick your language",
+                "tr": "Dilinizi seçin",
+                "id": "Pilih bahasa Anda",
+                "ms": "Pilih bahasa anda",
+                "fr": "Choisissez votre langue",
+                "de": "Wählen Sie Ihre Sprache"
+              },
+              "body": {
+                "en": "Choose your language — the app restarts to apply it.",
+                "tr": "Dilinizi seçin — uygulama uygulamak için yeniden başlar.",
+                "id": "Pilih bahasa Anda — aplikasi akan dimulai ulang untuk menerapkannya.",
+                "ms": "Pilih bahasa anda — aplikasi akan dimulakan semula untuk menggunakannya.",
+                "fr": "Choisissez votre langue — l'application redémarre pour l'appliquer.",
+                "de": "Wählen Sie Ihre Sprache — die App startet neu, um sie anzuwenden."
+              }
+            }
+          ]
+        },
+        {
+          "id": "wp_g_theme",
+          "type": "guide",
+          "order": 4,
+          "icon": "dark_mode",
+          "estimatedMinutes": 1,
+          "title": {
+            "en": "Switch theme or dark mode",
+            "tr": "Tema veya karanlık modu değiştirin",
+            "id": "Ganti tema atau mode gelap",
+            "ms": "Tukar tema atau mod gelap",
+            "fr": "Changer de thème ou de mode sombre",
+            "de": "Design oder Dunkelmodus wechseln"
+          },
+          "steps": [
+            {
+              "id": "wp_g_theme_s1",
+              "order": 1,
+              "deeplink": "appearance",
+              "pathLabels": [
+                "More",
+                "Settings",
+                "Appearance"
+              ],
+              "title": {
+                "en": "Open Appearance settings",
+                "tr": "Görünüm ayarlarını açın",
+                "id": "Buka pengaturan Tampilan",
+                "ms": "Buka tetapan Penampilan",
+                "fr": "Ouvrir les paramètres d'apparence",
+                "de": "Darstellungseinstellungen öffnen"
+              },
+              "body": {
+                "en": "Go to More → Settings → Appearance.",
+                "tr": "More → Settings → Appearance bölümüne gidin.",
+                "id": "Buka More → Settings → Appearance.",
+                "ms": "Pergi ke More → Settings → Appearance.",
+                "fr": "Allez dans More → Settings → Appearance.",
+                "de": "Gehen Sie zu More → Settings → Appearance."
+              }
+            },
+            {
+              "id": "wp_g_theme_s2",
+              "order": 2,
+              "pathLabels": [
+                "More",
+                "Settings",
+                "Appearance"
+              ],
+              "title": {
+                "en": "Choose a mode",
+                "tr": "Bir mod seçin",
+                "id": "Pilih mode",
+                "ms": "Pilih mod",
+                "fr": "Choisissez un mode",
+                "de": "Wählen Sie einen Modus"
+              },
+              "body": {
+                "en": "Choose Light, Dark or System.",
+                "tr": "Açık, Koyu veya Sistem seçeneğini seçin.",
+                "id": "Pilih Terang, Gelap, atau Sistem.",
+                "ms": "Pilih Cerah, Gelap atau Sistem.",
+                "fr": "Choisissez Clair, Sombre ou Système.",
+                "de": "Wählen Sie Hell, Dunkel oder System."
+              }
+            }
+          ]
+        }
       ]
     }
   ]

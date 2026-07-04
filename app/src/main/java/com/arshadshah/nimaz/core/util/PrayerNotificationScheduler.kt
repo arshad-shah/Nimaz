@@ -16,6 +16,7 @@ import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
 import dagger.hilt.android.qualifiers.ApplicationContext
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -39,9 +40,15 @@ class PrayerNotificationScheduler @Inject constructor(
         const val CHANNEL_ID_PRAYER = "prayer_notifications"
         const val CHANNEL_ID_ADHAN = "adhan_notifications"
         const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
+        // Silent (no-vibration) siblings — Android ignores enableVibration() changes
+        // after a channel exists, so the vibration preference is honoured by posting
+        // on the matching channel instead. See channelForPrayer/channelForAdhan.
+        const val CHANNEL_ID_PRAYER_SILENT = "prayer_notifications_silent"
+        const val CHANNEL_ID_ADHAN_SILENT = "adhan_notifications_silent"
 
         const val ACTION_PRAYER_NOTIFICATION = "com.arshadshah.nimaz.PRAYER_NOTIFICATION"
         const val ACTION_DAILY_SUMMARY = "com.arshadshah.nimaz.DAILY_SUMMARY"
+        const val ACTION_FRIDAY_REMINDER = "com.arshadshah.nimaz.FRIDAY_REMINDER"
         const val EXTRA_PRAYER_TYPE = "prayer_type"
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_TIME = "prayer_time"
@@ -52,9 +59,18 @@ class PrayerNotificationScheduler @Inject constructor(
         private const val PRE_REMINDER_REQUEST_CODE_BASE = 2000
         private const val TEST_NOTIFICATION_ID = 8888
         private const val DAILY_SUMMARY_REQUEST_CODE = 8889
+        private const val FRIDAY_REMINDER_REQUEST_CODE = 8890
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
+
+        /** Channel id for a standalone prayer notification honouring the vibration pref. */
+        fun channelForPrayer(vibrate: Boolean): String =
+            if (vibrate) CHANNEL_ID_PRAYER else CHANNEL_ID_PRAYER_SILENT
+
+        /** Channel id for an adhan notification honouring the vibration pref. */
+        fun channelForAdhan(vibrate: Boolean): String =
+            if (vibrate) CHANNEL_ID_ADHAN else CHANNEL_ID_ADHAN_SILENT
     }
 
     init {
@@ -96,11 +112,34 @@ class PrayerNotificationScheduler @Inject constructor(
                 enableLights(true)
             }
 
+            // Silent (no-vibration) siblings for when the vibration preference is off.
+            val prayerChannelSilent = NotificationChannel(
+                CHANNEL_ID_PRAYER_SILENT,
+                "Prayer Time Notifications (No Vibration)",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Prayer time notifications without vibration"
+                enableVibration(false)
+                enableLights(true)
+            }
+
+            val adhanChannelSilent = NotificationChannel(
+                CHANNEL_ID_ADHAN_SILENT,
+                "Adhan Notifications (No Vibration)",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Adhan notifications without vibration"
+                enableVibration(false)
+                enableLights(true)
+            }
+
             notificationManager.createNotificationChannels(
                 listOf(
                     prayerChannel,
                     adhanChannel,
-                    dailySummaryChannel
+                    dailySummaryChannel,
+                    prayerChannelSilent,
+                    adhanChannelSilent
                 )
             )
         }
@@ -124,7 +163,9 @@ class PrayerNotificationScheduler @Inject constructor(
         calculationMethod: CalculationMethod = CalculationMethod.MUSLIM_WORLD_LEAGUE,
         asrCalculation: AsrCalculation = AsrCalculation.STANDARD,
         highLatitudeRule: HighLatitudeRule? = null,
-        adjustments: Map<PrayerType, Int> = emptyMap()
+        adjustments: Map<PrayerType, Int> = emptyMap(),
+        fridayReminderEnabled: Boolean = false,
+        fridayReminderMinutes: Int = 60
     ) {
         if (!notificationsEnabled) {
             cancelAllPrayerNotifications()
@@ -189,6 +230,18 @@ class PrayerNotificationScheduler @Inject constructor(
         // Schedule daily summary notification at 11 PM
         scheduleDailySummary()
 
+        // Schedule (or cancel) the weekly Friday (Jummah) reminder
+        scheduleFridayReminder(
+            latitude = latitude,
+            longitude = longitude,
+            enabled = fridayReminderEnabled,
+            minutesBefore = fridayReminderMinutes,
+            calculationMethod = calculationMethod,
+            asrCalculation = asrCalculation,
+            highLatitudeRule = highLatitudeRule,
+            adjustments = adjustments
+        )
+
         PerfMonitor.stop(
             perfTrace,
             metrics = mapOf("scheduled_count" to scheduledCount.toLong()),
@@ -246,6 +299,86 @@ class PrayerNotificationScheduler @Inject constructor(
                 triggerTimeMillis,
                 pendingIntent
             )
+        }
+    }
+
+    /**
+     * Schedule the weekly Friday (Jummah) reminder for the upcoming Friday, at that
+     * Friday's Dhuhr time minus [minutesBefore]. Re-armed on every reschedule (daily
+     * midnight chain / settings change / boot), so the one-shot always targets the
+     * next Friday. Cancels when [enabled] is false.
+     */
+    private fun scheduleFridayReminder(
+        latitude: Double,
+        longitude: Double,
+        enabled: Boolean,
+        minutesBefore: Int,
+        calculationMethod: CalculationMethod,
+        asrCalculation: AsrCalculation,
+        highLatitudeRule: HighLatitudeRule?,
+        adjustments: Map<PrayerType, Int>
+    ) {
+        cancelFridayReminder()
+        if (!enabled) return
+        if (latitude == 0.0 && longitude == 0.0) return
+
+        val now = LocalDateTime.now()
+        val today = LocalDate.now()
+
+        // Find the reminder time for the upcoming Friday; if this week's has already
+        // passed, roll to next Friday.
+        fun reminderFor(friday: LocalDate): LocalDateTime? {
+            val times = prayerTimeCalculator.getPrayerTimes(
+                latitude = latitude,
+                longitude = longitude,
+                date = friday,
+                calculationMethod = calculationMethod,
+                asrCalculation = asrCalculation,
+                highLatitudeRule = highLatitudeRule,
+                adjustments = adjustments
+            )
+            val dhuhr = times.firstOrNull { it.type == PrayerType.DHUHR } ?: return null
+            return dhuhr.time.toLocalDateTime().minusMinutes(minutesBefore.toLong())
+        }
+
+        val daysUntilFriday = ((DayOfWeek.FRIDAY.value - today.dayOfWeek.value) + 7) % 7
+        var reminderTime = reminderFor(today.plusDays(daysUntilFriday.toLong()))
+        if (reminderTime == null || reminderTime.isBefore(now)) {
+            reminderTime = reminderFor(today.plusDays((daysUntilFriday + 7).toLong()))
+        }
+        val trigger = reminderTime ?: return
+
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_FRIDAY_REMINDER
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            FRIDAY_REMINDER_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        }
+    }
+
+    private fun cancelFridayReminder() {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_FRIDAY_REMINDER
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            FRIDAY_REMINDER_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+            it.cancel()
         }
     }
 
@@ -411,6 +544,7 @@ class PrayerNotificationScheduler @Inject constructor(
             cancelPreReminderNotification(prayerType)
         }
         cancelMidnightReschedule()
+        cancelFridayReminder()
     }
 
     /**

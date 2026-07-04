@@ -20,9 +20,12 @@ import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -105,8 +108,27 @@ data class NotificationSettingsUiState(
     val reminderMinutes: Int = 15,
     val showReminderBefore: Boolean = true,
     val persistentNotification: Boolean = false,
+    val fridayReminderEnabled: Boolean = false,
+    val fridayReminderMinutes: Int = 60,
     val selectedAdhanSound: String = "MISHARY"
 )
+
+/**
+ * A small, read-only rollup of the notification settings that other screens (e.g. Prayer
+ * Settings) show as summary subtitles. Sourced reactively from DataStore so it stays in sync
+ * no matter which screen changed the underlying value — see [SettingsViewModel.notificationSummary].
+ */
+data class NotificationSummary(
+    val notificationsMasterEnabled: Boolean = true,
+    val enabledPrayerCount: Int = TOTAL_PRAYER_COUNT,
+    val reminderEnabled: Boolean = true,
+    val reminderMinutes: Int = 15
+) {
+    companion object {
+        /** The five obligatory prayers the notification screen exposes toggles for. */
+        const val TOTAL_PRAYER_COUNT = 5
+    }
+}
 
 data class QuranSettingsUiState(
     val selectedTranslatorId: String = "sahih_international",
@@ -186,6 +208,8 @@ sealed interface SettingsEvent {
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetShowReminderBefore(val enabled: Boolean) : SettingsEvent
     data class SetPersistentNotification(val enabled: Boolean) : SettingsEvent
+    data class SetFridayReminderEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetFridayReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetAdhanSound(val sound: String) : SettingsEvent
     data object PreviewAdhanSound : SettingsEvent
     data object StopAdhanPreview : SettingsEvent
@@ -282,6 +306,38 @@ class SettingsViewModel @Inject constructor(
 
     private val _adhanPreviewError = MutableStateFlow<String?>(null)
     val adhanPreviewError: StateFlow<String?> = _adhanPreviewError.asStateFlow()
+
+    /**
+     * Reactive rollup of the notification settings for summary subtitles on other screens.
+     *
+     * Unlike [notificationState] (a one-shot snapshot loaded in [loadSettings]), this collects
+     * DataStore directly, so it reflects edits made from *any* screen — including the
+     * Notification Settings screen, which runs on a separate [SettingsViewModel] instance.
+     * DataStore is a singleton, so every collector across every instance sees the same live value.
+     */
+    val notificationSummary: StateFlow<NotificationSummary> = combine(
+        combine(
+            settingsRepository.fajrNotificationEnabled,
+            settingsRepository.dhuhrNotificationEnabled,
+            settingsRepository.asrNotificationEnabled,
+            settingsRepository.maghribNotificationEnabled,
+            settingsRepository.ishaNotificationEnabled
+        ) { flags -> flags.count { it } },
+        settingsRepository.prayerNotificationsEnabled,
+        settingsRepository.notificationReminderMinutes,
+        settingsRepository.showReminderBefore
+    ) { enabledPrayerCount, masterEnabled, reminderMinutes, reminderEnabled ->
+        NotificationSummary(
+            notificationsMasterEnabled = masterEnabled,
+            enabledPrayerCount = enabledPrayerCount,
+            reminderEnabled = reminderEnabled,
+            reminderMinutes = reminderMinutes
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = NotificationSummary()
+    )
 
     fun clearAdhanPreviewError() {
         _adhanPreviewError.value = null
@@ -522,6 +578,22 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetPersistentNotification -> {
                 _notificationState.update { it.copy(persistentNotification = event.enabled) }
                 viewModelScope.launch { settingsRepository.setPersistentNotification(event.enabled) }
+            }
+
+            is SettingsEvent.SetFridayReminderEnabled -> {
+                _notificationState.update { it.copy(fridayReminderEnabled = event.enabled) }
+                viewModelScope.launch {
+                    settingsRepository.setFridayReminderEnabled(event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+
+            is SettingsEvent.SetFridayReminderMinutes -> {
+                _notificationState.update { it.copy(fridayReminderMinutes = event.minutes) }
+                viewModelScope.launch {
+                    settingsRepository.setFridayReminderMinutes(event.minutes)
+                    rescheduleNotifications()
+                }
             }
 
             is SettingsEvent.SetAdhanSound -> {
@@ -815,6 +887,8 @@ class SettingsViewModel @Inject constructor(
             val reminderMin = settingsRepository.notificationReminderMinutes.first()
             val showReminder = settingsRepository.showReminderBefore.first()
             val persistent = settingsRepository.persistentNotification.first()
+            val fridayReminder = settingsRepository.fridayReminderEnabled.first()
+            val fridayReminderMin = settingsRepository.fridayReminderMinutes.first()
             val respectDnd = settingsRepository.adhanRespectDnd.first()
             val adhanSoundName = settingsRepository.selectedAdhanSound.first()
             val fajrNotif = settingsRepository.fajrNotificationEnabled.first()
@@ -844,6 +918,8 @@ class SettingsViewModel @Inject constructor(
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
                     persistentNotification = persistent,
+                    fridayReminderEnabled = fridayReminder,
+                    fridayReminderMinutes = fridayReminderMin,
                     respectDnd = respectDnd,
                     selectedAdhanSound = adhanSoundName,
                     fajrNotification = fajrNotif,
@@ -984,7 +1060,9 @@ class SettingsViewModel @Inject constructor(
             calculationMethod = calcMethod,
             asrCalculation = asrCalc,
             highLatitudeRule = highLatRule,
-            adjustments = adjustments
+            adjustments = adjustments,
+            fridayReminderEnabled = notifState.fridayReminderEnabled,
+            fridayReminderMinutes = notifState.fridayReminderMinutes
         )
     }
 

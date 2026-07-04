@@ -27,11 +27,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -46,6 +48,8 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
+import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
@@ -799,6 +803,27 @@ fun NavGraph(
 
             taggedComposable<Route.SettingsAbout>(ScreenTags.SettingsAbout) {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val shareScope = rememberCoroutineScope()
+                var showShareSheet by remember { mutableStateOf(false) }
+                if (showShareSheet) {
+                    ShareAppSheet(
+                        onDismiss = { showShareSheet = false },
+                        onShareLink = {
+                            showShareSheet = false
+                            shareScope.launch {
+                                ContentShareManager.shareBranded(
+                                    context,
+                                    Shareables.appInvite(context),
+                                    includeText = true,
+                                )
+                            }
+                        },
+                    )
+                }
+                val contactEmail =
+                    stringResource(com.arshadshah.nimaz.R.string.contact_email)
+                val contactSubject =
+                    stringResource(com.arshadshah.nimaz.R.string.contact_email_subject)
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
@@ -835,14 +860,12 @@ fun NavGraph(
                             }
                         }
                     },
-                    onShareApp = {
-                        ContentShareManager.shareText(context, Shareables.appInvite(context))
-                    },
+                    onShareApp = { showShareSheet = true },
                     onContactUs = {
                         ContentShareManager.sendEmail(
                             context,
-                            address = context.getString(com.arshadshah.nimaz.R.string.contact_email),
-                            subject = context.getString(com.arshadshah.nimaz.R.string.contact_email_subject),
+                            address = contactEmail,
+                            subject = contactSubject,
                         )
                     }
                 )
@@ -941,8 +964,9 @@ fun NavGraph(
 
             taggedComposable<Route.SettingsHelp>(ScreenTags.SettingsHelp) {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                // Unified support inbox — same address the About screen contacts.
                 val supportEmail =
-                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
+                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.contact_email)
                 val supportSubject =
                     androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                 com.arshadshah.nimaz.presentation.screens.help.HelpScreen(

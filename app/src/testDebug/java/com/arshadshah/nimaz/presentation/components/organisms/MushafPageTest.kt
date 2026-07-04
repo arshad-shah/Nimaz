@@ -89,7 +89,7 @@ class MushafPageTest {
             )
         }
 
-        // MushafSurahHeader renders the English name and ayah count
+        // SurahHeaderCartouche renders the English name and ayah count
         composeRule.onNodeWithText("Al-Fatihah").assertExists()
         composeRule.onNodeWithText("7 Ayahs").assertExists()
     }

@@ -98,6 +98,10 @@ interface SettingsRepository {
     suspend fun setShowReminderBefore(enabled: Boolean)
     val persistentNotification: Flow<Boolean>
     suspend fun setPersistentNotification(enabled: Boolean)
+    val fridayReminderEnabled: Flow<Boolean>
+    suspend fun setFridayReminderEnabled(enabled: Boolean)
+    val fridayReminderMinutes: Flow<Int>
+    suspend fun setFridayReminderMinutes(minutes: Int)
     val quranTranslatorId: Flow<String>
     suspend fun setQuranTranslatorId(translatorId: String)
     val showTranslation: Flow<Boolean>

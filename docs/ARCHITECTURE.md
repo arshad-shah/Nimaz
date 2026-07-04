@@ -32,7 +32,10 @@ These are the rules most often broken. Keep this checklist in mind for every cha
    `composable<Route.X>` in `NavGraph`. No raw route strings.
 7. **No hardcoded colors/typography in screens.** Use `MaterialTheme.colorScheme.*` or
    `NimazColors.*`. Reuse `presentation/components` (atoms/molecules/organisms) instead of
-   re-rolling generic UI.
+   re-rolling generic UI. Icons are Material glyphs via `NimazIcon` — no emoji.
+   > **Exception (Location screen only):** country flags on the Location screen
+   > (`LocationScreen`, curated cities in `LocationCatalog.kt`) are rendered as emoji.
+   > This is the single sanctioned emoji use in the app; no other emoji are permitted.
 8. **Verify before you finish.** `./gradlew :app:compileDebugKotlin` must pass (this runs
    KSP, so it validates Hilt + Room wiring too).
 
@@ -456,6 +459,14 @@ typed route object.
       CONTAINED` draws the glyph in a tinted container — the old `ContainedIcon`/`IconBadge` (a
       rounded-square contained icon is the reusable "badge"); `size`/`iconSize`/`containerSize`/
       `cornerRadius` give granular control. Tappable icons stay `NimazIconButton`.
+    - a previous/next navigation arrow (readers, the Quran Mushaf page bar, month
+      steppers, the calendar header) is `NimazNavArrowButton(direction = NavArrowDirection.PREVIOUS
+      | NEXT, onClick, contentDescription, enabled = …, size = …)`
+      (`components/atoms/NimazNavArrowButton.kt`), **not** a hand-rolled `Surface`/`IconButton`/
+      `FilledTonalIconButton` chevron. It is the single standard prev/next control (a circular
+      bordered chevron, `primary` when enabled and dimmed to `outlineVariant` at range ends);
+      `direction` is *visual* (which chevron is drawn, auto-mirrored) so RTL surfaces wire the
+      left arrow to advance. Default `size` is 48dp; steppers use 44dp. (Issue #227.)
     - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
       (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
       `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`/`border`,
@@ -522,6 +533,24 @@ typed route object.
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
       It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render and
       behave identically.
+    - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
+      header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
+      header is `SurahHeaderCartouche(surah, showBismillah = …)`
+      (`components/molecules/SurahHeaderCartouche.kt`) — an ogee *unwan* panel with a 12-lobe shamsa
+      number medallion and a gold bud finial, with the Basmala rendered below as a gold line flanked
+      by diamond florets — and is the **single** surah header (the old `MushafSurahHeader` /
+      `MushafSurahSeparator` / `SurahBanner` were removed). Its number ornament is the reusable
+      `ShamsaMedallion(number, size = …)` atom and the finial/Basmala mark is `DiamondFloret(color)`;
+      both draw from the shared `internal` path builders in
+      `components/atoms/QuranOrnamentGeometry.kt` (`scallopPath` / `cartouchePath` / `diamondPath` /
+      `circlePath`) — **never** re-hand-roll these `Path`s in a component. `MushafFrame`
+      (`MushafPage.kt`) reuses the same medallion for its page number and `DiamondFloret` in its
+      ornamental divider lines; the Juz and Page tab tiles share
+      `quranTileSurfaceColor` / `quranTileBorder` / `quranTileNumberColor` (`QuranPageGrid.kt`). The
+      ayah end-marker is coloured (gold brackets + teal number) through
+      `appendAyahEndMarker(number, bracketColor, numberColor)`
+      (`components/atoms/QuranTextFormat.kt`), used in every reader path and paired with the
+      `ArabicText(AnnotatedString)` overload — **not** a plain single-colour marker string.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 
@@ -562,6 +591,9 @@ copy anything listed as Open.
 | 2 | Theming | Bespoke per-item gradient palettes still hold raw `Color(0xFF…)` literals: `hadith/HadithCollectionScreen.kt` (`getBookGradient`, per-collection pairs) and `tasbih/BeadDesign.kt` (bead style gradients). These are centralized design tokens, not scattered ad-hoc colors. | Relocate into `NimazColors` (e.g. `HadithCollectionColors`, `TasbihBeadStyles`) preserving exact hex; do under visual review. |
 
 > **Accepted patterns (NOT deviations):**
+> - **Flag emoji on the Location screen** — the Location screen renders country flags as emoji,
+>   the one sanctioned exception to the "Material icons via `NimazIcon`, no emoji" rule (§7).
+>   Bounded to curated cities in `LocationCatalog.kt` / `LocationScreen.kt`; do not generalise.
 > - Exposing multiple `StateFlow`s from one ViewModel for distinct sub-screens (list/detail) is
 >   the house style (see `AsmaUlHusnaViewModel`). Do **not** "consolidate" them into one mega-state.
 > - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`) expose the audio engine's

@@ -101,9 +101,14 @@ object ShareCardRenderer {
             layout(card.attribution, textPaint(bold, 32f, TEAL_DARK), Layout.Alignment.ALIGN_CENTER, 4f)
         private val footerLayout =
             layout(
-                context.getString(R.string.share_card_footer),
+                context.getString(R.string.share_card_qr_caption),
                 textPaint(bodyFont, 26f, MUTED), Layout.Alignment.ALIGN_CENTER, 2f
             )
+
+        // "Scan to install" QR, drawn in the footer in brand teal on white.
+        private val qrBitmap: Bitmap? = runCatching {
+            QrCodes.encode(QrCodes.APP_URL, 200, dark = TEAL_800, light = Color.WHITE)
+        }.onFailure { CrashReporter.recordException(it) }.getOrNull()
 
         fun render(): Bitmap {
             val height = draw(null).toInt()
@@ -190,8 +195,16 @@ object ShareCardRenderer {
             }
             y += 2f + 28f
 
-            // ── Attribution + footer ──
-            y = drawBlock(canvas, attrLayout, left, y) + 16f
+            // ── Attribution ──
+            y = drawBlock(canvas, attrLayout, left, y) + 28f
+
+            // ── "Scan to install" QR (centred) + caption ──
+            qrBitmap?.let { qr ->
+                if (canvas != null) {
+                    canvas.drawBitmap(qr, left + (contentWidth - qr.width) / 2f, y, null)
+                }
+                y += qr.height + 14f
+            }
             y = drawBlock(canvas, footerLayout, left, y)
 
             return y + CARD_PAD

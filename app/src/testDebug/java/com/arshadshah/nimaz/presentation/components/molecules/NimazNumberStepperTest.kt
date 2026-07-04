@@ -1,5 +1,9 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.onNodeWithContentDescription
@@ -88,6 +92,32 @@ class NimazNumberStepperTest {
 
         composeRule.onNodeWithContentDescription("Decrease").performClick()
         assertThat(captured).isEqualTo(2)
+    }
+
+    @Test
+    fun `repeated increments keep advancing from the latest value`() {
+        // Regression: the hold-to-repeat gesture outlives recompositions; if it
+        // captured a stale onStep it would step from the original value forever
+        // ("stuck on first increment"). Drive real state and click three times.
+        composeRule.setThemedContent {
+            var v by remember { mutableStateOf(5) }
+            NimazNumberStepper(
+                label = "Count",
+                value = v,
+                onValueChange = { v = it },
+                minValue = 0,
+                maxValue = 100,
+                step = 1
+            )
+        }
+
+        val increase = composeRule.onNodeWithContentDescription("Increase")
+        increase.performClick()
+        increase.performClick()
+        increase.performClick()
+
+        // 5 -> 8 (INLINE shows the "+" prefix for positives)
+        composeRule.onNodeWithText("+8").assertExists()
     }
 
     @Test

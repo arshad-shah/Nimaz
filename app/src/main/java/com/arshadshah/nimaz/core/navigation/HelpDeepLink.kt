@@ -13,6 +13,14 @@ fun helpDeepLinkRoute(key: String?): Route? = when (key) {
     "fasting" -> Route.FastingTracker
     "tasbih" -> Route.TasbihHome
     "hadith" -> Route.HadithHome
+    "zakat" -> Route.ZakatCalculator
+    "prayer_tracker" -> Route.PrayerTracker()
+    "qada" -> Route.QadaPrayers
+    "qaida" -> Route.QaidaHome
+    "dua" -> Route.DuaHome
+    "tafseer" -> Route.TafseerChapters
+    "khatam" -> Route.KhatamList
+    "widgets" -> Route.SettingsWidgets
     "settings" -> Route.Settings
     "home" -> Route.Home
     else -> null

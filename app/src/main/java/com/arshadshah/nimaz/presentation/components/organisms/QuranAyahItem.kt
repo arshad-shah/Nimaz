@@ -62,7 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
-import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -196,20 +196,26 @@ internal fun AyahItem(
         // Arabic text with ayah end marker (with optional tajweed colors)
         val displayText = ayah.getDisplayArabicText()
         val textColor = MaterialTheme.colorScheme.onBackground
+        // Ayah end-marker: gold brackets + teal number, matching the ornament language.
+        val markerBracketColor = NimazColors.Gold500
+        val markerNumberColor = MaterialTheme.colorScheme.primary
 
         if (showTajweed && ayah.textTajweed != null) {
             // Render with tajweed colors using BasicText
-            val tajweedAnnotated = remember(ayah.textTajweed, isDarkTheme, ayah.numberInSurah) {
+            val tajweedAnnotated = remember(
+                ayah.textTajweed, isDarkTheme, ayah.numberInSurah,
+                markerBracketColor, markerNumberColor
+            ) {
                 val parsed = TajweedParser.parse(
                     tajweedText = ayah.textTajweed,
                     isDarkTheme = isDarkTheme,
                     defaultColor = textColor
                 )
-                // Append the end marker to the tajweed text
+                // Append the coloured end marker to the tajweed text
                 buildAnnotatedString {
                     append(parsed)
                     append(" ")
-                    append(formatAyahEndMarker(ayah.numberInSurah))
+                    appendAyahEndMarker(ayah.numberInSurah, markerBracketColor, markerNumberColor)
                 }
             }
             BasicText(

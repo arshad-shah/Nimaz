@@ -1,37 +1,25 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -69,8 +57,8 @@ fun NimazReaderBottomBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (hasPager) {
-                NavChevron(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                NimazNavArrowButton(
+                    direction = NavArrowDirection.PREVIOUS,
                     enabled = currentPage > 0,
                     onClick = onPrev,
                     contentDescription = prevContentDescription
@@ -78,8 +66,8 @@ fun NimazReaderBottomBar(
             }
             NimazActionPill(content = actions)
             if (hasPager) {
-                NavChevron(
-                    icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                NimazNavArrowButton(
+                    direction = NavArrowDirection.NEXT,
                     enabled = currentPage < pageCount - 1,
                     onClick = onNext,
                     contentDescription = nextContentDescription
@@ -106,42 +94,6 @@ fun NimazReaderBottomBar(
         }
     }
 }
-
-@Composable
-private fun NavChevron(
-    icon: ImageVector,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    contentDescription: String
-) {
-    val tint = if (enabled) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outlineVariant
-    }
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
-        modifier = Modifier.size(48.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            NimazIcon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = tint,
-                size = NimazIconSize.LARGE
-            )
-        }
-    }
-}
-
 
 // ==================== PREVIEWS ====================
 

@@ -25,7 +25,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -43,9 +42,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-private val SurahNumberSlotWidth = 40.dp
+private val SurahNumberSlotWidth = 50.dp
 private val SurahNumberSlotSpacing = 12.dp
 private val ChipShape = RoundedCornerShape(50)
 
@@ -88,14 +88,8 @@ internal fun SurahListItem(
                     shape = RoundedCornerShape(14.dp)
                 ) else Modifier
             ),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(14.dp),
+        style = NimazCardStyle.OUTLINED,
         selected = isSelected,
-        colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-        ),
-        elevation = 0.dp
     ) {
         Column {
             // Top row: number + English name + Arabic name + info button
@@ -105,7 +99,7 @@ internal fun SurahListItem(
                     .padding(start = 14.dp, end = 14.dp, top = 14.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Surah number indicator
+                // Surah number indicator — shamsa medallion echoing the header cartouche
                 Box(
                     modifier = Modifier.size(SurahNumberSlotWidth),
                     contentAlignment = Alignment.Center
@@ -118,21 +112,9 @@ internal fun SurahListItem(
                             iconSize = 36.dp
                         )
                     } else {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .rotate(45f)
-                                .border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                    shape = RoundedCornerShape(2.dp)
-                                )
-                        )
-                        Text(
-                            text = surah.number.toString(),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                        ShamsaMedallion(
+                            number = surah.number,
+                            size = SurahNumberSlotWidth
                         )
                     }
                 }
@@ -278,7 +260,7 @@ private fun SurahListItemLongNamePreview() {
     NimazTheme {
         SurahListItem(
             surah = Surah(
-                number = 58,
+                number = 400,
                 nameArabic = "\u0627\u0644\u0645\u062C\u0627\u062F\u0644\u0629",
                 nameEnglish = "Al-Mujadilah",
                 nameTransliteration = "The Pleading Woman",

@@ -1,5 +1,10 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import com.arshadshah.nimaz.domain.model.Ayah
 
 /**
@@ -26,6 +31,30 @@ fun formatAyahEndMarker(ayahNumber: Int): String {
 /** Appends the ornamental ayah end-marker to the supplied Arabic text. */
 fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
     return "$arabicText ${formatAyahEndMarker(ayahNumber)}"
+}
+
+/**
+ * Appends the ornamental end-marker with the brackets and the number tinted
+ * separately — gold brackets + a teal number, matching the Quran ornament
+ * language. Use inside a [buildAnnotatedString] block.
+ */
+fun AnnotatedString.Builder.appendAyahEndMarker(
+    ayahNumber: Int,
+    bracketColor: Color,
+    numberColor: Color,
+) {
+    withStyle(SpanStyle(color = bracketColor)) { append(AYAH_END_OPEN) }
+    withStyle(SpanStyle(color = numberColor)) { append(toArabicNumber(ayahNumber)) }
+    withStyle(SpanStyle(color = bracketColor)) { append(AYAH_END_CLOSE) }
+}
+
+/** The coloured end-marker as a standalone [AnnotatedString]. */
+fun annotatedAyahEndMarker(
+    ayahNumber: Int,
+    bracketColor: Color,
+    numberColor: Color,
+): AnnotatedString = buildAnnotatedString {
+    appendAyahEndMarker(ayahNumber, bracketColor, numberColor)
 }
 
 /**

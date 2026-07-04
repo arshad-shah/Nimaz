@@ -67,7 +67,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
-import com.arshadshah.nimaz.presentation.components.molecules.SurahBanner
+import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
@@ -807,10 +807,9 @@ fun QuranReaderScreen(
                     if (state.readingMode == ReadingMode.SURAH) {
                         state.surahWithAyahs?.let { surahWithAyahs ->
                             item(key = "banner") {
-                                SurahBanner(
-                                    surahNameArabic = surahWithAyahs.surah.nameArabic,
-                                    surahMeaning = surahWithAyahs.surah.nameTransliteration,
-                                    revelationType = surahWithAyahs.surah.revelationType,
+                                SurahHeaderCartouche(
+                                    surah = surahWithAyahs.surah,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
                                     showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
                                         ?: 0) != 1
                                 )

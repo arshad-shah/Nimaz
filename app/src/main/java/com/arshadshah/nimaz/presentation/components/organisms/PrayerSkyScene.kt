@@ -16,14 +16,25 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
@@ -42,7 +53,9 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -57,11 +70,15 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.GlassBackdrop
+import com.arshadshah.nimaz.presentation.components.atoms.GlassIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.glassBackdropSource
 import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
+import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.SkyColors
 import kotlin.math.PI
@@ -163,6 +180,17 @@ fun SkyBackground(
 /**
  * The [SkyBackground] with a time + status label overlaid (top-left). Used by
  * the dedicated Prayer Times screen.
+ *
+ * When [locationName], [onBack] and [onSettings] are all supplied, the scene also
+ * renders a pill-based glass topbar (back + settings + location) above the labels,
+ * sharing this scene's single glass backdrop so every pill frosts the same sky.
+ * In that mode the overlay is padded below the status bar, so callers should grow
+ * the scene's height by the status-bar inset to let the sky reach the very top
+ * (edge-to-edge). See [PrayerSkyTopBar].
+ *
+ * @param locationName when non-null (with [onBack]/[onSettings]), shown in the topbar's location pill.
+ * @param onBack invoked by the topbar's back pill; enables the topbar when set.
+ * @param onSettings invoked by the topbar's settings pill; enables the topbar when set.
  */
 @Composable
 fun PrayerSkyScene(
@@ -175,8 +203,18 @@ fun PrayerSkyScene(
     cloudsEnabled: Boolean = true,
     sunriseFraction: Float = SUNRISE_T,
     sunsetFraction: Float = SUNSET_T,
+    locationName: String? = null,
+    onBack: (() -> Unit)? = null,
+    onSettings: (() -> Unit)? = null,
 ) {
     val backdrop = rememberGlassBackdrop()
+    val showTopBar = locationName != null && onBack != null && onSettings != null
+    // Only reserve the status-bar band when the topbar is present (edge-to-edge).
+    val statusBarTop = if (showTopBar) {
+        WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    } else {
+        0.dp
+    }
     Box(modifier = modifier) {
         SkyBackground(
             timeOfDay = timeOfDay,
@@ -190,18 +228,26 @@ fun PrayerSkyScene(
             sunsetFraction = sunsetFraction,
         )
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = statusBarTop)
+                .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            val shadow = Shadow(
-                color = Color.Black.copy(alpha = 0.35f),
-                offset = Offset(0f, 1f),
-                blurRadius = 4f
-            )
+            if (showTopBar) {
+                PrayerSkyTopBar(
+                    locationName = locationName!!,
+                    onBackClick = onBack!!,
+                    onSettingsClick = onSettings!!,
+                    backdrop = backdrop,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+            }
             GlassPill(
                 text = timeLabel,
                 style = MaterialTheme.typography.titleLarge.copy(
-                    shadow = shadow,
+                    shadow = GlassTextShadow,
                     fontWeight = FontWeight.Bold,
                 ),
                 tone = GlassPillTone.Solid,
@@ -209,12 +255,73 @@ fun PrayerSkyScene(
             )
             GlassPill(
                 text = statusLabel,
-                style = MaterialTheme.typography.labelMedium.copy(shadow = shadow),
+                style = MaterialTheme.typography.labelMedium.copy(shadow = GlassTextShadow),
                 backdrop = backdrop,
             )
         }
     }
 }
+
+/**
+ * The pill-based glass topbar overlaid on [PrayerSkyScene]: back + settings
+ * circles on one row, then the location pill on its own line. It draws **no**
+ * background of its own — it sits on the scene's sky and shares the scene's
+ * [backdrop] so all three pills frost the same continuous sky.
+ */
+@Composable
+private fun PrayerSkyTopBar(
+    locationName: String,
+    onBackClick: () -> Unit,
+    onSettingsClick: () -> Unit,
+    backdrop: GlassBackdrop,
+    modifier: Modifier = Modifier,
+) {
+    Column(modifier = modifier) {
+        // Navigation actions at the two edges.
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            GlassIconButton(
+                icon = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = stringResource(R.string.cd_back),
+                onClick = onBackClick,
+                backdrop = backdrop,
+            )
+            GlassIconButton(
+                icon = Icons.Default.Settings,
+                contentDescription = stringResource(R.string.settings),
+                onClick = onSettingsClick,
+                backdrop = backdrop,
+            )
+        }
+
+        Spacer(modifier = Modifier.height(NimazSpacing.Medium))
+
+        // The location, on its own line so long names have room.
+        GlassPill(
+            text = locationName,
+            leadingIcon = Icons.Filled.Place,
+            tone = GlassPillTone.Solid,
+            tint = Color.White,
+            backdrop = backdrop,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = MaterialTheme.typography.titleMedium.copy(
+                fontWeight = FontWeight.SemiBold,
+                shadow = GlassTextShadow,
+            ),
+            modifier = Modifier.widthIn(max = LocationPillMaxWidth),
+        )
+    }
+}
+
+/** Keeps a long city name on one line and lets it ellipsise past this width. */
+private val LocationPillMaxWidth = 260.dp
+
+/** A soft drop shadow so overlaid glass text stays crisp over bright sky. */
+private val GlassTextShadow = Shadow(Color.Black.copy(alpha = 0.35f), Offset(0f, 1f), 4f)
 
 private const val SPRITE_SCALE = 0.6f
 private const val SUNRISE_T = 0.27f
@@ -824,6 +931,84 @@ private fun PrayerSkyScene_Isha_Preview() {
         )
     }
 }
+
+// The shipped configuration — sky + glass topbar (back · settings · location)
+// over the same continuous sky. Status-bar inset is 0 in previews, so the band
+// above the pills only appears on-device.
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 320, name = "Hero + topbar · Sunrise")
+@Composable
+private fun PrayerSkyScene_TopBar_Sunrise_Preview() {
+    NimazTheme {
+        PrayerSkyScene(
+            timeOfDay = 0.29f,
+            timeLabel = "6:45 AM",
+            statusLabel = "Sunrise · Dhuhr in 6h 30m",
+            locationName = "Manchester, UK",
+            onBack = {},
+            onSettings = {},
+            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            modifier = heroPreviewModifier(),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 320, name = "Hero + topbar · Dhuhr")
+@Composable
+private fun PrayerSkyScene_TopBar_Dhuhr_Preview() {
+    NimazTheme {
+        PrayerSkyScene(
+            timeOfDay = 0.5f,
+            timeLabel = "1:15 PM",
+            statusLabel = "Dhuhr · Asr in 3h 15m",
+            locationName = "Makkah",
+            onBack = {},
+            onSettings = {},
+            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            modifier = heroPreviewModifier(),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 320, name = "Hero + topbar · Isha")
+@Composable
+private fun PrayerSkyScene_TopBar_Isha_Preview() {
+    NimazTheme {
+        PrayerSkyScene(
+            timeOfDay = 0.92f,
+            timeLabel = "9:39 PM",
+            statusLabel = "Isha · Fajr in 6h 04m",
+            moonFraction = 0.62f,
+            locationName = "Kuala Lumpur",
+            onBack = {},
+            onSettings = {},
+            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            modifier = heroPreviewModifier(),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 380, heightDp = 320, name = "Hero + topbar · long location")
+@Composable
+private fun PrayerSkyScene_TopBar_LongLocation_Preview() {
+    NimazTheme {
+        PrayerSkyScene(
+            timeOfDay = 0.8f,
+            timeLabel = "8:11 PM",
+            statusLabel = "Maghrib · Isha in 1h 28m",
+            locationName = "Makkah al-Mukarramah, Saudi Arabia",
+            onBack = {},
+            onSettings = {},
+            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+            modifier = heroPreviewModifier(),
+        )
+    }
+}
+
+private fun heroPreviewModifier(): Modifier =
+    Modifier
+        .fillMaxWidth()
+        .height(320.dp)
 
 private fun scenePreviewModifier(): Modifier =
     Modifier

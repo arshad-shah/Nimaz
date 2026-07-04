@@ -685,6 +685,13 @@
     <string name="share_text_footer">Shared with Nimaz</string>
     <string name="share_card_footer">Shared with Nimaz</string>
     <string name="share_card_tagline">Islamic Companion</string>
+    <string name="share_card_qr_caption">Scan to install Nimaz</string>
+    <string name="share_app_title">Share Nimaz</string>
+    <string name="share_app_scan_hint">Scan the code to install Nimaz</string>
+    <string name="share_app_link_button">Share link</string>
+    <string name="share_invite_eyebrow">Invite</string>
+    <string name="share_invite_body">Prayer times, Quran, adhan, Qibla and more — your daily Islamic companion.</string>
+    <string name="share_invite_attribution">Free on Google Play</string>
     <string name="share_eyebrow_quran">Quran</string>
     <string name="share_eyebrow_hadith">Hadith</string>
     <string name="share_eyebrow_dua">Dua</string>
@@ -743,6 +750,10 @@
     <string name="quran_home_reason_heart">Heart of the Quran</string>
     <string name="quran_home_reason_mercy">The Most Merciful</string>
     <string name="quran_home_reason_provision">Seeking provision</string>
+    <string name="quran_home_reason_greatest">The greatest surah</string>
+    <string name="quran_home_reason_third">A third of the Quran</string>
+    <string name="quran_home_reason_refuge_evil">Refuge from evil</string>
+    <string name="quran_home_reason_refuge_whispers">Refuge from whispers</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Loading…</string>
@@ -872,12 +883,21 @@
 
     <string name="notification_settings_sunrise">Sunrise Alert</string>
     <string name="notification_settings_sunrise_subtitle">End of Fajr prayer time</string>
-    <string name="notification_settings_friday_reminder">Friday Prayer Reminder</string>
-    <string name="notification_settings_friday_subtitle">1 hour before Jummah</string>
+    <string name="notification_settings_friday_reminder">Friday (Jummah) Reminder</string>
+    <string name="notification_settings_friday_subtitle">Weekly reminder before Friday prayer</string>
+    <string name="notification_settings_lead_time">Lead time</string>
+    <string name="notification_settings_minutes_value">%1$d min</string>
     <string name="notification_settings_vibration">Vibration</string>
     <string name="notification_settings_vibration_subtitle">Vibrate with notification</string>
     <string name="notification_settings_dnd">Honor Do Not Disturb</string>
-    <string name="notification_settings_dnd_subtitle">Skip adhan when DND is active</string>
+    <string name="notification_settings_dnd_subtitle">Silence the adhan while DND is active (banner still shows)</string>
+
+    <!-- Friday (Jummah) reminder notification content -->
+    <string name="notif_friday_title">Jummah Mubarak</string>
+    <string name="notif_friday_1">Friday prayer is approaching — prepare for Jummah.</string>
+    <string name="notif_friday_2">It\'s Friday. Make ghusl and head to Jummah early.</string>
+    <string name="notif_friday_3">Don\'t forget to read Surah Al-Kahf this blessed Friday.</string>
+    <string name="notif_friday_bigtext">Prepare for Jummah: perform ghusl, wear your best clothes, apply perfume, read Surah Al-Kahf, and arrive early. \n\n\"O you who believe! When the call is made for prayer on Friday, hasten to the remembrance of Allah.\" — Quran 62:9</string>
     <string name="notification_settings_troubleshooting_section">TROUBLESHOOTING</string>
     <string name="notification_settings_test">Test Notification</string>
     <string name="notification_settings_test_sent">Test notification sent</string>
@@ -1089,6 +1109,8 @@
     <string name="location_search_results">Search Results</string>
     <string name="location_recent">Recent</string>
     <string name="location_popular_cities">Popular Cities</string>
+    <string name="location_browse_by_region">Browse by Region</string>
+    <string name="location_region_all">All</string>
     <string name="location_detecting">Detecting…</string>
     <string name="location_not_set">Not set</string>
     <string name="location_current">Current</string>
@@ -1240,6 +1262,12 @@
     <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
     <string name="adhan_notifications">Adhan Notifications</string>
     <string name="pre_adhan_reminder">Pre-Adhan Reminder</string>
+    <!-- Prayer Settings summary subtitles that mirror the Notification Settings screen -->
+    <string name="prayer_settings_notifications_off">Notifications off</string>
+    <string name="prayer_settings_all_prayers_enabled">All prayers enabled</string>
+    <string name="prayer_settings_prayers_enabled_count">%1$d of %2$d prayers enabled</string>
+    <string name="prayer_settings_no_prayers_enabled">No prayers enabled</string>
+    <string name="prayer_settings_reminder_off">Off</string>
     <string name="asr_standard_desc">Shadow equals object length</string>
     <string name="asr_hanafi_desc">Shadow equals twice object length</string>
     <string name="high_lat_middle_desc">Split the night in half from sunset to sunrise</string>

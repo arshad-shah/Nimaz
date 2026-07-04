@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -73,24 +75,24 @@ data class NimazPickerItem<T>(
 )
 
 /**
- * A type-safe, searchable selection dialog. Use this anywhere the user picks
+ * A type-safe, searchable selection sheet. Use this anywhere the user picks
  * one option from a list (calculation method, reciter, translator, language,
- * etc.). Built on top of [NimazDialog], so it inherits the shared dialog
- * chrome (corners, tonal elevation, accent stripe, header glyph).
+ * etc.). Presented as a modal bottom sheet ([NimazBottomSheet]) — thumb-reachable,
+ * swipe-dismissible, and less boxed-in than a dialog — with the picker's own
+ * search + grouped list inside.
  *
  * Defaults are tuned for the common case (single-select, auto-dismiss):
  * tapping an item calls [onSelected] and [onDismiss] together. Override
- * [autoDismiss] to require an explicit Confirm tap instead.
+ * [autoDismiss] to require an explicit Confirm tap (rendered in the sheet footer).
  *
  * - [searchable]: shows a search bar that filters items by title +
  *   description (case-insensitive substring). Auto-enabled when the list has
  *   ≥ 8 items; pass true/false to override.
- * - The dialog ignores `usePlatformDefaultWidth` so it can stretch wider than
- *   a stock Material dialog, which matters for long descriptions / grouped
- *   sections that AlertDialog truncates.
+ * - The search stays pinned while the grouped list scrolls inside the sheet.
  * - On open the list scrolls to centre the currently-selected item so the
  *   user sees where they are.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> NimazListPicker(
     title: String,
@@ -142,53 +144,70 @@ fun <T> NimazListPicker(
         }
     }
 
-    // Delegate the dialog chrome (Surface, header row with title + close X,
-    // tonal elevation, corners, action divider) to NimazDialog so the picker
-    // automatically inherits any future design-system tweaks. We pass
-    // wrapContent = false because the picker structures its own card-like
-    // content (search bar + grouped list).
-    NimazDialog(
-        title = title,
-        onDismiss = onDismiss,
+    // Present the picker in the shared modal bottom sheet. Search stays pinned
+    // (sheet body is not scrollable); the grouped list scrolls inside its own
+    // LazyColumn. The footer only appears when an explicit Confirm is required.
+    NimazBottomSheet(
+        onDismissRequest = onDismiss,
         modifier = modifier,
-        wrapContent = false,
-        showActionsDivider = !autoDismiss,
-        actions = if (autoDismiss) null else {
+        title = title,
+        onClose = onDismiss,
+        scrollable = false,
+        contentPadding = PaddingValues(horizontal = 16.dp),
+        footer = if (autoDismiss) null else {
             {
-                NimazDialogCancelButton(text = cancelText, onClick = onDismiss)
-                NimazDialogConfirmButton(text = confirmText, onClick = onDismiss)
-            }
-        },
-        content = {
-            if (searchable) {
-                NimazSearchBar(
-                    query = query,
-                    onQueryChange = { query = it },
-                    modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
+                NimazSheetFooterButtons(
+                    primaryText = confirmText,
+                    onPrimary = onDismiss,
+                    secondaryText = cancelText,
+                    onSecondary = onDismiss
                 )
             }
-
+        }
+    ) {
+        if (searchable) {
+            NimazSearchBar(
+                query = query,
+                onQueryChange = { query = it },
+                modifier = Modifier.padding(bottom = 4.dp)
+            )
             Spacer(modifier = Modifier.height(4.dp))
+        }
 
-            if (filtered.isEmpty()) {
-                EmptyState(
-                    text = emptySearchText,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 40.dp)
-                )
-            } else {
-                LazyColumn(
-                    state = listState,
-                    modifier = Modifier
-                        .heightIn(max = 440.dp)
-                        .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    // Render ungrouped (null group) items first, then each
-                    // named group with its header.
-                    grouped[null]?.let { ungrouped ->
-                        items(ungrouped, key = { it.title }) { item ->
+        if (filtered.isEmpty()) {
+            EmptyState(
+                text = emptySearchText,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 40.dp)
+            )
+        } else {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.heightIn(max = 480.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                // Render ungrouped (null group) items first, then each named
+                // group with its header.
+                grouped[null]?.let { ungrouped ->
+                    items(ungrouped, key = { it.title }) { item ->
+                        PickerRow(
+                            item = item,
+                            isSelected = item.value == selected,
+                            onClick = {
+                                onSelected(item.value)
+                                if (autoDismiss) onDismiss()
+                            }
+                        )
+                    }
+                }
+                grouped
+                    .filter { it.key != null }
+                    .forEach { (group, groupItems) ->
+                        item(key = "__header_${group}") {
+                            GroupHeader(text = group!!)
+                        }
+                        items(groupItems, key = { "${group}_${it.title}" }) { item ->
                             PickerRow(
                                 item = item,
                                 isSelected = item.value == selected,
@@ -199,27 +218,9 @@ fun <T> NimazListPicker(
                             )
                         }
                     }
-                    grouped
-                        .filter { it.key != null }
-                        .forEach { (group, groupItems) ->
-                            item(key = "__header_${group}") {
-                                GroupHeader(text = group!!)
-                            }
-                            items(groupItems, key = { "${group}_${it.title}" }) { item ->
-                                PickerRow(
-                                    item = item,
-                                    isSelected = item.value == selected,
-                                    onClick = {
-                                        onSelected(item.value)
-                                        if (autoDismiss) onDismiss()
-                                    }
-                                )
-                            }
-                        }
-                }
             }
         }
-    )
+    }
 }
 
 @Composable

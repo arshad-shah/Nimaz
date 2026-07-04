@@ -39,6 +39,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AsrJuristicMethod
 import com.arshadshah.nimaz.presentation.viewmodel.HighLatitudeRule
+import com.arshadshah.nimaz.presentation.viewmodel.NotificationSummary
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
 
@@ -51,6 +52,9 @@ fun PrayerSettingsScreen(
 ) {
     val prayerState by viewModel.prayerState.collectAsState()
     val locationState by viewModel.locationState.collectAsState()
+    // Reactive summary sourced from DataStore, so these subtitles reflect edits made on the
+    // Notification Settings screen (a separate ViewModel instance) the moment we return here.
+    val notificationSummary by viewModel.notificationSummary.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Dialog states for selection screens
@@ -191,14 +195,36 @@ fun PrayerSettingsScreen(
                     NimazSettingsItem(
                         icon = Icons.Default.Notifications,
                         title = stringResource(R.string.adhan_notifications),
-                        value = "All prayers enabled",
+                        value = when {
+                            !notificationSummary.notificationsMasterEnabled ->
+                                stringResource(R.string.prayer_settings_notifications_off)
+
+                            notificationSummary.enabledPrayerCount == NotificationSummary.TOTAL_PRAYER_COUNT ->
+                                stringResource(R.string.prayer_settings_all_prayers_enabled)
+
+                            notificationSummary.enabledPrayerCount == 0 ->
+                                stringResource(R.string.prayer_settings_no_prayers_enabled)
+
+                            else -> stringResource(
+                                R.string.prayer_settings_prayers_enabled_count,
+                                notificationSummary.enabledPrayerCount,
+                                NotificationSummary.TOTAL_PRAYER_COUNT
+                            )
+                        },
                         onClick = onNavigateToNotifications
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
                         icon = Icons.Default.Schedule,
                         title = stringResource(R.string.pre_adhan_reminder),
-                        value = "15 minutes before",
+                        value = if (notificationSummary.reminderEnabled) {
+                            stringResource(
+                                R.string.notification_settings_pre_adhan_subtitle,
+                                notificationSummary.reminderMinutes
+                            )
+                        } else {
+                            stringResource(R.string.prayer_settings_reminder_off)
+                        },
                         onClick = onNavigateToNotifications
                     )
                 }

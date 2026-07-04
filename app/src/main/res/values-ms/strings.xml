@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Jantung Al-Quran</string>
     <string name="quran_home_reason_mercy">Yang Maha Pengasih</string>
     <string name="quran_home_reason_provision">Mencari rezeki</string>
+    <string name="quran_home_reason_greatest">Surah teragung</string>
+    <string name="quran_home_reason_third">Satu pertiga Al-Quran</string>
+    <string name="quran_home_reason_refuge_evil">Berlindung dari kejahatan</string>
+    <string name="quran_home_reason_refuge_whispers">Berlindung dari bisikan</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Memuatkan…</string>
@@ -1242,4 +1246,38 @@
     <string name="tafseer_pdf_notes">Nota saya</string>
     <string name="tafseer_pdf_footer">Dijana oleh Nimaz</string>
     <string name="tafseer_pdf_ayah">Ayat %1$d</string>
+
+    <!-- Notifications, location, prayer-settings & share (added in feat branch) -->
+    <string name="contact_email_subject">Maklum Balas Aplikasi Nimaz</string>
+    <string name="favorite_removed">Kegemaran dialih keluar</string>
+    <string name="favorite_type">Kegemaran</string>
+    <string name="location_browse_by_region">Semak Ikut Wilayah</string>
+    <string name="location_region_all">Semua</string>
+    <string name="notif_friday_1">Solat Jumaat semakin hampir — bersedialah untuk Jummah.</string>
+    <string name="notif_friday_2">Hari ini Jumaat. Mandilah ghusl dan pergi ke Jummah lebih awal.</string>
+    <string name="notif_friday_3">Jangan lupa membaca Surah Al-Kahf pada hari Jumaat yang penuh berkat ini.</string>
+    <string name="notif_friday_bigtext">Bersedia untuk Jummah: lakukan ghusl, pakai pakaian terbaik, sapukan wangian, baca Surah Al-Kahf, dan tibalah lebih awal. \n\n\"Wahai orang yang beriman! Apabila diseru untuk menunaikan solat pada hari Jumaat, maka bersegeralah mengingati Allah.\" — Quran 62:9</string>
+    <string name="notif_friday_title">Jummah Mubarak</string>
+    <string name="notification_settings_lead_time">Masa awal</string>
+    <string name="notification_settings_minutes_value">%1$d min</string>
+    <string name="prayer_settings_all_prayers_enabled">Semua solat diaktifkan</string>
+    <string name="prayer_settings_no_prayers_enabled">Tiada solat diaktifkan</string>
+    <string name="prayer_settings_notifications_off">Pemberitahuan dimatikan</string>
+    <string name="prayer_settings_prayers_enabled_count">%1$d daripada %2$d solat diaktifkan</string>
+    <string name="prayer_settings_reminder_off">Mati</string>
+    <string name="share_card_footer">Dikongsi dengan Nimaz</string>
+    <string name="share_card_tagline">Teman Islami</string>
+    <string name="share_eyebrow_dua">Dua</string>
+    <string name="share_eyebrow_hadith">Hadith</string>
+    <string name="share_eyebrow_quran">Quran</string>
+    <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
+    <string name="share_reference_hadith">Hadith #%1$d</string>
+    <string name="share_text_footer">Dikongsi dengan Nimaz</string>
+    <string name="share_card_qr_caption">Imbas untuk memasang Nimaz</string>
+    <string name="share_app_title">Kongsi Nimaz</string>
+    <string name="share_app_scan_hint">Imbas kod untuk memasang Nimaz</string>
+    <string name="share_app_link_button">Kongsi pautan</string>
+    <string name="share_invite_eyebrow">Jemput</string>
+    <string name="share_invite_body">Waktu solat, Quran, azan, kiblat dan banyak lagi — teman Islami harian anda.</string>
+    <string name="share_invite_attribution">Percuma di Google Play</string>
 </resources>

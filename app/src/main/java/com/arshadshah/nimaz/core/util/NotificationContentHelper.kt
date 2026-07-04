@@ -58,10 +58,12 @@ object NotificationContentHelper {
         "Let your last act of the day be worship."
     )
 
+    // Reflections shown *below* the short "sun has risen" line — keep them distinct
+    // from notif_short_sunrise so the expanded notification doesn't repeat itself.
     private val sunriseMessages = listOf(
-        "The sun has risen. Time for Ishraq if you've prayed Fajr.",
-        "A new day of mercy and opportunity begins.",
-        "The prohibited time for prayer is ending soon."
+        "Whoever prays Fajr, then remembers Allah until sunrise and prays two rak'ahs, earns the reward of a Hajj and Umrah.",
+        "A new day of mercy and opportunity begins — seize its blessings.",
+        "The Duha prayer is a charity due for every joint of the body."
     )
 
     // Pre-reminder messages
@@ -168,6 +170,21 @@ object NotificationContentHelper {
             context.getString(R.string.notif_pre_reminder_4)
         ).random()
     }
+
+    /** Title for the weekly Friday (Jummah) reminder. */
+    fun getFridayReminderTitle(context: Context): String =
+        context.getString(R.string.notif_friday_title)
+
+    /** Short one-line body for the Friday reminder. */
+    fun getFridayReminderMessage(context: Context): String = listOf(
+        context.getString(R.string.notif_friday_1),
+        context.getString(R.string.notif_friday_2),
+        context.getString(R.string.notif_friday_3)
+    ).random()
+
+    /** Expanded body for the Friday reminder — the Sunnah preparations. */
+    fun getFridayReminderBigText(context: Context): String =
+        context.getString(R.string.notif_friday_bigtext)
 
     /**
      * Get a contextual greeting based on time of day.

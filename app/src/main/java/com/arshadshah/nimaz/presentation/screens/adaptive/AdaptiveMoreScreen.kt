@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -21,6 +24,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
@@ -45,8 +49,25 @@ fun AdaptiveMoreScreen(
         if (shouldRestart) onRestartApp()
     }
 
-    val shareApp = {
-        ContentShareManager.shareText(context, Shareables.appInvite(context))
+    val shareScope = rememberCoroutineScope()
+    var showShareSheet by remember { mutableStateOf(false) }
+    val shareApp = { showShareSheet = true }
+
+    if (showShareSheet) {
+        ShareAppSheet(
+            onDismiss = { showShareSheet = false },
+            onShareLink = {
+                showShareSheet = false
+                // Branded invite card image + the tappable store link.
+                shareScope.launch {
+                    ContentShareManager.shareBranded(
+                        context,
+                        Shareables.appInvite(context),
+                        includeText = true,
+                    )
+                }
+            },
+        )
     }
 
     val rateApp = {
@@ -143,39 +164,44 @@ fun AdaptiveMoreScreen(
                     val args = navigator.currentDestination?.contentKey
                     if (args != null) {
                         when (args.pane) {
-                            MoreDetailPane.ABOUT -> AboutScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } },
-                                onNavigateToPrivacyPolicy = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/privacy")
-                                    )
-                                    context.startActivity(intent)
-                                },
-                                onNavigateToTerms = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/terms")
-                                    )
-                                    context.startActivity(intent)
-                                },
-                                onNavigateToLicenses = {
-                                    navController.navigate(Route.Licenses)
-                                },
-                                onRateApp = rateApp,
-                                onShareApp = shareApp,
-                                onContactUs = {
-                                    ContentShareManager.sendEmail(
-                                        context,
-                                        address = context.getString(R.string.contact_email),
-                                        subject = context.getString(R.string.contact_email_subject),
-                                    )
-                                }
-                            )
+                            MoreDetailPane.ABOUT -> {
+                                val contactEmail = stringResource(R.string.contact_email)
+                                val contactSubject =
+                                    stringResource(R.string.contact_email_subject)
+                                AboutScreen(
+                                    onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                    onNavigateToPrivacyPolicy = {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://nimaz.arshadshah.com/privacy")
+                                        )
+                                        context.startActivity(intent)
+                                    },
+                                    onNavigateToTerms = {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://nimaz.arshadshah.com/terms")
+                                        )
+                                        context.startActivity(intent)
+                                    },
+                                    onNavigateToLicenses = {
+                                        navController.navigate(Route.Licenses)
+                                    },
+                                    onRateApp = rateApp,
+                                    onShareApp = shareApp,
+                                    onContactUs = {
+                                        ContentShareManager.sendEmail(
+                                            context,
+                                            address = contactEmail,
+                                            subject = contactSubject,
+                                        )
+                                    }
+                                )
+                            }
 
                             MoreDetailPane.HELP -> {
                                 val supportEmail =
-                                    stringResource(com.arshadshah.nimaz.R.string.support_email)
+                                    stringResource(com.arshadshah.nimaz.R.string.contact_email)
                                 val supportSubject =
                                     stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                                 HelpScreen(

@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import android.content.res.Configuration
+import androidx.compose.foundation.border
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -76,7 +77,7 @@ internal fun computeJuzHeaderIndices(
  * Resolves the surface fill colour for a page tile based on its state.
  */
 @Composable
-private fun pageSurfaceColor(isSelected: Boolean, isComplete: Boolean) = when {
+internal fun quranTileSurfaceColor(isSelected: Boolean, isComplete: Boolean) = when {
     isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
     isComplete -> MaterialTheme.colorScheme.primaryContainer
     else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
@@ -86,7 +87,7 @@ private fun pageSurfaceColor(isSelected: Boolean, isComplete: Boolean) = when {
  * Resolves the border for a page tile.
  */
 @Composable
-private fun pageBorder(isSelected: Boolean) = BorderStroke(
+internal fun quranTileBorder(isSelected: Boolean) = BorderStroke(
     width = if (isSelected) 2.dp else 1.dp,
     color = if (isSelected)
         MaterialTheme.colorScheme.primary
@@ -98,7 +99,7 @@ private fun pageBorder(isSelected: Boolean) = BorderStroke(
  * Resolves the text colour for the page number.
  */
 @Composable
-private fun pageNumberColor(highlighted: Boolean) =
+internal fun quranTileNumberColor(highlighted: Boolean) =
     if (highlighted) MaterialTheme.colorScheme.onPrimaryContainer
     else MaterialTheme.colorScheme.primary
 
@@ -157,6 +158,11 @@ internal fun LazyListScope.pageGridItems(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    RoundedCornerShape(6.dp)
+                                )
                                 .padding(horizontal = 8.dp, vertical = 3.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -172,6 +178,11 @@ internal fun LazyListScope.pageGridItems(
                             modifier = Modifier
                                 .size(24.dp)
                                 .clip(CircleShape)
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    CircleShape
+                                )
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f)),
                             contentAlignment = Alignment.Center
                         ) {
@@ -186,6 +197,11 @@ internal fun LazyListScope.pageGridItems(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(6.dp))
+                                .border(
+                                    1.dp,
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    RoundedCornerShape(6.dp)
+                                )
                                 .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
                                 .padding(horizontal = 8.dp, vertical = 3.dp),
                             contentAlignment = Alignment.Center
@@ -221,8 +237,8 @@ internal fun LazyListScope.pageGridItems(
                     Surface(
                         onClick = { onNavigateToPage(pageNumber) },
                         shape = RoundedCornerShape(12.dp),
-                        color = pageSurfaceColor(isSelected, isComplete),
-                        border = pageBorder(isSelected)
+                        color = quranTileSurfaceColor(isSelected, isComplete),
+                        border = quranTileBorder(isSelected)
                     ) {
                         Row(
                             modifier = Modifier.padding(8.dp),
@@ -250,7 +266,7 @@ internal fun LazyListScope.pageGridItems(
                                     text = pageNumber.toString(),
                                     style = MaterialTheme.typography.titleSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = pageNumberColor(isComplete || isSelected)
+                                    color = quranTileNumberColor(isComplete || isSelected)
                                 )
                             }
                             // Surah chips
@@ -304,8 +320,8 @@ internal fun LazyListScope.pageGridItems(
                             Surface(
                                 onClick = { onNavigateToPage(pg) },
                                 shape = RoundedCornerShape(8.dp),
-                                color = pageSurfaceColor(isSelected, isComplete),
-                                border = pageBorder(isSelected)
+                                color = quranTileSurfaceColor(isSelected, isComplete),
+                                border = quranTileBorder(isSelected)
                             ) {
                                 Box(
                                     modifier = Modifier.size(44.dp),
@@ -324,7 +340,7 @@ internal fun LazyListScope.pageGridItems(
                                         text = pg.toString(),
                                         style = MaterialTheme.typography.labelLarge,
                                         fontWeight = FontWeight.Bold,
-                                        color = pageNumberColor(isComplete || isSelected)
+                                        color = quranTileNumberColor(isComplete || isSelected)
                                     )
                                 }
                             }

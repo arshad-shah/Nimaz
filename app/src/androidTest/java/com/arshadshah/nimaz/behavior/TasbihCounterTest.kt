@@ -23,6 +23,9 @@ class TasbihCounterTest : BaseAppTest() {
         settings.setOnboardingCompleted(true)
         // Classic mode renders the tagged CounterCircle (TasbihCounter / TasbihCount).
         settings.setTasbihBeadMode(false)
+        // The count persists in Room and the suite has no clearPackageData, so reset
+        // it here to guarantee the counter starts at 0 regardless of prior tests/runs.
+        clearTasbih()
     }
 
     @Test

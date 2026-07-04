@@ -21,19 +21,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -65,9 +61,11 @@ import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
+import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
@@ -244,21 +242,12 @@ private fun MonthNavigationHeader(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
+                NimazNavArrowButton(
+                    direction = NavArrowDirection.PREVIOUS,
                     onClick = onPrevious,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                    ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                ) {
-                    NimazIcon(
-                        imageVector = Icons.Default.ChevronLeft,
-                        contentDescription = stringResource(R.string.cd_previous_month),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                    contentDescription = stringResource(R.string.cd_previous_month),
+                    size = 44.dp
+                )
 
                 Column(
                     modifier = Modifier.weight(1f),
@@ -295,21 +284,12 @@ private fun MonthNavigationHeader(
                     }
                 }
 
-                IconButton(
+                NimazNavArrowButton(
+                    direction = NavArrowDirection.NEXT,
                     onClick = onNext,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest
-                    ),
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                ) {
-                    NimazIcon(
-                        imageVector = Icons.Default.ChevronRight,
-                        contentDescription = stringResource(R.string.cd_next_month),
-                        tint = MaterialTheme.colorScheme.onSurface
-                    )
-                }
+                    contentDescription = stringResource(R.string.cd_next_month),
+                    size = 44.dp
+                )
             }
 
             if (isRamadan) {

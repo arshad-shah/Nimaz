@@ -51,6 +51,7 @@ import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -135,6 +136,11 @@ fun Modifier.glassBackdropSource(backdrop: GlassBackdrop): Modifier = this
  *                     content behind it for a true frosted-glass surface.
  * @param blurRadius   how strongly the backdrop is blurred; ignored without a
  *                     [backdrop]. Set to 0.dp for a flat translucent fill.
+ * @param maxLines     max lines for the label; defaults to unlimited so existing
+ *                     callers are unaffected. Set to 1 with a width-bounded
+ *                     [modifier] to keep a long label (e.g. a city name) on one line.
+ * @param overflow     how the label is truncated when it exceeds [maxLines]
+ *                     (e.g. [TextOverflow.Ellipsis]).
  * @param onClick      makes the whole pill tappable when provided.
  */
 @Composable
@@ -149,6 +155,8 @@ fun GlassPill(
     tint: Color = Color.White,
     backdrop: GlassBackdrop? = null,
     blurRadius: Dp = DefaultGlassBlur,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
     onClick: (() -> Unit)? = null,
 ) {
     val shape = RoundedCornerShape(percent = 100)
@@ -174,7 +182,7 @@ fun GlassPill(
                 iconSize = iconSize,
             )
         }
-        Text(text = text, style = style, color = tint)
+        Text(text = text, style = style, color = tint, maxLines = maxLines, overflow = overflow)
         if (trailingIcon != null) {
             NimazIcon(
                 imageVector = trailingIcon,

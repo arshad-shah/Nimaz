@@ -14,7 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,6 +31,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.ArabicTextStyles
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -77,6 +82,44 @@ fun ArabicText(
 }
 
 /**
+ * [AnnotatedString] variant of [ArabicText] — used where parts of the line carry
+ * their own colour (e.g. a gold-bracketed ayah end-marker). [color] is the
+ * default; spans in [text] override it.
+ */
+@Composable
+fun ArabicText(
+    text: AnnotatedString,
+    modifier: Modifier = Modifier,
+    size: ArabicTextSize = ArabicTextSize.MEDIUM,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    fontWeight: FontWeight = FontWeight.Normal,
+    textAlign: TextAlign = TextAlign.Center,
+    maxLines: Int = Int.MAX_VALUE,
+    overflow: TextOverflow = TextOverflow.Clip,
+    style: TextStyle? = null
+) {
+    val textStyle = style ?: TextStyle(
+        fontFamily = AmiriFontFamily,
+        fontSize = size.fontSize,
+        lineHeight = size.lineHeight,
+        fontWeight = fontWeight,
+        textAlign = textAlign,
+        textDirection = TextDirection.Rtl
+    )
+
+    CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Rtl) {
+        Text(
+            text = text,
+            modifier = modifier,
+            style = textStyle,
+            color = color,
+            maxLines = maxLines,
+            overflow = overflow
+        )
+    }
+}
+
+/**
  * Quran verse text with proper styling.
  */
 @Composable
@@ -90,28 +133,42 @@ fun QuranVerseText(
     color: Color = MaterialTheme.colorScheme.onSurface,
     showVerseNumber: Boolean = true
 ) {
-    val displayText = if (showVerseNumber && verseNumber != null) {
-        formatAyahWithEndMarker(arabicText, toArabicNumber(verseNumber).toInt())
-    } else {
-        arabicText
-    }
-
     // Use customFontSize if provided, otherwise use enum
     val actualFontSize = customFontSize?.sp ?: size.fontSize
     val actualLineHeight = customFontSize?.let { (it * 2).sp } ?: size.lineHeight
-
-    ArabicText(
-        text = displayText,
-        modifier = modifier.fillMaxWidth(),
-        size = size,
-        color = color,
-        textAlign = TextAlign.Center,
-        style = ArabicTextStyles.quranLarge.copy(
-            fontFamily = fontFamily,
-            fontSize = actualFontSize,
-            lineHeight = actualLineHeight
-        )
+    val verseStyle = ArabicTextStyles.quranLarge.copy(
+        fontFamily = fontFamily,
+        fontSize = actualFontSize,
+        lineHeight = actualLineHeight
     )
+
+    if (showVerseNumber && verseNumber != null) {
+        // Ayah end-marker: gold brackets + teal number, matching the ornament language.
+        val markerBracketColor = NimazColors.Gold500
+        val markerNumberColor = MaterialTheme.colorScheme.primary
+        val annotated = buildAnnotatedString {
+            withStyle(SpanStyle(color = color)) { append(arabicText) }
+            append(" ")
+            appendAyahEndMarker(verseNumber, markerBracketColor, markerNumberColor)
+        }
+        ArabicText(
+            text = annotated,
+            modifier = modifier.fillMaxWidth(),
+            size = size,
+            color = color,
+            textAlign = TextAlign.Center,
+            style = verseStyle
+        )
+    } else {
+        ArabicText(
+            text = arabicText,
+            modifier = modifier.fillMaxWidth(),
+            size = size,
+            color = color,
+            textAlign = TextAlign.Center,
+            style = verseStyle
+        )
+    }
 }
 
 /**

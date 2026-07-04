@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Cœur du Coran</string>
     <string name="quran_home_reason_mercy">Le Tout Miséricordieux</string>
     <string name="quran_home_reason_provision">Demande de subsistance</string>
+    <string name="quran_home_reason_greatest">La plus grande sourate</string>
+    <string name="quran_home_reason_third">Un tiers du Coran</string>
+    <string name="quran_home_reason_refuge_evil">Refuge contre le mal</string>
+    <string name="quran_home_reason_refuge_whispers">Refuge contre les insufflations</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Chargement…</string>
@@ -1241,4 +1245,38 @@
     <string name="tafseer_pdf_notes">Mes notes</string>
     <string name="tafseer_pdf_footer">Généré par Nimaz</string>
     <string name="tafseer_pdf_ayah">Verset %1$d</string>
+
+    <!-- Notifications, location, prayer-settings & share (added in feat branch) -->
+    <string name="contact_email_subject">Retour sur l\'application Nimaz</string>
+    <string name="favorite_removed">Favori supprimé</string>
+    <string name="favorite_type">Favori</string>
+    <string name="location_browse_by_region">Parcourir par région</string>
+    <string name="location_region_all">Tout</string>
+    <string name="notif_friday_1">La prière du vendredi approche — préparez-vous pour la Jummah.</string>
+    <string name="notif_friday_2">C\'est vendredi. Faites le ghusl et rendez-vous tôt à la Jummah.</string>
+    <string name="notif_friday_3">N\'oubliez pas de lire la Surah Al-Kahf en ce vendredi béni.</string>
+    <string name="notif_friday_bigtext">Préparez-vous pour la Jummah : faites le ghusl, portez vos plus beaux vêtements, mettez du parfum, lisez la Surah Al-Kahf et arrivez tôt. \n\n\"Ô vous qui croyez ! Quand on appelle à la prière du vendredi, empressez-vous vers le rappel d\'Allah.\" — Quran 62:9</string>
+    <string name="notif_friday_title">Jummah Mubarak</string>
+    <string name="notification_settings_lead_time">Délai d\'anticipation</string>
+    <string name="notification_settings_minutes_value">%1$d min</string>
+    <string name="prayer_settings_all_prayers_enabled">Toutes les prières activées</string>
+    <string name="prayer_settings_no_prayers_enabled">Aucune prière activée</string>
+    <string name="prayer_settings_notifications_off">Notifications désactivées</string>
+    <string name="prayer_settings_prayers_enabled_count">%1$d prières sur %2$d activées</string>
+    <string name="prayer_settings_reminder_off">Désactivé</string>
+    <string name="share_card_footer">Partagé avec Nimaz</string>
+    <string name="share_card_tagline">Compagnon islamique</string>
+    <string name="share_eyebrow_dua">Dua</string>
+    <string name="share_eyebrow_hadith">Hadith</string>
+    <string name="share_eyebrow_quran">Quran</string>
+    <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
+    <string name="share_reference_hadith">Hadith #%1$d</string>
+    <string name="share_text_footer">Partagé avec Nimaz</string>
+    <string name="share_card_qr_caption">Scannez pour installer Nimaz</string>
+    <string name="share_app_title">Partager Nimaz</string>
+    <string name="share_app_scan_hint">Scannez le code pour installer Nimaz</string>
+    <string name="share_app_link_button">Partager le lien</string>
+    <string name="share_invite_eyebrow">Inviter</string>
+    <string name="share_invite_body">Horaires de prière, Coran, adhan, Qibla et plus — votre compagnon islamique au quotidien.</string>
+    <string name="share_invite_attribution">Gratuit sur Google Play</string>
 </resources>
