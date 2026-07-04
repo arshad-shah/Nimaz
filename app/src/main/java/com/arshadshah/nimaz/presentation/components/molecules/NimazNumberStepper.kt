@@ -29,6 +29,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -417,12 +418,15 @@ private fun StepperButton(
         tonal -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onPrimary
     }
+    // The gesture coroutine in repeatingClickable outlives recompositions and is not
+    // re-keyed on `onStep`; read the latest lambda so it never steps from a stale value.
+    val currentStep by rememberUpdatedState(onStep)
     Box(
         modifier = Modifier
             .size(size.buttonSize)
             .clip(CircleShape)
             .background(container)
-            .repeatingClickable(enabled = enabled, onClick = onStep)
+            .repeatingClickable(enabled = enabled) { currentStep() }
             .semantics {
                 this.contentDescription = contentDescription
                 this.role = Role.Button
