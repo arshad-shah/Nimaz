@@ -27,6 +27,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,8 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
+import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
@@ -799,6 +802,23 @@ fun NavGraph(
 
             taggedComposable<Route.SettingsAbout>(ScreenTags.SettingsAbout) {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val shareScope = rememberCoroutineScope()
+                var showShareSheet by remember { mutableStateOf(false) }
+                if (showShareSheet) {
+                    ShareAppSheet(
+                        onDismiss = { showShareSheet = false },
+                        onShareLink = {
+                            showShareSheet = false
+                            shareScope.launch {
+                                ContentShareManager.shareBranded(
+                                    context,
+                                    Shareables.appInvite(context),
+                                    includeText = true,
+                                )
+                            }
+                        },
+                    )
+                }
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
@@ -835,9 +855,7 @@ fun NavGraph(
                             }
                         }
                     },
-                    onShareApp = {
-                        ContentShareManager.shareText(context, Shareables.appInvite(context))
-                    },
+                    onShareApp = { showShareSheet = true },
                     onContactUs = {
                         ContentShareManager.sendEmail(
                             context,
