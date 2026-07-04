@@ -62,18 +62,9 @@ data class SearchLocation(
     val name: String,
     val country: String,
     val latitude: Double,
-    val longitude: Double
-)
-
-val defaultPopularCities = listOf(
-    SearchLocation("Madinah", "Saudi Arabia", 24.4686, 39.6142),
-    SearchLocation("Istanbul", "Turkey", 41.0082, 28.9784),
-    SearchLocation("Cairo", "Egypt", 30.0444, 31.2357),
-    SearchLocation("Kuala Lumpur", "Malaysia", 3.1390, 101.6869),
-    SearchLocation("London", "United Kingdom", 51.5074, -0.1278),
-    SearchLocation("New York", "United States", 40.7128, -74.0060),
-    SearchLocation("Jakarta", "Indonesia", -6.2088, 106.8456),
-    SearchLocation("Riyadh", "Saudi Arabia", 24.7136, 46.6753)
+    val longitude: Double,
+    val region: CityRegion? = null,   // set for curated cities; null for Geocoder & recent results
+    val flag: String? = null,         // country-flag emoji for curated cities; null otherwise
 )
 
 sealed interface LocationEvent {
