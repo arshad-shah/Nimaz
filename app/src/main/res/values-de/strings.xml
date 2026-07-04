@@ -1275,4 +1275,7 @@
     <string name="share_app_title">Nimaz teilen</string>
     <string name="share_app_scan_hint">Code scannen, um Nimaz zu installieren</string>
     <string name="share_app_link_button">Link teilen</string>
+    <string name="share_invite_eyebrow">Einladen</string>
+    <string name="share_invite_body">Gebetszeiten, Koran, Adhan, Qibla und mehr — dein täglicher islamischer Begleiter.</string>
+    <string name="share_invite_attribution">Kostenlos bei Google Play</string>
 </resources>

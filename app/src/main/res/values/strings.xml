@@ -689,6 +689,9 @@
     <string name="share_app_title">Share Nimaz</string>
     <string name="share_app_scan_hint">Scan the code to install Nimaz</string>
     <string name="share_app_link_button">Share link</string>
+    <string name="share_invite_eyebrow">Invite</string>
+    <string name="share_invite_body">Prayer times, Quran, adhan, Qibla and more — your daily Islamic companion.</string>
+    <string name="share_invite_attribution">Free on Google Play</string>
     <string name="share_eyebrow_quran">Quran</string>
     <string name="share_eyebrow_hadith">Hadith</string>
     <string name="share_eyebrow_dua">Dua</string>

@@ -1279,4 +1279,7 @@
     <string name="share_app_title">Nimaz\'ı Paylaş</string>
     <string name="share_app_scan_hint">Nimaz\'ı yüklemek için kodu tarayın</string>
     <string name="share_app_link_button">Bağlantıyı paylaş</string>
+    <string name="share_invite_eyebrow">Davet</string>
+    <string name="share_invite_body">Namaz vakitleri, Kur\'an, ezan, kıble ve daha fazlası — günlük İslami rehberiniz.</string>
+    <string name="share_invite_attribution">Google Play\'de ücretsiz</string>
 </resources>

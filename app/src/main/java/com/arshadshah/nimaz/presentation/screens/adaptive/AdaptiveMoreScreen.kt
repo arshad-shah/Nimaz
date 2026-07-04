@@ -49,6 +49,7 @@ fun AdaptiveMoreScreen(
         if (shouldRestart) onRestartApp()
     }
 
+    val shareScope = rememberCoroutineScope()
     var showShareSheet by remember { mutableStateOf(false) }
     val shareApp = { showShareSheet = true }
 
@@ -57,7 +58,14 @@ fun AdaptiveMoreScreen(
             onDismiss = { showShareSheet = false },
             onShareLink = {
                 showShareSheet = false
-                ContentShareManager.shareText(context, Shareables.appInvite(context))
+                // Branded invite card image + the tappable store link.
+                shareScope.launch {
+                    ContentShareManager.shareBranded(
+                        context,
+                        Shareables.appInvite(context),
+                        includeText = true,
+                    )
+                }
             },
         )
     }

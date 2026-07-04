@@ -1276,4 +1276,7 @@
     <string name="share_app_title">Bagikan Nimaz</string>
     <string name="share_app_scan_hint">Pindai kode untuk memasang Nimaz</string>
     <string name="share_app_link_button">Bagikan tautan</string>
+    <string name="share_invite_eyebrow">Undang</string>
+    <string name="share_invite_body">Waktu salat, Quran, azan, kiblat, dan lainnya — pendamping Islami harian Anda.</string>
+    <string name="share_invite_attribution">Gratis di Google Play</string>
 </resources>

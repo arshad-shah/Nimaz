@@ -154,9 +154,21 @@ object Shareables {
         return Shareable(plainText = plain)
     }
 
-    /** The "invite a friend" app share. Already branded via its message + store link. */
+    /**
+     * The "invite a friend" app share. Renders a branded Nimaz card (with the
+     * "scan to install" QR) **and** keeps the store link as tappable text — a link
+     * the recipient can tap is the whole point of an invite.
+     */
     fun appInvite(context: Context): Shareable =
-        Shareable(plainText = context.getString(R.string.share_message))
+        Shareable(
+            plainText = context.getString(R.string.share_message),
+            card = ShareCard(
+                eyebrow = context.getString(R.string.share_invite_eyebrow),
+                arabic = null,
+                body = context.getString(R.string.share_invite_body),
+                attribution = context.getString(R.string.share_invite_attribution),
+            ),
+        )
 
     /** A pre-built file caption / arbitrary text passthrough (e.g. PDF exports). */
     fun text(plainText: String, subject: String? = null): Shareable =

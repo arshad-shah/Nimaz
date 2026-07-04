@@ -70,8 +70,12 @@ object ContentShareManager {
      * us to drop). Falls back to [shareText] only when the content has no [ShareCard]
      * or rendering fails. **Suspends** — the bitmap is drawn on [Dispatchers.Default];
      * the chooser launches on the main thread. Call from a coroutine.
+     *
+     * @param includeText keep [Shareable.plainText] as a caption alongside the image.
+     *   Off for content shares (issue #232 — image only). **On for the app invite**,
+     *   where the tappable Play Store link is the whole point.
      */
-    suspend fun shareBranded(context: Context, shareable: Shareable) {
+    suspend fun shareBranded(context: Context, shareable: Shareable, includeText: Boolean = false) {
         val card = shareable.card
         if (card == null) {
             withContext(Dispatchers.Main) { shareText(context, shareable) }
@@ -84,8 +88,12 @@ object ContentShareManager {
         }
         withContext(Dispatchers.Main) {
             if (file != null) {
-                // Rich media only — no EXTRA_TEXT.
-                shareFile(context, file, mimeType = "image/png")
+                shareFile(
+                    context,
+                    file,
+                    mimeType = "image/png",
+                    text = shareable.plainText.takeIf { includeText },
+                )
             } else {
                 shareText(context, shareable)
             }

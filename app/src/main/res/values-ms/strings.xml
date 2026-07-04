@@ -1277,4 +1277,7 @@
     <string name="share_app_title">Kongsi Nimaz</string>
     <string name="share_app_scan_hint">Imbas kod untuk memasang Nimaz</string>
     <string name="share_app_link_button">Kongsi pautan</string>
+    <string name="share_invite_eyebrow">Jemput</string>
+    <string name="share_invite_body">Waktu solat, Quran, azan, kiblat dan banyak lagi — teman Islami harian anda.</string>
+    <string name="share_invite_attribution">Percuma di Google Play</string>
 </resources>
