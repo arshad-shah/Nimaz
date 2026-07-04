@@ -178,6 +178,17 @@ abstract class BaseAppTest {
     protected fun scrollMoreToAndTap(text: String) =
         scrollListToAndTap(ScreenTags.MoreList, text)
 
+    /**
+     * Open a feature landing screen from the More menu and assert it is shown:
+     * the `tapBottomNav(MORE) → scroll-to the labelled row → assertScreen` triple
+     * that most feature-flow tests start with.
+     */
+    protected fun openFeatureFromMore(labelRes: Int, screenTag: String) {
+        tapBottomNav(Selectors.NavLabel.MORE)
+        scrollMoreToAndTap(Selectors.str(labelRes))
+        assertScreen(screenTag)
+    }
+
     /** Click the bottom-nav tab with the given [Selectors.NavLabel] label. */
     protected fun tapBottomNav(label: String) {
         // Click via the item's testTag (ScreenTags.bottomNav) rather than the label

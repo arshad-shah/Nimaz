@@ -72,6 +72,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -619,6 +621,7 @@ private fun BrowseTabContent(
 
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
+                modifier = Modifier.testTag(ScreenTags.QuranSurahList),
                 state = if (state.selectedTab == 2) pageListState else rememberLazyListState(),
                 contentPadding = PaddingValues(
                     start = 16.dp,
