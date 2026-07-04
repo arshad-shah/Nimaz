@@ -32,7 +32,10 @@ These are the rules most often broken. Keep this checklist in mind for every cha
    `composable<Route.X>` in `NavGraph`. No raw route strings.
 7. **No hardcoded colors/typography in screens.** Use `MaterialTheme.colorScheme.*` or
    `NimazColors.*`. Reuse `presentation/components` (atoms/molecules/organisms) instead of
-   re-rolling generic UI.
+   re-rolling generic UI. Icons are Material glyphs via `NimazIcon` — no emoji.
+   > **Exception (Location screen only):** country flags on the Location screen
+   > (`LocationScreen`, curated cities in `LocationCatalog.kt`) are rendered as emoji.
+   > This is the single sanctioned emoji use in the app; no other emoji are permitted.
 8. **Verify before you finish.** `./gradlew :app:compileDebugKotlin` must pass (this runs
    KSP, so it validates Hilt + Room wiring too).
 
@@ -562,6 +565,9 @@ copy anything listed as Open.
 | 2 | Theming | Bespoke per-item gradient palettes still hold raw `Color(0xFF…)` literals: `hadith/HadithCollectionScreen.kt` (`getBookGradient`, per-collection pairs) and `tasbih/BeadDesign.kt` (bead style gradients). These are centralized design tokens, not scattered ad-hoc colors. | Relocate into `NimazColors` (e.g. `HadithCollectionColors`, `TasbihBeadStyles`) preserving exact hex; do under visual review. |
 
 > **Accepted patterns (NOT deviations):**
+> - **Flag emoji on the Location screen** — the Location screen renders country flags as emoji,
+>   the one sanctioned exception to the "Material icons via `NimazIcon`, no emoji" rule (§7).
+>   Bounded to curated cities in `LocationCatalog.kt` / `LocationScreen.kt`; do not generalise.
 > - Exposing multiple `StateFlow`s from one ViewModel for distinct sub-screens (list/detail) is
 >   the house style (see `AsmaUlHusnaViewModel`). Do **not** "consolidate" them into one mega-state.
 > - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`) expose the audio engine's
