@@ -533,6 +533,24 @@ typed route object.
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
       It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render and
       behave identically.
+    - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
+      header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
+      header is `SurahHeaderCartouche(surah, showBismillah = …)`
+      (`components/molecules/SurahHeaderCartouche.kt`) — an ogee *unwan* panel with a 12-lobe shamsa
+      number medallion and a gold bud finial, with the Basmala rendered below as a gold line flanked
+      by diamond florets — and is the **single** surah header (the old `MushafSurahHeader` /
+      `MushafSurahSeparator` / `SurahBanner` were removed). Its number ornament is the reusable
+      `ShamsaMedallion(number, size = …)` atom and the finial/Basmala mark is `DiamondFloret(color)`;
+      both draw from the shared `internal` path builders in
+      `components/atoms/QuranOrnamentGeometry.kt` (`scallopPath` / `cartouchePath` / `diamondPath` /
+      `circlePath`) — **never** re-hand-roll these `Path`s in a component. `MushafFrame`
+      (`MushafPage.kt`) reuses the same medallion for its page number and `DiamondFloret` in its
+      ornamental divider lines; the Juz and Page tab tiles share
+      `quranTileSurfaceColor` / `quranTileBorder` / `quranTileNumberColor` (`QuranPageGrid.kt`). The
+      ayah end-marker is coloured (gold brackets + teal number) through
+      `appendAyahEndMarker(number, bracketColor, numberColor)`
+      (`components/atoms/QuranTextFormat.kt`), used in every reader path and paired with the
+      `ArabicText(AnnotatedString)` overload — **not** a plain single-colour marker string.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
 
