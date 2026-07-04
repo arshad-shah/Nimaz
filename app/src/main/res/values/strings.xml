@@ -1089,6 +1089,8 @@
     <string name="location_search_results">Search Results</string>
     <string name="location_recent">Recent</string>
     <string name="location_popular_cities">Popular Cities</string>
+    <string name="location_browse_by_region">Browse by Region</string>
+    <string name="location_region_all">All</string>
     <string name="location_detecting">Detecting…</string>
     <string name="location_not_set">Not set</string>
     <string name="location_current">Current</string>
