@@ -43,6 +43,7 @@ data class LocationUiState(
     val currentLocation: CurrentLocationState = CurrentLocationState.NotSet,
     val recentLocations: List<SearchLocation> = emptyList(),
     val popularCities: List<SearchLocation> = defaultPopularCities,
+    val selectedRegion: CityRegion? = null,
     val isSearching: Boolean = false,
     val isLoadingGps: Boolean = false,
     val error: String? = null
@@ -72,6 +73,7 @@ sealed interface LocationEvent {
     data object Search : LocationEvent
     data object ClearSearch : LocationEvent
     data class SelectLocation(val location: SearchLocation) : LocationEvent
+    data class SelectRegion(val region: CityRegion?) : LocationEvent
     data object UseCurrentGpsLocation : LocationEvent
     data object LoadCurrentLocation : LocationEvent
     data object DismissError : LocationEvent
@@ -112,6 +114,11 @@ class LocationViewModel @Inject constructor(
             }
             LocationEvent.ClearSearch -> _state.update {
                 it.copy(searchQuery = "", searchResults = emptyList())
+            }
+
+            is LocationEvent.SelectRegion -> {
+                AppAnalytics.logFeatureUsed("location", "filter_region")
+                _state.update { it.copy(selectedRegion = event.region) }
             }
 
             is LocationEvent.SelectLocation -> {
