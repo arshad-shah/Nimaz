@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
@@ -32,12 +33,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
@@ -310,6 +314,8 @@ private fun EditableValue(
     var focused by remember { mutableStateOf(false) }
     var field by remember { mutableStateOf(TextFieldValue(displayText)) }
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+    val keyboard = LocalSoftwareKeyboardController.current
 
     // Reflect external value changes while not editing (resting shows the formatted text).
     LaunchedEffect(displayText, focused) {
@@ -319,6 +325,15 @@ private fun EditableValue(
     fun commit() {
         field.text.trim().toIntOrNull()?.let { onCommit(it) }
         // Invalid / empty input is dropped; the resting sync restores displayText.
+    }
+
+    // A tap always (re)requests focus and re-shows the keyboard. This is what keeps
+    // the field from getting "stuck": if focus was retained after the IME was
+    // dismissed (e.g. system back), the manual `focused` flag stays true and
+    // onFocusChanged never fires again — so re-tapping must drive the IME directly.
+    val activate: () -> Unit = {
+        focusRequester.requestFocus()
+        keyboard?.show()
     }
 
     BasicTextField(
@@ -345,6 +360,7 @@ private fun EditableValue(
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
         modifier = Modifier
             .widthIn(min = minFieldWidth)
+            .focusRequester(focusRequester)
             .onFocusChanged { state ->
                 if (state.isFocused && !focused) {
                     focused = true
@@ -360,6 +376,7 @@ private fun EditableValue(
             Box(
                 modifier = Modifier
                     .clip(shape)
+                    .clickable(onClick = activate)
                     .background(
                         if (focused) MaterialTheme.colorScheme.surface
                         else MaterialTheme.colorScheme.surfaceContainerHighest
