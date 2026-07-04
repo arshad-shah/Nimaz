@@ -69,6 +69,10 @@ class BootReceiver : BroadcastReceiver() {
             PrayerNotificationScheduler.ACTION_DAILY_SUMMARY -> {
                 handleDailySummary(context)
             }
+
+            PrayerNotificationScheduler.ACTION_FRIDAY_REMINDER -> {
+                handleFridayReminder(context)
+            }
         }
     }
 
@@ -83,6 +87,8 @@ class BootReceiver : BroadcastReceiver() {
                 val enabledPrayers = buildEnabledPrayersSet()
                 val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
                 val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+                val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
+                val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
 
                 prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
                     latitude = latitude,
@@ -90,7 +96,9 @@ class BootReceiver : BroadcastReceiver() {
                     notificationsEnabled = notificationsEnabled,
                     enabledPrayers = enabledPrayers,
                     preReminderEnabled = preReminderEnabled,
-                    preReminderMinutes = preReminderMinutes
+                    preReminderMinutes = preReminderMinutes,
+                    fridayReminderEnabled = fridayReminderEnabled,
+                    fridayReminderMinutes = fridayReminderMinutes
                 )
             } catch (e: Exception) {
                 CrashReporter.log("BootReceiver reschedule failed")
@@ -113,6 +121,8 @@ class BootReceiver : BroadcastReceiver() {
                 val enabledPrayers = buildEnabledPrayersSet()
                 val preReminderEnabled = preferencesDataStore.showReminderBefore.first()
                 val preReminderMinutes = preferencesDataStore.notificationReminderMinutes.first()
+                val fridayReminderEnabled = preferencesDataStore.fridayReminderEnabled.first()
+                val fridayReminderMinutes = preferencesDataStore.fridayReminderMinutes.first()
 
                 prayerNotificationScheduler.scheduleTodaysPrayerNotifications(
                     latitude = latitude,
@@ -120,7 +130,9 @@ class BootReceiver : BroadcastReceiver() {
                     notificationsEnabled = notificationsEnabled,
                     enabledPrayers = enabledPrayers,
                     preReminderEnabled = preReminderEnabled,
-                    preReminderMinutes = preReminderMinutes
+                    preReminderMinutes = preReminderMinutes,
+                    fridayReminderEnabled = fridayReminderEnabled,
+                    fridayReminderMinutes = fridayReminderMinutes
                 )
             } catch (e: Exception) {
                 CrashReporter.log("BootReceiver markMissedPrayersAndReschedule failed")
@@ -165,6 +177,17 @@ class BootReceiver : BroadcastReceiver() {
                     return@launch
                 }
 
+                // Honor Do Not Disturb: when the pref is on and the system is in a DND
+                // mode, stay fully silent — no adhan audio and no visual notification.
+                val respectDnd = preferencesDataStore.adhanRespectDnd.first()
+                val isDndActive =
+                    (context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager)
+                        .currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                if (respectDnd && isDndActive) {
+                    AppAnalytics.logNotificationSuppressed(prayerType, reason = "dnd")
+                    return@launch
+                }
+
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
                 if (isPreReminder) {
@@ -191,16 +214,9 @@ class BootReceiver : BroadcastReceiver() {
                     preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
-                val respectDnd = preferencesDataStore.adhanRespectDnd.first()
-                val notificationManager =
-                    context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-                val isDndActive =
-                    notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
-                val dndBlocksAdhan = respectDnd && isDndActive
-
-                val shouldPlayAdhan =
-                    globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
-                val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
+                // DND already handled above (fully suppressed); no further gating here.
+                val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise
+                val shouldPlayBeep = globalAdhanEnabled && isSunrise
 
                 // Get notification content for merging into adhan service notification
                 val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
@@ -296,7 +312,7 @@ class BootReceiver : BroadcastReceiver() {
                     prayerType = prayerType,
                     isPreReminder = false,
                     adhanPlayed = adhanPlayed,
-                    dndBlocked = dndBlocksAdhan,
+                    dndBlocked = false,
                     deliveryLatencySeconds = deliveryLatencySeconds,
                 )
             } catch (e: Exception) {
@@ -373,7 +389,10 @@ class BootReceiver : BroadcastReceiver() {
         val bigText = "$message\n\n${NotificationContentHelper.getTimeBasedGreeting(context)}"
 
         val notification =
-            NotificationCompat.Builder(context, PrayerNotificationScheduler.CHANNEL_ID_PRAYER)
+            NotificationCompat.Builder(
+                context,
+                PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
+            )
                 .setSmallIcon(R.drawable.ic_stat_nimaz)
                 .setContentTitle(title)
                 .setContentText(message)
@@ -384,6 +403,7 @@ class BootReceiver : BroadcastReceiver() {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .apply {
+                    // Pre-O: channel has no effect, so also clear the vibration pattern.
                     if (!vibrationEnabled) {
                         setVibrate(longArrayOf(0L))
                     }
@@ -440,9 +460,9 @@ class BootReceiver : BroadcastReceiver() {
         val bigText = "$shortMessage\n\n$reflection"
 
         val channelId = if (adhanEnabled) {
-            PrayerNotificationScheduler.CHANNEL_ID_ADHAN
+            PrayerNotificationScheduler.channelForAdhan(vibrationEnabled)
         } else {
-            PrayerNotificationScheduler.CHANNEL_ID_PRAYER
+            PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
         }
 
         val notification = NotificationCompat.Builder(context, channelId)
@@ -572,6 +592,69 @@ class BootReceiver : BroadcastReceiver() {
             .build()
 
         notificationManager.notify("daily_summary".hashCode(), notification)
+    }
+
+    /**
+     * Post the weekly Friday (Jummah) reminder. Re-checks that notifications and the
+     * Friday reminder are still enabled, and honours Do Not Disturb.
+     */
+    private fun handleFridayReminder(context: Context) {
+        scope.launch {
+            try {
+                val prefs = preferencesDataStore.userPreferences.first()
+                if (!prefs.prayerNotificationsEnabled) return@launch
+                if (!preferencesDataStore.fridayReminderEnabled.first()) return@launch
+
+                val respectDnd = preferencesDataStore.adhanRespectDnd.first()
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                val isDndActive =
+                    notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
+                if (respectDnd && isDndActive) return@launch
+
+                val vibrationEnabled = preferencesDataStore.notificationVibration.first()
+
+                val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val openPendingIntent = mainIntent?.let {
+                    PendingIntent.getActivity(
+                        context,
+                        "friday_reminder".hashCode(),
+                        it,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                }
+
+                val title = NotificationContentHelper.getFridayReminderTitle(context)
+                val message = NotificationContentHelper.getFridayReminderMessage(context)
+                val bigText = NotificationContentHelper.getFridayReminderBigText(context)
+
+                val notification = NotificationCompat.Builder(
+                    context,
+                    PrayerNotificationScheduler.channelForPrayer(vibrationEnabled)
+                )
+                    .setSmallIcon(R.drawable.ic_stat_nimaz)
+                    .setContentTitle(title)
+                    .setContentText(message)
+                    .setStyle(
+                        NotificationCompat.BigTextStyle().bigText(bigText).setBigContentTitle(title)
+                    )
+                    .setAutoCancel(true)
+                    .setContentIntent(openPendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_HIGH)
+                    .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .setColorized(true)
+                    .setColor(0xFF0D9488.toInt())
+                    .apply { if (!vibrationEnabled) setVibrate(longArrayOf(0L)) }
+                    .build()
+
+                notificationManager.notify("friday_reminder".hashCode(), notification)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("friday_reminder", e.javaClass.simpleName, e.message)
+            }
+        }
     }
 
     /**

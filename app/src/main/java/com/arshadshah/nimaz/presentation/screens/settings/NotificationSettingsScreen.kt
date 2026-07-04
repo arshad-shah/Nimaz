@@ -73,6 +73,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -336,6 +338,24 @@ fun NotificationSettingsScreen(
                                 viewModel.onEvent(SettingsEvent.SetShowReminderBefore(!notificationState.showReminderBefore))
                             }
                         )
+                        // Editable lead time — revealed when the reminder is on.
+                        if (notificationState.showReminderBefore) {
+                            NimazNumberStepper(
+                                value = notificationState.reminderMinutes,
+                                onValueChange = {
+                                    viewModel.onEvent(SettingsEvent.SetReminderMinutes(it))
+                                },
+                                variant = NimazNumberStepperVariant.INLINE,
+                                label = stringResource(R.string.notification_settings_lead_time),
+                                formatValue = { min ->
+                                    context.getString(R.string.notification_settings_minutes_value, min)
+                                },
+                                minValue = 5,
+                                maxValue = 60,
+                                step = 5,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            )
+                        }
                         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                         // Sunrise Alert
@@ -354,15 +374,32 @@ fun NotificationSettingsScreen(
                         )
                         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                        // Friday Prayer Reminder (maps to persistent notification)
+                        // Friday (Jummah) Reminder — weekly, before Dhuhr on Friday
                         NimazSettingsItem(
                             title = stringResource(R.string.notification_settings_friday_reminder),
                             subtitle = stringResource(R.string.notification_settings_friday_subtitle),
-                            checked = notificationState.persistentNotification,
+                            checked = notificationState.fridayReminderEnabled,
                             onCheckedChange = {
-                                viewModel.onEvent(SettingsEvent.SetPersistentNotification(!notificationState.persistentNotification))
+                                viewModel.onEvent(SettingsEvent.SetFridayReminderEnabled(!notificationState.fridayReminderEnabled))
                             }
                         )
+                        if (notificationState.fridayReminderEnabled) {
+                            NimazNumberStepper(
+                                value = notificationState.fridayReminderMinutes,
+                                onValueChange = {
+                                    viewModel.onEvent(SettingsEvent.SetFridayReminderMinutes(it))
+                                },
+                                variant = NimazNumberStepperVariant.INLINE,
+                                label = stringResource(R.string.notification_settings_lead_time),
+                                formatValue = { min ->
+                                    context.getString(R.string.notification_settings_minutes_value, min)
+                                },
+                                minValue = 15,
+                                maxValue = 120,
+                                step = 15,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            )
+                        }
                         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
                         // Vibration

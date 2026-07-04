@@ -105,6 +105,8 @@ data class NotificationSettingsUiState(
     val reminderMinutes: Int = 15,
     val showReminderBefore: Boolean = true,
     val persistentNotification: Boolean = false,
+    val fridayReminderEnabled: Boolean = false,
+    val fridayReminderMinutes: Int = 60,
     val selectedAdhanSound: String = "MISHARY"
 )
 
@@ -186,6 +188,8 @@ sealed interface SettingsEvent {
     data class SetReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetShowReminderBefore(val enabled: Boolean) : SettingsEvent
     data class SetPersistentNotification(val enabled: Boolean) : SettingsEvent
+    data class SetFridayReminderEnabled(val enabled: Boolean) : SettingsEvent
+    data class SetFridayReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetAdhanSound(val sound: String) : SettingsEvent
     data object PreviewAdhanSound : SettingsEvent
     data object StopAdhanPreview : SettingsEvent
@@ -524,6 +528,22 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { settingsRepository.setPersistentNotification(event.enabled) }
             }
 
+            is SettingsEvent.SetFridayReminderEnabled -> {
+                _notificationState.update { it.copy(fridayReminderEnabled = event.enabled) }
+                viewModelScope.launch {
+                    settingsRepository.setFridayReminderEnabled(event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+
+            is SettingsEvent.SetFridayReminderMinutes -> {
+                _notificationState.update { it.copy(fridayReminderMinutes = event.minutes) }
+                viewModelScope.launch {
+                    settingsRepository.setFridayReminderMinutes(event.minutes)
+                    rescheduleNotifications()
+                }
+            }
+
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
@@ -815,6 +835,8 @@ class SettingsViewModel @Inject constructor(
             val reminderMin = settingsRepository.notificationReminderMinutes.first()
             val showReminder = settingsRepository.showReminderBefore.first()
             val persistent = settingsRepository.persistentNotification.first()
+            val fridayReminder = settingsRepository.fridayReminderEnabled.first()
+            val fridayReminderMin = settingsRepository.fridayReminderMinutes.first()
             val respectDnd = settingsRepository.adhanRespectDnd.first()
             val adhanSoundName = settingsRepository.selectedAdhanSound.first()
             val fajrNotif = settingsRepository.fajrNotificationEnabled.first()
@@ -844,6 +866,8 @@ class SettingsViewModel @Inject constructor(
                     reminderMinutes = reminderMin,
                     showReminderBefore = showReminder,
                     persistentNotification = persistent,
+                    fridayReminderEnabled = fridayReminder,
+                    fridayReminderMinutes = fridayReminderMin,
                     respectDnd = respectDnd,
                     selectedAdhanSound = adhanSoundName,
                     fajrNotification = fajrNotif,
@@ -984,7 +1008,9 @@ class SettingsViewModel @Inject constructor(
             calculationMethod = calcMethod,
             asrCalculation = asrCalc,
             highLatitudeRule = highLatRule,
-            adjustments = adjustments
+            adjustments = adjustments,
+            fridayReminderEnabled = notifState.fridayReminderEnabled,
+            fridayReminderMinutes = notifState.fridayReminderMinutes
         )
     }
 

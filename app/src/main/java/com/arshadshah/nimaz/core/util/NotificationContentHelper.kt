@@ -169,6 +169,21 @@ object NotificationContentHelper {
         ).random()
     }
 
+    /** Title for the weekly Friday (Jummah) reminder. */
+    fun getFridayReminderTitle(context: Context): String =
+        context.getString(R.string.notif_friday_title)
+
+    /** Short one-line body for the Friday reminder. */
+    fun getFridayReminderMessage(context: Context): String = listOf(
+        context.getString(R.string.notif_friday_1),
+        context.getString(R.string.notif_friday_2),
+        context.getString(R.string.notif_friday_3)
+    ).random()
+
+    /** Expanded body for the Friday reminder — the Sunnah preparations. */
+    fun getFridayReminderBigText(context: Context): String =
+        context.getString(R.string.notif_friday_bigtext)
+
     /**
      * Get a contextual greeting based on time of day.
      */
