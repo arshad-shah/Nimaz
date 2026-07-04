@@ -959,8 +959,9 @@ fun NavGraph(
 
             taggedComposable<Route.SettingsHelp>(ScreenTags.SettingsHelp) {
                 val context = androidx.compose.ui.platform.LocalContext.current
+                // Unified support inbox — same address the About screen contacts.
                 val supportEmail =
-                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.support_email)
+                    androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.contact_email)
                 val supportSubject =
                     androidx.compose.ui.res.stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                 com.arshadshah.nimaz.presentation.screens.help.HelpScreen(

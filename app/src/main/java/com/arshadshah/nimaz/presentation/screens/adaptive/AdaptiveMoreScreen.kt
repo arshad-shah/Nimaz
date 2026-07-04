@@ -196,7 +196,7 @@ fun AdaptiveMoreScreen(
 
                             MoreDetailPane.HELP -> {
                                 val supportEmail =
-                                    stringResource(com.arshadshah.nimaz.R.string.support_email)
+                                    stringResource(com.arshadshah.nimaz.R.string.contact_email)
                                 val supportSubject =
                                     stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
                                 HelpScreen(
