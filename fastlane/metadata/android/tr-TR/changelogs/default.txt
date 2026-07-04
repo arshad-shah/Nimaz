@@ -1,7 +1,7 @@
 3.0.31 sonrası yenilikler:
 
-• Yeniden tasarlanan Tefsir — yenilenen okuyucu, hareketle vurgulama, oluşturup düzenleyip silebileceğiniz hızlı notlar, kaynak değiştirici ve markalı PDF paylaşımı.
-• Yüzen bir Kur'an oynatıcı ve ayetleri ile duaları her yerde paylaşmanın yeni, markalı bir yolu.
-• Arama artık siz yazdıkça güncelleniyor; arama çubuğu yeniden tasarlandı.
-• Oruç sürenizi takip edin ve gerçek gün doğumu ile batımını izleyen daha isabetli bir "Canlı Gökyüzü" keyfini çıkarın.
-• Yeniden tasarlanan Konum ekranı, yeniden oluşturulan Kur'an Favorileri, sade sure başlıkları ve widget rötuşları.
+• Yeniden tasarlanan Tefsir — yenilenen okuyucu, hareketle vurgulama, düzenlenebilir notlar, kaynak değiştirici ve markalı PDF paylaşımı.
+• Yüzen Kur'an oynatıcı ve ayet ile duaları her yerde paylaşmanın yeni yolu.
+• Arama artık yazdıkça güncelleniyor, yeni arama çubuğuyla.
+• Oruç süresi takibi ve gerçek gün doğumu-batımını izleyen daha isabetli bir "Canlı Gökyüzü".
+• Yeni Konum ekranı, yeniden oluşturulan Kur'an Favorileri, sade sure başlıkları, widget rötuşları.

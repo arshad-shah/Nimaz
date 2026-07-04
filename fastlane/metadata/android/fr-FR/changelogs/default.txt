@@ -1,7 +1,7 @@
 Nouveautés depuis la 3.0.31 :
 
-• Le Tafseer repensé — lecteur rafraîchi, surlignage gestuel, notes rapides à créer, modifier et supprimer, sélecteur de sources et partage en PDF personnalisé.
-• Un lecteur de Coran flottant et une nouvelle façon personnalisée de partager versets et duas partout.
-• La recherche se met à jour à mesure que vous tapez, avec une barre de recherche repensée.
-• Suivez la durée de votre jeûne et profitez d'un « Living Sky » plus précis, aligné sur les vrais lever et coucher du soleil.
-• Écran de localisation repensé, onglet Favoris du Coran reconstruit, en-têtes de sourate épurés et améliorations du widget.
+• Tafseer repensé — lecteur rafraîchi, surlignage gestuel, notes modifiables, sélecteur de sources, partage PDF de marque.
+• Lecteur de Coran flottant et une nouvelle façon de partager versets et duas.
+• La recherche se met à jour à la frappe, avec une nouvelle barre.
+• Suivi du jeûne et un « Living Sky » plus précis selon les vrais lever et coucher du soleil.
+• Localisation repensée, Favoris du Coran refaits, en-têtes de sourate épurés, widget amélioré.
