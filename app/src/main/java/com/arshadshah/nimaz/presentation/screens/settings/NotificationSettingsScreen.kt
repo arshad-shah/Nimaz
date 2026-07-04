@@ -5,6 +5,7 @@ import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.background
+import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -284,25 +285,25 @@ fun NotificationSettingsScreen(
                 // Muezzin Selection (only show if adhan is enabled)
                 if (notificationState.adhanEnabled) {
                     item {
-                        NimazMenuGroup {
-                            adhanSounds.forEachIndexed { index, sound ->
+                        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                            adhanSounds.forEach { sound ->
                                 val soundDownloadState = downloadState[sound]
                                 val isThisPlaying = isPlaying && currentlyPlaying == sound
                                 val isDownloaded =
                                     viewModel.adhanAudioManager.isDownloaded(sound, false)
 
-                                AdhanOptionRow(
+                                VoiceOptionCard(
                                     name = sound.displayName,
-                                    location = sound.origin,
+                                    primaryTag = sound.origin,
                                     isSelected = sound.name == selectedAdhanName,
-                                    isDownloaded = isDownloaded,
-                                    isDownloading = soundDownloadState is DownloadState.Downloading,
-                                    downloadProgress = (soundDownloadState as? DownloadState.Downloading)?.progress,
                                     isPlaying = isThisPlaying,
-                                    onSelect = {
+                                    isDownloading = soundDownloadState is DownloadState.Downloading,
+                                    isDownloaded = isDownloaded,
+                                    previewContentDescription = stringResource(R.string.notification_settings_preview),
+                                    onClick = {
                                         viewModel.onEvent(SettingsEvent.SetAdhanSound(sound.name))
                                     },
-                                    onPlay = {
+                                    onPreviewClick = {
                                         if (isThisPlaying) {
                                             viewModel.onEvent(SettingsEvent.StopAdhanPreview)
                                         } else {
@@ -311,9 +312,6 @@ fun NotificationSettingsScreen(
                                         }
                                     }
                                 )
-                                if (index < adhanSounds.lastIndex) {
-                                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                                }
                             }
                         }
                     }
@@ -603,116 +601,6 @@ private fun PrayerNotificationRow(
     }
 }
 
-@Composable
-private fun AdhanOptionRow(
-    name: String,
-    location: String,
-    isSelected: Boolean,
-    isDownloaded: Boolean,
-    isDownloading: Boolean,
-    downloadProgress: Int?,
-    isPlaying: Boolean,
-    onSelect: () -> Unit,
-    onPlay: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onSelect)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Radio indicator
-        RadioButton(
-            selected = isSelected,
-            onClick = onSelect,
-            modifier = Modifier.size(20.dp),
-            colors = RadioButtonDefaults.colors(
-                selectedColor = MaterialTheme.colorScheme.primary,
-                unselectedColor = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        )
-
-        Spacer(modifier = Modifier.width(15.dp))
-
-        // Adhan info
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Text(
-                    text = location,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                if (isDownloaded) {
-                    NimazIcon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = stringResource(R.string.notification_settings_downloaded),
-                        variant = NimazIconVariant.PRIMARY,
-                        size = NimazIconSize.EXTRA_SMALL
-                    )
-                }
-            }
-        }
-
-        // Play/Download button
-        IconButton(
-            onClick = onPlay,
-            enabled = !isDownloading,
-            modifier = Modifier.size(36.dp),
-            colors = IconButtonDefaults.iconButtonColors(
-                containerColor = if (isPlaying) MaterialTheme.colorScheme.primaryContainer
-                else MaterialTheme.colorScheme.surfaceContainerHighest
-            )
-        ) {
-            when {
-                isDownloading -> {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(16.dp),
-                        strokeWidth = 2.dp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                isPlaying -> {
-                    NimazIcon(
-                        imageVector = Icons.Default.Stop,
-                        contentDescription = stringResource(R.string.notification_settings_stop),
-                        variant = NimazIconVariant.PRIMARY,
-                        size = NimazIconSize.SMALL
-                    )
-                }
-
-                !isDownloaded -> {
-                    NimazIcon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = stringResource(R.string.notification_settings_download_play),
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.SMALL
-                    )
-                }
-
-                else -> {
-                    NimazIcon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = stringResource(R.string.notification_settings_preview),
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.SMALL
-                    )
-                }
-            }
-        }
-    }
-}
-
 
 // Previews
 
@@ -750,42 +638,6 @@ private fun PrayerNotificationRowDisabledPreview() {
             onToggle = {},
             onSoundToggle = {},
             globalAdhanEnabled = true
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Adhan Option Row - Selected")
-@Composable
-private fun AdhanOptionRowSelectedPreview() {
-    NimazTheme {
-        AdhanOptionRow(
-            name = "Makkah Adhan",
-            location = "Masjid al-Haram",
-            isSelected = true,
-            isDownloaded = true,
-            isDownloading = false,
-            downloadProgress = null,
-            isPlaying = false,
-            onSelect = {},
-            onPlay = {}
-        )
-    }
-}
-
-@Preview(showBackground = true, widthDp = 400, name = "Adhan Option Row - Downloading")
-@Composable
-private fun AdhanOptionRowDownloadingPreview() {
-    NimazTheme {
-        AdhanOptionRow(
-            name = "Madinah Adhan",
-            location = "Masjid an-Nabawi",
-            isSelected = false,
-            isDownloaded = false,
-            isDownloading = true,
-            downloadProgress = 45,
-            isPlaying = false,
-            onSelect = {},
-            onPlay = {}
         )
     }
 }

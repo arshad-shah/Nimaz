@@ -54,6 +54,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
@@ -232,135 +233,38 @@ fun SelectReciterScreen(
                 key = { it.id }
             ) { reciter ->
                 val isSelected = reciter.id == selectedReciterId
+                val isThisPreviewing = previewingReciterId == reciter.id
 
-                NimazCard(
-                    style = NimazCardStyle.FILLED,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    selected = isSelected,
-                    colors = NimazCardDefaults.selectable(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-                        activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f),
-                        activeBorder = MaterialTheme.colorScheme.primary,
-                        activeBorderWidth = 2.dp,
-                    ),
+                VoiceOptionCard(
+                    name = reciter.name,
+                    primaryTag = reciter.style,
+                    secondaryTag = reciter.location,
+                    isSelected = isSelected,
+                    isPlaying = isThisPreviewing && audioState.isPlaying,
+                    isDownloading = isThisPreviewing && audioState.isDownloading,
+                    // Reciter audio streams — no separate download step to gate.
+                    isDownloaded = true,
+                    previewContentDescription = stringResource(R.string.cd_preview),
                     onClick = {
                         viewModel.onEvent(SettingsEvent.SetReciter(reciter.id))
-                    }
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(15.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(48.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                    else MaterialTheme.colorScheme.surfaceVariant
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            NimazIcon(
-                                imageVector = if (isSelected) Icons.Default.Check else Icons.Default.Mic,
-                                contentDescription = null,
-                                tint = if (isSelected) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                                size = NimazIconSize.LARGE
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(15.dp))
-
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = reciter.name,
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
-                            )
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(top = 4.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(6.dp),
-                                    color = if (isSelected) {
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                                    } else {
-                                        MaterialTheme.colorScheme.surfaceVariant
-                                    }
-                                ) {
-                                    Text(
-                                        text = reciter.style,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.padding(
-                                            horizontal = 8.dp,
-                                            vertical = 3.dp
-                                        )
-                                    )
-                                }
-                                Text(
-                                    text = reciter.location,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    onPreviewClick = {
+                        if (isThisPreviewing && audioState.isPlaying) {
+                            quranViewModel.onEvent(QuranEvent.StopAudio)
+                            previewingReciterId = null
+                        } else {
+                            previewingReciterId = reciter.id
+                            quranViewModel.audioManager.setReciter(reciter.id)
+                            quranViewModel.onEvent(
+                                QuranEvent.PlayAyahAudio(
+                                    ayahGlobalId = 1,
+                                    surahNumber = 1,
+                                    ayahNumber = 1
                                 )
-                            }
-                        }
-
-                        IconButton(
-                            onClick = {
-                                if (previewingReciterId == reciter.id && audioState.isPlaying) {
-                                    // Stop current preview
-                                    quranViewModel.onEvent(QuranEvent.StopAudio)
-                                    previewingReciterId = null
-                                } else {
-                                    // Start preview: play Al-Fatiha verse 1 with this reciter
-                                    previewingReciterId = reciter.id
-                                    quranViewModel.audioManager.setReciter(reciter.id)
-                                    quranViewModel.onEvent(
-                                        QuranEvent.PlayAyahAudio(
-                                            ayahGlobalId = 1,
-                                            surahNumber = 1,
-                                            ayahNumber = 1
-                                        )
-                                    )
-                                }
-                            },
-                            enabled = !(previewingReciterId != null && previewingReciterId != reciter.id && audioState.isDownloading)
-                        ) {
-                            when {
-                                previewingReciterId == reciter.id && audioState.isDownloading -> {
-                                    CircularProgressIndicator(
-                                        modifier = Modifier.size(20.dp),
-                                        strokeWidth = 2.dp,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-
-                                previewingReciterId == reciter.id && audioState.isPlaying -> {
-                                    NimazIcon(
-                                        imageVector = Icons.Default.Stop,
-                                        contentDescription = stringResource(R.string.cd_stop_preview),
-                                        variant = NimazIconVariant.PRIMARY
-                                    )
-                                }
-
-                                else -> {
-                                    NimazIcon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = stringResource(R.string.cd_preview),
-                                        variant = NimazIconVariant.MUTED
-                                    )
-                                }
-                            }
+                            )
                         }
                     }
-                }
+                )
             }
 
             item { Spacer(modifier = Modifier.height(16.dp)) }
