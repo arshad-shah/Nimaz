@@ -1255,6 +1255,12 @@
     <string name="manual_adjustments">Manual Adjustments (Minutes)</string>
     <string name="adhan_notifications">Adhan Notifications</string>
     <string name="pre_adhan_reminder">Pre-Adhan Reminder</string>
+    <!-- Prayer Settings summary subtitles that mirror the Notification Settings screen -->
+    <string name="prayer_settings_notifications_off">Notifications off</string>
+    <string name="prayer_settings_all_prayers_enabled">All prayers enabled</string>
+    <string name="prayer_settings_prayers_enabled_count">%1$d of %2$d prayers enabled</string>
+    <string name="prayer_settings_no_prayers_enabled">No prayers enabled</string>
+    <string name="prayer_settings_reminder_off">Off</string>
     <string name="asr_standard_desc">Shadow equals object length</string>
     <string name="asr_hanafi_desc">Shadow equals twice object length</string>
     <string name="high_lat_middle_desc">Split the night in half from sunset to sunrise</string>
