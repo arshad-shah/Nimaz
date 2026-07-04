@@ -178,15 +178,13 @@ class BootReceiver : BroadcastReceiver() {
                 }
 
                 // Honor Do Not Disturb: when the pref is on and the system is in a DND
-                // mode, stay fully silent — no adhan audio and no visual notification.
+                // mode, silence the adhan audio — the (silent) visual notification is
+                // still posted; the OS suppresses its channel sound under DND.
                 val respectDnd = preferencesDataStore.adhanRespectDnd.first()
                 val isDndActive =
                     (context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager)
                         .currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
-                if (respectDnd && isDndActive) {
-                    AppAnalytics.logNotificationSuppressed(prayerType, reason = "dnd")
-                    return@launch
-                }
+                val dndBlocksAdhan = respectDnd && isDndActive
 
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
@@ -214,9 +212,10 @@ class BootReceiver : BroadcastReceiver() {
                     preferencesDataStore.isAdhanEnabledForPrayer(prayerType).first()
                 val selectedAdhan = preferencesDataStore.selectedAdhanSound.first()
 
-                // DND already handled above (fully suppressed); no further gating here.
-                val shouldPlayAdhan = globalAdhanEnabled && prayerAdhanEnabled && !isSunrise
-                val shouldPlayBeep = globalAdhanEnabled && isSunrise
+                // DND gates only the audio — the visual notification still shows.
+                val shouldPlayAdhan =
+                    globalAdhanEnabled && prayerAdhanEnabled && !isSunrise && !dndBlocksAdhan
+                val shouldPlayBeep = globalAdhanEnabled && isSunrise && !dndBlocksAdhan
 
                 // Get notification content for merging into adhan service notification
                 val notifTitle = NotificationContentHelper.getPrayerTitle(prayerType, prayerTime)
@@ -312,7 +311,7 @@ class BootReceiver : BroadcastReceiver() {
                     prayerType = prayerType,
                     isPreReminder = false,
                     adhanPlayed = adhanPlayed,
-                    dndBlocked = false,
+                    dndBlocked = dndBlocksAdhan,
                     deliveryLatencySeconds = deliveryLatencySeconds,
                 )
             } catch (e: Exception) {
@@ -605,13 +604,10 @@ class BootReceiver : BroadcastReceiver() {
                 if (!prefs.prayerNotificationsEnabled) return@launch
                 if (!preferencesDataStore.fridayReminderEnabled.first()) return@launch
 
-                val respectDnd = preferencesDataStore.adhanRespectDnd.first()
+                // The Friday reminder has no adhan audio, so it always posts; the OS
+                // silences its channel sound under Do Not Disturb.
                 val notificationManager =
                     context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
-                val isDndActive =
-                    notificationManager.currentInterruptionFilter != android.app.NotificationManager.INTERRUPTION_FILTER_ALL
-                if (respectDnd && isDndActive) return@launch
-
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
                 val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)

@@ -883,7 +883,7 @@
     <string name="notification_settings_vibration">Vibration</string>
     <string name="notification_settings_vibration_subtitle">Vibrate with notification</string>
     <string name="notification_settings_dnd">Honor Do Not Disturb</string>
-    <string name="notification_settings_dnd_subtitle">Silence prayer alerts while DND is active</string>
+    <string name="notification_settings_dnd_subtitle">Silence the adhan while DND is active (banner still shows)</string>
 
     <!-- Friday (Jummah) reminder notification content -->
     <string name="notif_friday_title">Jummah Mubarak</string>
