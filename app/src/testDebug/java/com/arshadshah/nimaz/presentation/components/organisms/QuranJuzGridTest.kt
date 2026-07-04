@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
@@ -16,28 +15,30 @@ class QuranJuzGridTest {
     val composeRule = createComponentComposeRule()
 
     @Test
-    fun `renders juz numbers and labels`() {
+    fun `renders juz medallions and names`() {
         composeRule.setThemedContent {
             JuzGrid(onNavigateToJuz = {})
         }
 
-        // First row of the grid (juz 1..5) is visible without scrolling.
+        // Medallion numbers (Column is not lazy — all 30 compose).
         composeRule.onNodeWithText("1").assertExists()
         composeRule.onNodeWithText("2").assertExists()
         composeRule.onNodeWithText("5").assertExists()
-        // R.string.quran_home_juz_label == "Juz" — one per cell.
-        composeRule.onAllNodesWithText("Juz")[0].assertExists()
+        // Juz names — Arabic first-word of each juz.
+        composeRule.onNodeWithText("الم").assertExists()   // juz 1
+        composeRule.onNodeWithText("حم").assertExists()    // juz 26
     }
 
     @Test
-    fun `renders page range for first juz`() {
+    fun `renders page range badges for a juz`() {
         composeRule.setThemedContent {
             JuzGrid(onNavigateToJuz = {})
         }
 
-        // quran_home_page_range_format == "p. %1$d–%2$d"
-        // Juz 1: startPage 1, endPage = juzStartPages[1] - 1 = 21.
-        composeRule.onNodeWithText("p. 1–21").assertExists()
+        // Page range renders as separate cutout badges. Juz 3 spans pages 42–61
+        // (both > 30, so unambiguous vs. the 1..30 medallion numbers).
+        composeRule.onNodeWithText("42").assertExists()
+        composeRule.onNodeWithText("61").assertExists()
     }
 
     @Test
