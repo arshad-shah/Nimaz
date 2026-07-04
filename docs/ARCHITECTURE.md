@@ -459,6 +459,14 @@ typed route object.
       CONTAINED` draws the glyph in a tinted container — the old `ContainedIcon`/`IconBadge` (a
       rounded-square contained icon is the reusable "badge"); `size`/`iconSize`/`containerSize`/
       `cornerRadius` give granular control. Tappable icons stay `NimazIconButton`.
+    - a previous/next navigation arrow (readers, the Quran Mushaf page bar, month
+      steppers, the calendar header) is `NimazNavArrowButton(direction = NavArrowDirection.PREVIOUS
+      | NEXT, onClick, contentDescription, enabled = …, size = …)`
+      (`components/atoms/NimazNavArrowButton.kt`), **not** a hand-rolled `Surface`/`IconButton`/
+      `FilledTonalIconButton` chevron. It is the single standard prev/next control (a circular
+      bordered chevron, `primary` when enabled and dimmed to `outlineVariant` at range ends);
+      `direction` is *visual* (which chevron is drawn, auto-mirrored) so RTL surfaces wire the
+      left arrow to advance. Default `size` is 48dp; steppers use 44dp. (Issue #227.)
     - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
       (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
       `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`/`border`,

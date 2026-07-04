@@ -1,16 +1,11 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.IconButton
@@ -19,16 +14,16 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -59,12 +54,13 @@ internal fun MushafPageBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            // Next page (higher Quran page number — leftward in mushaf)
-            PageNavChevron(
-                icon = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+            // Next page (higher Quran page number — leftward in mushaf, so a left-pointing arrow)
+            NimazNavArrowButton(
+                direction = NavArrowDirection.PREVIOUS,
                 enabled = (secondPageNumber ?: pageNumber) < totalPages,
                 onClick = onNavigateNext,
-                contentDescription = stringResource(R.string.cd_next_page)
+                contentDescription = stringResource(R.string.cd_next_page),
+                size = 44.dp
             )
 
             // Page / Juz / Hizb as badge chips — mirrors the audio player position row
@@ -117,47 +113,13 @@ internal fun MushafPageBar(
                 }
             }
 
-            // Previous page (lower Quran page number — rightward in mushaf)
-            PageNavChevron(
-                icon = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            // Previous page (lower Quran page number — rightward in mushaf, so a right-pointing arrow)
+            NimazNavArrowButton(
+                direction = NavArrowDirection.NEXT,
                 enabled = pageNumber > 1,
                 onClick = onNavigatePrevious,
-                contentDescription = stringResource(R.string.cd_previous_page)
-            )
-        }
-    }
-}
-
-/**
- * Circular bordered chevron pill — matches the NavChevron used in [NimazReaderBottomBar]
- * so the page reader's navigation reads the same as the other readers.
- */
-@Composable
-private fun PageNavChevron(
-    icon: ImageVector,
-    enabled: Boolean,
-    onClick: () -> Unit,
-    contentDescription: String
-) {
-    Surface(
-        onClick = onClick,
-        enabled = enabled,
-        shape = CircleShape,
-        color = MaterialTheme.colorScheme.surface,
-        border = BorderStroke(
-            1.dp,
-            if (enabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
-        ),
-        modifier = Modifier.size(44.dp)
-    ) {
-        Box(contentAlignment = Alignment.Center) {
-            NimazIcon(
-                imageVector = icon,
-                contentDescription = contentDescription,
-                tint = if (enabled) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.outlineVariant,
-                size = NimazIconSize.LARGE
+                contentDescription = stringResource(R.string.cd_previous_page),
+                size = 44.dp
             )
         }
     }
