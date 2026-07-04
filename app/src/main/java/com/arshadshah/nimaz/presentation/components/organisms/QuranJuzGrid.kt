@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -25,9 +26,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.KhatamConstants
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 // Juz to page mapping (approximate start pages for each Juz)
@@ -48,6 +46,7 @@ internal fun getJuzStartPage(juz: Int): Int = juzStartPages.getOrElse(juz - 1) {
 
 internal fun getJuzEndPage(juz: Int): Int = if (juz < 30) juzStartPages[juz] - 1 else 604
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
@@ -84,27 +83,15 @@ internal fun JuzGrid(
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
                     val isSelected = selectedJuzNumber == juzNumber
 
-                    NimazCard(
-                        style = NimazCardStyle.FILLED,
+                    Surface(
                         onClick = { onNavigateToJuz(juzNumber) },
                         modifier = Modifier
                             .weight(1f)
-                            .aspectRatio(1f)
-                            .then(
-                                if (isSelected) Modifier.border(
-                                    width = 2.dp,
-                                    color = MaterialTheme.colorScheme.primary,
-                                    shape = RoundedCornerShape(12.dp)
-                                ) else Modifier
-                            ),
+                            .aspectRatio(1f),
                         shape = RoundedCornerShape(12.dp),
-                        colors = NimazCardDefaults.colors(
-                            container = when {
-                                isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-                                isComplete -> MaterialTheme.colorScheme.primaryContainer
-                                else -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-                            }
-                        )
+                        // Same tile language as the Pages tab grid
+                        color = quranTileSurfaceColor(isSelected, isComplete),
+                        border = quranTileBorder(isSelected)
                     ) {
                         Box(
                             modifier = Modifier.fillMaxSize(),
@@ -125,10 +112,7 @@ internal fun JuzGrid(
                                     text = juzNumber.toString(),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = if (isComplete || isSelected)
-                                        MaterialTheme.colorScheme.onPrimaryContainer
-                                    else
-                                        MaterialTheme.colorScheme.primary
+                                    color = quranTileNumberColor(isComplete || isSelected)
                                 )
                                 Text(
                                     text = stringResource(R.string.quran_home_juz_label),

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
-import com.arshadshah.nimaz.presentation.components.atoms.formatAyahEndMarker
+import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
 import androidx.compose.ui.text.font.FontFamily
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
@@ -73,9 +73,14 @@ fun MushafContinuousText(
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
+    // Ayah end-marker: gold brackets + teal number, matching the ornament language.
+    val markerBracketColor = NimazColors.Gold500
+    val markerNumberColor = MaterialTheme.colorScheme.primary
+
     val annotatedText = remember(
         ayahs, highlightedAyahId, selectedAyahId,
-        highlightColor, selectedColor, textColor, showTajweed, isDarkTheme
+        highlightColor, selectedColor, textColor, showTajweed, isDarkTheme,
+        markerBracketColor, markerNumberColor
     ) {
         buildMushafAnnotatedString(
             ayahs = ayahs,
@@ -85,7 +90,9 @@ fun MushafContinuousText(
             selectedColor = selectedColor,
             textColor = textColor,
             showTajweed = showTajweed,
-            isDarkTheme = isDarkTheme
+            isDarkTheme = isDarkTheme,
+            markerBracketColor = markerBracketColor,
+            markerNumberColor = markerNumberColor
         )
     }
 
@@ -191,7 +198,9 @@ private fun buildMushafAnnotatedString(
     selectedColor: Color,
     textColor: Color,
     showTajweed: Boolean = false,
-    isDarkTheme: Boolean = false
+    isDarkTheme: Boolean = false,
+    markerBracketColor: Color,
+    markerNumberColor: Color
 ): AnnotatedString {
     return buildAnnotatedString {
         ayahs.forEachIndexed { index, ayah ->
@@ -215,7 +224,7 @@ private fun buildMushafAnnotatedString(
             }
 
             append(" ")
-            append(formatAyahEndMarker(ayah.ayahNumber))
+            appendAyahEndMarker(ayah.ayahNumber, markerBracketColor, markerNumberColor)
 
             val end = length
 

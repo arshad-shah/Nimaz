@@ -46,11 +46,15 @@ private data class SurahRecommendation(
 
 /** Surahs with well-known virtues. Al-Kahf is surfaced first on Fridays. */
 private val RECOMMENDATIONS = listOf(
-    SurahRecommendation(18, R.string.quran_home_reason_friday),        // Al-Kahf
-    SurahRecommendation(67, R.string.quran_home_reason_before_sleep),  // Al-Mulk
-    SurahRecommendation(36, R.string.quran_home_reason_heart),         // Ya-Sin
-    SurahRecommendation(55, R.string.quran_home_reason_mercy),         // Ar-Rahman
-    SurahRecommendation(56, R.string.quran_home_reason_provision)      // Al-Waqi'ah
+    SurahRecommendation(18, R.string.quran_home_reason_friday),           // Al-Kahf
+    SurahRecommendation(67, R.string.quran_home_reason_before_sleep),     // Al-Mulk
+    SurahRecommendation(36, R.string.quran_home_reason_heart),            // Ya-Sin
+    SurahRecommendation(55, R.string.quran_home_reason_mercy),            // Ar-Rahman
+    SurahRecommendation(56, R.string.quran_home_reason_provision),        // Al-Waqi'ah
+    SurahRecommendation(1, R.string.quran_home_reason_greatest),          // Al-Fatihah
+    SurahRecommendation(112, R.string.quran_home_reason_third),           // Al-Ikhlas
+    SurahRecommendation(113, R.string.quran_home_reason_refuge_evil),     // Al-Falaq
+    SurahRecommendation(114, R.string.quran_home_reason_refuge_whispers)  // An-Nas
 )
 
 /**

@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Cœur du Coran</string>
     <string name="quran_home_reason_mercy">Le Tout Miséricordieux</string>
     <string name="quran_home_reason_provision">Demande de subsistance</string>
+    <string name="quran_home_reason_greatest">La plus grande sourate</string>
+    <string name="quran_home_reason_third">Un tiers du Coran</string>
+    <string name="quran_home_reason_refuge_evil">Refuge contre le mal</string>
+    <string name="quran_home_reason_refuge_whispers">Refuge contre les insufflations</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Chargement…</string>

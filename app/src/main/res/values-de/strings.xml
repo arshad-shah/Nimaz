@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Herz des Korans</string>
     <string name="quran_home_reason_mercy">Der Allerbarmer</string>
     <string name="quran_home_reason_provision">Um Versorgung bitten</string>
+    <string name="quran_home_reason_greatest">Die größte Sure</string>
+    <string name="quran_home_reason_third">Ein Drittel des Korans</string>
+    <string name="quran_home_reason_refuge_evil">Zuflucht vor dem Bösen</string>
+    <string name="quran_home_reason_refuge_whispers">Zuflucht vor dem Einflüstern</string>
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Wird geladen…</string>
     <string name="dua_reader_favorite">Favorit</string>

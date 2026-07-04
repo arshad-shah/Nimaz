@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Jantung Al-Quran</string>
     <string name="quran_home_reason_mercy">Yang Maha Pengasih</string>
     <string name="quran_home_reason_provision">Mencari rezeki</string>
+    <string name="quran_home_reason_greatest">Surah teragung</string>
+    <string name="quran_home_reason_third">Sepertiga Al-Quran</string>
+    <string name="quran_home_reason_refuge_evil">Berlindung dari kejahatan</string>
+    <string name="quran_home_reason_refuge_whispers">Berlindung dari bisikan</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Memuat…</string>

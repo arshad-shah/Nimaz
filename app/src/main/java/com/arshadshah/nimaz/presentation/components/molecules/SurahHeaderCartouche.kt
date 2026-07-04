@@ -18,10 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
@@ -36,17 +34,20 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.DiamondFloret
+import com.arshadshah.nimaz.presentation.components.atoms.cartouchePath
+import com.arshadshah.nimaz.presentation.components.atoms.circlePath
+import com.arshadshah.nimaz.presentation.components.atoms.diamondPath
+import com.arshadshah.nimaz.presentation.components.atoms.scallopPath
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-import kotlin.math.cos
-import kotlin.math.sin
 
 /* ------------------------------------------------------------------
  * Theme tokens — the cartouche is a fixed gold-on-teal "manuscript"
  * ornament, so it pins to the brand ramps rather than the running
- * colorScheme (mirrors how MushafSurahHeader pins its own palette).
+ * colorScheme.
  * ------------------------------------------------------------------ */
 private val CartoucheGold = NimazColors.Gold500
 private val CartoucheTeal = NimazColors.Primary400
@@ -235,76 +236,15 @@ private fun BismillahRow(color: Color, modifier: Modifier = Modifier) {
     }
 }
 
-/** A small solid diamond — the same mark as the cartouche's right-tip bud. */
-@Composable
-private fun DiamondFloret(color: Color, modifier: Modifier = Modifier, size: Dp = 7.dp) {
-    Canvas(modifier.size(size)) {
-        drawPath(
-            diamondPath(Offset(this.size.width / 2f, this.size.height / 2f), this.size.minDimension / 2f),
-            color.copy(alpha = 0.8f),
-        )
-    }
-}
-
 private fun RevelationType.displayLabel(): String = when (this) {
     RevelationType.MECCAN -> "Meccan"
     RevelationType.MEDINAN -> "Medinan"
 }
 
 /* ------------------------------------------------------------------
- * Geometry
+ * Geometry lives in atoms/QuranOrnamentGeometry.kt (shared with
+ * ShamsaMedallion and the rest of the Quran ornament language).
  * ------------------------------------------------------------------ */
-
-private fun polar(center: Offset, radius: Float, degrees: Float): Offset {
-    val rad = Math.toRadians(degrees.toDouble())
-    return Offset(
-        center.x + radius * cos(rad).toFloat(),
-        center.y + radius * sin(rad).toFloat(),
-    )
-}
-
-/** Ring of outward lobes; lobe apex lands ~ on radius [r]. */
-private fun scallopPath(c: Offset, r: Float, lobes: Int, anchor: Float, control: Float): Path {
-    val step = 360f / lobes
-    return Path().apply {
-        val start = polar(c, r * anchor, -90f)
-        moveTo(start.x, start.y)
-        for (i in 0 until lobes) {
-            val cp = polar(c, r * control, -90f + (i + 0.5f) * step)
-            val p = polar(c, r * anchor, -90f + (i + 1f) * step)
-            quadraticTo(cp.x, cp.y, p.x, p.y)
-        }
-        close()
-    }
-}
-
-/** Ogee-pointed panel between x0..x1, y0..y1; [t] is the tip extension. */
-private fun cartouchePath(x0: Float, y0: Float, x1: Float, y1: Float, t: Float): Path {
-    val cy = (y0 + y1) / 2f
-    val bl = x0 + t
-    val br = x1 - t
-    val bow = (y1 - y0) * 0.30f
-    return Path().apply {
-        moveTo(bl, y0)
-        lineTo(br, y0)
-        cubicTo(br + t * 0.55f, y0, x1 - t * 0.25f, cy - bow, x1, cy)
-        cubicTo(x1 - t * 0.25f, cy + bow, br + t * 0.55f, y1, br, y1)
-        lineTo(bl, y1)
-        cubicTo(bl - t * 0.55f, y1, x0 + t * 0.25f, cy + bow, x0, cy)
-        cubicTo(x0 + t * 0.25f, cy - bow, bl - t * 0.55f, y0, bl, y0)
-        close()
-    }
-}
-
-private fun diamondPath(c: Offset, r: Float): Path = Path().apply {
-    moveTo(c.x, c.y - r); lineTo(c.x + r, c.y)
-    lineTo(c.x, c.y + r); lineTo(c.x - r, c.y)
-    close()
-}
-
-private fun circlePath(c: Offset, r: Float): Path = Path().apply {
-    addOval(Rect(c.x - r, c.y - r, c.x + r, c.y + r))
-}
 
 /* ------------------------------------------------------------------
  * Previews
@@ -375,3 +315,26 @@ private fun SurahHeaderCartoucheBismillahPreview() {
         )
     }
 }
+
+// Sample data shared by header/page previews.
+internal val sampleSurahFatihah = Surah(
+    number = 1,
+    nameArabic = "الفاتحة",
+    nameEnglish = "Al-Fatihah",
+    nameTransliteration = "The Opening",
+    revelationType = RevelationType.MECCAN,
+    ayahCount = 7,
+    juzStart = 1,
+    orderInMushaf = 1
+)
+
+internal val sampleSurahBaqarah = Surah(
+    number = 2,
+    nameArabic = "البقرة",
+    nameEnglish = "Al-Baqarah",
+    nameTransliteration = "The Cow",
+    revelationType = RevelationType.MEDINAN,
+    ayahCount = 286,
+    juzStart = 1,
+    orderInMushaf = 2
+)

@@ -743,6 +743,10 @@
     <string name="quran_home_reason_heart">Heart of the Quran</string>
     <string name="quran_home_reason_mercy">The Most Merciful</string>
     <string name="quran_home_reason_provision">Seeking provision</string>
+    <string name="quran_home_reason_greatest">The greatest surah</string>
+    <string name="quran_home_reason_third">A third of the Quran</string>
+    <string name="quran_home_reason_refuge_evil">Refuge from evil</string>
+    <string name="quran_home_reason_refuge_whispers">Refuge from whispers</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Loading…</string>

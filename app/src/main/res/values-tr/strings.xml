@@ -541,6 +541,10 @@
     <string name="quran_home_reason_heart">Kur\'an\'ın Kalbi</string>
     <string name="quran_home_reason_mercy">En Merhametli</string>
     <string name="quran_home_reason_provision">Rızık dileme</string>
+    <string name="quran_home_reason_greatest">En büyük sure</string>
+    <string name="quran_home_reason_third">Kur\'an\'ın üçte biri</string>
+    <string name="quran_home_reason_refuge_evil">Kötülükten sığınma</string>
+    <string name="quran_home_reason_refuge_whispers">Vesveseden sığınma</string>
 
     <!-- Dua Reader Screen -->
     <string name="dua_reader_loading">Yükleniyor…</string>
