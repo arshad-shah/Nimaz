@@ -164,35 +164,40 @@ fun AdaptiveMoreScreen(
                     val args = navigator.currentDestination?.contentKey
                     if (args != null) {
                         when (args.pane) {
-                            MoreDetailPane.ABOUT -> AboutScreen(
-                                onNavigateBack = { scope.launch { navigator.navigateBack() } },
-                                onNavigateToPrivacyPolicy = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/privacy")
-                                    )
-                                    context.startActivity(intent)
-                                },
-                                onNavigateToTerms = {
-                                    val intent = Intent(
-                                        Intent.ACTION_VIEW,
-                                        Uri.parse("https://nimaz.arshadshah.com/terms")
-                                    )
-                                    context.startActivity(intent)
-                                },
-                                onNavigateToLicenses = {
-                                    navController.navigate(Route.Licenses)
-                                },
-                                onRateApp = rateApp,
-                                onShareApp = shareApp,
-                                onContactUs = {
-                                    ContentShareManager.sendEmail(
-                                        context,
-                                        address = context.getString(R.string.contact_email),
-                                        subject = context.getString(R.string.contact_email_subject),
-                                    )
-                                }
-                            )
+                            MoreDetailPane.ABOUT -> {
+                                val contactEmail = stringResource(R.string.contact_email)
+                                val contactSubject =
+                                    stringResource(R.string.contact_email_subject)
+                                AboutScreen(
+                                    onNavigateBack = { scope.launch { navigator.navigateBack() } },
+                                    onNavigateToPrivacyPolicy = {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://nimaz.arshadshah.com/privacy")
+                                        )
+                                        context.startActivity(intent)
+                                    },
+                                    onNavigateToTerms = {
+                                        val intent = Intent(
+                                            Intent.ACTION_VIEW,
+                                            Uri.parse("https://nimaz.arshadshah.com/terms")
+                                        )
+                                        context.startActivity(intent)
+                                    },
+                                    onNavigateToLicenses = {
+                                        navController.navigate(Route.Licenses)
+                                    },
+                                    onRateApp = rateApp,
+                                    onShareApp = shareApp,
+                                    onContactUs = {
+                                        ContentShareManager.sendEmail(
+                                            context,
+                                            address = contactEmail,
+                                            subject = contactSubject,
+                                        )
+                                    }
+                                )
+                            }
 
                             MoreDetailPane.HELP -> {
                                 val supportEmail =

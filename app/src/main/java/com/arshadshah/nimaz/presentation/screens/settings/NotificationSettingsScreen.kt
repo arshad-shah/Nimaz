@@ -110,6 +110,9 @@ fun NotificationSettingsScreen(
     val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
     val adhanPreviewError by viewModel.adhanPreviewError.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    // Resolved in composable scope: the steppers' formatValue callback is not
+    // composable, so it cannot call stringResource itself.
+    val minutesValueFormat = stringResource(R.string.notification_settings_minutes_value)
 
     LaunchedEffect(adhanPreviewError) {
         adhanPreviewError?.let { error ->
@@ -348,7 +351,7 @@ fun NotificationSettingsScreen(
                                 variant = NimazNumberStepperVariant.INLINE,
                                 label = stringResource(R.string.notification_settings_lead_time),
                                 formatValue = { min ->
-                                    context.getString(R.string.notification_settings_minutes_value, min)
+                                    minutesValueFormat.format(min)
                                 },
                                 minValue = 5,
                                 maxValue = 60,
@@ -392,7 +395,7 @@ fun NotificationSettingsScreen(
                                 variant = NimazNumberStepperVariant.INLINE,
                                 label = stringResource(R.string.notification_settings_lead_time),
                                 formatValue = { min ->
-                                    context.getString(R.string.notification_settings_minutes_value, min)
+                                    minutesValueFormat.format(min)
                                 },
                                 minValue = 15,
                                 maxValue = 120,

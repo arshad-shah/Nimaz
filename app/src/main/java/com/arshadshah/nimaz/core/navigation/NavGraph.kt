@@ -33,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -819,6 +820,10 @@ fun NavGraph(
                         },
                     )
                 }
+                val contactEmail =
+                    stringResource(com.arshadshah.nimaz.R.string.contact_email)
+                val contactSubject =
+                    stringResource(com.arshadshah.nimaz.R.string.contact_email_subject)
                 AboutScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToPrivacyPolicy = {
@@ -859,8 +864,8 @@ fun NavGraph(
                     onContactUs = {
                         ContentShareManager.sendEmail(
                             context,
-                            address = context.getString(com.arshadshah.nimaz.R.string.contact_email),
-                            subject = context.getString(com.arshadshah.nimaz.R.string.contact_email_subject),
+                            address = contactEmail,
+                            subject = contactSubject,
                         )
                     }
                 )
