@@ -685,6 +685,10 @@
     <string name="share_text_footer">Shared with Nimaz</string>
     <string name="share_card_footer">Shared with Nimaz</string>
     <string name="share_card_tagline">Islamic Companion</string>
+    <string name="share_card_qr_caption">Scan to install Nimaz</string>
+    <string name="share_app_title">Share Nimaz</string>
+    <string name="share_app_scan_hint">Scan the code to install Nimaz</string>
+    <string name="share_app_link_button">Share link</string>
     <string name="share_eyebrow_quran">Quran</string>
     <string name="share_eyebrow_hadith">Hadith</string>
     <string name="share_eyebrow_dua">Dua</string>

@@ -1273,4 +1273,8 @@
     <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
     <string name="share_reference_hadith">Hadith #%1$d</string>
     <string name="share_text_footer">Dikongsi dengan Nimaz</string>
+    <string name="share_card_qr_caption">Imbas untuk memasang Nimaz</string>
+    <string name="share_app_title">Kongsi Nimaz</string>
+    <string name="share_app_scan_hint">Imbas kod untuk memasang Nimaz</string>
+    <string name="share_app_link_button">Kongsi pautan</string>
 </resources>

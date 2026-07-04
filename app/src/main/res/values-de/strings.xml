@@ -1271,4 +1271,8 @@
     <string name="share_reference_ayah">Surah %1$s · Ayah %2$d</string>
     <string name="share_reference_hadith">Hadith #%1$d</string>
     <string name="share_text_footer">Geteilt mit Nimaz</string>
+    <string name="share_card_qr_caption">Zum Installieren von Nimaz scannen</string>
+    <string name="share_app_title">Nimaz teilen</string>
+    <string name="share_app_scan_hint">Code scannen, um Nimaz zu installieren</string>
+    <string name="share_app_link_button">Link teilen</string>
 </resources>

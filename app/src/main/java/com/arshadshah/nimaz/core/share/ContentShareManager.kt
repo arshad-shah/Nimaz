@@ -63,11 +63,13 @@ object ContentShareManager {
     }
 
     /**
-     * Render [shareable] as a branded Nimaz card image and share it as a PNG, with
-     * [Shareable.plainText] kept as the caption/fallback. Falls back to [shareText]
-     * when the content has no [ShareCard] or rendering fails. **Suspends** — the
-     * bitmap is drawn on [Dispatchers.Default]; the chooser launches on the main
-     * thread. Call from a coroutine (e.g. `rememberCoroutineScope().launch { }`).
+     * Render [shareable] as a branded Nimaz card image and share it as a PNG —
+     * **image only, no caption text**: the card already carries the content, the
+     * branding and a "scan to install" QR, so we deliberately do not attach
+     * [Shareable.plainText] (that duplicated, unstyled text is what issue #232 asked
+     * us to drop). Falls back to [shareText] only when the content has no [ShareCard]
+     * or rendering fails. **Suspends** — the bitmap is drawn on [Dispatchers.Default];
+     * the chooser launches on the main thread. Call from a coroutine.
      */
     suspend fun shareBranded(context: Context, shareable: Shareable) {
         val card = shareable.card
@@ -82,7 +84,8 @@ object ContentShareManager {
         }
         withContext(Dispatchers.Main) {
             if (file != null) {
-                shareFile(context, file, mimeType = "image/png", text = shareable.plainText)
+                // Rich media only — no EXTRA_TEXT.
+                shareFile(context, file, mimeType = "image/png")
             } else {
                 shareText(context, shareable)
             }

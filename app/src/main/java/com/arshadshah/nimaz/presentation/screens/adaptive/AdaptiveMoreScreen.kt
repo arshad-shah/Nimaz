@@ -12,7 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
@@ -21,6 +24,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.help.HelpScreen
 import com.arshadshah.nimaz.presentation.screens.more.MoreMenuScreen
@@ -45,8 +49,17 @@ fun AdaptiveMoreScreen(
         if (shouldRestart) onRestartApp()
     }
 
-    val shareApp = {
-        ContentShareManager.shareText(context, Shareables.appInvite(context))
+    var showShareSheet by remember { mutableStateOf(false) }
+    val shareApp = { showShareSheet = true }
+
+    if (showShareSheet) {
+        ShareAppSheet(
+            onDismiss = { showShareSheet = false },
+            onShareLink = {
+                showShareSheet = false
+                ContentShareManager.shareText(context, Shareables.appInvite(context))
+            },
+        )
     }
 
     val rateApp = {
