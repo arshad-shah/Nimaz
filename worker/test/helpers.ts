@@ -62,6 +62,39 @@ export function mockAnthropicToolResponse(
   };
 }
 
+export interface AiStubCall {
+  model: string;
+  input: Record<string, unknown>;
+  options?: {
+    gateway?: {
+      id: string;
+      metadata?: Record<string, string | number | boolean>;
+    };
+  };
+}
+
+/**
+ * Stub for the AI binding (`env.AI`). Pass the value each `run` resolves with,
+ * or an Error to make it reject. Recorded calls are exposed on `.calls` so
+ * tests can assert the catalog model id, gateway id, metadata, and forwarded
+ * Anthropic-native input.
+ */
+export function stubAi(result: unknown) {
+  const calls: AiStubCall[] = [];
+  return {
+    calls,
+    async run(
+      model: string,
+      input: Record<string, unknown>,
+      options?: AiStubCall["options"],
+    ): Promise<unknown> {
+      calls.push({ model, input, options });
+      if (result instanceof Error) throw result;
+      return result;
+    },
+  };
+}
+
 let saCounter = 0;
 
 /** Generate an RSA PKCS#8 PEM so integrity tests can sign a real JWT.

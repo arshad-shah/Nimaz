@@ -22,7 +22,15 @@
     "enabled": true
   },
 
-  // KV holds rate-limit counters and the monthly budget tally.
+  // AI binding — self-authenticating path to Anthropic via the `nimaz` AI
+  // Gateway with Unified Billing (Cloudflare holds the provider credentials
+  // and bills the account's AI credits). No API key or gateway token ships in
+  // the Worker.
+  "ai": {
+    "binding": "AI"
+  },
+
+  // KV holds the per-device and global daily rate-limit counters.
   // Created with: `wrangler kv namespace create NIMAZ_AI_KV`. The id below is a
   // resource identifier (not a secret — useless without CLOUDFLARE_API_TOKEN).
   "kv_namespaces": [
@@ -33,9 +41,10 @@
   ],
 
   // Non-secret configuration. Override per-environment in the dashboard or via
-  // `wrangler deploy --var KEY:value`. Secrets (ANTHROPIC_API_KEY,
-  // GOOGLE_SERVICE_ACCOUNT_JSON) are NOT stored here — set them with
-  // `wrangler secret put <NAME>` (see README.md).
+  // `wrangler deploy --var KEY:value`. The only secret
+  // (GOOGLE_SERVICE_ACCOUNT_JSON) is NOT stored here — set it with
+  // `wrangler secret put <NAME>` (see README.md). The monthly USD cost cap is
+  // enforced by the AI Gateway's Spend Limit (dashboard), not a Worker var.
   "vars": {
     // When "true", skips Play Integrity classification entirely (every request
     // runs at the verified tier). Use ONLY for local testing.
@@ -44,15 +53,9 @@
     "DAILY_DEVICE_LIMIT": "20",
     // Per-device requests per UTC day when attestation is missing/unavailable/
     // failed. Attestation never blocks a request — it only selects this
-    // smaller cap (the monthly budget guard is the hard backstop).
+    // smaller cap (the gateway spend limit is the hard cost backstop).
     "UNVERIFIED_DAILY_DEVICE_LIMIT": "5",
     // Global requests per UTC day (across all devices).
-    "DAILY_GLOBAL_LIMIT": "500",
-    // Monthly spend ceiling in USD before the Worker refuses new calls.
-    "MONTHLY_BUDGET_USD": "10",
-    // When set, Claude calls route through the Cloudflare AI Gateway. Shape:
-    // https://gateway.ai.cloudflare.com/v1/{account}/{gateway}/anthropic
-    // Leave empty to call api.anthropic.com directly.
-    "AI_GATEWAY_BASE_URL": "https://gateway.ai.cloudflare.com/v1/0e2f38a4dd1f2052809b0d876dcc790e/nimaz/anthropic"
+    "DAILY_GLOBAL_LIMIT": "500"
   }
 }

@@ -9,9 +9,15 @@ plus related search terms, which the app resolves against its **local**
 database (real records become the proof cards and the results list).
 
 The Worker never stores questions or answers. It classifies the caller with
-Play Integrity (never blocking — see below), enforces per-device/global/monthly
+Play Integrity (never blocking — see below), enforces per-device/global daily
 limits, calls Claude with a fixed cached prompt and a forced structured-output
 tool, and returns strict JSON.
+
+**Billing/auth:** Claude is reached through the Worker's **AI binding** →
+the **`nimaz`** Cloudflare **AI Gateway** with **Unified Billing** — Cloudflare
+holds the Anthropic credentials and bills the account's AI credits, so **no API
+key or gateway token exists in the Worker**. The monthly USD cost cap is the
+gateway's **Spend Limit** (dashboard), not Worker code.
 
 ## Architecture
 
@@ -19,10 +25,17 @@ tool, and returns strict JSON.
 POST /v1/invoke
   → integrity   (Play Integrity token → trust tier: verified | unverified)
   → rateLimit   (tiered per-device + global daily caps in KV)
-  → budgetGuard (monthly USD budget in KV; pre-call gate + post-call accounting)
   → dispatch    (registry lookup → Zod-validate input → build request
-                 → Claude (via AI Gateway if configured) → Zod-validate output)
+                 → env.AI.run("anthropic/claude-haiku-4-5", …, {gateway:{id:"nimaz"}})
+                 → Zod-validate output)
 ```
+
+The gateway call carries `metadata: { capability }` so the AI Gateway dashboard
+breaks spend down per feature (never the question text). A tripped gateway
+spend limit / exhausted credits maps to `BUDGET_EXCEEDED` (503), same as the
+old in-Worker budget guard, so the app UX is unchanged. Each successful call
+logs a structured `ai_usage` line (token counts only) and echoes the usage in
+an `x-nimaz-usage` response header — that's how you verify prompt-cache reads.
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
@@ -39,8 +52,8 @@ instead of throwing:
   API failure, or a failed verdict.
 
 The tier only selects the per-device daily cap (`DAILY_DEVICE_LIMIT` vs the
-much smaller `UNVERIFIED_DAILY_DEVICE_LIMIT`). The monthly budget guard is the
-hard backstop against abuse.
+much smaller `UNVERIFIED_DAILY_DEVICE_LIMIT`). The AI Gateway spend limit is
+the hard cost backstop against abuse.
 
 ## API contract
 
@@ -80,12 +93,12 @@ Errors use a typed envelope with the matching HTTP status:
 { "error": { "code": "RATE_LIMITED", "message": "...", "retryAfterSeconds": 3600 } }
 ```
 
-| code                 | status | when                                         |
-| -------------------- | ------ | -------------------------------------------- |
-| `INVALID_INPUT`      | 400    | bad envelope / schema / unknown capability   |
-| `RATE_LIMITED`       | 429    | per-device (tiered) or global daily cap hit  |
-| `UPSTREAM_ERROR`     | 502    | Claude call failed / returned bad shape      |
-| `BUDGET_EXCEEDED`    | 503    | monthly budget reached                       |
+| code                 | status | when                                                     |
+| -------------------- | ------ | -------------------------------------------------------- |
+| `INVALID_INPUT`      | 400    | bad envelope / schema / unknown capability               |
+| `RATE_LIMITED`       | 429    | per-device (tiered) or global daily cap hit              |
+| `UPSTREAM_ERROR`     | 502    | Claude call failed / returned bad shape                  |
+| `BUDGET_EXCEEDED`    | 503    | gateway spend limit tripped / AI credits exhausted       |
 
 ## Configuration
 
@@ -97,15 +110,18 @@ Non-secret vars live in `wrangler.jsonc`:
 | `DAILY_DEVICE_LIMIT`            | `20`    | requests per verified device per UTC day                 |
 | `UNVERIFIED_DAILY_DEVICE_LIMIT` | `5`     | requests per unverified device per UTC day               |
 | `DAILY_GLOBAL_LIMIT`            | `500`   | requests across all devices per UTC day                  |
-| `MONTHLY_BUDGET_USD`            | `10`    | monthly spend ceiling before `BUDGET_EXCEEDED`           |
-| `AI_GATEWAY_BASE_URL`           | `""`    | route Claude via Cloudflare AI Gateway when set          |
 
-Secrets are **not** in any file — set them with `wrangler secret put`:
+The monthly USD ceiling is **not** a var anymore — set a **Spend limit** on the
+`nimaz` AI Gateway in the dashboard (AI → AI Gateway → nimaz → Settings).
 
-- `ANTHROPIC_API_KEY` — your Anthropic API key.
+The only secret — set with `wrangler secret put`, never committed:
+
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
   used to mint an OAuth token for the Play Integrity API. Optional — without
   it every request simply runs at the unverified tier.
+
+There is **no Anthropic key**: the AI binding authenticates via Unified
+Billing (Cloudflare-managed provider credentials).
 
 ## Setup
 
@@ -118,20 +134,26 @@ npm ci                      # or: npm install (first time, to create the lockfil
 #    npx wrangler kv namespace create NIMAZ_AI_KV
 #    then paste the returned id into wrangler.jsonc.
 
-# 2. Set secrets (production):
-npx wrangler secret put ANTHROPIC_API_KEY
+# 2. Set the one secret (production):
 npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 
-# 3. (optional) Create an AI Gateway named "nimaz" in the Cloudflare dashboard
-#    and set AI_GATEWAY_BASE_URL to:
-#    https://gateway.ai.cloudflare.com/v1/<account_id>/nimaz/anthropic
+# 3. Cloudflare dashboard (one-time, cannot be done from wrangler):
+#    AI → AI Gateway → confirm the "nimaz" gateway exists.
+#    AI → AI Gateway → "Credits Available" → Manage → add a payment method,
+#    purchase credits, and set auto top-up (Unified Billing).
+#    Recommended: set a Spend limit on the "nimaz" gateway as the monthly
+#    cost backstop, and enable the gateway's ZDR (Zero-Data-Retention
+#    provider endpoints) setting.
 ```
 
 ## Local development
 
 ```bash
-# Run with attestation bypassed and a real Anthropic key so you can curl it.
-ANTHROPIC_API_KEY=sk-ant-... npx wrangler dev --var SKIP_ATTESTATION:true
+# Attestation bypassed so you can curl it. The AI binding proxies to the real
+# gateway even in dev, so you must be authenticated with Cloudflare
+# (`npx wrangler login`, or CLOUDFLARE_API_TOKEN in the environment) —
+# there is no Anthropic key to pass.
+npx wrangler dev --var SKIP_ATTESTATION:true
 ```
 
 Sample request (works against `wrangler dev` with `SKIP_ATTESTATION=true`):
@@ -150,7 +172,10 @@ curl -s http://localhost:8787/v1/invoke \
 ```
 
 Expected: a JSON body with `answer`, `quranRefs` (e.g. `["2:153"]`), `terms`,
-and `confidence`.
+and `confidence`, plus an `x-nimaz-usage` response header with the token
+usage. Run the same question twice and check the second response's header
+shows `cache_read_input_tokens > 0` — that proves the system prompt's
+`cache_control` survives the gateway.
 
 Health check:
 

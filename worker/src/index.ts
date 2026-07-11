@@ -5,7 +5,6 @@ import { getCapability, listCapabilityIds } from "./registry";
 import { callClaude, UpstreamError } from "./anthropic/client";
 import { checkIntegrity } from "./middleware/integrity";
 import { enforceRateLimit } from "./middleware/rateLimit";
-import { enforceBudget, recordSpend } from "./middleware/budgetGuard";
 import { ApiError } from "./middleware/errors";
 
 // Envelope shared by every capability invocation.
@@ -59,13 +58,13 @@ app.post("/v1/invoke", async (c) => {
     //    only demotes the request to the small unverified rate-limit tier.
     const tier = await checkIntegrity(c.env, integrityToken, now.getTime());
 
-    // 2. Rate limit (tiered per-device cap + global daily cap).
+    // 2. Rate limit (tiered per-device cap + global daily cap). The monthly
+    //    USD cost cap lives in the AI Gateway (Spend Limit + Unified Billing
+    //    credits); when it trips, callClaude maps it to BUDGET_EXCEEDED.
+
     await enforceRateLimit(c.env, deviceId, now, tier);
 
-    // 3. Budget guard (pre-call gate).
-    await enforceBudget(c.env, now);
-
-    // 4a. Validate capability input.
+    // 3a. Validate capability input.
     const parsedInput = capability.inputSchema.safeParse(input);
     if (!parsedInput.success) {
       throw new ApiError(
@@ -74,14 +73,20 @@ app.post("/v1/invoke", async (c) => {
       );
     }
 
-    // 4b. Build request + call Claude.
+    // 3b. Build request + call Claude via the AI binding (Unified Billing).
+    //     The capability id rides along as gateway metadata so the AI Gateway
+    //     dashboard breaks spend down per feature (never the question text).
     const request = capability.buildRequest(parsedInput.data, c.env);
-    const raw = await callClaude(request, c.env);
+    const raw = await callClaude(request, c.env, { capability: capabilityId });
 
-    // 4c. Account for spend (post-call).
-    await recordSpend(c.env, raw.usage, now);
+    // 3c. Structured usage log (observability): lets us confirm prompt-cache
+    //     reads (cache_read_input_tokens > 0) and watch token spend without
+    //     ever logging content.
+    console.log(
+      JSON.stringify({ event: "ai_usage", capability: capabilityId, ...raw.usage }),
+    );
 
-    // 4d. Parse + validate output against the strict contract.
+    // 3d. Parse + validate output against the strict contract.
     const output = capability.parseResponse(raw, parsedInput.data);
     const validated = capability.outputSchema.safeParse(output);
     if (!validated.success) {
@@ -91,6 +96,10 @@ app.post("/v1/invoke", async (c) => {
       );
     }
 
+    // Token usage echoed as a header — nothing sensitive, and it makes the
+    // prompt-cache smoke test (cache_read_input_tokens on the 2nd call) a
+    // plain curl instead of a dashboard dig.
+    c.header("x-nimaz-usage", JSON.stringify(raw.usage));
     return c.json(validated.data, 200);
   } catch (err) {
     if (err instanceof ApiError) return errorResponse(c, err);

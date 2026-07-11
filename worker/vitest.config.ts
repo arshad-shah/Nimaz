@@ -4,19 +4,22 @@ export default defineWorkersConfig({
   test: {
     poolOptions: {
       workers: {
-        wrangler: { configPath: "./wrangler.jsonc" },
+        // Miniflare is configured inline (NOT from wrangler.jsonc): the `ai`
+        // binding declared there is a real Cloudflare service that miniflare
+        // cannot emulate, so pointing the pool at the config file breaks
+        // startup. Tests inject a stubbed `AI` binding per request instead
+        // (see test/helpers.ts stubAi), and everything else the Worker needs
+        // is declared here. Keep compatibility settings in sync with
+        // wrangler.jsonc.
         miniflare: {
-          // Test-time bindings. Secrets/vars here override wrangler.jsonc so
-          // tests never touch real credentials or the real KV namespace.
+          compatibilityDate: "2024-12-30",
+          compatibilityFlags: ["nodejs_compat"],
           kvNamespaces: ["NIMAZ_AI_KV"],
           bindings: {
             SKIP_ATTESTATION: "true",
             DAILY_DEVICE_LIMIT: "3",
             UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
             DAILY_GLOBAL_LIMIT: "5",
-            MONTHLY_BUDGET_USD: "10",
-            AI_GATEWAY_BASE_URL: "",
-            ANTHROPIC_API_KEY: "test-key",
           },
         },
       },

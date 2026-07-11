@@ -37,19 +37,23 @@ sequenceDiagram
 
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
-    W->>W: integrity → tiered rate limit → budget guard
-    W->>GW: Messages API (forced submit_result tool, cached system prompt)
-    GW->>C: proxied request
+    W->>W: integrity → tiered rate limit
+    W->>GW: AI binding run (forced submit_result tool, cached system prompt)
+    GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON
-    GW-->>W: response + usage
-    W->>W: validate output, drop malformed refs, record spend
+    GW-->>W: native response + usage
+    W->>W: validate output, drop malformed refs, log usage
     W-->>App: {answer, quranRefs, terms, confidence}
     App->>Room: resolve quranRefs → real verses (proof cards)
     App->>Room: run terms through SearchLibraryUseCase (results list)
     App-->>U: answer + confidence + proof cards + AI-driven results list
 ```
 
-One Worker call per submit; everything else is local.
+One Worker call per submit; everything else is local. The `W → GW → Claude`
+leg is self-authenticating: the Worker's **AI binding** routes through the
+`nimaz` AI Gateway with **Unified Billing**, so Cloudflare injects the
+Anthropic credentials and bills the account's AI credits — no API key or
+gateway token exists in the Worker.
 
 ### Why attestation never blocks
 
@@ -64,7 +68,7 @@ instead of gating on it:
 | `unverified` | Missing token, Integrity API unreachable/unconfigured, failed verdict | `UNVERIFIED_DAILY_DEVICE_LIMIT` (5) |
 
 Every failure path degrades to `unverified` — a smaller cap, never an error.
-The monthly budget guard remains the hard backstop against abuse.
+The AI Gateway spend limit remains the hard cost backstop against abuse.
 
 Layers (Android):
 
@@ -89,7 +93,7 @@ worker/src/capabilities/search-assist               the single AI capability
 ## Capability contract
 
 Everything goes through the same `POST /v1/invoke` envelope and middleware
-(integrity tier → rate limit → budget). The Android `input` is sent as a raw
+(integrity tier → rate limit). The Android `input` is sent as a raw
 JSON object so one envelope serves every capability.
 
 ### `search-assist` (the single call)
@@ -182,19 +186,33 @@ payloads. The Worker stores nothing.
 
 ## Cost model
 
-- Model: `claude-haiku-4-5`. Pricing: **$1 / MTok input**, **$5 / MTok output**;
-  cached input reads billed at **10%** of the input rate.
+- **Billing: Cloudflare AI Gateway Unified Billing.** The Worker's AI binding
+  calls `anthropic/claude-haiku-4-5` through the `nimaz` gateway; Cloudflare
+  holds the Anthropic credentials and draws spend from the account's **AI
+  credits** — one Cloudflare invoice, no Anthropic account/key. Provider
+  per-token rates pass through with **no markup**; the one cost on top is a
+  **5% fee on credit purchases** (a $100 top-up costs $105). Auto top-up keeps
+  answers from stalling when credits run low.
+- Model: `claude-haiku-4-5` (catalog id `anthropic/claude-haiku-4-5`).
+  Pricing: **$1 / MTok input**, **$5 / MTok output**; cached input reads billed
+  at **10%** of the input rate.
 - Each submit is **one** call: `search-assist` (`max_tokens` 700,
   temperature 0.2). The system prompt is marked `cache_control: ephemeral`,
-  so after the first call it is read from cache at ~10% cost. One question
-  consumes one invocation of the per-device daily cap (the old design burned
-  two).
-- Guards (KV-backed, per UTC period): tiered per-device daily cap
-  (`DAILY_DEVICE_LIMIT` 20 verified / `UNVERIFIED_DAILY_DEVICE_LIMIT` 5),
-  global daily cap (`DAILY_GLOBAL_LIMIT`, 500), monthly USD budget
-  (`MONTHLY_BUDGET_USD`, 10). Spend is tallied in integer microdollars after
-  each call; when the month meets the cap the Worker returns `BUDGET_EXCEEDED`
-  (503).
+  so after the first call it is read from cache at ~10% cost — the binding
+  forwards the Anthropic-native request, so forced tool use and prompt caching
+  both survive the gateway. One question consumes one invocation of the
+  per-device daily cap (the old design burned two).
+- Guards: tiered per-device daily cap (`DAILY_DEVICE_LIMIT` 20 verified /
+  `UNVERIFIED_DAILY_DEVICE_LIMIT` 5) and global daily cap
+  (`DAILY_GLOBAL_LIMIT`, 500), both KV-backed in the Worker. The monthly USD
+  ceiling is the **AI Gateway Spend Limit** (dashboard setting on the `nimaz`
+  gateway) — when it trips (or credits run out) the Worker maps the gateway
+  error to `BUDGET_EXCEEDED` (503), same app UX as the old KV budget tally it
+  replaces.
+- Observability: every call attaches `metadata: { capability }` to the gateway
+  request (spend per feature in the dashboard; never the question text), logs
+  an `ai_usage` line (token counts only), and echoes usage in the
+  `x-nimaz-usage` response header.
 
 ## Adding a new capability
 
@@ -214,27 +232,44 @@ orchestrator, and wire it in `core/di/AiModule.kt` (reuse `AiApiClient`).
 These are required to make the feature actually work end-to-end. Nothing here is
 committed to the repo.
 
-### 1. Cloudflare (Worker)
+### 1. Cloudflare (Worker + Unified Billing)
 
 1. `cd worker && npm ci`
 2. The KV namespace id is already committed in `worker/wrangler.jsonc` (a
    resource id, not a secret). To recreate it in a different account:
    `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
-3. Set secrets:
-   `npx wrangler secret put ANTHROPIC_API_KEY`
+3. Set the one secret:
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
-   (If `GOOGLE_SERVICE_ACCOUNT_JSON` is absent the Worker still works — every
-   request simply runs at the smaller unverified rate-limit tier.)
-4. (Optional) Create an AI Gateway named `nimaz` and set the var
-   `AI_GATEWAY_BASE_URL` to
-   `https://gateway.ai.cloudflare.com/v1/<account_id>/nimaz/anthropic`.
-5. Deploy: push to `dev` (CI) or `npx wrangler deploy`. The Worker is served at
+   (If it is absent the Worker still works — every request simply runs at the
+   smaller unverified rate-limit tier.) There is **no `ANTHROPIC_API_KEY`**:
+   Claude auth is the AI binding + Unified Billing.
+4. **Unified Billing (dashboard, cannot be scripted):** AI → AI Gateway →
+   confirm the `nimaz` gateway exists → *Credits Available* → **Manage** →
+   add a payment method, **purchase credits**, and set **auto top-up**
+   (threshold + recharge amount) so answers don't stall when credits run low.
+   Until credits exist, every ask returns `BUDGET_EXCEEDED`/`UPSTREAM_ERROR`.
+5. **Spend limit (recommended):** on the `nimaz` gateway settings, set a
+   monthly USD Spend Limit — this replaced the Worker's old KV
+   `MONTHLY_BUDGET_USD` tally as the hard cost backstop.
+6. **ZDR (recommended):** enable the gateway's Zero-Data-Retention setting so
+   Unified-Billing requests route through ZDR provider endpoints — it matches
+   the app's "only the question is sent" promise. (Separate from the
+   gateway's own logging toggle, which you can also turn off.)
+7. Deploy: push to `dev` (CI) or `npx wrangler deploy`. The Worker is served at
    the custom domain **`https://ai.arshadshah.com`** (configured via the
    `routes` block in `wrangler.jsonc`; `wrangler deploy` provisions the domain +
    certificate, provided the `arshadshah.com` zone is on the same account). It is
    also reachable at its `*.workers.dev` URL.
-6. Keep `SKIP_ATTESTATION=false` in production. Use `--var SKIP_ATTESTATION:true`
+8. Keep `SKIP_ATTESTATION=false` in production. Use `--var SKIP_ATTESTATION:true`
    only for local `wrangler dev` testing (it forces the verified tier).
+9. Smoke test (post-deploy): ask the same question twice and check the second
+   response's `x-nimaz-usage` header shows `cache_read_input_tokens > 0`
+   (prompt caching survives the gateway) and that the answer parses (forced
+   `submit_result` tool survives). Confirm in the AI Gateway dashboard that the
+   request is logged with a cost and credits were deducted.
+10. One-time cleanup once the switch is verified in production:
+    `npx wrangler secret delete ANTHROPIC_API_KEY` — the old direct-Anthropic
+    secret is no longer read by any code.
 
 ### 2. Google Cloud / Play Console (Play Integrity)
 
