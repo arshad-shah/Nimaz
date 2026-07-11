@@ -7,6 +7,16 @@
   "compatibility_date": "2025-01-15",
   "compatibility_flags": ["nodejs_compat"],
 
+  // Custom domain the Android app talks to. `custom_domain: true` makes
+  // `wrangler deploy` provision the domain + certificate automatically. The
+  // `arshadshah.com` zone must be on the same Cloudflare account as this Worker.
+  "routes": [
+    {
+      "pattern": "ai.arshadshah.com",
+      "custom_domain": true
+    }
+  ],
+
   // Structured logs + metrics in the Cloudflare dashboard.
   "observability": {
     "enabled": true

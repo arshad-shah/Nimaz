@@ -169,8 +169,11 @@ committed to the repo.
 4. (Optional) Create an AI Gateway named `nimaz` and set the var
    `AI_GATEWAY_BASE_URL` to
    `https://gateway.ai.cloudflare.com/v1/<account_id>/nimaz/anthropic`.
-5. Deploy: push to `dev` (CI) or `npx wrangler deploy`. Note the
-   `https://nimaz-ai.<subdomain>.workers.dev` URL.
+5. Deploy: push to `dev` (CI) or `npx wrangler deploy`. The Worker is served at
+   the custom domain **`https://ai.arshadshah.com`** (configured via the
+   `routes` block in `wrangler.jsonc`; `wrangler deploy` provisions the domain +
+   certificate, provided the `arshadshah.com` zone is on the same account). It is
+   also reachable at its `*.workers.dev` URL.
 6. Keep `SKIP_ATTESTATION=false` in production. Use `--var SKIP_ATTESTATION:true`
    only for local `wrangler dev` testing.
 
@@ -195,13 +198,14 @@ committed to the repo.
 ### 4. gradle.properties (per environment)
 
 ```properties
-nimazAiWorkerUrlDebug=https://nimaz-ai.<subdomain>.workers.dev
-nimazAiWorkerUrl=https://nimaz-ai.<subdomain>.workers.dev
+nimazAiWorkerUrlDebug=https://ai.arshadshah.com
+nimazAiWorkerUrl=https://ai.arshadshah.com
 playIntegrityCloudProjectNumber=<google-cloud-project-number>
 ```
 
-With the placeholder values, the app still builds and runs — asking simply shows
-the network-error state (it never crashes).
+These committed defaults point at the production custom domain. Until the Worker
+is deployed and the domain resolves, the app still builds and runs — asking
+simply shows the network-error state (it never crashes).
 
 ## Testing
 
