@@ -104,9 +104,23 @@ app.post("/v1/invoke", async (c) => {
   } catch (err) {
     if (err instanceof ApiError) return errorResponse(c, err);
     if (err instanceof UpstreamError) {
+      // Log + echo the upstream detail: the app only switches on the error
+      // `code` (never shows server messages for UPSTREAM_ERROR), and having
+      // the gateway's reason in the envelope makes ops/CI failures diagnosable
+      // without a dashboard dig. No user content is ever in this message.
+      console.error(
+        JSON.stringify({
+          event: "upstream_error",
+          status: err.status,
+          message: err.message,
+        }),
+      );
       return errorResponse(
         c,
-        new ApiError("UPSTREAM_ERROR", "The AI service is unavailable."),
+        new ApiError(
+          "UPSTREAM_ERROR",
+          `The AI service is unavailable. [${err.message.slice(0, 300)}]`,
+        ),
       );
     }
     // parseResponse throwing (e.g. model didn't call the tool) lands here.

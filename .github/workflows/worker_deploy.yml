@@ -107,11 +107,15 @@ jobs:
           body='{"capability":"search-assist","integrityToken":"","deviceId":"ci-smoke-${{ github.run_id }}","input":{"question":"What does the Quran say about patience?"}}'
           for i in 1 2; do
             echo "=== call $i ==="
-            curl -fsS -D "headers$i.txt" -o "resp$i.json" \
+            code=$(curl -sS -D "headers$i.txt" -o "resp$i.json" -w '%{http_code}' \
               -H 'content-type: application/json' \
-              -d "$body" https://ai.arshadshah.com/v1/invoke \
-              || { echo "::error::invoke $i failed"; cat "resp$i.json" 2>/dev/null; exit 1; }
-            jq . "resp$i.json"
+              -d "$body" https://ai.arshadshah.com/v1/invoke)
+            echo "HTTP $code"
+            jq . "resp$i.json" || cat "resp$i.json"
+            if [ "$code" != "200" ]; then
+              echo "::error::invoke $i returned HTTP $code — see the error envelope above for the gateway's reason"
+              exit 1
+            fi
             # Forced tool use survived → strict output contract holds.
             jq -e '.answer | length > 0' "resp$i.json" > /dev/null
             jq -e '.quranRefs | type == "array"' "resp$i.json" > /dev/null
