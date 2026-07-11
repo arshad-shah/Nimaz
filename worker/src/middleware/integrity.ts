@@ -17,7 +17,7 @@ const PLAY_INTEGRITY_SCOPE = "https://www.googleapis.com/auth/playintegrity";
  *
  * Rationale: hard-failing on attestation bricked the feature for legitimate
  * users whenever Play services hiccuped or the Integrity API was unreachable.
- * A stingy unverified tier bounds abuse (the monthly budget guard is the
+ * A stingy unverified tier bounds abuse (the AI Gateway spend limit is the
  * ultimate backstop) without ever locking real users out.
  */
 export type IntegrityTier = "verified" | "unverified";

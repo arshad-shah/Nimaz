@@ -67,6 +67,73 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
           # Publishes the Worker + its wrangler.jsonc config (routes, vars, the
-          # NIMAZ_AI_KV binding). Secrets (ANTHROPIC_API_KEY,
-          # GOOGLE_SERVICE_ACCOUNT_JSON) are set once via `wrangler secret put`.
+          # NIMAZ_AI_KV binding), then pushes CLOUDFLARE_AI_TOKEN (the scoped
+          # AI Gateway Run token, from the GitHub secret of the same name) as a
+          # Worker secret — so the gateway credential stays synced from CI.
+          # GOOGLE_SERVICE_ACCOUNT_JSON is still set once via
+          # `wrangler secret put`. Claude auth is the gateway Run token +
+          # Unified Billing — no Anthropic API key anywhere.
           command: deploy
+          secrets: |
+            CLOUDFLARE_AI_TOKEN
+        env:
+          CLOUDFLARE_AI_TOKEN: ${{ secrets.CLOUDFLARE_AI_TOKEN }}
+
+  smoke-test:
+    name: Live smoke test (search-assist)
+    needs: deploy
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    # No checkout here, so the workflow-level `working-directory: worker`
+    # default would point at a nonexistent dir — run from the workspace root.
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
+    steps:
+      - name: Health check
+        run: |
+          sleep 10   # let the deploy propagate
+          curl -fsS https://ai.arshadshah.com/v1/health | tee health.json
+          grep -q '"search-assist"' health.json
+
+      # Sends the same question twice through the real AI-binding → gateway →
+      # Anthropic (Unified Billing) path and verifies the two Anthropic-native
+      # features the capability depends on:
+      #   - forced tool use: a valid {answer, quranRefs, terms, confidence}
+      #     body means the submit_result tool_use block survived the gateway;
+      #   - prompt caching: reported from the x-nimaz-usage header. NOTE this
+      #     is informational, not an assertion — Haiku 4.5's minimum cacheable
+      #     prefix is 4096 tokens and this capability's system prompt + tool
+      #     schema is well below that, so cache_read_input_tokens is expected
+      #     to stay 0 until the prompt grows past the minimum.
+      # Uses a fresh deviceId per run (unverified tier: 5 req/day/device), so
+      # the 2 calls never trip the rate limit. Costs ~2 * $0.002 in AI credits.
+      - name: Invoke search-assist twice
+        run: |
+          set -euo pipefail
+          body='{"capability":"search-assist","integrityToken":"","deviceId":"ci-smoke-${{ github.run_id }}","input":{"question":"What does the Quran say about patience?"}}'
+          for i in 1 2; do
+            echo "=== call $i ==="
+            code=$(curl -sS -D "headers$i.txt" -o "resp$i.json" -w '%{http_code}' \
+              -H 'content-type: application/json' \
+              -d "$body" https://ai.arshadshah.com/v1/invoke)
+            echo "HTTP $code"
+            jq . "resp$i.json" || cat "resp$i.json"
+            if [ "$code" != "200" ]; then
+              echo "::error::invoke $i returned HTTP $code — see the error envelope above for the gateway's reason"
+              exit 1
+            fi
+            # Forced tool use survived → strict output contract holds.
+            jq -e '.answer | length > 0' "resp$i.json" > /dev/null
+            jq -e '.quranRefs | type == "array"' "resp$i.json" > /dev/null
+            jq -e '.terms | length > 0' "resp$i.json" > /dev/null
+            jq -e '.confidence | IN("high","medium","low")' "resp$i.json" > /dev/null
+            echo "usage: $(grep -i '^x-nimaz-usage:' "headers$i.txt" || echo '<missing>')"
+          done
+          cache_read=$(grep -i '^x-nimaz-usage:' headers2.txt | sed 's/^[^:]*: //' | jq '.cache_read_input_tokens // 0')
+          if [ "$cache_read" -gt 0 ]; then
+            echo "prompt cache HIT on 2nd call (cache_read_input_tokens=$cache_read)"
+          else
+            echo "::notice::no cache read on 2nd call — expected: prompt is below Haiku 4.5's 4096-token cacheable minimum"
+          fi
+          echo "Smoke test passed: forced tool use + native response survived the AI binding."

@@ -3,6 +3,8 @@ import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import app from "../src/index";
 import { searchAssist } from "../src/capabilities/search-assist";
 import {
+  GATEWAY_HOST,
+  GATEWAY_PATH,
   makeAssistInput,
   makeAssistOutput,
   makeEnvelope,
@@ -51,7 +53,7 @@ describe("search-assist capability (unit)", () => {
   });
 });
 
-describe("search-assist (integration)", () => {
+describe("search-assist (integration, AI Gateway Unified Billing)", () => {
   beforeAll(() => {
     fetchMock.activate();
     fetchMock.disableNetConnect();
@@ -70,10 +72,10 @@ describe("search-assist (integration)", () => {
     );
   }
 
-  it("returns a validated assist result", async () => {
+  it("returns a validated assist result and echoes usage", async () => {
     fetchMock
-      .get("https://api.anthropic.com")
-      .intercept({ path: "/v1/messages", method: "POST" })
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
       .reply(200, mockAnthropicToolResponse(makeAssistOutput()));
     const res = await invoke("assist-dev-1");
     expect(res.status).toBe(200);
@@ -87,12 +89,43 @@ describe("search-assist (integration)", () => {
     expect(body.quranRefs).toEqual(["2:153", "39:10"]);
     expect(body.terms).toContain("patience");
     expect(body.confidence).toBe("high");
+    // Usage is echoed for the smoke test / ops.
+    expect(res.headers.get("x-nimaz-usage")).toContain("input_tokens");
+  });
+
+  it("sends the gateway token, metadata, and the native request unchanged", async () => {
+    let seenBody = "";
+    fetchMock
+      .get(GATEWAY_HOST)
+      .intercept({
+        path: GATEWAY_PATH,
+        method: "POST",
+        headers: {
+          "cf-aig-authorization": "Bearer test-gateway-token",
+          "anthropic-version": "2023-06-01",
+          "cf-aig-metadata": JSON.stringify({ capability: "search-assist" }),
+        },
+        body: (raw) => {
+          seenBody = String(raw);
+          return true;
+        },
+      })
+      .reply(200, mockAnthropicToolResponse(makeAssistOutput()));
+    const res = await invoke("assist-dev-2");
+    expect(res.status).toBe(200);
+    const sent = JSON.parse(seenBody) as Record<string, any>;
+    // The provider-native endpoint takes the plain Anthropic model name …
+    expect(sent.model).toBe("claude-haiku-4-5");
+    // … and the Anthropic-native features survive the transport unchanged.
+    expect(sent.tool_choice).toEqual({ type: "tool", name: "submit_result" });
+    expect(sent.system[0].cache_control).toEqual({ type: "ephemeral" });
+    expect(sent.max_tokens).toBe(700);
   });
 
   it("allows an out-of-scope answer with no refs", async () => {
     fetchMock
-      .get("https://api.anthropic.com")
-      .intercept({ path: "/v1/messages", method: "POST" })
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
       .reply(
         200,
         mockAnthropicToolResponse(
@@ -104,19 +137,41 @@ describe("search-assist (integration)", () => {
           }),
         ),
       );
-    const res = await invoke("assist-dev-2");
+    const res = await invoke("assist-dev-3");
     expect(res.status).toBe(200);
     const body = (await res.json()) as { quranRefs: string[] };
     expect(body.quranRefs).toEqual([]);
   });
 
-  it("maps an Anthropic 5xx to UPSTREAM_ERROR/502", async () => {
+  it("maps a gateway 5xx to UPSTREAM_ERROR/502", async () => {
     fetchMock
-      .get("https://api.anthropic.com")
-      .intercept({ path: "/v1/messages", method: "POST" })
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
       .reply(500, { error: "boom" });
-    const res = await invoke("assist-dev-3");
+    const res = await invoke("assist-dev-4");
     expect(res.status).toBe(502);
     expect(((await res.json()) as any).error.code).toBe("UPSTREAM_ERROR");
+  });
+
+  it("maps a normalised (non-Anthropic) response shape to UPSTREAM_ERROR/502", async () => {
+    fetchMock
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
+      .reply(200, { response: "plain text", usage: {} });
+    const res = await invoke("assist-dev-5");
+    expect(res.status).toBe(502);
+    expect(((await res.json()) as any).error.code).toBe("UPSTREAM_ERROR");
+  });
+
+  it("maps a tripped gateway spend limit / exhausted credits to BUDGET_EXCEEDED/503", async () => {
+    fetchMock
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
+      .reply(429, {
+        error: { message: "You have exceeded the spend limit for this gateway" },
+      });
+    const res = await invoke("assist-dev-6");
+    expect(res.status).toBe(503);
+    expect(((await res.json()) as any).error.code).toBe("BUDGET_EXCEEDED");
   });
 });

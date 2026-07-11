@@ -12,8 +12,11 @@ import {
 } from "../schemas/search-assist";
 
 // Fixed system prompt. Marked with cache_control (in buildRequest) so Anthropic
-// prompt-caches it across calls — it never changes, so every call after the
-// first reads it from cache at ~10% of input cost.
+// can prompt-cache it across calls (cached reads bill at ~10% of input cost).
+// NOTE: Haiku 4.5's minimum cacheable prefix is 4096 tokens and this prompt +
+// tool schema is well below that, so the marker is currently inert (harmless;
+// no cache entry is created). It starts paying off if the prompt/tools grow
+// past the minimum.
 const SYSTEM_PROMPT = `You are the search assistant inside Nimaz, an Islamic companion app whose device-local library holds the Quran (Arabic text + English translations), Hadith collections, and Duas (supplications).
 
 For each user question you return, via the submit_result tool:

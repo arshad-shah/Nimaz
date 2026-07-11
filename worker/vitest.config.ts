@@ -4,19 +4,19 @@ export default defineWorkersConfig({
   test: {
     poolOptions: {
       workers: {
-        wrangler: { configPath: "./wrangler.jsonc" },
+        // Test-time miniflare config. Bindings here are test values so tests
+        // never touch real credentials or the real KV namespace. Keep
+        // compatibility settings in sync with wrangler.jsonc.
         miniflare: {
-          // Test-time bindings. Secrets/vars here override wrangler.jsonc so
-          // tests never touch real credentials or the real KV namespace.
+          compatibilityDate: "2024-12-30",
+          compatibilityFlags: ["nodejs_compat"],
           kvNamespaces: ["NIMAZ_AI_KV"],
           bindings: {
             SKIP_ATTESTATION: "true",
             DAILY_DEVICE_LIMIT: "3",
             UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
             DAILY_GLOBAL_LIMIT: "5",
-            MONTHLY_BUDGET_USD: "10",
-            AI_GATEWAY_BASE_URL: "",
-            ANTHROPIC_API_KEY: "test-key",
+            CLOUDFLARE_AI_TOKEN: "test-gateway-token",
           },
         },
       },

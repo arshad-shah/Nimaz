@@ -2,7 +2,7 @@
 // Vars come from wrangler.jsonc; secrets are set via `wrangler secret put`.
 
 interface Env {
-  // KV namespace — rate-limit counters + monthly budget tally.
+  // KV namespace — per-device + global daily rate-limit counters.
   NIMAZ_AI_KV: KVNamespace;
 
   // ── Vars (wrangler.jsonc) ────────────────────────────────────────────────
@@ -10,11 +10,12 @@ interface Env {
   DAILY_DEVICE_LIMIT: string; // integer string, default "20" (verified tier)
   UNVERIFIED_DAILY_DEVICE_LIMIT: string; // integer string, default "5"
   DAILY_GLOBAL_LIMIT: string; // integer string, default "500"
-  MONTHLY_BUDGET_USD: string; // integer/decimal string, default "10"
-  AI_GATEWAY_BASE_URL: string; // "" or an AI Gateway base URL
 
   // ── Secrets (`wrangler secret put`) ──────────────────────────────────────
-  ANTHROPIC_API_KEY: string;
+  // Scoped Cloudflare API token with AI Gateway Run permission. Authenticates
+  // the Worker to the `nimaz` gateway (Unified Billing injects the Anthropic
+  // credentials — this is never an Anthropic key).
+  CLOUDFLARE_AI_TOKEN: string;
   // Full Google service-account JSON (as a single string) used to mint an
   // OAuth2 token for the Play Integrity API. Optional when SKIP_ATTESTATION.
   GOOGLE_SERVICE_ACCOUNT_JSON?: string;

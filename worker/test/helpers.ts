@@ -62,6 +62,12 @@ export function mockAnthropicToolResponse(
   };
 }
 
+// The AI Gateway Unified-Billing endpoint the client calls — tests intercept
+// this with fetchMock.
+export const GATEWAY_HOST = "https://gateway.ai.cloudflare.com";
+export const GATEWAY_PATH =
+  "/v1/0e2f38a4dd1f2052809b0d876dcc790e/nimaz/anthropic/v1/messages";
+
 let saCounter = 0;
 
 /** Generate an RSA PKCS#8 PEM so integrity tests can sign a real JWT.

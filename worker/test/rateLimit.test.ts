@@ -6,6 +6,8 @@ import {
   utcDayStamp,
 } from "../src/middleware/rateLimit";
 import {
+  GATEWAY_HOST,
+  GATEWAY_PATH,
   makeAssistInput,
   makeAssistOutput,
   makeEnvelope,
@@ -31,11 +33,11 @@ describe("rate limiting (integration)", () => {
   });
   afterEach(() => fetchMock.assertNoPendingInterceptors());
 
-  function stubAnthropic(times: number) {
+  function stubGateway(times: number) {
     for (let i = 0; i < times; i++) {
       fetchMock
-        .get("https://api.anthropic.com")
-        .intercept({ path: "/v1/messages", method: "POST" })
+        .get(GATEWAY_HOST)
+        .intercept({ path: GATEWAY_PATH, method: "POST" })
         .reply(200, mockAnthropicToolResponse(makeAssistOutput()));
     }
   }
@@ -59,7 +61,7 @@ describe("rate limiting (integration)", () => {
 
   it("allows up to the device cap then returns 429 with retryAfterSeconds", async () => {
     // Cap is 3 → first three succeed, the fourth is rate limited.
-    stubAnthropic(3);
+    stubGateway(3);
     const dev = "rl-device-A";
     for (let i = 0; i < 3; i++) {
       const ok = await invoke(dev);
@@ -82,7 +84,7 @@ describe("rate limiting (integration)", () => {
       GOOGLE_SERVICE_ACCOUNT_JSON: undefined,
       UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
     };
-    stubAnthropic(2);
+    stubGateway(2);
     const dev = "rl-device-unverified";
     for (let i = 0; i < 2; i++) {
       const ok = await invoke(dev, unverifiedEnv);
