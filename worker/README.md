@@ -173,9 +173,12 @@ curl -s http://localhost:8787/v1/invoke \
 
 Expected: a JSON body with `answer`, `quranRefs` (e.g. `["2:153"]`), `terms`,
 and `confidence`, plus an `x-nimaz-usage` response header with the token
-usage. Run the same question twice and check the second response's header
-shows `cache_read_input_tokens > 0` — that proves the system prompt's
-`cache_control` survives the gateway.
+usage. A valid body proves the forced `submit_result` tool survived the
+gateway. Note on caching: `cache_read_input_tokens` in the header is expected
+to be 0 for now — Haiku 4.5 only caches prefixes ≥ 4096 tokens and this
+capability's prompt + tool schema is well below that, so `cache_control` is
+currently inert (it engages automatically if the prompt grows). CI runs this
+same check after every deploy (`smoke-test` job in `worker_deploy.yml`).
 
 Health check:
 

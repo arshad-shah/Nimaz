@@ -197,11 +197,14 @@ payloads. The Worker stores nothing.
   Pricing: **$1 / MTok input**, **$5 / MTok output**; cached input reads billed
   at **10%** of the input rate.
 - Each submit is **one** call: `search-assist` (`max_tokens` 700,
-  temperature 0.2). The system prompt is marked `cache_control: ephemeral`,
-  so after the first call it is read from cache at ~10% cost — the binding
-  forwards the Anthropic-native request, so forced tool use and prompt caching
-  both survive the gateway. One question consumes one invocation of the
-  per-device daily cap (the old design burned two).
+  temperature 0.2). The binding forwards the Anthropic-native request, so the
+  forced `submit_result` tool and the `cache_control` marker both survive the
+  gateway. Caching caveat: Haiku 4.5 only caches prompt prefixes ≥ **4096
+  tokens**, and this capability's system prompt + tool schema is well below
+  that — so the marker is currently inert (no cache entry, full input price,
+  ~$0.002/question either way). It engages automatically if the prompt grows.
+  One question consumes one invocation of the per-device daily cap (the old
+  design burned two).
 - Guards: tiered per-device daily cap (`DAILY_DEVICE_LIMIT` 20 verified /
   `UNVERIFIED_DAILY_DEVICE_LIMIT` 5) and global daily cap
   (`DAILY_GLOBAL_LIMIT`, 500), both KV-backed in the Worker. The monthly USD
@@ -262,11 +265,13 @@ committed to the repo.
    also reachable at its `*.workers.dev` URL.
 8. Keep `SKIP_ATTESTATION=false` in production. Use `--var SKIP_ATTESTATION:true`
    only for local `wrangler dev` testing (it forces the verified tier).
-9. Smoke test (post-deploy): ask the same question twice and check the second
-   response's `x-nimaz-usage` header shows `cache_read_input_tokens > 0`
-   (prompt caching survives the gateway) and that the answer parses (forced
-   `submit_result` tool survives). Confirm in the AI Gateway dashboard that the
-   request is logged with a cost and credits were deducted.
+9. Smoke test (post-deploy): CI runs one automatically (`smoke-test` job in
+   `worker_deploy.yml`) — it asks the same question twice and asserts a valid
+   `{answer, quranRefs, terms, confidence}` body (forced `submit_result` tool
+   survives the gateway) and prints the `x-nimaz-usage` headers.
+   `cache_read_input_tokens` is expected to be 0 (prompt below Haiku 4.5's
+   4096-token cacheable minimum). Manually, confirm in the AI Gateway
+   dashboard that the request is logged with a cost and credits were deducted.
 10. One-time cleanup once the switch is verified in production:
     `npx wrangler secret delete ANTHROPIC_API_KEY` — the old direct-Anthropic
     secret is no longer read by any code.
