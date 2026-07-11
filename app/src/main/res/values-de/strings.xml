@@ -1300,13 +1300,9 @@
     <string name="ai_ask_placeholder">Frage zu Koran, Hadith oder Duas…</string>
     <string name="ai_answer_section">KI-Antwort</string>
     <string name="ai_thinking">Antwort wird gesucht…</string>
-    <string name="ai_enable_hint">Aktiviere KI-Antworten in den Sucheinstellungen</string>
-    <string name="ai_proof_section">Belege aus deiner Bibliothek</string>
     <string name="ai_confidence_high">Hohe Zuverlässigkeit</string>
     <string name="ai_confidence_medium">Mittlere Zuverlässigkeit</string>
     <string name="ai_confidence_low">Geringe Zuverlässigkeit</string>
-    <string name="ai_no_citations">Keine direkten Vers-Zitate für diese Antwort — sieh dir die verwandten Ergebnisse unten an.</string>
-    <string name="ai_footer_disclaimer">KI-generiert — kann Fehler enthalten. Überprüfe die zitierten Quellen. Keine Fatwa.</string>
     <string name="ai_try_again">Erneut versuchen</string>
     <string name="ai_error_rate_limited">Du hast das heutige Fragenlimit erreicht. Bitte versuche es morgen erneut.</string>
     <string name="ai_error_rate_limited_retry">Du hast das heutige Fragenlimit erreicht. Versuche es in etwa %1$s erneut.</string>

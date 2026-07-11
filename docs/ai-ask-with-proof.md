@@ -2,7 +2,11 @@
 
 An **opt-in**, privacy-disclosed AI layer over Global Search. The user types
 into Global Search's **single search bar** — the same text drives both keyword
-search and, on submit, the AI ask (there is no separate "ask" field).
+search (as-you-type) and the AI ask (there is no separate "ask" field). While
+AI is enabled and there is text, the shared `NimazSearchBar` shows a trailing
+**Ask** pill; tapping it — or pressing Enter — submits the question. The
+source filter (All / Qur'an / Hadith / Duas) is **pinned under the search
+bar** and scopes everything below it.
 
 When AI is enabled, each submit makes **one** Worker call (`search-assist`):
 
@@ -10,16 +14,23 @@ When AI is enabled, each submit makes **one** Worker call (`search-assist`):
    mainstream Islamic knowledge and returns (a) the **Quran references** that
    support the answer and (b) related **search terms** for the local library.
 2. **Prove (local)** — the app resolves each returned reference against the
-   LOCAL Quran database. Every reference that resolves becomes a tappable
-   "proof" card showing the **real verse text** with a deep link into the
-   reader; anything that doesn't resolve is dropped silently, so a proof card
-   can never show a verse that doesn't exist.
+   LOCAL Quran database. Every reference that resolves surfaces in the results
+   list as a normal result card marked **"Cited"** (teal left edge + solid
+   teal chip), sorted to the top, deep-linking into the reader like any other
+   Qur'an result; anything that doesn't resolve is dropped silently, so a
+   cited card can never show a verse that doesn't exist.
 3. **Enhance (local)** — the AI's terms run through the smart local search
-   (`SearchLibraryUseCase`) and replace the results list, so the list
+   (`SearchLibraryUseCase`) and fill the rest of the same list, so it
    dynamically shows the Quran/Hadith/Dua records the AI judged relevant.
 
+The answer card itself is deliberately slim — badge, confidence chip, the
+answer text and a trust note. Its grounding lives in the **one merged,
+filterable results list** below it: cited verses first, then related results
+(any related result that duplicates a cited verse is dropped). The pinned
+filter scopes the whole merged list, cited cards included.
+
 There is **no "no supporting sources found" dead end**: the answer stands on
-its own, proof cards show whatever resolved, and the related results are always
+its own, cited cards show whatever resolved, and the related results are always
 explorable. When AI is **off**, only local keyword search runs (no network, no
 behaviour change). AI is **off by default** — a user who never opens Search
 Settings sees nothing leave their device.
@@ -44,9 +55,9 @@ sequenceDiagram
     GW-->>W: native response + usage
     W->>W: validate output, drop malformed refs, log usage
     W-->>App: {answer, quranRefs, terms, confidence}
-    App->>Room: resolve quranRefs → real verses (proof cards)
-    App->>Room: run terms through SearchLibraryUseCase (results list)
-    App-->>U: answer + confidence + proof cards + AI-driven results list
+    App->>Room: resolve quranRefs → real verses ("Cited" result cards)
+    App->>Room: run terms through SearchLibraryUseCase (related results)
+    App-->>U: answer + confidence + one merged list (cited first, then related)
 ```
 
 One Worker call per submit; everything else is local. On the `W → GW → Claude`
@@ -74,8 +85,9 @@ The AI Gateway spend limit remains the hard cost backstop against abuse.
 Layers (Android):
 
 ```
-presentation/screens/search/SearchScreen.kt         shared search+ask input bar; bridges AI terms → list
-presentation/screens/search/AskComponents.kt        AI answer card / proof rows / loading / error+retry
+presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
+presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
+presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error / AI-off discovery card
 presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
 presentation/viewmodel/AskViewModel                 ask state machine (exposes relatedTerms)
 presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)

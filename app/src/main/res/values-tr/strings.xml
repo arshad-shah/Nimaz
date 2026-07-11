@@ -1304,13 +1304,9 @@
     <string name="ai_ask_placeholder">Kur\'an, Hadis veya Dua hakkında sorun…</string>
     <string name="ai_answer_section">Yapay zeka yanıtı</string>
     <string name="ai_thinking">Yanıt aranıyor…</string>
-    <string name="ai_enable_hint">Yapay zekâ yanıtlarını Arama ayarlarında etkinleştirin</string>
-    <string name="ai_proof_section">Kitaplığınızdan kanıtlar</string>
     <string name="ai_confidence_high">Yüksek güven</string>
     <string name="ai_confidence_medium">Orta güven</string>
     <string name="ai_confidence_low">Düşük güven</string>
-    <string name="ai_no_citations">Bu yanıt için doğrudan ayet alıntısı yok — aşağıdaki ilgili sonuçlara göz atın.</string>
-    <string name="ai_footer_disclaimer">Yapay zekâ tarafından oluşturuldu — hata içerebilir. Alıntılanan kaynaklarla doğrulayın. Fetva değildir.</string>
     <string name="ai_try_again">Tekrar dene</string>
     <string name="ai_error_rate_limited">Bugünkü soru sınırına ulaştınız. Lütfen yarın tekrar deneyin.</string>
     <string name="ai_error_rate_limited_retry">Bugünkü soru sınırına ulaştınız. Yaklaşık %1$s içinde tekrar deneyin.</string>

@@ -8,7 +8,6 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,23 +17,20 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.WifiOff
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.PauseCircle
+import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -48,70 +44,24 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
-import com.arshadshah.nimaz.domain.model.Proof
-import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.viewmodel.AskPhase
-import com.arshadshah.nimaz.presentation.viewmodel.AskUiState
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 /**
- * Adds the "Ask with Proof" experience to the Search screen's LazyColumn.
+ * The "Ask with Proof" hero cards for the Search screen: thinking, the
+ * answer itself, errors, and the AI-off discovery card.
  *
- * The question is entered through the screen's single shared search bar — this
- * section renders only the *output* of an ask. Gated on [AskUiState.aiEnabled]:
- * when off it shows a subtle, dismissible hint; when on it renders one hero
- * card per phase — thinking, answer + proof verses, or a friendly error with
- * retry. Proof cards are real records from the local library that deep-link
- * into the readers.
+ * The question is entered through the screen's single shared search bar, and
+ * — since the v2 redesign — the cited proof verses are NOT rendered here:
+ * [AskAnswerCard] carries only the answer + confidence + trust note, and
+ * `SearchScreen` merges the proofs into the one filterable results list as
+ * regular result cards marked "Cited".
  */
-fun LazyListScope.askSection(
-    state: AskUiState,
-    onNavigateToProof: (Route) -> Unit,
-    onNavigateToSearchSettings: () -> Unit,
-    onDismissHint: () -> Unit,
-    onRetry: () -> Unit,
-) {
-    if (!state.aiEnabled) {
-        if (!state.hintDismissed) {
-            item(key = "ai_hint") {
-                AskDisabledHint(
-                    onOpenSettings = onNavigateToSearchSettings,
-                    onDismiss = onDismissHint,
-                )
-            }
-        }
-        return
-    }
-
-    when (val phase = state.phase) {
-        AskPhase.Idle -> Unit
-
-        AskPhase.Loading -> {
-            item(key = "ai_card") { AskLoadingCard() }
-        }
-
-        is AskPhase.Answer -> {
-            item(key = "ai_card") {
-                AskAnswerCard(
-                    answer = phase.answer,
-                    confidence = phase.confidence,
-                    proofs = phase.proofs,
-                    onNavigateToProof = onNavigateToProof,
-                )
-            }
-        }
-
-        is AskPhase.Error -> {
-            item(key = "ai_card") { AskErrorCard(error = phase.error, onRetry = onRetry) }
-        }
-    }
-}
 
 /** Sparkle avatar on a soft theme-derived gradient — the AI section's marker. */
 @Composable
@@ -139,27 +89,26 @@ private fun AiBadge(modifier: Modifier = Modifier) {
     }
 }
 
+/** Thin teal→purple strip along the card's top edge — marks AI surfaces. */
 @Composable
-private fun AskHeaderRow(trailing: @Composable () -> Unit = {}) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        AiBadge()
-        Text(
-            text = stringResource(R.string.ai_answer_section),
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier
-                .padding(start = 12.dp)
-                .weight(1f),
-        )
-        trailing()
-    }
+private fun AiAccentStrip() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(3.dp)
+            .background(
+                Brush.horizontalGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primary,
+                        MaterialTheme.colorScheme.tertiary,
+                    ),
+                ),
+            ),
+    )
 }
 
 @Composable
-private fun AskLoadingCard() {
+internal fun AskLoadingCard() {
     // Gentle breathing on the badge while the answer is generated.
     val transition = rememberInfiniteTransition(label = "ai_loading")
     val pulse by transition.animateFloat(
@@ -172,32 +121,49 @@ private fun AskLoadingCard() {
         label = "ai_loading_pulse",
     )
     NimazCard(style = NimazCardStyle.ELEVATED, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                AiBadge(modifier = Modifier.alpha(pulse))
-                Text(
-                    text = stringResource(R.string.ai_thinking),
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(start = 12.dp),
+        Column {
+            AiAccentStrip()
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AiBadge(modifier = Modifier.alpha(pulse))
+                    Text(
+                        text = stringResource(R.string.ai_thinking),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+                // Skeleton of the incoming answer.
+                listOf(0.92f, 0.98f, 0.7f).forEach { widthFraction ->
+                    Box(
+                        modifier = Modifier
+                            .padding(top = 10.dp)
+                            .fillMaxWidth(widthFraction)
+                            .height(11.dp)
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)),
+                    )
+                }
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp)
+                        .clip(RoundedCornerShape(2.dp)),
                 )
             }
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .clip(RoundedCornerShape(2.dp)),
-            )
         }
     }
 }
 
+/**
+ * The AI answer alone — badge + "Answer" + confidence chip, the answer text,
+ * and the trust note. The cited verses live in the results list below, so the
+ * card deliberately carries no proof section.
+ */
 @Composable
-private fun AskAnswerCard(
+internal fun AskAnswerCard(
     answer: String,
     confidence: AnswerConfidence,
-    proofs: List<Proof>,
-    onNavigateToProof: (Route) -> Unit,
 ) {
     NimazCard(
         style = NimazCardStyle.ELEVATED,
@@ -205,219 +171,247 @@ private fun AskAnswerCard(
             .fillMaxWidth()
             .animateContentSize(),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            AskHeaderRow(trailing = { ConfidenceChip(confidence) })
+        Column {
+            AiAccentStrip()
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    AiBadge()
+                    Text(
+                        text = stringResource(R.string.ai_answer_section),
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier
+                            .padding(start = 12.dp)
+                            .weight(1f),
+                    )
+                    ConfidenceChip(confidence)
+                }
 
-            Text(
-                text = answer,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-
-            if (proofs.isEmpty()) {
                 Text(
-                    text = stringResource(R.string.ai_no_citations),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = answer,
+                    style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-            } else {
+
                 HorizontalDivider(
-                    modifier = Modifier.padding(vertical = 16.dp),
+                    modifier = Modifier.padding(top = 14.dp),
                     color = MaterialTheme.colorScheme.outlineVariant,
                 )
-                Text(
-                    text = stringResource(R.string.ai_proof_section),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Column(
-                    modifier = Modifier.padding(top = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    proofs.forEachIndexed { index, proof ->
-                        ProofRow(
-                            index = index + 1,
-                            proof = proof,
-                            onClick = { onNavigateToProof(proof.route) },
-                        )
-                    }
+                Row(modifier = Modifier.padding(top = 12.dp)) {
+                    Icon(
+                        imageVector = Icons.Outlined.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier
+                            .padding(top = 1.dp)
+                            .size(14.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.ai_trust_note),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
                 }
             }
-
-            Text(
-                text = stringResource(R.string.ai_footer_disclaimer),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 12.dp),
-            )
         }
     }
 }
 
 @Composable
 private fun ConfidenceChip(confidence: AnswerConfidence) {
+    // High reads as trust (teal), medium as caution (amber), low as muted.
     val (label, color) = when (confidence) {
         AnswerConfidence.HIGH ->
             stringResource(R.string.ai_confidence_high) to MaterialTheme.colorScheme.primary
 
         AnswerConfidence.MEDIUM ->
-            stringResource(R.string.ai_confidence_medium) to MaterialTheme.colorScheme.tertiary
+            stringResource(R.string.ai_confidence_medium) to NimazColors.Warning
 
         AnswerConfidence.LOW ->
             stringResource(R.string.ai_confidence_low) to MaterialTheme.colorScheme.onSurfaceVariant
     }
-    Box(
+    Row(
         modifier = Modifier
             .clip(RoundedCornerShape(8.dp))
             .background(color.copy(alpha = 0.12f))
             .padding(horizontal = 10.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
+        Box(
+            modifier = Modifier
+                .size(6.dp)
+                .clip(CircleShape)
+                .background(color),
+        )
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = color,
+            modifier = Modifier.padding(start = 5.dp),
         )
     }
 }
 
-/** One cited verse from the local library — tappable, deep-links to the reader. */
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * Discovery card shown on Global Search while AI answers are off: what the
+ * feature does, the privacy line, and enable / not-now actions.
+ */
 @Composable
-private fun ProofRow(index: Int, proof: Proof, onClick: () -> Unit) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
-            Box(
-                modifier = Modifier
-                    .size(24.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    text = index.toString(),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
-            Spacer(modifier = Modifier.width(10.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = proof.source.icon(),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(16.dp),
-                    )
-                    Text(
-                        text = proof.meta,
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(start = 6.dp),
-                    )
-                }
-                Text(
-                    text = proof.displayText,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 4.dp),
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun AskDisabledHint(
+internal fun AskDiscoveryCard(
     onOpenSettings: () -> Unit,
     onDismiss: () -> Unit,
 ) {
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        onClick = onOpenSettings,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Row(
-            modifier = Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Icon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-            )
-            Text(
-                text = stringResource(R.string.ai_enable_hint),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 12.dp),
-            )
-            IconButton(onClick = onDismiss) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = stringResource(R.string.dismiss),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+    NimazCard(style = NimazCardStyle.ELEVATED, modifier = Modifier.fillMaxWidth()) {
+        Column {
+            AiAccentStrip()
+            Column(modifier = Modifier.padding(16.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    AiBadge()
+                    Text(
+                        text = stringResource(R.string.ai_discover_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 12.dp),
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.ai_discover_body),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp),
                 )
+                Row(
+                    modifier = Modifier
+                        .padding(top = 12.dp)
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(11.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Shield,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(top = 1.dp)
+                            .size(14.dp),
+                    )
+                    Text(
+                        text = stringResource(R.string.ai_discover_privacy),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(start = 8.dp),
+                    )
+                }
+                Row(
+                    modifier = Modifier.padding(top = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    NimazButton(
+                        text = stringResource(R.string.ai_discover_enable),
+                        onClick = onOpenSettings,
+                        variant = NimazButtonVariant.FILLED,
+                        leadingIcon = Icons.Default.AutoAwesome,
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    NimazButton(
+                        text = stringResource(R.string.ai_discover_dismiss),
+                        onClick = onDismiss,
+                        variant = NimazButtonVariant.TEXT,
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
-    val message = when (error) {
+internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
+    val icon: ImageVector
+    val title: String
+    val body: String
+    when (error) {
         is AiError.RateLimited -> {
+            icon = Icons.Default.Schedule
+            title = stringResource(R.string.ai_error_rate_limited_title)
             val retry = error.retryAfterSeconds
-            if (retry != null) {
+            body = if (retry != null) {
                 stringResource(R.string.ai_error_rate_limited_retry, formatRetry(retry))
             } else {
                 stringResource(R.string.ai_error_rate_limited)
             }
         }
 
-        AiError.BudgetExceeded -> stringResource(R.string.ai_error_budget)
-        AiError.Network -> stringResource(R.string.ai_error_network)
-        is AiError.Invalid -> stringResource(R.string.ai_error_invalid)
-        AiError.Unknown -> stringResource(R.string.ai_error_unknown)
+        AiError.BudgetExceeded -> {
+            icon = Icons.Outlined.PauseCircle
+            title = stringResource(R.string.ai_error_budget_title)
+            body = stringResource(R.string.ai_error_budget)
+        }
+
+        AiError.Network -> {
+            icon = Icons.Default.WifiOff
+            title = stringResource(R.string.ai_error_network_title)
+            body = stringResource(R.string.ai_error_network)
+        }
+
+        is AiError.Invalid -> {
+            icon = Icons.Outlined.Info
+            title = stringResource(R.string.ai_error_invalid_title)
+            body = stringResource(R.string.ai_error_invalid)
+        }
+
+        AiError.Unknown -> {
+            icon = Icons.Outlined.Info
+            title = stringResource(R.string.ai_error_unknown_title)
+            body = stringResource(R.string.ai_error_unknown)
+        }
     }
     // Retrying can only help for transient failures — not for daily/budget caps.
     val retryable = error is AiError.Network || error is AiError.Unknown
     NimazCard(style = NimazCardStyle.FILLED, modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
-            AskHeaderRow()
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.errorContainer),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.size(21.dp),
+                )
+            }
             Text(
-                text = message,
+                text = title,
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            Text(
+                text = body,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 12.dp),
+                modifier = Modifier.padding(top = 4.dp),
             )
             if (retryable) {
                 Spacer(modifier = Modifier.height(8.dp))
                 NimazButton(
                     text = stringResource(R.string.ai_try_again),
                     onClick = onRetry,
-                    variant = NimazButtonVariant.TEXT,
+                    variant = NimazButtonVariant.FILLED,
                     leadingIcon = Icons.Default.Refresh,
                 )
             }
         }
     }
-}
-
-private fun ProofSource.icon(): ImageVector = when (this) {
-    ProofSource.QURAN -> Icons.AutoMirrored.Filled.MenuBook
-    ProofSource.HADITH -> Icons.Default.Mosque
-    ProofSource.DUA -> Icons.Default.SelfImprovement
 }
 
 /** Turn retry seconds into a coarse "minutes"/"hours" figure for display. */
