@@ -1301,13 +1301,9 @@
     <string name="ai_ask_placeholder">Posez une question sur le Coran, les Hadiths ou les Douas…</string>
     <string name="ai_answer_section">Réponse de l\'IA</string>
     <string name="ai_thinking">Recherche d\'une réponse…</string>
-    <string name="ai_enable_hint">Activez les réponses de l\'IA dans les paramètres de recherche</string>
-    <string name="ai_proof_section">Preuves de votre bibliothèque</string>
     <string name="ai_confidence_high">Confiance élevée</string>
     <string name="ai_confidence_medium">Confiance moyenne</string>
     <string name="ai_confidence_low">Confiance faible</string>
-    <string name="ai_no_citations">Aucune citation directe de verset pour cette réponse — explorez les résultats associés ci-dessous.</string>
-    <string name="ai_footer_disclaimer">Généré par IA — peut contenir des erreurs. Vérifiez avec les sources citées. Pas une fatwa.</string>
     <string name="ai_try_again">Réessayer</string>
     <string name="ai_error_rate_limited">Vous avez atteint la limite de questions pour aujourd\'hui. Veuillez réessayer demain.</string>
     <string name="ai_error_rate_limited_retry">Vous avez atteint la limite de questions pour aujourd\'hui. Réessayez dans environ %1$s.</string>

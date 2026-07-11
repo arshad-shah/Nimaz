@@ -588,8 +588,19 @@
 
     <!-- Search Screen -->
     <string name="search_title">Search</string>
-    <string name="search_placeholder">Search Quran, Hadith, Duas…</string>
-    <string name="search_or_ask_placeholder">Search or ask a question…</string>
+    <string name="search_placeholder">Search the Qur\'an, Hadith &amp; duas</string>
+    <string name="search_or_ask_placeholder">Search or ask about the Qur\'an, Hadith &amp; duas</string>
+    <string name="search_ask_button">Ask</string>
+    <string name="search_try_asking">Try asking</string>
+    <string name="search_recent">Recent</string>
+    <string name="search_typing_hint">Results update as you type · Enter to ask for an answer with sources</string>
+    <string name="search_matches_format">%d matches</string>
+    <string name="search_answer_count_format">%1$d in your library · %2$d cited in the answer</string>
+    <string name="search_cited_chip">Cited</string>
+    <string name="ask_example_1">What does the Qur\'an say about patience?</string>
+    <string name="ask_example_2">Duas for anxiety and worry</string>
+    <string name="ask_example_3">Verses about gratitude</string>
+    <string name="ask_example_4">Why is intention important in worship?</string>
     <string name="recent_searches">Recent Searches</string>
     <string name="clear_recent">Clear Recent</string>
     <string name="results_found_format">%d results found</string>
@@ -1458,20 +1469,27 @@
 
     <string name="ai_ask_a_question">Ask a question</string>
     <string name="ai_ask_placeholder">Ask about Quran, Hadith, or Duas…</string>
-    <string name="ai_answer_section">AI answer</string>
+    <string name="ai_answer_section">Answer</string>
     <string name="ai_thinking">Finding an answer…</string>
-    <string name="ai_enable_hint">Enable AI answers in Search settings</string>
-    <string name="ai_proof_section">Proof from your library</string>
     <string name="ai_confidence_high">High confidence</string>
     <string name="ai_confidence_medium">Medium confidence</string>
     <string name="ai_confidence_low">Low confidence</string>
-    <string name="ai_no_citations">No direct verse citations for this answer — explore the related results below.</string>
-    <string name="ai_footer_disclaimer">AI-generated — may contain mistakes. Verify against the cited sources. Not a fatwa.</string>
+    <string name="ai_trust_note">AI-generated summary — check it against the cited verses below. It describes what the sources say and isn\'t a fatwa.</string>
+    <string name="ai_discover_title">Get answers, backed by verses</string>
+    <string name="ai_discover_body">Ask a question in plain words and get a short answer supported by verses from your own library — every citation is a real ayah you can open and read.</string>
+    <string name="ai_discover_privacy">Only your question is sent. The verses and results are matched on your device, and questions are never used for analytics.</string>
+    <string name="ai_discover_enable">Turn on AI answers</string>
+    <string name="ai_discover_dismiss">Not now</string>
     <string name="ai_try_again">Try again</string>
-    <string name="ai_error_rate_limited">You\'ve reached today\'s question limit. Please try again tomorrow.</string>
-    <string name="ai_error_rate_limited_retry">You\'ve reached today\'s question limit. Try again in about %1$s.</string>
-    <string name="ai_error_budget">AI is resting for now. Please try again later.</string>
-    <string name="ai_error_network">Couldn\'t reach the AI service. Check your connection and try again.</string>
-    <string name="ai_error_invalid">That question couldn\'t be processed. Try rewording it.</string>
-    <string name="ai_error_unknown">Something went wrong generating the answer. Please try again.</string>
+    <string name="ai_error_network_title">Couldn\'t reach the answer service</string>
+    <string name="ai_error_network">You\'re offline, or the connection dropped. Keyword search still works offline — or try the answer again.</string>
+    <string name="ai_error_rate_limited_title">You\'ve reached today\'s question limit</string>
+    <string name="ai_error_rate_limited">You can ask again tomorrow. Keyword search across the Qur\'an, Hadith and duas still works offline in the meantime.</string>
+    <string name="ai_error_rate_limited_retry">You can ask again in about %1$s. Keyword search across the Qur\'an, Hadith and duas still works offline in the meantime.</string>
+    <string name="ai_error_budget_title">AI answers are paused for now</string>
+    <string name="ai_error_budget">Answers are temporarily unavailable while shared usage resets. Keyword search still works offline, and your library is fully available.</string>
+    <string name="ai_error_invalid_title">That question couldn\'t be processed</string>
+    <string name="ai_error_invalid">Try rewording the question and ask again.</string>
+    <string name="ai_error_unknown_title">Something went wrong</string>
+    <string name="ai_error_unknown">The answer couldn\'t be generated. Please try again.</string>
 </resources>

@@ -1302,13 +1302,9 @@
     <string name="ai_ask_placeholder">Tanya tentang Quran, Hadis, atau Doa…</string>
     <string name="ai_answer_section">Jawapan AI</string>
     <string name="ai_thinking">Mencari jawapan…</string>
-    <string name="ai_enable_hint">Dayakan jawapan AI dalam tetapan Carian</string>
-    <string name="ai_proof_section">Bukti daripada pustaka anda</string>
     <string name="ai_confidence_high">Keyakinan tinggi</string>
     <string name="ai_confidence_medium">Keyakinan sederhana</string>
     <string name="ai_confidence_low">Keyakinan rendah</string>
-    <string name="ai_no_citations">Tiada petikan ayat langsung untuk jawapan ini — teroka hasil berkaitan di bawah.</string>
-    <string name="ai_footer_disclaimer">Dijana AI — mungkin mengandungi kesilapan. Sahkan dengan sumber yang dipetik. Bukan fatwa.</string>
     <string name="ai_try_again">Cuba lagi</string>
     <string name="ai_error_rate_limited">Anda telah mencapai had soalan hari ini. Sila cuba lagi esok.</string>
     <string name="ai_error_rate_limited_retry">Anda telah mencapai had soalan hari ini. Cuba lagi dalam kira-kira %1$s.</string>
