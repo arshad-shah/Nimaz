@@ -3,9 +3,10 @@ import { z } from "zod";
 // ── search-assist: input ─────────────────────────────────────────────────────
 // The app's single AI capability: one call per submitted question. Only the
 // question text is sent — no passages, no retrieval round-trip. The model
-// answers from mainstream Islamic knowledge and returns the Quran references
-// that support the answer plus search terms; the app then resolves both against
-// its LOCAL database (real records become the proof cards and the results list).
+// answers from mainstream Islamic knowledge and returns the Quran and Hadith
+// references that support the answer plus search terms; the app then resolves
+// all of them against its LOCAL database (real records become the proof cards
+// and the results list).
 
 export const SearchAssistInputSchema = z.object({
   question: z.string().min(3).max(500),
@@ -22,6 +23,13 @@ export const SearchAssistOutputSchema = z.object({
   // mushaf numbering). The app resolves each against its local Quran database;
   // anything that doesn't resolve is dropped, so only real verses ever surface.
   quranRefs: z.array(z.string()).max(8),
+  // Hadith references that support the answer, "collection:number" where
+  // collection is one of the six canonical collections the app ships
+  // (bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah) and number is the
+  // hadith's standard reference number in that collection. Resolved against
+  // the local Hadith database exactly like quranRefs — unresolvable refs are
+  // dropped. Defaulted so an output without the field still validates.
+  hadithRefs: z.array(z.string()).max(6).default([]),
   // Short English keywords / 2-word phrases (incl. Arabic transliterations)
   // the app runs through its local Quran/Hadith/Dua search to build the
   // related-results list.
@@ -47,6 +55,12 @@ export const SEARCH_ASSIST_TOOL_JSON_SCHEMA = {
       description:
         "Up to 8 real Quran ayah references that directly support the answer, each as 'surah:ayah' (e.g. '2:153') in standard mushaf numbering, ordered by relevance. Cite only references you are certain exist and genuinely support the answer — the app displays the actual verse text beside the answer. When unsure, cite fewer. Empty array if none apply.",
     },
+    hadithRefs: {
+      type: "array",
+      items: { type: "string" },
+      description:
+        "Up to 6 real hadith references that directly support the answer, each as 'collection:number' (e.g. 'bukhari:6018') where collection is exactly one of: bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah — and number is the hadith's standard reference number in that collection (sunnah.com numbering), ordered by relevance. Cite only hadiths you are certain exist with that number and genuinely support the answer — the app displays the actual hadith text beside the answer, so a wrong number is immediately visible. When unsure, cite fewer. Empty array if none apply.",
+    },
     terms: {
       type: "array",
       items: { type: "string" },
@@ -57,8 +71,8 @@ export const SEARCH_ASSIST_TOOL_JSON_SCHEMA = {
       type: "string",
       enum: ["high", "medium", "low"],
       description:
-        "high = well-established and directly supported by the cited ayat; medium = partial support; low = indirect or uncertain.",
+        "high = well-established and directly supported by the cited sources; medium = partial support; low = indirect or uncertain.",
     },
   },
-  required: ["answer", "quranRefs", "terms", "confidence"],
+  required: ["answer", "quranRefs", "hadithRefs", "terms", "confidence"],
 } as const;

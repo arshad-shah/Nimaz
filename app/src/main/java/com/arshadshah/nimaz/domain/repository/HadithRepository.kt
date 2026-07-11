@@ -26,6 +26,13 @@ interface HadithRepository {
     fun getHadithsByBook(bookId: String): Flow<List<Hadith>>
     suspend fun getHadithById(hadithId: String): Hadith?
     suspend fun getHadithByNumber(bookId: String, hadithNumber: Int): Hadith?
+
+    /**
+     * Looks a hadith up by its canonical `collection:number` reference (e.g.
+     * "bukhari:6018") — the `reference` value stored on every hadith record.
+     * Used to resolve AI-cited hadith references into local proof records.
+     */
+    suspend fun getHadithByReference(reference: String): Hadith?
     fun getHadithsByGrade(grade: HadithGrade): Flow<List<Hadith>>
 
     // Search operations

@@ -1,4 +1,4 @@
-import type { ZodType } from "zod";
+import type { ZodType, ZodTypeDef } from "zod";
 
 // ── Anthropic Messages API shapes (only the fields we use) ──────────────────
 
@@ -48,7 +48,9 @@ export interface AnthropicResponse {
 export interface Capability<I, O> {
   id: string;
   inputSchema: ZodType<I>;
-  outputSchema: ZodType<O>;
+  // The schema's input type is left open so output schemas may use defaults
+  // (z.default(...)), where the pre-parse shape differs from the parsed O.
+  outputSchema: ZodType<O, ZodTypeDef, unknown>;
   model: string;
   maxOutputTokens: number;
   buildRequest(input: I, env: Env): AnthropicMessagesRequest;

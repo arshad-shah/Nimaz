@@ -42,6 +42,9 @@ interface HadithDao {
     @Query("SELECT * FROM hadiths WHERE book_id = :bookId AND number_in_book = :hadithNumber")
     suspend fun getHadithByNumber(bookId: Int, hadithNumber: Int): HadithEntity?
 
+    @Query("SELECT * FROM hadiths WHERE reference = :reference LIMIT 1")
+    suspend fun getHadithByReference(reference: String): HadithEntity?
+
     @Query("SELECT * FROM hadiths WHERE text_english LIKE '%' || :query || '%' OR text_arabic LIKE '%' || :query || '%'")
     fun searchHadiths(query: String): Flow<List<HadithEntity>>
 

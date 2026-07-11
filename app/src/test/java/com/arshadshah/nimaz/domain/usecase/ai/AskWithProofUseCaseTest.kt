@@ -5,13 +5,20 @@ import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.Hadith
+import com.arshadshah.nimaz.domain.model.HadithBook
+import com.arshadshah.nimaz.domain.model.HadithRef
+import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.SearchAssist
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
 import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.google.common.truth.Truth.assertThat
 import io.mockk.coEvery
@@ -28,6 +35,9 @@ class AskWithProofUseCaseTest {
     private val getAyahsBySurahUC = mockk<GetAyahsBySurahUseCase>()
     private val getSurahByNumberUC = mockk<GetSurahByNumberUseCase>()
     private val quranUseCases = mockk<QuranUseCases>()
+    private val getHadithByReferenceUC = mockk<GetHadithByReferenceUseCase>()
+    private val getBookByIdUC = mockk<GetBookByIdUseCase>()
+    private val hadithUseCases = mockk<HadithUseCases>()
 
     private lateinit var useCase: AskWithProofUseCase
 
@@ -35,7 +45,9 @@ class AskWithProofUseCaseTest {
     fun setUp() {
         every { quranUseCases.getAyahsBySurah } returns getAyahsBySurahUC
         every { quranUseCases.getSurahByNumber } returns getSurahByNumberUC
-        useCase = AskWithProofUseCase(aiRepository, quranUseCases)
+        every { hadithUseCases.getHadithByReference } returns getHadithByReferenceUC
+        every { hadithUseCases.getBookById } returns getBookByIdUC
+        useCase = AskWithProofUseCase(aiRepository, quranUseCases, hadithUseCases)
     }
 
     @Test
@@ -86,6 +98,55 @@ class AskWithProofUseCaseTest {
     }
 
     @Test
+    fun `cited hadith refs resolve to real local records after the quran proofs`() = runTest {
+        coEvery { aiRepository.assist(any()) } returns Result.success(
+            assist(
+                refs = listOf(CitationId.Quran(2, 153)),
+                hadithRefs = listOf(HadithRef("bukhari", 6018)),
+            ),
+        )
+        every { getAyahsBySurahUC.invoke(2) } returns flowOf(listOf(ayah(2, 153)))
+        coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
+        coEvery { getHadithByReferenceUC.invoke("bukhari:6018") } returns
+            hadith(id = "6041", numberInBook = 6018)
+        coEvery { getBookByIdUC.invoke("1") } returns book()
+
+        val outcome = useCase("q?") as AskWithProofUseCase.Outcome.Answered
+
+        // Quran proofs first, then hadith proofs — the proof carries the LOCAL
+        // hadith id so the results list can dedupe it, plus a reader deep link.
+        assertThat(outcome.proofs.map { it.citationId })
+            .containsExactly("quran:2:153", "hadith:6041")
+            .inOrder()
+        val hadithProof = outcome.proofs.last()
+        assertThat(hadithProof.source).isEqualTo(ProofSource.HADITH)
+        assertThat(hadithProof.displayText).isEqualTo("Actions are judged by intentions.")
+        assertThat(hadithProof.meta).isEqualTo("Sahih al-Bukhari • Hadith 6018")
+        assertThat(hadithProof.route).isEqualTo(Route.HadithReader("6041"))
+    }
+
+    @Test
+    fun `hadith refs that do not resolve locally are dropped silently`() = runTest {
+        coEvery { aiRepository.assist(any()) } returns Result.success(
+            assist(
+                refs = emptyList(),
+                hadithRefs = listOf(
+                    HadithRef("bukhari", 6018), // resolves
+                    HadithRef("muslim", 99999), // no such row -> dropped
+                ),
+            ),
+        )
+        coEvery { getHadithByReferenceUC.invoke("bukhari:6018") } returns
+            hadith(id = "6041", numberInBook = 6018)
+        coEvery { getHadithByReferenceUC.invoke("muslim:99999") } returns null
+        coEvery { getBookByIdUC.invoke("1") } returns book()
+
+        val outcome = useCase("q?") as AskWithProofUseCase.Outcome.Answered
+
+        assertThat(outcome.proofs.map { it.citationId }).containsExactly("hadith:6041")
+    }
+
+    @Test
     fun `an answer with no citations is still an answer, never a dead end`() = runTest {
         coEvery { aiRepository.assist(any()) } returns Result.success(
             assist(refs = emptyList(), terms = listOf("charity")),
@@ -121,28 +182,66 @@ class AskWithProofUseCaseTest {
     }
 
     @Test
-    fun `proofs are capped at MAX_PROOFS`() = runTest {
+    fun `proofs are capped at MAX_PROOFS per source`() = runTest {
         val refs = (1..12).map { CitationId.Quran(2, it) }
-        coEvery { aiRepository.assist(any()) } returns Result.success(assist(refs = refs))
+        val hadithRefs = (1..9).map { HadithRef("bukhari", it) }
+        coEvery { aiRepository.assist(any()) } returns
+            Result.success(assist(refs = refs, hadithRefs = hadithRefs))
         every { getAyahsBySurahUC.invoke(2) } returns
             flowOf((1..12).map { ayah(2, it) })
         coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
+        coEvery { getHadithByReferenceUC.invoke(any()) } answers {
+            val number = firstArg<String>().substringAfter(':').toInt()
+            hadith(id = number.toString(), numberInBook = number)
+        }
+        coEvery { getBookByIdUC.invoke("1") } returns book()
 
         val outcome = useCase("q?") as AskWithProofUseCase.Outcome.Answered
 
-        assertThat(outcome.proofs).hasSize(AskWithProofUseCase.MAX_PROOFS)
+        assertThat(outcome.proofs).hasSize(
+            AskWithProofUseCase.MAX_PROOFS + AskWithProofUseCase.MAX_HADITH_PROOFS,
+        )
     }
 
     // ── model builders ────────────────────────────────────────────────────────
 
     private fun assist(
         refs: List<CitationId.Quran>,
+        hadithRefs: List<HadithRef> = emptyList(),
         terms: List<String> = listOf("patience"),
     ) = SearchAssist(
         answer = "Patience is encouraged.",
         quranRefs = refs,
+        hadithRefs = hadithRefs,
         terms = terms,
         confidence = AnswerConfidence.HIGH,
+    )
+
+    private fun hadith(id: String, numberInBook: Int, bookId: String = "1") = Hadith(
+        id = id,
+        bookId = bookId,
+        chapterId = "1_0",
+        hadithNumber = 1,
+        hadithNumberInBook = numberInBook,
+        textArabic = "arabic",
+        textEnglish = "Actions are judged by intentions.",
+        narratorChain = null,
+        narratorName = "Umar ibn al-Khattab",
+        grade = null,
+        gradeArabic = null,
+        reference = "bukhari:$numberInBook",
+    )
+
+    private fun book(id: String = "1", name: String = "Sahih al-Bukhari") = HadithBook(
+        id = id,
+        nameArabic = "صحيح البخاري",
+        nameEnglish = name,
+        authorName = "Imam al-Bukhari",
+        authorArabic = "",
+        totalHadiths = 7563,
+        totalChapters = 97,
+        description = null,
+        displayOrder = 1,
     )
 
     private fun ayah(surah: Int, ayahNumber: Int, translation: String = "Be patient.") = Ayah(

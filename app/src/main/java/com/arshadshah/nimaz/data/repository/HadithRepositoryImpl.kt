@@ -128,6 +128,10 @@ class HadithRepositoryImpl @Inject constructor(
             ?.toDomain()
     }
 
+    override suspend fun getHadithByReference(reference: String): Hadith? {
+        return hadithDao.getHadithByReference(reference)?.toDomain()
+    }
+
     override fun getHadithsByGrade(grade: HadithGrade): Flow<List<Hadith>> {
         val gradeString = when (grade) {
             HadithGrade.SAHIH -> "sahih"

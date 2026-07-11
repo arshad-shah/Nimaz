@@ -18,6 +18,7 @@ data class HadithUseCases(
     val getHadithsByChapter: GetHadithsByChapterUseCase,
     val getHadithById: GetHadithByIdUseCase,
     val getHadithByNumber: GetHadithByNumberUseCase,
+    val getHadithByReference: GetHadithByReferenceUseCase,
     val getHadithsByGrade: GetHadithsByGradeUseCase,
     val getHadithOfTheDay: GetHadithOfTheDayUseCase,
     val searchHadiths: SearchHadithsUseCase,
@@ -58,6 +59,12 @@ class GetHadithByIdUseCase @Inject constructor(private val repository: HadithRep
 class GetHadithByNumberUseCase @Inject constructor(private val repository: HadithRepository) {
     suspend operator fun invoke(bookId: String, hadithNumber: Int): Hadith? =
         repository.getHadithByNumber(bookId, hadithNumber)
+}
+
+/** Canonical `collection:number` lookup — resolves AI-cited hadith references. */
+class GetHadithByReferenceUseCase @Inject constructor(private val repository: HadithRepository) {
+    suspend operator fun invoke(reference: String): Hadith? =
+        repository.getHadithByReference(reference)
 }
 
 class GetHadithsByGradeUseCase @Inject constructor(private val repository: HadithRepository) {

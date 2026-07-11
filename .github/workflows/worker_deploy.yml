@@ -99,8 +99,9 @@ jobs:
       # Sends the same question twice through the real AI-binding → gateway →
       # Anthropic (Unified Billing) path and verifies the two Anthropic-native
       # features the capability depends on:
-      #   - forced tool use: a valid {answer, quranRefs, terms, confidence}
-      #     body means the submit_result tool_use block survived the gateway;
+      #   - forced tool use: a valid {answer, quranRefs, hadithRefs, terms,
+      #     confidence} body means the submit_result tool_use block survived
+      #     the gateway;
       #   - prompt caching: reported from the x-nimaz-usage header. NOTE this
       #     is informational, not an assertion — Haiku 4.5's minimum cacheable
       #     prefix is 4096 tokens and this capability's system prompt + tool
@@ -126,6 +127,7 @@ jobs:
             # Forced tool use survived → strict output contract holds.
             jq -e '.answer | length > 0' "resp$i.json" > /dev/null
             jq -e '.quranRefs | type == "array"' "resp$i.json" > /dev/null
+            jq -e '.hadithRefs | type == "array"' "resp$i.json" > /dev/null
             jq -e '.terms | length > 0' "resp$i.json" > /dev/null
             jq -e '.confidence | IN("high","medium","low")' "resp$i.json" > /dev/null
             echo "usage: $(grep -i '^x-nimaz-usage:' "headers$i.txt" || echo '<missing>')"

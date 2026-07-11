@@ -12,16 +12,43 @@ enum class ProofSource {
 enum class AnswerConfidence { HIGH, MEDIUM, LOW }
 
 /**
+ * A hadith reference as cited by the model — `collection:number`, where
+ * `collection` is the lowercase slug of one of the six canonical collections
+ * the app ships (bukhari, muslim, abudawud, tirmidhi, nasai, ibnmajah) and
+ * `number` is the hadith's standard reference number in that collection. The
+ * combined form matches the `reference` value stored on local hadith records,
+ * so a ref resolves with a single local lookup; anything that doesn't resolve
+ * is dropped silently, exactly like an unresolvable Quran ref.
+ */
+data class HadithRef(val collection: String, val number: Int) {
+    /** The exact `reference` value stored on local hadith records. */
+    val reference: String get() = "$collection:$number"
+
+    companion object {
+        private val FORMAT = Regex("^([a-z]+):([1-9]\\d{0,4})$")
+
+        /** Strict like [CitationId.parse]: malformed refs return null. */
+        fun parse(raw: String): HadithRef? {
+            val match = FORMAT.matchEntire(raw.trim().lowercase()) ?: return null
+            val number = match.groupValues[2].toIntOrNull() ?: return null
+            return HadithRef(match.groupValues[1], number)
+        }
+    }
+}
+
+/**
  * The result of the single `search-assist` Worker call: the model's answer to
- * the question, the Quran references it cited in support, and search terms for
- * the app's LOCAL library. Nothing in here is shown raw — [quranRefs] are
- * resolved against the local Quran database (unresolvable refs are dropped, so
- * only real verses ever surface as proof), and [terms] drive the local
- * keyword search that builds the related-results list.
+ * the question, the Quran and Hadith references it cited in support, and
+ * search terms for the app's LOCAL library. Nothing in here is shown raw —
+ * [quranRefs] and [hadithRefs] are resolved against the local database
+ * (unresolvable refs are dropped, so only real verses and hadiths ever surface
+ * as proof), and [terms] drive the local keyword search that builds the
+ * related-results list.
  */
 data class SearchAssist(
     val answer: String,
     val quranRefs: List<CitationId.Quran>,
+    val hadithRefs: List<HadithRef>,
     val terms: List<String>,
     val confidence: AnswerConfidence,
 )

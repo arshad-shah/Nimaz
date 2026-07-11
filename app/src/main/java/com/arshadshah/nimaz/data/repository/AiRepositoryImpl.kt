@@ -10,6 +10,7 @@ import com.arshadshah.nimaz.data.ai.dto.InvokeRequest
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.CitationId
+import com.arshadshah.nimaz.domain.model.HadithRef
 import com.arshadshah.nimaz.domain.model.SearchAssist
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
@@ -79,6 +80,8 @@ class AiRepositoryImpl @Inject constructor(
             quranRefs = quranRefs.mapNotNull {
                 CitationId.parse("quran:${it.trim()}") as? CitationId.Quran
             }.distinct(),
+            // Same strictness for "bukhari:6018"-style hadith refs.
+            hadithRefs = hadithRefs.mapNotNull(HadithRef::parse).distinct(),
             terms = terms.map { it.trim() }.filter { it.isNotBlank() }.distinct(),
             confidence = when (confidence.lowercase()) {
                 "high" -> AnswerConfidence.HIGH

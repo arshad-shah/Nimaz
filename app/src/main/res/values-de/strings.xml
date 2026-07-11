@@ -1286,10 +1286,10 @@
     <string name="dismiss">Schließen</string>
     <string name="ai_answers">KI-Antworten</string>
     <string name="ai_answers_enable">KI-Antworten aktivieren</string>
-    <string name="ai_answers_enable_subtitle">Stelle eine Frage und erhalte eine Antwort mit Versen aus deiner Bibliothek als Beleg</string>
+    <string name="ai_answers_enable_subtitle">Stelle eine Frage und erhalte eine Antwort mit Versen und Hadithen aus deiner Bibliothek als Beleg</string>
     <string name="ai_privacy">Datenschutz</string>
     <string name="ai_what_gets_shared">Was geteilt wird</string>
-    <string name="ai_disclosure_full">Wenn du eine Frage stellst, wird nur der Fragetext über eine verschlüsselte Verbindung an den Nimaz-Server (gehostet auf Cloudflare) und an die Claude-API von Anthropic gesendet, um die Antwort zu erzeugen. Nichts anderes verlässt dein Gerät — die zitierten Verse und Suchergebnisse werden in der Bibliothek auf deinem Telefon nachgeschlagen. Deine Fragen werden niemals für Analysen verwendet. KI-Antworten können falsch sein — überprüfe sie stets anhand der zitierten Quellen. Dies ist kein religiöses Rechtsgutachten (Fatwa).</string>
+    <string name="ai_disclosure_full">Wenn du eine Frage stellst, wird nur der Fragetext über eine verschlüsselte Verbindung an den Nimaz-Server (gehostet auf Cloudflare) und an die Claude-API von Anthropic gesendet, um die Antwort zu erzeugen. Nichts anderes verlässt dein Gerät — die zitierten Verse, Hadithe und Suchergebnisse werden in der Bibliothek auf deinem Telefon nachgeschlagen. Deine Fragen werden niemals für Analysen verwendet. KI-Antworten können falsch sein — überprüfe sie stets anhand der zitierten Quellen. Dies ist kein religiöses Rechtsgutachten (Fatwa).</string>
     <string name="ai_history">Verlauf der KI-Fragen</string>
     <string name="ai_history_subtitle">Aktuelle KI-Fragen auf diesem Gerät behalten. Wenn deaktiviert, werden sie nur im Speicher gehalten.</string>
     <string name="ai_clear_history">KI-Verlauf löschen</string>
