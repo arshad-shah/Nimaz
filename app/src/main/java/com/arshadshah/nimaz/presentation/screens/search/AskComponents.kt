@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.search
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,80 +36,54 @@ import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import com.arshadshah.nimaz.presentation.viewmodel.AskEvent
 import com.arshadshah.nimaz.presentation.viewmodel.AskPhase
 import com.arshadshah.nimaz.presentation.viewmodel.AskUiState
 
 /**
  * Adds the "Ask with Proof" experience to the Search screen's LazyColumn.
- * Gated on [AskUiState.aiEnabled]: when off it shows a subtle, dismissible hint;
- * when on it shows the ask input plus the answer / proofs / error states.
+ *
+ * The question is entered through the screen's single shared search bar — this
+ * section renders only the *output* of an ask. Gated on [AskUiState.aiEnabled]:
+ * when off it shows a subtle, dismissible hint; when on it shows the AI answer /
+ * proofs / error states (or nothing while idle) beneath the keyword results.
  */
 fun LazyListScope.askSection(
     state: AskUiState,
-    onEvent: (AskEvent) -> Unit,
     onNavigateToProof: (Route) -> Unit,
     onNavigateToSearchSettings: () -> Unit,
+    onDismissHint: () -> Unit,
 ) {
     if (!state.aiEnabled) {
         if (!state.hintDismissed) {
             item(key = "ai_hint") {
                 AskDisabledHint(
                     onOpenSettings = onNavigateToSearchSettings,
-                    onDismiss = { onEvent(AskEvent.DismissHint) },
+                    onDismiss = onDismissHint,
                 )
             }
         }
         return
     }
 
-    item(key = "ai_input") {
-        NimazCard(style = NimazCardStyle.FILLED, modifier = Modifier.fillMaxWidth()) {
-            Column(modifier = Modifier.padding(12.dp)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.AutoAwesome,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                    Text(
-                        text = stringResource(R.string.ai_ask_a_question),
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
-                NimazSearchBar(
-                    query = state.question,
-                    onQueryChange = { onEvent(AskEvent.UpdateQuestion(it)) },
-                    placeholder = stringResource(R.string.ai_ask_placeholder),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    showClearButton = state.question.isNotEmpty(),
-                    onClear = { onEvent(AskEvent.Clear) },
-                    onSearch = { onEvent(AskEvent.Submit) },
-                )
-            }
-        }
-    }
-
     when (val phase = state.phase) {
         AskPhase.Idle -> Unit
 
-        AskPhase.Loading -> item(key = "ai_loading") {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                CircularProgressIndicator()
+        AskPhase.Loading -> {
+            item(key = "ai_answer_header") { AskAnswerHeader() }
+            item(key = "ai_loading") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
             }
         }
 
         is AskPhase.Answer -> {
+            item(key = "ai_answer_header") { AskAnswerHeader() }
             if (phase.answer.insufficientEvidence) {
                 item(key = "ai_no_sources") { AskNoSourcesCard() }
             } else {
@@ -137,9 +110,33 @@ fun LazyListScope.askSection(
             item(key = "ai_footer") { AskFooter() }
         }
 
-        is AskPhase.Error -> item(key = "ai_error") {
-            AskErrorCard(error = phase.error)
+        is AskPhase.Error -> {
+            item(key = "ai_answer_header") { AskAnswerHeader() }
+            item(key = "ai_error") { AskErrorCard(error = phase.error) }
         }
+    }
+}
+
+/** A small labelled header marking the AI output apart from the keyword results. */
+@Composable
+private fun AskAnswerHeader() {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Icon(
+            imageVector = Icons.Default.AutoAwesome,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+        )
+        Text(
+            text = stringResource(R.string.ai_answer_section),
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(start = 8.dp),
+        )
     }
 }
 

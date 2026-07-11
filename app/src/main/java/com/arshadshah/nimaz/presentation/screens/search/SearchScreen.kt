@@ -66,6 +66,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.viewmodel.AskEvent
 import com.arshadshah.nimaz.presentation.viewmodel.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
@@ -125,26 +126,48 @@ fun SearchScreen(
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Search Bar
+            // A single search bar drives both keyword search and — when the user has
+            // opted into AI answers on global search — the "Ask with Proof" question.
+            // Keyword results update as-you-type; the AI ask only fires on submit.
+            val askEnabled = enableAsk && askState.aiEnabled
             item {
                 NimazSearchBar(
                     query = state.query,
-                    onQueryChange = { viewModel.onEvent(SearchEvent.UpdateQuery(it)) },
-                    placeholder = stringResource(R.string.search_placeholder),
+                    onQueryChange = {
+                        viewModel.onEvent(SearchEvent.UpdateQuery(it))
+                        // Keep the AI question in sync so a submit uses the current text;
+                        // emptying the bar also clears any lingering AI answer.
+                        if (enableAsk) {
+                            if (it.isBlank()) askViewModel.onEvent(AskEvent.Clear)
+                            else askViewModel.onEvent(AskEvent.UpdateQuestion(it))
+                        }
+                    },
+                    placeholder = stringResource(
+                        if (askEnabled) R.string.search_or_ask_placeholder
+                        else R.string.search_placeholder
+                    ),
                     modifier = Modifier.fillMaxWidth(),
                     showClearButton = state.query.isNotEmpty(),
-                    onClear = { viewModel.onEvent(SearchEvent.ClearSearch) },
-                    onSearch = { viewModel.onEvent(SearchEvent.ExecuteSearch) }
+                    onClear = {
+                        viewModel.onEvent(SearchEvent.ClearSearch)
+                        if (enableAsk) askViewModel.onEvent(AskEvent.Clear)
+                    },
+                    onSearch = {
+                        viewModel.onEvent(SearchEvent.ExecuteSearch)
+                        if (askEnabled) askViewModel.onEvent(AskEvent.Submit)
+                    }
                 )
             }
 
             // Ask with Proof (AI) — only on global search, gated on the user's opt-in.
+            // The question shares the search bar above; this section shows the AI
+            // answer / proofs (or the discovery hint when AI is off).
             if (enableAsk) {
                 askSection(
                     state = askState,
-                    onEvent = askViewModel::onEvent,
                     onNavigateToProof = onNavigateToProof,
                     onNavigateToSearchSettings = onNavigateToSearchSettings,
+                    onDismissHint = { askViewModel.onEvent(AskEvent.DismissHint) },
                 )
             }
 

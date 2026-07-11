@@ -1,10 +1,11 @@
 # Ask with Proof — grounded AI Q&A
 
 An **opt-in**, privacy-disclosed, proof-driven question-answering feature. The
-user asks a question in Global Search; the app retrieves matching Quran/Hadith/Dua
-passages **locally** from Room, sends the question + those passages to a
-Cloudflare Worker, which asks Claude to answer **only from the supplied passages**
-and return strict JSON. The app resolves the cited passages back to real records
+user types into Global Search's **single search bar** — the same text drives both
+keyword search and, on submit, the AI ask (there is no separate "ask" field). The
+app retrieves matching Quran/Hadith/Dua passages **locally** from Room, sends the
+question + those passages to a Cloudflare Worker, which asks Claude to answer
+**only from the supplied passages** and return strict JSON. The app resolves the cited passages back to real records
 and shows them as tappable "proof" cards that deep-link into the reader screens.
 
 AI is **off by default**. A user who never opens Search Settings sees no
@@ -44,7 +45,8 @@ sequenceDiagram
 Layers (Android):
 
 ```
-presentation/screens/search/AskComponents.kt        UI for the ask/answer/proofs
+presentation/screens/search/SearchScreen.kt         shared search+ask input bar
+presentation/screens/search/AskComponents.kt        UI for the answer/proofs/hint
 presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
 presentation/viewmodel/AskViewModel                 ask state machine
 presentation/viewmodel/SearchSettingsViewModel      settings + consent state
