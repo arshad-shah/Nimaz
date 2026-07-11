@@ -31,8 +31,8 @@ When adding a feature, copy an existing one that follows the patterns — good r
 > `domain/usecase/ai/AskWithProofUseCase`, `domain/usecase/SearchLibraryUseCase` (smart local
 > search, also the non-AI path), `core/di/AiModule`, the `Ask*`/`SearchSettings*`
 > ViewModels/screens, and `Route.SearchSettings`. One Worker call per question (only the question
-> text leaves the device); cited Quran refs are resolved locally into proof cards. It is **off by
-> default**. See `docs/ai-ask-with-proof.md`.
+> text leaves the device); cited Quran and Hadith refs are resolved locally into proof cards. It
+> is **off by default**. See `docs/ai-ask-with-proof.md`.
 
 > Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The older
 > `docs/nimaz-pro-*.md` files are historical design/planning artifacts (they say "Nimaz Pro" /

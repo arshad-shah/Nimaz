@@ -11,23 +11,27 @@ bar** and scopes everything below it.
 When AI is enabled, each submit makes **one** Worker call (`search-assist`):
 
 1. **Ask** — the app sends ONLY the question text. Claude answers from
-   mainstream Islamic knowledge and returns (a) the **Quran references** that
-   support the answer and (b) related **search terms** for the local library.
+   mainstream Islamic knowledge and returns (a) the **Quran references** and
+   **Hadith references** that support the answer and (b) related **search
+   terms** for the local library.
 2. **Prove (local)** — the app resolves each returned reference against the
-   LOCAL Quran database. Every reference that resolves surfaces in the results
-   list as a normal result card marked **"Cited"** (teal left edge + solid
-   teal chip), sorted to the top, deep-linking into the reader like any other
-   Qur'an result; anything that doesn't resolve is dropped silently, so a
-   cited card can never show a verse that doesn't exist.
+   LOCAL database: Quran refs against the Quran tables, hadith refs against
+   the six shipped collections (by their canonical `collection:number`
+   reference). Every reference that resolves surfaces in the results list as a
+   normal result card marked **"Cited"** (accent left edge + solid chip),
+   sorted to the top, deep-linking into its reader like any other result;
+   anything that doesn't resolve is dropped silently, so a cited card can
+   never show a verse or hadith that doesn't exist.
 3. **Enhance (local)** — the AI's terms run through the smart local search
    (`SearchLibraryUseCase`) and fill the rest of the same list, so it
    dynamically shows the Quran/Hadith/Dua records the AI judged relevant.
 
 The answer card itself is deliberately slim — badge, confidence chip, the
 answer text and a trust note. Its grounding lives in the **one merged,
-filterable results list** below it: cited verses first, then related results
-(any related result that duplicates a cited verse is dropped). The pinned
-filter scopes the whole merged list, cited cards included.
+filterable results list** below it: cited verses and hadiths first, then
+related results (any related result that duplicates a cited record is
+dropped). The pinned filter scopes the whole merged list, cited cards
+included.
 
 There is **no "no supporting sources found" dead end**: the answer stands on
 its own, cited cards show whatever resolved, and the related results are always
@@ -54,8 +58,8 @@ sequenceDiagram
     C-->>GW: tool_use JSON
     GW-->>W: native response + usage
     W->>W: validate output, drop malformed refs, log usage
-    W-->>App: {answer, quranRefs, terms, confidence}
-    App->>Room: resolve quranRefs → real verses ("Cited" result cards)
+    W-->>App: {answer, quranRefs, hadithRefs, terms, confidence}
+    App->>Room: resolve quranRefs + hadithRefs → real records ("Cited" result cards)
     App->>Room: run terms through SearchLibraryUseCase (related results)
     App-->>U: answer + confidence + one merged list (cited first, then related)
 ```
@@ -94,7 +98,7 @@ presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms
 presentation/viewmodel/SearchSettingsViewModel      settings + consent state
 domain/usecase/ai/AskWithProofUseCase               ask → resolve refs → proofs (+ related terms)
 domain/usecase/SearchLibraryUseCase                 smart multi-word local search (also non-AI path)
-domain/model/{AiModels,CitationId,LibrarySearch}    SearchAssist/Proof/AiError/LibrarySearchResults
+domain/model/{AiModels,CitationId,LibrarySearch}    SearchAssist/HadithRef/Proof/AiError/LibrarySearchResults
 domain/repository/AiRepository                      gateway interface (assist)
 data/ai/{AiApiClient,IntegrityTokenProvider,DeviceIdProvider}
 data/ai/dto/AiDtos                                  wire DTOs (mirror the Worker)
@@ -122,14 +126,20 @@ Response (validated against a Zod schema before returning):
 {
   "answer": "≤120 words, descriptive, never a fatwa",
   "quranRefs": ["2:153", "39:10"],
+  "hadithRefs": ["bukhari:6018", "muslim:2564"],
   "terms": ["patience", "sabr", "hardship"],
   "confidence": "high|medium|low"
 }
 ```
 
 `quranRefs` are `surah:ayah` (standard mushaf numbering); the Worker drops
-malformed/impossible refs (surah 1–114) and the app only surfaces refs that
-resolve against its local database. Hadith/Dua use opaque local IDs the model
+malformed/impossible refs (surah 1–114). `hadithRefs` are
+`collection:number`, where collection is one of the six canonical collections
+the app ships — `bukhari`, `muslim`, `abudawud`, `tirmidhi`, `nasai`,
+`ibnmajah` — and number is the hadith's standard reference number in that
+collection (the `reference` value on every local hadith row); the Worker
+drops refs outside those collections. Either way the app only surfaces refs
+that resolve against its local database. Duas use opaque local IDs the model
 can't know, so they are reached only through `terms` in the results list.
 
 Error envelope (HTTP 400/429/502/503):
@@ -150,8 +160,13 @@ Round-trips cleanly so a citation resolves back to a local record and a deep lin
 | hadith | `hadith:{hadithId}`    | `getHadithById`                | `Route.HadithReader(hadithId)`   |
 | dua    | `dua:{duaId}`          | `getDuaById`                   | `Route.DuaReader(duaId)`         |
 
-Unparseable or unresolvable IDs are dropped silently. (The current AI flow
-only produces `quran:` citations; the grammar keeps hadith/dua for future use.)
+Unparseable or unresolvable IDs are dropped silently. The AI flow produces
+`quran:` citations directly and `hadith:` citations indirectly: the model
+cites a hadith as `collection:number` (`domain/model/HadithRef`), the app
+resolves it via the hadiths table's `reference` column, and the resulting
+proof carries the local `hadith:{hadithId}` citation id — the same key the
+results list derives, so cited hadiths dedupe like verses. `dua:` remains
+reserved for future use.
 
 ## Smart local search (`SearchLibraryUseCase`)
 

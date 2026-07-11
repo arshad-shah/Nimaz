@@ -1287,10 +1287,10 @@
     <string name="dismiss">Tutup</string>
     <string name="ai_answers">Jawaban AI</string>
     <string name="ai_answers_enable">Aktifkan jawaban AI</string>
-    <string name="ai_answers_enable_subtitle">Ajukan pertanyaan dan dapatkan jawaban dengan ayat dari pustaka Anda sebagai bukti</string>
+    <string name="ai_answers_enable_subtitle">Ajukan pertanyaan dan dapatkan jawaban dengan ayat dan hadis dari pustaka Anda sebagai bukti</string>
     <string name="ai_privacy">Privasi</string>
     <string name="ai_what_gets_shared">Apa yang dibagikan</string>
-    <string name="ai_disclosure_full">Saat Anda mengajukan pertanyaan, hanya teks pertanyaan yang dikirim melalui koneksi terenkripsi ke server Nimaz (dihosting di Cloudflare) dan ke API Claude milik Anthropic untuk menghasilkan jawaban. Tidak ada hal lain yang meninggalkan perangkat Anda — ayat yang dikutip dan hasil pencarian dicari di pustaka pada ponsel Anda. Pertanyaan Anda tidak pernah digunakan untuk analitik. Jawaban AI bisa salah — selalu verifikasi dengan sumber yang dikutip. Ini bukan fatwa.</string>
+    <string name="ai_disclosure_full">Saat Anda mengajukan pertanyaan, hanya teks pertanyaan yang dikirim melalui koneksi terenkripsi ke server Nimaz (dihosting di Cloudflare) dan ke API Claude milik Anthropic untuk menghasilkan jawaban. Tidak ada hal lain yang meninggalkan perangkat Anda — ayat dan hadis yang dikutip serta hasil pencarian dicari di pustaka pada ponsel Anda. Pertanyaan Anda tidak pernah digunakan untuk analitik. Jawaban AI bisa salah — selalu verifikasi dengan sumber yang dikutip. Ini bukan fatwa.</string>
     <string name="ai_history">Riwayat pertanyaan AI</string>
     <string name="ai_history_subtitle">Simpan pertanyaan AI terbaru di perangkat ini. Saat dimatikan, pertanyaan hanya disimpan di memori.</string>
     <string name="ai_clear_history">Hapus riwayat AI</string>

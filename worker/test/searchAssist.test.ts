@@ -32,6 +32,31 @@ describe("search-assist capability (unit)", () => {
     expect(out.quranRefs).toEqual(["2:153", "39:10"]);
   });
 
+  it("drops malformed and unknown-collection hadith refs, dedupes, keeps order", () => {
+    const raw = mockAnthropicToolResponse(
+      makeAssistOutput({
+        hadithRefs: [
+          "bukhari:6018",
+          "Muslim:2564", // uppercase is normalised, kept
+          "bukhari:6018", // duplicate
+          "riyadussalihin:1", // not one of the six shipped collections
+          "bukhari:0", // impossible number
+          "nasai:5758",
+        ],
+      }),
+    );
+    const out = searchAssist.parseResponse(raw as any, makeAssistInput());
+    expect(out.hadithRefs).toEqual(["bukhari:6018", "muslim:2564", "nasai:5758"]);
+  });
+
+  it("defaults hadithRefs to [] when the model omits the field", () => {
+    const output = makeAssistOutput() as Record<string, unknown>;
+    delete output.hadithRefs;
+    const raw = mockAnthropicToolResponse(output);
+    const out = searchAssist.parseResponse(raw as any, makeAssistInput());
+    expect(out.hadithRefs).toEqual([]);
+  });
+
   it("trims and dedupes terms, dropping blanks", () => {
     const raw = mockAnthropicToolResponse(
       makeAssistOutput({ terms: [" patience ", "sabr", "patience", "  "] }),
@@ -82,11 +107,13 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
     const body = (await res.json()) as {
       answer: string;
       quranRefs: string[];
+      hadithRefs: string[];
       terms: string[];
       confidence: string;
     };
     expect(body.answer.length).toBeGreaterThan(0);
     expect(body.quranRefs).toEqual(["2:153", "39:10"]);
+    expect(body.hadithRefs).toEqual(["bukhari:1469", "muslim:2999"]);
     expect(body.terms).toContain("patience");
     expect(body.confidence).toBe("high");
     // Usage is echoed for the smoke test / ops.
@@ -132,6 +159,7 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
           makeAssistOutput({
             answer: "I can only help with Islamic topics.",
             quranRefs: [],
+            hadithRefs: [],
             terms: ["quran", "hadith"],
             confidence: "low",
           }),
@@ -139,8 +167,12 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
       );
     const res = await invoke("assist-dev-3");
     expect(res.status).toBe(200);
-    const body = (await res.json()) as { quranRefs: string[] };
+    const body = (await res.json()) as {
+      quranRefs: string[];
+      hadithRefs: string[];
+    };
     expect(body.quranRefs).toEqual([]);
+    expect(body.hadithRefs).toEqual([]);
   });
 
   it("maps a gateway 5xx to UPSTREAM_ERROR/502", async () => {

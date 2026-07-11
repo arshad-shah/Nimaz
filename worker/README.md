@@ -86,6 +86,7 @@ Success `200`:
 {
   "answer": "The Quran repeatedly encourages patience (sabr)...",
   "quranRefs": ["2:153", "39:10"],
+  "hadithRefs": ["bukhari:1469", "muslim:2999"],
   "terms": ["patience", "sabr", "hardship", "perseverance"],
   "confidence": "high"
 }
@@ -93,6 +94,10 @@ Success `200`:
 
 - `quranRefs`: up to 8 `surah:ayah` references (surah 1–114 enforced; the app
   drops anything that doesn't resolve in its local Quran database).
+- `hadithRefs`: up to 6 `collection:number` references limited to the six
+  collections the app ships (`bukhari`, `muslim`, `abudawud`, `tirmidhi`,
+  `nasai`, `ibnmajah`); the app drops anything that doesn't resolve in its
+  local Hadith database.
 - `terms`: 4–10 short keywords the app runs through its local library search.
 
 Errors use a typed envelope with the matching HTTP status:
@@ -183,9 +188,9 @@ curl -s http://localhost:8787/v1/invoke \
   }' | jq
 ```
 
-Expected: a JSON body with `answer`, `quranRefs` (e.g. `["2:153"]`), `terms`,
-and `confidence`, plus an `x-nimaz-usage` response header with the token
-usage. A valid body proves the forced `submit_result` tool survived the
+Expected: a JSON body with `answer`, `quranRefs` (e.g. `["2:153"]`),
+`hadithRefs` (e.g. `["bukhari:1469"]`), `terms`, and `confidence`, plus an
+`x-nimaz-usage` response header with the token usage. A valid body proves the forced `submit_result` tool survived the
 gateway. Note on caching: `cache_read_input_tokens` in the header is expected
 to be 0 for now — Haiku 4.5 only caches prefixes ≥ 4096 tokens and this
 capability's prompt + tool schema is well below that, so `cache_control` is

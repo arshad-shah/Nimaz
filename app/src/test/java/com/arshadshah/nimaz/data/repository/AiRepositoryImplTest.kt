@@ -50,6 +50,7 @@ class AiRepositoryImplTest {
         val body = """
             {"answer":" Patience is virtuous. ",
              "quranRefs":["2:153","garbage","39:10","2:153"],
+             "hadithRefs":["bukhari:6018","Muslim:2999","not-a-ref","bukhari:6018","bukhari:0"],
              "terms":["patience"," sabr ","","patience"],
              "confidence":"medium"}
         """.trimIndent()
@@ -63,7 +64,23 @@ class AiRepositoryImplTest {
         // Malformed refs and blank/duplicate terms are dropped.
         assertThat(assist.quranRefs.map { it.raw })
             .containsExactly("quran:2:153", "quran:39:10")
+        assertThat(assist.hadithRefs.map { it.reference })
+            .containsExactly("bukhari:6018", "muslim:2999")
         assertThat(assist.terms).containsExactly("patience", "sabr")
+    }
+
+    @Test
+    fun `a response without hadithRefs (older Worker) still parses`() = runTest {
+        val body = """
+            {"answer":"Patience is virtuous.",
+             "quranRefs":["2:153"],
+             "terms":["patience"],
+             "confidence":"high"}
+        """.trimIndent()
+        val result = repo { respond(body, HttpStatusCode.OK, jsonHeaders()) }
+            .assist("q?")
+
+        assertThat(result.getOrThrow().hadithRefs).isEmpty()
     }
 
     @Test

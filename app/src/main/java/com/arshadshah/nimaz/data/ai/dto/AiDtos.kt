@@ -28,6 +28,9 @@ data class AssistInput(
 data class AssistOutput(
     val answer: String,
     val quranRefs: List<String>,
+    // Defaulted so a response from an older Worker (no hadith support yet)
+    // still deserializes.
+    val hadithRefs: List<String> = emptyList(),
     val terms: List<String>,
     val confidence: String,
 )

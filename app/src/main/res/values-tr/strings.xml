@@ -1290,10 +1290,10 @@
     <string name="dismiss">Kapat</string>
     <string name="ai_answers">Yapay zekâ yanıtları</string>
     <string name="ai_answers_enable">Yapay zekâ yanıtlarını etkinleştir</string>
-    <string name="ai_answers_enable_subtitle">Bir soru sorun, kitaplığınızdaki ayetlerle kanıtlanmış bir yanıt alın</string>
+    <string name="ai_answers_enable_subtitle">Bir soru sorun, kitaplığınızdaki ayet ve hadislerle kanıtlanmış bir yanıt alın</string>
     <string name="ai_privacy">Gizlilik</string>
     <string name="ai_what_gets_shared">Neler paylaşılır</string>
-    <string name="ai_disclosure_full">Bir soru sorduğunuzda, yalnızca soru metni şifreli bir bağlantı üzerinden Nimaz sunucusuna (Cloudflare üzerinde barındırılır) ve yanıtı oluşturmak için Anthropic\'in Claude API\'sine gönderilir. Başka hiçbir şey cihazınızdan ayrılmaz — alıntılanan ayetler ve arama sonuçları telefonunuzdaki kitaplıkta aranır. Sorularınız asla analiz için kullanılmaz. Yapay zekâ yanıtları hatalı olabilir — her zaman alıntılanan kaynaklarla doğrulayın. Bu bir fetva değildir.</string>
+    <string name="ai_disclosure_full">Bir soru sorduğunuzda, yalnızca soru metni şifreli bir bağlantı üzerinden Nimaz sunucusuna (Cloudflare üzerinde barındırılır) ve yanıtı oluşturmak için Anthropic\'in Claude API\'sine gönderilir. Başka hiçbir şey cihazınızdan ayrılmaz — alıntılanan ayetler, hadisler ve arama sonuçları telefonunuzdaki kitaplıkta aranır. Sorularınız asla analiz için kullanılmaz. Yapay zekâ yanıtları hatalı olabilir — her zaman alıntılanan kaynaklarla doğrulayın. Bu bir fetva değildir.</string>
     <string name="ai_history">Yapay zekâ soru geçmişi</string>
     <string name="ai_history_subtitle">Son yapay zekâ sorularını bu cihazda tutun. Kapalıyken yalnızca bellekte tutulur.</string>
     <string name="ai_clear_history">Yapay zekâ geçmişini temizle</string>

@@ -1287,10 +1287,10 @@
     <string name="dismiss">Ignorer</string>
     <string name="ai_answers">Réponses de l\'IA</string>
     <string name="ai_answers_enable">Activer les réponses de l\'IA</string>
-    <string name="ai_answers_enable_subtitle">Posez une question et obtenez une réponse avec des versets de votre bibliothèque comme preuve</string>
+    <string name="ai_answers_enable_subtitle">Posez une question et obtenez une réponse avec des versets et des hadiths de votre bibliothèque comme preuve</string>
     <string name="ai_privacy">Confidentialité</string>
     <string name="ai_what_gets_shared">Ce qui est partagé</string>
-    <string name="ai_disclosure_full">Lorsque vous posez une question, seul le texte de la question est envoyé via une connexion chiffrée au serveur Nimaz (hébergé sur Cloudflare) et à l\'API Claude d\'Anthropic pour générer la réponse. Rien d\'autre ne quitte votre appareil — les versets cités et les résultats de recherche sont consultés dans la bibliothèque de votre téléphone. Vos questions ne sont jamais utilisées à des fins d\'analyse. Les réponses de l\'IA peuvent être erronées — vérifiez-les toujours avec les sources citées. Ceci n\'est pas un avis religieux (fatwa).</string>
+    <string name="ai_disclosure_full">Lorsque vous posez une question, seul le texte de la question est envoyé via une connexion chiffrée au serveur Nimaz (hébergé sur Cloudflare) et à l\'API Claude d\'Anthropic pour générer la réponse. Rien d\'autre ne quitte votre appareil — les versets et hadiths cités ainsi que les résultats de recherche sont consultés dans la bibliothèque de votre téléphone. Vos questions ne sont jamais utilisées à des fins d\'analyse. Les réponses de l\'IA peuvent être erronées — vérifiez-les toujours avec les sources citées. Ceci n\'est pas un avis religieux (fatwa).</string>
     <string name="ai_history">Historique des questions à l\'IA</string>
     <string name="ai_history_subtitle">Conserver les questions récentes à l\'IA sur cet appareil. Une fois désactivé, elles ne sont conservées qu\'en mémoire.</string>
     <string name="ai_clear_history">Effacer l\'historique de l\'IA</string>

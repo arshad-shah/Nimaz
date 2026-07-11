@@ -15,6 +15,7 @@ export function makeAssistOutput(overrides: Record<string, unknown> = {}) {
     answer:
       "The Quran repeatedly encourages patience (sabr), promising that Allah is with the patient.",
     quranRefs: ["2:153", "39:10"],
+    hadithRefs: ["bukhari:1469", "muslim:2999"],
     terms: ["patience", "sabr", "hardship", "perseverance"],
     confidence: "high",
     ...overrides,

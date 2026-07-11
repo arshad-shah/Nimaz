@@ -1456,10 +1456,10 @@
     <string name="dismiss">Dismiss</string>
     <string name="ai_answers">AI answers</string>
     <string name="ai_answers_enable">Enable AI answers</string>
-    <string name="ai_answers_enable_subtitle">Ask a question and get an answer with verses from your library as proof</string>
+    <string name="ai_answers_enable_subtitle">Ask a question and get an answer with verses and hadiths from your library as proof</string>
     <string name="ai_privacy">Privacy</string>
     <string name="ai_what_gets_shared">What gets shared</string>
-    <string name="ai_disclosure_full">When you ask a question, only the question text is sent over an encrypted connection to the Nimaz server (hosted on Cloudflare) and to Anthropic\'s Claude API to generate the answer. Nothing else leaves your device — the cited verses and search results are looked up in the library on your phone. Your questions are never used for analytics. AI answers can be wrong — always verify them against the cited sources. This is not a religious ruling (fatwa).</string>
+    <string name="ai_disclosure_full">When you ask a question, only the question text is sent over an encrypted connection to the Nimaz server (hosted on Cloudflare) and to Anthropic\'s Claude API to generate the answer. Nothing else leaves your device — the cited verses, hadiths and search results are looked up in the library on your phone. Your questions are never used for analytics. AI answers can be wrong — always verify them against the cited sources. This is not a religious ruling (fatwa).</string>
     <string name="ai_history">AI question history</string>
     <string name="ai_history_subtitle">Keep recent AI questions on this device. When off, they are kept only in memory.</string>
     <string name="ai_clear_history">Clear AI history</string>
@@ -1474,10 +1474,10 @@
     <string name="ai_confidence_high">High confidence</string>
     <string name="ai_confidence_medium">Medium confidence</string>
     <string name="ai_confidence_low">Low confidence</string>
-    <string name="ai_trust_note">AI-generated summary — check it against the cited verses below. It describes what the sources say and isn\'t a fatwa.</string>
-    <string name="ai_discover_title">Get answers, backed by verses</string>
-    <string name="ai_discover_body">Ask a question in plain words and get a short answer supported by verses from your own library — every citation is a real ayah you can open and read.</string>
-    <string name="ai_discover_privacy">Only your question is sent. The verses and results are matched on your device, and questions are never used for analytics.</string>
+    <string name="ai_trust_note">AI-generated summary — check it against the cited sources below. It describes what the sources say and isn\'t a fatwa.</string>
+    <string name="ai_discover_title">Get answers, backed by your library</string>
+    <string name="ai_discover_body">Ask a question in plain words and get a short answer supported by verses and hadiths from your own library — every citation is a real source you can open and read.</string>
+    <string name="ai_discover_privacy">Only your question is sent. The cited sources and results are matched on your device, and questions are never used for analytics.</string>
     <string name="ai_discover_enable">Turn on AI answers</string>
     <string name="ai_discover_dismiss">Not now</string>
     <string name="ai_try_again">Try again</string>
