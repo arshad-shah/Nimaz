@@ -38,7 +38,7 @@ sequenceDiagram
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
     W->>W: integrity → tiered rate limit
-    W->>GW: AI binding run (forced submit_result tool, cached system prompt)
+    W->>GW: /ai/v1/messages (gateway Run token, forced submit_result tool)
     GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON
     GW-->>W: native response + usage
@@ -49,11 +49,11 @@ sequenceDiagram
     App-->>U: answer + confidence + proof cards + AI-driven results list
 ```
 
-One Worker call per submit; everything else is local. The `W → GW → Claude`
-leg is self-authenticating: the Worker's **AI binding** routes through the
-`nimaz` AI Gateway with **Unified Billing**, so Cloudflare injects the
-Anthropic credentials and bills the account's AI credits — no API key or
-gateway token exists in the Worker.
+One Worker call per submit; everything else is local. On the `W → GW → Claude`
+leg the Worker calls the `nimaz` AI Gateway's Anthropic-native REST endpoint
+with **Unified Billing**: Cloudflare injects the Anthropic credentials and
+bills the account's AI credits. The Worker's only credential is
+`CLOUDFLARE_AI_TOKEN`, a scoped AI Gateway Run token — never an Anthropic key.
 
 ### Why attestation never blocks
 
@@ -186,8 +186,9 @@ payloads. The Worker stores nothing.
 
 ## Cost model
 
-- **Billing: Cloudflare AI Gateway Unified Billing.** The Worker's AI binding
-  calls `anthropic/claude-haiku-4-5` through the `nimaz` gateway; Cloudflare
+- **Billing: Cloudflare AI Gateway Unified Billing.** The Worker calls
+  `anthropic/claude-haiku-4-5` through the `nimaz` gateway's REST endpoint
+  (auth: the scoped `CLOUDFLARE_AI_TOKEN` gateway-run secret); Cloudflare
   holds the Anthropic credentials and draws spend from the account's **AI
   credits** — one Cloudflare invoice, no Anthropic account/key. Provider
   per-token rates pass through with **no markup**; the one cost on top is a
@@ -197,9 +198,9 @@ payloads. The Worker stores nothing.
   Pricing: **$1 / MTok input**, **$5 / MTok output**; cached input reads billed
   at **10%** of the input rate.
 - Each submit is **one** call: `search-assist` (`max_tokens` 700,
-  temperature 0.2). The binding forwards the Anthropic-native request, so the
-  forced `submit_result` tool and the `cache_control` marker both survive the
-  gateway. Caching caveat: Haiku 4.5 only caches prompt prefixes ≥ **4096
+  temperature 0.2). The gateway's `/ai/v1/messages` endpoint uses the
+  Anthropic-native schema, so the forced `submit_result` tool and the
+  `cache_control` marker both survive the gateway. Caching caveat: Haiku 4.5 only caches prompt prefixes ≥ **4096
   tokens**, and this capability's system prompt + tool schema is well below
   that — so the marker is currently inert (no cache entry, full input price,
   ~$0.002/question either way). It engages automatically if the prompt grows.
@@ -212,8 +213,8 @@ payloads. The Worker stores nothing.
   gateway) — when it trips (or credits run out) the Worker maps the gateway
   error to `BUDGET_EXCEEDED` (503), same app UX as the old KV budget tally it
   replaces.
-- Observability: every call attaches `metadata: { capability }` to the gateway
-  request (spend per feature in the dashboard; never the question text), logs
+- Observability: every call attaches a `cf-aig-metadata: {"capability": …}`
+  header (spend per feature in the dashboard; never the question text), logs
   an `ai_usage` line (token counts only), and echoes usage in the
   `x-nimaz-usage` response header.
 
@@ -241,11 +242,14 @@ committed to the repo.
 2. The KV namespace id is already committed in `worker/wrangler.jsonc` (a
    resource id, not a secret). To recreate it in a different account:
    `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
-3. Set the one secret:
+3. Set the secrets:
+   `npx wrangler secret put CLOUDFLARE_AI_TOKEN` — the scoped Cloudflare API
+   token with **AI Gateway: Run** permission (create it from the gateway's
+   authentication settings). This is the Worker's only Claude credential.
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
-   (If it is absent the Worker still works — every request simply runs at the
-   smaller unverified rate-limit tier.) There is **no `ANTHROPIC_API_KEY`**:
-   Claude auth is the AI binding + Unified Billing.
+   (If the Google one is absent the Worker still works — every request simply
+   runs at the smaller unverified rate-limit tier.) There is **no
+   `ANTHROPIC_API_KEY`**: Unified Billing injects the Anthropic credentials.
 4. **Unified Billing (dashboard, cannot be scripted):** AI → AI Gateway →
    confirm the `nimaz` gateway exists → *Credits Available* → **Manage** →
    add a payment method, **purchase credits**, and set **auto top-up**

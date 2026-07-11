@@ -13,11 +13,12 @@ Play Integrity (never blocking — see below), enforces per-device/global daily
 limits, calls Claude with a fixed cached prompt and a forced structured-output
 tool, and returns strict JSON.
 
-**Billing/auth:** Claude is reached through the Worker's **AI binding** →
-the **`nimaz`** Cloudflare **AI Gateway** with **Unified Billing** — Cloudflare
-holds the Anthropic credentials and bills the account's AI credits, so **no API
-key or gateway token exists in the Worker**. The monthly USD cost cap is the
-gateway's **Spend Limit** (dashboard), not Worker code.
+**Billing/auth:** Claude is reached through the **`nimaz`** Cloudflare
+**AI Gateway** with **Unified Billing** — Cloudflare holds the Anthropic
+credentials and bills the account's AI credits. The Worker authenticates with
+one scoped secret, **`CLOUDFLARE_AI_TOKEN`** (an AI Gateway Run token) —
+**never an Anthropic key**. The monthly USD cost cap is the gateway's
+**Spend Limit** (dashboard), not Worker code.
 
 ## Architecture
 
@@ -26,16 +27,19 @@ POST /v1/invoke
   → integrity   (Play Integrity token → trust tier: verified | unverified)
   → rateLimit   (tiered per-device + global daily caps in KV)
   → dispatch    (registry lookup → Zod-validate input → build request
-                 → env.AI.run("anthropic/claude-haiku-4-5", …, {gateway:{id:"nimaz"}})
+                 → POST …/accounts/{acct}/ai/v1/messages   (AI Gateway,
+                   model "anthropic/claude-haiku-4-5", Anthropic-native schema)
                  → Zod-validate output)
 ```
 
-The gateway call carries `metadata: { capability }` so the AI Gateway dashboard
-breaks spend down per feature (never the question text). A tripped gateway
-spend limit / exhausted credits maps to `BUDGET_EXCEEDED` (503), same as the
-old in-Worker budget guard, so the app UX is unchanged. Each successful call
-logs a structured `ai_usage` line (token counts only) and echoes the usage in
-an `x-nimaz-usage` response header — that's how you verify prompt-cache reads.
+The gateway call carries a `cf-aig-metadata: {"capability": …}` header so the
+AI Gateway dashboard breaks spend down per feature (never the question text).
+A tripped gateway spend limit / exhausted credits maps to `BUDGET_EXCEEDED`
+(503), same as the old in-Worker budget guard, so the app UX is unchanged.
+Each successful call logs a structured `ai_usage` line (token counts only) and
+echoes the usage in an `x-nimaz-usage` response header. (The AI *binding* path
+was tried first and rejects the Anthropic-native schema with `7003: User Input
+Error` — the REST endpoint guarantees it.)
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
@@ -114,14 +118,15 @@ Non-secret vars live in `wrangler.jsonc`:
 The monthly USD ceiling is **not** a var anymore — set a **Spend limit** on the
 `nimaz` AI Gateway in the dashboard (AI → AI Gateway → nimaz → Settings).
 
-The only secret — set with `wrangler secret put`, never committed:
+Secrets — set with `wrangler secret put`, never committed:
 
+- `CLOUDFLARE_AI_TOKEN` — a scoped Cloudflare API token with **AI Gateway:
+  Run** permission (created from the gateway's authentication settings). It
+  authenticates the Worker to the `nimaz` gateway; Unified Billing injects the
+  Anthropic credentials. There is **no Anthropic key** anywhere.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
   used to mint an OAuth token for the Play Integrity API. Optional — without
   it every request simply runs at the unverified tier.
-
-There is **no Anthropic key**: the AI binding authenticates via Unified
-Billing (Cloudflare-managed provider credentials).
 
 ## Setup
 
@@ -134,13 +139,16 @@ npm ci                      # or: npm install (first time, to create the lockfil
 #    npx wrangler kv namespace create NIMAZ_AI_KV
 #    then paste the returned id into wrangler.jsonc.
 
-# 2. Set the one secret (production):
+# 2. Set the secrets (production):
+npx wrangler secret put CLOUDFLARE_AI_TOKEN        # AI Gateway Run token
 npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 
 # 3. Cloudflare dashboard (one-time, cannot be done from wrangler):
 #    AI → AI Gateway → confirm the "nimaz" gateway exists.
 #    AI → AI Gateway → "Credits Available" → Manage → add a payment method,
 #    purchase credits, and set auto top-up (Unified Billing).
+#    Gateway authentication: create the token with "AI Gateway: Run"
+#    permission — that's the CLOUDFLARE_AI_TOKEN secret above.
 #    Recommended: set a Spend limit on the "nimaz" gateway as the monthly
 #    cost backstop, and enable the gateway's ZDR (Zero-Data-Retention
 #    provider endpoints) setting.
@@ -149,10 +157,9 @@ npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 ## Local development
 
 ```bash
-# Attestation bypassed so you can curl it. The AI binding proxies to the real
-# gateway even in dev, so you must be authenticated with Cloudflare
-# (`npx wrangler login`, or CLOUDFLARE_API_TOKEN in the environment) —
-# there is no Anthropic key to pass.
+# Attestation bypassed so you can curl it. The gateway token comes from a
+# .dev.vars file (gitignored) containing CLOUDFLARE_AI_TOKEN=... — there is
+# no Anthropic key to pass.
 npx wrangler dev --var SKIP_ATTESTATION:true
 ```
 

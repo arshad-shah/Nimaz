@@ -22,13 +22,11 @@
     "enabled": true
   },
 
-  // AI binding — self-authenticating path to Anthropic via the `nimaz` AI
-  // Gateway with Unified Billing (Cloudflare holds the provider credentials
-  // and bills the account's AI credits). No API key or gateway token ships in
-  // the Worker.
-  "ai": {
-    "binding": "AI"
-  },
+  // Claude calls go to the AI Gateway's Anthropic-native REST endpoint with
+  // Unified Billing (Cloudflare holds the Anthropic credentials and bills the
+  // account's AI credits). Auth is the CLOUDFLARE_AI_TOKEN secret — a scoped
+  // AI Gateway Run token, never an Anthropic key. (The `ai` binding path was
+  // tried first but rejects the Anthropic-native schema — 7003.)
 
   // KV holds the per-device and global daily rate-limit counters.
   // Created with: `wrangler kv namespace create NIMAZ_AI_KV`. The id below is a
@@ -41,8 +39,8 @@
   ],
 
   // Non-secret configuration. Override per-environment in the dashboard or via
-  // `wrangler deploy --var KEY:value`. The only secret
-  // (GOOGLE_SERVICE_ACCOUNT_JSON) is NOT stored here — set it with
+  // `wrangler deploy --var KEY:value`. Secrets (CLOUDFLARE_AI_TOKEN,
+  // GOOGLE_SERVICE_ACCOUNT_JSON) are NOT stored here — set them with
   // `wrangler secret put <NAME>` (see README.md). The monthly USD cost cap is
   // enforced by the AI Gateway's Spend Limit (dashboard), not a Worker var.
   "vars": {

@@ -67,9 +67,10 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
           # Publishes the Worker + its wrangler.jsonc config (routes, vars, the
-          # NIMAZ_AI_KV and AI bindings). The one secret
-          # (GOOGLE_SERVICE_ACCOUNT_JSON) is set once via `wrangler secret put`.
-          # Claude auth is the AI binding + Unified Billing — no API key.
+          # NIMAZ_AI_KV binding). Secrets (CLOUDFLARE_AI_TOKEN,
+          # GOOGLE_SERVICE_ACCOUNT_JSON) are set once via `wrangler secret put`.
+          # Claude auth is the gateway Run token + Unified Billing — no
+          # Anthropic API key.
           command: deploy
 
   smoke-test:

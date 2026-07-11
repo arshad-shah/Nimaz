@@ -1,16 +1,17 @@
-import { env } from "cloudflare:test";
-import { describe, expect, it } from "vitest";
+import { env, fetchMock } from "cloudflare:test";
+import { afterEach, beforeAll, describe, expect, it } from "vitest";
 import app from "../src/index";
 import {
   secondsUntilUtcMidnight,
   utcDayStamp,
 } from "../src/middleware/rateLimit";
 import {
+  GATEWAY_HOST,
+  GATEWAY_PATH,
   makeAssistInput,
   makeAssistOutput,
   makeEnvelope,
   mockAnthropicToolResponse,
-  stubAi,
 } from "./helpers";
 
 describe("UTC helpers", () => {
@@ -26,6 +27,21 @@ describe("UTC helpers", () => {
 });
 
 describe("rate limiting (integration)", () => {
+  beforeAll(() => {
+    fetchMock.activate();
+    fetchMock.disableNetConnect();
+  });
+  afterEach(() => fetchMock.assertNoPendingInterceptors());
+
+  function stubGateway(times: number) {
+    for (let i = 0; i < times; i++) {
+      fetchMock
+        .get(GATEWAY_HOST)
+        .intercept({ path: GATEWAY_PATH, method: "POST" })
+        .reply(200, mockAnthropicToolResponse(makeAssistOutput()));
+    }
+  }
+
   async function invoke(deviceId: string, overrideEnv: Partial<Env> = {}) {
     return app.request(
       "/v1/invoke",
@@ -36,7 +52,6 @@ describe("rate limiting (integration)", () => {
       },
       {
         ...env,
-        AI: stubAi(mockAnthropicToolResponse(makeAssistOutput())),
         DAILY_DEVICE_LIMIT: "3",
         DAILY_GLOBAL_LIMIT: "100",
         ...overrideEnv,
@@ -46,6 +61,7 @@ describe("rate limiting (integration)", () => {
 
   it("allows up to the device cap then returns 429 with retryAfterSeconds", async () => {
     // Cap is 3 → first three succeed, the fourth is rate limited.
+    stubGateway(3);
     const dev = "rl-device-A";
     for (let i = 0; i < 3; i++) {
       const ok = await invoke(dev);
@@ -68,6 +84,7 @@ describe("rate limiting (integration)", () => {
       GOOGLE_SERVICE_ACCOUNT_JSON: undefined,
       UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
     };
+    stubGateway(2);
     const dev = "rl-device-unverified";
     for (let i = 0; i < 2; i++) {
       const ok = await invoke(dev, unverifiedEnv);
