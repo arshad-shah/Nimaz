@@ -51,6 +51,17 @@ android {
         ksp {
             arg("room.schemaLocation", "$projectDir/schemas")
         }
+
+        // Cloud project number backing the Play Integrity standard request. Driven
+        // by the gradle property `playIntegrityCloudProjectNumber` (placeholder 0
+        // until the real Google Cloud project is wired up — see gradle.properties).
+        val playIntegrityProjectNumber =
+            (project.findProperty("playIntegrityCloudProjectNumber") as String?) ?: "0"
+        buildConfigField(
+            "long",
+            "PLAY_INTEGRITY_CLOUD_PROJECT_NUMBER",
+            "${playIntegrityProjectNumber}L"
+        )
     }
 
     // Ship the exported Room schemas as androidTest assets so MigrationTestHelper can
@@ -70,7 +81,20 @@ android {
         }
     }
 
+    // Base URL of the Nimaz AI Worker. Driven by gradle properties so the real
+    // *.workers.dev URL is never committed: debug reads `nimazAiWorkerUrlDebug`,
+    // release reads `nimazAiWorkerUrl`; both fall back to a placeholder (the app
+    // then simply surfaces the network-error state — it never crashes).
+    val aiWorkerUrlPlaceholder = "https://nimaz-ai.REPLACE_ME.workers.dev"
+    val aiWorkerUrlDebug =
+        (project.findProperty("nimazAiWorkerUrlDebug") as String?) ?: aiWorkerUrlPlaceholder
+    val aiWorkerUrlRelease =
+        (project.findProperty("nimazAiWorkerUrl") as String?) ?: aiWorkerUrlPlaceholder
+
     buildTypes {
+        debug {
+            buildConfigField("String", "AI_WORKER_BASE_URL", "\"$aiWorkerUrlDebug\"")
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
             isMinifyEnabled = true
@@ -82,6 +106,7 @@ android {
             ndk {
                 debugSymbolLevel = "SYMBOL_TABLE"
             }
+            buildConfigField("String", "AI_WORKER_BASE_URL", "\"$aiWorkerUrlRelease\"")
         }
     }
     compileOptions {
@@ -174,6 +199,17 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // Ktor client (AI Worker API). Logging plugin is on the classpath but only
+    // installed at runtime for debug builds (gated on BuildConfig.DEBUG).
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.okhttp)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.kotlinx.json)
+    implementation(libs.ktor.client.logging)
+
+    // Play Integrity (device attestation for the AI Worker)
+    implementation(libs.play.integrity)
+
     // DateTime
     implementation(libs.kotlinx.datetime)
 
@@ -214,6 +250,7 @@ dependencies {
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.google.truth)
     testImplementation(libs.robolectric)
+    testImplementation(libs.ktor.client.mock)
 
     // Compose UI test harness for the Robolectric atom tests in src/testDebug
     // (createComposeRule, onNodeWithText, performClick, …). Declared here as a

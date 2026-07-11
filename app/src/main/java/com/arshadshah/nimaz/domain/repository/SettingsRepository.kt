@@ -158,6 +158,26 @@ interface SettingsRepository {
     val longitude: Flow<Double>
     val locationName: Flow<String>
     suspend fun updateLocation(latitude: Double, longitude: Double, name: String)
+
+    // AI — Ask with Proof (opt-in)
+    val aiAskEnabled: Flow<Boolean>
+    suspend fun setAiAskEnabled(enabled: Boolean)
+    val aiConsentTimestamp: Flow<Long>
+    suspend fun setAiConsentTimestamp(timestamp: Long)
+    val aiSourcesQuran: Flow<Boolean>
+    suspend fun setAiSourcesQuran(enabled: Boolean)
+    val aiSourcesHadith: Flow<Boolean>
+    suspend fun setAiSourcesHadith(enabled: Boolean)
+    val aiSourcesDua: Flow<Boolean>
+    suspend fun setAiSourcesDua(enabled: Boolean)
+    val aiMaxProofs: Flow<Int>
+    suspend fun setAiMaxProofs(count: Int)
+    val aiHistoryEnabled: Flow<Boolean>
+    suspend fun setAiHistoryEnabled(enabled: Boolean)
+    val aiAskHintDismissed: Flow<Boolean>
+    suspend fun setAiAskHintDismissed(dismissed: Boolean)
+    val aiQuestionHistory: Flow<String>
+    suspend fun setAiQuestionHistory(json: String)
     suspend fun exportAllPreferences(): Map<String, String>
     suspend fun importPreferences(prefsMap: Map<String, String>)
     val userPreferences: Flow<UserPreferences>

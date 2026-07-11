@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -64,6 +66,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.viewmodel.AskViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SearchEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.arshadshah.nimaz.presentation.viewmodel.SearchViewModel
@@ -78,10 +81,15 @@ fun SearchScreen(
     onNavigateToHadith: (String, String) -> Unit,
     onNavigateToDua: (String) -> Unit,
     initialFilter: SearchFilter? = null,
-    viewModel: SearchViewModel = hiltViewModel()
+    enableAsk: Boolean = false,
+    onNavigateToSearchSettings: () -> Unit = {},
+    onNavigateToProof: (Route) -> Unit = {},
+    viewModel: SearchViewModel = hiltViewModel(),
+    askViewModel: AskViewModel = hiltViewModel(),
 ) {
     val state by viewModel.searchState.collectAsState()
     val statsState by viewModel.statsState.collectAsState()
+    val askState by askViewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
     // Scope the search (e.g. to duas) when launched from a section screen.
@@ -97,7 +105,16 @@ fun SearchScreen(
             NimazBackTopAppBar(
                 title = stringResource(R.string.search_title),
                 onBackClick = onNavigateBack,
-                scrollBehavior = scrollBehavior
+                scrollBehavior = scrollBehavior,
+                actions = {
+                    IconButton(onClick = onNavigateToSearchSettings) {
+                        NimazIcon(
+                            imageVector = Icons.Default.Tune,
+                            contentDescription = stringResource(R.string.search_settings),
+                            size = NimazIconSize.MEDIUM
+                        )
+                    }
+                }
             )
         }
     ) { paddingValues ->
@@ -118,6 +135,16 @@ fun SearchScreen(
                     showClearButton = state.query.isNotEmpty(),
                     onClear = { viewModel.onEvent(SearchEvent.ClearSearch) },
                     onSearch = { viewModel.onEvent(SearchEvent.ExecuteSearch) }
+                )
+            }
+
+            // Ask with Proof (AI) — only on global search, gated on the user's opt-in.
+            if (enableAsk) {
+                askSection(
+                    state = askState,
+                    onEvent = askViewModel::onEvent,
+                    onNavigateToProof = onNavigateToProof,
+                    onNavigateToSearchSettings = onNavigateToSearchSettings,
                 )
             }
 

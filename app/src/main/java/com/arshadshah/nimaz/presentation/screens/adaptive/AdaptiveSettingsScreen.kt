@@ -41,6 +41,7 @@ fun AdaptiveSettingsScreen(
             onNavigateToLanguage = { navController.navigate(Route.SettingsLanguage) },
             onNavigateToWidgets = { navController.navigate(Route.SettingsWidgets) },
             onNavigateToSync = { navController.navigate(Route.SettingsSync) },
+            onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
             onRestartApp = onRestartApp,
         )
     } else {
@@ -116,6 +117,9 @@ fun AdaptiveSettingsScreen(
                                     SettingsDetailArgs(SettingsDetailPane.SYNC)
                                 )
                             }
+                        },
+                        onNavigateToSearchSettings = {
+                            navController.navigate(Route.SearchSettings)
                         },
                         onRestartApp = onRestartApp,
                     )

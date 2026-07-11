@@ -90,6 +90,7 @@ object ScreenTags {
     const val SettingsSync = "screen_settings_sync"
     const val AllBookmarks = "screen_all_bookmarks"
     const val GlobalSearch = "screen_global_search"
+    const val SearchSettings = "screen_search_settings"
 
     /** Scrollable lists on hub screens — let UI tests scroll to off-screen entries. */
     const val MoreList = "more_menu_list"

@@ -93,6 +93,7 @@ import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
+import com.arshadshah.nimaz.presentation.screens.settings.SearchSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
@@ -1035,6 +1036,7 @@ fun NavGraph(
             // Global Search
             taggedComposable<Route.GlobalSearch>(ScreenTags.GlobalSearch) {
                 SearchScreen(
+                    enableAsk = true,
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToQuranAyah = { surah, ayah ->
                         navController.navigate(Route.QuranReader(surah, ayah))
@@ -1047,7 +1049,15 @@ fun NavGraph(
                     },
                     onNavigateToDua = { duaId ->
                         navController.navigate(Route.DuaReader(duaId))
-                    }
+                    },
+                    onNavigateToSearchSettings = { navController.navigate(Route.SearchSettings) },
+                    onNavigateToProof = { route -> navController.navigate(route) }
+                )
+            }
+
+            taggedComposable<Route.SearchSettings>(ScreenTags.SearchSettings) {
+                SearchSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

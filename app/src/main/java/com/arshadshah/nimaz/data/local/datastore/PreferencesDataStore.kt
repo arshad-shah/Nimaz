@@ -166,6 +166,19 @@ class PreferencesDataStore @Inject constructor(
         val LATITUDE = doublePreferencesKey("latitude")
         val LONGITUDE = doublePreferencesKey("longitude")
         val LOCATION_NAME = stringPreferencesKey("location_name")
+
+        // AI — Ask with Proof (opt-in; all off/neutral by default)
+        val AI_ASK_ENABLED = booleanPreferencesKey("ai_ask_enabled")
+        val AI_CONSENT_TIMESTAMP = longPreferencesKey("ai_consent_timestamp")
+        val AI_SOURCES_QURAN = booleanPreferencesKey("ai_sources_quran")
+        val AI_SOURCES_HADITH = booleanPreferencesKey("ai_sources_hadith")
+        val AI_SOURCES_DUA = booleanPreferencesKey("ai_sources_dua")
+        val AI_MAX_PROOFS = intPreferencesKey("ai_max_proofs")
+        val AI_HISTORY_ENABLED = booleanPreferencesKey("ai_history_enabled")
+        val AI_ASK_HINT_DISMISSED = booleanPreferencesKey("ai_ask_hint_dismissed")
+        // JSON-encoded List<String> of recent AI questions (only persisted when
+        // AI_HISTORY_ENABLED). See recent-searches mechanism in SearchViewModel.
+        val AI_QUESTION_HISTORY = stringPreferencesKey("ai_question_history")
     }
 
     override suspend fun clearAllData() {
@@ -657,6 +670,53 @@ class PreferencesDataStore @Inject constructor(
             }
         }
     }
+
+    // AI — Ask with Proof
+    override val aiAskEnabled: Flow<Boolean> = preference(PreferencesKeys.AI_ASK_ENABLED, false)
+
+    override suspend fun setAiAskEnabled(enabled: Boolean) =
+        put(PreferencesKeys.AI_ASK_ENABLED, enabled)
+
+    override val aiConsentTimestamp: Flow<Long> = preference(PreferencesKeys.AI_CONSENT_TIMESTAMP, 0L)
+
+    override suspend fun setAiConsentTimestamp(timestamp: Long) =
+        put(PreferencesKeys.AI_CONSENT_TIMESTAMP, timestamp)
+
+    override val aiSourcesQuran: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_QURAN, true)
+
+    override suspend fun setAiSourcesQuran(enabled: Boolean) =
+        put(PreferencesKeys.AI_SOURCES_QURAN, enabled)
+
+    override val aiSourcesHadith: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_HADITH, true)
+
+    override suspend fun setAiSourcesHadith(enabled: Boolean) =
+        put(PreferencesKeys.AI_SOURCES_HADITH, enabled)
+
+    override val aiSourcesDua: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_DUA, true)
+
+    override suspend fun setAiSourcesDua(enabled: Boolean) =
+        put(PreferencesKeys.AI_SOURCES_DUA, enabled)
+
+    override val aiMaxProofs: Flow<Int> = preference(PreferencesKeys.AI_MAX_PROOFS, 5)
+
+    override suspend fun setAiMaxProofs(count: Int) = put(PreferencesKeys.AI_MAX_PROOFS, count)
+
+    override val aiHistoryEnabled: Flow<Boolean> = preference(PreferencesKeys.AI_HISTORY_ENABLED, false)
+
+    override suspend fun setAiHistoryEnabled(enabled: Boolean) =
+        put(PreferencesKeys.AI_HISTORY_ENABLED, enabled)
+
+    override val aiAskHintDismissed: Flow<Boolean> =
+        preference(PreferencesKeys.AI_ASK_HINT_DISMISSED, false)
+
+    override suspend fun setAiAskHintDismissed(dismissed: Boolean) =
+        put(PreferencesKeys.AI_ASK_HINT_DISMISSED, dismissed)
+
+    override val aiQuestionHistory: Flow<String> =
+        preference(PreferencesKeys.AI_QUESTION_HISTORY, "")
+
+    override suspend fun setAiQuestionHistory(json: String) =
+        put(PreferencesKeys.AI_QUESTION_HISTORY, json)
 
     // Combined user preferences
     override val userPreferences: Flow<UserPreferences> = dataStore.data.map { preferences ->
