@@ -1,0 +1,44 @@
+{
+  // Nimaz AI Worker — capability-registry backend for grounded Q&A.
+  // See README.md for setup, local dev, and deploy instructions.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "nimaz-ai",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-01-15",
+  "compatibility_flags": ["nodejs_compat"],
+
+  // Structured logs + metrics in the Cloudflare dashboard.
+  "observability": {
+    "enabled": true
+  },
+
+  // KV holds rate-limit counters and the monthly budget tally.
+  // Create it once with: `wrangler kv namespace create NIMAZ_AI_KV`
+  // then paste the returned id below (replacing "REPLACE_ME"). See README.md.
+  "kv_namespaces": [
+    {
+      "binding": "NIMAZ_AI_KV",
+      "id": "REPLACE_ME"
+    }
+  ],
+
+  // Non-secret configuration. Override per-environment in the dashboard or via
+  // `wrangler deploy --var KEY:value`. Secrets (ANTHROPIC_API_KEY,
+  // GOOGLE_SERVICE_ACCOUNT_JSON) are NOT stored here — set them with
+  // `wrangler secret put <NAME>` (see README.md).
+  "vars": {
+    // When "true", skips Play Integrity verification entirely. Use ONLY for
+    // local testing before Integrity is wired up. MUST be "false" in production.
+    "SKIP_ATTESTATION": "false",
+    // Per-device requests per UTC day.
+    "DAILY_DEVICE_LIMIT": "20",
+    // Global requests per UTC day (across all devices).
+    "DAILY_GLOBAL_LIMIT": "500",
+    // Monthly spend ceiling in USD before the Worker refuses new calls.
+    "MONTHLY_BUDGET_USD": "10",
+    // When set, Claude calls route through the Cloudflare AI Gateway. Shape:
+    // https://gateway.ai.cloudflare.com/v1/{account}/{gateway}/anthropic
+    // Leave empty to call api.anthropic.com directly.
+    "AI_GATEWAY_BASE_URL": ""
+  }
+}
