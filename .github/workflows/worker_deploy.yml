@@ -77,6 +77,11 @@ jobs:
     needs: deploy
     if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    # No checkout here, so the workflow-level `working-directory: worker`
+    # default would point at a nonexistent dir — run from the workspace root.
+    defaults:
+      run:
+        working-directory: ${{ github.workspace }}
     steps:
       - name: Health check
         run: |
