@@ -416,6 +416,7 @@
     <string name="hadith_count_format">%s hadis</string>
     <string name="search_title">Pencarian</string>
     <string name="search_placeholder">Cari Al-Quran, Hadis, Doa…</string>
+    <string name="search_or_ask_placeholder">Cari atau ajukan pertanyaan…</string>
     <string name="recent_searches">Pencarian Terbaru</string>
     <string name="clear_recent">Hapus Terbaru</string>
     <string name="results_found_format">%d hasil ditemukan</string>
@@ -1306,6 +1307,7 @@
     <string name="ai_consent_enable">Aktifkan</string>
     <string name="ai_ask_a_question">Ajukan pertanyaan</string>
     <string name="ai_ask_placeholder">Tanyakan tentang Quran, Hadis, atau Doa…</string>
+    <string name="ai_answer_section">Jawaban AI</string>
     <string name="ai_enable_hint">Aktifkan jawaban AI di pengaturan Pencarian</string>
     <string name="ai_proof_section">Bukti</string>
     <string name="ai_confidence_high">Keyakinan tinggi</string>

@@ -416,6 +416,7 @@
     <string name="hadith_count_format">%s hadiths</string>
     <string name="search_title">Recherche</string>
     <string name="search_placeholder">Rechercher Coran, Hadith, Duas…</string>
+    <string name="search_or_ask_placeholder">Rechercher ou poser une question…</string>
     <string name="recent_searches">Recherches récentes</string>
     <string name="clear_recent">Effacer les récentes</string>
     <string name="results_found_format">%d résultats trouvés</string>
@@ -1306,6 +1307,7 @@
     <string name="ai_consent_enable">Activer</string>
     <string name="ai_ask_a_question">Poser une question</string>
     <string name="ai_ask_placeholder">Posez une question sur le Coran, les Hadiths ou les Douas…</string>
+    <string name="ai_answer_section">Réponse de l\'IA</string>
     <string name="ai_enable_hint">Activez les réponses de l\'IA dans les paramètres de recherche</string>
     <string name="ai_proof_section">Preuve</string>
     <string name="ai_confidence_high">Confiance élevée</string>
