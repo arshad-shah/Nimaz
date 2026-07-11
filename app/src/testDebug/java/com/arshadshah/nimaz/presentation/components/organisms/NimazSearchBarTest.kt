@@ -4,6 +4,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
@@ -114,6 +115,110 @@ class NimazSearchBarTest {
         }
 
         composeRule.onNodeWithContentDescription("Clear search").assertDoesNotExist()
+    }
+
+    @Test
+    fun `ask button is hidden when askEnabled is false`() {
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "patience",
+                onQueryChange = {},
+                showAskButton = true,
+                askEnabled = false,
+                onAsk = {}
+            )
+        }
+
+        composeRule.onNodeWithText("Ask").assertDoesNotExist()
+    }
+
+    @Test
+    fun `ask button is hidden when query is blank`() {
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "",
+                onQueryChange = {},
+                showAskButton = true,
+                askEnabled = true,
+                onAsk = {}
+            )
+        }
+
+        composeRule.onNodeWithText("Ask").assertDoesNotExist()
+    }
+
+    @Test
+    fun `ask button is shown and invokes onAsk when enabled with text`() {
+        var asked = false
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "patience",
+                onQueryChange = {},
+                showAskButton = true,
+                askEnabled = true,
+                onAsk = { asked = true }
+            )
+        }
+
+        composeRule.onNodeWithText("Ask").assertIsDisplayed().performClick()
+        assertThat(asked).isTrue()
+    }
+
+    @Test
+    fun `clear button still works alongside the ask button`() {
+        var cleared = false
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "patience",
+                onQueryChange = {},
+                onClear = { cleared = true },
+                showAskButton = true,
+                askEnabled = true,
+                onAsk = {}
+            )
+        }
+
+        composeRule.onNodeWithText("Ask").assertIsDisplayed()
+        composeRule.onNodeWithContentDescription("Clear search").performClick()
+        assertThat(cleared).isTrue()
+    }
+
+    @Test
+    fun `ime search action invokes onAsk while the ask affordance is live`() {
+        var asked = false
+        var searched: String? = null
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "patience",
+                onQueryChange = {},
+                onSearch = { searched = it },
+                showAskButton = true,
+                askEnabled = true,
+                onAsk = { asked = true }
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Search...").performImeAction()
+        assertThat(asked).isTrue()
+        assertThat(searched).isNull()
+    }
+
+    @Test
+    fun `ime search action falls back to onSearch when ask is unavailable`() {
+        var searched: String? = null
+        composeRule.setThemedContent {
+            NimazSearchBar(
+                query = "patience",
+                onQueryChange = {},
+                onSearch = { searched = it },
+                showAskButton = true,
+                askEnabled = false,
+                onAsk = {}
+            )
+        }
+
+        composeRule.onNodeWithContentDescription("Search...").performImeAction()
+        assertThat(searched).isEqualTo("patience")
     }
 
     @Test

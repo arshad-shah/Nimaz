@@ -34,6 +34,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
@@ -119,11 +120,18 @@ private val NimazSearchBarHeight = 56.dp
  *   screens may want next to the clear button.
  * - Animated visibility on the clear button so its appearance/disappearance
  *   doesn't feel jumpy as the user types.
+ * - Optional trailing **Ask** pill ([showAskButton]/[askEnabled]/[onAsk]) for
+ *   screens where the same text can be submitted as an AI question ("Ask with
+ *   Proof" on Global Search). The pill renders only when the caller opts in,
+ *   the feature is on, and there is text to ask; it sits after the clear
+ *   button, which keeps working independently. While the pill is active the
+ *   IME action also routes to [onAsk] instead of [onSearch].
  *
  * API is fully backwards-compatible — existing callers (NimazListPicker,
  * SearchScreen, the asma/prophets list screens) continue to work with just
  * the original parameters.
  */
+@OptIn(androidx.compose.material3.ExperimentalMaterial3Api::class)
 @Composable
 fun NimazSearchBar(
     query: String,
@@ -136,6 +144,9 @@ fun NimazSearchBar(
     autoFocus: Boolean = false,
     onClear: () -> Unit = {},
     onSearch: (String) -> Unit = {},
+    showAskButton: Boolean = false,
+    askEnabled: Boolean = false,
+    onAsk: (() -> Unit)? = null,
     leadingIcon: @Composable (() -> Unit)? = {
         NimazIcon(
             imageVector = Icons.Default.Search,
@@ -150,6 +161,10 @@ fun NimazSearchBar(
     val focusRequester = remember { FocusRequester() }
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
+
+    // The Ask affordance is live only when the caller opted in, the feature is
+    // enabled, and there is something to ask.
+    val askActive = showAskButton && askEnabled && onAsk != null && query.isNotBlank()
 
     // Outlined-field language (matches NimazDropdownField): a neutral hairline at rest that
     // animates to the primary tint on focus. Always outlined — no fill swap.
@@ -212,7 +227,9 @@ fun NimazSearchBar(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 keyboardActions = KeyboardActions(
                     onSearch = {
-                        onSearch(query)
+                        // While the Ask affordance is live, Enter asks; otherwise
+                        // it falls back to the plain keyword search.
+                        if (askActive) onAsk?.invoke() else onSearch(query)
                         focusManager.clearFocus()
                     }
                 ),
@@ -275,6 +292,43 @@ fun NimazSearchBar(
                             contentDescription = stringResource(R.string.cd_clear_search),
                             tint = MaterialTheme.colorScheme.primary,
                             iconSize = 16.dp
+                        )
+                    }
+                }
+            }
+
+            // Ask pill — independent of the clear button: clear stays visible
+            // whenever there's text, Ask appears alongside it when live.
+            AnimatedVisibility(
+                visible = askActive,
+                enter = fadeIn() + scaleIn(initialScale = 0.7f),
+                exit = fadeOut() + scaleOut(targetScale = 0.7f)
+            ) {
+                Surface(
+                    onClick = {
+                        onAsk?.invoke()
+                        focusManager.clearFocus()
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 2.dp, end = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            iconSize = 15.dp
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.search_ask_button),
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimary
                         )
                     }
                 }
@@ -689,6 +743,16 @@ private fun NimazSearchBar_Showcase_Preview() {
                     query = "Al-Fatiha",
                     onQueryChange = {},
                     onClear = {},
+                )
+            }
+            PreviewSection(label = "Ask pill (AI on + text — clear stays)") {
+                NimazSearchBar(
+                    query = "What does the Qur'an say about patience?",
+                    onQueryChange = {},
+                    onClear = {},
+                    showAskButton = true,
+                    askEnabled = true,
+                    onAsk = {},
                 )
             }
             PreviewSection(label = "Loading (async lookup in flight)") {
