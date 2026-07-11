@@ -17,40 +17,19 @@ data class InvokeRequest(
     val input: JsonElement,
 )
 
+/** Input for the `search-assist` capability. Mirrors the Worker's SearchAssistInputSchema. */
 @Serializable
-data class AskInput(
-    val question: String,
-    val passages: List<PassageDto>,
-)
-
-/** Input for the `search-plan` capability. Mirrors the Worker's SearchPlanInputSchema. */
-@Serializable
-data class SearchPlanInput(
+data class AssistInput(
     val question: String,
 )
 
-/** Success body for `search-plan`. Mirrors the Worker's SearchPlanOutputSchema. */
+/** Success body for `search-assist`. Mirrors the Worker's SearchAssistOutputSchema. */
 @Serializable
-data class SearchPlanOutput(
-    val terms: List<String>,
-    val quranRefs: List<String>,
-)
-
-@Serializable
-data class PassageDto(
-    val id: String,
-    val source: String,
-    val text: String,
-    val meta: String,
-)
-
-/** Success body for ask-with-proof. Mirrors the Worker's AskOutputSchema. */
-@Serializable
-data class AskOutput(
+data class AssistOutput(
     val answer: String,
-    val citationIds: List<String>,
+    val quranRefs: List<String>,
+    val terms: List<String>,
     val confidence: String,
-    val insufficientEvidence: Boolean,
 )
 
 /** Error envelope: `{ "error": { code, message, retryAfterSeconds? } }`. */

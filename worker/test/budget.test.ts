@@ -5,7 +5,12 @@ import {
   usageToMicrodollars,
   utcMonthStamp,
 } from "../src/middleware/budgetGuard";
-import { makeAskInput, makeEnvelope, mockAnthropicToolResponse } from "./helpers";
+import {
+  makeAssistInput,
+  makeAssistOutput,
+  makeEnvelope,
+  mockAnthropicToolResponse,
+} from "./helpers";
 
 describe("budget math", () => {
   it("prices input at $1/MTok and output at $5/MTok (microdollars)", () => {
@@ -52,7 +57,7 @@ describe("budget guard (integration)", () => {
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(makeEnvelope(makeAskInput(), { deviceId: "budget-dev" })),
+        body: JSON.stringify(makeEnvelope(makeAssistInput(), { deviceId: "budget-dev" })),
       },
       { ...env, MONTHLY_BUDGET_USD: "0.000001" },
     );
@@ -68,22 +73,17 @@ describe("budget guard (integration)", () => {
       .intercept({ path: "/v1/messages", method: "POST" })
       .reply(
         200,
-        mockAnthropicToolResponse(
-          {
-            answer: "Be patient.",
-            citationIds: ["quran:2:153"],
-            confidence: "high",
-            insufficientEvidence: false,
-          },
-          { input_tokens: 1_000_000, output_tokens: 0 },
-        ),
+        mockAnthropicToolResponse(makeAssistOutput(), {
+          input_tokens: 1_000_000,
+          output_tokens: 0,
+        }),
       );
     const res = await app.request(
       "/v1/invoke",
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(makeEnvelope(makeAskInput(), { deviceId: "spend-dev" })),
+        body: JSON.stringify(makeEnvelope(makeAssistInput(), { deviceId: "spend-dev" })),
       },
       { ...env },
     );

@@ -1,7 +1,7 @@
 import { env } from "cloudflare:test";
 import { describe, expect, it } from "vitest";
 import app from "../src/index";
-import { makeAskInput, makeEnvelope } from "./helpers";
+import { makeAssistInput, makeEnvelope } from "./helpers";
 
 async function invoke(body: unknown, overrideEnv: Partial<Env> = {}) {
   return app.request(
@@ -21,7 +21,7 @@ describe("health", () => {
     expect(res.status).toBe(200);
     const body = (await res.json()) as { ok: boolean; capabilities: string[] };
     expect(body.ok).toBe(true);
-    expect(body.capabilities).toContain("ask-with-proof");
+    expect(body.capabilities).toContain("search-assist");
   });
 });
 
@@ -38,34 +38,34 @@ describe("dispatch validation", () => {
   });
 
   it("rejects a malformed envelope (missing deviceId)", async () => {
-    const res = await invoke({ capability: "ask-with-proof", input: {} });
+    const res = await invoke({ capability: "search-assist", input: {} });
     expect(res.status).toBe(400);
     expect(((await res.json()) as any).error.code).toBe("INVALID_INPUT");
   });
 
   it("rejects an unknown capability", async () => {
-    const res = await invoke(makeEnvelope(makeAskInput(), { capability: "does-not-exist" }));
+    const res = await invoke(
+      makeEnvelope(makeAssistInput(), { capability: "does-not-exist" }),
+    );
     expect(res.status).toBe(400);
-    const body = (await res.json()) as { error: { code: string; message: string } };
+    const body = (await res.json()) as {
+      error: { code: string; message: string };
+    };
     expect(body.error.code).toBe("INVALID_INPUT");
     expect(body.error.message).toContain("does-not-exist");
   });
 
   it("rejects capability input that fails the Zod schema (question too short)", async () => {
-    const res = await invoke(makeEnvelope(makeAskInput({ question: "hi" })));
+    const res = await invoke(makeEnvelope(makeAssistInput({ question: "hi" })));
     expect(res.status).toBe(400);
     expect(((await res.json()) as any).error.code).toBe("INVALID_INPUT");
   });
 
-  it("rejects when total passage chars exceed 8000", async () => {
-    const big = "x".repeat(1100);
-    const passages = Array.from({ length: 8 }, (_, i) => ({
-      id: `quran:2:${i + 1}`,
-      source: "quran" as const,
-      text: big,
-      meta: "meta",
-    }));
-    const res = await invoke(makeEnvelope(makeAskInput({ passages })));
+  it("rejects a question over 500 chars", async () => {
+    const res = await invoke(
+      makeEnvelope(makeAssistInput({ question: "x".repeat(501) })),
+    );
     expect(res.status).toBe(400);
+    expect(((await res.json()) as any).error.code).toBe("INVALID_INPUT");
   });
 });

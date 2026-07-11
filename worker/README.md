@@ -1,21 +1,24 @@
 # Nimaz AI Worker (`nimaz-ai`)
 
-A Cloudflare Worker (Hono + TypeScript) that backs Nimaz's opt-in, proof-driven
-AI features. It is a **capability registry**: every AI feature is one file under
-`src/capabilities/` plus one line in `src/registry.ts`. The first capability is
-**`ask-with-proof`** — grounded Q&A over Quran/Hadith/Dua passages the app
-retrieves locally and sends up as evidence.
+A Cloudflare Worker (Hono + TypeScript) that backs Nimaz's opt-in AI search.
+It is a **capability registry**: every AI feature is one file under
+`src/capabilities/` plus one line in `src/registry.ts`. The single capability is
+**`search-assist`** — the app sends only the user's question; Claude answers
+from mainstream Islamic knowledge and returns the supporting Quran references
+plus related search terms, which the app resolves against its **local**
+database (real records become the proof cards and the results list).
 
-The Worker never stores questions or answers. It verifies the caller with Play
-Integrity, enforces per-device/global/monthly limits, calls Claude with a fixed
-grounding prompt and a forced structured-output tool, and returns strict JSON.
+The Worker never stores questions or answers. It classifies the caller with
+Play Integrity (never blocking — see below), enforces per-device/global/monthly
+limits, calls Claude with a fixed cached prompt and a forced structured-output
+tool, and returns strict JSON.
 
 ## Architecture
 
 ```
 POST /v1/invoke
-  → integrity   (Play Integrity token → Google decodeIntegrityToken)
-  → rateLimit   (per-device + global daily caps in KV)
+  → integrity   (Play Integrity token → trust tier: verified | unverified)
+  → rateLimit   (tiered per-device + global daily caps in KV)
   → budgetGuard (monthly USD budget in KV; pre-call gate + post-call accounting)
   → dispatch    (registry lookup → Zod-validate input → build request
                  → Claude (via AI Gateway if configured) → Zod-validate output)
@@ -23,43 +26,53 @@ POST /v1/invoke
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
+### Integrity never blocks
+
+Attestation used to hard-fail requests (`ATTESTATION_FAILED`), which bricked
+the feature for legitimate users whenever a token couldn't be fetched or
+Google's API was unreachable. `checkIntegrity` now returns a **trust tier**
+instead of throwing:
+
+- `verified` — token decodes with `PLAY_RECOGNIZED` and the device meets
+  device or basic integrity (or `SKIP_ATTESTATION=true`).
+- `unverified` — missing/short token, no service account configured, Google
+  API failure, or a failed verdict.
+
+The tier only selects the per-device daily cap (`DAILY_DEVICE_LIMIT` vs the
+much smaller `UNVERIFIED_DAILY_DEVICE_LIMIT`). The monthly budget guard is the
+hard backstop against abuse.
+
 ## API contract
 
 `POST /v1/invoke`
 
 ```json
 {
-  "capability": "ask-with-proof",
-  "integrityToken": "<play-integrity-token>",
+  "capability": "search-assist",
+  "integrityToken": "<play-integrity-token, may be empty>",
   "deviceId": "<random UUID generated once per install>",
   "input": {
-    "question": "What does the Quran say about patience?",
-    "passages": [
-      {
-        "id": "quran:2:153",
-        "source": "quran",
-        "text": "O you who believe, seek help through patience and prayer...",
-        "meta": "Surah Al-Baqarah 153 (Sahih Intl)"
-      }
-    ]
+    "question": "What does the Quran say about patience?"
   }
 }
 ```
 
-- `question`: 3–500 chars.
-- `passages`: 1–8 items, each `text` ≤ 1200 chars, total passage text ≤ 8000 chars.
-- `source`: `quran | hadith | dua`.
+- `question`: 3–500 chars. Nothing else is sent.
 
 Success `200`:
 
 ```json
 {
-  "answer": "The sources describe patience as sought through prayer...",
-  "citationIds": ["quran:2:153"],
-  "confidence": "high",
-  "insufficientEvidence": false
+  "answer": "The Quran repeatedly encourages patience (sabr)...",
+  "quranRefs": ["2:153", "39:10"],
+  "terms": ["patience", "sabr", "hardship", "perseverance"],
+  "confidence": "high"
 }
 ```
+
+- `quranRefs`: up to 8 `surah:ayah` references (surah 1–114 enforced; the app
+  drops anything that doesn't resolve in its local Quran database).
+- `terms`: 4–10 short keywords the app runs through its local library search.
 
 Errors use a typed envelope with the matching HTTP status:
 
@@ -70,8 +83,7 @@ Errors use a typed envelope with the matching HTTP status:
 | code                 | status | when                                         |
 | -------------------- | ------ | -------------------------------------------- |
 | `INVALID_INPUT`      | 400    | bad envelope / schema / unknown capability   |
-| `ATTESTATION_FAILED` | 401    | Play Integrity verification failed           |
-| `RATE_LIMITED`       | 429    | per-device or global daily cap hit           |
+| `RATE_LIMITED`       | 429    | per-device (tiered) or global daily cap hit  |
 | `UPSTREAM_ERROR`     | 502    | Claude call failed / returned bad shape      |
 | `BUDGET_EXCEEDED`    | 503    | monthly budget reached                       |
 
@@ -79,20 +91,21 @@ Errors use a typed envelope with the matching HTTP status:
 
 Non-secret vars live in `wrangler.jsonc`:
 
-| var                  | default | meaning                                             |
-| -------------------- | ------- | --------------------------------------------------- |
-| `SKIP_ATTESTATION`   | `false` | `true` bypasses Play Integrity (testing ONLY)       |
-| `DAILY_DEVICE_LIMIT` | `20`    | requests per device per UTC day                     |
-| `DAILY_GLOBAL_LIMIT` | `500`   | requests across all devices per UTC day             |
-| `MONTHLY_BUDGET_USD` | `10`    | monthly spend ceiling before `BUDGET_EXCEEDED`      |
-| `AI_GATEWAY_BASE_URL`| `""`    | route Claude via Cloudflare AI Gateway when set     |
+| var                             | default | meaning                                                  |
+| ------------------------------- | ------- | -------------------------------------------------------- |
+| `SKIP_ATTESTATION`              | `false` | `true` forces the verified tier (local testing ONLY)     |
+| `DAILY_DEVICE_LIMIT`            | `20`    | requests per verified device per UTC day                 |
+| `UNVERIFIED_DAILY_DEVICE_LIMIT` | `5`     | requests per unverified device per UTC day               |
+| `DAILY_GLOBAL_LIMIT`            | `500`   | requests across all devices per UTC day                  |
+| `MONTHLY_BUDGET_USD`            | `10`    | monthly spend ceiling before `BUDGET_EXCEEDED`           |
+| `AI_GATEWAY_BASE_URL`           | `""`    | route Claude via Cloudflare AI Gateway when set          |
 
 Secrets are **not** in any file — set them with `wrangler secret put`:
 
 - `ANTHROPIC_API_KEY` — your Anthropic API key.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
-  used to mint an OAuth token for the Play Integrity API. Optional while
-  `SKIP_ATTESTATION=true`.
+  used to mint an OAuth token for the Play Integrity API. Optional — without
+  it every request simply runs at the unverified tier.
 
 ## Setup
 
@@ -127,25 +140,17 @@ Sample request (works against `wrangler dev` with `SKIP_ATTESTATION=true`):
 curl -s http://localhost:8787/v1/invoke \
   -H 'content-type: application/json' \
   -d '{
-    "capability": "ask-with-proof",
+    "capability": "search-assist",
     "integrityToken": "debug-skip",
     "deviceId": "11111111-1111-1111-1111-111111111111",
     "input": {
-      "question": "What does the Quran say about patience?",
-      "passages": [
-        {
-          "id": "quran:2:153",
-          "source": "quran",
-          "text": "O you who believe, seek help through patience and prayer. Indeed, Allah is with the patient.",
-          "meta": "Surah Al-Baqarah 153 (Sahih Intl)"
-        }
-      ]
+      "question": "What does the Quran say about patience?"
     }
   }' | jq
 ```
 
-Expected: a JSON body with `answer`, `citationIds: ["quran:2:153"]`,
-`confidence`, and `insufficientEvidence: false`.
+Expected: a JSON body with `answer`, `quranRefs` (e.g. `["2:153"]`), `terms`,
+and `confidence`.
 
 Health check:
 

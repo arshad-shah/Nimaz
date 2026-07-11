@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.viewmodel
 
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
-import com.arshadshah.nimaz.domain.model.GroundedAnswer
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.ai.AskWithProofUseCase
 import com.google.common.truth.Truth.assertThat
@@ -34,10 +33,6 @@ class AskViewModelTest {
         every { settings.aiAskHintDismissed } returns flowOf(false)
         every { settings.aiHistoryEnabled } returns flowOf(false)
         every { settings.aiQuestionHistory } returns flowOf("")
-        every { settings.aiSourcesQuran } returns flowOf(true)
-        every { settings.aiSourcesHadith } returns flowOf(true)
-        every { settings.aiSourcesDua } returns flowOf(true)
-        every { settings.aiMaxProofs } returns flowOf(5)
     }
 
     @After
@@ -61,16 +56,13 @@ class AskViewModelTest {
     }
 
     @Test
-    fun `successful ask ends in Answer phase`() = runTest {
-        coEvery { askWithProof.invoke(any(), any(), any()) } returns
+    fun `successful ask ends in Answer phase with related terms`() = runTest {
+        coEvery { askWithProof.invoke(any()) } returns
             AskWithProofUseCase.Outcome.Answered(
-                answer = GroundedAnswer(
-                    answer = "Patience is virtuous.",
-                    citationIds = emptyList(),
-                    confidence = AnswerConfidence.HIGH,
-                    insufficientEvidence = false,
-                ),
+                answer = "Patience is virtuous.",
+                confidence = AnswerConfidence.HIGH,
                 proofs = emptyList(),
+                relatedTerms = listOf("patience", "sabr"),
             )
 
         val vm = viewModel()
@@ -79,37 +71,54 @@ class AskViewModelTest {
 
         val phase = vm.uiState.value.phase
         assertThat(phase).isInstanceOf(AskPhase.Answer::class.java)
-        assertThat((phase as AskPhase.Answer).answer.answer).isEqualTo("Patience is virtuous.")
+        assertThat((phase as AskPhase.Answer).answer).isEqualTo("Patience is virtuous.")
+        assertThat(vm.uiState.value.relatedTerms).containsExactly("patience", "sabr")
         assertThat(vm.uiState.value.recentQuestions).contains(
             "What does the Quran say about patience?",
         )
     }
 
     @Test
-    fun `no-evidence outcome ends in an insufficient-evidence Answer`() = runTest {
-        coEvery { askWithProof.invoke(any(), any(), any()) } returns
-            AskWithProofUseCase.Outcome.NoEvidence
-
-        val vm = viewModel()
-        vm.onEvent(AskEvent.UpdateQuestion("An unrelated question"))
-        vm.onEvent(AskEvent.Submit)
-
-        val phase = vm.uiState.value.phase as AskPhase.Answer
-        assertThat(phase.answer.insufficientEvidence).isTrue()
-        assertThat(phase.proofs).isEmpty()
-    }
-
-    @Test
-    fun `failed outcome ends in Error phase`() = runTest {
-        coEvery { askWithProof.invoke(any(), any(), any()) } returns
-            AskWithProofUseCase.Outcome.Failed(AiError.Network)
+    fun `failed outcome ends in Error phase and clears related terms`() = runTest {
+        coEvery { askWithProof.invoke(any()) } returns
+            AskWithProofUseCase.Outcome.Answered(
+                answer = "ok",
+                confidence = AnswerConfidence.LOW,
+                proofs = emptyList(),
+                relatedTerms = listOf("stale"),
+            ) andThen AskWithProofUseCase.Outcome.Failed(AiError.Network)
 
         val vm = viewModel()
         vm.onEvent(AskEvent.UpdateQuestion("What is patience?"))
+        vm.onEvent(AskEvent.Submit)
+        assertThat(vm.uiState.value.relatedTerms).containsExactly("stale")
+
         vm.onEvent(AskEvent.Submit)
 
         val phase = vm.uiState.value.phase
         assertThat(phase).isInstanceOf(AskPhase.Error::class.java)
         assertThat((phase as AskPhase.Error).error).isEqualTo(AiError.Network)
+        // Stale terms from the previous answer must not keep driving the list.
+        assertThat(vm.uiState.value.relatedTerms).isEmpty()
+    }
+
+    @Test
+    fun `clear resets phase, question and related terms`() = runTest {
+        coEvery { askWithProof.invoke(any()) } returns
+            AskWithProofUseCase.Outcome.Answered(
+                answer = "ok",
+                confidence = AnswerConfidence.HIGH,
+                proofs = emptyList(),
+                relatedTerms = listOf("charity"),
+            )
+
+        val vm = viewModel()
+        vm.onEvent(AskEvent.UpdateQuestion("What about charity?"))
+        vm.onEvent(AskEvent.Submit)
+        vm.onEvent(AskEvent.Clear)
+
+        assertThat(vm.uiState.value.phase).isEqualTo(AskPhase.Idle)
+        assertThat(vm.uiState.value.question).isEmpty()
+        assertThat(vm.uiState.value.relatedTerms).isEmpty()
     }
 }

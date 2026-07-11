@@ -1,24 +1,33 @@
-import type { AskInput } from "../src/schemas/ask";
+import type { SearchAssistInput } from "../src/schemas/search-assist";
 
-export function makeAskInput(overrides: Partial<AskInput> = {}): AskInput {
+export function makeAssistInput(
+  overrides: Partial<SearchAssistInput> = {},
+): SearchAssistInput {
   return {
     question: "What does the Quran say about patience?",
-    passages: [
-      {
-        id: "quran:2:153",
-        source: "quran",
-        text: "O you who believe, seek help through patience and prayer. Indeed, Allah is with the patient.",
-        meta: "Surah Al-Baqarah 153 (Sahih Intl)",
-      },
-    ],
     ...overrides,
   };
 }
 
-export function makeEnvelope(input: AskInput, extra: Record<string, unknown> = {}) {
+/** A well-formed search-assist tool output the mock Anthropic API returns. */
+export function makeAssistOutput(overrides: Record<string, unknown> = {}) {
   return {
-    capability: "ask-with-proof",
-    integrityToken: "debug-skip",
+    answer:
+      "The Quran repeatedly encourages patience (sabr), promising that Allah is with the patient.",
+    quranRefs: ["2:153", "39:10"],
+    terms: ["patience", "sabr", "hardship", "perseverance"],
+    confidence: "high",
+    ...overrides,
+  };
+}
+
+export function makeEnvelope(
+  input: unknown,
+  extra: Record<string, unknown> = {},
+) {
+  return {
+    capability: "search-assist",
+    integrityToken: "test-integrity-token",
     deviceId: "test-device-0001",
     input,
     ...extra,
@@ -28,11 +37,15 @@ export function makeEnvelope(input: AskInput, extra: Record<string, unknown> = {
 /** A well-formed Anthropic Messages response that calls the named tool. */
 export function mockAnthropicToolResponse(
   toolInput: unknown,
-  usage: { input_tokens: number; output_tokens: number; cache_read_input_tokens?: number } = {
+  usage: {
+    input_tokens: number;
+    output_tokens: number;
+    cache_read_input_tokens?: number;
+  } = {
     input_tokens: 500,
-    output_tokens: 80,
+    output_tokens: 120,
   },
-  toolName = "submit_answer",
+  toolName = "submit_result",
 ) {
   return {
     id: "msg_test",
@@ -46,20 +59,6 @@ export function mockAnthropicToolResponse(
     ],
     stop_reason: "tool_use",
     usage,
-  };
-}
-
-/** Envelope for a search-plan invocation. */
-export function makePlanEnvelope(
-  question = "How do I cope with grief?",
-  extra: Record<string, unknown> = {},
-) {
-  return {
-    capability: "search-plan",
-    integrityToken: "debug-skip",
-    deviceId: "test-device-plan-1",
-    input: { question },
-    ...extra,
   };
 }
 

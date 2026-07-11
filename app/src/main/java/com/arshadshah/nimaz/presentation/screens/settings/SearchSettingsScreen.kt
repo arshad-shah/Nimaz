@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.settings
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,14 +12,12 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -38,7 +35,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SearchSettingsViewModel
-import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,70 +74,6 @@ fun SearchSettingsScreen(
                             viewModel.onEvent(SearchSettingsEvent.ToggleAiRequested)
                         },
                     )
-                }
-            }
-
-            // ── Sources ───────────────────────────────────────────────────
-            item { NimazSectionHeader(title = stringResource(R.string.ai_sources)) }
-            item {
-                NimazMenuGroup {
-                    NimazSettingsItem(
-                        title = stringResource(R.string.ai_source_quran),
-                        subtitle = stringResource(R.string.ai_source_quran_subtitle),
-                        checked = state.sourcesQuran,
-                        onCheckedChange = {
-                            viewModel.onEvent(SearchSettingsEvent.SetSourceQuran(it))
-                        },
-                    )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    NimazSettingsItem(
-                        title = stringResource(R.string.ai_source_hadith),
-                        subtitle = stringResource(R.string.ai_source_hadith_subtitle),
-                        checked = state.sourcesHadith,
-                        onCheckedChange = {
-                            viewModel.onEvent(SearchSettingsEvent.SetSourceHadith(it))
-                        },
-                    )
-                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
-                    NimazSettingsItem(
-                        title = stringResource(R.string.ai_source_dua),
-                        subtitle = stringResource(R.string.ai_source_dua_subtitle),
-                        checked = state.sourcesDua,
-                        onCheckedChange = {
-                            viewModel.onEvent(SearchSettingsEvent.SetSourceDua(it))
-                        },
-                    )
-                }
-            }
-            item {
-                NimazMenuGroup {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = stringResource(R.string.ai_proofs_count),
-                                style = MaterialTheme.typography.bodyLarge,
-                            )
-                            Text(
-                                text = state.maxProofs.toString(),
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.primary,
-                            )
-                        }
-                        Slider(
-                            value = state.maxProofs.toFloat(),
-                            onValueChange = {
-                                viewModel.onEvent(
-                                    SearchSettingsEvent.SetMaxProofs(it.roundToInt()),
-                                )
-                            },
-                            valueRange = 3f..8f,
-                            steps = 4,
-                        )
-                    }
                 }
             }
 

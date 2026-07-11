@@ -16,10 +16,6 @@ import javax.inject.Inject
 
 data class SearchSettingsUiState(
     val aiEnabled: Boolean = false,
-    val sourcesQuran: Boolean = true,
-    val sourcesHadith: Boolean = true,
-    val sourcesDua: Boolean = true,
-    val maxProofs: Int = 5,
     val historyEnabled: Boolean = false,
     val showConsentSheet: Boolean = false,
 )
@@ -29,10 +25,6 @@ sealed interface SearchSettingsEvent {
     data object ToggleAiRequested : SearchSettingsEvent
     data object ConsentAccepted : SearchSettingsEvent
     data object ConsentDismissed : SearchSettingsEvent
-    data class SetSourceQuran(val enabled: Boolean) : SearchSettingsEvent
-    data class SetSourceHadith(val enabled: Boolean) : SearchSettingsEvent
-    data class SetSourceDua(val enabled: Boolean) : SearchSettingsEvent
-    data class SetMaxProofs(val count: Int) : SearchSettingsEvent
     data class SetHistoryEnabled(val enabled: Boolean) : SearchSettingsEvent
     data object ClearHistory : SearchSettingsEvent
 }
@@ -48,25 +40,9 @@ class SearchSettingsViewModel @Inject constructor(
     init {
         combine(
             settingsRepository.aiAskEnabled,
-            settingsRepository.aiSourcesQuran,
-            settingsRepository.aiSourcesHadith,
-            settingsRepository.aiSourcesDua,
-        ) { enabled, quran, hadith, dua ->
-            _uiState.update {
-                it.copy(
-                    aiEnabled = enabled,
-                    sourcesQuran = quran,
-                    sourcesHadith = hadith,
-                    sourcesDua = dua,
-                )
-            }
-        }.launchIn(viewModelScope)
-
-        combine(
-            settingsRepository.aiMaxProofs,
             settingsRepository.aiHistoryEnabled,
-        ) { maxProofs, history ->
-            _uiState.update { it.copy(maxProofs = maxProofs, historyEnabled = history) }
+        ) { enabled, history ->
+            _uiState.update { it.copy(aiEnabled = enabled, historyEnabled = history) }
         }.launchIn(viewModelScope)
     }
 
@@ -76,20 +52,6 @@ class SearchSettingsViewModel @Inject constructor(
             SearchSettingsEvent.ConsentAccepted -> onConsentAccepted()
             SearchSettingsEvent.ConsentDismissed ->
                 _uiState.update { it.copy(showConsentSheet = false) }
-
-            is SearchSettingsEvent.SetSourceQuran ->
-                viewModelScope.launch { settingsRepository.setAiSourcesQuran(event.enabled) }
-
-            is SearchSettingsEvent.SetSourceHadith ->
-                viewModelScope.launch { settingsRepository.setAiSourcesHadith(event.enabled) }
-
-            is SearchSettingsEvent.SetSourceDua ->
-                viewModelScope.launch { settingsRepository.setAiSourcesDua(event.enabled) }
-
-            is SearchSettingsEvent.SetMaxProofs ->
-                viewModelScope.launch {
-                    settingsRepository.setAiMaxProofs(event.count.coerceIn(3, 8))
-                }
 
             is SearchSettingsEvent.SetHistoryEnabled ->
                 viewModelScope.launch {

@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.AiError
-import com.arshadshah.nimaz.domain.model.GroundedAnswer
+import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.ai.AskWithProofUseCase
@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
@@ -26,7 +25,12 @@ import javax.inject.Inject
 sealed interface AskPhase {
     data object Idle : AskPhase
     data object Loading : AskPhase
-    data class Answer(val answer: GroundedAnswer, val proofs: List<Proof>) : AskPhase
+    data class Answer(
+        val answer: String,
+        val confidence: AnswerConfidence,
+        val proofs: List<Proof>,
+    ) : AskPhase
+
     data class Error(val error: AiError) : AskPhase
 }
 
@@ -37,11 +41,11 @@ data class AskUiState(
     val recentQuestions: List<String> = emptyList(),
     val phase: AskPhase = AskPhase.Idle,
     /**
-     * The search terms the AI's retrieval plan used for the most recent answer.
-     * The Search screen drives its results list from these (same plan, no extra
-     * planning call), giving the AI control over the list when enabled.
+     * The AI's related search terms for the most recent answer. The Search
+     * screen drives its results list from these (same single call — no extra
+     * round-trip), so the list dynamically reflects what the AI judged relevant.
      */
-    val plannedTerms: List<String> = emptyList(),
+    val relatedTerms: List<String> = emptyList(),
 )
 
 sealed interface AskEvent {
@@ -84,7 +88,7 @@ class AskViewModel @Inject constructor(
                     recentQuestions = recentQuestions.toList(),
                 )
             }
-        }.onEach { }.launchIn(viewModelScope)
+        }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: AskEvent) {
@@ -100,7 +104,7 @@ class AskViewModel @Inject constructor(
 
             AskEvent.Clear ->
                 _uiState.update {
-                    it.copy(question = "", phase = AskPhase.Idle, plannedTerms = emptyList())
+                    it.copy(question = "", phase = AskPhase.Idle, relatedTerms = emptyList())
                 }
 
             AskEvent.DismissHint ->
@@ -113,44 +117,23 @@ class AskViewModel @Inject constructor(
         if (question.length < MIN_QUESTION_LENGTH) return
 
         AppAnalytics.logEvent(EVENT_SUBMITTED, null) // event name only — never the question text
-        // Reset the plan so a stale one can't drive the list if this ask ends in
-        // NoEvidence/Error; only a fresh Answered sets plannedTerms again.
-        _uiState.update { it.copy(phase = AskPhase.Loading, plannedTerms = emptyList()) }
+        // Reset the terms so a stale set can't drive the list if this ask fails;
+        // only a fresh answer sets relatedTerms again.
+        _uiState.update { it.copy(phase = AskPhase.Loading, relatedTerms = emptyList()) }
 
         viewModelScope.launch {
-            val sources = AskWithProofUseCase.Sources(
-                quran = settingsRepository.aiSourcesQuran.first(),
-                hadith = settingsRepository.aiSourcesHadith.first(),
-                dua = settingsRepository.aiSourcesDua.first(),
-            )
-            val maxProofs = settingsRepository.aiMaxProofs.first()
-
-            when (val outcome = askWithProof(question, sources, maxProofs)) {
+            when (val outcome = askWithProof(question)) {
                 is AskWithProofUseCase.Outcome.Answered -> {
                     AppAnalytics.logEvent(EVENT_ANSWERED, null)
                     addRecent(question)
                     _uiState.update {
                         it.copy(
-                            phase = AskPhase.Answer(outcome.answer, outcome.proofs),
-                            plannedTerms = outcome.plannedTerms,
-                        )
-                    }
-                }
-
-                AskWithProofUseCase.Outcome.NoEvidence -> {
-                    AppAnalytics.logEvent(EVENT_ANSWERED, null)
-                    addRecent(question)
-                    _uiState.update {
-                        it.copy(
                             phase = AskPhase.Answer(
-                                GroundedAnswer(
-                                    answer = "",
-                                    citationIds = emptyList(),
-                                    confidence = com.arshadshah.nimaz.domain.model.AnswerConfidence.LOW,
-                                    insufficientEvidence = true,
-                                ),
-                                proofs = emptyList(),
+                                answer = outcome.answer,
+                                confidence = outcome.confidence,
+                                proofs = outcome.proofs,
                             ),
+                            relatedTerms = outcome.relatedTerms,
                         )
                     }
                 }
@@ -188,7 +171,6 @@ class AskViewModel @Inject constructor(
     private fun errorSlug(error: AiError): String = when (error) {
         is AiError.RateLimited -> "rate_limited"
         AiError.BudgetExceeded -> "budget"
-        AiError.Attestation -> "attestation"
         AiError.Network -> "network"
         is AiError.Invalid -> "invalid"
         AiError.Unknown -> "unknown"

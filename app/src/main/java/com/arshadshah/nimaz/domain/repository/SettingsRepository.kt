@@ -164,14 +164,6 @@ interface SettingsRepository {
     suspend fun setAiAskEnabled(enabled: Boolean)
     val aiConsentTimestamp: Flow<Long>
     suspend fun setAiConsentTimestamp(timestamp: Long)
-    val aiSourcesQuran: Flow<Boolean>
-    suspend fun setAiSourcesQuran(enabled: Boolean)
-    val aiSourcesHadith: Flow<Boolean>
-    suspend fun setAiSourcesHadith(enabled: Boolean)
-    val aiSourcesDua: Flow<Boolean>
-    suspend fun setAiSourcesDua(enabled: Boolean)
-    val aiMaxProofs: Flow<Int>
-    suspend fun setAiMaxProofs(count: Int)
     val aiHistoryEnabled: Flow<Boolean>
     suspend fun setAiHistoryEnabled(enabled: Boolean)
     val aiAskHintDismissed: Flow<Boolean>

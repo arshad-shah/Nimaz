@@ -1,4 +1,5 @@
 import { ApiError } from "./errors";
+import type { IntegrityTier } from "./integrity";
 
 // UTC calendar helpers. We avoid Date.now() semantics that differ per timezone:
 // all keys and rollovers are UTC so a "day" is unambiguous across devices.
@@ -47,14 +48,23 @@ async function incrementCounter(
  * Enforce the per-device and global daily request caps. Increments both
  * counters; throws ApiError(RATE_LIMITED) with retryAfterSeconds when either
  * cap is exceeded.
+ *
+ * The per-device cap is tiered by the request's [IntegrityTier]: devices that
+ * passed Play Integrity get the full DAILY_DEVICE_LIMIT; unverified requests
+ * (no token, verification unavailable, failed verdict) get the much smaller
+ * UNVERIFIED_DAILY_DEVICE_LIMIT instead of being blocked outright.
  */
 export async function enforceRateLimit(
   env: Env,
   deviceId: string,
   now: Date,
+  tier: IntegrityTier = "verified",
 ): Promise<void> {
   const day = utcDayStamp(now);
-  const deviceLimit = intVar(env.DAILY_DEVICE_LIMIT, 20);
+  const deviceLimit =
+    tier === "verified"
+      ? intVar(env.DAILY_DEVICE_LIMIT, 20)
+      : intVar(env.UNVERIFIED_DAILY_DEVICE_LIMIT, 5);
   const globalLimit = intVar(env.DAILY_GLOBAL_LIMIT, 500);
   const retryAfter = secondsUntilUtcMidnight(now);
 

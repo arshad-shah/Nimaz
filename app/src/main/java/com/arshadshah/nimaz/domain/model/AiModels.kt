@@ -2,47 +2,28 @@ package com.arshadshah.nimaz.domain.model
 
 import com.arshadshah.nimaz.core.navigation.Route
 
-/**
- * The kind of Islamic source a proof passage comes from. Maps 1:1 to the
- * Worker's `source` field ("quran" | "hadith" | "dua").
- */
-enum class ProofSource(val wire: String) {
-    QURAN("quran"),
-    HADITH("hadith"),
-    DUA("dua");
-
-    companion object {
-        fun fromWire(value: String): ProofSource? =
-            entries.firstOrNull { it.wire == value }
-    }
+/** The kind of Islamic source a proof or search result comes from. */
+enum class ProofSource {
+    QURAN,
+    HADITH,
+    DUA,
 }
-
-/**
- * A single grounding passage sent to the AI Worker as evidence. Retrieved
- * locally from Room; the model may only answer from these.
- *
- * @param id citation ID (see [CitationId]) — e.g. `quran:2:255`, `hadith:{id}`.
- * @param text passage text (already truncated to the Worker's per-passage cap).
- * @param meta human-readable reference line, e.g. "Surah Al-Baqarah 255".
- */
-data class ProofPassage(
-    val id: String,
-    val source: ProofSource,
-    val text: String,
-    val meta: String,
-)
 
 enum class AnswerConfidence { HIGH, MEDIUM, LOW }
 
 /**
- * The raw grounded answer returned by the Worker, before local citation
- * resolution into [Proof] items.
+ * The result of the single `search-assist` Worker call: the model's answer to
+ * the question, the Quran references it cited in support, and search terms for
+ * the app's LOCAL library. Nothing in here is shown raw — [quranRefs] are
+ * resolved against the local Quran database (unresolvable refs are dropped, so
+ * only real verses ever surface as proof), and [terms] drive the local
+ * keyword search that builds the related-results list.
  */
-data class GroundedAnswer(
+data class SearchAssist(
     val answer: String,
-    val citationIds: List<String>,
+    val quranRefs: List<CitationId.Quran>,
+    val terms: List<String>,
     val confidence: AnswerConfidence,
-    val insufficientEvidence: Boolean,
 )
 
 /**
@@ -60,12 +41,12 @@ data class Proof(
 /**
  * Errors surfaced by the AI feature, mapped from the Worker's error envelope
  * (and local/transport failures). The presentation layer renders friendly
- * messages from these.
+ * messages from these. Attestation is no longer an error — integrity problems
+ * only reduce the Worker-side rate limit, they never fail a request.
  */
 sealed interface AiError {
     data class RateLimited(val retryAfterSeconds: Long?) : AiError
     data object BudgetExceeded : AiError
-    data object Attestation : AiError
     data object Network : AiError
     data class Invalid(val message: String) : AiError
     data object Unknown : AiError

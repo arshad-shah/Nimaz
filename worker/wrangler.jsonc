@@ -37,11 +37,15 @@
   // GOOGLE_SERVICE_ACCOUNT_JSON) are NOT stored here — set them with
   // `wrangler secret put <NAME>` (see README.md).
   "vars": {
-    // When "true", skips Play Integrity verification entirely. Use ONLY for
-    // local testing before Integrity is wired up. MUST be "false" in production.
+    // When "true", skips Play Integrity classification entirely (every request
+    // runs at the verified tier). Use ONLY for local testing.
     "SKIP_ATTESTATION": "false",
-    // Per-device requests per UTC day.
+    // Per-device requests per UTC day for Play-Integrity-verified devices.
     "DAILY_DEVICE_LIMIT": "20",
+    // Per-device requests per UTC day when attestation is missing/unavailable/
+    // failed. Attestation never blocks a request — it only selects this
+    // smaller cap (the monthly budget guard is the hard backstop).
+    "UNVERIFIED_DAILY_DEVICE_LIMIT": "5",
     // Global requests per UTC day (across all devices).
     "DAILY_GLOBAL_LIMIT": "500",
     // Monthly spend ceiling in USD before the Worker refuses new calls.

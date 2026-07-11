@@ -5,22 +5,18 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
+import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
 sealed class UnifiedSearchResult {
@@ -67,10 +63,10 @@ sealed interface SearchEvent {
     data object ClearRecentSearches : SearchEvent
 
     /**
-     * Replace the results list with matches for the AI's planned search terms.
+     * Replace the results list with matches for the AI's related search terms.
      * Emitted by the Search screen after an AI answer, so the list reflects what
-     * the AI chose to retrieve (Global Search, AI-enabled). Purely local — no
-     * network call; the terms already came from the single planning round.
+     * the AI judged relevant. Purely local — no network call; the terms came
+     * with the answer.
      */
     data class ApplyAiTerms(val terms: List<String>) : SearchEvent
 }
@@ -80,9 +76,7 @@ private const val SEARCH_DEBOUNCE_MS = 300L
 
 @HiltViewModel
 class SearchViewModel @Inject constructor(
-    private val quranUseCases: QuranUseCases,
-    private val hadithUseCases: HadithUseCases,
-    private val duaUseCases: DuaUseCases
+    private val searchLibrary: SearchLibraryUseCase,
 ) : ViewModel() {
 
     private val _searchState = MutableStateFlow(SearchUiState())
@@ -92,10 +86,9 @@ class SearchViewModel @Inject constructor(
     val statsState: StateFlow<SearchStatsUiState> = _statsState.asStateFlow()
 
     private val recentSearchesList = mutableListOf<String>()
-    private val pendingSearchCount = AtomicInteger(0)
 
-    // The in-flight search (debounce + the per-source lookups it launches as children).
-    // Cancelled and replaced on each new query so stale results never clobber newer ones.
+    // The in-flight search (debounce + lookup). Cancelled and replaced on each
+    // new query so stale results never clobber newer ones.
     private var searchJob: Job? = null
 
     fun onEvent(event: SearchEvent) {
@@ -130,7 +123,7 @@ class SearchViewModel @Inject constructor(
         }
         // Search-as-you-type, debounced. The recent-searches list is only touched on an
         // explicit submit (enter / recent tap), not on every keystroke.
-        launchSearch(trimmed, addToRecent = false, debounceMillis = SEARCH_DEBOUNCE_MS)
+        launchSearch(debounceMillis = SEARCH_DEBOUNCE_MS) { searchLibrary(trimmed) }
     }
 
     private fun setFilter(filter: SearchFilter) {
@@ -161,239 +154,63 @@ class SearchViewModel @Inject constructor(
             return
         }
         // Explicit submit (enter / recent search): search immediately and remember it.
-        launchSearch(query, addToRecent = true, debounceMillis = 0L)
+        addToRecentSearches(query)
+        launchSearch(debounceMillis = 0L) { searchLibrary(query) }
     }
 
     /**
-     * Populate the results list from the AI's planned terms (Global Search only).
-     * Runs each term through the existing local searches and merges the union —
-     * so when AI is on, the AI effectively chooses what the list shows. Replaces
-     * the debounced keyword search that ran while the user was typing.
+     * Populate the results list from the AI's related terms (Global Search only).
+     * Runs the terms through the smart local search so the list shows what the
+     * AI judged relevant. Replaces the debounced keyword search that ran while
+     * the user was typing.
      */
     private fun applyAiTerms(terms: List<String>) {
         val cleaned = terms.map { it.trim() }.filter { it.isNotBlank() }.distinct()
         if (cleaned.isEmpty()) return
-        searchJob?.cancel()
-        _searchState.update { it.copy(isSearching = true, error = null) }
-        searchJob = viewModelScope.launch {
-            val quran = LinkedHashMap<Int, QuranSearchResult>()
-            val surahs = LinkedHashMap<Int, Surah>()
-            val hadith = LinkedHashMap<String, HadithSearchResult>()
-            val duas = LinkedHashMap<String, DuaSearchResult>()
-
-            for (term in cleaned) {
-                quranUseCases.searchQuran(term, "sahih_international").first()
-                    .forEach { quran.putIfAbsent(it.ayah.id, it) }
-                quranUseCases.getSurahList.search(term).first()
-                    .forEach { surahs.putIfAbsent(it.number, it) }
-                hadithUseCases.searchHadiths(term).first()
-                    .forEach { hadith.putIfAbsent(it.hadith.id, it) }
-                duaUseCases.searchDuas(term).first()
-                    .forEach { duas.putIfAbsent(it.dua.id, it) }
-            }
-
-            val quranResults = quran.values.toList()
-            val surahResults = surahs.values.toList()
-            val hadithResults = hadith.values.toList()
-            val duaResults = duas.values.toList()
-            val unified = quranResults.map { UnifiedSearchResult.QuranResult(it) } +
-                    surahResults.map { UnifiedSearchResult.SurahResult(it) } +
-                    hadithResults.map { UnifiedSearchResult.HadithResult(it) } +
-                    duaResults.map { UnifiedSearchResult.DuaResult(it) }
-
-            _searchState.update { state ->
-                state.copy(
-                    quranResults = quranResults,
-                    surahResults = surahResults,
-                    hadithResults = hadithResults,
-                    duaResults = duaResults,
-                    allResults = unified,
-                    filteredResults = applyFilter(unified, state.selectedFilter),
-                    isSearching = false,
-                )
-            }
-            updateStats()
-        }
+        launchSearch(debounceMillis = 0L) { searchLibrary.byTerms(cleaned) }
     }
 
     /**
-     * Cancel any in-flight search and start a new one. [isSearching] flips on synchronously
-     * (before the debounce delay) so the screen's "no results" state can never show while a
-     * lookup is still pending. The per-source lookups are launched as children of [searchJob],
-     * so cancelling it cancels them too.
+     * Cancel any in-flight search and start a new one. [SearchUiState.isSearching]
+     * flips on synchronously (before the debounce delay) so the screen's
+     * "no results" state can never show while a lookup is still pending.
      */
-    private fun launchSearch(query: String, addToRecent: Boolean, debounceMillis: Long) {
+    private fun launchSearch(
+        debounceMillis: Long,
+        lookup: suspend () -> LibrarySearchResults,
+    ) {
         searchJob?.cancel()
         _searchState.update { it.copy(isSearching = true, error = null) }
-        if (addToRecent) addToRecentSearches(query)
         searchJob = viewModelScope.launch {
             if (debounceMillis > 0) delay(debounceMillis)
-            when (_searchState.value.selectedFilter) {
-                SearchFilter.ALL -> searchAll(query, this)
-                SearchFilter.QURAN -> searchQuranOnly(query, this)
-                SearchFilter.HADITH -> searchHadithOnly(query, this)
-                SearchFilter.DUA -> searchDuaOnly(query, this)
-            }
-        }
-    }
-
-    private fun searchAll(query: String, scope: CoroutineScope) {
-        val totalSearches = 4
-        pendingSearchCount.set(totalSearches)
-
-        fun onSearchComplete() {
-            if (pendingSearchCount.decrementAndGet() <= 0) {
-                _searchState.update { it.copy(isSearching = false) }
-            }
-        }
-
-        // Search Quran (include translations for English search terms)
-        scope.launch {
-            quranUseCases.searchQuran(query, "sahih_international").collect { results ->
-                _searchState.update { state ->
-                    val unified =
-                        state.allResults.filterNot { it is UnifiedSearchResult.QuranResult } +
-                                results.map { UnifiedSearchResult.QuranResult(it) }
-                    state.copy(
-                        quranResults = results,
-                        allResults = unified,
-                        filteredResults = applyFilter(unified, state.selectedFilter)
-                    )
-                }
-                updateStats()
-                onSearchComplete()
-            }
-        }
-
-        // Search Surahs by name
-        scope.launch {
-            quranUseCases.getSurahList.search(query).collect { surahs ->
-                _searchState.update { state ->
-                    val unified =
-                        state.allResults.filterNot { it is UnifiedSearchResult.SurahResult } +
-                                surahs.map { UnifiedSearchResult.SurahResult(it) }
-                    state.copy(
-                        surahResults = surahs,
-                        allResults = unified,
-                        filteredResults = applyFilter(unified, state.selectedFilter)
-                    )
-                }
-                updateStats()
-                onSearchComplete()
-            }
-        }
-
-        // Search Hadith
-        scope.launch {
-            hadithUseCases.searchHadiths(query).collect { results ->
-                _searchState.update { state ->
-                    val unified =
-                        state.allResults.filterNot { it is UnifiedSearchResult.HadithResult } +
-                                results.map { UnifiedSearchResult.HadithResult(it) }
-                    state.copy(
-                        hadithResults = results,
-                        allResults = unified,
-                        filteredResults = applyFilter(unified, state.selectedFilter)
-                    )
-                }
-                updateStats()
-                onSearchComplete()
-            }
-        }
-
-        // Search Duas
-        scope.launch {
-            duaUseCases.searchDuas(query).collect { results ->
-                _searchState.update { state ->
-                    val unified =
-                        state.allResults.filterNot { it is UnifiedSearchResult.DuaResult } +
-                                results.map { UnifiedSearchResult.DuaResult(it) }
-                    state.copy(
-                        duaResults = results,
-                        allResults = unified,
-                        filteredResults = applyFilter(unified, state.selectedFilter)
-                    )
-                }
-                updateStats()
-                onSearchComplete()
-            }
-        }
-    }
-
-    private fun searchQuranOnly(query: String, scope: CoroutineScope) {
-        val totalSearches = 2
-        pendingSearchCount.set(totalSearches)
-
-        fun onSearchComplete() {
-            if (pendingSearchCount.decrementAndGet() <= 0) {
-                _searchState.update { it.copy(isSearching = false) }
-            }
-        }
-
-        scope.launch {
-            quranUseCases.searchQuran(query, "sahih_international").collect { results ->
-                val unified = results.map { UnifiedSearchResult.QuranResult(it) }
+            val results = runCatching { lookup() }.getOrElse { e ->
+                if (e is kotlinx.coroutines.CancellationException) throw e
                 _searchState.update {
-                    it.copy(
-                        quranResults = results,
-                        allResults = unified,
-                        filteredResults = unified
-                    )
+                    it.copy(isSearching = false, error = e.message ?: "Search failed")
                 }
-                updateStats()
-                onSearchComplete()
+                return@launch
             }
-        }
-
-        scope.launch {
-            quranUseCases.getSurahList.search(query).collect { surahs ->
-                _searchState.update { state ->
-                    val surahResults = surahs.map { UnifiedSearchResult.SurahResult(it) }
-                    val combined = state.allResults + surahResults
-                    state.copy(
-                        surahResults = surahs,
-                        allResults = combined,
-                        filteredResults = combined
-                    )
-                }
-                updateStats()
-                onSearchComplete()
-            }
+            publish(results)
         }
     }
 
-    private fun searchHadithOnly(query: String, scope: CoroutineScope) {
-        scope.launch {
-            hadithUseCases.searchHadiths(query).collect { results ->
-                val unified = results.map { UnifiedSearchResult.HadithResult(it) }
-                _searchState.update {
-                    it.copy(
-                        hadithResults = results,
-                        allResults = unified,
-                        filteredResults = unified,
-                        isSearching = false
-                    )
-                }
-                updateStats()
-            }
+    private fun publish(results: LibrarySearchResults) {
+        val unified = results.quran.map { UnifiedSearchResult.QuranResult(it) } +
+                results.surahs.map { UnifiedSearchResult.SurahResult(it) } +
+                results.hadith.map { UnifiedSearchResult.HadithResult(it) } +
+                results.duas.map { UnifiedSearchResult.DuaResult(it) }
+        _searchState.update { state ->
+            state.copy(
+                quranResults = results.quran,
+                surahResults = results.surahs,
+                hadithResults = results.hadith,
+                duaResults = results.duas,
+                allResults = unified,
+                filteredResults = applyFilter(unified, state.selectedFilter),
+                isSearching = false,
+            )
         }
-    }
-
-    private fun searchDuaOnly(query: String, scope: CoroutineScope) {
-        scope.launch {
-            duaUseCases.searchDuas(query).collect { results ->
-                val unified = results.map { UnifiedSearchResult.DuaResult(it) }
-                _searchState.update {
-                    it.copy(
-                        duaResults = results,
-                        allResults = unified,
-                        filteredResults = unified,
-                        isSearching = false
-                    )
-                }
-                updateStats()
-            }
-        }
+        updateStats()
     }
 
     private fun applyFilter(
@@ -409,6 +226,7 @@ class SearchViewModel @Inject constructor(
     }
 
     private fun clearSearch() {
+        searchJob?.cancel()
         _searchState.update {
             SearchUiState(recentSearches = it.recentSearches)
         }

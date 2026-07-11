@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.domain.repository
 
-import com.arshadshah.nimaz.domain.model.GroundedAnswer
-import com.arshadshah.nimaz.domain.model.ProofPassage
-import com.arshadshah.nimaz.domain.model.SearchPlan
+import com.arshadshah.nimaz.domain.model.SearchAssist
 
 /**
  * Gateway to the Nimaz AI Worker. The implementation lives in the data layer
@@ -10,21 +8,12 @@ import com.arshadshah.nimaz.domain.model.SearchPlan
  */
 interface AiRepository {
     /**
-     * Ask the AI to plan retrieval for a question — which local sources to fetch
-     * (`search-plan` capability). Returns a [SearchPlan] on success, or a failure
-     * carrying an [com.arshadshah.nimaz.domain.model.AiError] via [AiRequestException].
+     * The single AI call (`search-assist`): send the question, get back the
+     * answer + supporting Quran references + local search terms. Only the
+     * question text ever leaves the device. Failures carry an
+     * [com.arshadshah.nimaz.domain.model.AiError] via [AiRequestException].
      */
-    suspend fun planSearch(question: String): Result<SearchPlan>
-
-    /**
-     * Ask a grounded question against the supplied evidence passages. Returns a
-     * [GroundedAnswer] on success, or a failure whose exception is an
-     * [com.arshadshah.nimaz.domain.model.AiError]-carrying [AiRequestException].
-     */
-    suspend fun ask(
-        question: String,
-        passages: List<ProofPassage>,
-    ): Result<GroundedAnswer>
+    suspend fun assist(question: String): Result<SearchAssist>
 }
 
 /** Wraps an [com.arshadshah.nimaz.domain.model.AiError] so it can travel in a [Result.failure]. */
