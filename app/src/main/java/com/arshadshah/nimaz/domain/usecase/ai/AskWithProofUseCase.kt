@@ -217,13 +217,26 @@ class AskWithProofUseCase @Inject constructor(
             .filter { it.length > 2 && it !in STOPWORDS }
             .distinct()
 
-    /** Original question plus up to two stripped keyword variants. */
+    /**
+     * The search terms to fan the local lookups over.
+     *
+     * The DB search matches a single contiguous substring (`LIKE '%term%'`), so a
+     * multi-word phrase like "patience during hardship" almost never matches a
+     * translation and retrieval comes back empty — which surfaces as
+     * "No supporting sources found" without ever calling the AI. We therefore
+     * search each significant word **on its own** (that is what actually retrieves
+     * passages), plus the full phrase for the rare exact-substring hit. Ranking
+     * downstream re-sorts the union by how many of the question's terms overlap,
+     * so single-word noise is outranked by passages matching several terms.
+     */
     private fun queryVariants(question: String, content: List<String>): List<String> {
         val variants = LinkedHashSet<String>()
         variants += question.trim()
-        if (content.isNotEmpty()) variants += content.joinToString(" ")
-        val top = content.sortedByDescending { it.length }.take(3)
-        if (top.isNotEmpty()) variants += top.joinToString(" ")
+        // Individual content words, longest (most distinctive) first so the
+        // strongest terms are still searched when we cap the count.
+        content.sortedByDescending { it.length }
+            .take(MAX_WORD_VARIANTS)
+            .forEach { variants += it }
         return variants.filter { it.isNotBlank() }
     }
 
@@ -237,6 +250,8 @@ class AskWithProofUseCase @Inject constructor(
         const val MAX_PASSAGES = 8
         const val MAX_PASSAGE_CHARS = 1200
         const val MAX_TOTAL_CHARS = 8000
+        /** Cap on individual-word searches per source, to bound DB work. */
+        private const val MAX_WORD_VARIANTS = 8
         private const val QURAN_TRANSLATOR = "sahih_international"
         private val NON_WORD = Regex("[^\\p{L}\\p{N}]+")
         private val STOPWORDS = setOf(

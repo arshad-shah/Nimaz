@@ -83,6 +83,29 @@ class AskWithProofUseCaseTest {
     }
 
     @Test
+    fun `retrieval searches individual words, not just the whole phrase`() = runTest {
+        // The DB search matches a contiguous substring, so a natural-language phrase
+        // never hits — only the single word "patience" does. Retrieval must still
+        // find the passage (and therefore call the AI) by searching words on their own.
+        every { searchQuranUC.invoke(any(), any()) } answers {
+            if (firstArg<String>() == "patience") flowOf(listOf(quranResult(2, 153)))
+            else flowOf(emptyList())
+        }
+        every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
+        every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+
+        val captured = slot<List<ProofPassage>>()
+        coEvery { aiRepository.ask(any(), capture(captured)) } returns
+            Result.success(answer(citationIds = emptyList()))
+
+        val outcome = useCase("How do I show patience in hardship?", allSources, maxProofs = 5)
+
+        assertThat(outcome).isInstanceOf(AskWithProofUseCase.Outcome.Answered::class.java)
+        assertThat(captured.captured).isNotEmpty()
+        coVerify { aiRepository.ask(any(), any()) }
+    }
+
+    @Test
     fun `disabled sources are not searched`() = runTest {
         every { searchQuranUC.invoke(any(), any()) } returns flowOf(listOf(quranResult(2, 153)))
         coEvery { aiRepository.ask(any(), any()) } returns
