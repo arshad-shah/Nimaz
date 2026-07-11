@@ -14,17 +14,18 @@ export class UpstreamError extends Error {
   }
 }
 
-// Cloudflare model-catalog id (author/model form, dot version — matches the
-// dashboard model catalog) — routes the gateway to Anthropic with Unified
-// Billing (Cloudflare-managed credentials + credits).
-const MODEL_ID = "anthropic/claude-haiku-4.5";
-const GATEWAY_ID = "nimaz";
 const ACCOUNT_ID = "0e2f38a4dd1f2052809b0d876dcc790e";
-// AI Gateway's Anthropic-native REST endpoint: strictly the Anthropic
-// Messages schema, so forced tool use and cache_control pass through
-// verbatim. (The AI binding path rejected the native input with
-// "7003: User Input Error", so the REST endpoint is the supported route.)
-const ENDPOINT = `https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/ai/v1/messages`;
+const GATEWAY_ID = "nimaz";
+// The gateway's Anthropic provider-native endpoint: strictly the Anthropic
+// Messages schema (forced tool use + cache_control pass through verbatim) and
+// plain Anthropic model names. With no provider key attached, Unified Billing
+// injects the Cloudflare-managed Anthropic credentials and bills the
+// account's AI credits. Auth is the gateway's own token (cf-aig-authorization,
+// enforced by the gateway's Authenticated Gateway setting).
+// (Two other transports were live-tested and rejected: the AI binding fails
+// the native schema with 7003, and api.cloudflare.com/...:/ai/v1/messages
+// rejects this token class with 401/10000.)
+const ENDPOINT = `https://gateway.ai.cloudflare.com/v1/${ACCOUNT_ID}/${GATEWAY_ID}/anthropic/v1/messages`;
 const ANTHROPIC_VERSION = "2023-06-01";
 
 // Gateway errors that mean "no more money", not "the model broke": the
@@ -34,20 +35,18 @@ const OUT_OF_BUDGET =
   /spend limit|spending limit|insufficient credit|out of credit|no credits/i;
 
 /**
- * Call Claude through the `nimaz` AI Gateway with Unified Billing. Auth is a
- * scoped Cloudflare token (AI Gateway Run) — never an Anthropic key; the
- * Anthropic credentials are Cloudflare-managed and spend draws from the
- * account's AI credits. The token is sent both as the API bearer and as
- * cf-aig-authorization so it satisfies the gateway's authenticated-gateway
- * check too.
+ * Call Claude through the `nimaz` AI Gateway with Unified Billing. The only
+ * credential is CLOUDFLARE_AI_TOKEN — the gateway's authentication token —
+ * never an Anthropic key. The Anthropic-native request (system +
+ * cache_control, tools, tool_choice, model "claude-haiku-4-5") is forwarded
+ * unchanged.
  */
 export async function callClaude(
   request: AnthropicMessagesRequest,
   env: Env,
   metadata?: Record<string, string | number | boolean>,
 ): Promise<AnthropicResponse> {
-  // Tolerate a secret pasted with a "Bearer " prefix or stray whitespace —
-  // a doubled "Bearer Bearer x" header fails auth with 401/10000.
+  // Tolerate a secret pasted with a "Bearer " prefix or stray whitespace.
   const token = (env.CLOUDFLARE_AI_TOKEN ?? "")
     .trim()
     .replace(/^Bearer\s+/i, "");
@@ -55,18 +54,13 @@ export async function callClaude(
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${token}`,
       "cf-aig-authorization": `Bearer ${token}`,
-      "cf-aig-gateway-id": GATEWAY_ID,
       "anthropic-version": ANTHROPIC_VERSION,
       // Per-feature spend breakdown in the gateway dashboard. Never contains
       // question text.
       ...(metadata ? { "cf-aig-metadata": JSON.stringify(metadata) } : {}),
     },
-    // The catalog id selects provider + model at the gateway; everything else
-    // (system + cache_control, tools, tool_choice, max_tokens, temperature)
-    // is the Anthropic-native request, forwarded unchanged.
-    body: JSON.stringify({ ...request, model: MODEL_ID }),
+    body: JSON.stringify(request),
   });
 
   if (!res.ok) {

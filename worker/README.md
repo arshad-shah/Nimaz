@@ -14,11 +14,13 @@ limits, calls Claude with a fixed cached prompt and a forced structured-output
 tool, and returns strict JSON.
 
 **Billing/auth:** Claude is reached through the **`nimaz`** Cloudflare
-**AI Gateway** with **Unified Billing** — Cloudflare holds the Anthropic
+**AI Gateway** (Anthropic provider-native endpoint) with **Unified Billing** —
+no provider key is attached, so Cloudflare injects its managed Anthropic
 credentials and bills the account's AI credits. The Worker authenticates with
-one scoped secret, **`CLOUDFLARE_AI_TOKEN`** (an AI Gateway Run token) —
-**never an Anthropic key**. The monthly USD cost cap is the gateway's
-**Spend Limit** (dashboard), not Worker code.
+one scoped secret, **`CLOUDFLARE_AI_TOKEN`** (the gateway's authentication
+token, sent as `cf-aig-authorization`) — **never an Anthropic key**. The
+monthly USD cost cap is the gateway's **Spend Limit** (dashboard), not Worker
+code.
 
 ## Architecture
 
@@ -27,8 +29,8 @@ POST /v1/invoke
   → integrity   (Play Integrity token → trust tier: verified | unverified)
   → rateLimit   (tiered per-device + global daily caps in KV)
   → dispatch    (registry lookup → Zod-validate input → build request
-                 → POST …/accounts/{acct}/ai/v1/messages   (AI Gateway,
-                   model "anthropic/claude-haiku-4.5", Anthropic-native schema)
+                 → POST gateway.ai.cloudflare.com/v1/{acct}/nimaz/anthropic
+                   /v1/messages  (Anthropic-native schema, Unified Billing)
                  → Zod-validate output)
 ```
 
@@ -37,9 +39,11 @@ AI Gateway dashboard breaks spend down per feature (never the question text).
 A tripped gateway spend limit / exhausted credits maps to `BUDGET_EXCEEDED`
 (503), same as the old in-Worker budget guard, so the app UX is unchanged.
 Each successful call logs a structured `ai_usage` line (token counts only) and
-echoes the usage in an `x-nimaz-usage` response header. (The AI *binding* path
-was tried first and rejects the Anthropic-native schema with `7003: User Input
-Error` — the REST endpoint guarantees it.)
+echoes the usage in an `x-nimaz-usage` response header. (Two other transports
+were live-tested and rejected: the AI *binding* fails the Anthropic-native
+schema with `7003: User Input Error`, and `api.cloudflare.com/…/ai/v1/messages`
+rejects gateway-auth tokens with `401/10000` — the provider-native gateway URL
+is the path that works.)
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
@@ -120,10 +124,11 @@ The monthly USD ceiling is **not** a var anymore — set a **Spend limit** on th
 
 Secrets — set with `wrangler secret put`, never committed:
 
-- `CLOUDFLARE_AI_TOKEN` — a scoped Cloudflare API token with **AI Gateway:
-  Run** permission (created from the gateway's authentication settings). It
-  authenticates the Worker to the `nimaz` gateway; Unified Billing injects the
-  Anthropic credentials. There is **no Anthropic key** anywhere.
+- `CLOUDFLARE_AI_TOKEN` — the `nimaz` gateway's authentication token (created
+  from the gateway's **Authenticated Gateway** settings), sent as
+  `cf-aig-authorization`. Unified Billing injects the Anthropic credentials.
+  There is **no Anthropic key** anywhere. In CI it lives as the GitHub secret
+  of the same name and is pushed to the Worker on every deploy.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
   used to mint an OAuth token for the Play Integrity API. Optional — without
   it every request simply runs at the unverified tier.
@@ -140,15 +145,15 @@ npm ci                      # or: npm install (first time, to create the lockfil
 #    then paste the returned id into wrangler.jsonc.
 
 # 2. Set the secrets (production):
-npx wrangler secret put CLOUDFLARE_AI_TOKEN        # AI Gateway Run token
+npx wrangler secret put CLOUDFLARE_AI_TOKEN        # gateway auth token
 npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 
 # 3. Cloudflare dashboard (one-time, cannot be done from wrangler):
 #    AI → AI Gateway → confirm the "nimaz" gateway exists.
 #    AI → AI Gateway → "Credits Available" → Manage → add a payment method,
 #    purchase credits, and set auto top-up (Unified Billing).
-#    Gateway authentication: create the token with "AI Gateway: Run"
-#    permission — that's the CLOUDFLARE_AI_TOKEN secret above.
+#    Gateway → Settings → Authenticated Gateway: enable it and create the
+#    gateway authentication token — that's the CLOUDFLARE_AI_TOKEN secret.
 #    Recommended: set a Spend limit on the "nimaz" gateway as the monthly
 #    cost backstop, and enable the gateway's ZDR (Zero-Data-Retention
 #    provider endpoints) setting.

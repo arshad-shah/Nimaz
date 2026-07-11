@@ -96,43 +96,6 @@ jobs:
           curl -fsS https://ai.arshadshah.com/v1/health | tee health.json
           grep -q '"search-assist"' health.json
 
-      # TEMPORARY diagnostics while bringing up gateway auth: probe the two
-      # candidate endpoints and token validity straight from the runner using
-      # the same secret the Worker gets. GitHub masks the secret in logs.
-      # Remove this step once the smoke test below is green.
-      - name: Gateway auth diagnostics (temporary)
-        env:
-          TOKEN: ${{ secrets.CLOUDFLARE_AI_TOKEN }}
-        run: |
-          set -uo pipefail
-          probe() {
-            local label="$1"; shift
-            echo "=== $label ==="
-            local code
-            code=$(curl -sS -o out.json -w '%{http_code}' "$@") || true
-            echo "HTTP $code"
-            head -c 700 out.json; echo
-          }
-          probe "A) api.cloudflare.com /ai/v1/messages (authorization: Bearer)" \
-            -H "authorization: Bearer $TOKEN" \
-            -H "cf-aig-gateway-id: nimaz" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d '{"model":"anthropic/claude-haiku-4.5","max_tokens":32,"messages":[{"role":"user","content":"Say OK"}]}' \
-            https://api.cloudflare.com/client/v4/accounts/0e2f38a4dd1f2052809b0d876dcc790e/ai/v1/messages
-          probe "B) gateway.ai.cloudflare.com anthropic-native (cf-aig-authorization)" \
-            -H "cf-aig-authorization: Bearer $TOKEN" \
-            -H "anthropic-version: 2023-06-01" \
-            -H "content-type: application/json" \
-            -d '{"model":"claude-haiku-4-5","max_tokens":32,"messages":[{"role":"user","content":"Say OK"}]}' \
-            https://gateway.ai.cloudflare.com/v1/0e2f38a4dd1f2052809b0d876dcc790e/nimaz/anthropic/v1/messages
-          probe "C) user token verify" \
-            -H "authorization: Bearer $TOKEN" \
-            https://api.cloudflare.com/client/v4/user/tokens/verify
-          probe "D) account token verify" \
-            -H "authorization: Bearer $TOKEN" \
-            https://api.cloudflare.com/client/v4/accounts/0e2f38a4dd1f2052809b0d876dcc790e/tokens/verify
-
       # Sends the same question twice through the real AI-binding → gateway →
       # Anthropic (Unified Billing) path and verifies the two Anthropic-native
       # features the capability depends on:

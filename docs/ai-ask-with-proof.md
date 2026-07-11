@@ -38,7 +38,7 @@ sequenceDiagram
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
     W->>W: integrity → tiered rate limit
-    W->>GW: /ai/v1/messages (gateway Run token, forced submit_result tool)
+    W->>GW: anthropic/v1/messages (cf-aig-authorization, forced submit_result tool)
     GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON
     GW-->>W: native response + usage
@@ -50,10 +50,11 @@ sequenceDiagram
 ```
 
 One Worker call per submit; everything else is local. On the `W → GW → Claude`
-leg the Worker calls the `nimaz` AI Gateway's Anthropic-native REST endpoint
-with **Unified Billing**: Cloudflare injects the Anthropic credentials and
-bills the account's AI credits. The Worker's only credential is
-`CLOUDFLARE_AI_TOKEN`, a scoped AI Gateway Run token — never an Anthropic key.
+leg the Worker calls the `nimaz` AI Gateway's Anthropic provider-native
+endpoint with **Unified Billing**: no provider key is attached, so Cloudflare
+injects its managed Anthropic credentials and bills the account's AI credits.
+The Worker's only credential is `CLOUDFLARE_AI_TOKEN` — the gateway's
+authentication token (`cf-aig-authorization`) — never an Anthropic key.
 
 ### Why attestation never blocks
 
@@ -187,18 +188,18 @@ payloads. The Worker stores nothing.
 ## Cost model
 
 - **Billing: Cloudflare AI Gateway Unified Billing.** The Worker calls
-  `anthropic/claude-haiku-4.5` through the `nimaz` gateway's REST endpoint
-  (auth: the scoped `CLOUDFLARE_AI_TOKEN` gateway-run secret); Cloudflare
-  holds the Anthropic credentials and draws spend from the account's **AI
-  credits** — one Cloudflare invoice, no Anthropic account/key. Provider
+  `claude-haiku-4-5` through the `nimaz` gateway's Anthropic provider-native
+  endpoint (auth: the `CLOUDFLARE_AI_TOKEN` gateway authentication token);
+  Cloudflare holds the Anthropic credentials and draws spend from the
+  account's **AI credits** — one Cloudflare invoice, no Anthropic account/key. Provider
   per-token rates pass through with **no markup**; the one cost on top is a
   **5% fee on credit purchases** (a $100 top-up costs $105). Auto top-up keeps
   answers from stalling when credits run low.
-- Model: `claude-haiku-4-5` (catalog id `anthropic/claude-haiku-4.5`).
-  Pricing: **$1 / MTok input**, **$5 / MTok output**; cached input reads billed
-  at **10%** of the input rate.
+- Model: `claude-haiku-4-5` (the provider-native endpoint takes the plain
+  Anthropic model name). Pricing: **$1 / MTok input**, **$5 / MTok output**;
+  cached input reads billed at **10%** of the input rate.
 - Each submit is **one** call: `search-assist` (`max_tokens` 700,
-  temperature 0.2). The gateway's `/ai/v1/messages` endpoint uses the
+  temperature 0.2). The gateway's provider-native endpoint uses the
   Anthropic-native schema, so the forced `submit_result` tool and the
   `cache_control` marker both survive the gateway. Caching caveat: Haiku 4.5 only caches prompt prefixes ≥ **4096
   tokens**, and this capability's system prompt + tool schema is well below
@@ -243,11 +244,12 @@ committed to the repo.
    resource id, not a secret). To recreate it in a different account:
    `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
 3. Set the secrets:
-   `CLOUDFLARE_AI_TOKEN` — the scoped Cloudflare API token with **AI
-   Gateway: Run** permission. Store it as the GitHub Actions secret of the
-   same name; CI pushes it into the Worker on every deploy (manual
-   alternative: `npx wrangler secret put CLOUDFLARE_AI_TOKEN`). This is the
-   Worker's only Claude credential.
+   `CLOUDFLARE_AI_TOKEN` — the `nimaz` gateway's authentication token
+   (gateway → Settings → **Authenticated Gateway** → create token). Store it
+   as the GitHub Actions secret of the same name; CI pushes it into the
+   Worker on every deploy (manual alternative:
+   `npx wrangler secret put CLOUDFLARE_AI_TOKEN`). This is the Worker's only
+   Claude credential.
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
    (If the Google one is absent the Worker still works — every request simply
    runs at the smaller unverified rate-limit tier.) There is **no
@@ -299,8 +301,8 @@ unverified daily cap.
 
 - `CLOUDFLARE_API_TOKEN` — token with Workers + KV edit permission (deploys).
 - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account id.
-- `CLOUDFLARE_AI_TOKEN` — the scoped AI Gateway Run token. CI pushes it as a
-  Worker secret on every deploy (`secrets:` input of wrangler-action), so it
+- `CLOUDFLARE_AI_TOKEN` — the gateway's authentication token. CI pushes it as
+  a Worker secret on every deploy (`secrets:` input of wrangler-action), so it
   never needs a manual `wrangler secret put`.
 
 (The Android/deploy secrets — `FIREBASE_CONFIG`, `PLAY_STORE_CONFIG_JSON`,

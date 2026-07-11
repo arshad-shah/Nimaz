@@ -93,7 +93,7 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
     expect(res.headers.get("x-nimaz-usage")).toContain("input_tokens");
   });
 
-  it("sends the gateway token, gateway id, metadata, catalog model id, and the native request", async () => {
+  it("sends the gateway token, metadata, and the native request unchanged", async () => {
     let seenBody = "";
     fetchMock
       .get(GATEWAY_HOST)
@@ -101,9 +101,7 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
         path: GATEWAY_PATH,
         method: "POST",
         headers: {
-          authorization: "Bearer test-gateway-token",
           "cf-aig-authorization": "Bearer test-gateway-token",
-          "cf-aig-gateway-id": "nimaz",
           "anthropic-version": "2023-06-01",
           "cf-aig-metadata": JSON.stringify({ capability: "search-assist" }),
         },
@@ -116,8 +114,8 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
     const res = await invoke("assist-dev-2");
     expect(res.status).toBe(200);
     const sent = JSON.parse(seenBody) as Record<string, any>;
-    // Provider + model selected by the Cloudflare catalog id …
-    expect(sent.model).toBe("anthropic/claude-haiku-4.5");
+    // The provider-native endpoint takes the plain Anthropic model name …
+    expect(sent.model).toBe("claude-haiku-4-5");
     // … and the Anthropic-native features survive the transport unchanged.
     expect(sent.tool_choice).toEqual({ type: "tool", name: "submit_result" });
     expect(sent.system[0].cache_control).toEqual({ type: "ephemeral" });
