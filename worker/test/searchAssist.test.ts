@@ -117,7 +117,7 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
     expect(res.status).toBe(200);
     const sent = JSON.parse(seenBody) as Record<string, any>;
     // Provider + model selected by the Cloudflare catalog id …
-    expect(sent.model).toBe("anthropic/claude-haiku-4-5");
+    expect(sent.model).toBe("anthropic/claude-haiku-4.5");
     // … and the Anthropic-native features survive the transport unchanged.
     expect(sent.tool_choice).toEqual({ type: "tool", name: "submit_result" });
     expect(sent.system[0].cache_control).toEqual({ type: "ephemeral" });

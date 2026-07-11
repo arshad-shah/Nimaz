@@ -14,9 +14,10 @@ export class UpstreamError extends Error {
   }
 }
 
-// Cloudflare model-catalog id (author/model form) — routes the gateway to
-// Anthropic with Unified Billing (Cloudflare-managed credentials + credits).
-const MODEL_ID = "anthropic/claude-haiku-4-5";
+// Cloudflare model-catalog id (author/model form, dot version — matches the
+// dashboard model catalog) — routes the gateway to Anthropic with Unified
+// Billing (Cloudflare-managed credentials + credits).
+const MODEL_ID = "anthropic/claude-haiku-4.5";
 const GATEWAY_ID = "nimaz";
 const ACCOUNT_ID = "0e2f38a4dd1f2052809b0d876dcc790e";
 // AI Gateway's Anthropic-native REST endpoint: strictly the Anthropic
@@ -45,12 +46,17 @@ export async function callClaude(
   env: Env,
   metadata?: Record<string, string | number | boolean>,
 ): Promise<AnthropicResponse> {
+  // Tolerate a secret pasted with a "Bearer " prefix or stray whitespace —
+  // a doubled "Bearer Bearer x" header fails auth with 401/10000.
+  const token = (env.CLOUDFLARE_AI_TOKEN ?? "")
+    .trim()
+    .replace(/^Bearer\s+/i, "");
   const res = await fetch(ENDPOINT, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${env.CLOUDFLARE_AI_TOKEN}`,
-      "cf-aig-authorization": `Bearer ${env.CLOUDFLARE_AI_TOKEN}`,
+      authorization: `Bearer ${token}`,
+      "cf-aig-authorization": `Bearer ${token}`,
       "cf-aig-gateway-id": GATEWAY_ID,
       "anthropic-version": ANTHROPIC_VERSION,
       // Per-feature spend breakdown in the gateway dashboard. Never contains

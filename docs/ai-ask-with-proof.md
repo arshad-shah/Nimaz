@@ -187,14 +187,14 @@ payloads. The Worker stores nothing.
 ## Cost model
 
 - **Billing: Cloudflare AI Gateway Unified Billing.** The Worker calls
-  `anthropic/claude-haiku-4-5` through the `nimaz` gateway's REST endpoint
+  `anthropic/claude-haiku-4.5` through the `nimaz` gateway's REST endpoint
   (auth: the scoped `CLOUDFLARE_AI_TOKEN` gateway-run secret); Cloudflare
   holds the Anthropic credentials and draws spend from the account's **AI
   credits** — one Cloudflare invoice, no Anthropic account/key. Provider
   per-token rates pass through with **no markup**; the one cost on top is a
   **5% fee on credit purchases** (a $100 top-up costs $105). Auto top-up keeps
   answers from stalling when credits run low.
-- Model: `claude-haiku-4-5` (catalog id `anthropic/claude-haiku-4-5`).
+- Model: `claude-haiku-4-5` (catalog id `anthropic/claude-haiku-4.5`).
   Pricing: **$1 / MTok input**, **$5 / MTok output**; cached input reads billed
   at **10%** of the input rate.
 - Each submit is **one** call: `search-assist` (`max_tokens` 700,

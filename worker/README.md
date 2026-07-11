@@ -28,7 +28,7 @@ POST /v1/invoke
   → rateLimit   (tiered per-device + global daily caps in KV)
   → dispatch    (registry lookup → Zod-validate input → build request
                  → POST …/accounts/{acct}/ai/v1/messages   (AI Gateway,
-                   model "anthropic/claude-haiku-4-5", Anthropic-native schema)
+                   model "anthropic/claude-haiku-4.5", Anthropic-native schema)
                  → Zod-validate output)
 ```
 
