@@ -49,6 +49,6 @@
     // When set, Claude calls route through the Cloudflare AI Gateway. Shape:
     // https://gateway.ai.cloudflare.com/v1/{account}/{gateway}/anthropic
     // Leave empty to call api.anthropic.com directly.
-    "AI_GATEWAY_BASE_URL": ""
+    "AI_GATEWAY_BASE_URL": "https://gateway.ai.cloudflare.com/v1/0e2f38a4dd1f2052809b0d876dcc790e/nimaz/anthropic"
   }
 }
