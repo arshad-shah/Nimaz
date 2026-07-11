@@ -42,7 +42,7 @@ class AiRepositoryImplTest {
         coEvery { integrity.getToken() } returns "debug-skip"
         val device = mockk<DeviceIdProvider>()
         coEvery { device.getOrCreate() } returns "dev-1"
-        return AiRepositoryImpl(apiClient, integrity, device)
+        return AiRepositoryImpl(apiClient, integrity, device, json)
     }
 
     private val passages = listOf(
@@ -64,6 +64,30 @@ class AiRepositoryImplTest {
         val answer = result.getOrThrow()
         assertThat(answer.confidence).isEqualTo(AnswerConfidence.MEDIUM)
         assertThat(answer.citationIds).containsExactly("quran:2:153")
+    }
+
+    @Test
+    fun `planSearch maps terms and parses quran refs, dropping malformed ones`() = runTest {
+        val body = """
+            {"terms":["patience"," sabr ",""],"quranRefs":["2:153","garbage","39:10"]}
+        """.trimIndent()
+        val result = repo { respond(body, HttpStatusCode.OK, jsonHeaders()) }
+            .planSearch("How do I show patience?")
+
+        assertThat(result.isSuccess).isTrue()
+        val plan = result.getOrThrow()
+        assertThat(plan.terms).containsExactly("patience", "sabr")
+        assertThat(plan.quranRefs.map { it.raw })
+            .containsExactly("quran:2:153", "quran:39:10")
+    }
+
+    @Test
+    fun `planSearch surfaces api errors`() = runTest {
+        val body = """{"error":{"code":"RATE_LIMITED","message":"slow","retryAfterSeconds":60}}"""
+        val result = repo { respond(body, HttpStatusCode.TooManyRequests, jsonHeaders()) }
+            .planSearch("q?")
+        assertThat((result.exceptionOrNull() as AiRequestException).error)
+            .isEqualTo(AiError.RateLimited(60))
     }
 
     @Test

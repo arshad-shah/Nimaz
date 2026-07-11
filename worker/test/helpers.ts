@@ -25,13 +25,14 @@ export function makeEnvelope(input: AskInput, extra: Record<string, unknown> = {
   };
 }
 
-/** A well-formed Anthropic Messages response that calls submit_answer. */
+/** A well-formed Anthropic Messages response that calls the named tool. */
 export function mockAnthropicToolResponse(
   toolInput: unknown,
   usage: { input_tokens: number; output_tokens: number; cache_read_input_tokens?: number } = {
     input_tokens: 500,
     output_tokens: 80,
   },
+  toolName = "submit_answer",
 ) {
   return {
     id: "msg_test",
@@ -39,12 +40,26 @@ export function mockAnthropicToolResponse(
       {
         type: "tool_use",
         id: "toolu_test",
-        name: "submit_answer",
+        name: toolName,
         input: toolInput,
       },
     ],
     stop_reason: "tool_use",
     usage,
+  };
+}
+
+/** Envelope for a search-plan invocation. */
+export function makePlanEnvelope(
+  question = "How do I cope with grief?",
+  extra: Record<string, unknown> = {},
+) {
+  return {
+    capability: "search-plan",
+    integrityToken: "debug-skip",
+    deviceId: "test-device-plan-1",
+    input: { question },
+    ...extra,
   };
 }
 

@@ -100,6 +100,15 @@ fun SearchScreen(
         }
     }
 
+    // When the AI answers, it also produced the retrieval plan — drive the results
+    // list from the same planned terms so the AI controls what's listed (no extra
+    // planning call). Only on global search with AI enabled.
+    LaunchedEffect(askState.plannedTerms) {
+        if (enableAsk && askState.plannedTerms.isNotEmpty()) {
+            viewModel.onEvent(SearchEvent.ApplyAiTerms(askState.plannedTerms))
+        }
+    }
+
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {

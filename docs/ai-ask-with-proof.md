@@ -2,14 +2,26 @@
 
 An **opt-in**, privacy-disclosed, proof-driven question-answering feature. The
 user types into Global Search's **single search bar** — the same text drives both
-keyword search and, on submit, the AI ask (there is no separate "ask" field). The
-app retrieves matching Quran/Hadith/Dua passages **locally** from Room, sends the
-question + those passages to a Cloudflare Worker, which asks Claude to answer
-**only from the supplied passages** and return strict JSON. The app resolves the cited passages back to real records
-and shows them as tappable "proof" cards that deep-link into the reader screens.
+keyword search and, on submit, the AI ask (there is no separate "ask" field).
 
-AI is **off by default**. A user who never opens Search Settings sees no
-behaviour change and nothing leaves their device.
+When AI is enabled it **drives retrieval end-to-end** (two Worker calls per
+submit):
+
+1. **Plan** (`search-plan`) — the app sends only the question; Claude returns the
+   search *terms* and specific *Quran refs* it judges relevant. The app decides
+   nothing about relevance itself.
+2. **Retrieve (local)** — the app runs the plan's terms through the existing
+   Quran/Hadith/Dua searches and resolves its Quran refs, all against Room. These
+   real records populate **both** the results list (so the AI controls what's
+   listed) and the evidence set. Falls back to local keyword variants if planning
+   fails or is empty.
+3. **Ground** (`ask-with-proof`) — the app sends the question + retrieved passages;
+   Claude answers **only from the supplied passages**. Cited passages resolve back
+   to real records shown as tappable "proof" cards that deep-link into the readers.
+
+When AI is **off**, only local keyword search runs (no network, no behaviour
+change). AI is **off by default** — a user who never opens Search Settings sees
+nothing leave their device.
 
 ## Architecture
 
@@ -23,13 +35,15 @@ sequenceDiagram
     participant C as Claude (Haiku 4.5)
 
     U->>App: Ask a question
-    App->>Room: search use cases (question + keyword variants)
-    Room-->>App: candidate passages
+    App->>W: POST /v1/invoke (search-plan) {question}
+    W-->>App: {terms, quranRefs}  (fallback: local keyword variants on failure)
+    App->>Room: run terms + resolve quranRefs (local search use cases)
+    Room-->>App: candidate passages + list results
     App->>App: rank by term overlap, cap ≤8, ≤8000 chars
     alt no passages
-        App-->>U: "No supporting sources found" (no network call)
+        App-->>U: "No supporting sources found" (no grounding call)
     else has passages
-        App->>W: POST /v1/invoke {capability, integrityToken, deviceId, input}
+        App->>W: POST /v1/invoke (ask-with-proof) {question, passages}
         W->>W: integrity → rate limit → budget guard
         W->>GW: Messages API (forced submit_answer tool, cached system prompt)
         GW->>C: proxied request
@@ -38,28 +52,55 @@ sequenceDiagram
         W->>W: validate output, drop unknown citationIds, record spend
         W-->>App: {answer, citationIds, confidence, insufficientEvidence}
         App->>Room: resolve citationIds → records (round-trip)
-        App-->>U: answer + confidence + tappable proof cards
+        App-->>U: answer + confidence + proof cards + AI-driven results list
     end
 ```
+
+Each submit makes **two** Worker calls (plan + ground) — see the cost note below.
 
 Layers (Android):
 
 ```
-presentation/screens/search/SearchScreen.kt         shared search+ask input bar
+presentation/screens/search/SearchScreen.kt         shared search+ask input bar; bridges AI plan → list
 presentation/screens/search/AskComponents.kt        UI for the answer/proofs/hint
 presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
-presentation/viewmodel/AskViewModel                 ask state machine
+presentation/viewmodel/AskViewModel                 ask state machine (exposes plannedTerms)
+presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)
 presentation/viewmodel/SearchSettingsViewModel      settings + consent state
-domain/usecase/ai/AskWithProofUseCase               retrieval → call → resolve
-domain/model/{AiModels,CitationId}                  ProofPassage/GroundedAnswer/Proof/AiError
-domain/repository/AiRepository                      gateway interface
+domain/usecase/ai/AskWithProofUseCase               plan → retrieve → ground → resolve
+domain/model/{AiModels,CitationId,SearchPlan}       ProofPassage/GroundedAnswer/Proof/AiError/SearchPlan
+domain/repository/AiRepository                      gateway interface (planSearch + ask)
 data/ai/{AiApiClient,IntegrityTokenProvider,DeviceIdProvider}
 data/ai/dto/AiDtos                                  wire DTOs (mirror the Worker)
 data/repository/AiRepositoryImpl                    error-envelope → AiError mapping
 core/di/AiModule                                    Ktor client + wiring
+worker/src/capabilities/{ask-with-proof,search-plan} the two AI capabilities
 ```
 
 ## Capability contract
+
+Both capabilities go through the same `POST /v1/invoke` envelope and middleware
+(integrity → rate limit → budget). The Android `input` is sent as a raw JSON
+object so one envelope serves every capability.
+
+### `search-plan` (retrieval planning — call 1)
+
+```json
+{ "capability": "search-plan", "integrityToken": "…", "deviceId": "…",
+  "input": { "question": "3..500 chars" } }
+```
+
+Response:
+
+```json
+{ "terms": ["patience", "sabr", "hardship"], "quranRefs": ["2:153", "39:10"] }
+```
+
+`terms` are keyword/substring search terms; `quranRefs` are `surah:ayah` (real
+references only — malformed ones are dropped in `parseResponse`). Hadith/Dua use
+opaque local IDs the model can't know, so it plans them only through `terms`.
+
+### `ask-with-proof` (grounded answer — call 2)
 
 `POST /v1/invoke`:
 
@@ -133,9 +174,12 @@ names via `AppAnalytics.logEvent`: `ai_ask_submitted`, `ai_ask_answered`,
 
 - Model: `claude-haiku-4-5`. Pricing: **$1 / MTok input**, **$5 / MTok output**;
   cached input reads billed at **10%** of the input rate.
-- The system prompt is marked `cache_control: ephemeral`, so after the first call
-  it is read from cache at ~10% cost.
-- `max_tokens` = 600, temperature 0.2.
+- Each submit is **two** calls: `search-plan` (`max_tokens` 300) then
+  `ask-with-proof` (`max_tokens` 600). Both prompts are marked
+  `cache_control: ephemeral`, so after the first call each is read from cache at
+  ~10% cost. Both count against the rate-limit/budget guards, so **one question
+  consumes two invocations** of the per-device daily cap.
+- temperature 0.2 for both.
 - Guards (KV-backed, per UTC period): per-device daily cap (`DAILY_DEVICE_LIMIT`,
   20), global daily cap (`DAILY_GLOBAL_LIMIT`, 500), monthly USD budget
   (`MONTHLY_BUDGET_USD`, 10). Spend is tallied in integer microdollars after each
