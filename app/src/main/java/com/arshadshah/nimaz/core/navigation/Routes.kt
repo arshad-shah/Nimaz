@@ -189,6 +189,10 @@ sealed interface Route {
     @Serializable
     data object SettingsSync : Route
 
+    // Search & AI settings (Ask with Proof)
+    @Serializable
+    data object SearchSettings : Route
+
     // Onboarding
     @Serializable
     data object Onboarding : Route

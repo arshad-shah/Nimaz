@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -61,6 +62,7 @@ fun SettingsScreen(
     onNavigateToLanguage: () -> Unit,
     onNavigateToWidgets: () -> Unit,
     onNavigateToSync: () -> Unit = {},
+    onNavigateToSearchSettings: () -> Unit = {},
     onRestartApp: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
@@ -129,6 +131,19 @@ fun SettingsScreen(
                         subtitle = stringResource(R.string.quran_settings_subtitle),
                         icon = Icons.AutoMirrored.Filled.MenuBook,
                         onClick = onNavigateToQuranSettings
+                    )
+                }
+            }
+
+            // Search & AI
+            item { NimazSectionHeader(title = stringResource(R.string.search_settings)) }
+            item {
+                NimazMenuGroup {
+                    NimazMenuItem(
+                        title = stringResource(R.string.search_settings),
+                        subtitle = stringResource(R.string.search_settings_subtitle),
+                        icon = Icons.Default.Search,
+                        onClick = onNavigateToSearchSettings
                     )
                 }
             }
