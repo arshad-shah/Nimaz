@@ -36,6 +36,12 @@ data class AskUiState(
     val question: String = "",
     val recentQuestions: List<String> = emptyList(),
     val phase: AskPhase = AskPhase.Idle,
+    /**
+     * The search terms the AI's retrieval plan used for the most recent answer.
+     * The Search screen drives its results list from these (same plan, no extra
+     * planning call), giving the AI control over the list when enabled.
+     */
+    val plannedTerms: List<String> = emptyList(),
 )
 
 sealed interface AskEvent {
@@ -93,7 +99,9 @@ class AskViewModel @Inject constructor(
             }
 
             AskEvent.Clear ->
-                _uiState.update { it.copy(question = "", phase = AskPhase.Idle) }
+                _uiState.update {
+                    it.copy(question = "", phase = AskPhase.Idle, plannedTerms = emptyList())
+                }
 
             AskEvent.DismissHint ->
                 viewModelScope.launch { settingsRepository.setAiAskHintDismissed(true) }
@@ -105,7 +113,9 @@ class AskViewModel @Inject constructor(
         if (question.length < MIN_QUESTION_LENGTH) return
 
         AppAnalytics.logEvent(EVENT_SUBMITTED, null) // event name only — never the question text
-        _uiState.update { it.copy(phase = AskPhase.Loading) }
+        // Reset the plan so a stale one can't drive the list if this ask ends in
+        // NoEvidence/Error; only a fresh Answered sets plannedTerms again.
+        _uiState.update { it.copy(phase = AskPhase.Loading, plannedTerms = emptyList()) }
 
         viewModelScope.launch {
             val sources = AskWithProofUseCase.Sources(
@@ -120,7 +130,10 @@ class AskViewModel @Inject constructor(
                     AppAnalytics.logEvent(EVENT_ANSWERED, null)
                     addRecent(question)
                     _uiState.update {
-                        it.copy(phase = AskPhase.Answer(outcome.answer, outcome.proofs))
+                        it.copy(
+                            phase = AskPhase.Answer(outcome.answer, outcome.proofs),
+                            plannedTerms = outcome.plannedTerms,
+                        )
                     }
                 }
 

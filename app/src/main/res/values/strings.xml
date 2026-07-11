@@ -589,6 +589,7 @@
     <!-- Search Screen -->
     <string name="search_title">Search</string>
     <string name="search_placeholder">Search Quran, Hadith, Duas…</string>
+    <string name="search_or_ask_placeholder">Search or ask a question…</string>
     <string name="recent_searches">Recent Searches</string>
     <string name="clear_recent">Clear Recent</string>
     <string name="results_found_format">%d results found</string>
@@ -1465,6 +1466,7 @@
 
     <string name="ai_ask_a_question">Ask a question</string>
     <string name="ai_ask_placeholder">Ask about Quran, Hadith, or Duas…</string>
+    <string name="ai_answer_section">AI answer</string>
     <string name="ai_enable_hint">Enable AI answers in Search settings</string>
     <string name="ai_proof_section">Proof</string>
     <string name="ai_confidence_high">High confidence</string>

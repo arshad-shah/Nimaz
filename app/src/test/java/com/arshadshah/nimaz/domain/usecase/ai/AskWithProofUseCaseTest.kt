@@ -8,8 +8,10 @@ import com.arshadshah.nimaz.domain.model.DuaSearchResult
 import com.arshadshah.nimaz.domain.model.GroundedAnswer
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
+import com.arshadshah.nimaz.domain.model.CitationId
 import com.arshadshah.nimaz.domain.model.ProofPassage
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
+import com.arshadshah.nimaz.domain.model.SearchPlan
 import com.arshadshah.nimaz.domain.model.SearchType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.RevelationType
@@ -65,6 +67,11 @@ class AskWithProofUseCaseTest {
         every { duaUseCases.searchDuas } returns searchDuasUC
         every { duaUseCases.getDuaById } returns getDuaByIdUC
 
+        // Default: planning yields nothing, so retrieval falls back to local
+        // keyword variants. Tests that exercise the plan override this.
+        coEvery { aiRepository.planSearch(any()) } returns
+            Result.success(SearchPlan(terms = emptyList(), quranRefs = emptyList()))
+
         useCase = AskWithProofUseCase(aiRepository, quranUseCases, hadithUseCases, duaUseCases)
     }
 
@@ -80,6 +87,29 @@ class AskWithProofUseCaseTest {
 
         assertThat(outcome).isEqualTo(AskWithProofUseCase.Outcome.NoEvidence)
         coVerify(exactly = 0) { aiRepository.ask(any(), any()) }
+    }
+
+    @Test
+    fun `retrieval searches individual words, not just the whole phrase`() = runTest {
+        // The DB search matches a contiguous substring, so a natural-language phrase
+        // never hits — only the single word "patience" does. Retrieval must still
+        // find the passage (and therefore call the AI) by searching words on their own.
+        every { searchQuranUC.invoke(any(), any()) } answers {
+            if (firstArg<String>() == "patience") flowOf(listOf(quranResult(2, 153)))
+            else flowOf(emptyList())
+        }
+        every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
+        every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+
+        val captured = slot<List<ProofPassage>>()
+        coEvery { aiRepository.ask(any(), capture(captured)) } returns
+            Result.success(answer(citationIds = emptyList()))
+
+        val outcome = useCase("How do I show patience in hardship?", allSources, maxProofs = 5)
+
+        assertThat(outcome).isInstanceOf(AskWithProofUseCase.Outcome.Answered::class.java)
+        assertThat(captured.captured).isNotEmpty()
+        coVerify { aiRepository.ask(any(), any()) }
     }
 
     @Test
@@ -147,6 +177,49 @@ class AskWithProofUseCaseTest {
         assertThat(quranProof.route).isEqualTo(Route.QuranReader(2, 153))
         val hadithProof = answered.proofs.first { it.citationId == "hadith:bukhari-1" }
         assertThat(hadithProof.route).isEqualTo(Route.HadithReader("bukhari-1"))
+    }
+
+    @Test
+    fun `AI plan drives retrieval and planned terms are returned`() = runTest {
+        coEvery { aiRepository.planSearch(any()) } returns
+            Result.success(SearchPlan(terms = listOf("patience", "sabr"), quranRefs = emptyList()))
+        // Only the planned term "patience" matches anything in the DB.
+        every { searchQuranUC.invoke(any(), any()) } answers {
+            if (firstArg<String>() == "patience") flowOf(listOf(quranResult(2, 153)))
+            else flowOf(emptyList())
+        }
+        every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
+        every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+        coEvery { aiRepository.ask(any(), any()) } returns
+            Result.success(answer(citationIds = emptyList()))
+
+        val outcome = useCase("How do I stay patient?", allSources, maxProofs = 5)
+
+        val answered = outcome as AskWithProofUseCase.Outcome.Answered
+        assertThat(answered.plannedTerms).containsExactly("patience", "sabr")
+        coVerify { aiRepository.ask(any(), any()) }
+    }
+
+    @Test
+    fun `planned quran refs are resolved to passages even without keyword hits`() = runTest {
+        coEvery { aiRepository.planSearch(any()) } returns Result.success(
+            SearchPlan(terms = listOf("mercy"), quranRefs = listOf(CitationId.Quran(2, 153))),
+        )
+        every { searchQuranUC.invoke(any(), any()) } returns flowOf(emptyList())
+        every { searchHadithsUC.invoke(any()) } returns flowOf(emptyList())
+        every { searchDuasUC.invoke(any()) } returns flowOf(emptyList())
+        // Direct ref resolution reads the ayah from the local DB.
+        every { getAyahsBySurahUC.invoke(2) } returns flowOf(listOf(ayah(2, 153)))
+        coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
+
+        val captured = slot<List<ProofPassage>>()
+        coEvery { aiRepository.ask(any(), capture(captured)) } returns
+            Result.success(answer(citationIds = emptyList()))
+
+        val outcome = useCase("Tell me about mercy", allSources, maxProofs = 5)
+
+        assertThat(outcome).isInstanceOf(AskWithProofUseCase.Outcome.Answered::class.java)
+        assertThat(captured.captured.map { it.id }).contains("quran:2:153")
     }
 
     // ── model builders ────────────────────────────────────────────────────────

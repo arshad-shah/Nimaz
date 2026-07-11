@@ -416,6 +416,7 @@
     <string name="hadith_count_format">%s hadis</string>
     <string name="search_title">Arama</string>
     <string name="search_placeholder">Kur\'an, Hadis, Dua Ara…</string>
+    <string name="search_or_ask_placeholder">Arayın veya bir soru sorun…</string>
     <string name="recent_searches">Son Aramalar</string>
     <string name="clear_recent">Son Aramaları Temizle</string>
     <string name="results_found_format">%d sonuç bulundu</string>
@@ -1309,6 +1310,7 @@
     <string name="ai_consent_enable">Etkinleştir</string>
     <string name="ai_ask_a_question">Bir soru sorun</string>
     <string name="ai_ask_placeholder">Kur\'an, Hadis veya Dua hakkında sorun…</string>
+    <string name="ai_answer_section">Yapay zeka yanıtı</string>
     <string name="ai_enable_hint">Yapay zekâ yanıtlarını Arama ayarlarında etkinleştirin</string>
     <string name="ai_proof_section">Kanıt</string>
     <string name="ai_confidence_high">Yüksek güven</string>

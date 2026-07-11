@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
@@ -64,6 +65,14 @@ sealed interface SearchEvent {
     data object ExecuteSearch : SearchEvent
     data object ClearSearch : SearchEvent
     data object ClearRecentSearches : SearchEvent
+
+    /**
+     * Replace the results list with matches for the AI's planned search terms.
+     * Emitted by the Search screen after an AI answer, so the list reflects what
+     * the AI chose to retrieve (Global Search, AI-enabled). Purely local — no
+     * network call; the terms already came from the single planning round.
+     */
+    data class ApplyAiTerms(val terms: List<String>) : SearchEvent
 }
 
 /** Idle time after the last keystroke before a search-as-you-type lookup fires. */
@@ -106,6 +115,7 @@ class SearchViewModel @Inject constructor(
             SearchEvent.ExecuteSearch -> executeSearch()
             SearchEvent.ClearSearch -> clearSearch()
             SearchEvent.ClearRecentSearches -> clearRecentSearches()
+            is SearchEvent.ApplyAiTerms -> applyAiTerms(event.terms)
         }
     }
 
@@ -152,6 +162,58 @@ class SearchViewModel @Inject constructor(
         }
         // Explicit submit (enter / recent search): search immediately and remember it.
         launchSearch(query, addToRecent = true, debounceMillis = 0L)
+    }
+
+    /**
+     * Populate the results list from the AI's planned terms (Global Search only).
+     * Runs each term through the existing local searches and merges the union —
+     * so when AI is on, the AI effectively chooses what the list shows. Replaces
+     * the debounced keyword search that ran while the user was typing.
+     */
+    private fun applyAiTerms(terms: List<String>) {
+        val cleaned = terms.map { it.trim() }.filter { it.isNotBlank() }.distinct()
+        if (cleaned.isEmpty()) return
+        searchJob?.cancel()
+        _searchState.update { it.copy(isSearching = true, error = null) }
+        searchJob = viewModelScope.launch {
+            val quran = LinkedHashMap<Int, QuranSearchResult>()
+            val surahs = LinkedHashMap<Int, Surah>()
+            val hadith = LinkedHashMap<String, HadithSearchResult>()
+            val duas = LinkedHashMap<String, DuaSearchResult>()
+
+            for (term in cleaned) {
+                quranUseCases.searchQuran(term, "sahih_international").first()
+                    .forEach { quran.putIfAbsent(it.ayah.id, it) }
+                quranUseCases.getSurahList.search(term).first()
+                    .forEach { surahs.putIfAbsent(it.number, it) }
+                hadithUseCases.searchHadiths(term).first()
+                    .forEach { hadith.putIfAbsent(it.hadith.id, it) }
+                duaUseCases.searchDuas(term).first()
+                    .forEach { duas.putIfAbsent(it.dua.id, it) }
+            }
+
+            val quranResults = quran.values.toList()
+            val surahResults = surahs.values.toList()
+            val hadithResults = hadith.values.toList()
+            val duaResults = duas.values.toList()
+            val unified = quranResults.map { UnifiedSearchResult.QuranResult(it) } +
+                    surahResults.map { UnifiedSearchResult.SurahResult(it) } +
+                    hadithResults.map { UnifiedSearchResult.HadithResult(it) } +
+                    duaResults.map { UnifiedSearchResult.DuaResult(it) }
+
+            _searchState.update { state ->
+                state.copy(
+                    quranResults = quranResults,
+                    surahResults = surahResults,
+                    hadithResults = hadithResults,
+                    duaResults = duaResults,
+                    allResults = unified,
+                    filteredResults = applyFilter(unified, state.selectedFilter),
+                    isSearching = false,
+                )
+            }
+            updateStats()
+        }
     }
 
     /**
