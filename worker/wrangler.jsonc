@@ -13,12 +13,12 @@
   },
 
   // KV holds rate-limit counters and the monthly budget tally.
-  // Create it once with: `wrangler kv namespace create NIMAZ_AI_KV`
-  // then paste the returned id below (replacing "REPLACE_ME"). See README.md.
+  // Created with: `wrangler kv namespace create NIMAZ_AI_KV`. The id below is a
+  // resource identifier (not a secret — useless without CLOUDFLARE_API_TOKEN).
   "kv_namespaces": [
     {
       "binding": "NIMAZ_AI_KV",
-      "id": "REPLACE_ME"
+      "id": "be91ba3b175a449c839332a6ecc3773d"
     }
   ],
 

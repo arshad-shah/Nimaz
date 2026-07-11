@@ -160,9 +160,9 @@ committed to the repo.
 ### 1. Cloudflare (Worker)
 
 1. `cd worker && npm ci`
-2. Create the KV namespace and paste its id into `worker/wrangler.jsonc`
-   (replace `"REPLACE_ME"`):
-   `npx wrangler kv namespace create NIMAZ_AI_KV`
+2. The KV namespace id is already committed in `worker/wrangler.jsonc` (a
+   resource id, not a secret). To recreate it in a different account:
+   `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
 3. Set secrets:
    `npx wrangler secret put ANTHROPIC_API_KEY`
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`

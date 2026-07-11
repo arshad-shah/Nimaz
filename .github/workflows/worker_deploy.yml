@@ -62,3 +62,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
+          # Publishes the Worker + its wrangler.jsonc config (routes, vars, the
+          # NIMAZ_AI_KV binding). Secrets (ANTHROPIC_API_KEY,
+          # GOOGLE_SERVICE_ACCOUNT_JSON) are set once via `wrangler secret put`.
+          command: deploy

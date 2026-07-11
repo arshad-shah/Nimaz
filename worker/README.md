@@ -100,9 +100,10 @@ Secrets are **not** in any file — set them with `wrangler secret put`:
 cd worker
 npm ci                      # or: npm install (first time, to create the lockfile)
 
-# 1. Create the KV namespace and paste the returned id into wrangler.jsonc
-#    (replace "REPLACE_ME"):
-npx wrangler kv namespace create NIMAZ_AI_KV
+# 1. KV namespace: already created and its id is committed in wrangler.jsonc
+#    (a resource id, not a secret). To recreate it in another account:
+#    npx wrangler kv namespace create NIMAZ_AI_KV
+#    then paste the returned id into wrangler.jsonc.
 
 # 2. Set secrets (production):
 npx wrangler secret put ANTHROPIC_API_KEY
