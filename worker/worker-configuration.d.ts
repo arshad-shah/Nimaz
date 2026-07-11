@@ -7,7 +7,8 @@ interface Env {
 
   // ── Vars (wrangler.jsonc) ────────────────────────────────────────────────
   SKIP_ATTESTATION: string; // "true" | "false"
-  DAILY_DEVICE_LIMIT: string; // integer string, default "20"
+  DAILY_DEVICE_LIMIT: string; // integer string, default "20" (verified tier)
+  UNVERIFIED_DAILY_DEVICE_LIMIT: string; // integer string, default "5"
   DAILY_GLOBAL_LIMIT: string; // integer string, default "500"
   MONTHLY_BUDGET_USD: string; // integer/decimal string, default "10"
   AI_GATEWAY_BASE_URL: string; // "" or an AI Gateway base URL

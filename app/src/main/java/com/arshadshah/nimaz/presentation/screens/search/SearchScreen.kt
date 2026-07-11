@@ -100,12 +100,12 @@ fun SearchScreen(
         }
     }
 
-    // When the AI answers, it also produced the retrieval plan — drive the results
-    // list from the same planned terms so the AI controls what's listed (no extra
-    // planning call). Only on global search with AI enabled.
-    LaunchedEffect(askState.plannedTerms) {
-        if (enableAsk && askState.plannedTerms.isNotEmpty()) {
-            viewModel.onEvent(SearchEvent.ApplyAiTerms(askState.plannedTerms))
+    // When the AI answers it also returns related search terms — drive the
+    // results list from them so the list dynamically shows what the AI judged
+    // relevant (no extra call). Only on global search with AI enabled.
+    LaunchedEffect(askState.relatedTerms) {
+        if (enableAsk && askState.relatedTerms.isNotEmpty()) {
+            viewModel.onEvent(SearchEvent.ApplyAiTerms(askState.relatedTerms))
         }
     }
 
@@ -177,6 +177,7 @@ fun SearchScreen(
                     onNavigateToProof = onNavigateToProof,
                     onNavigateToSearchSettings = onNavigateToSearchSettings,
                     onDismissHint = { askViewModel.onEvent(AskEvent.DismissHint) },
+                    onRetry = { askViewModel.onEvent(AskEvent.Submit) },
                 )
             }
 

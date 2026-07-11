@@ -1,19 +1,13 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
-import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
-import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.domain.usecase.QuranUseCases
-import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
+import com.arshadshah.nimaz.domain.model.LibrarySearchResults
+import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import com.google.common.truth.Truth.assertThat
-import io.mockk.every
+import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.mockk
-import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
@@ -27,40 +21,20 @@ import org.junit.Test
 class SearchViewModelTest {
     private val dispatcher = StandardTestDispatcher()
 
-    private lateinit var quranUseCases: QuranUseCases
-    private lateinit var hadithUseCases: HadithUseCases
-    private lateinit var duaUseCases: DuaUseCases
-    private lateinit var searchDuas: SearchDuasUseCase
-    private lateinit var searchHadiths: SearchHadithsUseCase
-    private lateinit var searchQuran: SearchQuranUseCase
+    private lateinit var searchLibrary: SearchLibraryUseCase
 
     @Before
     fun setUp() {
         Dispatchers.setMain(dispatcher)
-
-        searchQuran = mockk()
-        every { searchQuran.invoke(any(), any()) } returns flowOf(emptyList())
-        val getSurahList = mockk<GetSurahListUseCase>()
-        every { getSurahList.search(any()) } returns flowOf(emptyList())
-        quranUseCases = mockk(relaxed = true)
-        every { quranUseCases.searchQuran } returns searchQuran
-        every { quranUseCases.getSurahList } returns getSurahList
-
-        searchHadiths = mockk()
-        every { searchHadiths.invoke(any()) } returns flowOf(emptyList())
-        hadithUseCases = mockk(relaxed = true)
-        every { hadithUseCases.searchHadiths } returns searchHadiths
-
-        searchDuas = mockk()
-        every { searchDuas.invoke(any()) } returns flowOf(emptyList())
-        duaUseCases = mockk(relaxed = true)
-        every { duaUseCases.searchDuas } returns searchDuas
+        searchLibrary = mockk()
+        coEvery { searchLibrary.invoke(any(), any()) } returns LibrarySearchResults.EMPTY
+        coEvery { searchLibrary.byTerms(any(), any()) } returns LibrarySearchResults.EMPTY
     }
 
     @After
     fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = SearchViewModel(quranUseCases, hadithUseCases, duaUseCases)
+    private fun viewModel() = SearchViewModel(searchLibrary)
 
     @Test
     fun `typing a query runs the search without pressing enter`() = runTest {
@@ -68,7 +42,7 @@ class SearchViewModelTest {
         vm.onEvent(SearchEvent.UpdateQuery("noor"))
         advanceUntilIdle()
         // The search must have executed off the query change alone — no ExecuteSearch event.
-        verify { searchDuas.invoke("noor") }
+        coVerify { searchLibrary.invoke("noor", any()) }
     }
 
     @Test
@@ -87,9 +61,9 @@ class SearchViewModelTest {
         vm.onEvent(SearchEvent.UpdateQuery("no"))
         vm.onEvent(SearchEvent.UpdateQuery("noor"))
         advanceUntilIdle()
-        verify(exactly = 1) { searchDuas.invoke("noor") }
-        verify(exactly = 0) { searchDuas.invoke("n") }
-        verify(exactly = 0) { searchDuas.invoke("no") }
+        coVerify(exactly = 1) { searchLibrary.invoke("noor", any()) }
+        coVerify(exactly = 0) { searchLibrary.invoke("n", any()) }
+        coVerify(exactly = 0) { searchLibrary.invoke("no", any()) }
     }
 
     @Test
@@ -101,5 +75,13 @@ class SearchViewModelTest {
         advanceUntilIdle()
         assertThat(vm.searchState.value.isSearching).isFalse()
         assertThat(vm.searchState.value.filteredResults).isEmpty()
+    }
+
+    @Test
+    fun `AI terms replace the results list via the smart search`() = runTest {
+        val vm = viewModel()
+        vm.onEvent(SearchEvent.ApplyAiTerms(listOf("patience", " sabr ", "")))
+        advanceUntilIdle()
+        coVerify { searchLibrary.byTerms(listOf("patience", "sabr"), any()) }
     }
 }

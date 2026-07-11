@@ -12,6 +12,7 @@ export default defineWorkersConfig({
           bindings: {
             SKIP_ATTESTATION: "true",
             DAILY_DEVICE_LIMIT: "3",
+            UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
             DAILY_GLOBAL_LIMIT: "5",
             MONTHLY_BUDGET_USD: "10",
             AI_GATEWAY_BASE_URL: "",

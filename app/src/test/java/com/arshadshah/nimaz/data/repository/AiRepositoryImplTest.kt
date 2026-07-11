@@ -5,8 +5,6 @@ import com.arshadshah.nimaz.data.ai.DeviceIdProvider
 import com.arshadshah.nimaz.data.ai.IntegrityTokenProvider
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
-import com.arshadshah.nimaz.domain.model.ProofPassage
-import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.domain.repository.AiRequestException
 import com.google.common.truth.Truth.assertThat
 import io.ktor.client.HttpClient
@@ -45,49 +43,27 @@ class AiRepositoryImplTest {
         return AiRepositoryImpl(apiClient, integrity, device, json)
     }
 
-    private val passages = listOf(
-        ProofPassage("quran:2:153", ProofSource.QURAN, "Be patient.", "Al-Baqarah 153"),
-    )
-
     private fun jsonHeaders() = headersOf(HttpHeaders.ContentType, "application/json")
 
     @Test
-    fun `success maps to a grounded answer with confidence`() = runTest {
+    fun `success maps answer, terms, refs and confidence`() = runTest {
         val body = """
-            {"answer":"Patience is virtuous.","citationIds":["quran:2:153"],
-             "confidence":"medium","insufficientEvidence":false}
+            {"answer":" Patience is virtuous. ",
+             "quranRefs":["2:153","garbage","39:10","2:153"],
+             "terms":["patience"," sabr ","","patience"],
+             "confidence":"medium"}
         """.trimIndent()
         val result = repo { respond(body, HttpStatusCode.OK, jsonHeaders()) }
-            .ask("q?", passages)
+            .assist("How do I show patience?")
 
         assertThat(result.isSuccess).isTrue()
-        val answer = result.getOrThrow()
-        assertThat(answer.confidence).isEqualTo(AnswerConfidence.MEDIUM)
-        assertThat(answer.citationIds).containsExactly("quran:2:153")
-    }
-
-    @Test
-    fun `planSearch maps terms and parses quran refs, dropping malformed ones`() = runTest {
-        val body = """
-            {"terms":["patience"," sabr ",""],"quranRefs":["2:153","garbage","39:10"]}
-        """.trimIndent()
-        val result = repo { respond(body, HttpStatusCode.OK, jsonHeaders()) }
-            .planSearch("How do I show patience?")
-
-        assertThat(result.isSuccess).isTrue()
-        val plan = result.getOrThrow()
-        assertThat(plan.terms).containsExactly("patience", "sabr")
-        assertThat(plan.quranRefs.map { it.raw })
+        val assist = result.getOrThrow()
+        assertThat(assist.answer).isEqualTo("Patience is virtuous.")
+        assertThat(assist.confidence).isEqualTo(AnswerConfidence.MEDIUM)
+        // Malformed refs and blank/duplicate terms are dropped.
+        assertThat(assist.quranRefs.map { it.raw })
             .containsExactly("quran:2:153", "quran:39:10")
-    }
-
-    @Test
-    fun `planSearch surfaces api errors`() = runTest {
-        val body = """{"error":{"code":"RATE_LIMITED","message":"slow","retryAfterSeconds":60}}"""
-        val result = repo { respond(body, HttpStatusCode.TooManyRequests, jsonHeaders()) }
-            .planSearch("q?")
-        assertThat((result.exceptionOrNull() as AiRequestException).error)
-            .isEqualTo(AiError.RateLimited(60))
+        assertThat(assist.terms).containsExactly("patience", "sabr")
     }
 
     @Test
@@ -96,7 +72,7 @@ class AiRepositoryImplTest {
             {"error":{"code":"RATE_LIMITED","message":"slow down","retryAfterSeconds":3600}}
         """.trimIndent()
         val result = repo { respond(body, HttpStatusCode.TooManyRequests, jsonHeaders()) }
-            .ask("q?", passages)
+            .assist("q?")
 
         val error = (result.exceptionOrNull() as AiRequestException).error
         assertThat(error).isEqualTo(AiError.RateLimited(3600))
@@ -106,25 +82,16 @@ class AiRepositoryImplTest {
     fun `503 maps to BudgetExceeded`() = runTest {
         val body = """{"error":{"code":"BUDGET_EXCEEDED","message":"resting"}}"""
         val result = repo { respond(body, HttpStatusCode.ServiceUnavailable, jsonHeaders()) }
-            .ask("q?", passages)
+            .assist("q?")
         assertThat((result.exceptionOrNull() as AiRequestException).error)
             .isEqualTo(AiError.BudgetExceeded)
-    }
-
-    @Test
-    fun `401 maps to Attestation`() = runTest {
-        val body = """{"error":{"code":"ATTESTATION_FAILED","message":"no"}}"""
-        val result = repo { respond(body, HttpStatusCode.Unauthorized, jsonHeaders()) }
-            .ask("q?", passages)
-        assertThat((result.exceptionOrNull() as AiRequestException).error)
-            .isEqualTo(AiError.Attestation)
     }
 
     @Test
     fun `400 maps to Invalid`() = runTest {
         val body = """{"error":{"code":"INVALID_INPUT","message":"bad"}}"""
         val result = repo { respond(body, HttpStatusCode.BadRequest, jsonHeaders()) }
-            .ask("q?", passages)
+            .assist("q?")
         assertThat((result.exceptionOrNull() as AiRequestException).error)
             .isInstanceOf(AiError.Invalid::class.java)
     }
@@ -133,14 +100,25 @@ class AiRepositoryImplTest {
     fun `502 upstream maps to Unknown`() = runTest {
         val body = """{"error":{"code":"UPSTREAM_ERROR","message":"boom"}}"""
         val result = repo { respond(body, HttpStatusCode.BadGateway, jsonHeaders()) }
-            .ask("q?", passages)
+            .assist("q?")
         assertThat((result.exceptionOrNull() as AiRequestException).error)
             .isEqualTo(AiError.Unknown)
     }
 
     @Test
+    fun `unrecognized error code falls back to the http status`() = runTest {
+        // An old client talking to a newer Worker (or vice versa) must degrade
+        // gracefully: unknown code + 429 still reads as RateLimited.
+        val body = """{"error":{"code":"SOMETHING_NEW","message":"?","retryAfterSeconds":10}}"""
+        val result = repo { respond(body, HttpStatusCode.TooManyRequests, jsonHeaders()) }
+            .assist("q?")
+        assertThat((result.exceptionOrNull() as AiRequestException).error)
+            .isEqualTo(AiError.RateLimited(10))
+    }
+
+    @Test
     fun `transport failure maps to Network`() = runTest {
-        val result = repo { throw IOException("offline") }.ask("q?", passages)
+        val result = repo { throw IOException("offline") }.assist("q?")
         assertThat((result.exceptionOrNull() as AiRequestException).error)
             .isEqualTo(AiError.Network)
     }

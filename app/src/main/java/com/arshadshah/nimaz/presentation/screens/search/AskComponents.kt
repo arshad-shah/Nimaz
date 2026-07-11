@@ -1,29 +1,48 @@
 package com.arshadshah.nimaz.presentation.screens.search
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Mosque
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.SelfImprovement
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -34,6 +53,8 @@ import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.viewmodel.AskPhase
@@ -44,14 +65,17 @@ import com.arshadshah.nimaz.presentation.viewmodel.AskUiState
  *
  * The question is entered through the screen's single shared search bar — this
  * section renders only the *output* of an ask. Gated on [AskUiState.aiEnabled]:
- * when off it shows a subtle, dismissible hint; when on it shows the AI answer /
- * proofs / error states (or nothing while idle) beneath the keyword results.
+ * when off it shows a subtle, dismissible hint; when on it renders one hero
+ * card per phase — thinking, answer + proof verses, or a friendly error with
+ * retry. Proof cards are real records from the local library that deep-link
+ * into the readers.
  */
 fun LazyListScope.askSection(
     state: AskUiState,
     onNavigateToProof: (Route) -> Unit,
     onNavigateToSearchSettings: () -> Unit,
     onDismissHint: () -> Unit,
+    onRetry: () -> Unit,
 ) {
     if (!state.aiEnabled) {
         if (!state.hintDismissed) {
@@ -69,74 +93,246 @@ fun LazyListScope.askSection(
         AskPhase.Idle -> Unit
 
         AskPhase.Loading -> {
-            item(key = "ai_answer_header") { AskAnswerHeader() }
-            item(key = "ai_loading") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
-            }
+            item(key = "ai_card") { AskLoadingCard() }
         }
 
         is AskPhase.Answer -> {
-            item(key = "ai_answer_header") { AskAnswerHeader() }
-            if (phase.answer.insufficientEvidence) {
-                item(key = "ai_no_sources") { AskNoSourcesCard() }
-            } else {
-                item(key = "ai_answer") {
-                    AnswerCard(
-                        answer = phase.answer.answer,
-                        confidence = phase.answer.confidence,
-                    )
-                }
-                if (phase.proofs.isNotEmpty()) {
-                    item(key = "ai_proof_header") {
-                        Text(
-                            text = stringResource(R.string.ai_proof_section),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 4.dp),
-                        )
-                    }
-                    items(phase.proofs, key = { it.citationId }) { proof ->
-                        ProofCard(proof = proof, onClick = { onNavigateToProof(proof.route) })
-                    }
-                }
+            item(key = "ai_card") {
+                AskAnswerCard(
+                    answer = phase.answer,
+                    confidence = phase.confidence,
+                    proofs = phase.proofs,
+                    onNavigateToProof = onNavigateToProof,
+                )
             }
-            item(key = "ai_footer") { AskFooter() }
         }
 
         is AskPhase.Error -> {
-            item(key = "ai_answer_header") { AskAnswerHeader() }
-            item(key = "ai_error") { AskErrorCard(error = phase.error) }
+            item(key = "ai_card") { AskErrorCard(error = phase.error, onRetry = onRetry) }
         }
     }
 }
 
-/** A small labelled header marking the AI output apart from the keyword results. */
+/** Sparkle avatar on a soft theme-derived gradient — the AI section's marker. */
 @Composable
-private fun AskAnswerHeader() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+private fun AiBadge(modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier
+            .size(36.dp)
+            .clip(CircleShape)
+            .background(
+                Brush.linearGradient(
+                    colors = listOf(
+                        MaterialTheme.colorScheme.primaryContainer,
+                        MaterialTheme.colorScheme.tertiaryContainer,
+                    ),
+                ),
+            ),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Default.AutoAwesome,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(20.dp),
         )
+    }
+}
+
+@Composable
+private fun AskHeaderRow(trailing: @Composable () -> Unit = {}) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        AiBadge()
         Text(
             text = stringResource(R.string.ai_answer_section),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(start = 8.dp),
+            modifier = Modifier
+                .padding(start = 12.dp)
+                .weight(1f),
         )
+        trailing()
+    }
+}
+
+@Composable
+private fun AskLoadingCard() {
+    // Gentle breathing on the badge while the answer is generated.
+    val transition = rememberInfiniteTransition(label = "ai_loading")
+    val pulse by transition.animateFloat(
+        initialValue = 0.55f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(durationMillis = 700, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse,
+        ),
+        label = "ai_loading_pulse",
+    )
+    NimazCard(style = NimazCardStyle.ELEVATED, modifier = Modifier.fillMaxWidth()) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                AiBadge(modifier = Modifier.alpha(pulse))
+                Text(
+                    text = stringResource(R.string.ai_thinking),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(start = 12.dp),
+                )
+            }
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 16.dp)
+                    .clip(RoundedCornerShape(2.dp)),
+            )
+        }
+    }
+}
+
+@Composable
+private fun AskAnswerCard(
+    answer: String,
+    confidence: AnswerConfidence,
+    proofs: List<Proof>,
+    onNavigateToProof: (Route) -> Unit,
+) {
+    NimazCard(
+        style = NimazCardStyle.ELEVATED,
+        modifier = Modifier
+            .fillMaxWidth()
+            .animateContentSize(),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            AskHeaderRow(trailing = { ConfidenceChip(confidence) })
+
+            Text(
+                text = answer,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+
+            if (proofs.isEmpty()) {
+                Text(
+                    text = stringResource(R.string.ai_no_citations),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp),
+                )
+            } else {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 16.dp),
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                )
+                Text(
+                    text = stringResource(R.string.ai_proof_section),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+                Column(
+                    modifier = Modifier.padding(top = 8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    proofs.forEachIndexed { index, proof ->
+                        ProofRow(
+                            index = index + 1,
+                            proof = proof,
+                            onClick = { onNavigateToProof(proof.route) },
+                        )
+                    }
+                }
+            }
+
+            Text(
+                text = stringResource(R.string.ai_footer_disclaimer),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ConfidenceChip(confidence: AnswerConfidence) {
+    val (label, color) = when (confidence) {
+        AnswerConfidence.HIGH ->
+            stringResource(R.string.ai_confidence_high) to MaterialTheme.colorScheme.primary
+
+        AnswerConfidence.MEDIUM ->
+            stringResource(R.string.ai_confidence_medium) to MaterialTheme.colorScheme.tertiary
+
+        AnswerConfidence.LOW ->
+            stringResource(R.string.ai_confidence_low) to MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(8.dp))
+            .background(color.copy(alpha = 0.12f))
+            .padding(horizontal = 10.dp, vertical = 4.dp),
+    ) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.SemiBold,
+            color = color,
+        )
+    }
+}
+
+/** One cited verse from the local library — tappable, deep-links to the reader. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ProofRow(index: Int, proof: Proof, onClick: () -> Unit) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.Top) {
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = index.toString(),
+                    style = MaterialTheme.typography.labelSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Spacer(modifier = Modifier.width(10.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = proof.source.icon(),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = proof.meta,
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(start = 6.dp),
+                    )
+                }
+                Text(
+                    text = proof.displayText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
     }
 }
 
@@ -178,99 +374,7 @@ private fun AskDisabledHint(
 }
 
 @Composable
-private fun AnswerCard(answer: String, confidence: AnswerConfidence) {
-    NimazCard(style = NimazCardStyle.ELEVATED, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            ConfidenceIndicator(confidence)
-            Text(
-                text = answer,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun ConfidenceIndicator(confidence: AnswerConfidence) {
-    val (label, color) = when (confidence) {
-        AnswerConfidence.HIGH ->
-            stringResource(R.string.ai_confidence_high) to MaterialTheme.colorScheme.primary
-
-        AnswerConfidence.MEDIUM ->
-            stringResource(R.string.ai_confidence_medium) to MaterialTheme.colorScheme.tertiary
-
-        AnswerConfidence.LOW ->
-            stringResource(R.string.ai_confidence_low) to MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = color,
-        )
-    }
-}
-
-@Composable
-private fun ProofCard(proof: Proof, onClick: () -> Unit) {
-    NimazCard(
-        style = NimazCardStyle.OUTLINED,
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(
-                    imageVector = proof.source.icon(),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    text = proof.meta,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 8.dp),
-                )
-            }
-            Text(
-                text = proof.displayText,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 8.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun AskNoSourcesCard() {
-    NimazCard(style = NimazCardStyle.FILLED, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = stringResource(R.string.ai_no_sources_title),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-            )
-            Text(
-                text = stringResource(R.string.ai_no_sources_message),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-        }
-    }
-}
-
-@Composable
-private fun AskErrorCard(error: AiError) {
+private fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
     val message = when (error) {
         is AiError.RateLimited -> {
             val retry = error.retryAfterSeconds
@@ -282,31 +386,32 @@ private fun AskErrorCard(error: AiError) {
         }
 
         AiError.BudgetExceeded -> stringResource(R.string.ai_error_budget)
-        AiError.Attestation -> stringResource(R.string.ai_error_attestation)
         AiError.Network -> stringResource(R.string.ai_error_network)
         is AiError.Invalid -> stringResource(R.string.ai_error_invalid)
         AiError.Unknown -> stringResource(R.string.ai_error_unknown)
     }
+    // Retrying can only help for transient failures — not for daily/budget caps.
+    val retryable = error is AiError.Network || error is AiError.Unknown
     NimazCard(style = NimazCardStyle.FILLED, modifier = Modifier.fillMaxWidth()) {
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onErrorContainer,
-            modifier = Modifier.padding(16.dp),
-        )
+        Column(modifier = Modifier.padding(16.dp)) {
+            AskHeaderRow()
+            Text(
+                text = message,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 12.dp),
+            )
+            if (retryable) {
+                Spacer(modifier = Modifier.height(8.dp))
+                NimazButton(
+                    text = stringResource(R.string.ai_try_again),
+                    onClick = onRetry,
+                    variant = NimazButtonVariant.TEXT,
+                    leadingIcon = Icons.Default.Refresh,
+                )
+            }
+        }
     }
-}
-
-@Composable
-private fun AskFooter() {
-    Text(
-        text = stringResource(R.string.ai_footer_disclaimer),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-    )
 }
 
 private fun ProofSource.icon(): ImageVector = when (this) {

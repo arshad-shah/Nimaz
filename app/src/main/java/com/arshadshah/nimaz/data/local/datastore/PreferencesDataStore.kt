@@ -170,10 +170,6 @@ class PreferencesDataStore @Inject constructor(
         // AI — Ask with Proof (opt-in; all off/neutral by default)
         val AI_ASK_ENABLED = booleanPreferencesKey("ai_ask_enabled")
         val AI_CONSENT_TIMESTAMP = longPreferencesKey("ai_consent_timestamp")
-        val AI_SOURCES_QURAN = booleanPreferencesKey("ai_sources_quran")
-        val AI_SOURCES_HADITH = booleanPreferencesKey("ai_sources_hadith")
-        val AI_SOURCES_DUA = booleanPreferencesKey("ai_sources_dua")
-        val AI_MAX_PROOFS = intPreferencesKey("ai_max_proofs")
         val AI_HISTORY_ENABLED = booleanPreferencesKey("ai_history_enabled")
         val AI_ASK_HINT_DISMISSED = booleanPreferencesKey("ai_ask_hint_dismissed")
         // JSON-encoded List<String> of recent AI questions (only persisted when
@@ -681,25 +677,6 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setAiConsentTimestamp(timestamp: Long) =
         put(PreferencesKeys.AI_CONSENT_TIMESTAMP, timestamp)
-
-    override val aiSourcesQuran: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_QURAN, true)
-
-    override suspend fun setAiSourcesQuran(enabled: Boolean) =
-        put(PreferencesKeys.AI_SOURCES_QURAN, enabled)
-
-    override val aiSourcesHadith: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_HADITH, true)
-
-    override suspend fun setAiSourcesHadith(enabled: Boolean) =
-        put(PreferencesKeys.AI_SOURCES_HADITH, enabled)
-
-    override val aiSourcesDua: Flow<Boolean> = preference(PreferencesKeys.AI_SOURCES_DUA, true)
-
-    override suspend fun setAiSourcesDua(enabled: Boolean) =
-        put(PreferencesKeys.AI_SOURCES_DUA, enabled)
-
-    override val aiMaxProofs: Flow<Int> = preference(PreferencesKeys.AI_MAX_PROOFS, 5)
-
-    override suspend fun setAiMaxProofs(count: Int) = put(PreferencesKeys.AI_MAX_PROOFS, count)
 
     override val aiHistoryEnabled: Flow<Boolean> = preference(PreferencesKeys.AI_HISTORY_ENABLED, false)
 

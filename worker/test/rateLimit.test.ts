@@ -5,7 +5,12 @@ import {
   secondsUntilUtcMidnight,
   utcDayStamp,
 } from "../src/middleware/rateLimit";
-import { makeAskInput, makeEnvelope, mockAnthropicToolResponse } from "./helpers";
+import {
+  makeAssistInput,
+  makeAssistOutput,
+  makeEnvelope,
+  mockAnthropicToolResponse,
+} from "./helpers";
 
 describe("UTC helpers", () => {
   it("formats the UTC day stamp", () => {
@@ -31,29 +36,24 @@ describe("rate limiting (integration)", () => {
       fetchMock
         .get("https://api.anthropic.com")
         .intercept({ path: "/v1/messages", method: "POST" })
-        .reply(
-          200,
-          mockAnthropicToolResponse({
-            answer: "Be patient.",
-            citationIds: ["quran:2:153"],
-            confidence: "high",
-            insufficientEvidence: false,
-          }),
-        );
+        .reply(200, mockAnthropicToolResponse(makeAssistOutput()));
     }
   }
 
-  async function invoke(deviceId: string) {
+  async function invoke(deviceId: string, overrideEnv: Partial<Env> = {}) {
     return app.request(
       "/v1/invoke",
       {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(
-          makeEnvelope(makeAskInput(), { deviceId }),
-        ),
+        body: JSON.stringify(makeEnvelope(makeAssistInput(), { deviceId })),
       },
-      { ...env, DAILY_DEVICE_LIMIT: "3", DAILY_GLOBAL_LIMIT: "100" },
+      {
+        ...env,
+        DAILY_DEVICE_LIMIT: "3",
+        DAILY_GLOBAL_LIMIT: "100",
+        ...overrideEnv,
+      },
     );
   }
 
@@ -72,5 +72,24 @@ describe("rate limiting (integration)", () => {
     };
     expect(body.error.code).toBe("RATE_LIMITED");
     expect(body.error.retryAfterSeconds).toBeGreaterThan(0);
+  });
+
+  it("applies the smaller unverified cap when attestation is unavailable", async () => {
+    // SKIP_ATTESTATION off + no service account → every request classifies as
+    // unverified → UNVERIFIED_DAILY_DEVICE_LIMIT (2) applies instead of 3.
+    const unverifiedEnv: Partial<Env> = {
+      SKIP_ATTESTATION: "false",
+      GOOGLE_SERVICE_ACCOUNT_JSON: undefined,
+      UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
+    };
+    stubAnthropic(2);
+    const dev = "rl-device-unverified";
+    for (let i = 0; i < 2; i++) {
+      const ok = await invoke(dev, unverifiedEnv);
+      expect(ok.status).toBe(200);
+    }
+    const limited = await invoke(dev, unverifiedEnv);
+    expect(limited.status).toBe(429);
+    expect(((await limited.json()) as any).error.code).toBe("RATE_LIMITED");
   });
 });

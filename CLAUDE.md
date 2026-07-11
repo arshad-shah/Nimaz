@@ -17,18 +17,22 @@ updated as part of your change** (see "Documentation is part of the work" below)
 - **[`docs/CLEAN_ARCHITECTURE_CHECKLIST.md`](docs/CLEAN_ARCHITECTURE_CHECKLIST.md)** — tick-box
   anti-pattern backlog with detection commands.
 - **[`docs/ai-ask-with-proof.md`](docs/ai-ask-with-proof.md)** — the opt-in "Ask with Proof" AI
-  Q&A feature: the Cloudflare Worker (`worker/`), capability contract, settings/consent, cost
-  model, and the manual setup runbook.
+  search feature: the Cloudflare Worker (`worker/`), the `search-assist` capability contract,
+  local proof resolution, the smart local search, settings/consent, cost model, and the manual
+  setup runbook.
 
 When adding a feature, copy an existing one that follows the patterns — good references:
 `AsmaUlHusna`, `Prophet`, `Khatam`, `Quran`.
 
 > **AI / Worker map:** the "Ask with Proof" feature adds a Cloudflare Worker in **`worker/`**
-> (capability-registry backend, deployed by `.github/workflows/worker_deploy.yml`) and an Android
-> slice under `data/ai/`, `domain/model/{AiModels,CitationId}`, `domain/repository/AiRepository`,
-> `domain/usecase/ai/AskWithProofUseCase`, `core/di/AiModule`, the `Ask*`/`SearchSettings*`
-> ViewModels/screens, and `Route.SearchSettings`. It is **off by default**. See
-> `docs/ai-ask-with-proof.md`.
+> (capability-registry backend with a single `search-assist` capability, deployed by
+> `.github/workflows/worker_deploy.yml`) and an Android slice under `data/ai/`,
+> `domain/model/{AiModels,CitationId,LibrarySearch}`, `domain/repository/AiRepository`,
+> `domain/usecase/ai/AskWithProofUseCase`, `domain/usecase/SearchLibraryUseCase` (smart local
+> search, also the non-AI path), `core/di/AiModule`, the `Ask*`/`SearchSettings*`
+> ViewModels/screens, and `Route.SearchSettings`. One Worker call per question (only the question
+> text leaves the device); cited Quran refs are resolved locally into proof cards. It is **off by
+> default**. See `docs/ai-ask-with-proof.md`.
 
 > Naming: the app is **Nimaz** and the package is **`com.arshadshah.nimaz`**. The older
 > `docs/nimaz-pro-*.md` files are historical design/planning artifacts (they say "Nimaz Pro" /

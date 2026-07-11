@@ -3,7 +3,7 @@ import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { z } from "zod";
 import { getCapability, listCapabilityIds } from "./registry";
 import { callClaude, UpstreamError } from "./anthropic/client";
-import { verifyIntegrity } from "./middleware/integrity";
+import { checkIntegrity } from "./middleware/integrity";
 import { enforceRateLimit } from "./middleware/rateLimit";
 import { enforceBudget, recordSpend } from "./middleware/budgetGuard";
 import { ApiError } from "./middleware/errors";
@@ -55,11 +55,12 @@ app.post("/v1/invoke", async (c) => {
   }
 
   try {
-    // 1. Integrity (Play Integrity attestation, bypassed when SKIP_ATTESTATION).
-    await verifyIntegrity(c.env, integrityToken, now.getTime());
+    // 1. Integrity → trust tier. Never blocks: a missing/failed attestation
+    //    only demotes the request to the small unverified rate-limit tier.
+    const tier = await checkIntegrity(c.env, integrityToken, now.getTime());
 
-    // 2. Rate limit (per-device + global daily caps).
-    await enforceRateLimit(c.env, deviceId, now);
+    // 2. Rate limit (tiered per-device cap + global daily cap).
+    await enforceRateLimit(c.env, deviceId, now, tier);
 
     // 3. Budget guard (pre-call gate).
     await enforceBudget(c.env, now);
