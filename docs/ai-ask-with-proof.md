@@ -243,9 +243,11 @@ committed to the repo.
    resource id, not a secret). To recreate it in a different account:
    `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
 3. Set the secrets:
-   `npx wrangler secret put CLOUDFLARE_AI_TOKEN` — the scoped Cloudflare API
-   token with **AI Gateway: Run** permission (create it from the gateway's
-   authentication settings). This is the Worker's only Claude credential.
+   `CLOUDFLARE_AI_TOKEN` — the scoped Cloudflare API token with **AI
+   Gateway: Run** permission. Store it as the GitHub Actions secret of the
+   same name; CI pushes it into the Worker on every deploy (manual
+   alternative: `npx wrangler secret put CLOUDFLARE_AI_TOKEN`). This is the
+   Worker's only Claude credential.
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
    (If the Google one is absent the Worker still works — every request simply
    runs at the smaller unverified rate-limit tier.) There is **no
@@ -295,8 +297,11 @@ unverified daily cap.
 
 ### 3. GitHub secrets (for `worker_deploy.yml`)
 
-- `CLOUDFLARE_API_TOKEN` — token with Workers + KV edit permission.
+- `CLOUDFLARE_API_TOKEN` — token with Workers + KV edit permission (deploys).
 - `CLOUDFLARE_ACCOUNT_ID` — the Cloudflare account id.
+- `CLOUDFLARE_AI_TOKEN` — the scoped AI Gateway Run token. CI pushes it as a
+  Worker secret on every deploy (`secrets:` input of wrangler-action), so it
+  never needs a manual `wrangler secret put`.
 
 (The Android/deploy secrets — `FIREBASE_CONFIG`, `PLAY_STORE_CONFIG_JSON`,
 `KEYSTORE_*`, `BUMP_APP_*` — are unchanged.)
