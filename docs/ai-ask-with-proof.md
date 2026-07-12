@@ -113,7 +113,7 @@ Layers (Android):
 presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
 presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
 presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
-presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
+presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy; clear-history opens a destructive NimazDialog listing the saved questions
 presentation/viewmodel/AskViewModel                 ask state machine (exposes relatedTerms)
 presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)
 presentation/viewmodel/SearchSettingsViewModel      settings + consent state

@@ -1464,6 +1464,8 @@
     <string name="ai_history_subtitle">Keep recent AI questions on this device. When off, they are kept only in memory.</string>
     <string name="ai_clear_history">Clear AI history</string>
     <string name="ai_clear_history_subtitle">Remove all saved AI questions</string>
+    <string name="ai_clear_history_dialog_title">Clear AI history?</string>
+    <string name="ai_clear_history_dialog_message">These saved questions will be permanently removed from this device:</string>
     <string name="ai_consent_title">Enable AI answers?</string>
     <string name="ai_consent_enable">Enable</string>
 
