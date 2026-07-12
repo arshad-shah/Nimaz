@@ -26,6 +26,9 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.model.Announcement
+import com.arshadshah.nimaz.domain.model.AnnouncementAction
+import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
@@ -35,9 +38,13 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -110,6 +117,18 @@ data class PrayerTimeDisplay(
     val prayerStatus: PrayerStatus = PrayerStatus.NOT_PRAYED
 )
 
+/**
+ * The FCM engagement banner's slice of Home state. [announcement] is null when
+ * there is nothing active (nothing received, dismissed, expired or outside the
+ * version window). [showCta] is true only when the announcement carries a CTA
+ * label AND its route resolves (allowlisted key or https URL) — otherwise the
+ * banner renders without a button.
+ */
+data class AnnouncementUiState(
+    val announcement: Announcement? = null,
+    val showCta: Boolean = false,
+)
+
 sealed interface HomeEvent {
     data class UpdateLocation(val latitude: Double, val longitude: Double, val name: String) :
         HomeEvent
@@ -117,6 +136,8 @@ sealed interface HomeEvent {
     data object RefreshPrayerTimes : HomeEvent
     data object RefreshPermissions : HomeEvent
     data class TogglePrayerStatus(val prayerType: PrayerType) : HomeEvent
+    data object DismissAnnouncement : HomeEvent
+    data object AnnouncementCtaClicked : HomeEvent
 }
 
 @HiltViewModel
@@ -127,11 +148,36 @@ class HomeViewModel @Inject constructor(
     private val fastingUseCases: FastingUseCases,
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
-    private val settingsRepository: SettingsRepository
+    private val settingsRepository: SettingsRepository,
+    private val announcementUseCases: AnnouncementUseCases
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
     val state: StateFlow<HomeUiState> = _state.asStateFlow()
+
+    // Last announcement id logged as shown — analytics fires once per id, not
+    // on every recomposition/re-emission.
+    private var lastShownAnnouncementId: String? = null
+
+    /** Active FCM engagement announcement (already dismissal/expiry/version-gated). */
+    val announcement: StateFlow<AnnouncementUiState> =
+        announcementUseCases.observeActiveAnnouncement()
+            .map { active ->
+                AnnouncementUiState(
+                    announcement = active,
+                    showCta = active?.ctaLabel != null &&
+                            announcementUseCases.resolveAnnouncementRoute(active.route) !=
+                            AnnouncementAction.None,
+                )
+            }
+            .onEach { uiState ->
+                val active = uiState.announcement ?: return@onEach
+                if (active.id != lastShownAnnouncementId) {
+                    lastShownAnnouncementId = active.id
+                    AppAnalytics.logAnnouncementShown(active.id, active.type.key)
+                }
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), AnnouncementUiState())
 
     // Declared before init{} so it is initialized before loadPrayerRecords()
     // collects into it. The getTodayPrayerRecords() Flow can emit synchronously
@@ -260,7 +306,24 @@ class HomeViewModel @Inject constructor(
             HomeEvent.RefreshPrayerTimes -> calculatePrayerTimes()
             HomeEvent.RefreshPermissions -> checkPermissions()
             is HomeEvent.TogglePrayerStatus -> togglePrayerStatus(event.prayerType)
+            HomeEvent.DismissAnnouncement -> dismissAnnouncement()
+            HomeEvent.AnnouncementCtaClicked -> logAnnouncementCta()
         }
+    }
+
+    private fun dismissAnnouncement() {
+        val active = announcement.value.announcement ?: return
+        viewModelScope.launch {
+            announcementUseCases.dismissAnnouncement(active.id)
+            AppAnalytics.logAnnouncementDismissed(active.id)
+        }
+    }
+
+    // Navigation itself is handled by the screen's onOpenAnnouncementRoute
+    // callback (NavGraph owns the controller); the VM only records the click.
+    private fun logAnnouncementCta() {
+        val active = announcement.value.announcement ?: return
+        AppAnalytics.logAnnouncementCtaClicked(active.id, active.route)
     }
 
     fun getBatteryOptimizationIntent(): Intent {

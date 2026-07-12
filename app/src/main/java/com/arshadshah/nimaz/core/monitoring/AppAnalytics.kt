@@ -187,6 +187,25 @@ object AppAnalytics {
     }
 
     // ---------------------------------------------------------------------
+    // Engagement announcements (FCM banner)
+    // ---------------------------------------------------------------------
+
+    /** Logged when the Home announcement banner becomes visible. */
+    fun logAnnouncementShown(id: String, type: String) {
+        logEvent("announcement_shown", "announcement_id" to id, "announcement_type" to type)
+    }
+
+    /** Logged when the banner's CTA is tapped. */
+    fun logAnnouncementCtaClicked(id: String, route: String?) {
+        logEvent("announcement_cta_clicked", "announcement_id" to id, "route" to route)
+    }
+
+    /** Logged when the banner is dismissed (permanent — the id never resurfaces). */
+    fun logAnnouncementDismissed(id: String) {
+        logEvent("announcement_dismissed", "announcement_id" to id)
+    }
+
+    // ---------------------------------------------------------------------
     // Adhan
     // ---------------------------------------------------------------------
 

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
@@ -9,6 +10,22 @@ import com.arshadshah.nimaz.domain.usecase.*
 // Test helpers: wrap a (mock) repository in the real use-case wrappers so existing
 // repository-level stubbing continues to drive ViewModel behaviour after the
 // use-case layer was introduced.
+
+fun buildAnnouncementUseCases(
+    repository: AnnouncementRepository,
+    currentVersionCode: Int = 1,
+    nowMillis: () -> Long = { System.currentTimeMillis() },
+    isKnownFeatureKey: (String) -> Boolean = { false },
+) = AnnouncementUseCases(
+    observeActiveAnnouncement = ObserveActiveAnnouncementUseCase(
+        repository,
+        currentVersionCode,
+        nowMillis
+    ),
+    setAnnouncement = SetAnnouncementUseCase(repository),
+    dismissAnnouncement = DismissAnnouncementUseCase(repository),
+    resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(isKnownFeatureKey)
+)
 
 fun buildFastingUseCases(repository: FastingRepository) = FastingUseCases(
     getFastRecordForDate = GetFastRecordForDateUseCase(repository),

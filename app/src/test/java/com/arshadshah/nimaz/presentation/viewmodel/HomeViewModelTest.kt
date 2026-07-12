@@ -7,6 +7,7 @@ import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.HadithRepository
@@ -45,6 +46,7 @@ class HomeViewModelTest {
     private lateinit var hadithRepository: HadithRepository
     private lateinit var duaRepository: DuaRepository
     private lateinit var settingsRepository: SettingsRepository
+    private lateinit var announcementRepository: AnnouncementRepository
 
     @Before
     fun setUp() {
@@ -57,6 +59,8 @@ class HomeViewModelTest {
         hadithRepository = mockk(relaxed = true)
         duaRepository = mockk(relaxed = true)
         settingsRepository = mockk(relaxed = true)
+        announcementRepository = mockk(relaxed = true)
+        every { announcementRepository.observeCurrentAnnouncement() } returns flowOf(null)
 
         // The today's-records Flow emits synchronously, mirroring Room emitting an
         // initial value during ViewModel init before the rest of the constructor
@@ -76,7 +80,8 @@ class HomeViewModelTest {
         fastingUseCases = buildFastingUseCases(fastingRepository),
         hadithUseCases = buildHadithUseCases(hadithRepository),
         duaUseCases = buildDuaUseCases(duaRepository),
-        settingsRepository = settingsRepository
+        settingsRepository = settingsRepository,
+        announcementUseCases = buildAnnouncementUseCases(announcementRepository)
     )
 
     /**
