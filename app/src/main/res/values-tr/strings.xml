@@ -1314,4 +1314,29 @@
     <string name="ai_error_network">Yapay zekâ hizmetine ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin.</string>
     <string name="ai_error_invalid">Bu soru işlenemedi. Yeniden ifade etmeyi deneyin.</string>
     <string name="ai_error_unknown">Yanıt oluşturulurken bir sorun oluştu. Lütfen tekrar deneyin.</string>
+
+    <string name="search_ask_button">Sor</string>
+    <string name="search_try_asking">Şunları sormayı deneyin</string>
+    <string name="search_recent">Son aramalar</string>
+    <string name="search_typing_hint">Sonuçlar siz yazarken güncellenir · Kaynaklı yanıt için Enter tuşuna basın</string>
+    <string name="search_matches_format">%d eşleşme</string>
+    <string name="search_answer_count_format">%1$d kitaplığınızda · %2$d yanıtta alıntılandı</string>
+    <string name="search_cited_chip">Alıntı</string>
+    <string name="ask_example_1">Kur\'an sabır hakkında ne söylüyor?</string>
+    <string name="ask_example_2">Kaygı ve endişe için dualar</string>
+    <string name="ask_example_3">Şükürle ilgili ayetler</string>
+    <string name="ask_example_4">İbadette niyet neden önemlidir?</string>
+    <string name="ai_clear_history_dialog_title">Yapay zekâ geçmişi silinsin mi?</string>
+    <string name="ai_clear_history_dialog_message">Bu kayıtlı sorular bu cihazdan kalıcı olarak kaldırılacak:</string>
+    <string name="ai_trust_note">Yapay zekâ tarafından oluşturulan özet — aşağıda alıntılanan kaynaklarla karşılaştırın. Kaynakların ne söylediğini açıklar ve bir fetva değildir.</string>
+    <string name="ai_discover_title">Kitaplığınıza dayanan yanıtlar alın</string>
+    <string name="ai_discover_body">Sorunuzu sade sözcüklerle sorun ve kendi kitaplığınızdaki ayet ve hadislerle desteklenen kısa bir yanıt alın — her alıntı, açıp okuyabileceğiniz gerçek bir kaynaktır.</string>
+    <string name="ai_discover_privacy">Yalnızca sorunuz gönderilir. Alıntılanan kaynaklar ve sonuçlar cihazınızda eşleştirilir ve sorular hiçbir zaman analiz için kullanılmaz.</string>
+    <string name="ai_discover_enable">Yapay zekâ yanıtlarını aç</string>
+    <string name="ai_discover_dismiss">Şimdi değil</string>
+    <string name="ai_error_network_title">Yanıt hizmetine ulaşılamadı</string>
+    <string name="ai_error_rate_limited_title">Bugünkü soru sınırına ulaştınız</string>
+    <string name="ai_error_budget_title">Yapay zekâ yanıtları şimdilik duraklatıldı</string>
+    <string name="ai_error_invalid_title">Bu soru işlenemedi</string>
+    <string name="ai_error_unknown_title">Bir şeyler ters gitti</string>
 </resources>
