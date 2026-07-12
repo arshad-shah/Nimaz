@@ -237,11 +237,12 @@ dependencies {
     implementation(libs.app.review)
     implementation(libs.app.review.ktx)
 
-    // Firebase (Crashlytics + Analytics + Performance) — versions pinned by the BoM
+    // Firebase (Crashlytics + Analytics + Performance + Messaging) — versions pinned by the BoM
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.perf)
+    implementation(libs.firebase.messaging)
 
     // Testing
     testImplementation(libs.junit)
