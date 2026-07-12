@@ -71,6 +71,20 @@ export async function callClaude(
         "AI answers are resting for now — the spending limit has been reached. Please try again later.",
       );
     }
+    if (res.status === 429) {
+      // The gateway's Rate Limiting rule tripped — it owns all request
+      // throttling now (the Worker keeps no counters). Pass it through so the
+      // app shows its "question limit" banner instead of a generic error.
+      const retryAfter = Number.parseInt(
+        res.headers.get("retry-after") ?? "",
+        10,
+      );
+      throw new ApiError(
+        "RATE_LIMITED",
+        "The service has reached its request limit. Please try again later.",
+        Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter : undefined,
+      );
+    }
     throw new UpstreamError(
       `AI Gateway ${res.status}: ${body.slice(0, 500)}`,
       res.status,

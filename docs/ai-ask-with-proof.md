@@ -62,7 +62,7 @@ sequenceDiagram
 
     U->>App: Ask a question
     App->>W: POST /v1/invoke (search-assist) {question}
-    W->>W: integrity → tiered rate limit
+    W->>W: Play Integrity (only guard; fail-open, blocks failed verdicts)
     W->>GW: anthropic/v1/messages (cf-aig-authorization, forced submit_result tool)
     GW->>C: Unified Billing — Cloudflare-managed Anthropic credentials
     C-->>GW: tool_use JSON
@@ -81,27 +81,30 @@ injects its managed Anthropic credentials and bills the account's AI credits.
 The Worker's only credential is `CLOUDFLARE_AI_TOKEN` — the gateway's
 authentication token (`cf-aig-authorization`) — never an Anthropic key.
 
-### Why attestation never blocks
+### Play Integrity is the only Worker guard — and it fails open
 
-Play Integrity used to hard-fail requests (ATTESTATION_FAILED) whenever the
-token couldn't be fetched or Google's API hiccuped — bricking the feature for
-legitimate users. The Worker now **classifies** each request into a trust tier
-instead of gating on it:
+The Worker keeps no rate-limit counters (no KV): request throttling is the AI
+Gateway's **Rate Limiting rule** and the monthly cost cap is its **Spend
+Limit**. The one check the Worker performs is Play Integrity:
 
-| Tier         | When                                                                | Per-device daily cap              |
-| ------------ | ------------------------------------------------------------------- | --------------------------------- |
-| `verified`   | Token decodes with `PLAY_RECOGNIZED` + device/basic integrity        | `DAILY_DEVICE_LIMIT` (20)         |
-| `unverified` | Missing token, Integrity API unreachable/unconfigured, failed verdict | `UNVERIFIED_DAILY_DEVICE_LIMIT` (5) |
+| Outcome       | When                                                            | Effect                        |
+| ------------- | ---------------------------------------------------------------- | ----------------------------- |
+| `verified`    | Token decodes with `PLAY_RECOGNIZED` + device/basic integrity    | proceeds                      |
+| `unavailable` | Missing token, Integrity API unreachable/unconfigured            | proceeds (fail-open)          |
+| `failed`      | Google decoded the token and the verdict failed                  | `ATTESTATION_FAILED` (403)    |
 
-Every failure path degrades to `unverified` — a smaller cap, never an error.
-The AI Gateway spend limit remains the hard cost backstop against abuse.
+Fail-open matters: hard-failing the unavailable paths bricked the feature for
+legitimate users whenever Play services hiccuped or Google's API was
+unreachable. Only an explicit failed verdict (unrecognized app, tampered
+device, package mismatch) is rejected; the gateway's rate/spend limits bound
+whatever slips through.
 
 The app fetches tokens with the **standard** Play Integrity API (warm up a
 `StandardIntegrityTokenProvider` once, then a cheap `request()` per question),
 not the classic one. Classic requests are throttled per app-instance by Play
 services after a few calls in a short window, so fetching one per question
 meant legitimate installs "worked for a while" and then every token fetch
-failed → empty token → stuck at the unverified 5/day cap. The standard API is
+failed → empty token → verification skipped for every request. The standard API is
 designed for frequent per-action checks; if the warmed-up provider goes stale,
 `IntegrityTokenProvider` re-prepares it once before falling back. The Worker is
 unaffected: `decodeIntegrityToken` decodes classic and standard tokens alike,
@@ -131,7 +134,7 @@ worker/src/capabilities/search-assist               the single AI capability
 ## Capability contract
 
 Everything goes through the same `POST /v1/invoke` envelope and middleware
-(integrity tier → rate limit). The Android `input` is sent as a raw
+(Play Integrity only). The Android `input` is sent as a raw
 JSON object so one envelope serves every capability.
 
 ### `search-assist` (the single call)
@@ -163,13 +166,15 @@ drops refs outside those collections. Either way the app only surfaces refs
 that resolve against its local database. Duas use opaque local IDs the model
 can't know, so they are reached only through `terms` in the results list.
 
-Error envelope (HTTP 400/429/502/503):
+Error envelope (HTTP 400/403/429/502/503):
 
 ```json
-{ "error": { "code": "RATE_LIMITED|BUDGET_EXCEEDED|INVALID_INPUT|UPSTREAM_ERROR", "message": "…", "retryAfterSeconds": 3600 } }
+{ "error": { "code": "RATE_LIMITED|ATTESTATION_FAILED|BUDGET_EXCEEDED|INVALID_INPUT|UPSTREAM_ERROR", "message": "…", "retryAfterSeconds": 3600 } }
 ```
 
-(There is no ATTESTATION_FAILED anymore — see the tier table above.)
+(`RATE_LIMITED` is a pass-through of the gateway's Rate Limiting rule;
+`ATTESTATION_FAILED` is an explicit failed Play Integrity verdict — see the
+table above.)
 
 ### Citation ID grammar (`domain/model/CitationId.kt`)
 
@@ -253,15 +258,14 @@ payloads. The Worker stores nothing.
   tokens**, and this capability's system prompt + tool schema is well below
   that — so the marker is currently inert (no cache entry, full input price,
   ~$0.002/question either way). It engages automatically if the prompt grows.
-  One question consumes one invocation of the per-device daily cap (the old
-  design burned two).
-- Guards: tiered per-device daily cap (`DAILY_DEVICE_LIMIT` 20 verified /
-  `UNVERIFIED_DAILY_DEVICE_LIMIT` 5) and global daily cap
-  (`DAILY_GLOBAL_LIMIT`, 500), both KV-backed in the Worker. The monthly USD
-  ceiling is the **AI Gateway Spend Limit** (dashboard setting on the `nimaz`
-  gateway) — when it trips (or credits run out) the Worker maps the gateway
-  error to `BUDGET_EXCEEDED` (503), same app UX as the old KV budget tally it
-  replaces.
+- Guards: all on the **AI Gateway** (the Worker keeps no counters and has no
+  KV). Its **Rate Limiting rule** throttles request volume — the Worker passes
+  a gateway 429 through as `RATE_LIMITED` (with `retryAfterSeconds` from the
+  `retry-after` header when present). The monthly USD ceiling is the
+  gateway's **Spend Limit** — when it trips (or credits run out) the Worker
+  maps the gateway error to `BUDGET_EXCEEDED` (503). The Worker's own guard is
+  Play Integrity only (fail-open; explicit failed verdicts get
+  `ATTESTATION_FAILED`/403).
 - Observability: every call attaches a `cf-aig-metadata: {"capability": …}`
   header (spend per feature in the dashboard; never the question text), logs
   an `ai_usage` line (token counts only), and echoes usage in the
@@ -288,10 +292,7 @@ committed to the repo.
 ### 1. Cloudflare (Worker + Unified Billing)
 
 1. `cd worker && npm ci`
-2. The KV namespace id is already committed in `worker/wrangler.jsonc` (a
-   resource id, not a secret). To recreate it in a different account:
-   `npx wrangler kv namespace create NIMAZ_AI_KV` and paste the returned id.
-3. Set the secrets:
+2. Set the secrets:
    `CLOUDFLARE_AI_TOKEN` — the `nimaz` gateway's authentication token
    (gateway → Settings → **Authenticated Gateway** → create token). Store it
    as the GitHub Actions secret of the same name; CI pushes it into the
@@ -299,14 +300,18 @@ committed to the repo.
    `npx wrangler secret put CLOUDFLARE_AI_TOKEN`). This is the Worker's only
    Claude credential.
    `npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON`
-   (If the Google one is absent the Worker still works — every request simply
-   runs at the smaller unverified rate-limit tier.) There is **no
+   (If the Google one is absent the Worker still works — verification is
+   "unavailable" and every request passes, fail-open.) There is **no
    `ANTHROPIC_API_KEY`**: Unified Billing injects the Anthropic credentials.
-4. **Unified Billing (dashboard, cannot be scripted):** AI → AI Gateway →
+3. **Unified Billing (dashboard, cannot be scripted):** AI → AI Gateway →
    confirm the `nimaz` gateway exists → *Credits Available* → **Manage** →
    add a payment method, **purchase credits**, and set **auto top-up**
    (threshold + recharge amount) so answers don't stall when credits run low.
    Until credits exist, every ask returns `BUDGET_EXCEEDED`/`UPSTREAM_ERROR`.
+4. **Rate Limiting rule (required):** on the `nimaz` gateway settings, set a
+   request rate limit — this replaced the Worker's KV per-device/global daily
+   caps as the only throttle. The Worker passes the gateway's 429 through to
+   the app as `RATE_LIMITED`.
 5. **Spend limit (recommended):** on the `nimaz` gateway settings, set a
    monthly USD Spend Limit — this replaced the Worker's old KV
    `MONTHLY_BUDGET_USD` tally as the hard cost backstop.
@@ -320,7 +325,7 @@ committed to the repo.
    certificate, provided the `arshadshah.com` zone is on the same account). It is
    also reachable at its `*.workers.dev` URL.
 8. Keep `SKIP_ATTESTATION=false` in production. Use `--var SKIP_ATTESTATION:true`
-   only for local `wrangler dev` testing (it forces the verified tier).
+   only for local `wrangler dev` testing (it bypasses Play Integrity).
 9. Smoke test (post-deploy): CI runs one automatically (`smoke-test` job in
    `worker_deploy.yml`) — it asks the same question twice and asserts a valid
    `{answer, quranRefs, terms, confidence}` body (forced `submit_result` tool
@@ -338,12 +343,13 @@ committed to the repo.
    number**.
 2. Enable the **Play Integrity API** in that Cloud project.
 3. Create a **service account** with access to the Play Integrity API; download
-   its JSON key — this is `GOOGLE_SERVICE_ACCOUNT_JSON` (step 1.3). Never commit it.
+   its JSON key — this is `GOOGLE_SERVICE_ACCOUNT_JSON` (step 1.2). Never commit it.
 4. Put the project number into `gradle.properties` as
    `playIntegrityCloudProjectNumber` (or pass `-PplayIntegrityCloudProjectNumber=…`).
 
-Note: even with none of this configured, AI answers work — devices just get the
-unverified daily cap.
+Note: even with none of this configured, AI answers work — verification is
+"unavailable" and requests pass unverified (fail-open); the gateway's rate and
+spend limits are the backstop.
 
 ### 3. GitHub secrets (for `worker_deploy.yml`)
 

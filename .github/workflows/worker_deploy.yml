@@ -63,8 +63,8 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: worker
-          # Publishes the Worker + its wrangler.jsonc config (routes, vars, the
-          # NIMAZ_AI_KV binding), then pushes CLOUDFLARE_AI_TOKEN (the scoped
+          # Publishes the Worker + its wrangler.jsonc config (routes, vars),
+          # then pushes CLOUDFLARE_AI_TOKEN (the scoped
           # AI Gateway Run token, from the GitHub secret of the same name) as a
           # Worker secret — so the gateway credential stays synced from CI.
           # GOOGLE_SERVICE_ACCOUNT_JSON is still set once via
@@ -104,8 +104,10 @@ jobs:
       #     prefix is 4096 tokens and this capability's system prompt + tool
       #     schema is well below that, so cache_read_input_tokens is expected
       #     to stay 0 until the prompt grows past the minimum.
-      # Uses a fresh deviceId per run (unverified tier: 5 req/day/device), so
-      # the 2 calls never trip the rate limit. Costs ~2 * $0.002 in AI credits.
+      # The Worker keeps no rate-limit counters — throttling is the AI
+      # Gateway's Rate Limiting rule, sized well above 2 calls/run. An empty
+      # integrityToken passes (verification "unavailable" fails open).
+      # Costs ~2 * $0.002 in AI credits.
       - name: Invoke search-assist twice
         run: |
           set -euo pipefail

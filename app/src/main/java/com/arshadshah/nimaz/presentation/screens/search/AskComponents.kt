@@ -365,6 +365,12 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
             body = stringResource(R.string.ai_error_network)
         }
 
+        AiError.Unverified -> {
+            icon = Icons.Outlined.Shield
+            title = stringResource(R.string.ai_error_unverified_title)
+            body = stringResource(R.string.ai_error_unverified)
+        }
+
         is AiError.Invalid -> {
             icon = Icons.Outlined.Info
             title = stringResource(R.string.ai_error_invalid_title)

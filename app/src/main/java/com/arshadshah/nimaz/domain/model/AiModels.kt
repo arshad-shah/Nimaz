@@ -96,13 +96,15 @@ sealed interface Proof {
 /**
  * Errors surfaced by the AI feature, mapped from the Worker's error envelope
  * (and local/transport failures). The presentation layer renders friendly
- * messages from these. Attestation is no longer an error — integrity problems
- * only reduce the Worker-side rate limit, they never fail a request.
+ * messages from these. Play Integrity is the Worker's only guard: an explicit
+ * failed verdict surfaces as [Unverified]; rate limits come from the AI
+ * Gateway and surface as [RateLimited].
  */
 sealed interface AiError {
     data class RateLimited(val retryAfterSeconds: Long?) : AiError
     data object BudgetExceeded : AiError
     data object Network : AiError
     data class Invalid(val message: String) : AiError
+    data object Unverified : AiError
     data object Unknown : AiError
 }

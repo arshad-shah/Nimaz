@@ -10,12 +10,8 @@ export default defineWorkersConfig({
         miniflare: {
           compatibilityDate: "2024-12-30",
           compatibilityFlags: ["nodejs_compat"],
-          kvNamespaces: ["NIMAZ_AI_KV"],
           bindings: {
             SKIP_ATTESTATION: "true",
-            DAILY_DEVICE_LIMIT: "3",
-            UNVERIFIED_DAILY_DEVICE_LIMIT: "2",
-            DAILY_GLOBAL_LIMIT: "5",
             CLOUDFLARE_AI_TOKEN: "test-gateway-token",
           },
         },

@@ -8,10 +8,11 @@ from mainstream Islamic knowledge and returns the supporting Quran references
 plus related search terms, which the app resolves against its **local**
 database (real records become the proof cards and the results list).
 
-The Worker never stores questions or answers. It classifies the caller with
-Play Integrity (never blocking — see below), enforces per-device/global daily
-limits, calls Claude with a fixed cached prompt and a forced structured-output
-tool, and returns strict JSON.
+The Worker never stores questions or answers. Its only guard is **Play
+Integrity** (fail-open — see below); it then calls Claude with a fixed cached
+prompt and a forced structured-output tool and returns strict JSON. Request
+throttling and the monthly cost cap are **not Worker code** — they are the
+`nimaz` AI Gateway's Rate Limiting rule and Spend Limit (dashboard).
 
 **Billing/auth:** Claude is reached through the **`nimaz`** Cloudflare
 **AI Gateway** (Anthropic provider-native endpoint) with **Unified Billing** —
@@ -26,8 +27,8 @@ code.
 
 ```
 POST /v1/invoke
-  → integrity   (Play Integrity token → trust tier: verified | unverified)
-  → rateLimit   (tiered per-device + global daily caps in KV)
+  → integrity   (Play Integrity token → verified | unavailable | failed;
+                 only "failed" rejects — ATTESTATION_FAILED/403)
   → dispatch    (registry lookup → Zod-validate input → build request
                  → POST gateway.ai.cloudflare.com/v1/{acct}/nimaz/anthropic
                    /v1/messages  (Anthropic-native schema, Unified Billing)
@@ -37,7 +38,10 @@ POST /v1/invoke
 The gateway call carries a `cf-aig-metadata: {"capability": …}` header so the
 AI Gateway dashboard breaks spend down per feature (never the question text).
 A tripped gateway spend limit / exhausted credits maps to `BUDGET_EXCEEDED`
-(503), same as the old in-Worker budget guard, so the app UX is unchanged.
+(503); a tripped gateway Rate Limiting rule (429) passes through as
+`RATE_LIMITED` (with `retryAfterSeconds` from the gateway's `retry-after`
+header when present), so the app UX is unchanged from the old in-Worker
+guards.
 Each successful call logs a structured `ai_usage` line (token counts only) and
 echoes the usage in an `x-nimaz-usage` response header. (Two other transports
 were live-tested and rejected: the AI *binding* fails the Anthropic-native
@@ -47,21 +51,23 @@ is the path that works.)
 
 `GET /v1/health` returns `{ ok: true, capabilities: [...] }` (no auth).
 
-### Integrity never blocks
+### Integrity is the only guard — and it fails open
 
-Attestation used to hard-fail requests (`ATTESTATION_FAILED`), which bricked
-the feature for legitimate users whenever a token couldn't be fetched or
-Google's API was unreachable. `checkIntegrity` now returns a **trust tier**
-instead of throwing:
+`checkIntegrity` returns one of three outcomes:
 
 - `verified` — token decodes with `PLAY_RECOGNIZED` and the device meets
-  device or basic integrity (or `SKIP_ATTESTATION=true`).
-- `unverified` — missing/short token, no service account configured, Google
-  API failure, or a failed verdict.
+  device or basic integrity (or `SKIP_ATTESTATION=true`). Proceeds.
+- `unavailable` — verification could not run: missing/short token, no service
+  account configured, or a Google API failure. **Proceeds** (fail-open):
+  hard-failing these paths bricked the feature for legitimate users whenever
+  Play services hiccuped or Google's API was unreachable.
+- `failed` — Google decoded the token and the verdict failed (app not
+  Play-recognized, device integrity not met, package mismatch). Rejected with
+  `ATTESTATION_FAILED` (403).
 
-The tier only selects the per-device daily cap (`DAILY_DEVICE_LIMIT` vs the
-much smaller `UNVERIFIED_DAILY_DEVICE_LIMIT`). The AI Gateway spend limit is
-the hard cost backstop against abuse.
+Abuse cost is bounded by the AI Gateway: its **Rate Limiting rule** throttles
+request volume (surfaced to the app as `RATE_LIMITED`) and its **Spend Limit**
+is the hard monthly cost backstop. The Worker keeps no counters and has no KV.
 
 ## API contract
 
@@ -109,7 +115,8 @@ Errors use a typed envelope with the matching HTTP status:
 | code                 | status | when                                                     |
 | -------------------- | ------ | -------------------------------------------------------- |
 | `INVALID_INPUT`      | 400    | bad envelope / schema / unknown capability               |
-| `RATE_LIMITED`       | 429    | per-device (tiered) or global daily cap hit              |
+| `ATTESTATION_FAILED` | 403    | Play Integrity verdict explicitly failed                 |
+| `RATE_LIMITED`       | 429    | the gateway's Rate Limiting rule tripped (pass-through)  |
 | `UPSTREAM_ERROR`     | 502    | Claude call failed / returned bad shape                  |
 | `BUDGET_EXCEEDED`    | 503    | gateway spend limit tripped / AI credits exhausted       |
 
@@ -117,15 +124,13 @@ Errors use a typed envelope with the matching HTTP status:
 
 Non-secret vars live in `wrangler.jsonc`:
 
-| var                             | default | meaning                                                  |
-| ------------------------------- | ------- | -------------------------------------------------------- |
-| `SKIP_ATTESTATION`              | `false` | `true` forces the verified tier (local testing ONLY)     |
-| `DAILY_DEVICE_LIMIT`            | `20`    | requests per verified device per UTC day                 |
-| `UNVERIFIED_DAILY_DEVICE_LIMIT` | `5`     | requests per unverified device per UTC day               |
-| `DAILY_GLOBAL_LIMIT`            | `500`   | requests across all devices per UTC day                  |
+| var                | default | meaning                                             |
+| ------------------ | ------- | --------------------------------------------------- |
+| `SKIP_ATTESTATION` | `false` | `true` bypasses Play Integrity (local testing ONLY) |
 
-The monthly USD ceiling is **not** a var anymore — set a **Spend limit** on the
-`nimaz` AI Gateway in the dashboard (AI → AI Gateway → nimaz → Settings).
+Throttling and the monthly USD ceiling are **not** vars — set a **Rate
+Limiting rule** and a **Spend limit** on the `nimaz` AI Gateway in the
+dashboard (AI → AI Gateway → nimaz → Settings).
 
 Secrets — set with `wrangler secret put`, never committed:
 
@@ -136,7 +141,7 @@ Secrets — set with `wrangler secret put`, never committed:
   of the same name and is pushed to the Worker on every deploy.
 - `GOOGLE_SERVICE_ACCOUNT_JSON` — the full service-account JSON (one string)
   used to mint an OAuth token for the Play Integrity API. Optional — without
-  it every request simply runs at the unverified tier.
+  it verification is "unavailable" and every request passes (fail-open).
 
 ## Setup
 
@@ -144,21 +149,18 @@ Secrets — set with `wrangler secret put`, never committed:
 cd worker
 npm ci                      # or: npm install (first time, to create the lockfile)
 
-# 1. KV namespace: already created and its id is committed in wrangler.jsonc
-#    (a resource id, not a secret). To recreate it in another account:
-#    npx wrangler kv namespace create NIMAZ_AI_KV
-#    then paste the returned id into wrangler.jsonc.
-
-# 2. Set the secrets (production):
+# 1. Set the secrets (production):
 npx wrangler secret put CLOUDFLARE_AI_TOKEN        # gateway auth token
 npx wrangler secret put GOOGLE_SERVICE_ACCOUNT_JSON
 
-# 3. Cloudflare dashboard (one-time, cannot be done from wrangler):
+# 2. Cloudflare dashboard (one-time, cannot be done from wrangler):
 #    AI → AI Gateway → confirm the "nimaz" gateway exists.
 #    AI → AI Gateway → "Credits Available" → Manage → add a payment method,
 #    purchase credits, and set auto top-up (Unified Billing).
 #    Gateway → Settings → Authenticated Gateway: enable it and create the
 #    gateway authentication token — that's the CLOUDFLARE_AI_TOKEN secret.
+#    Gateway → Settings → Rate Limiting: set the request throttle (this is
+#    the ONLY rate limit — the Worker keeps no counters of its own).
 #    Recommended: set a Spend limit on the "nimaz" gateway as the monthly
 #    cost backstop, and enable the gateway's ZDR (Zero-Data-Retention
 #    provider endpoints) setting.
