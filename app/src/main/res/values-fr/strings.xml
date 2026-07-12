@@ -1311,4 +1311,29 @@
     <string name="ai_error_network">Impossible de joindre le service d\'IA. Vérifiez votre connexion et réessayez.</string>
     <string name="ai_error_invalid">Cette question n\'a pas pu être traitée. Essayez de la reformuler.</string>
     <string name="ai_error_unknown">Une erreur s\'est produite lors de la génération de la réponse. Veuillez réessayer.</string>
+
+    <string name="search_ask_button">Demander</string>
+    <string name="search_try_asking">Essayez de demander</string>
+    <string name="search_recent">Récents</string>
+    <string name="search_typing_hint">Les résultats se mettent à jour pendant la saisie · Entrée pour une réponse avec sources</string>
+    <string name="search_matches_format">%d résultats</string>
+    <string name="search_answer_count_format">%1$d dans votre bibliothèque · %2$d cités dans la réponse</string>
+    <string name="search_cited_chip">Cité</string>
+    <string name="ask_example_1">Que dit le Coran sur la patience ?</string>
+    <string name="ask_example_2">Invocations contre l\'anxiété et l\'inquiétude</string>
+    <string name="ask_example_3">Versets sur la gratitude</string>
+    <string name="ask_example_4">Pourquoi l\'intention est-elle importante dans l\'adoration ?</string>
+    <string name="ai_clear_history_dialog_title">Effacer l\'historique de l\'IA ?</string>
+    <string name="ai_clear_history_dialog_message">Ces questions enregistrées seront définitivement supprimées de cet appareil :</string>
+    <string name="ai_trust_note">Résumé généré par l\'IA — vérifiez-le à l\'aide des sources citées ci-dessous. Il décrit ce que disent les sources et ne constitue pas une fatwa.</string>
+    <string name="ai_discover_title">Des réponses appuyées sur votre bibliothèque</string>
+    <string name="ai_discover_body">Posez une question en termes simples et obtenez une courte réponse appuyée par des versets et des hadiths de votre propre bibliothèque — chaque citation est une source réelle que vous pouvez ouvrir et lire.</string>
+    <string name="ai_discover_privacy">Seule votre question est envoyée. Les sources citées et les résultats sont associés sur votre appareil, et les questions ne sont jamais utilisées à des fins d\'analyse.</string>
+    <string name="ai_discover_enable">Activer les réponses de l\'IA</string>
+    <string name="ai_discover_dismiss">Pas maintenant</string>
+    <string name="ai_error_network_title">Impossible de joindre le service de réponses</string>
+    <string name="ai_error_rate_limited_title">Vous avez atteint la limite de questions du jour</string>
+    <string name="ai_error_budget_title">Les réponses de l\'IA sont suspendues pour le moment</string>
+    <string name="ai_error_invalid_title">Cette question n\'a pas pu être traitée</string>
+    <string name="ai_error_unknown_title">Une erreur s\'est produite</string>
 </resources>

@@ -96,13 +96,24 @@ instead of gating on it:
 Every failure path degrades to `unverified` — a smaller cap, never an error.
 The AI Gateway spend limit remains the hard cost backstop against abuse.
 
+The app fetches tokens with the **standard** Play Integrity API (warm up a
+`StandardIntegrityTokenProvider` once, then a cheap `request()` per question),
+not the classic one. Classic requests are throttled per app-instance by Play
+services after a few calls in a short window, so fetching one per question
+meant legitimate installs "worked for a while" and then every token fetch
+failed → empty token → stuck at the unverified 5/day cap. The standard API is
+designed for frequent per-action checks; if the warmed-up provider goes stale,
+`IntegrityTokenProvider` re-prepares it once before falling back. The Worker is
+unaffected: `decodeIntegrityToken` decodes classic and standard tokens alike,
+and the verdict fields it checks are identical.
+
 Layers (Android):
 
 ```
 presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
 presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
 presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
-presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
+presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy; clear-history opens a destructive NimazDialog listing the saved questions
 presentation/viewmodel/AskViewModel                 ask state machine (exposes relatedTerms)
 presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)
 presentation/viewmodel/SearchSettingsViewModel      settings + consent state

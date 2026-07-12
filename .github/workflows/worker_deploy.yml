@@ -40,12 +40,9 @@ jobs:
   deploy:
     name: Deploy to Cloudflare
     needs: test
-    # TEMPORARY: also deploy from pull_request for the initial ai.arshadshah.com
-    # bring-up so we can verify the Worker + custom domain from this PR. Same-repo
-    # PRs have access to the Cloudflare secrets; fork PRs do not and will no-op.
-    # REVERT to `if: github.event_name == 'push'` once the Worker is live so
-    # unreviewed PR code is never published to production again.
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    # Deploy ONLY on push to dev (i.e. after merge). PRs run typecheck/tests but
+    # must never publish unreviewed code to production.
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -82,7 +79,7 @@ jobs:
   smoke-test:
     name: Live smoke test (search-assist)
     needs: deploy
-    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
     # No checkout here, so the workflow-level `working-directory: worker`
     # default would point at a nonexistent dir — run from the workspace root.

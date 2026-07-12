@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
@@ -18,9 +20,13 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
@@ -29,6 +35,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazAccordion
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogCancelButton
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDialogDestructiveButton
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
@@ -44,6 +53,7 @@ fun SearchSettingsScreen(
 ) {
     val state by viewModel.uiState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showClearHistoryDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -100,15 +110,60 @@ fun SearchSettingsScreen(
                         },
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // An in-place destructive action, not navigation — no
+                    // trailing arrow; disabled while there is nothing to clear.
                     NimazMenuItem(
                         title = stringResource(R.string.ai_clear_history),
                         subtitle = stringResource(R.string.ai_clear_history_subtitle),
-                        onClick = { viewModel.onEvent(SearchSettingsEvent.ClearHistory) },
+                        trailingIcon = null,
+                        enabled = state.savedQuestions.isNotEmpty(),
+                        onClick = { showClearHistoryDialog = true },
                     )
                 }
             }
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
+    }
+
+    if (showClearHistoryDialog) {
+        NimazDialog(
+            title = stringResource(R.string.ai_clear_history_dialog_title),
+            titleIcon = Icons.Default.Delete,
+            accentColor = MaterialTheme.colorScheme.error,
+            showCloseButton = false,
+            onDismiss = { showClearHistoryDialog = false },
+            content = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.ai_clear_history_dialog_message),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    state.savedQuestions.forEach { question ->
+                        Text(
+                            text = "•  $question",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    }
+                }
+            },
+            actions = {
+                NimazDialogCancelButton(
+                    text = stringResource(R.string.cancel),
+                    onClick = { showClearHistoryDialog = false },
+                )
+                NimazDialogDestructiveButton(
+                    text = stringResource(R.string.delete),
+                    onClick = {
+                        viewModel.onEvent(SearchSettingsEvent.ClearHistory)
+                        showClearHistoryDialog = false
+                    },
+                )
+            },
+        )
     }
 
     if (state.showConsentSheet) {

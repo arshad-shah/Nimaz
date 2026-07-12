@@ -1312,4 +1312,29 @@
     <string name="ai_error_network">Tidak dapat menghubungi perkhidmatan AI. Semak sambungan anda dan cuba lagi.</string>
     <string name="ai_error_invalid">Soalan itu tidak dapat diproses. Cuba susun semula.</string>
     <string name="ai_error_unknown">Sesuatu tidak kena semasa menjana jawapan. Sila cuba lagi.</string>
+
+    <string name="search_ask_button">Tanya</string>
+    <string name="search_try_asking">Cuba tanya</string>
+    <string name="search_recent">Terkini</string>
+    <string name="search_typing_hint">Keputusan dikemas kini semasa anda menaip · Tekan Enter untuk jawapan dengan sumber</string>
+    <string name="search_matches_format">%d padanan</string>
+    <string name="search_answer_count_format">%1$d dalam perpustakaan anda · %2$d dipetik dalam jawapan</string>
+    <string name="search_cited_chip">Dipetik</string>
+    <string name="ask_example_1">Apakah yang Al-Qur\'an katakan tentang kesabaran?</string>
+    <string name="ask_example_2">Doa untuk kegelisahan dan kebimbangan</string>
+    <string name="ask_example_3">Ayat-ayat tentang kesyukuran</string>
+    <string name="ask_example_4">Mengapa niat penting dalam ibadah?</string>
+    <string name="ai_clear_history_dialog_title">Padam sejarah AI?</string>
+    <string name="ai_clear_history_dialog_message">Soalan tersimpan berikut akan dipadamkan secara kekal daripada peranti ini:</string>
+    <string name="ai_trust_note">Ringkasan janaan AI — semak dengan sumber yang dipetik di bawah. Ia menerangkan apa yang dinyatakan oleh sumber dan bukan fatwa.</string>
+    <string name="ai_discover_title">Dapatkan jawapan yang disokong perpustakaan anda</string>
+    <string name="ai_discover_body">Ajukan soalan dengan perkataan mudah dan dapatkan jawapan ringkas yang disokong oleh ayat dan hadis daripada perpustakaan anda sendiri — setiap petikan ialah sumber sebenar yang boleh anda buka dan baca.</string>
+    <string name="ai_discover_privacy">Hanya soalan anda yang dihantar. Sumber yang dipetik dan keputusan dipadankan pada peranti anda, dan soalan tidak pernah digunakan untuk analitik.</string>
+    <string name="ai_discover_enable">Hidupkan jawapan AI</string>
+    <string name="ai_discover_dismiss">Bukan sekarang</string>
+    <string name="ai_error_network_title">Tidak dapat menghubungi perkhidmatan jawapan</string>
+    <string name="ai_error_rate_limited_title">Anda telah mencapai had soalan hari ini</string>
+    <string name="ai_error_budget_title">Jawapan AI dijeda buat masa ini</string>
+    <string name="ai_error_invalid_title">Soalan itu tidak dapat diproses</string>
+    <string name="ai_error_unknown_title">Berlaku ralat</string>
 </resources>

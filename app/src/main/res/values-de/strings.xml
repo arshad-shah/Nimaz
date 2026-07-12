@@ -1310,4 +1310,29 @@
     <string name="ai_error_network">Der KI-Dienst konnte nicht erreicht werden. Prüfe deine Verbindung und versuche es erneut.</string>
     <string name="ai_error_invalid">Diese Frage konnte nicht verarbeitet werden. Formuliere sie um.</string>
     <string name="ai_error_unknown">Beim Erzeugen der Antwort ist etwas schiefgelaufen. Bitte versuche es erneut.</string>
+
+    <string name="search_ask_button">Fragen</string>
+    <string name="search_try_asking">Frag zum Beispiel</string>
+    <string name="search_recent">Zuletzt</string>
+    <string name="search_typing_hint">Ergebnisse werden beim Tippen aktualisiert · Enter für eine Antwort mit Quellen</string>
+    <string name="search_matches_format">%d Treffer</string>
+    <string name="search_answer_count_format">%1$d in deiner Bibliothek · %2$d in der Antwort zitiert</string>
+    <string name="search_cited_chip">Zitiert</string>
+    <string name="ask_example_1">Was sagt der Koran über Geduld?</string>
+    <string name="ask_example_2">Bittgebete bei Angst und Sorgen</string>
+    <string name="ask_example_3">Verse über Dankbarkeit</string>
+    <string name="ask_example_4">Warum ist die Absicht im Gottesdienst wichtig?</string>
+    <string name="ai_clear_history_dialog_title">KI-Verlauf löschen?</string>
+    <string name="ai_clear_history_dialog_message">Diese gespeicherten Fragen werden dauerhaft von diesem Gerät entfernt:</string>
+    <string name="ai_trust_note">KI-generierte Zusammenfassung — prüfe sie anhand der unten zitierten Quellen. Sie beschreibt, was die Quellen sagen, und ist keine Fatwa.</string>
+    <string name="ai_discover_title">Antworten, gestützt auf deine Bibliothek</string>
+    <string name="ai_discover_body">Stelle eine Frage in einfachen Worten und erhalte eine kurze Antwort, gestützt auf Verse und Hadithe aus deiner eigenen Bibliothek — jedes Zitat ist eine echte Quelle, die du öffnen und lesen kannst.</string>
+    <string name="ai_discover_privacy">Nur deine Frage wird gesendet. Die zitierten Quellen und Ergebnisse werden auf deinem Gerät zugeordnet, und Fragen werden nie für Analysen verwendet.</string>
+    <string name="ai_discover_enable">KI-Antworten aktivieren</string>
+    <string name="ai_discover_dismiss">Jetzt nicht</string>
+    <string name="ai_error_network_title">Antwortdienst nicht erreichbar</string>
+    <string name="ai_error_rate_limited_title">Du hast das heutige Fragenlimit erreicht</string>
+    <string name="ai_error_budget_title">KI-Antworten sind vorerst pausiert</string>
+    <string name="ai_error_invalid_title">Diese Frage konnte nicht verarbeitet werden</string>
+    <string name="ai_error_unknown_title">Etwas ist schiefgelaufen</string>
 </resources>

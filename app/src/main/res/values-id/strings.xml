@@ -1311,4 +1311,29 @@
     <string name="ai_error_network">Tidak dapat menjangkau layanan AI. Periksa koneksi Anda dan coba lagi.</string>
     <string name="ai_error_invalid">Pertanyaan itu tidak dapat diproses. Coba susun ulang.</string>
     <string name="ai_error_unknown">Terjadi kesalahan saat menghasilkan jawaban. Silakan coba lagi.</string>
+
+    <string name="search_ask_button">Tanya</string>
+    <string name="search_try_asking">Coba tanyakan</string>
+    <string name="search_recent">Terbaru</string>
+    <string name="search_typing_hint">Hasil diperbarui saat Anda mengetik · Tekan Enter untuk jawaban dengan sumber</string>
+    <string name="search_matches_format">%d hasil cocok</string>
+    <string name="search_answer_count_format">%1$d di pustaka Anda · %2$d dikutip dalam jawaban</string>
+    <string name="search_cited_chip">Dikutip</string>
+    <string name="ask_example_1">Apa kata Al-Qur\'an tentang kesabaran?</string>
+    <string name="ask_example_2">Doa untuk kecemasan dan kekhawatiran</string>
+    <string name="ask_example_3">Ayat-ayat tentang rasa syukur</string>
+    <string name="ask_example_4">Mengapa niat penting dalam ibadah?</string>
+    <string name="ai_clear_history_dialog_title">Hapus riwayat AI?</string>
+    <string name="ai_clear_history_dialog_message">Pertanyaan tersimpan berikut akan dihapus permanen dari perangkat ini:</string>
+    <string name="ai_trust_note">Ringkasan buatan AI — periksa dengan sumber yang dikutip di bawah. Ringkasan ini menjelaskan isi sumber dan bukan fatwa.</string>
+    <string name="ai_discover_title">Dapatkan jawaban yang didukung pustaka Anda</string>
+    <string name="ai_discover_body">Ajukan pertanyaan dengan kata-kata sederhana dan dapatkan jawaban singkat yang didukung ayat dan hadis dari pustaka Anda sendiri — setiap kutipan adalah sumber asli yang dapat Anda buka dan baca.</string>
+    <string name="ai_discover_privacy">Hanya pertanyaan Anda yang dikirim. Sumber yang dikutip dan hasil dicocokkan di perangkat Anda, dan pertanyaan tidak pernah digunakan untuk analitik.</string>
+    <string name="ai_discover_enable">Aktifkan jawaban AI</string>
+    <string name="ai_discover_dismiss">Nanti saja</string>
+    <string name="ai_error_network_title">Tidak dapat menjangkau layanan jawaban</string>
+    <string name="ai_error_rate_limited_title">Anda telah mencapai batas pertanyaan hari ini</string>
+    <string name="ai_error_budget_title">Jawaban AI dijeda untuk saat ini</string>
+    <string name="ai_error_invalid_title">Pertanyaan itu tidak dapat diproses</string>
+    <string name="ai_error_unknown_title">Terjadi kesalahan</string>
 </resources>

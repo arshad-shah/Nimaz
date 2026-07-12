@@ -12,11 +12,16 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import javax.inject.Inject
 
 data class SearchSettingsUiState(
     val aiEnabled: Boolean = false,
     val historyEnabled: Boolean = false,
+    /** Persisted recent questions — shown in the clear-history confirm dialog. */
+    val savedQuestions: List<String> = emptyList(),
     val showConsentSheet: Boolean = false,
 )
 
@@ -34,6 +39,8 @@ class SearchSettingsViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
 ) : ViewModel() {
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     private val _uiState = MutableStateFlow(SearchSettingsUiState())
     val uiState: StateFlow<SearchSettingsUiState> = _uiState.asStateFlow()
 
@@ -41,10 +48,27 @@ class SearchSettingsViewModel @Inject constructor(
         combine(
             settingsRepository.aiAskEnabled,
             settingsRepository.aiHistoryEnabled,
-        ) { enabled, history ->
-            _uiState.update { it.copy(aiEnabled = enabled, historyEnabled = history) }
+            settingsRepository.aiQuestionHistory,
+        ) { enabled, history, historyJson ->
+            _uiState.update {
+                it.copy(
+                    aiEnabled = enabled,
+                    historyEnabled = history,
+                    savedQuestions = decodeHistory(historyJson),
+                )
+            }
         }.launchIn(viewModelScope)
     }
+
+    // Same wire format as AskViewModel's encodeHistory: a JSON string list.
+    private fun decodeHistory(raw: String): List<String> =
+        if (raw.isBlank()) {
+            emptyList()
+        } else {
+            runCatching {
+                json.decodeFromString(ListSerializer(String.serializer()), raw)
+            }.getOrDefault(emptyList())
+        }
 
     fun onEvent(event: SearchSettingsEvent) {
         when (event) {
