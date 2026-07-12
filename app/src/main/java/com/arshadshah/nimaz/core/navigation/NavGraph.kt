@@ -116,6 +116,8 @@ fun NavGraph(
     onPendingQuranSurahConsumed: () -> Unit = {},
     pendingIslamicCalendar: Boolean = false,
     onPendingIslamicCalendarConsumed: () -> Unit = {},
+    pendingAnnouncementRoute: String? = null,
+    onPendingAnnouncementRouteConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -166,6 +168,28 @@ fun NavGraph(
             launchSingleTop = true
         }
         onPendingIslamicCalendarConsumed()
+    }
+
+    // Deep-link from a tapped FCM announcement notification. Allowlist-resolved;
+    // unknown keys just land on Home (where the banner shows) and https URLs
+    // open in the browser.
+    LaunchedEffect(pendingAnnouncementRoute) {
+        val key = pendingAnnouncementRoute ?: return@LaunchedEffect
+        if (key.startsWith("https://")) {
+            runCatching {
+                analyticsContext.startActivity(
+                    Intent(Intent.ACTION_VIEW, android.net.Uri.parse(key))
+                )
+            }
+        } else {
+            announcementRoute(key)?.let { route ->
+                navController.navigate(route) {
+                    popUpTo(Route.Home) { inclusive = false }
+                    launchSingleTop = true
+                }
+            }
+        }
+        onPendingAnnouncementRouteConsumed()
     }
 
     // Onboarding ViewModel to check status
@@ -285,7 +309,18 @@ fun NavGraph(
                     onNavigateToSettings = { navController.navigate(Route.Settings) },
                     onNavigateToPrayerSettings = { navController.navigate(Route.SettingsPrayerCalculation) },
                     onNavigateToPrayerTimes = { navController.navigate(Route.PrayerTimes) },
-                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) }
+                    onOpenHadith = { hadithId -> navController.navigate(Route.HadithReader(hadithId)) },
+                    onOpenAnnouncementRoute = { key ->
+                        if (key.startsWith("https://")) {
+                            runCatching {
+                                analyticsContext.startActivity(
+                                    Intent(Intent.ACTION_VIEW, android.net.Uri.parse(key))
+                                )
+                            }
+                        } else {
+                            announcementRoute(key)?.let { navController.navigate(it) }
+                        }
+                    }
                 )
             }
 

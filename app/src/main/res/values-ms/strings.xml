@@ -1335,6 +1335,8 @@
     <string name="ai_error_network_title">Tidak dapat menghubungi perkhidmatan jawapan</string>
     <string name="ai_error_rate_limited_title">Anda telah mencapai had soalan hari ini</string>
     <string name="ai_error_budget_title">Jawapan AI dijeda buat masa ini</string>
+    <string name="ai_error_unverified_title">Salinan aplikasi ini tidak dapat disahkan</string>
+    <string name="ai_error_unverified">Jawapan AI hanya tersedia pada aplikasi rasmi daripada Google Play. Carian kata kunci merentas Quran, Hadis dan doa masih berfungsi secara luar talian.</string>
     <string name="ai_error_invalid_title">Soalan itu tidak dapat diproses</string>
     <string name="ai_error_unknown_title">Berlaku ralat</string>
 </resources>

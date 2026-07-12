@@ -52,6 +52,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimesSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerCarousel
@@ -66,6 +67,7 @@ import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
+import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
@@ -86,9 +88,19 @@ fun HomeScreen(
     onNavigateToPrayerSettings: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit = {},
     onOpenHadith: (hadithId: String) -> Unit = {},
+    onOpenAnnouncementRoute: (String) -> Unit = {},
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsState()
+    val announcementState by viewModel.announcement.collectAsState()
+
+    val onAnnouncementCta: () -> Unit = {
+        viewModel.onEvent(HomeEvent.AnnouncementCtaClicked)
+        announcementState.announcement?.route?.let { onOpenAnnouncementRoute(it) }
+    }
+    val onAnnouncementDismiss: () -> Unit = {
+        viewModel.onEvent(HomeEvent.DismissAnnouncement)
+    }
     val updateManager = LocalInAppUpdateManager.current
     val updateState = updateManager?.updateState?.collectAsState()?.value ?: UpdateState.Idle
 
@@ -158,6 +170,9 @@ fun HomeScreen(
                     Box(modifier = Modifier.fillMaxSize()) {
                         HomeCompactContent(
                             state = state,
+                            announcementState = announcementState,
+                            onAnnouncementCta = onAnnouncementCta,
+                            onAnnouncementDismiss = onAnnouncementDismiss,
                             listState = compactListState,
                             updateState = updateState,
                             updateManager = updateManager,
@@ -186,6 +201,9 @@ fun HomeScreen(
                 else -> {
                     HomeTabletContent(
                         state = state,
+                        announcementState = announcementState,
+                        onAnnouncementCta = onAnnouncementCta,
+                        onAnnouncementDismiss = onAnnouncementDismiss,
                         updateState = updateState,
                         updateManager = updateManager,
                         onNavigateToSettings = onNavigateToSettings,
@@ -210,6 +228,9 @@ fun HomeScreen(
 @Composable
 private fun HomeCompactContent(
     state: HomeUiState,
+    announcementState: AnnouncementUiState,
+    onAnnouncementCta: () -> Unit,
+    onAnnouncementDismiss: () -> Unit,
     listState: LazyListState,
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
@@ -261,6 +282,18 @@ private fun HomeCompactContent(
         // so the two read as distinct containers rather than abutting slabs.
         item(key = "hero_spacer") {
             Spacer(modifier = Modifier.height(20.dp))
+        }
+
+        // FCM engagement announcement — dismissable, renders nothing (zero
+        // height) when no announcement is active.
+        item(key = "announcement") {
+            AnnouncementBanner(
+                announcement = announcementState.announcement,
+                showCta = announcementState.showCta,
+                onCtaClick = onAnnouncementCta,
+                onDismiss = onAnnouncementDismiss,
+                modifier = Modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+            )
         }
 
         if (banners.isNotEmpty()) {
@@ -328,6 +361,9 @@ private fun HomeCompactContent(
 @Composable
 private fun HomeTabletContent(
     state: HomeUiState,
+    announcementState: AnnouncementUiState,
+    onAnnouncementCta: () -> Unit,
+    onAnnouncementDismiss: () -> Unit,
     updateState: UpdateState,
     updateManager: com.arshadshah.nimaz.core.util.InAppUpdateManager?,
     onNavigateToSettings: () -> Unit,
@@ -369,6 +405,15 @@ private fun HomeTabletContent(
             nextPrayerTime = nextPrayerTime,
             timeUntilNextPrayer = state.timeUntilNextPrayer,
             onSettingsClick = onNavigateToSettings
+        )
+
+        // FCM engagement announcement — same banner as the compact layout.
+        AnnouncementBanner(
+            announcement = announcementState.announcement,
+            showCta = announcementState.showCta,
+            onCtaClick = onAnnouncementCta,
+            onDismiss = onAnnouncementDismiss,
+            modifier = Modifier.padding(start = 20.dp, end = 20.dp, top = 8.dp),
         )
 
         // Tablet shares the same compact pill carousel — keeps both layouts

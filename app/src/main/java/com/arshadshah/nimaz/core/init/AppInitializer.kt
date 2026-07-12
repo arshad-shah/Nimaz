@@ -6,6 +6,7 @@ import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.monitoring.PerfMonitor
 import com.arshadshah.nimaz.core.util.LocaleHelper
 import com.arshadshah.nimaz.core.util.PrayerNotificationScheduler
+import com.arshadshah.nimaz.data.announcement.AnnouncementBootstrap
 import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
@@ -32,6 +33,7 @@ class AppInitializer @Inject constructor(
     private val preferencesDataStore: PreferencesDataStore,
     private val prayerNotificationScheduler: PrayerNotificationScheduler,
     private val adhanAudioManager: AdhanAudioManager,
+    private val announcementBootstrap: AnnouncementBootstrap,
 ) {
     private val _isReady = MutableStateFlow(false)
     val isReady: StateFlow<Boolean> = _isReady.asStateFlow()
@@ -48,10 +50,14 @@ class AppInitializer @Inject constructor(
                     val localeTask = async { applySavedLocale() }
                     val notificationTask = async { scheduleInitialNotifications() }
                     val adhanTask = async { downloadDefaultAdhanIfNeeded() }
+                    // FCM announcements: create the Updates channel + (re-)subscribe
+                    // to the topic each launch. Internally guarded, never throws.
+                    val announcementTask = async { announcementBootstrap.initialize() }
 
                     localeTask.await()
                     notificationTask.await()
                     adhanTask.await()
+                    announcementTask.await()
                 }
             } catch (e: Exception) {
                 // Timeout or other failure — report it but proceed to UI anyway

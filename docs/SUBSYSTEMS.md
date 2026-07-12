@@ -25,7 +25,8 @@ Source root: `app/src/main/java/com/arshadshah/nimaz/`
 9. [App initialization & monitoring](#9-app-initialization--monitoring)
 10. [Device-to-device sync](#10-device-to-device-sync)
 11. [Content sharing](#11-content-sharing)
-12. [Keeping this doc updated](#keeping-this-doc-updated)
+12. [Engagement announcements (FCM)](#12-engagement-announcements-fcm)
+13. [Keeping this doc updated](#keeping-this-doc-updated)
 
 ---
 
@@ -286,7 +287,7 @@ formatted strings.
 `AppAnalytics.init(this)`, logs a crash breadcrumb, tags the crash DB-schema key, and runs
 `appInitializer.initialize()`. It also supplies the `HiltWorkerFactory` (§3).
 
-**`core/init/AppInitializer.kt`** — `@Singleton`. `initialize()` launches an IO coroutine that runs three tasks **in parallel under a 5 s `withTimeout`** (then proceeds to UI regardless): apply saved locale, schedule today's prayer notifications (§4), download the default adhan/beep if missing (§1). It exposes `val isReady: StateFlow<Boolean>` (the splash gate). Failures are reported to monitoring but never block startup.
+**`core/init/AppInitializer.kt`** — `@Singleton`. `initialize()` launches an IO coroutine that runs four tasks **in parallel under a 5 s `withTimeout`** (then proceeds to UI regardless): apply saved locale, schedule today's prayer notifications (§4), download the default adhan/beep if missing (§1), and bootstrap FCM announcements (§12 — create the Updates channel + topic subscribe). It exposes `val isReady: StateFlow<Boolean>` (the splash gate). Failures are reported to monitoring but never block startup.
 
 **`core/monitoring/`** — three thin Kotlin `object` wrappers over Firebase, each guarded so **every call is wrapped in `runCatching` and no-ops if Firebase isn't initialized** (debug/PR-check builds without `google-services.json` run unchanged). They are static singletons, never Hilt-injected.
 - `AppAnalytics.kt` → Firebase **Analytics**. The only one with `init(context)` (called from `NimazApp`) — it caches `applicationContext` so any caller can log without a `Context`. Provides semantic helpers + name catalogs (`Event`/`Param`/`UserProperty`), notably the notification pipeline (`notification_scheduled`/`_displayed`/`_suppressed`/`_opened`) and `logDiagnostics()` (records OS-level notification/exact-alarm/battery state as durable user properties).
@@ -370,6 +371,71 @@ composable coroutine scope.
 **Gotchas.**
 - `ShareCardRenderer` measures then draws in one `draw(canvas)` walk (null canvas = measure pass) so the bitmap height can't drift from the content; Arabic/body text is length-capped for the card, but the full text always survives in the `plainText` fallback.
 - Chooser title is a single shared `R.string.share_chooser_title` — the old per-feature titles (`share_hadith`, `dua_reader_share`, `tafseer_share_chooser`) are no longer wired to the chooser.
+
+---
+
+## 12. Engagement announcements (FCM)
+
+**Pure FCM, no backend.** Announcements (feature nudges, changelog items, privacy/T&C notices)
+are sent from the **Firebase console Notifications composer** as notification+data messages,
+broadcast to topic **`announcements`**. No server, no Remote Config, no token storage. With no
+message ever sent there is zero behaviour change — the feature is inert by default.
+
+**Delivery model.**
+- **App foreground** → `NimazMessagingService.onMessageReceived` fires: custom data →
+  `AnnouncementPayloadMapper` → `Announcement` → persisted via `AnnouncementRepository`. **No
+  system notification is posted**; the Home screen observes the repository and renders a
+  dismissable `AnnouncementBanner`.
+- **App backgrounded/killed** → the **OS** posts the tray notification itself (composer
+  title/body) on the `nimaz_announcements` channel (manifest meta-data
+  `default_notification_channel_id` / `_icon` / `_color`); `onMessageReceived` is **not** called.
+  Tapping copies the custom data onto the launcher intent — `MainActivity.handleIntent` maps the
+  extras, persists the announcement (banner shows on Home) and deep-links to its `route` if valid.
+  *Accepted gap:* opening the app without tapping the notification shows no banner.
+
+**Key files.**
+- `data/announcement/NimazMessagingService.kt` — the app's **only** `FirebaseMessagingService`
+  (`@AndroidEntryPoint`; parse-and-write only; `onNewToken` logs only).
+- `data/announcement/AnnouncementPayloadMapper.kt` — `Map<String,String>`/intent-extras →
+  `Announcement?`; null (never throws) on missing/blank required fields (`id`,`type`,`title`,`body`)
+  or any malformed optional (`min_version_code`, `max_version_code`, ISO-8601 `expires_at`,
+  `dismissable`).
+- `data/announcement/AnnouncementBootstrap.kt` — per-launch channel create + idempotent
+  `subscribeToTopic("announcements")`, called from `AppInitializer` (§9); no-ops when Firebase
+  isn't initialized (no `google-services.json`).
+- `data/local/datastore/AnnouncementLocalDataSource.kt` — own Preferences DataStore
+  (`nimaz_announcements`): JSON-serialized current announcement + `dismissed_announcement_ids`
+  string-set (dismissal is **permanent**; re-sending the same `id` never resurfaces).
+- `data/repository/AnnouncementRepositoryImpl.kt` → `domain/repository/AnnouncementRepository`.
+- `domain/model/Announcement.kt`, `domain/usecase/AnnouncementUseCases.kt` —
+  `ObserveActiveAnnouncementUseCase` gates on dismissed (repo) + expiry + `versionCode` window;
+  `ResolveAnnouncementRouteUseCase` classifies `route` into https-URL / allowlisted feature key / none.
+- `core/navigation/AnnouncementRoutes.kt` — `announcementRoute(key)` **allowlist** (mirrors
+  `helpDeepLinkRoute`); unknown keys → CTA hidden, never a blind navigation. URLs open via
+  `ACTION_VIEW`.
+- `core/di/AnnouncementModule.kt`; banner UI in
+  `presentation/components/molecules/AnnouncementBanner.kt`, state in `HomeViewModel.announcement`
+  (`StateFlow<AnnouncementUiState>`).
+
+**Channel.** `nimaz_announcements` ("Updates & Announcements"), **IMPORTANCE_LOW** — visible,
+silent, and strictly separate from the prayer/adhan channels (§4), which are never touched.
+
+**Payload contract** (console → Additional options → Custom data): required `id`, `type`
+(`feature|privacy|tos|changelog`), `title`, `body`; optional `cta_label`, `route` (allowlist key
+or `https://…`), `min_version_code`, `max_version_code`, `expires_at` (ISO-8601 UTC),
+`dismissable` (default `true`). Never use reserved keys (`from`, `message_type`, `google.*`,
+`gcm.*`). FCM is not E2E-encrypted — public content only.
+
+**Analytics.** `announcement_shown` / `announcement_cta_clicked` / `announcement_dismissed`
+(helpers in `AppAnalytics`), on top of FCM's own delivery/open reports.
+
+**Gotchas.**
+- The console can only send notification-bearing messages, so the foreground banner and the
+  background tray are mutually exclusive surfaces per delivery (see accepted gap above).
+- `POST_NOTIFICATIONS` denied → no tray in background; the banner still works for foreground
+  receipt and notification-tap entry is simply never exercised.
+- Old app versions ignore route keys they don't know — never serialize `Route` objects into
+  payloads; extend the allowlist instead.
 
 ---
 

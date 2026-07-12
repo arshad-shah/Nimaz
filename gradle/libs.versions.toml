@@ -146,6 +146,7 @@ firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.r
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-perf = { group = "com.google.firebase", name = "firebase-perf" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }
