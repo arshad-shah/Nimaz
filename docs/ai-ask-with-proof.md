@@ -96,6 +96,17 @@ instead of gating on it:
 Every failure path degrades to `unverified` — a smaller cap, never an error.
 The AI Gateway spend limit remains the hard cost backstop against abuse.
 
+The app fetches tokens with the **standard** Play Integrity API (warm up a
+`StandardIntegrityTokenProvider` once, then a cheap `request()` per question),
+not the classic one. Classic requests are throttled per app-instance by Play
+services after a few calls in a short window, so fetching one per question
+meant legitimate installs "worked for a while" and then every token fetch
+failed → empty token → stuck at the unverified 5/day cap. The standard API is
+designed for frequent per-action checks; if the warmed-up provider goes stale,
+`IntegrityTokenProvider` re-prepares it once before falling back. The Worker is
+unaffected: `decodeIntegrityToken` decodes classic and standard tokens alike,
+and the verdict fields it checks are identical.
+
 Layers (Android):
 
 ```
