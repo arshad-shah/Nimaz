@@ -15,13 +15,18 @@ When AI is enabled, each submit makes **one** Worker call (`search-assist`):
    **Hadith references** that support the answer and (b) related **search
    terms** for the local library.
 2. **Prove (local)** — the app resolves each returned reference against the
-   LOCAL database: Quran refs against the Quran tables, hadith refs against
-   the six shipped collections (by their canonical `collection:number`
-   reference). Every reference that resolves surfaces in the results list as a
-   normal result card marked **"Cited"** (accent left edge + solid chip),
-   sorted to the top, deep-linking into its reader like any other result;
-   anything that doesn't resolve is dropped silently, so a cited card can
-   never show a verse or hadith that doesn't exist.
+   LOCAL database: Quran refs against the Quran tables (joining the same
+   default translator the keyword search uses, so the card shows the English
+   translation), hadith refs against the six shipped collections (by their
+   canonical `collection:number` reference). `Proof` is a sealed interface
+   (`Proof.Quran` / `Proof.Hadith`) carrying the same structured fields the
+   keyword search returns — surah:ayah numbers + English surah name, or hadith
+   number + book name — so a cited card renders **identically** to its keyword
+   equivalent (same title, subtitle, source tag, English snippet), marked
+   **"Cited"** (accent left edge + solid chip), sorted to the top, and
+   deep-linking into its reader like any other result; anything that doesn't
+   resolve is dropped silently, so a cited card can never show a verse or
+   hadith that doesn't exist.
 3. **Enhance (local)** — the AI's terms run through the smart local search
    (`SearchLibraryUseCase`) and fill the rest of the same list, so it
    dynamically shows the Quran/Hadith/Dua records the AI judged relevant.
@@ -31,7 +36,12 @@ answer text and a trust note. Its grounding lives in the **one merged,
 filterable results list** below it: cited verses and hadiths first, then
 related results (any related result that duplicates a cited record is
 dropped). The pinned filter scopes the whole merged list, cited cards
-included.
+included. The list never blanks into a separate loading stage: while the
+AI-terms lookup runs, the keyword results the user was already looking at
+stay on screen below the cited rows and are swapped in place when it lands.
+Ask failures render as design-system `NimazBanner`s — expected pauses (daily
+limit, shared budget) as the amber WARNING variant, transient failures as the
+ERROR variant with a retry action.
 
 There is **no "no supporting sources found" dead end**: the answer stands on
 its own, cited cards show whatever resolved, and the related results are always
@@ -91,7 +101,7 @@ Layers (Android):
 ```
 presentation/components/organisms/NimazSearchBar.kt shared bar; optional trailing Ask pill (showAskButton/askEnabled/onAsk; IME action routes to onAsk while live)
 presentation/screens/search/SearchScreen.kt         pinned bar+filter; merges cited proofs + related results into ONE list (dedup, "Cited" cards)
-presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error / AI-off discovery card
+presentation/screens/search/AskComponents.kt        answer card (no proof list) / loading / error banner (NimazBanner) / AI-off discovery card
 presentation/screens/settings/SearchSettingsScreen  consent + toggles + privacy
 presentation/viewmodel/AskViewModel                 ask state machine (exposes relatedTerms)
 presentation/viewmodel/SearchViewModel              results list (+ ApplyAiTerms event)

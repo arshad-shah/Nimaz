@@ -1,7 +1,7 @@
 Neu seit 3.0.31:
 
-• Tafseer neu gedacht — überarbeiteter Reader, Hervorheben per Geste, bearbeitbare Notizen, Quellenwechsler, PDF-Teilen im Markendesign.
-• Schwebender Koran-Player und eine neue Art, Verse und Duas überall zu teilen.
-• Suche aktualisiert sich beim Tippen, mit neuer Suchleiste.
-• Fastendauer-Erfassung und ein genauerer „Living Sky“ nach echtem Sonnenauf- und -untergang.
-• Neuer Standort-Bildschirm, neu aufgebaute Koran-Favoriten, klarere Sura-Köpfe, Widget-Feinschliff.
+• Tafseer neu gedacht — überarbeiteter Reader, Gesten-Hervorhebung, bearbeitbare Notizen, PDF-Teilen im Markendesign.
+• Schwebender Koran-Player und neues Teilen von Versen und Duas.
+• Suche, neu gebaut: Ergebnisse beim Tippen, plus optionale KI-Antworten mit zitierten Versen und Hadithen in einer Ergebnisliste, mit klareren Limit-Hinweisen.
+• Fastendauer-Erfassung und ein genauerer „Living Sky“.
+• Neuer Standort-Bildschirm, neue Koran-Favoriten, Widget-Feinschliff.

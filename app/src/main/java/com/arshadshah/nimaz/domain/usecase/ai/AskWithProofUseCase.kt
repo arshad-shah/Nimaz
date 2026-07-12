@@ -6,11 +6,11 @@ import com.arshadshah.nimaz.domain.model.AnswerConfidence
 import com.arshadshah.nimaz.domain.model.CitationId
 import com.arshadshah.nimaz.domain.model.HadithRef
 import com.arshadshah.nimaz.domain.model.Proof
-import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
+import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
@@ -74,17 +74,23 @@ class AskWithProofUseCase @Inject constructor(
         )
     }
 
-    /** Resolve an AI-cited Quran reference to the real local record, or null. */
+    /**
+     * Resolve an AI-cited Quran reference to the real local record, or null.
+     * The lookup joins the same translator the local keyword search uses, so a
+     * cited verse shows the same English translation a keyword result would.
+     */
     private suspend fun resolve(ref: CitationId.Quran): Proof? {
-        val ayah = quranUseCases.getAyahsBySurah(ref.surah).first()
+        val surahWithAyahs = quranUseCases
+            .getSurahWithAyahs(ref.surah, SearchLibraryUseCase.DEFAULT_TRANSLATOR)
+            .first() ?: return null
+        val ayah = surahWithAyahs.ayahs
             .firstOrNull { it.ayahNumber == ref.ayah } ?: return null
-        val surahName = quranUseCases.getSurahByNumber(ref.surah)?.nameEnglish
-        val text = ayah.translation?.takeIf { it.isNotBlank() } ?: ayah.textSimple
-        return Proof(
+        return Proof.Quran(
             citationId = ref.raw,
-            source = ProofSource.QURAN,
-            displayText = text,
-            meta = "Surah ${surahName ?: ref.surah} • Ayah ${ref.ayah}",
+            surahNumber = ref.surah,
+            ayahNumber = ref.ayah,
+            surahName = surahWithAyahs.surah.nameEnglish,
+            displayText = ayah.translation?.takeIf { it.isNotBlank() } ?: ayah.textSimple,
             route = Route.QuranReader(ref.surah, ref.ayah),
         )
     }
@@ -93,15 +99,14 @@ class AskWithProofUseCase @Inject constructor(
     private suspend fun resolve(ref: HadithRef): Proof? {
         val hadith = hadithUseCases.getHadithByReference(ref.reference) ?: return null
         val bookName = hadithUseCases.getBookById(hadith.bookId)?.nameEnglish
-        val text = hadith.textEnglish.takeIf { it.isNotBlank() } ?: hadith.textArabic
-        return Proof(
+        return Proof.Hadith(
             // The proof carries the local hadith id (hadith:{id}) — the same
             // citation key the results list derives for its hadith rows, so a
             // cited hadith dedupes against the related results like a verse.
             citationId = CitationId.Hadith(hadith.id).raw,
-            source = ProofSource.HADITH,
-            displayText = text,
-            meta = "${bookName ?: "Hadith"} • Hadith ${hadith.hadithNumberInBook}",
+            hadithNumber = hadith.hadithNumber,
+            bookName = bookName ?: "Hadith",
+            displayText = hadith.textEnglish.takeIf { it.isNotBlank() } ?: hadith.textArabic,
             route = Route.HadithReader(hadith.id),
         )
     }

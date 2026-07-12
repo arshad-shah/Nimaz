@@ -161,6 +161,7 @@ import com.arshadshah.nimaz.domain.usecase.GetFastingStatsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteDuasUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithOfTheDayUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithsByChapterUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase

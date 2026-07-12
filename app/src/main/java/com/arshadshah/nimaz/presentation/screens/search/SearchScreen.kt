@@ -253,16 +253,18 @@ fun SearchScreen(
                     // Answer state: ONE merged list under the pinned filter —
                     // cited proofs first (marked "Cited"), then the related
                     // results driven by the AI's terms. A related result that is
-                    // also cited is dropped so nothing appears twice.
+                    // also cited is dropped so nothing appears twice. While the
+                    // AI-terms lookup is still running, the keyword results the
+                    // user was already looking at stay on screen below the cited
+                    // rows and are swapped in place when it lands — the list
+                    // never blanks into a separate loading stage.
                     val citedVisible = answerPhase.proofs
                         .filter { it.source.matchesFilter(state.selectedFilter) }
                     val citedIds = answerPhase.proofs.map { it.citationId }.toSet()
                     val related = state.filteredResults
                         .filterNot { it.citationKey() in citedIds }
 
-                    if (state.isSearching) {
-                        item { SearchingIndicator() }
-                    } else {
+                    if (!state.isSearching) {
                         item {
                             Text(
                                 text = stringResource(
@@ -284,17 +286,19 @@ fun SearchScreen(
                         )
                     }
 
-                    if (!state.isSearching) {
-                        items(related) { result ->
-                            UnifiedResultCard(
-                                result = result,
-                                query = state.query,
-                                onNavigateToQuranAyah = onNavigateToQuranAyah,
-                                onNavigateToSurah = onNavigateToSurah,
-                                onNavigateToHadith = onNavigateToHadith,
-                                onNavigateToDua = onNavigateToDua
-                            )
-                        }
+                    items(related) { result ->
+                        UnifiedResultCard(
+                            result = result,
+                            query = state.query,
+                            onNavigateToQuranAyah = onNavigateToQuranAyah,
+                            onNavigateToSurah = onNavigateToSurah,
+                            onNavigateToHadith = onNavigateToHadith,
+                            onNavigateToDua = onNavigateToDua
+                        )
+                    }
+
+                    if (state.isSearching && related.isEmpty()) {
+                        item { SearchingIndicator() }
                     }
                 } else if (state.query.isEmpty()) {
                     // Resting: example questions to ask (AI on), then recent
@@ -649,9 +653,10 @@ private fun UnifiedResultCard(
 }
 
 /**
- * A verse the AI cited in its answer, rendered with the same shared result
- * card as every other result — just marked "Cited" and sorted to the top.
- * Tapping deep-links into the reader like any Qur'an result.
+ * A record the AI cited in its answer, rendered with the same shared result
+ * card as every other result — identical title, subtitle, source tag and
+ * English snippet as the keyword equivalent — just marked "Cited" and sorted
+ * to the top. Tapping deep-links into the reader like any keyword result.
  */
 @Composable
 private fun CitedProofCard(
@@ -660,18 +665,37 @@ private fun CitedProofCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    SearchResultCard(
-        icon = sourceIcon(proof.source),
-        iconColor = sourceAccent(proof.source),
-        type = null,
-        title = proof.meta,
-        subtitle = null,
-        highlightedText = proof.displayText,
-        query = query,
-        onClick = onClick,
-        cited = true,
-        modifier = modifier
-    )
+    when (proof) {
+        is Proof.Quran -> SearchResultCard(
+            icon = sourceIcon(ProofSource.QURAN),
+            iconColor = sourceAccent(ProofSource.QURAN),
+            type = stringResource(R.string.quran_type),
+            title = stringResource(
+                R.string.surah_result_format,
+                proof.surahNumber,
+                proof.ayahNumber
+            ),
+            subtitle = proof.surahName,
+            highlightedText = proof.displayText,
+            query = query,
+            onClick = onClick,
+            cited = true,
+            modifier = modifier
+        )
+
+        is Proof.Hadith -> SearchResultCard(
+            icon = sourceIcon(ProofSource.HADITH),
+            iconColor = sourceAccent(ProofSource.HADITH),
+            type = stringResource(R.string.hadith_type),
+            title = stringResource(R.string.hadith_result_format, proof.hadithNumber),
+            subtitle = proof.bookName,
+            highlightedText = proof.displayText,
+            query = query,
+            onClick = onClick,
+            cited = true,
+            modifier = modifier
+        )
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -743,9 +767,10 @@ private fun SurahSearchResultCard(
 
 /**
  * The single result-card component shared by keyword results, cited proofs and
- * AI-related results. [cited] swaps the source tag for a solid teal "Cited"
- * chip and adds a teal left edge; everything else — badge, title, subtitle,
- * highlighted snippet — is identical across the three uses.
+ * AI-related results. [cited] adds a solid teal "Cited" chip next to the source
+ * tag and a teal left edge; everything else — badge, title, subtitle, source
+ * tag, highlighted snippet — is identical across the three uses, so cited rows
+ * read as part of the same list.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -820,9 +845,7 @@ private fun SearchResultCard(
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.weight(1f)
                         )
-                        if (cited) {
-                            CitedChip()
-                        } else if (type != null) {
+                        if (type != null) {
                             Surface(
                                 shape = RoundedCornerShape(4.dp),
                                 color = iconColor.copy(alpha = 0.1f)
@@ -834,6 +857,11 @@ private fun SearchResultCard(
                                     modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
                                 )
                             }
+                        }
+                        if (cited) {
+                            CitedChip(
+                                modifier = Modifier.padding(start = if (type != null) 6.dp else 0.dp)
+                            )
                         }
                     }
 

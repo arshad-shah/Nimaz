@@ -1,7 +1,7 @@
 Yang baru sejak 3.0.31:
 
-• Tafsir dirombak — pembaca diperbarui, penyorotan gestur, catatan bisa diedit, pengalih sumber, berbagi PDF berbranding.
+• Tafsir dirombak — pembaca diperbarui, penyorotan gestur, catatan bisa diedit, berbagi PDF berbranding.
 • Pemutar Al-Qur'an mengambang dan cara baru berbagi ayat dan doa.
-• Pencarian diperbarui saat mengetik, dengan bilah pencarian baru.
-• Pelacakan durasi puasa dan "Living Sky" lebih akurat mengikuti matahari terbit dan terbenam.
-• Layar Lokasi baru, tab Favorit Al-Qur'an dibangun ulang, header surah lebih rapi, poles widget.
+• Pencarian dirombak: hasil saat mengetik, plus jawaban AI opsional didukung ayat dan hadis yang dikutip dalam satu daftar hasil, dengan peringatan batas yang lebih jelas.
+• Pelacakan durasi puasa dan "Living Sky" lebih akurat.
+• Layar Lokasi baru, Favorit Al-Qur'an dibangun ulang, poles widget.
