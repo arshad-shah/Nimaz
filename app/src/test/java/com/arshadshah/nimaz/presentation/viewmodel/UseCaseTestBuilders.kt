@@ -57,6 +57,7 @@ fun buildHadithUseCases(repository: HadithRepository) = HadithUseCases(
     getHadithsByChapter = GetHadithsByChapterUseCase(repository),
     getHadithById = GetHadithByIdUseCase(repository),
     getHadithByNumber = GetHadithByNumberUseCase(repository),
+    getHadithByReference = GetHadithByReferenceUseCase(repository),
     getHadithsByGrade = GetHadithsByGradeUseCase(repository),
     getHadithOfTheDay = GetHadithOfTheDayUseCase(repository),
     searchHadiths = SearchHadithsUseCase(repository),
