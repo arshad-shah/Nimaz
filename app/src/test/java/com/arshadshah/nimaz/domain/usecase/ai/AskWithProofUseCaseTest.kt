@@ -9,15 +9,16 @@ import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithRef
 import com.arshadshah.nimaz.domain.model.ProofSource
+import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.SearchAssist
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.model.SurahWithAyahs
 import com.arshadshah.nimaz.domain.repository.AiRepository
 import com.arshadshah.nimaz.domain.repository.AiRequestException
-import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.google.common.truth.Truth.assertThat
@@ -32,8 +33,7 @@ import org.junit.Test
 class AskWithProofUseCaseTest {
 
     private val aiRepository = mockk<AiRepository>()
-    private val getAyahsBySurahUC = mockk<GetAyahsBySurahUseCase>()
-    private val getSurahByNumberUC = mockk<GetSurahByNumberUseCase>()
+    private val getSurahWithAyahsUC = mockk<GetSurahWithAyahsUseCase>()
     private val quranUseCases = mockk<QuranUseCases>()
     private val getHadithByReferenceUC = mockk<GetHadithByReferenceUseCase>()
     private val getBookByIdUC = mockk<GetBookByIdUseCase>()
@@ -43,8 +43,7 @@ class AskWithProofUseCaseTest {
 
     @Before
     fun setUp() {
-        every { quranUseCases.getAyahsBySurah } returns getAyahsBySurahUC
-        every { quranUseCases.getSurahByNumber } returns getSurahByNumberUC
+        every { quranUseCases.getSurahWithAyahs } returns getSurahWithAyahsUC
         every { hadithUseCases.getHadithByReference } returns getHadithByReferenceUC
         every { hadithUseCases.getBookById } returns getBookByIdUC
         useCase = AskWithProofUseCase(aiRepository, quranUseCases, hadithUseCases)
@@ -58,10 +57,10 @@ class AskWithProofUseCaseTest {
                 terms = listOf("patience", "sabr"),
             ),
         )
-        every { getAyahsBySurahUC.invoke(2) } returns flowOf(listOf(ayah(2, 153)))
-        every { getAyahsBySurahUC.invoke(39) } returns flowOf(listOf(ayah(39, 10)))
-        coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
-        coEvery { getSurahByNumberUC.invoke(39) } returns surah(39)
+        every { getSurahWithAyahsUC.invoke(2, any()) } returns
+            flowOf(surahWithAyahs(2, listOf(ayah(2, 153))))
+        every { getSurahWithAyahsUC.invoke(39, any()) } returns
+            flowOf(surahWithAyahs(39, listOf(ayah(39, 10))))
 
         val outcome = useCase("What does the Quran say about patience?")
 
@@ -72,9 +71,14 @@ class AskWithProofUseCaseTest {
         assertThat(answered.proofs.map { it.citationId })
             .containsExactly("quran:2:153", "quran:39:10")
             .inOrder()
-        assertThat(answered.proofs.first().route).isEqualTo(Route.QuranReader(2, 153))
-        // The proof shows the real local translation, not model text.
-        assertThat(answered.proofs.first().displayText).isEqualTo("Be patient.")
+        // The proof carries the same structured fields a keyword result shows:
+        // surah:ayah numbers, English surah name and the LOCAL translation.
+        val quranProof = answered.proofs.first() as Proof.Quran
+        assertThat(quranProof.route).isEqualTo(Route.QuranReader(2, 153))
+        assertThat(quranProof.surahNumber).isEqualTo(2)
+        assertThat(quranProof.ayahNumber).isEqualTo(153)
+        assertThat(quranProof.surahName).isEqualTo("The Cow")
+        assertThat(quranProof.displayText).isEqualTo("Be patient.")
     }
 
     @Test
@@ -88,9 +92,9 @@ class AskWithProofUseCaseTest {
                 ),
             ),
         )
-        every { getAyahsBySurahUC.invoke(2) } returns flowOf(listOf(ayah(2, 153)))
-        every { getAyahsBySurahUC.invoke(99) } returns flowOf(emptyList())
-        coEvery { getSurahByNumberUC.invoke(any()) } returns surah(2)
+        every { getSurahWithAyahsUC.invoke(2, any()) } returns
+            flowOf(surahWithAyahs(2, listOf(ayah(2, 153))))
+        every { getSurahWithAyahsUC.invoke(99, any()) } returns flowOf(null)
 
         val outcome = useCase("q?") as AskWithProofUseCase.Outcome.Answered
 
@@ -105,8 +109,8 @@ class AskWithProofUseCaseTest {
                 hadithRefs = listOf(HadithRef("bukhari", 6018)),
             ),
         )
-        every { getAyahsBySurahUC.invoke(2) } returns flowOf(listOf(ayah(2, 153)))
-        coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
+        every { getSurahWithAyahsUC.invoke(2, any()) } returns
+            flowOf(surahWithAyahs(2, listOf(ayah(2, 153))))
         coEvery { getHadithByReferenceUC.invoke("bukhari:6018") } returns
             hadith(id = "6041", numberInBook = 6018)
         coEvery { getBookByIdUC.invoke("1") } returns book()
@@ -118,10 +122,13 @@ class AskWithProofUseCaseTest {
         assertThat(outcome.proofs.map { it.citationId })
             .containsExactly("quran:2:153", "hadith:6041")
             .inOrder()
-        val hadithProof = outcome.proofs.last()
+        // The proof mirrors the keyword hadith result: same title number
+        // (hadithNumber), book-name subtitle and English text.
+        val hadithProof = outcome.proofs.last() as Proof.Hadith
         assertThat(hadithProof.source).isEqualTo(ProofSource.HADITH)
         assertThat(hadithProof.displayText).isEqualTo("Actions are judged by intentions.")
-        assertThat(hadithProof.meta).isEqualTo("Sahih al-Bukhari • Hadith 6018")
+        assertThat(hadithProof.hadithNumber).isEqualTo(1)
+        assertThat(hadithProof.bookName).isEqualTo("Sahih al-Bukhari")
         assertThat(hadithProof.route).isEqualTo(Route.HadithReader("6041"))
     }
 
@@ -187,9 +194,8 @@ class AskWithProofUseCaseTest {
         val hadithRefs = (1..9).map { HadithRef("bukhari", it) }
         coEvery { aiRepository.assist(any()) } returns
             Result.success(assist(refs = refs, hadithRefs = hadithRefs))
-        every { getAyahsBySurahUC.invoke(2) } returns
-            flowOf((1..12).map { ayah(2, it) })
-        coEvery { getSurahByNumberUC.invoke(2) } returns surah(2)
+        every { getSurahWithAyahsUC.invoke(2, any()) } returns
+            flowOf(surahWithAyahs(2, (1..12).map { ayah(2, it) }))
         coEvery { getHadithByReferenceUC.invoke(any()) } answers {
             val number = firstArg<String>().substringAfter(':').toInt()
             hadith(id = number.toString(), numberInBook = number)
@@ -258,6 +264,9 @@ class AskWithProofUseCaseTest {
         sajdaNumber = null,
         translation = translation,
     )
+
+    private fun surahWithAyahs(number: Int, ayahs: List<Ayah>) =
+        SurahWithAyahs(surah = surah(number), ayahs = ayahs)
 
     private fun surah(number: Int) = Surah(
         number = number,

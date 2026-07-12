@@ -21,7 +21,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material.icons.outlined.Info
@@ -46,6 +45,8 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -330,6 +331,11 @@ internal fun AskDiscoveryCard(
     }
 }
 
+/**
+ * Ask failures rendered with the design-system [NimazBanner]: expected pauses
+ * (daily limit, shared budget) as the amber WARNING variant, transient/technical
+ * failures as the ERROR variant with a retry action where retrying can help.
+ */
 @Composable
 internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
     val icon: ImageVector
@@ -373,45 +379,20 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
     }
     // Retrying can only help for transient failures — not for daily/budget caps.
     val retryable = error is AiError.Network || error is AiError.Unknown
-    NimazCard(style = NimazCardStyle.FILLED, modifier = Modifier.fillMaxWidth()) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(MaterialTheme.colorScheme.errorContainer),
-                contentAlignment = Alignment.Center,
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.size(21.dp),
-                )
-            }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(top = 12.dp),
-            )
-            Text(
-                text = body,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 4.dp),
-            )
-            if (retryable) {
-                Spacer(modifier = Modifier.height(8.dp))
-                NimazButton(
-                    text = stringResource(R.string.ai_try_again),
-                    onClick = onRetry,
-                    variant = NimazButtonVariant.FILLED,
-                    leadingIcon = Icons.Default.Refresh,
-                )
-            }
-        }
+    // Hitting a usage cap is an expected pause, not a failure — warn, don't alarm.
+    val variant = when (error) {
+        is AiError.RateLimited, AiError.BudgetExceeded -> NimazBannerVariant.WARNING
+        else -> NimazBannerVariant.ERROR
     }
+    NimazBanner(
+        message = body,
+        variant = variant,
+        icon = icon,
+        title = title,
+        actionLabel = if (retryable) stringResource(R.string.ai_try_again) else null,
+        onAction = if (retryable) onRetry else null,
+        modifier = Modifier.fillMaxWidth(),
+    )
 }
 
 /** Turn retry seconds into a coarse "minutes"/"hours" figure for display. */

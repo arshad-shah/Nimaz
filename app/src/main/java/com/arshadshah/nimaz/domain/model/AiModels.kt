@@ -55,15 +55,43 @@ data class SearchAssist(
 
 /**
  * A citation resolved back to a real local record, with a type-safe deep-link
- * [route] the UI can navigate to.
+ * [route] the UI can navigate to. Each variant carries the same structured
+ * fields the local keyword search returns for that source, so the UI renders a
+ * cited proof and a keyword result with identical content — same title,
+ * subtitle and English [displayText] — differing only by the "Cited" marker.
  */
-data class Proof(
-    val citationId: String,
-    val source: ProofSource,
-    val displayText: String,
-    val meta: String,
-    val route: Route,
-)
+sealed interface Proof {
+    val citationId: String
+    val source: ProofSource
+
+    /** English text for the snippet — verse translation / hadith English text. */
+    val displayText: String
+    val route: Route
+
+    data class Quran(
+        override val citationId: String,
+        val surahNumber: Int,
+        val ayahNumber: Int,
+        /** English surah name, e.g. "Al-Furqan" — the keyword result's subtitle. */
+        val surahName: String,
+        override val displayText: String,
+        override val route: Route,
+    ) : Proof {
+        override val source: ProofSource get() = ProofSource.QURAN
+    }
+
+    data class Hadith(
+        override val citationId: String,
+        /** The number keyword results title with (`hadith_result_format`). */
+        val hadithNumber: Int,
+        /** English collection name, e.g. "Sahih al-Bukhari" — the subtitle. */
+        val bookName: String,
+        override val displayText: String,
+        override val route: Route,
+    ) : Proof {
+        override val source: ProofSource get() = ProofSource.HADITH
+    }
+}
 
 /**
  * Errors surfaced by the AI feature, mapped from the Worker's error envelope
