@@ -1333,6 +1333,8 @@
     <string name="ai_error_network_title">Antwortdienst nicht erreichbar</string>
     <string name="ai_error_rate_limited_title">Du hast das heutige Fragenlimit erreicht</string>
     <string name="ai_error_budget_title">KI-Antworten sind vorerst pausiert</string>
+    <string name="ai_error_unverified_title">Diese App-Kopie konnte nicht verifiziert werden</string>
+    <string name="ai_error_unverified">KI-Antworten sind nur in der offiziellen App von Google Play verfügbar. Die Stichwortsuche im Koran, in Hadithen und Duas funktioniert weiterhin offline.</string>
     <string name="ai_error_invalid_title">Diese Frage konnte nicht verarbeitet werden</string>
     <string name="ai_error_unknown_title">Etwas ist schiefgelaufen</string>
 </resources>

@@ -1334,6 +1334,8 @@
     <string name="ai_error_network_title">Tidak dapat menjangkau layanan jawaban</string>
     <string name="ai_error_rate_limited_title">Anda telah mencapai batas pertanyaan hari ini</string>
     <string name="ai_error_budget_title">Jawaban AI dijeda untuk saat ini</string>
+    <string name="ai_error_unverified_title">Salinan aplikasi ini tidak dapat diverifikasi</string>
+    <string name="ai_error_unverified">Jawaban AI hanya tersedia di aplikasi resmi dari Google Play. Pencarian kata kunci di Quran, Hadis, dan doa tetap berfungsi secara offline.</string>
     <string name="ai_error_invalid_title">Pertanyaan itu tidak dapat diproses</string>
     <string name="ai_error_unknown_title">Terjadi kesalahan</string>
 </resources>

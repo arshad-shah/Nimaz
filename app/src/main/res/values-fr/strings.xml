@@ -1334,6 +1334,8 @@
     <string name="ai_error_network_title">Impossible de joindre le service de réponses</string>
     <string name="ai_error_rate_limited_title">Vous avez atteint la limite de questions du jour</string>
     <string name="ai_error_budget_title">Les réponses de l\'IA sont suspendues pour le moment</string>
+    <string name="ai_error_unverified_title">Cette copie de l\'application n\'a pas pu être vérifiée</string>
+    <string name="ai_error_unverified">Les réponses de l\'IA ne sont disponibles que sur l\'application officielle de Google Play. La recherche par mots-clés dans le Coran, les hadiths et les douas fonctionne toujours hors ligne.</string>
     <string name="ai_error_invalid_title">Cette question n\'a pas pu être traitée</string>
     <string name="ai_error_unknown_title">Une erreur s\'est produite</string>
 </resources>

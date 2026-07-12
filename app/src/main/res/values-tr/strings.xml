@@ -1337,6 +1337,8 @@
     <string name="ai_error_network_title">Yanıt hizmetine ulaşılamadı</string>
     <string name="ai_error_rate_limited_title">Bugünkü soru sınırına ulaştınız</string>
     <string name="ai_error_budget_title">Yapay zekâ yanıtları şimdilik duraklatıldı</string>
+    <string name="ai_error_unverified_title">Bu uygulama kopyası doğrulanamadı</string>
+    <string name="ai_error_unverified">Yapay zekâ yanıtları yalnızca Google Play\'deki resmî uygulamada kullanılabilir. Quran, hadis ve dualarda anahtar kelime araması çevrimdışı çalışmaya devam eder.</string>
     <string name="ai_error_invalid_title">Bu soru işlenemedi</string>
     <string name="ai_error_unknown_title">Bir şeyler ters gitti</string>
 </resources>
