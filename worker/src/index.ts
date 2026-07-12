@@ -4,7 +4,6 @@ import { z } from "zod";
 import { getCapability, listCapabilityIds } from "./registry";
 import { callClaude, UpstreamError } from "./anthropic/client";
 import { checkIntegrity } from "./middleware/integrity";
-import { enforceRateLimit } from "./middleware/rateLimit";
 import { ApiError } from "./middleware/errors";
 
 // Envelope shared by every capability invocation.
@@ -42,8 +41,9 @@ app.post("/v1/invoke", async (c) => {
       new ApiError("INVALID_INPUT", "Malformed request envelope."),
     );
   }
-  const { capability: capabilityId, integrityToken, deviceId, input } =
-    envelope.data;
+  // deviceId stays in the envelope for compatibility/forward use, but the
+  // Worker no longer keeps per-device counters — throttling is the gateway's.
+  const { capability: capabilityId, integrityToken, input } = envelope.data;
 
   const capability = getCapability(capabilityId);
   if (!capability) {
@@ -54,17 +54,20 @@ app.post("/v1/invoke", async (c) => {
   }
 
   try {
-    // 1. Integrity → trust tier. Never blocks: a missing/failed attestation
-    //    only demotes the request to the small unverified rate-limit tier.
-    const tier = await checkIntegrity(c.env, integrityToken, now.getTime());
+    // 1. Play Integrity — the Worker's only guard. Blocks only an explicit
+    //    failed verdict; "unavailable" (missing token, unconfigured, Google
+    //    outage) fails open. Request throttling and the monthly USD cost cap
+    //    both live in the AI Gateway (Rate Limiting rule + Spend Limit);
+    //    callClaude maps them to RATE_LIMITED / BUDGET_EXCEEDED.
+    const integrity = await checkIntegrity(c.env, integrityToken, now.getTime());
+    if (integrity === "failed") {
+      throw new ApiError(
+        "ATTESTATION_FAILED",
+        "This device or app could not be verified.",
+      );
+    }
 
-    // 2. Rate limit (tiered per-device cap + global daily cap). The monthly
-    //    USD cost cap lives in the AI Gateway (Spend Limit + Unified Billing
-    //    credits); when it trips, callClaude maps it to BUDGET_EXCEEDED.
-
-    await enforceRateLimit(c.env, deviceId, now, tier);
-
-    // 3a. Validate capability input.
+    // 2a. Validate capability input.
     const parsedInput = capability.inputSchema.safeParse(input);
     if (!parsedInput.success) {
       throw new ApiError(
@@ -73,20 +76,20 @@ app.post("/v1/invoke", async (c) => {
       );
     }
 
-    // 3b. Build request + call Claude via the AI binding (Unified Billing).
+    // 2b. Build request + call Claude via the AI binding (Unified Billing).
     //     The capability id rides along as gateway metadata so the AI Gateway
     //     dashboard breaks spend down per feature (never the question text).
     const request = capability.buildRequest(parsedInput.data, c.env);
     const raw = await callClaude(request, c.env, { capability: capabilityId });
 
-    // 3c. Structured usage log (observability): lets us confirm prompt-cache
+    // 2c. Structured usage log (observability): lets us confirm prompt-cache
     //     reads (cache_read_input_tokens > 0) and watch token spend without
     //     ever logging content.
     console.log(
       JSON.stringify({ event: "ai_usage", capability: capabilityId, ...raw.usage }),
     );
 
-    // 3d. Parse + validate output against the strict contract.
+    // 2d. Parse + validate output against the strict contract.
     const output = capability.parseResponse(raw, parsedInput.data);
     const validated = capability.outputSchema.safeParse(output);
     if (!validated.success) {

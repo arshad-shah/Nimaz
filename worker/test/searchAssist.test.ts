@@ -195,6 +195,24 @@ describe("search-assist (integration, AI Gateway Unified Billing)", () => {
     expect(((await res.json()) as any).error.code).toBe("UPSTREAM_ERROR");
   });
 
+  it("passes a gateway rate limit through as RATE_LIMITED/429 with retryAfterSeconds", async () => {
+    fetchMock
+      .get(GATEWAY_HOST)
+      .intercept({ path: GATEWAY_PATH, method: "POST" })
+      .reply(
+        429,
+        { error: { message: "Rate limit exceeded" } },
+        { headers: { "retry-after": "120" } },
+      );
+    const res = await invoke("assist-dev-rl");
+    expect(res.status).toBe(429);
+    const body = (await res.json()) as {
+      error: { code: string; retryAfterSeconds?: number };
+    };
+    expect(body.error.code).toBe("RATE_LIMITED");
+    expect(body.error.retryAfterSeconds).toBe(120);
+  });
+
   it("maps a tripped gateway spend limit / exhausted credits to BUDGET_EXCEEDED/503", async () => {
     fetchMock
       .get(GATEWAY_HOST)

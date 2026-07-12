@@ -173,6 +173,7 @@ class AskViewModel @Inject constructor(
         AiError.BudgetExceeded -> "budget"
         AiError.Network -> "network"
         is AiError.Invalid -> "invalid"
+        AiError.Unverified -> "unverified"
         AiError.Unknown -> "unknown"
     }
 

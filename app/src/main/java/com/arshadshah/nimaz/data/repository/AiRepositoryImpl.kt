@@ -31,7 +31,8 @@ class AiRepositoryImpl @Inject constructor(
         val request = InvokeRequest(
             capability = CAPABILITY_SEARCH_ASSIST,
             // Best-effort: an unavailable token is sent empty and the Worker
-            // simply applies its smaller unverified rate limit — never an error.
+            // fails open (verification "unavailable") — only an explicit
+            // failed Play Integrity verdict is rejected.
             integrityToken = integrityTokenProvider.getToken(),
             deviceId = deviceIdProvider.getOrCreate(),
             input = json.encodeToJsonElement(
@@ -59,10 +60,12 @@ class AiRepositoryImpl @Inject constructor(
         retryAfterSeconds: Long?,
     ): AiError = when (code) {
         "RATE_LIMITED" -> AiError.RateLimited(retryAfterSeconds)
+        "ATTESTATION_FAILED" -> AiError.Unverified
         "BUDGET_EXCEEDED" -> AiError.BudgetExceeded
         "INVALID_INPUT" -> AiError.Invalid("The question could not be processed.")
         "UPSTREAM_ERROR" -> AiError.Unknown
         else -> when (status) {
+            403 -> AiError.Unverified
             429 -> AiError.RateLimited(retryAfterSeconds)
             503 -> AiError.BudgetExceeded
             else -> AiError.Unknown

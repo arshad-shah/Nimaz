@@ -7,20 +7,22 @@ const GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token";
 const PLAY_INTEGRITY_SCOPE = "https://www.googleapis.com/auth/playintegrity";
 
 /**
- * The trust tier a request runs at. Attestation never hard-blocks a request —
- * it only decides which per-device daily cap applies (see rateLimit.ts):
+ * The outcome of Play Integrity verification — the Worker's only guard.
+ * Rate limiting and the monthly cost cap live in the AI Gateway (Rate
+ * Limiting + Spend Limit on the `nimaz` gateway), not in Worker code.
  *
- *  - "verified":   Play Integrity confirmed the official app on a sane device
- *                  (or SKIP_ATTESTATION is on) → full daily cap.
- *  - "unverified": no token, verification unavailable (Google outage, not yet
- *                  configured), or a failed verdict → small daily cap.
- *
- * Rationale: hard-failing on attestation bricked the feature for legitimate
- * users whenever Play services hiccuped or the Integrity API was unreachable.
- * A stingy unverified tier bounds abuse (the AI Gateway spend limit is the
- * ultimate backstop) without ever locking real users out.
+ *  - "verified":    Play Integrity confirmed the official app on a sane
+ *                   device (or SKIP_ATTESTATION is on) → proceed.
+ *  - "unavailable": verification could not run — missing token, service
+ *                   account not configured, Google outage → fail OPEN and
+ *                   proceed. Hard-failing these paths bricked the feature for
+ *                   legitimate users whenever Play services hiccuped; the
+ *                   gateway's rate limit + spend limit bound the abuse cost.
+ *  - "failed":      Google decoded the token and the verdict failed (app not
+ *                   Play-recognized, device integrity not met, package
+ *                   mismatch) → the request is rejected (ATTESTATION_FAILED).
  */
-export type IntegrityTier = "verified" | "unverified";
+export type IntegrityResult = "verified" | "unavailable" | "failed";
 
 interface ServiceAccount {
   client_email: string;
@@ -136,24 +138,24 @@ interface IntegrityVerdict {
 }
 
 /**
- * Classify a request's trust tier from its Play Integrity token. NEVER throws
- * and never blocks: every failure path — missing token, unconfigured service
- * account, Google API outage, failed verdict — degrades to "unverified", which
- * only tightens the per-device rate limit.
+ * Verify a request's Play Integrity token. NEVER throws. Only an explicit
+ * failed verdict returns "failed" (and blocks the request); every path where
+ * verification cannot run — missing token, unconfigured service account,
+ * Google API outage — returns "unavailable" and the request proceeds.
  */
 export async function checkIntegrity(
   env: Env,
   integrityToken: string,
   nowMs: number,
-): Promise<IntegrityTier> {
+): Promise<IntegrityResult> {
   if (env.SKIP_ATTESTATION === "true") {
     return "verified"; // Explicit bypass for local dev/testing.
   }
 
   // Not configured yet, or the app couldn't obtain a token (Play services
-  // unavailable, offline fetch, sideload) → run at the unverified tier.
-  if (!env.GOOGLE_SERVICE_ACCOUNT_JSON) return "unverified";
-  if (!integrityToken || integrityToken.length < 10) return "unverified";
+  // unavailable, offline fetch) → verification can't run; fail open.
+  if (!env.GOOGLE_SERVICE_ACCOUNT_JSON) return "unavailable";
+  if (!integrityToken || integrityToken.length < 10) return "unavailable";
 
   try {
     const accessToken = await getGoogleAccessToken(
@@ -170,7 +172,7 @@ export async function checkIntegrity(
       },
       body: JSON.stringify({ integrity_token: integrityToken }),
     });
-    if (!res.ok) return "unverified";
+    if (!res.ok) return "unavailable";
 
     const decoded = (await res.json()) as {
       tokenPayloadExternal?: IntegrityVerdict;
@@ -190,9 +192,9 @@ export async function checkIntegrity(
       deviceVerdicts.includes("MEETS_BASIC_INTEGRITY");
     const pkgOk = pkg === undefined || pkg === PACKAGE_NAME;
 
-    return appOk && deviceOk && pkgOk ? "verified" : "unverified";
+    return appOk && deviceOk && pkgOk ? "verified" : "failed";
   } catch {
     // Google outage / transient failure — never punish the user for it.
-    return "unverified";
+    return "unavailable";
   }
 }

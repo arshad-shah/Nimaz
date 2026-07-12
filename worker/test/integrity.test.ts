@@ -1,12 +1,19 @@
 import { env, fetchMock } from "cloudflare:test";
 import { afterEach, beforeAll, describe, expect, it } from "vitest";
+import app from "../src/index";
 import { checkIntegrity } from "../src/middleware/integrity";
-import { generateServiceAccountJson } from "./helpers";
+import {
+  generateServiceAccountJson,
+  makeAssistInput,
+  makeEnvelope,
+} from "./helpers";
 
-// checkIntegrity never throws — it classifies each request into a trust tier
-// ("verified" gets the full daily cap, "unverified" the small one). These tests
-// pin every degradation path to "unverified" and the happy path to "verified".
-describe("integrity classification", () => {
+// checkIntegrity never throws. It is the Worker's only guard: an explicit
+// failed verdict returns "failed" (the dispatcher rejects with
+// ATTESTATION_FAILED/403); every path where verification cannot run returns
+// "unavailable" and the request proceeds (fail-open). Throttling/cost caps
+// live in the AI Gateway, not here.
+describe("integrity verification", () => {
   beforeAll(() => {
     fetchMock.activate();
     fetchMock.disableNetConnect();
@@ -20,27 +27,27 @@ describe("integrity classification", () => {
     ).resolves.toBe("verified");
   });
 
-  it("returns unverified when no service account is configured", async () => {
+  it("returns unavailable when no service account is configured", async () => {
     await expect(
       checkIntegrity(
         { ...env, SKIP_ATTESTATION: "false", GOOGLE_SERVICE_ACCOUNT_JSON: undefined },
         "a-real-looking-integrity-token",
         Date.now(),
       ),
-    ).resolves.toBe("unverified");
+    ).resolves.toBe("unavailable");
   });
 
-  it("returns unverified when the token is missing or too short", async () => {
+  it("returns unavailable when the token is missing or too short", async () => {
     const envNoSkip = {
       ...env,
       SKIP_ATTESTATION: "false",
       GOOGLE_SERVICE_ACCOUNT_JSON: await generateServiceAccountJson(),
     };
     await expect(checkIntegrity(envNoSkip, "", Date.now())).resolves.toBe(
-      "unverified",
+      "unavailable",
     );
     await expect(checkIntegrity(envNoSkip, "short", Date.now())).resolves.toBe(
-      "unverified",
+      "unavailable",
     );
   });
 
@@ -105,7 +112,7 @@ describe("integrity classification", () => {
     ).resolves.toBe("verified");
   });
 
-  it("demotes an unrecognized app verdict to unverified (never throws)", async () => {
+  it("fails an unrecognized app verdict (never throws)", async () => {
     const sa = await generateServiceAccountJson();
     fetchMock
       .get("https://oauth2.googleapis.com")
@@ -130,10 +137,10 @@ describe("integrity classification", () => {
         "a-real-looking-integrity-token",
         Date.now(),
       ),
-    ).resolves.toBe("unverified");
+    ).resolves.toBe("failed");
   });
 
-  it("demotes to unverified when the Play Integrity API is down", async () => {
+  it("returns unavailable when the Play Integrity API is down", async () => {
     const sa = await generateServiceAccountJson();
     fetchMock
       .get("https://oauth2.googleapis.com")
@@ -153,10 +160,10 @@ describe("integrity classification", () => {
         "a-real-looking-integrity-token",
         Date.now(),
       ),
-    ).resolves.toBe("unverified");
+    ).resolves.toBe("unavailable");
   });
 
-  it("demotes to unverified when Google token minting fails", async () => {
+  it("returns unavailable when Google token minting fails", async () => {
     const sa = await generateServiceAccountJson();
     fetchMock
       .get("https://oauth2.googleapis.com")
@@ -169,6 +176,46 @@ describe("integrity classification", () => {
         "a-real-looking-integrity-token",
         Date.now(),
       ),
-    ).resolves.toBe("unverified");
+    ).resolves.toBe("unavailable");
+  });
+});
+
+describe("integrity gating (integration)", () => {
+  beforeAll(() => {
+    fetchMock.activate();
+    fetchMock.disableNetConnect();
+  });
+  afterEach(() => fetchMock.assertNoPendingInterceptors());
+
+  it("rejects a failed verdict with ATTESTATION_FAILED/403", async () => {
+    const sa = await generateServiceAccountJson();
+    fetchMock
+      .get("https://oauth2.googleapis.com")
+      .intercept({ path: "/token", method: "POST" })
+      .reply(200, { access_token: "ya29.test", expires_in: 3600 });
+    fetchMock
+      .get("https://playintegrity.googleapis.com")
+      .intercept({
+        path: "/v1/com.arshadshah.nimaz:decodeIntegrityToken",
+        method: "POST",
+      })
+      .reply(200, {
+        tokenPayloadExternal: {
+          appIntegrity: { appRecognitionVerdict: "UNRECOGNIZED_VERSION" },
+          deviceIntegrity: { deviceRecognitionVerdict: [] },
+        },
+      });
+
+    const res = await app.request(
+      "/v1/invoke",
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(makeEnvelope(makeAssistInput())),
+      },
+      { ...env, SKIP_ATTESTATION: "false", GOOGLE_SERVICE_ACCOUNT_JSON: sa },
+    );
+    expect(res.status).toBe(403);
+    expect(((await res.json()) as any).error.code).toBe("ATTESTATION_FAILED");
   });
 });

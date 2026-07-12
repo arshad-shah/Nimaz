@@ -96,6 +96,15 @@ class AiRepositoryImplTest {
     }
 
     @Test
+    fun `403 maps to Unverified`() = runTest {
+        val body = """{"error":{"code":"ATTESTATION_FAILED","message":"not verified"}}"""
+        val result = repo { respond(body, HttpStatusCode.Forbidden, jsonHeaders()) }
+            .assist("q?")
+        assertThat((result.exceptionOrNull() as AiRequestException).error)
+            .isEqualTo(AiError.Unverified)
+    }
+
+    @Test
     fun `503 maps to BudgetExceeded`() = runTest {
         val body = """{"error":{"code":"BUDGET_EXCEEDED","message":"resting"}}"""
         val result = repo { respond(body, HttpStatusCode.ServiceUnavailable, jsonHeaders()) }

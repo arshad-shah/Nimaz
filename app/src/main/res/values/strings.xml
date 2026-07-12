@@ -1490,6 +1490,8 @@
     <string name="ai_error_rate_limited_retry">You can ask again in about %1$s. Keyword search across the Qur\'an, Hadith and duas still works offline in the meantime.</string>
     <string name="ai_error_budget_title">AI answers are paused for now</string>
     <string name="ai_error_budget">Answers are temporarily unavailable while shared usage resets. Keyword search still works offline, and your library is fully available.</string>
+    <string name="ai_error_unverified_title">This app copy couldn\'t be verified</string>
+    <string name="ai_error_unverified">AI answers are only available on the official app from Google Play. Keyword search across the Qur\'an, Hadith and duas still works offline.</string>
     <string name="ai_error_invalid_title">That question couldn\'t be processed</string>
     <string name="ai_error_invalid">Try rewording the question and ask again.</string>
     <string name="ai_error_unknown_title">Something went wrong</string>
