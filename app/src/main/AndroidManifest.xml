@@ -194,6 +194,26 @@
             android:exported="false"
             android:foregroundServiceType="mediaPlayback" />
 
+        <!-- FCM engagement announcements: foreground messages are handled by the
+             service (Home banner, no tray notification); backgrounded messages are
+             posted by the OS on the channel/icon/color declared below. -->
+        <service
+            android:name=".data.announcement.NimazMessagingService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_channel_id"
+            android:value="nimaz_announcements" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@drawable/ic_stat_nimaz" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/teal_700" />
+
         <!-- FileProvider for sharing exported files (e.g. prayer-times PDF) -->
         <provider
             android:name="androidx.core.content.FileProvider"
