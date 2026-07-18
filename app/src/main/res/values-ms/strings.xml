@@ -13,7 +13,6 @@
     <string name="widgets">Widget</string>
     <string name="today">Hari Ini</string>
     <string name="prayed">Telah Solat</string>
-    <string name="unknown">Tidak Diketahui</string>
     <string name="no_favorites_yet">Belum ada kegemaran</string>
     <string name="remove_from_favorites">Buang dari kegemaran</string>
     <string name="add_to_favorites">Tambah ke kegemaran</string>
@@ -40,19 +39,15 @@
     <string name="update_ready">Kemas kini sedia untuk dipasang</string>
     <string name="restart">Mulakan Semula</string>
     <string name="notifications_disabled_title">Pemberitahuan Dilumpuhkan</string>
-    <string name="notifications_disabled_message">Pemberitahuan solat memerlukan kebenaran untuk memaklumkan anda pada waktu solat.</string>
     <string name="enable">Aktifkan</string>
     <string name="location_permission_title">Kebenaran Lokasi Diperlukan</string>
-    <string name="location_permission_message">Lokasi diperlukan untuk mengira waktu solat yang tepat bagi kawasan anda.</string>
     <string name="grant">Benarkan</string>
     <string name="battery_optimization_title">Pengoptimuman Bateri Aktif</string>
-    <string name="battery_optimization_message">Pengoptimuman bateri mungkin menghalang pemberitahuan solat yang tepat pada masanya.</string>
     <string name="fix">Betulkan</string>
     <string name="jumuah_mubarak">Jumaat Mubarak</string>
     <string name="khutbah_time">Waktu khutbah</string>
     <string name="jumuah_passed">Waktu solat Jumaat telah berlalu</string>
     <string name="time_until_jumuah">Masa sehingga Jumaat</string>
-    <string name="jumuah_hadith">"Hari terbaik di mana matahari terbit ialah hari Jumaat." \u2014 Sahih Muslim</string>
     <string name="prayer_settings">Tetapan Solat</string>
     <string name="calculation_method">Kaedah Pengiraan</string>
     <string name="calculation_method_subtitle">Tetapan pengiraan waktu solat</string>
@@ -101,12 +96,6 @@
     <string name="prayer_times_menu_subtitle">Waktu solat harian dengan paparan bulanan</string>
     <string name="zakat">Zakat</string>
     <string name="zakat_subtitle">Kalkulator zakat</string>
-    <string name="calculation_method_menu_subtitle">Parameter pengiraan waktu solat</string>
-    <string name="notifications_menu_subtitle">Peringatan dan amaran solat</string>
-    <string name="location_menu_subtitle">Urus lokasi untuk waktu solat</string>
-    <string name="appearance_menu_subtitle">Tema, warna dan paparan</string>
-    <string name="language_menu_subtitle">Keutamaan bahasa aplikasi</string>
-    <string name="widgets_menu_subtitle">Tetapan widget skrin utama</string>
     <string name="support">Sokongan</string>
     <string name="about_nimaz">Tentang Nimaz</string>
     <string name="about_nimaz_subtitle">Versi, kredit dan maklumat</string>
@@ -121,16 +110,12 @@
     <string name="delete_all_data_dialog_title">Padam Semua Data</string>
     <string name="delete_all_data_dialog_message">Ini akan memadamkan semua data anda secara kekal termasuk penjejakan solat, penanda buku, sejarah tasbih dan tetapan. Tindakan ini tidak boleh dibatalkan.</string>
     <string name="about">Tentang</string>
-    <string name="app_description">Aplikasi teman Islam yang komprehensif dengan waktu solat yang tepat, arah kiblat, bacaan Al-Quran dan banyak lagi.</string>
     <string name="about_tagline">Teman Islami harian anda — waktu solat tepat, Al-Quran, kiblat dan banyak lagi.</string>
     <string name="about_rate">Nilai</string>
     <string name="about_share">Kongsi</string>
-    <string name="about_updates">Kemas kini</string>
     <string name="links">Pautan</string>
     <string name="developer">Pembangun</string>
     <string name="data_sources_credits">Sumber Data &amp; Kredit</string>
-    <string name="rate_play_store">Nilaikan di Play Store</string>
-    <string name="rate_play_store_subtitle">Bantu kami menjangkau lebih ramai umat Islam</string>
     <string name="contact_support">Hubungi Sokongan</string>
     <string name="contact_email">arshad@arshadshah.com</string>
     <string name="website">Laman Web</string>
@@ -152,8 +137,6 @@
     <string name="update_tap_to_check">Ketik untuk semak</string>
     <string name="developer_name">Arshad Shah</string>
     <string name="developer_role">Jurutera Perisian di HMH, Dublin</string>
-    <string name="developer_education">BSc Sains Komputer, TU Dublin</string>
-    <string name="developer_location">Dublin, Ireland</string>
     <string name="credit_quran_text">Teks Al-Quran</string>
     <string name="credit_tanzil">Tanzil.net</string>
     <string name="credit_translations">Terjemahan</string>
@@ -166,53 +149,16 @@
     <string name="credit_quran_com">Quran.com</string>
     <string name="credit_hijri_calendar">Kalendar Hijri</string>
     <string name="credit_islamic_finder">Islamic Finder</string>
-    <string name="github">GitHub</string>
-    <string name="linkedin">LinkedIn</string>
-    <string name="email">E-mel</string>
     <string name="made_with">Dibuat dengan </string>
     <string name="for_the_ummah"> untuk Ummah</string>
     <string name="copyright_format">\u00A9 %d Nimaz. Hak cipta terpelihara.</string>
-    <string name="help_intro_title">Bagaimana kami boleh membantu?</string>
-    <string name="help_intro_subtitle">Layari soalan lazim, ketahui cara setiap ciri berfungsi, dan selesaikan masalah — atau hubungi kami dan kami akan membalas.</string>
-    <string name="feature_guides">Panduan Ciri</string>
-    <string name="contact_us">Hubungi Kami</string>
-    <string name="email_support">Sokongan E-mel</string>
-    <string name="support_email">info@arshadshah.com</string>
     <string name="nimaz_support_request">Permintaan Sokongan Nimaz</string>
-    <string name="send_email">Hantar E-mel</string>
-    <string name="troubleshooting_title">Penyelesaian Masalah</string>
     <string name="guide_qibla_title">Kompas Kiblat</string>
-    <string name="trouble_times_wrong_title">Waktu solat kelihatan salah atau tersasar kira-kira sejam</string>
-    <string name="trouble_times_wrong_symptom">Satu atau lebih waktu solat kelihatan terlalu awal atau terlalu lewat, kadangkala kira-kira sejam.</string>
-    <string name="trouble_times_wrong_solution">Buka Lagi > Tetapan > Kaedah Pengiraan dan sahkan bahawa kaedah pengiraan, kaedah Asar, dan peraturan latitud tinggi sepadan dengan yang digunakan oleh kawasan atau masjid anda. Kemudian buka Lagi > Tetapan > Lokasi dan pastikan bandar anda betul dan bukan lokasi manual yang lama. Perbezaan kira-kira sejam biasanya merupakan isu zon waktu atau waktu penjimatan siang, jadi tetapkan tarikh, masa, dan zon waktu telefon anda kepada automatik. Akhirnya, kosongkan sebarang nilai yang tidak disengajakan di bawah Pelarasan Manual (Minit).</string>
-    <string name="trouble_no_notifications_title">Tiada pemberitahuan solat atau azan</string>
-    <string name="trouble_no_notifications_symptom">Pemberitahuan solat atau azan tidak muncul pada waktu solat.</string>
-    <string name="trouble_no_notifications_solution">Dalam Lagi > Tetapan > Pemberitahuan, hidupkan Dayakan Pemberitahuan dan solat yang anda mahukan. Pada Android 13 dan lebih baharu, berikan kebenaran pemberitahuan apabila diminta atau dalam tetapan aplikasi sistem. Pada Android 12 dan lebih baharu, benarkan penggera tepat untuk Nimaz dalam tetapan Penggera dan peringatan sistem. Kemudian ketik Lumpuhkan Pengoptimuman Bateri pada skrin yang sama, dan pastikan Jangan Ganggu dimatikan atau Hormati Jangan Ganggu dilumpuhkan. Pada telefon Samsung, Xiaomi atau MIUI, Oppo, dan Huawei, juga benarkan Nimaz berjalan di latar belakang dan matikan sebarang tetapan bateri atau pembunuh tugas yang agresif. Gunakan Uji Pemberitahuan untuk mengesahkan.</string>
-    <string name="trouble_adhan_silent_title">Pemberitahuan azan muncul tetapi tiada bunyi</string>
-    <string name="trouble_adhan_silent_symptom">Pemberitahuan solat muncul, tetapi azan tidak memainkan sebarang bunyi.</string>
-    <string name="trouble_adhan_silent_solution">Buka Lagi > Tetapan > Pemberitahuan dan pastikan Dayakan Bunyi Azan dihidupkan dan muazin dipilih serta selesai dimuat turun. Azan dimainkan pada saluran penggera, jadi naikkan kelantangan penggera dan media serta pastikan telefon tidak dalam mod senyap. Jika anda hanya mahukan nada ringkas, pilih Bip Ringkas. Anda juga boleh membuka tetapan pemberitahuan sistem untuk Nimaz dan mengesahkan bunyi saluran azan tidak dimatikan.</string>
-    <string name="trouble_location_title">Lokasi tidak dapat dikemaskini</string>
-    <string name="trouble_location_symptom">Waktu solat atau Kiblat menggunakan tempat yang salah, atau pengesanan lokasi semasa gagal.</string>
-    <string name="trouble_location_solution">Buka Lagi > Tetapan > Lokasi dan ketik Gunakan Lokasi Semasa. Berikan kebenaran lokasi apabila diminta dan pastikan GPS atau perkhidmatan lokasi telefon anda dihidupkan. Jika bandar yang dicari secara manual masih dipilih ia mengatasi pengesanan automatik, jadi cari dan pilih bandar yang betul atau gunakan lokasi semasa sekali lagi.</string>
-    <string name="trouble_qibla_title">Kiblat menunjuk ke arah yang salah</string>
-    <string name="trouble_qibla_symptom">Kompas Kiblat menunjuk ke arah yang salah atau terus-menerus hanyut.</string>
-    <string name="trouble_qibla_solution">Tentukur kompas dengan menggerakkan telefon anda dalam corak angka-8 sehingga ketepatan menunjukkan Sederhana atau Tinggi, dan jauhkan diri daripada objek logam, magnet, pembesar suara, dan elektronik yang mengganggu sensor magnet. Sahkan lokasi anda betul dalam Lagi > Tetapan > Lokasi. Sesetengah telefon mempunyai sensor magnet yang lemah atau tiada; pada peranti tersebut, bandingkan bacaan dengan arah yang diketahui sebelum bergantung padanya.</string>
-    <string name="trouble_background_title">Nimaz berhenti berfungsi di latar belakang</string>
-    <string name="trouble_background_symptom">Pemberitahuan berhenti tiba selepas aplikasi ditutup untuk seketika, terutamanya pada jenama tertentu.</string>
-    <string name="trouble_background_solution">Lumpuhkan pengoptimuman bateri untuk Nimaz dari Lagi > Tetapan > Pemberitahuan, dan dalam tetapan sistem anda benarkan aplikasi berjalan di latar belakang serta matikan sebarang penjimat bateri atau pembunuh tugas untuk Nimaz. Pengeluar seperti Samsung, Xiaomi atau MIUI, Oppo, dan Huawei amat agresif; laman web dontkillmyapp.com mempunyai arahan langkah demi langkah untuk setiap jenama. Selepas melaraskan tetapan ini, kembali ke Lagi > Tetapan > Pemberitahuan dan ketik Tetapkan Semula Pemberitahuan untuk menjadualkan semula.</string>
-    <string name="trouble_hijri_title">Tarikh Hijri tersasar sehari</string>
-    <string name="trouble_hijri_symptom">Tarikh Hijri atau tarikh peristiwa Islam sehari lebih awal atau lewat daripada yang dijangkakan.</string>
-    <string name="trouble_hijri_solution">Nimaz menggunakan kalendar Hijri yang dikira, yang boleh berbeza sehari daripada tarikh yang ditetapkan oleh rukyah bulan tempatan, kerana pengiraan dan rukyah tidak selalu bersetuju. Pada masa ini tiada pelarasan hari manual, jadi aplikasi mengikut tarikh yang dikira. Untuk pemerhatian keagamaan, bergantunglah kepada pihak berkuasa rukyah bulan tempatan anda. Kalendar Hijri tersedia di bawah Lagi > Alatan > Kalendar.</string>
-    <string name="trouble_quran_audio_title">Audio Al-Quran atau azan tidak dapat dimuat turun atau dimainkan</string>
-    <string name="trouble_quran_audio_symptom">Audio bacaan atau azan gagal dimuat turun, atau main balik tidak bermula.</string>
-    <string name="trouble_quran_audio_solution">Fail audio dimuat turun pada kali pertama anda memainkannya, jadi pastikan anda mempunyai sambungan internet yang berfungsi dan storan percuma yang mencukupi. Untuk bacaan, buka Tetapan Al-Quran, ketik Pembaca, dan biarkan pembaca yang dipilih selesai dimuat turun sebelum dimainkan. Untuk azan, buka Lagi > Tetapan > Pemberitahuan dan sahkan muazin yang dipilih ditunjukkan sebagai telah dimuat turun. Jika muat turun terhenti, tukar ke rangkaian lain dan cuba lagi, atau pilih Bip Ringkas sebagai alternatif untuk azan.</string>
     <string name="compass">Kompas</string>
     <string name="ar">AR</string>
     <string name="facing_qibla">Menghadap Kiblat</string>
     <string name="turn_right_format">Pusing kanan %d\u00B0</string>
     <string name="turn_left_format">Pusing kiri %d\u00B0</string>
-    <string name="qibla_direction_format">%s \u2022 Arah Kiblat</string>
-    <string name="km_to_mecca_format">%s km ke Makkah</string>
     <string name="compass_accuracy">Ketepatan Kompas</string>
     <string name="calibrate">Tentukur</string>
     <string name="calibrate_compass">Tentukur Kompas</string>
@@ -237,20 +183,7 @@
     <string name="grant_permission">Beri Kebenaran</string>
     <string name="not_now">Bukan Sekarang</string>
     <string name="unknown_error">Ralat tidak diketahui</string>
-    <string name="direction_north">Utara</string>
-    <string name="direction_northeast">Timur Laut</string>
-    <string name="direction_east">Timur</string>
-    <string name="direction_southeast">Tenggara</string>
-    <string name="direction_south">Selatan</string>
-    <string name="direction_southwest">Barat Daya</string>
-    <string name="direction_west">Barat</string>
-    <string name="direction_northwest">Barat Laut</string>
-    <string name="direction_n">U</string>
-    <string name="direction_e">T</string>
-    <string name="direction_s">S</string>
-    <string name="direction_w">B</string>
     <string name="prayer_settings_title">Tetapan Solat</string>
-    <string name="calculation_method_section">KAEDAH PENGIRAAN</string>
     <string name="asr_calculation">Pengiraan Asar</string>
     <string name="asr_standard">Standard (Syafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
@@ -280,45 +213,23 @@
     <string name="prophets_place">Tempat Berdakwah</string>
     <string name="khatam_title">Khatam Al-Quran</string>
     <string name="khatam_active">Khatam Aktif</string>
-    <string name="khatam_in_progress">Sedang Berjalan</string>
-    <string name="khatam_completed">Selesai</string>
-    <string name="khatam_abandoned">Ditinggalkan</string>
-    <string name="khatam_stats_title">Gambaran Keseluruhan</string>
-    <string name="khatam_ayahs_read">Ayat Dibaca</string>
-    <string name="khatam_daily_target">Sasaran Harian</string>
     <string name="khatam_start_new">Mulakan Khatam Baharu</string>
     <string name="khatam_no_in_progress">Tiada khatam sedang berjalan</string>
     <string name="khatam_no_completed">Tiada khatam yang selesai</string>
-    <string name="khatam_no_abandoned">Tiada khatam yang ditinggalkan</string>
     <string name="khatam_set_active">Tetapkan sebagai Aktif</string>
-    <string name="khatam_abandon">Tinggalkan</string>
-    <string name="khatam_reactivate">Aktifkan Semula</string>
     <string name="khatam_delete_title">Padam Khatam</string>
     <string name="khatam_delete_message">Adakah anda pasti mahu memadamkan \"%s\"? Tindakan ini tidak boleh dibatalkan.</string>
-    <string name="khatam_ayahs_format">%1$d / %2$d ayat</string>
-    <string name="khatam_ayahs_read_count">%d Ayat Dibaca</string>
-    <string name="khatam_per_day_format">%d / hari</string>
-    <string name="khatam_created_format">Dicipta %s</string>
     <string name="khatam_no_started">Tiada Khatam Dimulakan</string>
     <string name="khatam_start_journey">Mulakan perjalanan anda untuk menyempurnakan Al-Quran</string>
     <string name="khatam_new">Khatam Baharu</string>
     <string name="khatam_name_label">Nama Khatam</string>
     <string name="khatam_name_placeholder">cth., Khatam Ramadan 2026</string>
-    <string name="khatam_ayahs_unit">%d ayat</string>
-    <string name="khatam_estimated_completion">Anggaran selesai: ~%d hari</string>
     <string name="khatam_notes_label">Nota (Pilihan)</string>
     <string name="khatam_notes_placeholder">Sebarang nota peribadi\u2026</string>
-    <string name="khatam_creating">Mencipta\u2026</string>
-    <string name="khatam_start">Mulakan Khatam</string>
     <string name="khatam_detail">Perincian Khatam</string>
     <string name="khatam_continue_reading">Teruskan Membaca</string>
-    <string name="khatam_juz_progress">Kemajuan Juzuk</string>
-    <string name="khatam_daily_reading">Bacaan Harian</string>
     <string name="khatam_of_ayahs_read">%1$d daripada %2$d ayat dibaca</string>
-    <string name="khatam_days_active">Hari Aktif</string>
     <string name="khatam_avg_pace">Purata Kadar</string>
-    <string name="khatam_target">Sasaran</string>
-    <string name="khatam_pace_per_day">%d/hari</string>
 
     <!-- Khatam: status and pace -->
     <string name="khatam_archived">Diarkibkan</string>
@@ -368,7 +279,6 @@
     <string name="khatam_action_save">Simpan perubahan</string>
     <string name="khatam_action_begin">Mulakan Khatam</string>
     <string name="khatam_edit_progress_note">Menyunting tidak akan mengubah kemajuan anda</string>
-    <string name="khatam_section_danger">Zon bahaya</string>
     <string name="khatam_action_archive">Arkibkan Khatam ini</string>
     <string name="khatam_action_delete">Padam secara kekal</string>
     <string name="khatam_archive_title">Arkibkan Khatam</string>
@@ -377,9 +287,6 @@
     <string name="khatam_error_save_failed">Gagal menyimpan. Sila cuba lagi.</string>
 
     <!-- Khatam: counted quantities -->
-    <plurals name="khatam_ayahs_count">
-        <item quantity="other">%1$d ayat</item>
-    </plurals>
     <plurals name="khatam_ayahs_read_plural">
         <item quantity="other">%1$d ayat dibaca</item>
     </plurals>
@@ -388,12 +295,6 @@
     </plurals>
     <plurals name="khatam_days_remaining">
         <item quantity="other">~%1$d hari berbaki</item>
-    </plurals>
-    <plurals name="khatam_days_count">
-        <item quantity="other">%1$d hari</item>
-    </plurals>
-    <plurals name="khatam_juz_completed_count">
-        <item quantity="other">%1$d juzuk selesai</item>
     </plurals>
 
     <!-- Khatam: widget -->
@@ -411,7 +312,6 @@
     <string name="khatam_widget_description">Kemajuan khatam Al-Quran anda</string>
     <string name="khatam_widget_no_active">Tiada Khatam aktif</string>
     <string name="khatam_widget_start">Mulakan satu</string>
-    <string name="khatam_widget_continue">Teruskan membaca</string>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Peringatan khatam</string>
@@ -420,12 +320,6 @@
     <string name="notif_khatam_body_on_track">%1$s · anda mengikut kadar. %2$d ayat untuk terus meneruskannya.</string>
     <string name="notif_khatam_body_behind">%1$s · %2$d ayat hari ini untuk kembali mengikut kadar.</string>
     <string name="notif_khatam_body_generic">%1$s · %2$d ayat untuk dibaca hari ini.</string>
-    <string name="notif_khatam_action_read">Baca sekarang</string>
-    <string name="qibla_ar_heading">Arah Hadapan</string>
-    <string name="qibla_ar_bearing">Bearing Kiblat</string>
-    <string name="qibla_ar_facing">Menghadap Kiblat</string>
-    <string name="qibla_ar_distance">Jarak</string>
-    <string name="qibla_ar_accuracy">Ketepatan</string>
     <string name="widget_hijri_date_description">Memaparkan tarikh Hijri semasa</string>
     <string name="widget_next_prayer_description">Memaparkan waktu solat seterusnya dan kira detik</string>
     <string name="widget_prayer_times_description">Memaparkan semua waktu solat untuk hari ini</string>
@@ -453,14 +347,7 @@
     <string name="missed">Tertinggal</string>
     <string name="made_up">Diqadakan</string>
     <string name="upcoming">Akan datang</string>
-    <string name="tasbih">Tasbih</string>
-    <string name="tasbih_title">Tasbih</string>
     <string name="history">Sejarah</string>
-    <string name="add_preset">Tambah Pratetap</string>
-    <string name="today_upper">HARI INI</string>
-    <string name="rounds">PUSINGAN</string>
-    <string name="sessions_upper">SESI</string>
-    <string name="quick_presets">PRATETAP PANTAS</string>
     <string name="target_format">Sasaran: %d</string>
     <string name="tap_to_count">Ketik untuk mengira</string>
     <string name="reset_action">Tetapkan Semula</string>
@@ -474,7 +361,6 @@
     <string name="custom">Tersuai</string>
     <string name="laps_format">%d pusingan</string>
     <string name="done">Selesai</string>
-    <string name="add_preset_title">Tambah Pratetap</string>
     <string name="name_required">Nama *</string>
     <string name="name_required_error">Nama diperlukan</string>
     <string name="preset_name_placeholder">cth., SubhanAllah wa Bihamdihi</string>
@@ -486,7 +372,6 @@
     <string name="translation_placeholder">cth., Maha Suci Allah dan segala puji bagi-Nya</string>
     <string name="target_count">Kiraan Sasaran</string>
     <string name="category">Kategori</string>
-    <string name="save_preset">Simpan Pratetap</string>
     <string name="duas_adhkar">Doa &amp; Zikir</string>
     <string name="bookmarks">Penanda Buku</string>
     <string name="daily_adhkar">Zikir Harian</string>
@@ -495,7 +380,6 @@
     <string name="bookmarks_title">Penanda Buku</string>
     <string name="no_bookmarks_yet">Belum Ada Penanda Buku</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis dan doa untuk akses pantas</string>
-    <string name="quran_verses">Ayat Al-Quran</string>
     <string name="share">Kongsi</string>
     <string name="added_format">Ditambah %s</string>
     <string name="quran_type">Al-Quran</string>
@@ -511,7 +395,6 @@
     <string name="read_today">Dibaca Hari Ini</string>
     <string name="bookmarked">Ditanda Buku</string>
     <string name="day_streak">Rekod Hari</string>
-    <string name="share_hadith">Kongsi Hadis</string>
     <string name="kutub_al_sittah">Kutub al-Sittah</string>
     <string name="bookmark">Tanda Buku</string>
     <string name="hadith_count_format">%s hadis</string>
@@ -519,15 +402,12 @@
     <string name="search_placeholder">Cari Al-Quran, Hadis, Doa\u2026</string>
     <string name="search_or_ask_placeholder">Cari atau tanya soalan\u2026</string>
     <string name="recent_searches">Carian Terkini</string>
-    <string name="clear_recent">Kosongkan Terkini</string>
-    <string name="results_found_format">%d hasil ditemui</string>
     <string name="no_results_format">Tiada hasil untuk \"%s\"</string>
     <string name="no_results_hint">Cuba kata kunci atau penapis yang berbeza</string>
     <string name="remove">Buang</string>
     <string name="surah_ayahs_format">%1$s \u2022 %2$d ayat</string>
     <string name="zakat_calculator">Kalkulator Zakat</string>
     <string name="zakat_due">Zakat Perlu Dibayar</string>
-    <string name="zakat_rate_hint">2.5%% daripada harta yang layak</string>
     <string name="assets">Aset</string>
     <string name="cash_on_hand">Wang Tunai di Tangan</string>
     <string name="bank_balance">Baki Bank</string>
@@ -540,26 +420,13 @@
     <string name="other_assets">Aset Lain</string>
     <string name="liabilities">Liabiliti</string>
     <string name="debts_owed">Hutang Tertunggak</string>
-    <string name="expenses_due">Perbelanjaan Tertunggak</string>
     <string name="other_liabilities">Liabiliti Lain</string>
     <string name="total_assets">Jumlah Aset</string>
     <string name="total_liabilities">Jumlah Liabiliti</string>
     <string name="net_zakatable_wealth">Harta Bersih Wajib Zakat</string>
     <string name="nisab_threshold">Ambang Nisab</string>
     <string name="meets_nisab">Mencapai Nisab</string>
-    <string name="yes">Ya</string>
-    <string name="no">Tidak</string>
-    <string name="zakat_due_rate">Zakat Perlu Dibayar (2.5%%)</string>
     <string name="save_calculation">Simpan Pengiraan</string>
-    <string name="zakat_history">Sejarah</string>
-    <string name="enter_amount">Masukkan jumlah</string>
-    <string name="gold_nisab">Emas</string>
-    <string name="silver_nisab">Perak</string>
-    <string name="nisab_gold_price_format">Emas (%s/g)</string>
-    <string name="nisab_silver_price_format">Perak (%s/g)</string>
-    <string name="nisab_above_format">Harta anda melebihi ambang nisab. Zakat adalah wajib.</string>
-    <string name="nisab_below_format">Harta anda di bawah ambang nisab. Zakat tidak wajib.</string>
-    <string name="breakdown">Pecahan</string>
     <string name="loans">Pinjaman</string>
     <string name="bills_due">Bil Tertunggak</string>
     <string name="hint_physical_cash">Wang tunai fizikal yang anda miliki</string>
@@ -575,10 +442,6 @@
     <string name="hint_outstanding_bills">Bil yang belum dibayar</string>
     <string name="hint_other_liabilities">Sebarang liabiliti lain</string>
     <string name="calculation_breakdown">Pecahan Pengiraan</string>
-    <string name="nisab_above_detail_format">Harta anda melebihi ambang nisab %1$s sebanyak %2$s</string>
-    <string name="nisab_below_detail_format">Ambang nisab (%1$s): %2$s</string>
-    <string name="nisab_gold_subtitle_format">87.48g @ $%d/g</string>
-    <string name="nisab_silver_subtitle_format">612.36g @ $%s/g</string>
     <string name="name_detail">Perincian Nama</string>
     <string name="prophet_detail">Perincian Nabi</string>
     <string name="language_title">Bahasa</string>
@@ -616,20 +479,12 @@
     <string name="quran_home_jump_to_page">Lompat ke Halaman (1–604)</string>
     <string name="quran_home_enter_page_number">Masukkan nombor halaman</string>
     <string name="quran_home_go_to_page">Pergi ke halaman</string>
-    <string name="quran_home_juz_label">Juzuk</string>
-    <string name="quran_home_juz_pages_format">Juzuk %1$d (Halaman %2$d–%3$d)</string>
     <string name="quran_home_verse_format">Ayat %1$d</string>
     <string name="quran_home_juz_format">Juzuk %1$d</string>
     <string name="quran_home_page_format">Halaman %1$d</string>
     <string name="quran_home_surah_fallback">Surah %1$d</string>
     <string name="quran_home_continue_reading">TERUSKAN MEMBACA</string>
-    <string name="quran_home_percent_complete">%1$d%% selesai</string>
     <string name="quran_home_completed">Selesai</string>
-    <string name="quran_home_completed_count">%1$d selesai</string>
-    <string name="quran_home_ayahs_read">Ayat Dibaca</string>
-    <string name="quran_home_remaining">Baki</string>
-    <string name="quran_home_start_khatam">Mulakan Khatam</string>
-    <string name="quran_home_track_progress">Jejaki kemajuan bacaan Al-Quran anda</string>
     <string name="quran_home_makkah">Makkah</string>
     <string name="quran_home_madinah">Madinah</string>
     <string name="quran_home_verses_count">%1$d Ayat</string>
@@ -655,15 +510,10 @@
     <string name="dua_reader_added_tasbih">Ditambah ke Tasbih</string>
     <string name="dua_reader_prev">Sblm</string>
     <string name="dua_reader_next">Strs</string>
-    <string name="dua_reader_index_format">%1$d daripada …</string>
-    <string name="dua_reader_first_dua">Ini adalah doa pertama</string>
-    <string name="dua_reader_source">Sumber</string>
-    <string name="dua_reader_recommended">Disyorkan</string>
     <string name="dua_reader_recite_once">Baca %1$d kali</string>
     <string name="dua_reader_recite_times">Baca %1$d kali</string>
     <string name="dua_reader_virtue">Kelebihan Doa Ini</string>
     <string name="dua_reader_share">Kongsi</string>
-    <string name="dua_reader_done">Selesai</string>
     <string name="dua_reader_source_label">Sumber: %1$s</string>
     <string name="dua_reader_not_found">Doa tidak dijumpai</string>
     <!-- Dua Settings Screen -->
@@ -678,7 +528,6 @@
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Penjejak</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
-    <string name="fasting_tab_voluntary">Sunat</string>
     <string name="fasting_tab_makeup">Ganti</string>
     <string name="fasting_title">Puasa</string>
     <string name="fasting_current">SEMASA</string>
@@ -721,7 +570,6 @@
     <string name="fasting_makeup_info">Puasa ganti sebaik-baiknya diselesaikan sebelum Ramadan seterusnya. Berpuasa pada hari Isnin dan Khamis adalah disyorkan.</string>
     <string name="fasting_pending_count">%1$d belum selesai</string>
     <string name="fasting_fasts_count">%1$d puasa</string>
-    <string name="fasting_edit_coming_soon">Dialog edit puasa ganti akan datang</string>
     <string name="fasting_pending">Belum Selesai</string>
     <string name="fasting_edit">Edit</string>
     <string name="fasting_mark_complete">Tandakan Selesai</string>
@@ -772,9 +620,6 @@
     <string name="notification_settings_prayer_notification">Pemberitahuan solat</string>
     <string name="notification_settings_sound_on">Bunyi hidup</string>
     <string name="notification_settings_sound_off">Bunyi mati</string>
-    <string name="notification_settings_downloaded">Dimuat turun</string>
-    <string name="notification_settings_stop">Berhenti</string>
-    <string name="notification_settings_download_play">Muat Turun dan Main</string>
     <string name="notification_settings_preview">Pratonton</string>
     <!-- Onboarding -->
     <string name="onboarding_welcome_title">Selamat Datang ke Nimaz</string>
@@ -801,18 +646,6 @@
     <string name="onboarding_feature_audio">Bacaan audio</string>
     <string name="onboarding_feature_bookmarks">Penanda buku dan nota</string>
     <string name="onboarding_feature_search">Fungsi carian</string>
-    <string name="onboarding_feature_auto_location">Pengesanan lokasi automatik</string>
-    <string name="onboarding_feature_precise_times">Waktu solat tepat</string>
-    <string name="onboarding_feature_qibla">Arah kiblat tepat</string>
-    <string name="onboarding_feature_distance_mecca">Jarak ke Makkah</string>
-    <string name="onboarding_feature_prayer_alerts">Amaran waktu solat</string>
-    <string name="onboarding_feature_adhan_sounds">Bunyi azan tersuai</string>
-    <string name="onboarding_feature_pre_reminders">Peringatan pra-solat</string>
-    <string name="onboarding_feature_quiet_hours">Sokongan waktu senyap</string>
-    <string name="onboarding_feature_reliable_notif">Pemberitahuan boleh dipercayai</string>
-    <string name="onboarding_feature_background_alerts">Amaran solat latar belakang</string>
-    <string name="onboarding_feature_consistent_reminders">Peringatan konsisten</string>
-    <string name="onboarding_feature_no_missed">Tiada solat terlepas</string>
     <string name="onboarding_skip">Langkau</string>
     <string name="onboarding_back">Kembali</string>
     <string name="onboarding_next">Seterusnya</string>
@@ -842,10 +675,8 @@
     <string name="adhan_download_failed">Muat turun azan gagal</string>
     <string name="adhan_download_failed_subtitle">Semak sambungan internet anda dan cuba semula</string>
     <!-- Fasting sheet / Quran home / free-day labels -->
-    <string name="free_count">Bebas</string>
     <string name="free_count_label">Kiraan bebas</string>
     <string name="quran_home_page_range_format">ms. %1$d–%2$d</string>
-    <string name="quran_home_surah_starts">▸ %1$s bermula</string>
     <string name="quran_home_juz_indicator">Juzuk %1$d</string>
     <string name="fasting_sheet_status">Status</string>
     <string name="fasting_sheet_type">Jenis Puasa</string>
@@ -920,7 +751,6 @@
     <string name="cd_delete">Padam</string>
     <string name="cd_copy">Salin</string>
     <string name="cd_translation">Terjemahan</string>
-    <string name="cd_stop_preview">Hentikan pratonton</string>
     <string name="cd_stop_audio">Hentikan audio</string>
     <string name="cd_reset">Tetap semula</string>
     <string name="cd_previous_page">Halaman sebelumnya</string>
@@ -931,8 +761,6 @@
     <string name="cd_new_calculation">Pengiraan baharu</string>
     <string name="cd_increase">Tambah</string>
     <string name="cd_history">Sejarah</string>
-    <string name="cd_facing_qibla">Menghadap Kiblat</string>
-    <string name="cd_export_annotations">Eksport anotasi</string>
     <string name="cd_edit">Edit</string>
     <string name="cd_dismiss">Tolak</string>
     <string name="cd_decrease">Kurang</string>
@@ -965,9 +793,6 @@
     <string name="tasbih_stat_today">HARI INI</string>
     <string name="tasbih_stat_laps">PUSINGAN</string>
     <string name="tasbih_change_dhikr">Tukar Zikir</string>
-    <string name="tasbih_target_value">Sasaran  %d</string>
-    <string name="tasbih_decrease_target">Kurangkan sasaran</string>
-    <string name="tasbih_increase_target">Tambah sasaran</string>
     <string name="tasbih_bead_wood">Kayu</string>
     <string name="tasbih_bead_marble">Marmar</string>
     <string name="tasbih_bead_amethyst">Ametis</string>
@@ -1071,7 +896,6 @@
     <string name="location_search_hint">Cari bandar atau alamat…</string>
     <string name="location_search_results">Hasil Carian</string>
     <string name="location_recent">Terkini</string>
-    <string name="location_popular_cities">Bandar Popular</string>
     <string name="location_detecting">Mengesan…</string>
     <string name="location_not_set">Belum ditetapkan</string>
     <string name="location_current">Semasa</string>
@@ -1103,15 +927,12 @@
     <string name="unread">Belum dibaca</string>
     <string name="listen">Dengar</string>
     <string name="days_count_format">%1$d hari</string>
-    <string name="quran_verses_label">Ayat</string>
-    <string name="quran_revelation_label">Penurunan</string>
     <string name="quran_order_label">Susunan</string>
     <string name="quran_juz_label">Juz</string>
     <string name="quran_makki">Makki</string>
     <string name="quran_madani">Madani</string>
     <string name="quran_meccan">Makki</string>
     <string name="quran_medinan">Madani</string>
-    <string name="quran_ayahs_count_format">%1$d Ayah</string>
     <string name="juz_page_dot_format">Juz %1$d • Halaman %2$d</string>
     <string name="page_range_format">Halaman %1$d–%2$d</string>
     <string name="page_single_format">Halaman %1$d</string>
@@ -1121,10 +942,8 @@
     <string name="unknown_date">Tarikh tidak diketahui</string>
     <string name="hadith_chapter_format">Bab %1$d</string>
     <string name="no_hadith_found">Tiada hadith ditemui</string>
-    <string name="hadith_of_count_format">daripada %1$d</string>
     <string name="hadith_narrated_by_format">Diriwayatkan oleh %1$s</string>
     <string name="hadith_isnad">Rantaian Periwayatan (Isnad)</string>
-    <string name="hadith_reader_not_found">Hadis tidak dijumpai</string>
     <string name="hadith_copied">Disalin ke papan keratan</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
@@ -1144,7 +963,6 @@
     <string name="ramadan_year_format">Ramadan %1$d</string>
     <string name="monthly_full_month_subtitle">Sebulan penuh · 1 → hari terakhir</string>
     <string name="ramadan_month_label">BULAN RAMADAN</string>
-    <string name="cd_prayer_settings">Tetapan solat</string>
     <string name="cd_previous_day">Hari sebelumnya</string>
     <string name="cd_pick_date">Pilih tarikh</string>
     <string name="cd_next_day">Hari seterusnya</string>
@@ -1162,7 +980,6 @@
     <string name="tafseer_no_notes">Belum ada nota. Tekan lama ulasan untuk menyorot dan menambah nota.</string>
     <string name="tafseer_read_in_format">Baca dalam %1$s</string>
     <string name="tafseer_no_commentary_format">Tiada tafsir %1$s untuk ayat ini</string>
-    <string name="tafseer_page_format">Halaman %1$d daripada %2$d</string>
     <string name="tafseer_add_note">Tambah nota…</string>
     <string name="prayer_sunrise">Matahari Terbit</string>
     <string name="high_latitude_method">Kaedah Latitud Tinggi</string>
@@ -1342,7 +1159,6 @@
     <string name="tafseer_delete_highlight_title">Padam sorotan?</string>
     <string name="tafseer_delete_highlight_message">Ini akan membuang sorotan dan sebarang nota yang dilampirkan. Tindakan ini tidak boleh dibatalkan.</string>
     <string name="cd_share_tafseer">Kongsi tafsir</string>
-    <string name="tafseer_share_chooser">Kongsi tafsir</string>
     <string name="tafseer_pdf_header">TAFSIR</string>
     <string name="tafseer_pdf_commentary">Ulasan</string>
     <string name="tafseer_pdf_notes">Nota saya</string>
@@ -1367,7 +1183,6 @@
     <string name="prayer_settings_notifications_off">Pemberitahuan dimatikan</string>
     <string name="prayer_settings_prayers_enabled_count">%1$d daripada %2$d solat diaktifkan</string>
     <string name="prayer_settings_reminder_off">Mati</string>
-    <string name="share_card_footer">Dikongsi dengan Nimaz</string>
     <string name="share_card_tagline">Teman Islami</string>
     <string name="share_eyebrow_dua">Dua</string>
     <string name="share_eyebrow_hadith">Hadith</string>
@@ -1386,7 +1201,6 @@
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Carian &amp; AI</string>
     <string name="search_settings_subtitle">Jawapan AI dan privasi</string>
-    <string name="dismiss">Tutup</string>
     <string name="ai_answers">Jawapan AI</string>
     <string name="ai_answers_enable">Dayakan jawapan AI</string>
     <string name="ai_answers_enable_subtitle">Ajukan soalan dan dapatkan jawapan dengan ayat dan hadis daripada pustaka anda sebagai bukti</string>
@@ -1399,8 +1213,6 @@
     <string name="ai_clear_history_subtitle">Buang semua soalan AI yang disimpan</string>
     <string name="ai_consent_title">Dayakan jawapan AI?</string>
     <string name="ai_consent_enable">Dayakan</string>
-    <string name="ai_ask_a_question">Ajukan soalan</string>
-    <string name="ai_ask_placeholder">Tanya tentang Quran, Hadis, atau Doa…</string>
     <string name="ai_answer_section">Jawapan AI</string>
     <string name="ai_thinking">Mencari jawapan…</string>
     <string name="ai_confidence_high">Keyakinan tinggi</string>

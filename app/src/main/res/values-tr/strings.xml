@@ -13,7 +13,6 @@
     <string name="widgets">Widget\'lar</string>
     <string name="today">Bugün</string>
     <string name="prayed">Kılındı</string>
-    <string name="unknown">Bilinmiyor</string>
     <string name="no_favorites_yet">Henüz favori yok</string>
     <string name="remove_from_favorites">Favorilerden kaldır</string>
     <string name="add_to_favorites">Favorilere ekle</string>
@@ -40,19 +39,15 @@
     <string name="update_ready">Güncelleme yüklenmeye hazır</string>
     <string name="restart">Yeniden Başlat</string>
     <string name="notifications_disabled_title">Bildirimler Devre Dışı</string>
-    <string name="notifications_disabled_message">Namaz bildirimlerinin sizi namaz vakitlerinde uyarabilmesi için izin gereklidir.</string>
     <string name="enable">Etkinleştir</string>
     <string name="location_permission_title">Konum İzni Gerekli</string>
-    <string name="location_permission_message">Bulunduğunuz bölge için doğru namaz vakitlerini hesaplamak üzere konum bilgisi gereklidir.</string>
     <string name="grant">İzin Ver</string>
     <string name="battery_optimization_title">Pil Optimizasyonu Etkin</string>
-    <string name="battery_optimization_message">Pil optimizasyonu, namaz bildirimlerinin zamanında ulaşmasını engelleyebilir.</string>
     <string name="fix">Düzelt</string>
     <string name="jumuah_mubarak">Cuma Mübarek</string>
     <string name="khutbah_time">Hutbe vakti</string>
     <string name="jumuah_passed">Cuma namazı vakti geçti</string>
     <string name="time_until_jumuah">Cuma namazına kalan süre</string>
-    <string name="jumuah_hadith">"Güneşin doğduğu en hayırlı gün Cuma günüdür." — Sahih Muslim</string>
     <string name="prayer_settings">Namaz Ayarları</string>
     <string name="calculation_method">Hesaplama Yöntemi</string>
     <string name="calculation_method_subtitle">Namaz vakti hesaplama ayarları</string>
@@ -101,12 +96,6 @@
     <string name="prayer_times_menu_subtitle">Aylık görünümlü günlük namaz vakitleri</string>
     <string name="zakat">Zekat</string>
     <string name="zakat_subtitle">Zekat hesaplayıcı</string>
-    <string name="calculation_method_menu_subtitle">Namaz vakti hesaplama parametreleri</string>
-    <string name="notifications_menu_subtitle">Namaz uyarıları ve hatırlatmalar</string>
-    <string name="location_menu_subtitle">Namaz vakitleri için konumları yönet</string>
-    <string name="appearance_menu_subtitle">Tema, renkler ve görünüm</string>
-    <string name="language_menu_subtitle">Uygulama dil tercihleri</string>
-    <string name="widgets_menu_subtitle">Ana ekran widget ayarları</string>
     <string name="support">Destek</string>
     <string name="about_nimaz">Nimaz Hakkında</string>
     <string name="about_nimaz_subtitle">Sürüm, tanıtım ve bilgi</string>
@@ -121,16 +110,12 @@
     <string name="delete_all_data_dialog_title">Tüm Verileri Sil</string>
     <string name="delete_all_data_dialog_message">Bu işlem namaz takibi, yer imleri, tesbih geçmişi ve ayarlar dahil tüm verilerinizi kalıcı olarak silecektir. Bu işlem geri alınamaz.</string>
     <string name="about">Hakkında</string>
-    <string name="app_description">Doğru namaz vakitleri, kıble yönü, Kur\'an okuma ve daha fazlasını içeren kapsamlı bir İslami yardımcı uygulama.</string>
     <string name="about_tagline">Günlük İslami arkadaşınız — doğru namaz vakitleri, Kur\'an, kıble ve daha fazlası.</string>
     <string name="about_rate">Puan ver</string>
     <string name="about_share">Paylaş</string>
-    <string name="about_updates">Güncellemeler</string>
     <string name="links">Bağlantılar</string>
     <string name="developer">Geliştirici</string>
     <string name="data_sources_credits">Veri Kaynakları &amp; Emeği Geçenler</string>
-    <string name="rate_play_store">Play Store\'da Değerlendirin</string>
-    <string name="rate_play_store_subtitle">Daha fazla Müslümana ulaşmamıza yardımcı olun</string>
     <string name="contact_support">Desteğe Başvur</string>
     <string name="contact_email">arshad@arshadshah.com</string>
     <string name="website">Web Sitesi</string>
@@ -152,8 +137,6 @@
     <string name="update_tap_to_check">Kontrol etmek için dokunun</string>
     <string name="developer_name">Arshad Shah</string>
     <string name="developer_role">HMH, Dublin\'de Yazılım Mühendisi</string>
-    <string name="developer_education">Bilgisayar Bilimleri Lisans, TU Dublin</string>
-    <string name="developer_location">Dublin, Ireland</string>
     <string name="credit_quran_text">Kur\'an Metni</string>
     <string name="credit_tanzil">Tanzil.net</string>
     <string name="credit_translations">Çeviriler</string>
@@ -166,53 +149,16 @@
     <string name="credit_quran_com">Quran.com</string>
     <string name="credit_hijri_calendar">Hicri Takvim</string>
     <string name="credit_islamic_finder">Islamic Finder</string>
-    <string name="github">GitHub</string>
-    <string name="linkedin">LinkedIn</string>
-    <string name="email">E-posta</string>
     <string name="made_with">Ümmet için </string>
     <string name="for_the_ummah"> ile yapıldı</string>
     <string name="copyright_format">© %d Nimaz. Tüm hakları saklıdır.</string>
-    <string name="help_intro_title">Size nasıl yardımcı olabiliriz?</string>
-    <string name="help_intro_subtitle">Sık sorulan soruları inceleyin, her özelliğin nasıl çalıştığını öğrenin ve sorunları giderin — ya da bize ulaşın, size geri dönelim.</string>
-    <string name="feature_guides">Özellik Rehberleri</string>
-    <string name="contact_us">Bize Ulaşın</string>
-    <string name="email_support">E-posta Desteği</string>
-    <string name="support_email">info@arshadshah.com</string>
     <string name="nimaz_support_request">Nimaz Destek Talebi</string>
-    <string name="send_email">E-posta Gönder</string>
-    <string name="troubleshooting_title">Sorun Giderme</string>
     <string name="guide_qibla_title">Kıble Pusulası</string>
-    <string name="trouble_times_wrong_title">Namaz vakitleri yanlış veya yaklaşık bir saat hatalı görünüyor</string>
-    <string name="trouble_times_wrong_symptom">Bir veya birden fazla namaz vakti çok erken veya çok geç görünüyor; bazen yaklaşık bir saat fark oluyor.</string>
-    <string name="trouble_times_wrong_solution">Daha Fazla > Ayarlar > Hesaplama Yöntemi\'ni açın ve hesaplama yöntemi, İkindi yöntemi ve yüksek enlem kuralının bölgenizde veya caminizde kullanılanla eşleştiğini doğrulayın. Ardından Daha Fazla > Ayarlar > Konum\'u açın ve şehrinizin doğru olduğundan, eski manuel bir konum olmadığından emin olun. Yaklaşık bir saatlik fark genellikle saat dilimi veya yaz saati uygulaması sorunudur; bu nedenle telefonunuzun tarih, saat ve saat dilimini otomatik olarak ayarlayın. Son olarak Manuel Düzenlemeler (Dakika) altındaki istem dışı değerleri temizleyin.</string>
-    <string name="trouble_no_notifications_title">Namaz bildirimi veya ezan gelmiyor</string>
-    <string name="trouble_no_notifications_symptom">Namaz vakitlerinde namaz bildirimleri veya ezan gelmiyor.</string>
-    <string name="trouble_no_notifications_solution">Daha Fazla > Ayarlar > Bildirimler\'de Bildirimleri Etkinleştir\'i ve istediğiniz namazları açın. Android 13 ve üzerinde istendiğinde veya sistem uygulama ayarlarından bildirim iznini verin. Android 12 ve üzerinde sistem Alarmlar ve hatırlatıcılar ayarından Nimaz için tam zamanlamalı alarmlara izin verin. Ardından aynı ekranda Pil Optimizasyonunu Devre Dışı Bırak\'a dokunun ve Rahatsız Etme\'nin kapalı olduğunu veya Rahatsız Etme\'ye Saygı Göster\'in devre dışı olduğunu kontrol edin. Samsung, Xiaomi veya MIUI, Oppo ve Huawei telefonlarda ayrıca Nimaz\'ın arka planda çalışmasına izin verin ve agresif pil veya görev kesici ayarları kapatın. Onaylamak için Test Bildirimi\'ni kullanın.</string>
-    <string name="trouble_adhan_silent_title">Ezan bildirimi geliyor ama ses çıkmıyor</string>
-    <string name="trouble_adhan_silent_symptom">Namaz bildirimi görünüyor ama ezan hiç ses çıkarmıyor.</string>
-    <string name="trouble_adhan_silent_solution">Daha Fazla > Ayarlar > Bildirimler\'i açın ve Ezan Sesini Etkinleştir\'in açık olduğundan ve bir müezzin seçilip indirmenin tamamlandığından emin olun. Ezan alarm akışından çaldığından alarm ve medya sesini yükseltin ve telefonun sessiz modda olmadığını kontrol edin. Yalnızca kısa bir ton istiyorsanız Kısa Bip\'i seçin. Ayrıca Nimaz için sistem bildirim ayarlarını açıp ezan kanalının sesinin kapalı olmadığını doğrulayabilirsiniz.</string>
-    <string name="trouble_location_title">Konum güncellenmiyor</string>
-    <string name="trouble_location_symptom">Namaz vakitleri veya Kıble yanlış yeri kullanıyor ya da mevcut konum tespiti başarısız oluyor.</string>
-    <string name="trouble_location_solution">Daha Fazla > Ayarlar > Konum\'u açın ve Mevcut Konumu Kullan\'a dokunun. İstendiğinde konum iznini verin ve telefonunuzun GPS veya konum servislerinin açık olduğundan emin olun. Manuel aranan bir şehir hâlâ seçiliyse otomatik tespiti geçersiz kılar; bu nedenle doğru şehri arayıp seçin ya da mevcut konumu tekrar kullanın.</string>
-    <string name="trouble_qibla_title">Kıble yanlış yönü gösteriyor</string>
-    <string name="trouble_qibla_symptom">Kıble pusulası yanlış yönü gösteriyor veya sürekli sapıyor.</string>
-    <string name="trouble_qibla_solution">Doğruluk Orta veya Yüksek seviyeye gelene kadar telefonunuzu 8 çizerek hareket ettirerek pusulayı kalibre edin; manyetik sensörle etkileşen metal nesneler, mıknatıslar, hoparlörler ve elektronik cihazlardan uzak durun. Konumunuzun Daha Fazla > Ayarlar > Konum\'da doğru olduğunu onaylayın. Bazı telefonların zayıf veya eksik manyetik sensörü vardır; bu cihazlarda güvenmeden önce okumanızı bilinen bir yönle karşılaştırın.</string>
-    <string name="trouble_background_title">Nimaz arka planda çalışmayı durduruyor</string>
-    <string name="trouble_background_symptom">Uygulama bir süre kapalı kaldıktan sonra bildirimler gelmeyi durduruyor; özellikle belirli markalarda.</string>
-    <string name="trouble_background_solution">Daha Fazla > Ayarlar > Bildirimler\'den Nimaz için pil optimizasyonunu devre dışı bırakın; sistem ayarlarında uygulamanın arka planda çalışmasına izin verin ve Nimaz için pil tasarrufu veya görev kesiciyi kapatın. Samsung, Xiaomi veya MIUI, Oppo ve Huawei gibi üreticiler özellikle agresiftir; dontkillmyapp.com sitesinde her marka için adım adım talimatlar mevcuttur. Bu ayarları yaptıktan sonra Daha Fazla > Ayarlar > Bildirimler\'e dönün ve bildirimleri yeniden zamanlamak için Bildirimleri Sıfırla\'ya dokunun.</string>
-    <string name="trouble_hijri_title">Hicri tarih bir gün hatalı</string>
-    <string name="trouble_hijri_symptom">Hicri tarih veya bir İslami etkinlik tarihi beklenenden bir gün erken veya geç.</string>
-    <string name="trouble_hijri_solution">Nimaz hesaplanmış bir Hicri takvim kullanır; bu takvim, yerel hilal gözlemiyle belirlenen tarihlerden bir gün farklı olabilir çünkü hesaplama ve gözlem her zaman örtüşmez. Şu an için manuel gün ayarı bulunmamaktadır; uygulama hesaplanmış tarihi takip eder. Dini vecibelerde yerel hilal gözlemi otoritenize güvenin. Hicri takvim Daha Fazla > Araçlar > Takvim altında bulunabilir.</string>
-    <string name="trouble_quran_audio_title">Kur\'an veya ezan sesi indirilmiyor ya da çalmıyor</string>
-    <string name="trouble_quran_audio_symptom">Tilavet veya ezan sesi indirilemiyor ya da oynatma başlamıyor.</string>
-    <string name="trouble_quran_audio_solution">Ses dosyaları ilk oynatmada indirilir; bu nedenle çalışan bir internet bağlantınız ve yeterli boş depolama alanınız olduğundan emin olun. Tilavet için Kur\'an Ayarları\'nı açın, Okuyucu\'ya dokunun ve seçilen okuyucunun indirmesinin tamamlandığını onaylayın; ardından oynatın. Ezan için Daha Fazla > Ayarlar > Bildirimler\'i açın ve seçilen müezzinin indirildi olarak göründüğünü doğrulayın. Bir indirme takılı kalırsa başka bir ağa geçip tekrar deneyin ya da ezan için Kısa Bip\'i yedek olarak seçin.</string>
     <string name="compass">Pusula</string>
     <string name="ar">AR</string>
     <string name="facing_qibla">Kıbleye Dönük</string>
     <string name="turn_right_format">Sağa %d° dönün</string>
     <string name="turn_left_format">Sola %d° dönün</string>
-    <string name="qibla_direction_format">%s • Kıble Yönü</string>
-    <string name="km_to_mecca_format">Mekke\'ye %s km</string>
     <string name="compass_accuracy">Pusula Doğruluğu</string>
     <string name="calibrate">Kalibre Et</string>
     <string name="calibrate_compass">Pusulayı Kalibre Et</string>
@@ -237,20 +183,7 @@
     <string name="grant_permission">İzin Ver</string>
     <string name="not_now">Şimdi Değil</string>
     <string name="unknown_error">Bilinmeyen hata</string>
-    <string name="direction_north">Kuzey</string>
-    <string name="direction_northeast">Kuzeydoğu</string>
-    <string name="direction_east">Doğu</string>
-    <string name="direction_southeast">Güneydoğu</string>
-    <string name="direction_south">Güney</string>
-    <string name="direction_southwest">Güneybatı</string>
-    <string name="direction_west">Batı</string>
-    <string name="direction_northwest">Kuzeybatı</string>
-    <string name="direction_n">K</string>
-    <string name="direction_e">D</string>
-    <string name="direction_s">G</string>
-    <string name="direction_w">B</string>
     <string name="prayer_settings_title">Namaz Ayarları</string>
-    <string name="calculation_method_section">HESAPLAMA YÖNTEMİ</string>
     <string name="asr_calculation">İkindi Hesaplaması</string>
     <string name="asr_standard">Standart (Şafii, Maliki, Hanbeli)</string>
     <string name="asr_hanafi">Hanefi</string>
@@ -280,45 +213,23 @@
     <string name="prophets_place">Tebliğ Yeri</string>
     <string name="khatam_title">Hatim</string>
     <string name="khatam_active">Aktif Hatim</string>
-    <string name="khatam_in_progress">Devam Ediyor</string>
-    <string name="khatam_completed">Tamamlandı</string>
-    <string name="khatam_abandoned">Bırakıldı</string>
-    <string name="khatam_stats_title">Genel Bakış</string>
-    <string name="khatam_ayahs_read">Okunan Ayetler</string>
-    <string name="khatam_daily_target">Günlük Hedef</string>
     <string name="khatam_start_new">Yeni Hatim Başlat</string>
     <string name="khatam_no_in_progress">Devam eden hatim yok</string>
     <string name="khatam_no_completed">Tamamlanmış hatim yok</string>
-    <string name="khatam_no_abandoned">Bırakılmış hatim yok</string>
     <string name="khatam_set_active">Aktif Olarak Ayarla</string>
-    <string name="khatam_abandon">Bırak</string>
-    <string name="khatam_reactivate">Yeniden Etkinleştir</string>
     <string name="khatam_delete_title">Hatmi Sil</string>
     <string name="khatam_delete_message">\"%s\" hatmini silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.</string>
-    <string name="khatam_ayahs_format">%1$d / %2$d ayet</string>
-    <string name="khatam_ayahs_read_count">%d Ayet Okundu</string>
-    <string name="khatam_per_day_format">%d / gün</string>
-    <string name="khatam_created_format">Oluşturulma: %s</string>
     <string name="khatam_no_started">Henüz Hatim Başlatılmadı</string>
     <string name="khatam_start_journey">Kur\'an\'ı hatmetme yolculuğunuza başlayın</string>
     <string name="khatam_new">Yeni Hatim</string>
     <string name="khatam_name_label">Hatim Adı</string>
     <string name="khatam_name_placeholder">örn., Ramazan Hatmi 2026</string>
-    <string name="khatam_ayahs_unit">%d ayet</string>
-    <string name="khatam_estimated_completion">Tahmini tamamlanma: ~%d gün</string>
     <string name="khatam_notes_label">Notlar (İsteğe Bağlı)</string>
     <string name="khatam_notes_placeholder">Kişisel notlarınız…</string>
-    <string name="khatam_creating">Oluşturuluyor…</string>
-    <string name="khatam_start">Hatmi Başlat</string>
     <string name="khatam_detail">Hatim Detayı</string>
     <string name="khatam_continue_reading">Okumaya Devam Et</string>
-    <string name="khatam_juz_progress">Cüz İlerlemesi</string>
-    <string name="khatam_daily_reading">Günlük Okuma</string>
     <string name="khatam_of_ayahs_read">%2$d ayetten %1$d okundu</string>
-    <string name="khatam_days_active">Aktif Günler</string>
     <string name="khatam_avg_pace">Ort. Hız</string>
-    <string name="khatam_target">Hedef</string>
-    <string name="khatam_pace_per_day">%d/gün</string>
 
     <!-- Khatam: status and pace -->
     <string name="khatam_archived">Arşivlendi</string>
@@ -368,7 +279,6 @@
     <string name="khatam_action_save">Değişiklikleri kaydet</string>
     <string name="khatam_action_begin">Hatme Başla</string>
     <string name="khatam_edit_progress_note">Düzenleme ilerlemenizi asla değiştirmez</string>
-    <string name="khatam_section_danger">Tehlikeli bölge</string>
     <string name="khatam_action_archive">Bu Hatmi arşivle</string>
     <string name="khatam_action_delete">Kalıcı olarak sil</string>
     <string name="khatam_archive_title">Hatmi Arşivle</string>
@@ -377,27 +287,24 @@
     <string name="khatam_error_save_failed">Kaydedilemedi. Lütfen tekrar deneyin.</string>
 
     <!-- Khatam: counted quantities -->
-    <plurals name="khatam_ayahs_count">
-        <item quantity="other">%1$d ayet</item>
-    </plurals>
+    <!-- Turkish nouns are not inflected after a numeral, so "one" and "other"
+         intentionally carry identical text; CLDR still requires both buckets. -->
     <plurals name="khatam_ayahs_read_plural">
+        <item quantity="one">%1$d ayet okundu</item>
         <item quantity="other">%1$d ayet okundu</item>
     </plurals>
     <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">%1$d ayet kaldı</item>
         <item quantity="other">%1$d ayet kaldı</item>
     </plurals>
     <plurals name="khatam_days_remaining">
+        <item quantity="one">~%1$d gün kaldı</item>
         <item quantity="other">~%1$d gün kaldı</item>
-    </plurals>
-    <plurals name="khatam_days_count">
-        <item quantity="other">%1$d gün</item>
-    </plurals>
-    <plurals name="khatam_juz_completed_count">
-        <item quantity="other">%1$d cüz tamamlandı</item>
     </plurals>
 
     <!-- Khatam: widget -->
     <plurals name="khatam_completed_lifetime">
+        <item quantity="one">%1$d Hatim tamamlandı</item>
         <item quantity="other">%1$d Hatim tamamlandı</item>
     </plurals>
     <string name="notification_settings_khatam_reminder">Hatim hatırlatıcısı</string>
@@ -411,7 +318,6 @@
     <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
     <string name="khatam_widget_no_active">Aktif Hatim yok</string>
     <string name="khatam_widget_start">Bir tane başlat</string>
-    <string name="khatam_widget_continue">Okumaya devam et</string>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Hatim hatırlatmaları</string>
@@ -420,12 +326,6 @@
     <string name="notif_khatam_body_on_track">%1$s · hedeftesiniz. Devam etmek için %2$d ayet.</string>
     <string name="notif_khatam_body_behind">%1$s · hedefe geri dönmek için bugün %2$d ayet.</string>
     <string name="notif_khatam_body_generic">%1$s · bugün okunacak %2$d ayet.</string>
-    <string name="notif_khatam_action_read">Şimdi oku</string>
-    <string name="qibla_ar_heading">Yön</string>
-    <string name="qibla_ar_bearing">Kıble Açısı</string>
-    <string name="qibla_ar_facing">Kıbleye Dönük</string>
-    <string name="qibla_ar_distance">Mesafe</string>
-    <string name="qibla_ar_accuracy">Doğruluk</string>
     <string name="widget_hijri_date_description">Mevcut Hicri tarihi gösterir</string>
     <string name="widget_next_prayer_description">Sonraki namaz vaktini ve geri sayımı gösterir</string>
     <string name="widget_prayer_times_description">Bugünün tüm namaz vakitlerini gösterir</string>
@@ -453,14 +353,7 @@
     <string name="missed">Kaçırıldı</string>
     <string name="made_up">Kaza edildi</string>
     <string name="upcoming">Yaklaşan</string>
-    <string name="tasbih">Tesbih</string>
-    <string name="tasbih_title">Tesbih</string>
     <string name="history">Geçmiş</string>
-    <string name="add_preset">Hazır Ayar Ekle</string>
-    <string name="today_upper">BUGÜN</string>
-    <string name="rounds">TURLAR</string>
-    <string name="sessions_upper">OTURUMLAR</string>
-    <string name="quick_presets">HIZLI AYARLAR</string>
     <string name="target_format">Hedef: %d</string>
     <string name="tap_to_count">Saymak için dokunun</string>
     <string name="reset_action">Sıfırla</string>
@@ -474,7 +367,6 @@
     <string name="custom">Özel</string>
     <string name="laps_format">%d tur</string>
     <string name="done">Tamam</string>
-    <string name="add_preset_title">Hazır Ayar Ekle</string>
     <string name="name_required">Ad *</string>
     <string name="name_required_error">Ad gereklidir</string>
     <string name="preset_name_placeholder">örn., Sübhanallahi ve Bihamdihi</string>
@@ -486,7 +378,6 @@
     <string name="translation_placeholder">örn., Allah\'ı hamd ile tesbih ederim</string>
     <string name="target_count">Hedef Sayı</string>
     <string name="category">Kategori</string>
-    <string name="save_preset">Hazır Ayarı Kaydet</string>
     <string name="duas_adhkar">Dualar &amp; Zikirler</string>
     <string name="bookmarks">Yer İmleri</string>
     <string name="daily_adhkar">Günlük Zikirler</string>
@@ -495,7 +386,6 @@
     <string name="bookmarks_title">Yer İmleri</string>
     <string name="no_bookmarks_yet">Henüz Yer İmi Yok</string>
     <string name="no_bookmarks_hint">Hızlı erişim için ayetleri, hadisleri ve duaları kaydedin</string>
-    <string name="quran_verses">Kur\'an Ayetleri</string>
     <string name="share">Paylaş</string>
     <string name="added_format">Eklenme: %s</string>
     <string name="quran_type">Kur\'an</string>
@@ -511,7 +401,6 @@
     <string name="read_today">Bugün Okundu</string>
     <string name="bookmarked">Yer İmi Eklendi</string>
     <string name="day_streak">Günlük Seri</string>
-    <string name="share_hadith">Hadis Paylaş</string>
     <string name="kutub_al_sittah">Kütüb-i Sitte</string>
     <string name="bookmark">Yer İmi</string>
     <string name="hadith_count_format">%s hadis</string>
@@ -519,15 +408,12 @@
     <string name="search_placeholder">Kur\'an, Hadis, Dua Ara…</string>
     <string name="search_or_ask_placeholder">Arayın veya bir soru sorun…</string>
     <string name="recent_searches">Son Aramalar</string>
-    <string name="clear_recent">Son Aramaları Temizle</string>
-    <string name="results_found_format">%d sonuç bulundu</string>
     <string name="no_results_format">\"%s\" için sonuç bulunamadı</string>
     <string name="no_results_hint">Farklı anahtar kelimeler veya filtreler deneyin</string>
     <string name="remove">Kaldır</string>
     <string name="surah_ayahs_format">%1$s • %2$d ayet</string>
     <string name="zakat_calculator">Zekat Hesaplayıcı</string>
     <string name="zakat_due">Ödenecek Zekat</string>
-    <string name="zakat_rate_hint">Uygun varlığın %%2,5\'i</string>
     <string name="assets">Varlıklar</string>
     <string name="cash_on_hand">Nakit Para</string>
     <string name="bank_balance">Banka Bakiyesi</string>
@@ -540,26 +426,13 @@
     <string name="other_assets">Diğer Varlıklar</string>
     <string name="liabilities">Borçlar</string>
     <string name="debts_owed">Mevcut Borçlar</string>
-    <string name="expenses_due">Ödenmesi Gereken Giderler</string>
     <string name="other_liabilities">Diğer Yükümlülükler</string>
     <string name="total_assets">Toplam Varlıklar</string>
     <string name="total_liabilities">Toplam Borçlar</string>
     <string name="net_zakatable_wealth">Net Zekata Tabi Servet</string>
     <string name="nisab_threshold">Nisab Eşiği</string>
     <string name="meets_nisab">Nisab\'ı Karşılıyor</string>
-    <string name="yes">Evet</string>
-    <string name="no">Hayır</string>
-    <string name="zakat_due_rate">Ödenecek Zekat (%%2,5)</string>
     <string name="save_calculation">Hesaplamayı Kaydet</string>
-    <string name="zakat_history">Geçmiş</string>
-    <string name="enter_amount">Tutar girin</string>
-    <string name="gold_nisab">Altın</string>
-    <string name="silver_nisab">Gümüş</string>
-    <string name="nisab_gold_price_format">Altın (%s/g)</string>
-    <string name="nisab_silver_price_format">Gümüş (%s/g)</string>
-    <string name="nisab_above_format">Servetiniz nisab eşiğinin üzerindedir. Zekat vermek farzdır.</string>
-    <string name="nisab_below_format">Servetiniz nisab eşiğinin altındadır. Zekat vermek farz değildir.</string>
-    <string name="breakdown">Detaylı Döküm</string>
     <string name="loans">Krediler</string>
     <string name="bills_due">Ödenmesi Gereken Faturalar</string>
     <string name="hint_physical_cash">Elinizde bulunan nakit para</string>
@@ -575,10 +448,6 @@
     <string name="hint_outstanding_bills">Ödenmemiş faturalar</string>
     <string name="hint_other_liabilities">Diğer yükümlülükler</string>
     <string name="calculation_breakdown">Hesaplama Detayları</string>
-    <string name="nisab_above_detail_format">Servetiniz %1$s nisab eşiği olan %2$s miktarını aşmaktadır</string>
-    <string name="nisab_below_detail_format">Nisab eşiği (%1$s): %2$s</string>
-    <string name="nisab_gold_subtitle_format">87,48g @ $%d/g</string>
-    <string name="nisab_silver_subtitle_format">612,36g @ $%s/g</string>
     <string name="name_detail">İsim Detayı</string>
     <string name="prophet_detail">Peygamber Detayı</string>
     <string name="language_title">Dil</string>
@@ -616,20 +485,12 @@
     <string name="quran_home_jump_to_page">Sayfaya Git (1–604)</string>
     <string name="quran_home_enter_page_number">Sayfa numarası girin</string>
     <string name="quran_home_go_to_page">Sayfaya git</string>
-    <string name="quran_home_juz_label">Cüz</string>
-    <string name="quran_home_juz_pages_format">Cüz %1$d (Sayfa %2$d–%3$d)</string>
     <string name="quran_home_verse_format">Ayet %1$d</string>
     <string name="quran_home_juz_format">Cüz %1$d</string>
     <string name="quran_home_page_format">Sayfa %1$d</string>
     <string name="quran_home_surah_fallback">Sure %1$d</string>
     <string name="quran_home_continue_reading">OKUMAYA DEVAM ET</string>
-    <string name="quran_home_percent_complete">%%%1$d tamamlandı</string>
     <string name="quran_home_completed">Tamamlandı</string>
-    <string name="quran_home_completed_count">%1$d tamamlandı</string>
-    <string name="quran_home_ayahs_read">Okunan Ayetler</string>
-    <string name="quran_home_remaining">Kalan</string>
-    <string name="quran_home_start_khatam">Hatim Başlat</string>
-    <string name="quran_home_track_progress">Kur\'an okuma ilerlemenizi takip edin</string>
     <string name="quran_home_makkah">Mekke</string>
     <string name="quran_home_madinah">Medine</string>
     <string name="quran_home_verses_count">%1$d Ayet</string>
@@ -655,15 +516,10 @@
     <string name="dua_reader_added_tasbih">Tesbih\'e eklendi</string>
     <string name="dua_reader_prev">Önceki</string>
     <string name="dua_reader_next">Sonraki</string>
-    <string name="dua_reader_index_format">%1$d / …</string>
-    <string name="dua_reader_first_dua">Bu ilk duadır</string>
-    <string name="dua_reader_source">Kaynak</string>
-    <string name="dua_reader_recommended">Tavsiye Edilen</string>
     <string name="dua_reader_recite_once">%1$d kez oku</string>
     <string name="dua_reader_recite_times">%1$d kez oku</string>
     <string name="dua_reader_virtue">Bu Duanın Fazileti</string>
     <string name="dua_reader_share">Paylaş</string>
-    <string name="dua_reader_done">Tamam</string>
     <string name="dua_reader_source_label">Kaynak: %1$s</string>
     <string name="dua_reader_not_found">Dua bulunamadı</string>
     <!-- Dua Settings Screen -->
@@ -678,7 +534,6 @@
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Takip</string>
     <string name="fasting_tab_ramadan">Ramazan</string>
-    <string name="fasting_tab_voluntary">Nafile</string>
     <string name="fasting_tab_makeup">Kaza</string>
     <string name="fasting_title">Oruç</string>
     <string name="fasting_current">MEVCUT</string>
@@ -721,7 +576,6 @@
     <string name="fasting_makeup_info">Kaza oruçları ideal olarak bir sonraki Ramazan\'dan önce tamamlanmalıdır. Pazartesi ve Perşembe günleri oruç tutmak tavsiye edilir.</string>
     <string name="fasting_pending_count">%1$d bekleyen</string>
     <string name="fasting_fasts_count">%1$d oruç</string>
-    <string name="fasting_edit_coming_soon">Kaza orucu düzenleme iletişim kutusu yakında</string>
     <string name="fasting_pending">Bekleyen</string>
     <string name="fasting_edit">Düzenle</string>
     <string name="fasting_mark_complete">Tamamlandı İşaretle</string>
@@ -772,9 +626,6 @@
     <string name="notification_settings_prayer_notification">Namaz bildirimi</string>
     <string name="notification_settings_sound_on">Ses açık</string>
     <string name="notification_settings_sound_off">Ses kapalı</string>
-    <string name="notification_settings_downloaded">İndirildi</string>
-    <string name="notification_settings_stop">Durdur</string>
-    <string name="notification_settings_download_play">İndir ve Çal</string>
     <string name="notification_settings_preview">Önizleme</string>
 
     <!-- Onboarding -->
@@ -802,18 +653,6 @@
     <string name="onboarding_feature_audio">Sesli kıraatler</string>
     <string name="onboarding_feature_bookmarks">Yer imleri ve notlar</string>
     <string name="onboarding_feature_search">Arama işlevi</string>
-    <string name="onboarding_feature_auto_location">Otomatik konum algılama</string>
-    <string name="onboarding_feature_precise_times">Hassas namaz vakitleri</string>
-    <string name="onboarding_feature_qibla">Doğru kıble yönü</string>
-    <string name="onboarding_feature_distance_mecca">Mekke\'ye mesafe</string>
-    <string name="onboarding_feature_prayer_alerts">Namaz vakti uyarıları</string>
-    <string name="onboarding_feature_adhan_sounds">Özel ezan sesleri</string>
-    <string name="onboarding_feature_pre_reminders">Namaz öncesi hatırlatmalar</string>
-    <string name="onboarding_feature_quiet_hours">Sessiz saat desteği</string>
-    <string name="onboarding_feature_reliable_notif">Güvenilir bildirimler</string>
-    <string name="onboarding_feature_background_alerts">Arka plan namaz uyarıları</string>
-    <string name="onboarding_feature_consistent_reminders">Tutarlı hatırlatmalar</string>
-    <string name="onboarding_feature_no_missed">Kaçırılan namaz yok</string>
     <string name="onboarding_skip">Atla</string>
     <string name="onboarding_back">Geri</string>
     <string name="onboarding_next">İleri</string>
@@ -843,10 +682,8 @@
     <string name="adhan_download_failed">Ezan indirmesi başarısız</string>
     <string name="adhan_download_failed_subtitle">İnternet bağlantınızı kontrol edip tekrar deneyin</string>
     <!-- Fasting sheet / Quran home / free-day labels -->
-    <string name="free_count">Serbest</string>
     <string name="free_count_label">Serbest sayısı</string>
     <string name="quran_home_page_range_format">s. %1$d–%2$d</string>
-    <string name="quran_home_surah_starts">▸ %1$s başlıyor</string>
     <string name="quran_home_juz_indicator">Cüz %1$d</string>
     <string name="fasting_sheet_status">Durum</string>
     <string name="fasting_sheet_type">Oruç Türü</string>
@@ -921,7 +758,6 @@
     <string name="cd_delete">Sil</string>
     <string name="cd_copy">Kopyala</string>
     <string name="cd_translation">Çeviri</string>
-    <string name="cd_stop_preview">Önizlemeyi durdur</string>
     <string name="cd_stop_audio">Sesi durdur</string>
     <string name="cd_reset">Sıfırla</string>
     <string name="cd_previous_page">Önceki sayfa</string>
@@ -932,8 +768,6 @@
     <string name="cd_new_calculation">Yeni hesaplama</string>
     <string name="cd_increase">Artır</string>
     <string name="cd_history">Geçmiş</string>
-    <string name="cd_facing_qibla">Kıbleye dönük</string>
-    <string name="cd_export_annotations">Ek açıklamaları dışa aktar</string>
     <string name="cd_edit">Düzenle</string>
     <string name="cd_dismiss">Kapat</string>
     <string name="cd_decrease">Azalt</string>
@@ -966,9 +800,6 @@
     <string name="tasbih_stat_today">BUGÜN</string>
     <string name="tasbih_stat_laps">TUR</string>
     <string name="tasbih_change_dhikr">Zikri değiştir</string>
-    <string name="tasbih_target_value">Hedef  %d</string>
-    <string name="tasbih_decrease_target">Hedefi azalt</string>
-    <string name="tasbih_increase_target">Hedefi artır</string>
     <string name="tasbih_bead_wood">Ahşap</string>
     <string name="tasbih_bead_marble">Mermer</string>
     <string name="tasbih_bead_amethyst">Ametist</string>
@@ -1072,7 +903,6 @@
     <string name="location_search_hint">Şehir veya adres ara…</string>
     <string name="location_search_results">Arama Sonuçları</string>
     <string name="location_recent">Son Kullanılan</string>
-    <string name="location_popular_cities">Popüler Şehirler</string>
     <string name="location_detecting">Tespit ediliyor…</string>
     <string name="location_not_set">Ayarlanmadı</string>
     <string name="location_current">Mevcut</string>
@@ -1104,15 +934,12 @@
     <string name="unread">Okunmadı</string>
     <string name="listen">Dinle</string>
     <string name="days_count_format">%1$d gün</string>
-    <string name="quran_verses_label">Ayetler</string>
-    <string name="quran_revelation_label">İniş</string>
     <string name="quran_order_label">Sıra</string>
     <string name="quran_juz_label">Cüz</string>
     <string name="quran_makki">Mekki</string>
     <string name="quran_madani">Medeni</string>
     <string name="quran_meccan">Mekki</string>
     <string name="quran_medinan">Medeni</string>
-    <string name="quran_ayahs_count_format">%1$d Ayet</string>
     <string name="juz_page_dot_format">Cüz %1$d • Sayfa %2$d</string>
     <string name="page_range_format">Sayfa %1$d–%2$d</string>
     <string name="page_single_format">Sayfa %1$d</string>
@@ -1122,10 +949,8 @@
     <string name="unknown_date">Bilinmeyen tarih</string>
     <string name="hadith_chapter_format">Bölüm %1$d</string>
     <string name="no_hadith_found">Hadis bulunamadı</string>
-    <string name="hadith_of_count_format">/ %1$d</string>
     <string name="hadith_narrated_by_format">%1$s tarafından rivayet edilmiştir</string>
     <string name="hadith_isnad">Rivayet Zinciri (İsnad)</string>
-    <string name="hadith_reader_not_found">Hadis bulunamadı</string>
     <string name="hadith_copied">Panoya kopyalandı</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
@@ -1145,7 +970,6 @@
     <string name="ramadan_year_format">Ramazan %1$d</string>
     <string name="monthly_full_month_subtitle">Tam ay · 1 → son gün</string>
     <string name="ramadan_month_label">RAMAZAN AYI</string>
-    <string name="cd_prayer_settings">Namaz ayarları</string>
     <string name="cd_previous_day">Önceki gün</string>
     <string name="cd_pick_date">Tarih seç</string>
     <string name="cd_next_day">Sonraki gün</string>
@@ -1163,7 +987,6 @@
     <string name="tafseer_no_notes">Henüz not yok. Vurgulamak ve not eklemek için yoruma basılı tutun.</string>
     <string name="tafseer_read_in_format">%1$s dilinde oku</string>
     <string name="tafseer_no_commentary_format">Bu ayet için %1$s tefsiri yok</string>
-    <string name="tafseer_page_format">Sayfa %1$d / %2$d</string>
     <string name="tafseer_add_note">Not ekle…</string>
     <string name="prayer_sunrise">Güneş Doğuşu</string>
     <string name="high_latitude_method">Yüksek Enlem Yöntemi</string>
@@ -1344,7 +1167,6 @@
     <string name="tafseer_delete_highlight_title">Vurgu silinsin mi?</string>
     <string name="tafseer_delete_highlight_message">Bu, vurguyu ve ona ekli notu kaldırır. Bu işlem geri alınamaz.</string>
     <string name="cd_share_tafseer">Tefsiri paylaş</string>
-    <string name="tafseer_share_chooser">Tefsiri paylaş</string>
     <string name="tafseer_pdf_header">TEFSİR</string>
     <string name="tafseer_pdf_commentary">Yorum</string>
     <string name="tafseer_pdf_notes">Notlarım</string>
@@ -1369,7 +1191,6 @@
     <string name="prayer_settings_notifications_off">Bildirimler kapalı</string>
     <string name="prayer_settings_prayers_enabled_count">%2$d namazdan %1$d tanesi etkin</string>
     <string name="prayer_settings_reminder_off">Kapalı</string>
-    <string name="share_card_footer">Nimaz ile paylaşıldı</string>
     <string name="share_card_tagline">İslami Rehber</string>
     <string name="share_eyebrow_dua">Dua</string>
     <string name="share_eyebrow_hadith">Hadith</string>
@@ -1388,7 +1209,6 @@
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Arama &amp; Yapay Zekâ</string>
     <string name="search_settings_subtitle">Yapay zekâ yanıtları ve gizlilik</string>
-    <string name="dismiss">Kapat</string>
     <string name="ai_answers">Yapay zekâ yanıtları</string>
     <string name="ai_answers_enable">Yapay zekâ yanıtlarını etkinleştir</string>
     <string name="ai_answers_enable_subtitle">Bir soru sorun, kitaplığınızdaki ayet ve hadislerle kanıtlanmış bir yanıt alın</string>
@@ -1401,8 +1221,6 @@
     <string name="ai_clear_history_subtitle">Kaydedilen tüm yapay zekâ sorularını kaldır</string>
     <string name="ai_consent_title">Yapay zekâ yanıtları etkinleştirilsin mi?</string>
     <string name="ai_consent_enable">Etkinleştir</string>
-    <string name="ai_ask_a_question">Bir soru sorun</string>
-    <string name="ai_ask_placeholder">Kur\'an, Hadis veya Dua hakkında sorun…</string>
     <string name="ai_answer_section">Yapay zeka yanıtı</string>
     <string name="ai_thinking">Yanıt aranıyor…</string>
     <string name="ai_confidence_high">Yüksek güven</string>
