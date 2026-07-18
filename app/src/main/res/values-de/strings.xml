@@ -269,7 +269,10 @@
     <string name="khatam_preset_half_juz_daily">½ Juz / Tag</string>
     <string name="khatam_preset_quarter_juz_daily">¼ Juz / Tag</string>
     <string name="khatam_preset_custom">Benutzerdefiniert</string>
-    <string name="khatam_ayahs_per_day">%1$d Ayahs / Tag</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="one">%1$d Ayah / Tag</item>
+        <item quantity="other">%1$d Ayahs / Tag</item>
+    </plurals>
     <string name="khatam_projected_finish">Fertig ~%1$s</string>
     <string name="khatam_field_deadline">Frist</string>
     <string name="khatam_field_reminder">Tägliche Erinnerung</string>
@@ -321,9 +324,18 @@
     <string name="notif_khatam_channel_name">Khatam-Erinnerungen</string>
     <string name="notif_khatam_channel_description">Tägliche Erinnerungen, damit Ihr Quran-Abschluss im Plan bleibt</string>
     <string name="notif_khatam_title">Zeit für die heutige Lesung</string>
-    <string name="notif_khatam_body_on_track">%1$s · Sie sind im Plan. %2$d Ayahs, um dranzubleiben.</string>
-    <string name="notif_khatam_body_behind">%1$s · %2$d Ayahs heute, um wieder in den Plan zu kommen.</string>
-    <string name="notif_khatam_body_generic">%1$s · %2$d Ayahs heute zu lesen.</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="one">%1$s · Sie sind im Plan. %2$d Ayah, um dranzubleiben.</item>
+        <item quantity="other">%1$s · Sie sind im Plan. %2$d Ayahs, um dranzubleiben.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="one">%1$s · %2$d Ayah heute, um wieder in den Plan zu kommen.</item>
+        <item quantity="other">%1$s · %2$d Ayahs heute, um wieder in den Plan zu kommen.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="one">%1$s · %2$d Ayah heute zu lesen.</item>
+        <item quantity="other">%1$s · %2$d Ayahs heute zu lesen.</item>
+    </plurals>
     <string name="widget_hijri_date_description">Zeigt das aktuelle Hidschri-Datum an</string>
     <string name="widget_next_prayer_description">Zeigt die nächste Gebetszeit und den Countdown an</string>
     <string name="widget_prayer_times_description">Zeigt alle Gebetszeiten für heute an</string>
@@ -342,8 +354,10 @@
     <string name="all_caught_up_message">Sie haben keine versäumten Gebete nachzuholen. Weiter so!</string>
     <string name="prayers_to_make_up">Nachzuholende Gebete</string>
     <string name="all_caught_up_short">Alles erledigt!</string>
-    <string name="missed_prayers_pending">%1$d versäumte%2$s Gebet%2$s ausstehend</string>
-    <string name="plural_s">e</string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="one">%1$d versäumtes Gebet ausstehend</item>
+        <item quantity="other">%1$d versäumte Gebete ausstehend</item>
+    </plurals>
     <string name="current_streak">Aktuelle Serie</string>
     <string name="consecutive_days_all_prayers">aufeinanderfolgende Tage mit allen Gebeten</string>
     <string name="on_time">Pünktlich</string>
@@ -363,7 +377,10 @@
     <string name="start_counting_hint">Beginnen Sie zu zählen, um Ihren Verlauf hier zu sehen</string>
     <string name="sessions">Sitzungen</string>
     <string name="custom">Benutzerdefiniert</string>
-    <string name="laps_format">%d Runden</string>
+    <plurals name="laps_format">
+        <item quantity="one">%d Runde</item>
+        <item quantity="other">%d Runden</item>
+    </plurals>
     <string name="done">Fertig</string>
     <string name="name_required">Name *</string>
     <string name="name_required_error">Name ist erforderlich</string>
@@ -380,7 +397,10 @@
     <string name="bookmarks">Lesezeichen</string>
     <string name="daily_adhkar">Tägliche Adhkar</string>
     <string name="situational_duas">Situationsbezogene Duas</string>
-    <string name="duas_count_format">%d Duas</string>
+    <plurals name="duas_count_format">
+        <item quantity="one">%d Dua</item>
+        <item quantity="other">%d Duas</item>
+    </plurals>
     <string name="bookmarks_title">Lesezeichen</string>
     <string name="no_bookmarks_yet">Noch keine Lesezeichen</string>
     <string name="no_bookmarks_hint">Speichern Sie Ayahs, Hadithe und Duas für schnellen Zugriff</string>
@@ -409,7 +429,10 @@
     <string name="no_results_format">Keine Ergebnisse für \"%s\"</string>
     <string name="no_results_hint">Versuchen Sie andere Schlüsselwörter oder Filter</string>
     <string name="remove">Entfernen</string>
-    <string name="surah_ayahs_format">%1$s • %2$d Ayahs</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="one">%1$s • %2$d Ayah</item>
+        <item quantity="other">%1$s • %2$d Ayahs</item>
+    </plurals>
     <string name="zakat_calculator">Zakat-Rechner</string>
     <string name="zakat_due">Fällige Zakat</string>
     <string name="assets">Vermögenswerte</string>
@@ -491,7 +514,10 @@
     <string name="quran_home_completed">Abgeschlossen</string>
     <string name="quran_home_makkah">Mekka</string>
     <string name="quran_home_madinah">Medina</string>
-    <string name="quran_home_verses_count">%1$d Verse</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="one">%1$d Vers</item>
+        <item quantity="other">%1$d Verse</item>
+    </plurals>
     <string name="quran_home_surah_info">Sure-Info</string>
     <string name="quran_home_verse_of_the_day">VERS DES TAGES</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -513,8 +539,10 @@
     <string name="dua_reader_added_tasbih">Zu Tasbih hinzugefügt</string>
     <string name="dua_reader_prev">Zurück</string>
     <string name="dua_reader_next">Weiter</string>
-    <string name="dua_reader_recite_once">%1$d Mal rezitieren</string>
-    <string name="dua_reader_recite_times">%1$d Mal rezitieren</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="one">%1$d Mal rezitieren</item>
+        <item quantity="other">%1$d Mal rezitieren</item>
+    </plurals>
     <string name="dua_reader_virtue">Vorzüge dieses Duas</string>
     <string name="dua_reader_share">Teilen</string>
     <string name="dua_reader_source_label">Quelle: %1$s</string>
@@ -561,7 +589,10 @@
     <string name="fasting_ayyam_desc">13., 14., 15. des Mondmonats</string>
     <string name="fasting_next_format">Nächster: %1$s</string>
     <string name="fasting_tomorrow">Morgen</string>
-    <string name="fasting_in_days_format">In %1$d Tagen</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="one">In %1$d Tag</item>
+        <item quantity="other">In %1$d Tagen</item>
+    </plurals>
     <string name="fasting_log_today">Heutigen Fastentag erfassen</string>
     <string name="fasting_no_makeup">Keine nachzuholenden Fastentage</string>
     <string name="fasting_all_up_to_date">Alle Ihre Fastentage sind aktuell!</string>
@@ -572,7 +603,10 @@
     <string name="fasting_total_label">Gesamt</string>
     <string name="fasting_makeup_info">Nachzuholende Fastentage sollten idealerweise vor dem nächsten Ramadan abgeschlossen werden. Das Fasten an Montagen und Donnerstagen wird empfohlen.</string>
     <string name="fasting_pending_count">%1$d ausstehend</string>
-    <string name="fasting_fasts_count">%1$d Fastentage</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="one">%1$d Fastentag</item>
+        <item quantity="other">%1$d Fastentage</item>
+    </plurals>
     <string name="fasting_pending">Ausstehend</string>
     <string name="fasting_edit">Bearbeiten</string>
     <string name="fasting_mark_complete">Als erledigt markieren</string>
@@ -595,7 +629,10 @@
     <string name="notification_settings_enable_adhan_subtitle">Adhan zu den Gebetszeiten abspielen</string>
     <string name="notification_settings_additional_section">ZUSÄTZLICHE BENACHRICHTIGUNGEN</string>
     <string name="notification_settings_pre_adhan">Vorab-Erinnerung</string>
-    <string name="notification_settings_pre_adhan_subtitle">%1$d Minuten vorher</string>
+    <plurals name="notification_settings_pre_adhan_subtitle">
+        <item quantity="one">%1$d Minute vorher</item>
+        <item quantity="other">%1$d Minuten vorher</item>
+    </plurals>
     <string name="notification_settings_sunrise">Sonnenaufgangs-Benachrichtigung</string>
     <string name="notification_settings_sunrise_subtitle">Ende der Fajr-Gebetszeit</string>
     <string name="notification_settings_friday_reminder">Freitagsgebet-Erinnerung</string>
@@ -714,7 +751,10 @@
     <string name="notif_short_isha">Es ist Zeit zu beten. Beschließe deinen Tag mit dem Ischa-Gebet.</string>
     <string name="notif_short_generic">Es ist Zeit für das %s-Gebet.</string>
 
-    <string name="notif_pre_reminder_title">%1$s in %2$d Minuten</string>
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="one">%1$s in %2$d Minute</item>
+        <item quantity="other">%1$s in %2$d Minuten</item>
+    </plurals>
     <string name="notif_pre_reminder_1">Bereite dein Herz vor und vollziehe die Wudu.</string>
     <string name="notif_pre_reminder_2">Zeit, sich für das Gebet bereitzumachen.</string>
     <string name="notif_pre_reminder_3">Eine Erinnerung, sich auf den Gottesdienst vorzubereiten.</string>
@@ -927,7 +967,10 @@
     <string name="action_tafseer">Tafseer</string>
     <string name="unread">Ungelesen</string>
     <string name="listen">Anhören</string>
-    <string name="days_count_format">%1$d Tage</string>
+    <plurals name="days_count_format">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
     <string name="quran_order_label">Reihenfolge</string>
     <string name="quran_juz_label">Juz</string>
     <string name="quran_makki">Makki</string>
@@ -958,7 +1001,10 @@
     <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
     <string name="hadith_settings_preview_translation">Die Taten werden nur nach den Absichten bewertet.</string>
     <string name="hadith_chapters_title">Kapitel</string>
-    <string name="hadith_chapters_count_format">%1$d Kapitel</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="one">%1$d Kapitel</item>
+        <item quantity="other">%1$d Kapitel</item>
+    </plurals>
     <string name="export_as_pdf">Als PDF exportieren</string>
     <string name="monthly_this_month">Diesen Monat</string>
     <string name="ramadan_year_format">Ramadan %1$d</string>
@@ -1092,7 +1138,10 @@
     <string name="qaida_play_letter">Buchstaben abspielen</string>
     <string name="qaida_its_shapes">Seine Formen</string>
     <string name="qaida_where_made">Wo er gebildet wird</string>
-    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayahs</string>
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="one">Surah %1$d • %2$d Ayah</item>
+        <item quantity="other">Surah %1$d • %2$d Ayahs</item>
+    </plurals>
     <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
     <string name="bookmark_hadith_format">Hadith #%1$d</string>
     <string name="dua_label">Dua</string>
@@ -1104,8 +1153,14 @@
     <string name="makhraj_shafatain">die beiden Lippen</string>
     <string name="makhraj_khayshum">die Nase</string>
     <string name="relative_yesterday">Gestern</string>
-    <string name="relative_in_days_format">In %1$d Tagen</string>
-    <string name="relative_days_ago_format">Vor %1$d Tagen</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="one">In %1$d Tag</item>
+        <item quantity="other">In %1$d Tagen</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="one">Vor %1$d Tag</item>
+        <item quantity="other">Vor %1$d Tagen</item>
+    </plurals>
     <string name="calc_region_mwl">Verwendet in Europa, Fernost, Teilen der USA</string>
     <string name="calc_region_egyptian">Verwendet in Afrika, Syrien, Libanon, Malaysia</string>
     <string name="calc_region_karachi">Verwendet in Pakistan, Bangladesch, Indien, Afghanistan</string>
@@ -1232,7 +1287,10 @@
     <string name="search_try_asking">Frag zum Beispiel</string>
     <string name="search_recent">Zuletzt</string>
     <string name="search_typing_hint">Ergebnisse werden beim Tippen aktualisiert · Enter für eine Antwort mit Quellen</string>
-    <string name="search_matches_format">%d Treffer</string>
+    <plurals name="search_matches_format">
+        <item quantity="one">%d Treffer</item>
+        <item quantity="other">%d Treffer</item>
+    </plurals>
     <string name="search_answer_count_format">%1$d in deiner Bibliothek · %2$d in der Antwort zitiert</string>
     <string name="search_cited_chip">Zitiert</string>
     <string name="ask_example_1">Was sagt der Koran über Geduld?</string>

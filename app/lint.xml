@@ -67,6 +67,41 @@
     </issue>
 
     <!--
+      PluralsCandidate flags any string with a %d in it as a potential <plurals>.
+      Every genuine count-driven string in the app has been converted; the names
+      below are the remaining false positives, for three distinct reasons:
+
+        A year or a unit, not a count - there is no singular/plural form to pick
+        between, so a <plurals> would only add two identical buckets:
+          copyright_format        - "%d" is a calendar year.
+          khatam_a11y_progress_ring - "%1$d percent complete"; percent is a unit.
+
+        No countable noun in the string - the number stands alone next to an
+        adjective, so nothing inflects:
+          bookmarks_count         - "%1$d saved"
+          fasting_pending_count   - "%1$d pending"
+
+        The noun agrees with a constant total, not with the varying counter.
+        These are all "%1$d of %2$d <noun>" progress readouts where %2$d is a
+        fixed total (5 prayers, 6236 ayahs, ...), so the noun is always plural
+        no matter what %1$d is; a <plurals> can only inflect on one argument and
+        would inflect on the wrong one:
+          prayers_count_format, khatam_of_ayahs_read, notif_summary_count,
+          prayer_insight_overall_desc, prayer_settings_prayers_enabled_count,
+          audio_downloading_format
+          search_answer_count_format is the same problem in a different shape -
+          two independent counts, only one of which a <plurals> could select on.
+
+      These are NOT suppressed here. PluralsCandidate's message carries only the
+      word that follows the %d, never the resource name, and <ignore regexp> is
+      matched against the message - so a rule here could only key on that trailing
+      word, which is far too broad in this app (an "ayahs" ignore would swallow
+      every future ayah counter). Each string above instead carries a
+      tools:ignore="PluralsCandidate" on its own element in values/strings.xml,
+      scoped to exactly that string. Any other count string stays flagged.
+    -->
+
+    <!--
       REQUEST_IGNORE_BATTERY_OPTIMIZATIONS is used only to offer an opt-in prompt
       so adhan alarms fire on time; Doze otherwise defers them past the prayer
       time, which defeats the app's core function. This is the exact "alarms and

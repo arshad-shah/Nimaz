@@ -269,7 +269,10 @@
     <string name="khatam_preset_half_juz_daily">Günde ½ cüz</string>
     <string name="khatam_preset_quarter_juz_daily">Günde ¼ cüz</string>
     <string name="khatam_preset_custom">Özel</string>
-    <string name="khatam_ayahs_per_day">Günde %1$d ayet</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="one">Günde %1$d ayet</item>
+        <item quantity="other">Günde %1$d ayet</item>
+    </plurals>
     <string name="khatam_projected_finish">Bitiş ~%1$s</string>
     <string name="khatam_field_deadline">Son tarih</string>
     <string name="khatam_field_reminder">Günlük hatırlatma</string>
@@ -323,9 +326,18 @@
     <string name="notif_khatam_channel_name">Hatim hatırlatmaları</string>
     <string name="notif_khatam_channel_description">Kur\'an hatminizi hedefte tutmak için günlük hatırlatmalar</string>
     <string name="notif_khatam_title">Bugünün okuma zamanı</string>
-    <string name="notif_khatam_body_on_track">%1$s · hedeftesiniz. Devam etmek için %2$d ayet.</string>
-    <string name="notif_khatam_body_behind">%1$s · hedefe geri dönmek için bugün %2$d ayet.</string>
-    <string name="notif_khatam_body_generic">%1$s · bugün okunacak %2$d ayet.</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="one">%1$s · hedeftesiniz. Devam etmek için %2$d ayet.</item>
+        <item quantity="other">%1$s · hedeftesiniz. Devam etmek için %2$d ayet.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="one">%1$s · hedefe geri dönmek için bugün %2$d ayet.</item>
+        <item quantity="other">%1$s · hedefe geri dönmek için bugün %2$d ayet.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="one">%1$s · bugün okunacak %2$d ayet.</item>
+        <item quantity="other">%1$s · bugün okunacak %2$d ayet.</item>
+    </plurals>
     <string name="widget_hijri_date_description">Mevcut Hicri tarihi gösterir</string>
     <string name="widget_next_prayer_description">Sonraki namaz vaktini ve geri sayımı gösterir</string>
     <string name="widget_prayer_times_description">Bugünün tüm namaz vakitlerini gösterir</string>
@@ -344,8 +356,10 @@
     <string name="all_caught_up_message">Kaza etmeniz gereken namaz yok. Böyle devam edin!</string>
     <string name="prayers_to_make_up">Kaza Namazları</string>
     <string name="all_caught_up_short">Tamamı kılındı!</string>
-    <string name="missed_prayers_pending">%1$d kaza namazı%2$s bekliyor</string>
-    <string name="plural_s"></string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="one">%1$d kaza namazı bekliyor</item>
+        <item quantity="other">%1$d kaza namazı bekliyor</item>
+    </plurals>
     <string name="current_streak">Mevcut Seri</string>
     <string name="consecutive_days_all_prayers">tüm namazların kılındığı ardışık gün</string>
     <string name="on_time">Vaktinde</string>
@@ -365,7 +379,10 @@
     <string name="start_counting_hint">Geçmişinizi görmek için saymaya başlayın</string>
     <string name="sessions">Oturumlar</string>
     <string name="custom">Özel</string>
-    <string name="laps_format">%d tur</string>
+    <plurals name="laps_format">
+        <item quantity="one">%d tur</item>
+        <item quantity="other">%d tur</item>
+    </plurals>
     <string name="done">Tamam</string>
     <string name="name_required">Ad *</string>
     <string name="name_required_error">Ad gereklidir</string>
@@ -382,7 +399,10 @@
     <string name="bookmarks">Yer İmleri</string>
     <string name="daily_adhkar">Günlük Zikirler</string>
     <string name="situational_duas">Durumsal Dualar</string>
-    <string name="duas_count_format">%d dua</string>
+    <plurals name="duas_count_format">
+        <item quantity="one">%d dua</item>
+        <item quantity="other">%d dua</item>
+    </plurals>
     <string name="bookmarks_title">Yer İmleri</string>
     <string name="no_bookmarks_yet">Henüz Yer İmi Yok</string>
     <string name="no_bookmarks_hint">Hızlı erişim için ayetleri, hadisleri ve duaları kaydedin</string>
@@ -411,7 +431,10 @@
     <string name="no_results_format">\"%s\" için sonuç bulunamadı</string>
     <string name="no_results_hint">Farklı anahtar kelimeler veya filtreler deneyin</string>
     <string name="remove">Kaldır</string>
-    <string name="surah_ayahs_format">%1$s • %2$d ayet</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="one">%1$s • %2$d ayet</item>
+        <item quantity="other">%1$s • %2$d ayet</item>
+    </plurals>
     <string name="zakat_calculator">Zekat Hesaplayıcı</string>
     <string name="zakat_due">Ödenecek Zekat</string>
     <string name="assets">Varlıklar</string>
@@ -493,7 +516,10 @@
     <string name="quran_home_completed">Tamamlandı</string>
     <string name="quran_home_makkah">Mekke</string>
     <string name="quran_home_madinah">Medine</string>
-    <string name="quran_home_verses_count">%1$d Ayet</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="one">%1$d Ayet</item>
+        <item quantity="other">%1$d Ayet</item>
+    </plurals>
     <string name="quran_home_surah_info">Sure Bilgisi</string>
     <string name="quran_home_verse_of_the_day">GÜNÜN AYETİ</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -516,8 +542,10 @@
     <string name="dua_reader_added_tasbih">Tesbih\'e eklendi</string>
     <string name="dua_reader_prev">Önceki</string>
     <string name="dua_reader_next">Sonraki</string>
-    <string name="dua_reader_recite_once">%1$d kez oku</string>
-    <string name="dua_reader_recite_times">%1$d kez oku</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="one">%1$d kez oku</item>
+        <item quantity="other">%1$d kez oku</item>
+    </plurals>
     <string name="dua_reader_virtue">Bu Duanın Fazileti</string>
     <string name="dua_reader_share">Paylaş</string>
     <string name="dua_reader_source_label">Kaynak: %1$s</string>
@@ -564,7 +592,10 @@
     <string name="fasting_ayyam_desc">Kameri ayın 13, 14 ve 15. günleri</string>
     <string name="fasting_next_format">Sonraki: %1$s</string>
     <string name="fasting_tomorrow">Yarın</string>
-    <string name="fasting_in_days_format">%1$d gün sonra</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="one">%1$d gün sonra</item>
+        <item quantity="other">%1$d gün sonra</item>
+    </plurals>
     <string name="fasting_log_today">Bugünün Orucunu Kaydet</string>
     <string name="fasting_no_makeup">Kaza Orucu Yok</string>
     <string name="fasting_all_up_to_date">Tüm oruçlarınız güncel!</string>
@@ -575,7 +606,10 @@
     <string name="fasting_total_label">Toplam</string>
     <string name="fasting_makeup_info">Kaza oruçları ideal olarak bir sonraki Ramazan\'dan önce tamamlanmalıdır. Pazartesi ve Perşembe günleri oruç tutmak tavsiye edilir.</string>
     <string name="fasting_pending_count">%1$d bekleyen</string>
-    <string name="fasting_fasts_count">%1$d oruç</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="one">%1$d oruç</item>
+        <item quantity="other">%1$d oruç</item>
+    </plurals>
     <string name="fasting_pending">Bekleyen</string>
     <string name="fasting_edit">Düzenle</string>
     <string name="fasting_mark_complete">Tamamlandı İşaretle</string>
@@ -599,7 +633,10 @@
     <string name="notification_settings_enable_adhan_subtitle">Namaz vakitlerinde ezan çal</string>
     <string name="notification_settings_additional_section">EK UYARILAR</string>
     <string name="notification_settings_pre_adhan">Ezan Öncesi Hatırlatma</string>
-    <string name="notification_settings_pre_adhan_subtitle">%1$d dakika önce</string>
+    <plurals name="notification_settings_pre_adhan_subtitle">
+        <item quantity="one">%1$d dakika önce</item>
+        <item quantity="other">%1$d dakika önce</item>
+    </plurals>
     <string name="notification_settings_sunrise">Güneş Doğuşu Uyarısı</string>
     <string name="notification_settings_sunrise_subtitle">Sabah namazı vaktinin sonu</string>
     <string name="notification_settings_friday_reminder">Cuma Namazı Hatırlatması</string>
@@ -718,7 +755,10 @@
     <string name="notif_short_isha">Namaz vakti. Gününü yatsı ile tamamla.</string>
     <string name="notif_short_generic">%s namazının vakti geldi.</string>
 
-    <string name="notif_pre_reminder_title">%1$s %2$d dakika içinde</string>
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="one">%1$s %2$d dakika içinde</item>
+        <item quantity="other">%1$s %2$d dakika içinde</item>
+    </plurals>
     <string name="notif_pre_reminder_1">Kalbini hazırla ve abdest al.</string>
     <string name="notif_pre_reminder_2">Namaza hazırlanma vakti.</string>
     <string name="notif_pre_reminder_3">İbadete hazırlanmak için bir hatırlatma.</string>
@@ -933,7 +973,10 @@
     <string name="action_tafseer">Tefsir</string>
     <string name="unread">Okunmadı</string>
     <string name="listen">Dinle</string>
-    <string name="days_count_format">%1$d gün</string>
+    <plurals name="days_count_format">
+        <item quantity="one">%1$d gün</item>
+        <item quantity="other">%1$d gün</item>
+    </plurals>
     <string name="quran_order_label">Sıra</string>
     <string name="quran_juz_label">Cüz</string>
     <string name="quran_makki">Mekki</string>
@@ -964,7 +1007,10 @@
     <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
     <string name="hadith_settings_preview_translation">Ameller niyetlere göredir.</string>
     <string name="hadith_chapters_title">Bölümler</string>
-    <string name="hadith_chapters_count_format">%1$d bölüm</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="one">%1$d bölüm</item>
+        <item quantity="other">%1$d bölüm</item>
+    </plurals>
     <string name="export_as_pdf">PDF Olarak Dışa Aktar</string>
     <string name="monthly_this_month">Bu ay</string>
     <string name="ramadan_year_format">Ramazan %1$d</string>
@@ -1098,7 +1144,10 @@
     <string name="qaida_play_letter">Harfi oynat</string>
     <string name="qaida_its_shapes">Şekilleri</string>
     <string name="qaida_where_made">Çıkış yeri</string>
-    <string name="quran_surah_ayahs_format">Sure %1$d • %2$d Ayet</string>
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="one">Sure %1$d • %2$d Ayet</item>
+        <item quantity="other">Sure %1$d • %2$d Ayet</item>
+    </plurals>
     <string name="bookmark_surah_ayah_format">Sure %1$d, Ayet %2$d</string>
     <string name="bookmark_hadith_format">Hadis #%1$d</string>
     <string name="dua_label">Dua</string>
@@ -1110,8 +1159,14 @@
     <string name="makhraj_shafatain">iki dudak</string>
     <string name="makhraj_khayshum">burun</string>
     <string name="relative_yesterday">Dün</string>
-    <string name="relative_in_days_format">%1$d gün sonra</string>
-    <string name="relative_days_ago_format">%1$d gün önce</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="one">%1$d gün sonra</item>
+        <item quantity="other">%1$d gün sonra</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="one">%1$d gün önce</item>
+        <item quantity="other">%1$d gün önce</item>
+    </plurals>
     <string name="calc_region_mwl">Avrupa, Uzak Doğu ve ABD\'nin bazı bölgelerinde kullanılır</string>
     <string name="calc_region_egyptian">Afrika, Suriye, Lübnan, Malezya\'da kullanılır</string>
     <string name="calc_region_karachi">Pakistan, Bangladeş, Hindistan, Afganistan\'da kullanılır</string>
@@ -1238,7 +1293,10 @@
     <string name="search_try_asking">Şunları sormayı deneyin</string>
     <string name="search_recent">Son aramalar</string>
     <string name="search_typing_hint">Sonuçlar siz yazarken güncellenir · Kaynaklı yanıt için Enter tuşuna basın</string>
-    <string name="search_matches_format">%d eşleşme</string>
+    <plurals name="search_matches_format">
+        <item quantity="one">%d eşleşme</item>
+        <item quantity="other">%d eşleşme</item>
+    </plurals>
     <string name="search_answer_count_format">%1$d kitaplığınızda · %2$d yanıtta alıntılandı</string>
     <string name="search_cited_chip">Alıntı</string>
     <string name="ask_example_1">Kur\'an sabır hakkında ne söylüyor?</string>

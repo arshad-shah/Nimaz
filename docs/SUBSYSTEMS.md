@@ -161,6 +161,14 @@ time, **returns without posting when no khatam is active**, and derives the day'
 alarm firing in a cold process would otherwise resolve strings in the *system* language. Settings
 live in Notification settings (toggle + 24-hour time picker).
 
+**App Bundle language splits are disabled** (`android { bundle { language { enableSplit = false } } }`
+in `app/build.gradle.kts`). Settings lets the user pick an app language independently of the device
+locale (`core/util/LocaleHelper.kt`), but Play's default language splitting only delivers the
+resources matching the *device* locale — so on a Play install every other language would silently
+fall back to English. Disabling the split ships all locales in the base APK. This never reproduces
+on a locally built APK, only on an Play-installed build, so **do not re-enable it** without moving
+to Play Core's on-demand language download.
+
 **Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 
 **Gotchas.**

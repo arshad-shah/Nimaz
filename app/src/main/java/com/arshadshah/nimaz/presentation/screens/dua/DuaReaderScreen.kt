@@ -47,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -292,11 +293,11 @@ private fun DuaMetaChips(
             NimazLabelChip(text = reference, icon = Icons.Default.Book)
         }
         if (repeatCount > 0) {
-            val label = if (repeatCount > 1) {
-                stringResource(R.string.dua_reader_recite_times, repeatCount)
-            } else {
-                stringResource(R.string.dua_reader_recite_once, repeatCount)
-            }
+            val label = pluralStringResource(
+                R.plurals.dua_reader_recite_count,
+                repeatCount,
+                repeatCount
+            )
             NimazLabelChip(text = label, icon = Icons.Default.Refresh)
         }
     }

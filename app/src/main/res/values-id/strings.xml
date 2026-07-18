@@ -269,7 +269,9 @@
     <string name="khatam_preset_half_juz_daily">½ juz / hari</string>
     <string name="khatam_preset_quarter_juz_daily">¼ juz / hari</string>
     <string name="khatam_preset_custom">Kustom</string>
-    <string name="khatam_ayahs_per_day">%1$d ayat / hari</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="other">%1$d ayat / hari</item>
+    </plurals>
     <string name="khatam_projected_finish">Selesai ~%1$s</string>
     <string name="khatam_field_deadline">Tenggat waktu</string>
     <string name="khatam_field_reminder">Pengingat harian</string>
@@ -317,9 +319,15 @@
     <string name="notif_khatam_channel_name">Pengingat khatam</string>
     <string name="notif_khatam_channel_description">Pengingat harian agar khatam Al-Quran Anda tetap sesuai target</string>
     <string name="notif_khatam_title">Waktunya bacaan hari ini</string>
-    <string name="notif_khatam_body_on_track">%1$s · Anda sesuai target. %2$d ayat untuk terus melanjutkan.</string>
-    <string name="notif_khatam_body_behind">%1$s · %2$d ayat hari ini untuk kembali sesuai target.</string>
-    <string name="notif_khatam_body_generic">%1$s · %2$d ayat untuk dibaca hari ini.</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="other">%1$s · Anda sesuai target. %2$d ayat untuk terus melanjutkan.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="other">%1$s · %2$d ayat hari ini untuk kembali sesuai target.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="other">%1$s · %2$d ayat untuk dibaca hari ini.</item>
+    </plurals>
     <string name="widget_hijri_date_description">Menampilkan tanggal Hijriah hari ini</string>
     <string name="widget_next_prayer_description">Menampilkan waktu shalat berikutnya dan hitung mundur</string>
     <string name="widget_prayer_times_description">Menampilkan semua waktu shalat hari ini</string>
@@ -338,8 +346,9 @@
     <string name="all_caught_up_message">Anda tidak memiliki shalat yang terlewat untuk diqada. Pertahankan!</string>
     <string name="prayers_to_make_up">Shalat yang Perlu Diqada</string>
     <string name="all_caught_up_short">Semua terpenuhi!</string>
-    <string name="missed_prayers_pending">%1$d shalat terlewat%2$s tertunda</string>
-    <string name="plural_s"></string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="other">%1$d shalat terlewat tertunda</item>
+    </plurals>
     <string name="current_streak">Pencapaian Beruntun</string>
     <string name="consecutive_days_all_prayers">hari berturut-turut dengan semua shalat</string>
     <string name="on_time">Tepat waktu</string>
@@ -359,7 +368,9 @@
     <string name="start_counting_hint">Mulai menghitung untuk melihat riwayat Anda di sini</string>
     <string name="sessions">Sesi</string>
     <string name="custom">Kustom</string>
-    <string name="laps_format">%d putaran</string>
+    <plurals name="laps_format">
+        <item quantity="other">%d putaran</item>
+    </plurals>
     <string name="done">Selesai</string>
     <string name="name_required">Nama *</string>
     <string name="name_required_error">Nama wajib diisi</string>
@@ -376,7 +387,9 @@
     <string name="bookmarks">Penanda</string>
     <string name="daily_adhkar">Dzikir Harian</string>
     <string name="situational_duas">Doa Situasional</string>
-    <string name="duas_count_format">%d doa</string>
+    <plurals name="duas_count_format">
+        <item quantity="other">%d doa</item>
+    </plurals>
     <string name="bookmarks_title">Penanda</string>
     <string name="no_bookmarks_yet">Belum Ada Penanda</string>
     <string name="no_bookmarks_hint">Simpan ayat, hadis, dan doa untuk akses cepat</string>
@@ -405,7 +418,9 @@
     <string name="no_results_format">Tidak ada hasil untuk \"%s\"</string>
     <string name="no_results_hint">Coba kata kunci atau filter yang berbeda</string>
     <string name="remove">Hapus</string>
-    <string name="surah_ayahs_format">%1$s • %2$d ayat</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="other">%1$s • %2$d ayat</item>
+    </plurals>
     <string name="zakat_calculator">Kalkulator Zakat</string>
     <string name="zakat_due">Zakat yang Harus Dibayar</string>
     <string name="assets">Aset</string>
@@ -487,7 +502,9 @@
     <string name="quran_home_completed">Selesai</string>
     <string name="quran_home_makkah">Makkah</string>
     <string name="quran_home_madinah">Madinah</string>
-    <string name="quran_home_verses_count">%1$d Ayat</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="other">%1$d Ayat</item>
+    </plurals>
     <string name="quran_home_surah_info">Info Surah</string>
     <string name="quran_home_verse_of_the_day">AYAT HARI INI</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -510,8 +527,9 @@
     <string name="dua_reader_added_tasbih">Ditambahkan ke Tasbih</string>
     <string name="dua_reader_prev">Sblm</string>
     <string name="dua_reader_next">Brkt</string>
-    <string name="dua_reader_recite_once">Baca %1$d kali</string>
-    <string name="dua_reader_recite_times">Baca %1$d kali</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="other">Baca %1$d kali</item>
+    </plurals>
     <string name="dua_reader_virtue">Keutamaan Doa Ini</string>
     <string name="dua_reader_share">Bagikan</string>
     <string name="dua_reader_source_label">Sumber: %1$s</string>
@@ -558,7 +576,9 @@
     <string name="fasting_ayyam_desc">Tanggal 13, 14, 15 bulan hijriah</string>
     <string name="fasting_next_format">Berikutnya: %1$s</string>
     <string name="fasting_tomorrow">Besok</string>
-    <string name="fasting_in_days_format">Dalam %1$d hari</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="other">Dalam %1$d hari</item>
+    </plurals>
     <string name="fasting_log_today">Catat Puasa Hari Ini</string>
     <string name="fasting_no_makeup">Tidak Ada Puasa Qadha</string>
     <string name="fasting_all_up_to_date">Semua puasa Anda sudah terpenuhi!</string>
@@ -569,7 +589,9 @@
     <string name="fasting_total_label">Total</string>
     <string name="fasting_makeup_info">Puasa qadha idealnya diselesaikan sebelum Ramadan berikutnya. Berpuasa pada hari Senin dan Kamis direkomendasikan.</string>
     <string name="fasting_pending_count">%1$d tertunda</string>
-    <string name="fasting_fasts_count">%1$d puasa</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="other">%1$d puasa</item>
+    </plurals>
     <string name="fasting_pending">Tertunda</string>
     <string name="fasting_edit">Edit</string>
     <string name="fasting_mark_complete">Tandai Selesai</string>
@@ -593,7 +615,9 @@
     <string name="notification_settings_enable_adhan_subtitle">Putar adzan saat waktu shalat</string>
     <string name="notification_settings_additional_section">PERINGATAN TAMBAHAN</string>
     <string name="notification_settings_pre_adhan">Pengingat Pra-Adzan</string>
-    <string name="notification_settings_pre_adhan_subtitle">%1$d menit sebelumnya</string>
+    <plurals name="notification_settings_pre_adhan_subtitle">
+        <item quantity="other">%1$d menit sebelumnya</item>
+    </plurals>
     <string name="notification_settings_sunrise">Peringatan Matahari Terbit</string>
     <string name="notification_settings_sunrise_subtitle">Akhir waktu shalat Subuh</string>
     <string name="notification_settings_friday_reminder">Pengingat Shalat Jumat</string>
@@ -712,7 +736,9 @@
     <string name="notif_short_isha">Waktunya salat. Tutuplah harimu dengan Isya.</string>
     <string name="notif_short_generic">Waktunya salat %s.</string>
 
-    <string name="notif_pre_reminder_title">%1$s dalam %2$d menit</string>
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="other">%1$s dalam %2$d menit</item>
+    </plurals>
     <string name="notif_pre_reminder_1">Siapkan hatimu dan berwudulah.</string>
     <string name="notif_pre_reminder_2">Waktunya bersiap untuk salat.</string>
     <string name="notif_pre_reminder_3">Pengingat untuk bersiap beribadah.</string>
@@ -925,7 +951,9 @@
     <string name="action_tafseer">Tafsir</string>
     <string name="unread">Belum Dibaca</string>
     <string name="listen">Dengarkan</string>
-    <string name="days_count_format">%1$d hari</string>
+    <plurals name="days_count_format">
+        <item quantity="other">%1$d hari</item>
+    </plurals>
     <string name="quran_order_label">Urutan</string>
     <string name="quran_juz_label">Juz</string>
     <string name="quran_makki">Makki</string>
@@ -956,7 +984,9 @@
     <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
     <string name="hadith_settings_preview_translation">Amal itu tergantung niatnya.</string>
     <string name="hadith_chapters_title">Bab</string>
-    <string name="hadith_chapters_count_format">%1$d bab</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="other">%1$d bab</item>
+    </plurals>
     <string name="export_as_pdf">Ekspor sebagai PDF</string>
     <string name="monthly_this_month">Bulan ini</string>
     <string name="ramadan_year_format">Ramadan %1$d</string>
@@ -1090,7 +1120,9 @@
     <string name="qaida_play_letter">Putar huruf</string>
     <string name="qaida_its_shapes">Bentuk-bentuknya</string>
     <string name="qaida_where_made">Tempat keluarnya</string>
-    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayah</string>
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="other">Surah %1$d • %2$d Ayah</item>
+    </plurals>
     <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
     <string name="bookmark_hadith_format">Hadith #%1$d</string>
     <string name="dua_label">Doa</string>
@@ -1102,8 +1134,12 @@
     <string name="makhraj_shafatain">dua bibir</string>
     <string name="makhraj_khayshum">hidung</string>
     <string name="relative_yesterday">Kemarin</string>
-    <string name="relative_in_days_format">Dalam %1$d hari</string>
-    <string name="relative_days_ago_format">%1$d hari yang lalu</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="other">Dalam %1$d hari</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="other">%1$d hari yang lalu</item>
+    </plurals>
     <string name="calc_region_mwl">Digunakan di Eropa, Timur Jauh, sebagian AS</string>
     <string name="calc_region_egyptian">Digunakan di Afrika, Suriah, Lebanon, Malaysia</string>
     <string name="calc_region_karachi">Digunakan di Pakistan, Bangladesh, India, Afghanistan</string>
@@ -1229,7 +1265,9 @@
     <string name="search_try_asking">Coba tanyakan</string>
     <string name="search_recent">Terbaru</string>
     <string name="search_typing_hint">Hasil diperbarui saat Anda mengetik · Tekan Enter untuk jawaban dengan sumber</string>
-    <string name="search_matches_format">%d hasil cocok</string>
+    <plurals name="search_matches_format">
+        <item quantity="other">%d hasil cocok</item>
+    </plurals>
     <string name="search_answer_count_format">%1$d di pustaka Anda · %2$d dikutip dalam jawaban</string>
     <string name="search_cited_chip">Dikutip</string>
     <string name="ask_example_1">Apa kata Al-Qur\'an tentang kesabaran?</string>

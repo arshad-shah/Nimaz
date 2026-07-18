@@ -118,6 +118,18 @@ android {
         buildConfig = true
     }
 
+    bundle {
+        language {
+            // Settings lets the user pick an app language independently of the
+            // device locale (see LocaleHelper). With language splits on, Play
+            // only delivers the resources for the device's locale, so choosing
+            // any other language would silently fall back to English on a Play
+            // install - a bug that never reproduces on a locally built APK.
+            // Ship every locale in the base APK instead.
+            enableSplit = false
+        }
+    }
+
     testOptions {
         unitTests {
             // Required so Robolectric can read merged Android resources/manifest,

@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">Nimaz</string>
 
     <!-- Onboarding -->
@@ -66,7 +66,7 @@
     <string name="next_prayer">NEXT PRAYER</string>
     <string name="at_time">at %s</string>
     <string name="todays_progress">Today\'s Progress</string>
-    <string name="prayers_count_format">%1$d of %2$d prayers</string>
+    <string name="prayers_count_format" tools:ignore="PluralsCandidate">%1$d of %2$d prayers</string>
     <string name="fasting">Fasting</string>
     <string name="today_fasting">Fasting today</string>
     <string name="no_fast_today">No fast today</string>
@@ -222,7 +222,7 @@
     <string name="credit_islamic_finder">Islamic Finder</string>
     <string name="made_with">Made with </string>
     <string name="for_the_ummah"> for the Ummah</string>
-    <string name="copyright_format">© %d Nimaz. All rights reserved.</string>
+    <string name="copyright_format" tools:ignore="PluralsCandidate">© %d Nimaz. All rights reserved.</string>
 
     <!-- Help & Support Screen -->
     <string name="nimaz_support_request">Nimaz Support Request</string>
@@ -319,7 +319,7 @@
     <string name="khatam_notes_placeholder">Any personal notes…</string>
     <string name="khatam_detail">Khatam Detail</string>
     <string name="khatam_continue_reading">Continue Reading</string>
-    <string name="khatam_of_ayahs_read">%1$d of %2$d ayahs read</string>
+    <string name="khatam_of_ayahs_read" tools:ignore="PluralsCandidate">%1$d of %2$d ayahs read</string>
     <string name="khatam_avg_pace">Avg Pace</string>
 
     <!-- Khatam: status and pace -->
@@ -351,7 +351,7 @@
     <string name="khatam_a11y_juz_complete">Juz %1$d, complete</string>
     <string name="khatam_a11y_juz_current">Juz %1$d, in progress</string>
     <string name="khatam_a11y_juz_locked">Juz %1$d, not started</string>
-    <string name="khatam_a11y_progress_ring">%1$d percent complete</string>
+    <string name="khatam_a11y_progress_ring" tools:ignore="PluralsCandidate">%1$d percent complete</string>
 
     <!-- Khatam: create and edit form -->
     <string name="khatam_edit_title">Edit Khatam</string>
@@ -360,7 +360,10 @@
     <string name="khatam_preset_half_juz_daily">½ juz / day</string>
     <string name="khatam_preset_quarter_juz_daily">¼ juz / day</string>
     <string name="khatam_preset_custom">Custom</string>
-    <string name="khatam_ayahs_per_day">%1$d ayahs / day</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="one">%1$d ayah / day</item>
+        <item quantity="other">%1$d ayahs / day</item>
+    </plurals>
     <string name="khatam_projected_finish">Finishes ~%1$s</string>
     <string name="khatam_field_deadline">Deadline</string>
     <string name="khatam_field_reminder">Daily reminder</string>
@@ -412,9 +415,18 @@
     <string name="notif_khatam_channel_name">Khatam reminders</string>
     <string name="notif_khatam_channel_description">Daily nudges to keep your Quran completion on pace</string>
     <string name="notif_khatam_title">Time for today\'s reading</string>
-    <string name="notif_khatam_body_on_track">%1$s · you\'re on pace. %2$d ayahs to keep it going.</string>
-    <string name="notif_khatam_body_behind">%1$s · %2$d ayahs today to get back on pace.</string>
-    <string name="notif_khatam_body_generic">%1$s · %2$d ayahs to read today.</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="one">%1$s · you\'re on pace. %2$d ayah to keep it going.</item>
+        <item quantity="other">%1$s · you\'re on pace. %2$d ayahs to keep it going.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="one">%1$s · %2$d ayah today to get back on pace.</item>
+        <item quantity="other">%1$s · %2$d ayahs today to get back on pace.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="one">%1$s · %2$d ayah to read today.</item>
+        <item quantity="other">%1$s · %2$d ayahs to read today.</item>
+    </plurals>
 
     <!-- Qibla AR -->
 
@@ -441,8 +453,10 @@
     <string name="all_caught_up_message">You have no missed prayers to make up. Keep up the good work!</string>
     <string name="prayers_to_make_up">Prayers to Make Up</string>
     <string name="all_caught_up_short">All caught up!</string>
-    <string name="missed_prayers_pending">%1$d missed prayer%2$s pending</string>
-    <string name="plural_s">s</string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="one">%1$d missed prayer pending</item>
+        <item quantity="other">%1$d missed prayers pending</item>
+    </plurals>
     <string name="current_streak">Current Streak</string>
     <string name="consecutive_days_all_prayers">consecutive days with all prayers</string>
     <string name="on_time">On time</string>
@@ -494,7 +508,10 @@
     <string name="start_counting_hint">Start counting to see your history here</string>
     <string name="sessions">Sessions</string>
     <string name="custom">Custom</string>
-    <string name="laps_format">%d laps</string>
+    <plurals name="laps_format">
+        <item quantity="one">%d lap</item>
+        <item quantity="other">%d laps</item>
+    </plurals>
     <string name="done">Done</string>
     <string name="all_time">All Time</string>
 
@@ -518,7 +535,10 @@
     <string name="bookmarks">Bookmarks</string>
     <string name="daily_adhkar">Daily Adhkar</string>
     <string name="situational_duas">Situational Duas</string>
-    <string name="duas_count_format">%d duas</string>
+    <plurals name="duas_count_format">
+        <item quantity="one">%d dua</item>
+        <item quantity="other">%d duas</item>
+    </plurals>
     <string name="all_categories_az">All Categories (A–Z)</string>
     <string name="sort_categories_alphabetically">Sort categories alphabetically</string>
     <string name="sort_categories_default">Switch to default order</string>
@@ -533,7 +553,7 @@
     <string name="hadith_type">Hadith</string>
     <string name="dua_type">Dua</string>
     <string name="favorite_type">Favorite</string>
-    <string name="bookmarks_count">%1$d saved</string>
+    <string name="bookmarks_count" tools:ignore="PluralsCandidate">%1$d saved</string>
     <string name="bookmark_removed">Bookmark removed</string>
     <string name="favorite_removed">Favorite removed</string>
     <string name="undo">Undo</string>
@@ -566,8 +586,11 @@
     <string name="search_try_asking">Try asking</string>
     <string name="search_recent">Recent</string>
     <string name="search_typing_hint">Results update as you type · Enter to ask for an answer with sources</string>
-    <string name="search_matches_format">%d matches</string>
-    <string name="search_answer_count_format">%1$d in your library · %2$d cited in the answer</string>
+    <plurals name="search_matches_format">
+        <item quantity="one">%d match</item>
+        <item quantity="other">%d matches</item>
+    </plurals>
+    <string name="search_answer_count_format" tools:ignore="PluralsCandidate">%1$d in your library · %2$d cited in the answer</string>
     <string name="search_cited_chip">Cited</string>
     <string name="ask_example_1">What does the Qur\'an say about patience?</string>
     <string name="ask_example_2">Duas for anxiety and worry</string>
@@ -577,7 +600,10 @@
     <string name="no_results_format">No results for \"%s\"</string>
     <string name="no_results_hint">Try different keywords or filters</string>
     <string name="remove">Remove</string>
-    <string name="surah_ayahs_format">%1$s • %2$d ayahs</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="one">%1$s • %2$d ayah</item>
+        <item quantity="other">%1$s • %2$d ayahs</item>
+    </plurals>
 
     <!-- Zakat Calculator Screen -->
     <string name="zakat_calculator">Zakat Calculator</string>
@@ -693,7 +719,10 @@
     <string name="quran_home_completed">Completed</string>
     <string name="quran_home_makkah">Makkah</string>
     <string name="quran_home_madinah">Madinah</string>
-    <string name="quran_home_verses_count">%1$d Verses</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="one">%1$d Verse</item>
+        <item quantity="other">%1$d Verses</item>
+    </plurals>
     <string name="quran_home_surah_info">Surah Info</string>
     <string name="quran_home_verse_of_the_day">VERSE OF THE DAY</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -716,8 +745,10 @@
     <string name="dua_reader_added_tasbih">Added to Tasbih</string>
     <string name="dua_reader_prev">Prev</string>
     <string name="dua_reader_next">Next</string>
-    <string name="dua_reader_recite_once">Recite %1$d time</string>
-    <string name="dua_reader_recite_times">Recite %1$d times</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="one">Recite %1$d time</item>
+        <item quantity="other">Recite %1$d times</item>
+    </plurals>
     <string name="dua_reader_virtue">Virtue of this Dua</string>
     <string name="dua_reader_share">Share</string>
     <string name="dua_reader_source_label">Source: %1$s</string>
@@ -764,7 +795,10 @@
     <string name="fasting_ayyam_desc">13th, 14th, 15th of lunar month</string>
     <string name="fasting_next_format">Next: %1$s</string>
     <string name="fasting_tomorrow">Tomorrow</string>
-    <string name="fasting_in_days_format">In %1$d days</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
     <string name="fasting_log_today">Log Today\'s Fast</string>
     <string name="fasting_no_makeup">No Makeup Fasts</string>
     <string name="fasting_all_up_to_date">All your fasts are up to date!</string>
@@ -774,8 +808,11 @@
     <string name="fasting_pending_label">Pending</string>
     <string name="fasting_total_label">Total</string>
     <string name="fasting_makeup_info">Makeup fasts should ideally be completed before the next Ramadan. Fasting on Mondays and Thursdays is recommended.</string>
-    <string name="fasting_pending_count">%1$d pending</string>
-    <string name="fasting_fasts_count">%1$d fasts</string>
+    <string name="fasting_pending_count" tools:ignore="PluralsCandidate">%1$d pending</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="one">%1$d fast</item>
+        <item quantity="other">%1$d fasts</item>
+    </plurals>
     <string name="fasting_pending">Pending</string>
     <string name="fasting_edit">Edit</string>
     <string name="fasting_mark_complete">Mark Complete</string>
@@ -811,7 +848,10 @@
     <string name="notification_settings_enable_adhan_subtitle">Play adhan at prayer times</string>
     <string name="notification_settings_additional_section">ADDITIONAL ALERTS</string>
     <string name="notification_settings_pre_adhan">Pre-Adhan Reminder</string>
-    <string name="notification_settings_pre_adhan_subtitle">%1$d minutes before</string>
+    <plurals name="notification_settings_pre_adhan_subtitle">
+        <item quantity="one">%1$d minute before</item>
+        <item quantity="other">%1$d minutes before</item>
+    </plurals>
 
     <!-- Adhan Download Notifications -->
     <string name="adhan_download_channel_name">Adhan Downloads</string>
@@ -874,7 +914,10 @@
     <string name="notif_short_isha">It\'s time to pray. Seal your day with Isha.</string>
     <string name="notif_short_generic">It\'s time for %s prayer.</string>
 
-    <string name="notif_pre_reminder_title">%1$s in %2$d minutes</string>
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="one">%1$s in %2$d minute</item>
+        <item quantity="other">%1$s in %2$d minutes</item>
+    </plurals>
     <string name="notif_pre_reminder_1">Prepare your heart and make wudu.</string>
     <string name="notif_pre_reminder_2">Time to get ready for prayer.</string>
     <string name="notif_pre_reminder_3">A reminder to prepare for worship.</string>
@@ -888,7 +931,7 @@
 
     <string name="notif_summary_title_all_complete">Masha\'Allah! All Prayers Complete</string>
     <string name="notif_summary_title_default">Daily Prayer Summary</string>
-    <string name="notif_summary_count">%1$d of %2$d prayers completed</string>
+    <string name="notif_summary_count" tools:ignore="PluralsCandidate">%1$d of %2$d prayers completed</string>
     <string name="widget_loading">Loading…</string>
     <string name="widget_tap_to_setup">Tap to setup</string>
     <string name="widget_next_prayer">Next Prayer</string>
@@ -1034,7 +1077,7 @@
     <string name="prayer_insight_needs_attention">%1$s needs attention</string>
     <string name="prayer_insight_needs_attention_desc">Your %1$s completion is at %2$d%%. Try setting an alarm to improve.</string>
     <string name="prayer_insight_overall">Overall completion: %1$d%%</string>
-    <string name="prayer_insight_overall_desc">You\'ve completed %1$d out of %2$d prayers. Keep going!</string>
+    <string name="prayer_insight_overall_desc" tools:ignore="PluralsCandidate">You\'ve completed %1$d out of %2$d prayers. Keep going!</string>
     <string name="prayer_insight_best">Best prayer: %1$s</string>
     <string name="prayer_insight_best_desc">You consistently complete %1$s at %2$d%%.</string>
 
@@ -1095,7 +1138,10 @@
     <string name="action_tafseer">Tafseer</string>
     <string name="unread">Unread</string>
     <string name="listen">Listen</string>
-    <string name="days_count_format">%1$d days</string>
+    <plurals name="days_count_format">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
 
     <!-- Quran surah info labels -->
     <string name="quran_order_label">Order</string>
@@ -1133,7 +1179,10 @@
     <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
     <string name="hadith_settings_preview_translation">Actions are but by intentions.</string>
     <string name="hadith_chapters_title">Chapters</string>
-    <string name="hadith_chapters_count_format">%1$d chapters</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="one">%1$d chapter</item>
+        <item quantity="other">%1$d chapters</item>
+    </plurals>
 
     <!-- Monthly Prayer Times Screen -->
     <string name="export_as_pdf">Export as PDF</string>
@@ -1197,7 +1246,7 @@
     <!-- Prayer Settings summary subtitles that mirror the Notification Settings screen -->
     <string name="prayer_settings_notifications_off">Notifications off</string>
     <string name="prayer_settings_all_prayers_enabled">All prayers enabled</string>
-    <string name="prayer_settings_prayers_enabled_count">%1$d of %2$d prayers enabled</string>
+    <string name="prayer_settings_prayers_enabled_count" tools:ignore="PluralsCandidate">%1$d of %2$d prayers enabled</string>
     <string name="prayer_settings_no_prayers_enabled">No prayers enabled</string>
     <string name="prayer_settings_reminder_off">Off</string>
     <string name="asr_standard_desc">Shadow equals object length</string>
@@ -1326,7 +1375,10 @@
     <string name="qaida_where_made">Where it\'s made</string>
 
     <!-- Quran / Bookmarks view-model titles -->
-    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayahs</string>
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="one">Surah %1$d • %2$d Ayah</item>
+        <item quantity="other">Surah %1$d • %2$d Ayahs</item>
+    </plurals>
     <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
     <string name="bookmark_hadith_format">Hadith #%1$d</string>
     <string name="dua_label">Dua</string>
@@ -1345,8 +1397,14 @@
 
     <!-- Relative day labels -->
     <string name="relative_yesterday">Yesterday</string>
-    <string name="relative_in_days_format">In %1$d days</string>
-    <string name="relative_days_ago_format">%1$d days ago</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="one">In %1$d day</item>
+        <item quantity="other">In %1$d days</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
+    </plurals>
 
     <!-- Calculation method regions -->
     <string name="calc_region_mwl">Used in Europe, Far East, parts of the US</string>
@@ -1363,7 +1421,7 @@
 
     <!-- Quran audio status (shared) -->
     <string name="audio_preparing">Preparing Audio</string>
-    <string name="audio_downloading_format">Downloading %1$d of %2$d ayahs</string>
+    <string name="audio_downloading_format" tools:ignore="PluralsCandidate">Downloading %1$d of %2$d ayahs</string>
     <string name="audio_ayah_progress_format">Ayah %1$d of %2$d</string>
     <string name="audio_downloading_short_format">Downloading %1$d / %2$d…</string>
     <string name="audio_position_ayah_format">Ayah %1$d / %2$d</string>

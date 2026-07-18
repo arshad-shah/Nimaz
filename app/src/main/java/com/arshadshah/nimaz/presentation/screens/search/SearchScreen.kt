@@ -50,6 +50,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -380,8 +381,9 @@ fun SearchScreen(
                     if (!state.isSearching && state.filteredResults.isNotEmpty()) {
                         item {
                             Text(
-                                text = stringResource(
-                                    R.string.search_matches_format,
+                                text = pluralStringResource(
+                                    R.plurals.search_matches_format,
+                                    statsState.totalResults,
                                     statsState.totalResults
                                 ),
                                 style = MaterialTheme.typography.labelMedium,
@@ -746,8 +748,9 @@ private fun SurahSearchResultCard(
                     fontWeight = FontWeight.SemiBold
                 )
                 Text(
-                    text = stringResource(
-                        R.string.surah_ayahs_format,
+                    text = pluralStringResource(
+                        R.plurals.surah_ayahs_format,
+                        surah.numberOfAyahs,
                         surah.nameTransliteration,
                         surah.numberOfAyahs
                     ),

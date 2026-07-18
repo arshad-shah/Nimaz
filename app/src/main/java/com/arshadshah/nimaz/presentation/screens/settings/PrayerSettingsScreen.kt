@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
@@ -218,8 +219,9 @@ fun PrayerSettingsScreen(
                         icon = Icons.Default.Schedule,
                         title = stringResource(R.string.pre_adhan_reminder),
                         value = if (notificationSummary.reminderEnabled) {
-                            stringResource(
-                                R.string.notification_settings_pre_adhan_subtitle,
+                            pluralStringResource(
+                                R.plurals.notification_settings_pre_adhan_subtitle,
+                                notificationSummary.reminderMinutes,
                                 notificationSummary.reminderMinutes
                             )
                         } else {

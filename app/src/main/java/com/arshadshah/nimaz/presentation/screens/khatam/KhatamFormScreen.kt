@@ -228,7 +228,7 @@ private fun KhatamFormContent(
             value = preset,
             label = stringResource(presetLabelRes(preset)),
             description = preset.targetAyahs()?.let {
-                stringResource(R.string.khatam_ayahs_per_day, it)
+                pluralStringResource(R.plurals.khatam_ayahs_per_day, it, it)
             },
         )
     }

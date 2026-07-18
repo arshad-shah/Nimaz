@@ -519,7 +519,12 @@ class QuranViewModel @Inject constructor(
                             ayahs = surahWithAyahs?.ayahs ?: emptyList(),
                             title = surahWithAyahs?.surah?.nameEnglish ?: "",
                             subtitle = surahWithAyahs?.let { s ->
-                                context.getString(R.string.quran_surah_ayahs_format, s.surah.number, s.surah.numberOfAyahs)
+                                context.resources.getQuantityString(
+                                    R.plurals.quran_surah_ayahs_format,
+                                    s.surah.numberOfAyahs,
+                                    s.surah.number,
+                                    s.surah.numberOfAyahs
+                                )
                             } ?: "",
                             isLoading = false,
                             readingMode = ReadingMode.SURAH

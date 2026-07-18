@@ -157,7 +157,12 @@ object NotificationContentHelper {
      * Get a pre-reminder notification title.
      */
     fun getPreReminderTitle(context: Context, prayerName: String, minutesBefore: Int): String {
-        return context.getString(R.string.notif_pre_reminder_title, prayerName, minutesBefore)
+        return context.resources.getQuantityString(
+            R.plurals.notif_pre_reminder_title,
+            minutesBefore,
+            prayerName,
+            minutesBefore
+        )
     }
 
     /**
@@ -197,14 +202,17 @@ object NotificationContentHelper {
         ayahsToday: Int,
         pace: KhatamPace
     ): String = when (pace) {
-        KhatamPace.ON_TRACK ->
-            context.getString(R.string.notif_khatam_body_on_track, khatamName, ayahsToday)
+        KhatamPace.ON_TRACK -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_on_track, ayahsToday, khatamName, ayahsToday
+        )
 
-        KhatamPace.BEHIND, KhatamPace.SLIGHTLY_BEHIND ->
-            context.getString(R.string.notif_khatam_body_behind, khatamName, ayahsToday)
+        KhatamPace.BEHIND, KhatamPace.SLIGHTLY_BEHIND -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_behind, ayahsToday, khatamName, ayahsToday
+        )
 
-        KhatamPace.NOT_STARTED ->
-            context.getString(R.string.notif_khatam_body_generic, khatamName, ayahsToday)
+        KhatamPace.NOT_STARTED -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_generic, ayahsToday, khatamName, ayahsToday
+        )
     }
 
     /** Expanded body for the Friday reminder — the Sunnah preparations. */

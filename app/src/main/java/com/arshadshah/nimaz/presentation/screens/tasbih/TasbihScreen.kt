@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -368,7 +369,7 @@ private fun TasbihCountCapsule(
             )
             if (laps > 0) {
                 Text(
-                    text = stringResource(R.string.laps_format, laps),
+                    text = pluralStringResource(R.plurals.laps_format, laps, laps),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -628,7 +629,7 @@ private fun CounterCircle(
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
-                        text = if (laps > 0) stringResource(R.string.laps_format, laps)
+                        text = if (laps > 0) pluralStringResource(R.plurals.laps_format, laps, laps)
                         else stringResource(R.string.tap_to_count),
                         style = MaterialTheme.typography.labelSmall,
                         color = if (laps > 0) MaterialTheme.colorScheme.primary.copy(alpha = 0.8f)

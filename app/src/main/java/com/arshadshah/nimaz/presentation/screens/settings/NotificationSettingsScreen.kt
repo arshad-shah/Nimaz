@@ -63,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -338,8 +339,9 @@ fun NotificationSettingsScreen(
                         // Pre-Adhan Reminder
                         NimazSettingsItem(
                             title = stringResource(R.string.notification_settings_pre_adhan),
-                            subtitle = stringResource(
-                                R.string.notification_settings_pre_adhan_subtitle,
+                            subtitle = pluralStringResource(
+                                R.plurals.notification_settings_pre_adhan_subtitle,
+                                notificationState.reminderMinutes,
                                 notificationState.reminderMinutes
                             ),
                             checked = notificationState.showReminderBefore,

@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -181,7 +182,11 @@ internal fun SurahListItem(
                     else MaterialTheme.colorScheme.onPrimaryContainer
                 )
                 NimazBadge(
-                    text = stringResource(R.string.quran_home_verses_count, surah.ayahCount),
+                    text = pluralStringResource(
+                        R.plurals.quran_home_verses_count,
+                        surah.ayahCount,
+                        surah.ayahCount
+                    ),
                     size = NimazBadgeSize.SMALL,
                     shape = ChipShape,
                     backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
