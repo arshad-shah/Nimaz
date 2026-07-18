@@ -314,12 +314,103 @@
     <string name="khatam_continue_reading">Teruskan Membaca</string>
     <string name="khatam_juz_progress">Kemajuan Juzuk</string>
     <string name="khatam_daily_reading">Bacaan Harian</string>
-    <string name="khatam_ayahs_count_format">%d ayat</string>
     <string name="khatam_of_ayahs_read">%1$d daripada %2$d ayat dibaca</string>
     <string name="khatam_days_active">Hari Aktif</string>
     <string name="khatam_avg_pace">Purata Kadar</string>
     <string name="khatam_target">Sasaran</string>
     <string name="khatam_pace_per_day">%d/hari</string>
+
+    <!-- Khatam: status and pace -->
+    <string name="khatam_archived">Diarkibkan</string>
+    <string name="khatam_status_active_badge">Aktif</string>
+    <string name="khatam_status_completed_badge">Khatam</string>
+    <string name="khatam_pace_on_track">Mengikut kadar</string>
+    <string name="khatam_pace_slightly_behind">Hampir mengikut kadar</string>
+    <string name="khatam_pace_behind">Ketinggalan kadar</string>
+    <string name="khatam_pace_not_started">Belum dimulakan</string>
+
+    <!-- Khatam: list and hero -->
+    <string name="khatam_section_in_progress">Sedang berjalan</string>
+    <string name="khatam_section_completed">Selesai</string>
+    <string name="khatam_section_archived">Diarkibkan</string>
+    <string name="khatam_juz_position">Juzuk %1$d</string>
+    <string name="khatam_continue_at">Teruskan · %1$s %2$d</string>
+    <string name="khatam_started_on">Dimulakan %1$s</string>
+    <string name="khatam_finished_on">Selesai %1$s</string>
+    <string name="khatam_no_archived">Tiada khatam yang diarkibkan</string>
+
+    <!-- Khatam: detail -->
+    <string name="khatam_section_journey">Perjalanan anda</string>
+    <string name="khatam_journey_progress">%1$d / %2$d</string>
+    <string name="khatam_stat_streak">Hari berturut-turut</string>
+    <string name="khatam_stat_juz_done">Juzuk selesai</string>
+    <string name="khatam_edit">Sunting</string>
+    <string name="khatam_not_found">Khatam ini tidak lagi tersedia</string>
+    <string name="khatam_a11y_juz_complete">Juzuk %1$d, selesai</string>
+    <string name="khatam_a11y_juz_current">Juzuk %1$d, sedang berjalan</string>
+    <string name="khatam_a11y_juz_locked">Juzuk %1$d, belum dimulakan</string>
+    <string name="khatam_a11y_progress_ring">%1$d peratus selesai</string>
+
+    <!-- Khatam: create and edit form -->
+    <string name="khatam_edit_title">Sunting Khatam</string>
+    <string name="khatam_field_pace">Kadar</string>
+    <string name="khatam_preset_juz_daily">1 juzuk / hari</string>
+    <string name="khatam_preset_half_juz_daily">½ juzuk / hari</string>
+    <string name="khatam_preset_quarter_juz_daily">¼ juzuk / hari</string>
+    <string name="khatam_preset_custom">Tersuai</string>
+    <string name="khatam_ayahs_per_day">%1$d ayat / hari</string>
+    <string name="khatam_projected_finish">Selesai ~%1$s</string>
+    <string name="khatam_field_deadline">Tarikh akhir</string>
+    <string name="khatam_field_reminder">Peringatan harian</string>
+    <string name="khatam_optional">Pilihan</string>
+    <string name="khatam_deadline_not_set">Belum ditetapkan</string>
+    <string name="khatam_deadline_clear">Kosongkan tarikh akhir</string>
+    <string name="khatam_action_save">Simpan perubahan</string>
+    <string name="khatam_action_begin">Mulakan Khatam</string>
+    <string name="khatam_edit_progress_note">Menyunting tidak akan mengubah kemajuan anda</string>
+    <string name="khatam_section_danger">Zon bahaya</string>
+    <string name="khatam_action_archive">Arkibkan Khatam ini</string>
+    <string name="khatam_action_delete">Padam secara kekal</string>
+    <string name="khatam_archive_title">Arkibkan Khatam</string>
+    <string name="khatam_archive_message">Arkibkan \"%1$s\"? Kemajuan anda disimpan dan boleh dipulihkan kemudian.</string>
+    <string name="khatam_error_name_required">Sila masukkan nama</string>
+    <string name="khatam_error_save_failed">Gagal menyimpan. Sila cuba lagi.</string>
+
+    <!-- Khatam: counted quantities -->
+    <plurals name="khatam_ayahs_count">
+        <item quantity="other">%1$d ayat</item>
+    </plurals>
+    <plurals name="khatam_ayahs_read_plural">
+        <item quantity="other">%1$d ayat dibaca</item>
+    </plurals>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="other">%1$d ayat berbaki</item>
+    </plurals>
+    <plurals name="khatam_days_remaining">
+        <item quantity="other">~%1$d hari berbaki</item>
+    </plurals>
+    <plurals name="khatam_days_count">
+        <item quantity="other">%1$d hari</item>
+    </plurals>
+    <plurals name="khatam_juz_completed_count">
+        <item quantity="other">%1$d juzuk selesai</item>
+    </plurals>
+
+    <!-- Khatam: widget -->
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="khatam_widget_description">Kemajuan khatam Al-Quran anda</string>
+    <string name="khatam_widget_no_active">Tiada Khatam aktif</string>
+    <string name="khatam_widget_start">Mulakan satu</string>
+    <string name="khatam_widget_continue">Teruskan membaca</string>
+
+    <!-- Khatam: daily reminder notification -->
+    <string name="notif_khatam_channel_name">Peringatan khatam</string>
+    <string name="notif_khatam_channel_description">Peringatan harian supaya khatam Al-Quran anda kekal mengikut kadar</string>
+    <string name="notif_khatam_title">Masa untuk bacaan hari ini</string>
+    <string name="notif_khatam_body_on_track">%1$s · anda mengikut kadar. %2$d ayat untuk terus meneruskannya.</string>
+    <string name="notif_khatam_body_behind">%1$s · %2$d ayat hari ini untuk kembali mengikut kadar.</string>
+    <string name="notif_khatam_body_generic">%1$s · %2$d ayat untuk dibaca hari ini.</string>
+    <string name="notif_khatam_action_read">Baca sekarang</string>
     <string name="qibla_ar_heading">Arah Hadapan</string>
     <string name="qibla_ar_bearing">Bearing Kiblat</string>
     <string name="qibla_ar_facing">Menghadap Kiblat</string>

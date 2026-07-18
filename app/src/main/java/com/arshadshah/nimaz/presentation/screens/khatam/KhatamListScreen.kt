@@ -1,83 +1,53 @@
 package com.arshadshah.nimaz.presentation.screens.khatam
 
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DoNotDisturb
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Timeline
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
-import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.domain.model.KhatamStatus
-import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
-import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
+import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
+import com.arshadshah.nimaz.presentation.components.molecules.KhatamRowCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
+import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
+import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamListUiState
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamViewModel
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+
+/** Which status bucket the list is filtered to. */
+private enum class KhatamTab { IN_PROGRESS, COMPLETED, ARCHIVED }
+
+/** Vertical room reserved so the extended FAB never covers the last card. */
+private val FabClearance = 88.dp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,693 +55,194 @@ fun KhatamListScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToCreate: () -> Unit,
-    viewModel: KhatamViewModel = hiltViewModel()
+    onNavigateToRead: (Int, Int) -> Unit = { _, _ -> },
+    viewModel: KhatamViewModel = hiltViewModel(),
 ) {
-    val state by viewModel.listState.collectAsState()
-    var selectedTab by remember { mutableIntStateOf(0) }
-    var selectedKhatamForAction by remember { mutableStateOf<Khatam?>(null) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
+    val state by viewModel.listState.collectAsStateWithLifecycle()
+    var selectedTab by rememberSaveable { mutableStateOf(KhatamTab.IN_PROGRESS) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.khatam_title),
-                onBackClick = onNavigateBack
+                onBackClick = onNavigateBack,
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
                 onClick = onNavigateToCreate,
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                NimazIcon(
-                    Icons.Default.Add,
-                    contentDescription = stringResource(R.string.khatam_start_new)
-                )
-            }
-        }
-    ) { paddingValues ->
-        if (state.isLoading) {
-            NimazLoadingState(modifier = Modifier.padding(paddingValues))
-            return@Scaffold
-        }
-
-        val displayList = when (selectedTab) {
-            0 -> state.inProgressKhatams
-            1 -> state.completedKhatams
-            else -> state.abandonedKhatams
-        }
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 20.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            // Stats card
-            if (state.hasAnyKhatam) {
-                item {
-                    KhatamStatsCard(state = state)
-                }
-            }
-
-            // Active khatam summary
-            state.activeKhatam?.let { active ->
-                item {
-                    ActiveKhatamCard(
-                        khatam = active,
-                        onClick = { onNavigateToDetail(active.id) }
-                    )
-                }
-            }
-
-            // Tabs for In Progress / Completed / Abandoned
-            item {
-                KhatamStatusTabs(
-                    inProgressCount = state.inProgressKhatams.size,
-                    completedCount = state.completedKhatams.size,
-                    abandonedCount = state.abandonedKhatams.size,
-                    selectedIndex = selectedTab,
-                    onTabSelect = { selectedTab = it }
-                )
-            }
-
-            if (displayList.isEmpty()) {
-                item {
-                    if (state.inProgressKhatams.isEmpty() && state.completedKhatams.isEmpty() && state.abandonedKhatams.isEmpty()) {
-                        EmptyState(onCreateClick = onNavigateToCreate)
-                    } else {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 40.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = when (selectedTab) {
-                                    0 -> stringResource(R.string.khatam_no_in_progress)
-                                    1 -> stringResource(R.string.khatam_no_completed)
-                                    else -> stringResource(R.string.khatam_no_abandoned)
-                                },
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-                }
-            }
-
-            items(displayList, key = { it.id }) { khatam ->
-                KhatamCard(
-                    khatam = khatam,
-                    onClick = { onNavigateToDetail(khatam.id) },
-                    onLongClick = { selectedKhatamForAction = khatam }
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(80.dp)) } // FAB clearance
-        }
-    }
-
-    // Bottom sheet for khatam actions
-    selectedKhatamForAction?.let { khatam ->
-        NimazBottomSheet(
-            onDismissRequest = { selectedKhatamForAction = null },
-            sheetState = rememberModalBottomSheetState(),
-            title = khatam.name,
-            scrollable = false,
-            contentPadding = PaddingValues(0.dp)
-        ) {
-            Column {
-                if (!khatam.isActive && khatam.status != KhatamStatus.COMPLETED) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.khatam_set_active)) },
-                        leadingContent = {
-                            NimazIcon(
-                                Icons.Default.Star,
-                                contentDescription = null,
-                                variant = NimazIconVariant.PRIMARY
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            viewModel.onEvent(KhatamEvent.SetActiveKhatam(khatam.id))
-                            selectedKhatamForAction = null
-                        }
-                    )
-                }
-
-                if (khatam.status != KhatamStatus.COMPLETED && khatam.status != KhatamStatus.ABANDONED) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.khatam_abandon)) },
-                        leadingContent = {
-                            NimazIcon(
-                                Icons.Default.DoNotDisturb,
-                                contentDescription = null,
-                                variant = NimazIconVariant.ERROR
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            viewModel.onEvent(KhatamEvent.AbandonKhatam(khatam.id))
-                            selectedKhatamForAction = null
-                        }
-                    )
-                }
-
-                if (khatam.status == KhatamStatus.ABANDONED) {
-                    ListItem(
-                        headlineContent = { Text(stringResource(R.string.khatam_reactivate)) },
-                        leadingContent = {
-                            NimazIcon(
-                                Icons.Default.Refresh,
-                                contentDescription = null,
-                                variant = NimazIconVariant.PRIMARY
-                            )
-                        },
-                        modifier = Modifier.clickable {
-                            viewModel.onEvent(KhatamEvent.ReactivateKhatam(khatam.id))
-                            selectedKhatamForAction = null
-                        }
-                    )
-                }
-
-                ListItem(
-                    headlineContent = {
-                        Text(
-                            stringResource(R.string.delete),
-                            color = MaterialTheme.colorScheme.error
-                        )
-                    },
-                    leadingContent = {
-                        NimazIcon(
-                            Icons.Default.Delete,
-                            contentDescription = null,
-                            variant = NimazIconVariant.ERROR
-                        )
-                    },
-                    modifier = Modifier.clickable {
-                        showDeleteConfirm = true
-                    }
-                )
-            }
-        }
-    }
-
-    // Delete confirmation dialog
-    if (showDeleteConfirm) {
-        val khatamToDelete = selectedKhatamForAction
-        NimazConfirmDialog(
-            title = stringResource(R.string.khatam_delete_title),
-            message = stringResource(R.string.khatam_delete_message, khatamToDelete?.name ?: ""),
-            confirmText = stringResource(R.string.delete),
-            cancelText = stringResource(R.string.cancel),
-            titleIcon = Icons.Default.Delete,
-            isDestructive = true,
-            onConfirm = {
-                khatamToDelete?.let { viewModel.onEvent(KhatamEvent.DeleteKhatam(it.id)) }
-                selectedKhatamForAction = null
-            },
-            onDismiss = {
-                showDeleteConfirm = false
-                selectedKhatamForAction = null
-            },
-        )
-    }
-}
-
-// --- Custom Status Tabs ---
-
-@Composable
-private fun KhatamStatusTabs(
-    inProgressCount: Int,
-    completedCount: Int,
-    abandonedCount: Int,
-    selectedIndex: Int,
-    onTabSelect: (Int) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        StatusTabCard(
-            count = inProgressCount,
-            label = stringResource(R.string.khatam_in_progress),
-            isSelected = selectedIndex == 0,
-            onClick = { onTabSelect(0) },
-            modifier = Modifier.weight(1f)
-        )
-        StatusTabCard(
-            count = completedCount,
-            label = stringResource(R.string.khatam_completed),
-            isSelected = selectedIndex == 1,
-            onClick = { onTabSelect(1) },
-            modifier = Modifier.weight(1f)
-        )
-        StatusTabCard(
-            count = abandonedCount,
-            label = stringResource(R.string.khatam_abandoned),
-            isSelected = selectedIndex == 2,
-            onClick = { onTabSelect(2) },
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun StatusTabCard(
-    count: Int,
-    label: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.primaryContainer
-        } else {
-            MaterialTheme.colorScheme.surfaceVariant
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text(stringResource(R.string.khatam_start_new)) },
+            )
         },
-        animationSpec = tween(durationMillis = 250),
-        label = "tabBackground"
-    )
-
-    val contentColor by animateColorAsState(
-        targetValue = if (isSelected) {
-            MaterialTheme.colorScheme.onPrimaryContainer
-        } else {
-            MaterialTheme.colorScheme.onSurfaceVariant
-        },
-        animationSpec = tween(durationMillis = 250),
-        label = "tabContent"
-    )
-
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(color = backgroundColor)
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp, horizontal = 8.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(2.dp)
-    ) {
-        Text(
-            text = count.toString(),
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = contentColor
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = contentColor.copy(alpha = 0.8f),
-            textAlign = TextAlign.Center,
-            maxLines = 1
-        )
-    }
-}
-
-// --- Stats Card ---
-
-@Composable
-private fun KhatamStatsCard(
-    state: KhatamListUiState,
-    modifier: Modifier = Modifier
-) {
-    val completedCount = state.completedKhatams.size
-    val inProgressCount = state.inProgressKhatams.size
-    val totalAyahsRead = (state.completedKhatams + state.inProgressKhatams + state.abandonedKhatams)
-        .sumOf { it.totalAyahsRead }
-
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            StatItem(
-                icon = Icons.Default.CheckCircle,
-                value = completedCount.toString(),
-                label = stringResource(R.string.khatam_completed),
-                tint = MaterialTheme.colorScheme.primary
-            )
-            StatItem(
-                icon = Icons.AutoMirrored.Filled.TrendingUp,
-                value = inProgressCount.toString(),
-                label = stringResource(R.string.khatam_in_progress),
-                tint = MaterialTheme.colorScheme.tertiary
-            )
-            StatItem(
-                icon = Icons.Default.AutoStories,
-                value = formatAyahCount(totalAyahsRead),
-                label = stringResource(R.string.khatam_ayahs_read),
-                tint = MaterialTheme.colorScheme.secondary
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatItem(
-    icon: ImageVector,
-    value: String,
-    label: String,
-    tint: androidx.compose.ui.graphics.Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = tint,
-            size = NimazIconSize.MEDIUM
-        )
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-        )
-    }
-}
-
-private fun formatAyahCount(count: Int): String {
-    return when {
-        count >= 1000 -> String.format(Locale.US, "%.1fk", count / 1000f)
-        else -> count.toString()
-    }
-}
-
-// --- Active Khatam Card ---
-
-@Composable
-private fun ActiveKhatamCard(
-    khatam: Khatam,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    GradientCard(
-        modifier = modifier.fillMaxWidth(),
-        gradientColors = listOf(
-            MaterialTheme.colorScheme.primaryContainer,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-        ),
-        onClick = onClick,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-      Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        // Star label
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.Star,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-                iconSize = 14.dp
-            )
-            Text(
-                text = stringResource(R.string.khatam_active),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
-            )
-        }
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = khatam.name,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = stringResource(
-                        R.string.khatam_ayahs_format,
-                        khatam.totalAyahsRead,
-                        Khatam.TOTAL_QURAN_AYAHS
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
-                )
-            }
-
-            // Progress ring
-            Box(contentAlignment = Alignment.Center) {
-                CircularProgressIndicator(
-                    progress = { khatam.progressPercent },
-                    modifier = Modifier.size(72.dp),
-                    trackColor = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                    strokeWidth = 6.dp
-                )
-                Text(
-                    text = "${(khatam.progressPercent * 100).toInt()}%",
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
-        }
-
-        // Stats pills row
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            ActiveKhatamPill(
-                icon = Icons.Default.AutoStories,
-                text = stringResource(R.string.khatam_ayahs_read_count, khatam.totalAyahsRead),
-                modifier = Modifier.weight(1f)
-            )
-            ActiveKhatamPill(
-                icon = Icons.Default.Timeline,
-                text = stringResource(R.string.khatam_per_day_format, khatam.dailyTarget),
-                modifier = Modifier.weight(1f)
-            )
-        }
-      }
-    }
-}
-
-@Composable
-private fun ActiveKhatamPill(
-    icon: ImageVector,
-    text: String,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(8.dp)
-            )
-            .padding(horizontal = 10.dp, vertical = 6.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center
-    ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            iconSize = 14.dp
-        )
-        Spacer(modifier = Modifier.width(4.dp))
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            maxLines = 1
-        )
-    }
-}
-
-// --- Khatam List Card ---
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun KhatamCard(
-    khatam: Khatam,
-    onClick: () -> Unit,
-    onLongClick: () -> Unit = {},
-    modifier: Modifier = Modifier
-) {
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-      Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            )
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Box(
+    ) { padding ->
+        when {
+            state.isLoading -> Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(
-                        color = when (khatam.status) {
-                            KhatamStatus.COMPLETED -> MaterialTheme.colorScheme.primaryContainer
-                            KhatamStatus.ABANDONED -> MaterialTheme.colorScheme.errorContainer
-                            else -> MaterialTheme.colorScheme.surface
-                        },
-                        shape = CircleShape
-                    ),
-                contentAlignment = Alignment.Center
+                    .fillMaxSize()
+                    .padding(padding),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator() }
+
+            !state.hasAnyKhatam -> Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(NimazSpacing.Large),
+                contentAlignment = Alignment.Center,
             ) {
-                when (khatam.status) {
-                    KhatamStatus.COMPLETED -> NimazIcon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        variant = NimazIconVariant.PRIMARY,
-                        size = NimazIconSize.LARGE
-                    )
-
-                    KhatamStatus.ABANDONED -> NimazIcon(
-                        imageVector = Icons.Default.DoNotDisturb,
-                        contentDescription = null,
-                        variant = NimazIconVariant.ERROR,
-                        size = NimazIconSize.LARGE
-                    )
-
-                    else -> NimazIcon(
-                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
-                        contentDescription = null,
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.LARGE
-                    )
-                }
-            }
-
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = khatam.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = stringResource(
-                        R.string.khatam_ayahs_format,
-                        khatam.totalAyahsRead,
-                        Khatam.TOTAL_QURAN_AYAHS
-                    ),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = stringResource(
-                        R.string.khatam_created_format,
-                        formatDate(khatam.createdAt)
-                    ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                NimazEmptyState(
+                    title = stringResource(R.string.khatam_no_started),
+                    message = stringResource(R.string.khatam_start_journey),
+                    icon = Icons.Default.MenuBook,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    actionLabel = stringResource(R.string.khatam_start_new),
+                    onAction = onNavigateToCreate,
                 )
             }
 
-            Text(
-                text = "${(khatam.progressPercent * 100).toInt()}%",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
+            else -> KhatamListContent(
+                state = state,
+                selectedTab = selectedTab,
+                onTabSelect = { selectedTab = it },
+                contentPadding = padding,
+                onKhatamClick = onNavigateToDetail,
+                onContinue = {
+                    val surah = state.nextUnreadSurah
+                    val ayah = state.nextUnreadAyah
+                    if (surah != null && ayah != null) onNavigateToRead(surah, ayah)
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun KhatamListContent(
+    state: KhatamListUiState,
+    selectedTab: KhatamTab,
+    onTabSelect: (KhatamTab) -> Unit,
+    contentPadding: PaddingValues,
+    onKhatamClick: (Long) -> Unit,
+    onContinue: () -> Unit,
+) {
+    val accent = rememberKhatamAccent()
+    val tabs = listOf(
+        stringResource(R.string.khatam_section_in_progress),
+        stringResource(R.string.khatam_section_completed),
+        stringResource(R.string.khatam_section_archived),
+    )
+
+    val visible = when (selectedTab) {
+        KhatamTab.IN_PROGRESS -> state.inProgressKhatams
+        KhatamTab.COMPLETED -> state.completedKhatams
+        KhatamTab.ARCHIVED -> state.abandonedKhatams
+    }
+
+    val active = state.activeKhatam
+    val activeInsights = state.activeInsights
+    val hasNextPosition = state.nextUnreadSurah != null && state.nextUnreadAyah != null
+    val continueText = continueLabel(state)
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(
+            start = NimazSpacing.Large,
+            end = NimazSpacing.Large,
+            top = contentPadding.calculateTopPadding() + NimazSpacing.Small,
+            bottom = contentPadding.calculateBottomPadding() + FabClearance,
+        ),
+        verticalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
+    ) {
+        if (active != null && activeInsights != null) {
+            item(key = "hero-${active.id}") {
+                KhatamHeroCard(
+                    khatam = active,
+                    insights = activeInsights,
+                    accent = accent,
+                    continueLabel = continueText,
+                    onContinue = onContinue.takeIf { hasNextPosition },
+                    onClick = { onKhatamClick(active.id) },
+                )
+            }
+        }
+
+        item(key = "tabs") {
+            NimazPillTabs(
+                tabs = tabs,
+                selectedIndex = selectedTab.ordinal,
+                onTabSelect = { onTabSelect(KhatamTab.entries[it]) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = NimazSpacing.Small),
             )
         }
 
-        LinearProgressIndicator(
-            progress = { khatam.progressPercent },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(4.dp)
-                .clip(RoundedCornerShape(2.dp)),
-            color = when (khatam.status) {
-                KhatamStatus.COMPLETED -> MaterialTheme.colorScheme.primary
-                KhatamStatus.ABANDONED -> MaterialTheme.colorScheme.error
-                else -> MaterialTheme.colorScheme.tertiary
-            },
-            trackColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.12f),
-            strokeCap = StrokeCap.Round
-        )
-      }
+        if (visible.isEmpty()) {
+            item(key = "empty-${selectedTab.name}") {
+                NimazEmptyState(
+                    title = stringResource(emptyTitleRes(selectedTab)),
+                    message = stringResource(R.string.khatam_start_journey),
+                    icon = Icons.Default.MenuBook,
+                    iconTint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(vertical = NimazSpacing.Medium),
+                )
+            }
+        } else {
+            item(key = "header-${selectedTab.name}") {
+                NimazSectionHeader(
+                    title = tabs[selectedTab.ordinal],
+                    trailingText = visible.size.toString(),
+                )
+            }
+            items(visible, key = { it.id }) { khatam ->
+                KhatamRowCard(
+                    khatam = khatam,
+                    accent = accent,
+                    subtitle = rowSubtitle(khatam),
+                    onClick = { onKhatamClick(khatam.id) },
+                )
+            }
+        }
     }
 }
 
-private fun formatDate(timestamp: Long): String {
-    val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-    return sdf.format(Date(timestamp))
-}
-
-// --- Empty State ---
-
+/** "Continue · Surah 8 12", or a plain label when no position is known yet. */
 @Composable
-private fun EmptyState(
-    onCreateClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 40.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        NimazIcon(
-            imageVector = Icons.AutoMirrored.Filled.MenuBook,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-            iconSize = 64.dp
+private fun continueLabel(state: KhatamListUiState): String {
+    val surah = state.nextUnreadSurah
+    val ayah = state.nextUnreadAyah
+    return if (surah != null && ayah != null) {
+        stringResource(
+            R.string.khatam_continue_at,
+            stringResource(R.string.surah_number_format, surah),
+            ayah,
         )
-        Text(
-            text = stringResource(R.string.khatam_no_started),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Text(
-            text = stringResource(R.string.khatam_start_journey),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-            textAlign = TextAlign.Center
-        )
+    } else {
+        stringResource(R.string.khatam_continue_reading)
     }
 }
 
-private val KhatamListUiState.hasAnyKhatam: Boolean
-    get() = inProgressKhatams.isNotEmpty() || completedKhatams.isNotEmpty() || abandonedKhatams.isNotEmpty()
+/** "1,240 ayahs read · Started 12 Feb 2026" — or the finish date once complete. */
+@Composable
+private fun rowSubtitle(khatam: Khatam): String {
+    val read = pluralStringResource(
+        R.plurals.khatam_ayahs_read_plural,
+        khatam.totalAyahsRead,
+        khatam.totalAyahsRead,
+    )
+    val formatter = rememberKhatamDateFormatter()
+    val date = khatam.completedAt ?: khatam.startedAt ?: khatam.createdAt
+    val dateLabel = stringResource(
+        if (khatam.completedAt != null) R.string.khatam_finished_on else R.string.khatam_started_on,
+        formatter.format(date),
+    )
+    return "$read · $dateLabel"
+}
+
+private fun emptyTitleRes(tab: KhatamTab): Int = when (tab) {
+    KhatamTab.IN_PROGRESS -> R.string.khatam_no_in_progress
+    KhatamTab.COMPLETED -> R.string.khatam_no_completed
+    KhatamTab.ARCHIVED -> R.string.khatam_no_archived
+}

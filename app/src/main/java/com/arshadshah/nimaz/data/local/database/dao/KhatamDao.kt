@@ -167,6 +167,25 @@ interface KhatamDao {
     @Query("UPDATE khatams SET status = 'active', updated_at = :timestamp WHERE id = :khatamId")
     suspend fun reactivateKhatam(khatamId: Long, timestamp: Long = System.currentTimeMillis())
 
+    // ---- Lifetime stats ----
+
+    @Query("SELECT COUNT(*) FROM khatams WHERE status = 'completed'")
+    fun observeCompletedKhatamCount(): Flow<Int>
+
+    @Query("SELECT COUNT(*) FROM khatams WHERE status = 'active'")
+    fun observeActiveKhatamCount(): Flow<Int>
+
+    /**
+     * Ayahs read across every khatam ever, including completed and abandoned ones.
+     * COALESCE guards the empty-table case, where SUM returns NULL.
+     */
+    @Query("SELECT COALESCE(SUM(total_ayahs_read), 0) FROM khatams")
+    fun observeTotalAyahsReadAllTime(): Flow<Int>
+
+    /** Every logged reading day across all khatams, for lifetime streak maths. */
+    @Query("SELECT * FROM khatam_daily_log WHERE ayahs_read > 0 ORDER BY date DESC")
+    fun observeAllDailyLogs(): Flow<List<KhatamDailyLogEntity>>
+
     // Sync export queries
     @Query("SELECT * FROM khatams ORDER BY updated_at DESC")
     suspend fun getAllKhatamsSync(): List<KhatamEntity>

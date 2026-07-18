@@ -417,12 +417,109 @@
     <string name="khatam_continue_reading">Continue Reading</string>
     <string name="khatam_juz_progress">Juz Progress</string>
     <string name="khatam_daily_reading">Daily Reading</string>
-    <string name="khatam_ayahs_count_format">%d ayahs</string>
     <string name="khatam_of_ayahs_read">%1$d of %2$d ayahs read</string>
     <string name="khatam_days_active">Days Active</string>
     <string name="khatam_avg_pace">Avg Pace</string>
     <string name="khatam_target">Target</string>
     <string name="khatam_pace_per_day">%d/day</string>
+
+    <!-- Khatam: status and pace -->
+    <string name="khatam_archived">Archived</string>
+    <string name="khatam_status_active_badge">Active</string>
+    <string name="khatam_status_completed_badge">Khatam</string>
+    <string name="khatam_pace_on_track">On track</string>
+    <string name="khatam_pace_slightly_behind">Almost on pace</string>
+    <string name="khatam_pace_behind">Behind pace</string>
+    <string name="khatam_pace_not_started">Not started</string>
+
+    <!-- Khatam: list and hero -->
+    <string name="khatam_section_in_progress">In progress</string>
+    <string name="khatam_section_completed">Completed</string>
+    <string name="khatam_section_archived">Archived</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_continue_at">Continue · %1$s %2$d</string>
+    <string name="khatam_started_on">Started %1$s</string>
+    <string name="khatam_finished_on">Finished %1$s</string>
+    <string name="khatam_no_archived">No archived khatams</string>
+
+    <!-- Khatam: detail -->
+    <string name="khatam_section_journey">Your journey</string>
+    <string name="khatam_journey_progress">%1$d / %2$d</string>
+    <string name="khatam_stat_streak">Day streak</string>
+    <string name="khatam_stat_juz_done">Juz done</string>
+    <string name="khatam_edit">Edit</string>
+    <string name="khatam_not_found">This khatam is no longer available</string>
+    <string name="khatam_a11y_juz_complete">Juz %1$d, complete</string>
+    <string name="khatam_a11y_juz_current">Juz %1$d, in progress</string>
+    <string name="khatam_a11y_juz_locked">Juz %1$d, not started</string>
+    <string name="khatam_a11y_progress_ring">%1$d percent complete</string>
+
+    <!-- Khatam: create and edit form -->
+    <string name="khatam_edit_title">Edit Khatam</string>
+    <string name="khatam_field_pace">Pace</string>
+    <string name="khatam_preset_juz_daily">1 juz / day</string>
+    <string name="khatam_preset_half_juz_daily">½ juz / day</string>
+    <string name="khatam_preset_quarter_juz_daily">¼ juz / day</string>
+    <string name="khatam_preset_custom">Custom</string>
+    <string name="khatam_ayahs_per_day">%1$d ayahs / day</string>
+    <string name="khatam_projected_finish">Finishes ~%1$s</string>
+    <string name="khatam_field_deadline">Deadline</string>
+    <string name="khatam_field_reminder">Daily reminder</string>
+    <string name="khatam_optional">Optional</string>
+    <string name="khatam_deadline_not_set">Not set</string>
+    <string name="khatam_deadline_clear">Clear deadline</string>
+    <string name="khatam_action_save">Save changes</string>
+    <string name="khatam_action_begin">Begin Khatam</string>
+    <string name="khatam_edit_progress_note">Editing never changes your progress</string>
+    <string name="khatam_section_danger">Danger zone</string>
+    <string name="khatam_action_archive">Archive this Khatam</string>
+    <string name="khatam_action_delete">Delete permanently</string>
+    <string name="khatam_archive_title">Archive Khatam</string>
+    <string name="khatam_archive_message">Archive \"%1$s\"? Your progress is kept and you can restore it later.</string>
+    <string name="khatam_error_name_required">Please enter a name</string>
+    <string name="khatam_error_save_failed">Couldn\'t save. Please try again.</string>
+
+    <!-- Khatam: counted quantities -->
+    <plurals name="khatam_ayahs_count">
+        <item quantity="one">%1$d ayah</item>
+        <item quantity="other">%1$d ayahs</item>
+    </plurals>
+    <plurals name="khatam_ayahs_read_plural">
+        <item quantity="one">%1$d ayah read</item>
+        <item quantity="other">%1$d ayahs read</item>
+    </plurals>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">%1$d ayah remaining</item>
+        <item quantity="other">%1$d ayahs remaining</item>
+    </plurals>
+    <plurals name="khatam_days_remaining">
+        <item quantity="one">~%1$d day left</item>
+        <item quantity="other">~%1$d days left</item>
+    </plurals>
+    <plurals name="khatam_days_count">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="khatam_juz_completed_count">
+        <item quantity="one">%1$d juz completed</item>
+        <item quantity="other">%1$d juz completed</item>
+    </plurals>
+
+    <!-- Khatam: widget -->
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="khatam_widget_description">Your Quran completion progress</string>
+    <string name="khatam_widget_no_active">No active Khatam</string>
+    <string name="khatam_widget_start">Start one</string>
+    <string name="khatam_widget_continue">Continue reading</string>
+
+    <!-- Khatam: daily reminder notification -->
+    <string name="notif_khatam_channel_name">Khatam reminders</string>
+    <string name="notif_khatam_channel_description">Daily nudges to keep your Quran completion on pace</string>
+    <string name="notif_khatam_title">Time for today\'s reading</string>
+    <string name="notif_khatam_body_on_track">%1$s · you\'re on pace. %2$d ayahs to keep it going.</string>
+    <string name="notif_khatam_body_behind">%1$s · %2$d ayahs today to get back on pace.</string>
+    <string name="notif_khatam_body_generic">%1$s · %2$d ayahs to read today.</string>
+    <string name="notif_khatam_action_read">Read now</string>
 
     <!-- Qibla AR -->
     <string name="qibla_ar_heading">Heading</string>

@@ -59,7 +59,6 @@ import com.arshadshah.nimaz.domain.usecase.InsertQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.InsertHadithBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.InsertDuaBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateDuaBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.GetActiveKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUlHusnaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUnNabiUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
@@ -78,8 +77,6 @@ import com.arshadshah.nimaz.domain.usecase.GetFavoriteProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpGuideUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetJuzProgressUseCase
-import com.arshadshah.nimaz.domain.usecase.GetKhatamStatsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNextUnreadPositionUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
@@ -91,7 +88,6 @@ import com.arshadshah.nimaz.domain.usecase.GetQaidaLettersUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranBookmarksUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranFavoriteAyahIdsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranFavoritesUseCase
-import com.arshadshah.nimaz.domain.usecase.GetReadAyahIdsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetReadingProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSajdaAyahsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetVerseOfTheDayUseCase
@@ -113,7 +109,11 @@ import com.arshadshah.nimaz.domain.usecase.ObserveCompletedCellsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveCompletedKhatamsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveDailyLogsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveInProgressKhatamsUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveJuzProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveKhatamDetailUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveKhatamStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveReadAyahIdsUseCase
 import com.arshadshah.nimaz.domain.usecase.ProphetUseCases
 import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
@@ -442,14 +442,14 @@ object UseCaseModule {
     ): KhatamUseCases {
         return KhatamUseCases(
             createKhatam = CreateKhatamUseCase(repository),
-            getActiveKhatam = GetActiveKhatamUseCase(repository),
+            updateKhatam = UpdateKhatamUseCase(repository),
             observeActiveKhatam = ObserveActiveKhatamUseCase(repository),
             setActiveKhatam = SetActiveKhatamUseCase(repository),
             markAyahsRead = MarkAyahsReadUseCase(repository),
-            getReadAyahIds = GetReadAyahIdsUseCase(repository),
             observeReadAyahIds = ObserveReadAyahIdsUseCase(repository),
-            getJuzProgress = GetJuzProgressUseCase(repository),
+            observeJuzProgress = ObserveJuzProgressUseCase(repository),
             observeDailyLogs = ObserveDailyLogsUseCase(repository),
+            observeKhatamDetail = ObserveKhatamDetailUseCase(repository),
             completeKhatam = CompleteKhatamUseCase(repository),
             abandonKhatam = AbandonKhatamUseCase(repository),
             reactivateKhatam = ReactivateKhatamUseCase(repository),
@@ -460,7 +460,7 @@ object UseCaseModule {
             observeAbandonedKhatams = ObserveAbandonedKhatamsUseCase(repository),
             observeKhatamById = ObserveKhatamByIdUseCase(repository),
             logDailyProgress = LogDailyProgressUseCase(repository),
-            getKhatamStats = GetKhatamStatsUseCase(repository),
+            observeKhatamStats = ObserveKhatamStatsUseCase(repository),
             getNextUnreadPosition = GetNextUnreadPositionUseCase(repository),
             unmarkAyahRead = UnmarkAyahReadUseCase(repository),
             markSurahAsRead = MarkSurahAsReadUseCase(repository)

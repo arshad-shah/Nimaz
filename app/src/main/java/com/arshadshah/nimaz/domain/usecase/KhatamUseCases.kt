@@ -3,21 +3,29 @@ package com.arshadshah.nimaz.domain.usecase
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
+/**
+ * Khatam use cases.
+ *
+ * Every read is a Flow. The one-shot `Get*` variants that used to sit alongside
+ * `Observe*` were removed rather than documented — leaving both available is what
+ * let call sites silently opt into stale data.
+ */
 data class KhatamUseCases(
     val createKhatam: CreateKhatamUseCase,
-    val getActiveKhatam: GetActiveKhatamUseCase,
+    val updateKhatam: UpdateKhatamUseCase,
     val observeActiveKhatam: ObserveActiveKhatamUseCase,
     val setActiveKhatam: SetActiveKhatamUseCase,
     val markAyahsRead: MarkAyahsReadUseCase,
-    val getReadAyahIds: GetReadAyahIdsUseCase,
     val observeReadAyahIds: ObserveReadAyahIdsUseCase,
-    val getJuzProgress: GetJuzProgressUseCase,
+    val observeJuzProgress: ObserveJuzProgressUseCase,
     val observeDailyLogs: ObserveDailyLogsUseCase,
+    val observeKhatamDetail: ObserveKhatamDetailUseCase,
     val completeKhatam: CompleteKhatamUseCase,
     val abandonKhatam: AbandonKhatamUseCase,
     val reactivateKhatam: ReactivateKhatamUseCase,
@@ -28,7 +36,7 @@ data class KhatamUseCases(
     val observeAbandonedKhatams: ObserveAbandonedKhatamsUseCase,
     val observeKhatamById: ObserveKhatamByIdUseCase,
     val logDailyProgress: LogDailyProgressUseCase,
-    val getKhatamStats: GetKhatamStatsUseCase,
+    val observeKhatamStats: ObserveKhatamStatsUseCase,
     val getNextUnreadPosition: GetNextUnreadPositionUseCase,
     val unmarkAyahRead: UnmarkAyahReadUseCase,
     val markSurahAsRead: MarkSurahAsReadUseCase
@@ -38,8 +46,8 @@ class CreateKhatamUseCase @Inject constructor(private val repository: KhatamRepo
     suspend operator fun invoke(khatam: Khatam): Long = repository.createKhatam(khatam)
 }
 
-class GetActiveKhatamUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(): Khatam? = repository.getActiveKhatam()
+class UpdateKhatamUseCase @Inject constructor(private val repository: KhatamRepository) {
+    suspend operator fun invoke(khatam: Khatam) = repository.updateKhatam(khatam)
 }
 
 class ObserveActiveKhatamUseCase @Inject constructor(private val repository: KhatamRepository) {
@@ -55,22 +63,23 @@ class MarkAyahsReadUseCase @Inject constructor(private val repository: KhatamRep
         repository.markAyahsRead(khatamId, ayahIds)
 }
 
-class GetReadAyahIdsUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long): Set<Int> = repository.getReadAyahIds(khatamId)
-}
-
 class ObserveReadAyahIdsUseCase @Inject constructor(private val repository: KhatamRepository) {
     operator fun invoke(khatamId: Long): Flow<Set<Int>> = repository.observeReadAyahIds(khatamId)
 }
 
-class GetJuzProgressUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(khatamId: Long): List<JuzProgressInfo> =
-        repository.getJuzProgress(khatamId)
+class ObserveJuzProgressUseCase @Inject constructor(private val repository: KhatamRepository) {
+    operator fun invoke(khatamId: Long): Flow<List<JuzProgressInfo>> =
+        repository.observeJuzProgress(khatamId)
 }
 
 class ObserveDailyLogsUseCase @Inject constructor(private val repository: KhatamRepository) {
     operator fun invoke(khatamId: Long): Flow<List<DailyLogEntry>> =
         repository.observeDailyLogs(khatamId)
+}
+
+class ObserveKhatamDetailUseCase @Inject constructor(private val repository: KhatamRepository) {
+    operator fun invoke(khatamId: Long): Flow<KhatamDetailSnapshot?> =
+        repository.observeKhatamDetail(khatamId)
 }
 
 class CompleteKhatamUseCase @Inject constructor(private val repository: KhatamRepository) {
@@ -114,8 +123,8 @@ class LogDailyProgressUseCase @Inject constructor(private val repository: Khatam
         repository.logDailyProgress(khatamId, date, ayahsRead)
 }
 
-class GetKhatamStatsUseCase @Inject constructor(private val repository: KhatamRepository) {
-    suspend operator fun invoke(): KhatamStats = repository.getKhatamStats()
+class ObserveKhatamStatsUseCase @Inject constructor(private val repository: KhatamRepository) {
+    operator fun invoke(): Flow<KhatamStats> = repository.observeKhatamStats()
 }
 
 class GetNextUnreadPositionUseCase @Inject constructor(private val repository: KhatamRepository) {

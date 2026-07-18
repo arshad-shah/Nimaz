@@ -75,7 +75,7 @@ import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamFormScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
@@ -988,12 +988,25 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToRead = { surahNumber, ayahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                    },
+                    onNavigateToEdit = { khatamId ->
+                        navController.navigate(Route.KhatamEdit(khatamId))
                     }
                 )
             }
 
+            // Create and edit share one screen; a null id means "create".
             taggedComposable<Route.KhatamCreate>(ScreenTags.KhatamCreate) {
-                KhatamCreateScreen(
+                KhatamFormScreen(
+                    khatamId = null,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            taggedComposable<Route.KhatamEdit>(ScreenTags.KhatamEdit) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.KhatamEdit>()
+                KhatamFormScreen(
+                    khatamId = args.khatamId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

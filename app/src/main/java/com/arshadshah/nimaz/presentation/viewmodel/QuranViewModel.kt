@@ -27,6 +27,7 @@ import android.content.Context
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +37,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -707,22 +713,36 @@ class QuranViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Active khatam plus its read-ayah set, as one stream shared by the reader and home.
+     *
+     * Previously each caller nested `observeReadAyahIds(...).collect` *inside*
+     * `observeActiveKhatam().collect`. The inner collect on a Room Flow never returns, so
+     * the outer flow could never process a second emission — switching the active khatam
+     * left both surfaces pinned to the first khatam's ayahs until the process restarted.
+     * [flatMapLatest] cancels the inner subscription when the active khatam changes.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val activeKhatamStream: Flow<Pair<Khatam?, Set<Int>>> =
+        khatamUseCases.observeActiveKhatam()
+            .flatMapLatest { khatam ->
+                if (khatam == null) {
+                    flowOf(null to emptySet())
+                } else {
+                    khatamUseCases.observeReadAyahIds(khatam.id)
+                        .map { ids -> khatam to ids }
+                }
+            }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+
     private fun observeActiveKhatam() {
         viewModelScope.launch {
-            khatamUseCases.observeActiveKhatam().collect { khatam ->
-                val khatamId = khatam?.id
-                _readerState.update { it.copy(activeKhatamId = khatamId) }
-                if (khatamId != null) {
-                    // Start observing read ayah IDs for this khatam
-                    khatamUseCases.observeReadAyahIds(khatamId).collect { ids ->
-                        _readerState.update { it.copy(khatamReadAyahIds = ids) }
-                        // Reactive completion check
-                        if (ids.size >= Khatam.TOTAL_QURAN_AYAHS) {
-                            khatamUseCases.completeKhatam(khatamId)
-                        }
-                    }
-                } else {
-                    _readerState.update { it.copy(khatamReadAyahIds = emptySet()) }
+            activeKhatamStream.collect { (khatam, ids) ->
+                _readerState.update {
+                    it.copy(activeKhatamId = khatam?.id, khatamReadAyahIds = ids)
+                }
+                if (khatam != null && ids.size >= Khatam.TOTAL_QURAN_AYAHS) {
+                    khatamUseCases.completeKhatam(khatam.id)
                 }
             }
         }
@@ -730,15 +750,8 @@ class QuranViewModel @Inject constructor(
 
     private fun observeActiveKhatamForHome() {
         viewModelScope.launch {
-            khatamUseCases.observeActiveKhatam().collect { khatam ->
-                _homeState.update { it.copy(activeKhatam = khatam) }
-                if (khatam != null) {
-                    khatamUseCases.observeReadAyahIds(khatam.id).collect { ids ->
-                        _homeState.update { it.copy(khatamReadAyahIds = ids) }
-                    }
-                } else {
-                    _homeState.update { it.copy(khatamReadAyahIds = emptySet()) }
-                }
+            activeKhatamStream.collect { (khatam, ids) ->
+                _homeState.update { it.copy(activeKhatam = khatam, khatamReadAyahIds = ids) }
             }
         }
         viewModelScope.launch {

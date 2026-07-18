@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.KhatamDao
 import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
@@ -7,12 +8,16 @@ import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamConstants
+import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
+import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
-import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +31,7 @@ class KhatamRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateKhatam(khatam: Khatam) {
-        khatamDao.updateKhatam(khatam.toEntity())
+        khatamDao.updateKhatam(khatam.toEntity().copy(updatedAt = System.currentTimeMillis()))
     }
 
     override suspend fun deleteKhatam(khatamId: Long) {
@@ -43,10 +48,6 @@ class KhatamRepositoryImpl @Inject constructor(
 
     override fun observeActiveKhatam(): Flow<Khatam?> {
         return khatamDao.observeActiveKhatam().map { it?.toDomain() }
-    }
-
-    override suspend fun getActiveKhatam(): Khatam? {
-        return khatamDao.getActiveKhatam()?.toDomain()
     }
 
     override fun observeInProgressKhatams(): Flow<List<Khatam>> {
@@ -73,10 +74,6 @@ class KhatamRepositoryImpl @Inject constructor(
         khatamDao.markAyahsRead(khatamId, ayahIds)
     }
 
-    override suspend fun getReadAyahIds(khatamId: Long): Set<Int> {
-        return khatamDao.getReadAyahIds(khatamId).toSet()
-    }
-
     override fun observeReadAyahIds(khatamId: Long): Flow<Set<Int>> {
         return khatamDao.observeReadAyahIds(khatamId).map { it.toSet() }
     }
@@ -99,20 +96,42 @@ class KhatamRepositoryImpl @Inject constructor(
         khatamDao.markSurahAsRead(khatamId, surahNumber)
     }
 
-    override suspend fun getJuzProgress(khatamId: Long): List<JuzProgressInfo> {
-        return KhatamConstants.JUZ_AYAH_RANGES.mapIndexed { index, (startAyahId, endAyahId) ->
-            val readIds = khatamDao.getReadAyahIdsInRange(khatamId, startAyahId, endAyahId)
-            JuzProgressInfo(
-                juzNumber = index + 1,
-                totalAyahs = endAyahId - startAyahId + 1,
-                readAyahs = readIds.size
-            )
-        }
+    /**
+     * Derives all 30 juz from the single read-ayah set rather than issuing 30 range
+     * queries, so this is both live and cheaper than the one-shot version it replaces.
+     */
+    override fun observeJuzProgress(khatamId: Long): Flow<List<JuzProgressInfo>> {
+        return observeReadAyahIds(khatamId).map { readIds -> juzProgressFrom(readIds) }
     }
 
     override fun observeDailyLogs(khatamId: Long): Flow<List<DailyLogEntry>> {
         return khatamDao.observeDailyLogs(khatamId).map { list ->
             list.map { DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead) }
+        }
+    }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun observeKhatamDetail(khatamId: Long): Flow<KhatamDetailSnapshot?> {
+        return khatamDao.observeKhatamById(khatamId).flatMapLatest { entity ->
+            if (entity == null) {
+                // Emit null rather than stalling, so a deleted khatam resolves the
+                // loading state instead of spinning forever.
+                kotlinx.coroutines.flow.flowOf(null)
+            } else {
+                combine(
+                    observeReadAyahIds(khatamId),
+                    observeDailyLogs(khatamId)
+                ) { readIds, logs ->
+                    val khatam = entity.toDomain()
+                    val juz = juzProgressFrom(readIds)
+                    KhatamDetailSnapshot(
+                        khatam = khatam,
+                        juzProgress = juz,
+                        dailyLogs = logs,
+                        insights = KhatamProgressCalculator.insights(khatam, logs, juz)
+                    )
+                }
+            }
         }
     }
 
@@ -134,16 +153,37 @@ class KhatamRepositoryImpl @Inject constructor(
         khatamDao.reactivateKhatam(khatamId)
     }
 
-    override suspend fun getKhatamStats(): KhatamStats {
-        // Simplified stats - computed from observing all khatams
-        return KhatamStats(
-            totalKhatamsCompleted = 0,
-            totalKhatamsActive = 0,
-            totalAyahsReadAllTime = 0,
-            longestStreak = 0,
-            currentStreak = 0
-        )
+    /**
+     * Real lifetime stats. Replaces a stub that returned all zeros while satisfying
+     * its signature — which type-checked and shipped, but would have silently
+     * reported "0 khatams completed" to any screen that used it.
+     */
+    override fun observeKhatamStats(): Flow<KhatamStats> {
+        return combine(
+            khatamDao.observeCompletedKhatamCount(),
+            khatamDao.observeActiveKhatamCount(),
+            khatamDao.observeTotalAyahsReadAllTime(),
+            khatamDao.observeAllDailyLogs()
+        ) { completed, active, totalAyahs, logEntities ->
+            val logs = logEntities.map { DailyLogEntry(date = it.date, ayahsRead = it.ayahsRead) }
+            KhatamStats(
+                totalKhatamsCompleted = completed,
+                totalKhatamsActive = active,
+                totalAyahsReadAllTime = totalAyahs,
+                longestStreak = KhatamProgressCalculator.longestStreak(logs),
+                currentStreak = KhatamProgressCalculator.currentStreak(logs)
+            )
+        }
     }
+
+    private fun juzProgressFrom(readIds: Set<Int>): List<JuzProgressInfo> =
+        KhatamConstants.JUZ_AYAH_RANGES.mapIndexed { index, (startAyahId, endAyahId) ->
+            JuzProgressInfo(
+                juzNumber = index + 1,
+                totalAyahs = endAyahId - startAyahId + 1,
+                readAyahs = readIds.count { it in startAyahId..endAyahId }
+            )
+        }
 
     private fun KhatamEntity.toDomain() = Khatam(
         id = id,
@@ -178,5 +218,4 @@ class KhatamRepositoryImpl @Inject constructor(
         completedAt = completedAt,
         updatedAt = updatedAt
     )
-
 }

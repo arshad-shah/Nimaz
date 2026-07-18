@@ -66,6 +66,9 @@ fun AdaptiveKhatamScreen(
                                     Route.QuranReader(surahNumber, ayahNumber)
                                 )
                             },
+                            onNavigateToEdit = { khatamId ->
+                                navController.navigate(Route.KhatamEdit(khatamId))
+                            },
                         )
                     }
                 }

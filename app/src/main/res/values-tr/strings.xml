@@ -314,12 +314,103 @@
     <string name="khatam_continue_reading">Okumaya Devam Et</string>
     <string name="khatam_juz_progress">Cüz İlerlemesi</string>
     <string name="khatam_daily_reading">Günlük Okuma</string>
-    <string name="khatam_ayahs_count_format">%d ayet</string>
     <string name="khatam_of_ayahs_read">%2$d ayetten %1$d okundu</string>
     <string name="khatam_days_active">Aktif Günler</string>
     <string name="khatam_avg_pace">Ort. Hız</string>
     <string name="khatam_target">Hedef</string>
     <string name="khatam_pace_per_day">%d/gün</string>
+
+    <!-- Khatam: status and pace -->
+    <string name="khatam_archived">Arşivlendi</string>
+    <string name="khatam_status_active_badge">Aktif</string>
+    <string name="khatam_status_completed_badge">Hatim</string>
+    <string name="khatam_pace_on_track">Hedefte</string>
+    <string name="khatam_pace_slightly_behind">Neredeyse hedefte</string>
+    <string name="khatam_pace_behind">Hedefin gerisinde</string>
+    <string name="khatam_pace_not_started">Başlatılmadı</string>
+
+    <!-- Khatam: list and hero -->
+    <string name="khatam_section_in_progress">Devam eden</string>
+    <string name="khatam_section_completed">Tamamlanan</string>
+    <string name="khatam_section_archived">Arşivlenen</string>
+    <string name="khatam_juz_position">Cüz %1$d</string>
+    <string name="khatam_continue_at">Devam et · %1$s %2$d</string>
+    <string name="khatam_started_on">Başlangıç: %1$s</string>
+    <string name="khatam_finished_on">Bitiş: %1$s</string>
+    <string name="khatam_no_archived">Arşivlenmiş hatim yok</string>
+
+    <!-- Khatam: detail -->
+    <string name="khatam_section_journey">Yolculuğunuz</string>
+    <string name="khatam_journey_progress">%1$d / %2$d</string>
+    <string name="khatam_stat_streak">Günlük seri</string>
+    <string name="khatam_stat_juz_done">Biten cüz</string>
+    <string name="khatam_edit">Düzenle</string>
+    <string name="khatam_not_found">Bu hatim artık mevcut değil</string>
+    <string name="khatam_a11y_juz_complete">Cüz %1$d, tamamlandı</string>
+    <string name="khatam_a11y_juz_current">Cüz %1$d, devam ediyor</string>
+    <string name="khatam_a11y_juz_locked">Cüz %1$d, başlatılmadı</string>
+    <string name="khatam_a11y_progress_ring">Yüzde %1$d tamamlandı</string>
+
+    <!-- Khatam: create and edit form -->
+    <string name="khatam_edit_title">Hatmi Düzenle</string>
+    <string name="khatam_field_pace">Hız</string>
+    <string name="khatam_preset_juz_daily">Günde 1 cüz</string>
+    <string name="khatam_preset_half_juz_daily">Günde ½ cüz</string>
+    <string name="khatam_preset_quarter_juz_daily">Günde ¼ cüz</string>
+    <string name="khatam_preset_custom">Özel</string>
+    <string name="khatam_ayahs_per_day">Günde %1$d ayet</string>
+    <string name="khatam_projected_finish">Bitiş ~%1$s</string>
+    <string name="khatam_field_deadline">Son tarih</string>
+    <string name="khatam_field_reminder">Günlük hatırlatma</string>
+    <string name="khatam_optional">İsteğe bağlı</string>
+    <string name="khatam_deadline_not_set">Ayarlanmadı</string>
+    <string name="khatam_deadline_clear">Son tarihi temizle</string>
+    <string name="khatam_action_save">Değişiklikleri kaydet</string>
+    <string name="khatam_action_begin">Hatme Başla</string>
+    <string name="khatam_edit_progress_note">Düzenleme ilerlemenizi asla değiştirmez</string>
+    <string name="khatam_section_danger">Tehlikeli bölge</string>
+    <string name="khatam_action_archive">Bu Hatmi arşivle</string>
+    <string name="khatam_action_delete">Kalıcı olarak sil</string>
+    <string name="khatam_archive_title">Hatmi Arşivle</string>
+    <string name="khatam_archive_message">\"%1$s\" arşivlensin mi? İlerlemeniz korunur ve daha sonra geri yükleyebilirsiniz.</string>
+    <string name="khatam_error_name_required">Lütfen bir ad girin</string>
+    <string name="khatam_error_save_failed">Kaydedilemedi. Lütfen tekrar deneyin.</string>
+
+    <!-- Khatam: counted quantities -->
+    <plurals name="khatam_ayahs_count">
+        <item quantity="other">%1$d ayet</item>
+    </plurals>
+    <plurals name="khatam_ayahs_read_plural">
+        <item quantity="other">%1$d ayet okundu</item>
+    </plurals>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="other">%1$d ayet kaldı</item>
+    </plurals>
+    <plurals name="khatam_days_remaining">
+        <item quantity="other">~%1$d gün kaldı</item>
+    </plurals>
+    <plurals name="khatam_days_count">
+        <item quantity="other">%1$d gün</item>
+    </plurals>
+    <plurals name="khatam_juz_completed_count">
+        <item quantity="other">%1$d cüz tamamlandı</item>
+    </plurals>
+
+    <!-- Khatam: widget -->
+    <string name="khatam_widget_label">Hatim</string>
+    <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
+    <string name="khatam_widget_no_active">Aktif Hatim yok</string>
+    <string name="khatam_widget_start">Bir tane başlat</string>
+    <string name="khatam_widget_continue">Okumaya devam et</string>
+
+    <!-- Khatam: daily reminder notification -->
+    <string name="notif_khatam_channel_name">Hatim hatırlatmaları</string>
+    <string name="notif_khatam_channel_description">Kur\'an hatminizi hedefte tutmak için günlük hatırlatmalar</string>
+    <string name="notif_khatam_title">Bugünün okuma zamanı</string>
+    <string name="notif_khatam_body_on_track">%1$s · hedeftesiniz. Devam etmek için %2$d ayet.</string>
+    <string name="notif_khatam_body_behind">%1$s · hedefe geri dönmek için bugün %2$d ayet.</string>
+    <string name="notif_khatam_body_generic">%1$s · bugün okunacak %2$d ayet.</string>
+    <string name="notif_khatam_action_read">Şimdi oku</string>
     <string name="qibla_ar_heading">Yön</string>
     <string name="qibla_ar_bearing">Kıble Açısı</string>
     <string name="qibla_ar_facing">Kıbleye Dönük</string>

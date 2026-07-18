@@ -84,6 +84,7 @@ object ScreenTags {
     const val KhatamList = "screen_khatam_list"
     const val KhatamDetail = "screen_khatam_detail"
     const val KhatamCreate = "screen_khatam_create"
+    const val KhatamEdit = "screen_khatam_edit"
     const val SettingsHelp = "screen_settings_help"
     const val HelpTopicDetail = "screen_help_topic_detail"
     const val HelpGuide = "screen_help_guide"
