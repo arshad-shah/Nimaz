@@ -725,14 +725,20 @@ class QuranViewModel @Inject constructor(
      * left both surfaces pinned to the first khatam's ayahs until the process restarted.
      * [flatMapLatest] cancels the inner subscription when the active khatam changes.
      */
+    /**
+     * Declared `by lazy` deliberately: `init` runs before property initialisers that appear
+     * later in the class body, and both collectors below are started from `init`. As a plain
+     * `val` this field is still null at that point and the ViewModel crashes on construction.
+     */
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val activeKhatamStream: Flow<KhatamDetailSnapshot?> =
+    private val activeKhatamStream: Flow<KhatamDetailSnapshot?> by lazy {
         khatamUseCases.observeActiveKhatam()
             .flatMapLatest { khatam ->
                 if (khatam == null) flowOf(null)
                 else khatamUseCases.observeKhatamDetail(khatam.id)
             }
             .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
+    }
 
     private fun observeActiveKhatam() {
         viewModelScope.launch {

@@ -171,6 +171,19 @@
                 android:resource="@xml/hijri_calendar_widget_info" />
         </receiver>
 
+        <!-- Khatam Widget -->
+        <receiver
+            android:name=".widget.khatam.KhatamWidgetReceiver"
+            android:exported="true"
+            android:label="@string/khatam_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/khatam_widget_info" />
+        </receiver>
+
         <!-- Widget per-minute countdown tick receiver -->
         <receiver
             android:name=".widget.WidgetTickReceiver"
