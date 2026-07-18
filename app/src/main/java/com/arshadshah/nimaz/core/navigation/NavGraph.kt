@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.core.navigation
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -75,7 +76,7 @@ import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamCreateScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamFormScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
@@ -178,7 +179,7 @@ fun NavGraph(
         if (key.startsWith("https://")) {
             runCatching {
                 analyticsContext.startActivity(
-                    Intent(Intent.ACTION_VIEW, android.net.Uri.parse(key))
+                    Intent(Intent.ACTION_VIEW, key.toUri())
                 )
             }
         } else {
@@ -314,7 +315,7 @@ fun NavGraph(
                         if (key.startsWith("https://")) {
                             runCatching {
                                 analyticsContext.startActivity(
-                                    Intent(Intent.ACTION_VIEW, android.net.Uri.parse(key))
+                                    Intent(Intent.ACTION_VIEW, key.toUri())
                                 )
                             }
                         } else {
@@ -865,14 +866,14 @@ fun NavGraph(
                     onNavigateToPrivacyPolicy = {
                         val intent = Intent(
                             Intent.ACTION_VIEW,
-                            android.net.Uri.parse("https://nimaz.arshadshah.com/privacy")
+                            "https://nimaz.arshadshah.com/privacy".toUri()
                         )
                         context.startActivity(intent)
                     },
                     onNavigateToTerms = {
                         val intent = Intent(
                             Intent.ACTION_VIEW,
-                            android.net.Uri.parse("https://nimaz.arshadshah.com/terms")
+                            "https://nimaz.arshadshah.com/terms".toUri()
                         )
                         context.startActivity(intent)
                     },
@@ -889,7 +890,7 @@ fun NavGraph(
                                 } else {
                                     val intent = Intent(
                                         Intent.ACTION_VIEW,
-                                        android.net.Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                                        "https://play.google.com/store/apps/details?id=com.arshadshah.nimaz".toUri()
                                     )
                                     context.startActivity(intent)
                                 }
@@ -988,12 +989,25 @@ fun NavGraph(
                     onNavigateBack = { navController.popBackStack() },
                     onNavigateToRead = { surahNumber, ayahNumber ->
                         navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                    },
+                    onNavigateToEdit = { khatamId ->
+                        navController.navigate(Route.KhatamEdit(khatamId))
                     }
                 )
             }
 
+            // Create and edit share one screen; a null id means "create".
             taggedComposable<Route.KhatamCreate>(ScreenTags.KhatamCreate) {
-                KhatamCreateScreen(
+                KhatamFormScreen(
+                    khatamId = null,
+                    onNavigateBack = { navController.popBackStack() }
+                )
+            }
+
+            taggedComposable<Route.KhatamEdit>(ScreenTags.KhatamEdit) { backStackEntry ->
+                val args = backStackEntry.toRoute<Route.KhatamEdit>()
+                KhatamFormScreen(
+                    khatamId = args.khatamId,
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

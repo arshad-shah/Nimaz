@@ -75,7 +75,6 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
             android:theme="@style/Theme.Nimaz">
             <intent-filter>
@@ -100,6 +99,9 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.arshadshah.nimaz.DAILY_SUMMARY" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="com.arshadshah.nimaz.KHATAM_REMINDER" />
             </intent-filter>
         </receiver>
 
@@ -166,6 +168,19 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/hijri_calendar_widget_info" />
+        </receiver>
+
+        <!-- Khatam Widget -->
+        <receiver
+            android:name=".widget.khatam.KhatamWidgetReceiver"
+            android:exported="true"
+            android:label="@string/khatam_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/khatam_widget_info" />
         </receiver>
 
         <!-- Widget per-minute countdown tick receiver -->

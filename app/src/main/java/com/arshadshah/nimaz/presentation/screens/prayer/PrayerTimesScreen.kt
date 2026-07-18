@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import androidx.compose.animation.AnimatedContent
@@ -379,7 +380,7 @@ private fun relativeLabel(date: LocalDate): String {
     return when {
         diff == 1L -> stringResource(R.string.fasting_tomorrow)
         diff == -1L -> stringResource(R.string.relative_yesterday)
-        diff > 0 -> stringResource(R.string.relative_in_days_format, diff)
-        else -> stringResource(R.string.relative_days_ago_format, -diff)
+        diff > 0 -> pluralStringResource(R.plurals.relative_in_days_format, diff.toInt(), diff)
+        else -> pluralStringResource(R.plurals.relative_days_ago_format, (-diff).toInt(), -diff)
     }
 }

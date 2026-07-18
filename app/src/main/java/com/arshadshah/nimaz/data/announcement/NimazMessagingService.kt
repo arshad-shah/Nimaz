@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.data.announcement
 
 import android.util.Log
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -29,10 +31,16 @@ class NimazMessagingService : FirebaseMessagingService() {
     lateinit var mapper: AnnouncementPayloadMapper
 
     override fun onMessageReceived(message: RemoteMessage) {
-        val announcement = mapper.fromPayload(message.data) ?: return
-        // Blocking keeps the write inside the callback's execution window;
-        // a DataStore edit is a fast local disk write.
-        runBlocking { repository.setAnnouncement(announcement) }
+        // This runs headless: an uncaught throw here is invisible, so report it.
+        try {
+            val announcement = mapper.fromPayload(message.data) ?: return
+            // Blocking keeps the write inside the callback's execution window;
+            // a DataStore edit is a fast local disk write.
+            runBlocking { repository.setAnnouncement(announcement) }
+        } catch (e: Exception) {
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("announcements", e.javaClass.simpleName, e.message)
+        }
     }
 
     override fun onNewToken(token: String) {

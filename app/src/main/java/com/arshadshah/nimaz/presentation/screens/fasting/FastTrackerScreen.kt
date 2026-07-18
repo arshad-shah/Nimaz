@@ -42,6 +42,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -808,7 +809,7 @@ private fun RecommendedFastsSection(
     val ayyamText = when {
         ayyamDays == 0 -> todayText
         ayyamDays == 1 -> stringResource(R.string.fasting_tomorrow)
-        else -> stringResource(R.string.fasting_in_days_format, ayyamDays)
+        else -> pluralStringResource(R.plurals.fasting_in_days_format, ayyamDays, ayyamDays)
     }
 
     // Islamic calendar recommended fasts
@@ -1168,8 +1169,9 @@ private fun MakeupFastsContent(
                 Spacer(modifier = Modifier.height(4.dp))
                 NimazSectionHeader(
                     title = stringResource(R.string.fasting_completed_label),
-                    trailingText = stringResource(
-                        R.string.fasting_fasts_count,
+                    trailingText = pluralStringResource(
+                        R.plurals.fasting_fasts_count,
+                        completedFasts.size,
                         completedFasts.size
                     ),
                     modifier = Modifier.fillMaxWidth()

@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -162,7 +163,11 @@ private fun BookHeaderCard(
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 NimazLabelChip(
-                    text = stringResource(R.string.hadith_chapters_count_format, chapterCount)
+                    text = pluralStringResource(
+                        R.plurals.hadith_chapters_count_format,
+                        chapterCount,
+                        chapterCount
+                    )
                 )
                 NimazLabelChip(
                     text = stringResource(R.string.hadith_count_format, book.totalHadiths.toString())

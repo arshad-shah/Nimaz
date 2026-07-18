@@ -44,12 +44,17 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -58,6 +63,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -105,6 +111,7 @@ fun NotificationSettingsScreen(
 ) {
     val context = LocalContext.current
     val notificationState by viewModel.notificationState.collectAsState()
+    var showKhatamTimePicker by remember { mutableStateOf(false) }
     val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
     val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
     val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
@@ -332,8 +339,9 @@ fun NotificationSettingsScreen(
                         // Pre-Adhan Reminder
                         NimazSettingsItem(
                             title = stringResource(R.string.notification_settings_pre_adhan),
-                            subtitle = stringResource(
-                                R.string.notification_settings_pre_adhan_subtitle,
+                            subtitle = pluralStringResource(
+                                R.plurals.notification_settings_pre_adhan_subtitle,
+                                notificationState.reminderMinutes,
                                 notificationState.reminderMinutes
                             ),
                             checked = notificationState.showReminderBefore,
@@ -401,6 +409,28 @@ fun NotificationSettingsScreen(
                                 maxValue = 120,
                                 step = 15,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            )
+                        }
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                        // Khatam daily reminder — only fires when a khatam is active
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_khatam_reminder),
+                            subtitle = stringResource(R.string.notification_settings_khatam_subtitle),
+                            checked = notificationState.khatamReminderEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetKhatamReminderEnabled(!notificationState.khatamReminderEnabled)
+                                )
+                            }
+                        )
+                        if (notificationState.khatamReminderEnabled) {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notification_settings_reminder_time),
+                                subtitle = notificationState.khatamReminderTime,
+                                onClick = { showKhatamTimePicker = true },
+                                showArrow = true,
+                                modifier = Modifier.padding(horizontal = 16.dp)
                             )
                         }
                         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
@@ -563,6 +593,17 @@ fun NotificationSettingsScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
+
+    if (showKhatamTimePicker) {
+        KhatamReminderTimePicker(
+            initialTime = notificationState.khatamReminderTime,
+            onConfirm = { time ->
+                viewModel.onEvent(SettingsEvent.SetKhatamReminderTime(time))
+                showKhatamTimePicker = false
+            },
+            onDismiss = { showKhatamTimePicker = false },
+        )
+    }
 }
 
 @Composable
@@ -680,4 +721,26 @@ private fun PrayerNotificationRowDisabledPreview() {
             globalAdhanEnabled = true
         )
     }
+}
+
+/**
+ * The Khatam reminder time picker.
+ *
+ * Uses the app's own [NimazTimePickerDialog] rather than Material3's `TimePicker`, whose
+ * clock dial brings a different visual language to a settings screen built from Nimaz
+ * components. Stores 24-hour "HH:mm" regardless of the device's display format so the
+ * scheduler can parse it without knowing the locale.
+ */
+@Composable
+private fun KhatamReminderTimePicker(
+    initialTime: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    NimazTimePickerDialog(
+        initialTime = NimazTime.parse(initialTime),
+        onConfirm = { onConfirm(it.toStorageString()) },
+        onDismiss = onDismiss,
+        title = stringResource(R.string.notification_settings_reminder_time),
+    )
 }

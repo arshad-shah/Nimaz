@@ -75,6 +75,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -327,7 +328,11 @@ private fun CategoryGridCard(
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = stringResource(R.string.duas_count_format, category.duaCount),
+                text = pluralStringResource(
+                    R.plurals.duas_count_format,
+                    category.duaCount,
+                    category.duaCount
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -401,7 +406,11 @@ private fun AdhkarListItem(
                     .padding(horizontal = 10.dp, vertical = 4.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.duas_count_format, category.duaCount),
+                    text = pluralStringResource(
+                    R.plurals.duas_count_format,
+                    category.duaCount,
+                    category.duaCount
+                ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )

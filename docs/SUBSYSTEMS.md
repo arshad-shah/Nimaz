@@ -135,8 +135,8 @@ at runtime.
 ## 4. Prayer-time / adhan notifications
 
 Built on **`AlarmManager` exact alarms** (no WorkManager). Per-prayer notifications, optional
-adhan playback, pre-prayer reminders, a nightly daily summary, and re-scheduling on midnight
-rollover and boot.
+adhan playback, pre-prayer reminders, a nightly daily summary, a **Khatam daily reminder**,
+and re-scheduling on midnight rollover and boot.
 
 **Key files.**
 - `core/util/PrayerNotificationScheduler.kt` — `@Singleton`; schedules/cancels alarms, owns the channels.
@@ -144,11 +144,30 @@ rollover and boot.
 - `core/util/NotificationContentHelper.kt` — pure title/message/summary text generator.
 - `data/audio/AdhanPlaybackService.kt` — plays the adhan and posts the merged prayer+adhan notification (§1).
 
-**Channels** (created in `PrayerNotificationScheduler.init`, API 26+): `CHANNEL_ID_PRAYER` = `prayer_notifications` (HIGH), `CHANNEL_ID_ADHAN` = `adhan_notifications` (HIGH), `CHANNEL_ID_DAILY_SUMMARY` = `daily_summary_notifications` (DEFAULT), plus no-vibration siblings `CHANNEL_ID_PRAYER_SILENT` / `CHANNEL_ID_ADHAN_SILENT`. **Vibration is a channel property** — Android ignores `enableVibration()` changes after a channel exists, so the `notificationVibration` preference is honoured by *posting on the matching channel* via `channelForPrayer(vibrate)` / `channelForAdhan(vibrate)`, **not** by per-notification `setVibrate` (that's kept only as the pre-O fallback). `AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `CHANNEL_ID_ADHAN`** — so the playback channel is effectively unused for the visible notification.
+**Channels** (created in `PrayerNotificationScheduler.init`, API 26+): `CHANNEL_ID_PRAYER` = `prayer_notifications` (HIGH), `CHANNEL_ID_ADHAN` = `adhan_notifications` (HIGH), `CHANNEL_ID_DAILY_SUMMARY` = `daily_summary_notifications` (DEFAULT), `CHANNEL_ID_KHATAM` = `khatam_notifications` (DEFAULT — a nudge, not an alarm; it is also the only channel whose name/description come from string resources rather than English literals), plus no-vibration siblings `CHANNEL_ID_PRAYER_SILENT` / `CHANNEL_ID_ADHAN_SILENT`. **Vibration is a channel property** — Android ignores `enableVibration()` changes after a channel exists, so the `notificationVibration` preference is honoured by *posting on the matching channel* via `channelForPrayer(vibrate)` / `channelForAdhan(vibrate)`, **not** by per-notification `setVibrate` (that's kept only as the pre-O fallback). `AdhanPlaybackService` also creates `adhan_playback_channel` but **posts on `CHANNEL_ID_ADHAN`** — so the playback channel is effectively unused for the visible notification.
 
-**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`. Pre-reminders fire at `prayerTime − preReminderMinutes` (skipped for Sunrise); the lead time is **user-editable** (the pre-adhan stepper → `SetReminderMinutes`). The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
+**Scheduling.** `scheduleTodaysPrayerNotifications(...)` cancels everything then re-arms enabled prayers, using `setExactAndAllowWhileIdle(RTC_WAKEUP, …)` with `PendingIntent.getBroadcast` targeting `BootReceiver` (explicit intent). Request codes: prayer `1000 + ordinal`, pre-reminder `2000 + ordinal`, midnight reschedule `9999` (00:01), daily summary `8889` (23:00), Friday reminder `8890`, Khatam reminder `8891`. Pre-reminders fire at `prayerTime − preReminderMinutes` (skipped for Sunrise); the lead time is **user-editable** (the pre-adhan stepper → `SetReminderMinutes`). The **Friday (Jummah) reminder** (`scheduleFridayReminder`, gated on `fridayReminderEnabled`) is a one-shot at the upcoming Friday's Dhuhr − `fridayReminderMinutes`, re-armed on every reschedule so it always targets the next Friday.
 
-**Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
+**Firing.** `BootReceiver.onReceive` dispatches on action: boot → reschedule; `ACTION_MIDNIGHT_RESCHEDULE` → mark missed prayers + reschedule (self-perpetuating daily chain); `ACTION_PRAYER_NOTIFICATION` → post notification &/or play adhan; `ACTION_DAILY_SUMMARY` → summary; `ACTION_FRIDAY_REMINDER` → post the Jummah reminder; `ACTION_KHATAM_REMINDER` → post the Khatam nudge. If adhan should play and the file exists, it calls `AdhanPlaybackService.playAdhan(...)` and the service's foreground notification **doubles as** the prayer notification (shared id `prayerName.hashCode()`); if the file is missing it triggers a download for next time and falls back to beep. **Do Not Disturb:** when `adhanRespectDnd` is on and the system is in a DND mode, `dndBlocksAdhan` gates only the **adhan audio** (`shouldPlayAdhan`/`shouldPlayBeep`) — the visual prayer notification is still posted, and the OS silences its channel sound under DND. The Friday reminder (no adhan audio) always posts and is likewise silenced by the OS under DND.
+
+**Khatam daily reminder.** `scheduleKhatamReminder()` is a one-shot at the user's stored
+`khatamReminderTime` ("HH:mm", default 06:00), gated on `khatamReminderEnabled`. Like every
+other alarm here it is armed **inside `scheduleTodaysPrayerNotifications`**, which is what keeps
+the midnight chain and the boot path re-arming it — a reminder scheduled outside that call would
+fire once and never again. `BootReceiver.handleKhatamReminder` re-checks the preference at fire
+time, **returns without posting when no khatam is active**, and derives the day's target from
+`KhatamProgressCalculator`. It **re-applies the saved locale as its first statement**: below API
+33 the per-app locale is process-local and applied asynchronously by `AppInitializer`, so an
+alarm firing in a cold process would otherwise resolve strings in the *system* language. Settings
+live in Notification settings (toggle + 24-hour time picker).
+
+**App Bundle language splits are disabled** (`android { bundle { language { enableSplit = false } } }`
+in `app/build.gradle.kts`). Settings lets the user pick an app language independently of the device
+locale (`core/util/LocaleHelper.kt`), but Play's default language splitting only delivers the
+resources matching the *device* locale — so on a Play install every other language would silently
+fall back to English. Disabling the split ships all locales in the base APK. This never reproduces
+on a locally built APK, only on an Play-installed build, so **do not re-enable it** without moving
+to Play Core's on-demand language download.
 
 **Wiring.** `PrayerNotificationScheduler` is constructor-injected (`@Singleton @Inject`, deps: `PrayerTimeCalculator`). Called by `AppInitializer` on startup and by `SettingsViewModel.rescheduleNotifications()` when prayer/notification settings change. Permissions in `AndroidManifest.xml`: `POST_NOTIFICATIONS`, `SCHEDULE_EXACT_ALARM`, `USE_EXACT_ALARM`, `RECEIVE_BOOT_COMPLETED`, `WAKE_LOCK`, `REQUEST_IGNORE_BATTERY_OPTIMIZATIONS`.
 

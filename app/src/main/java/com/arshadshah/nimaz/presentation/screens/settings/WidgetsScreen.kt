@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -29,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ListAlt
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -189,6 +192,19 @@ fun WidgetsScreen(
                     infoSize = stringResource(R.string.widget_hijri_calendar_size),
                     infoIcon = Icons.Default.CalendarMonth,
                     preview = { HijriCalendarWidgetPreview(previewData) }
+                )
+            }
+
+            // Khatam Widget (4x2)
+            item {
+                WidgetSection(
+                    // Reuses the localised widget strings rather than adding
+                    // screen-only copy that would exist in English alone.
+                    title = stringResource(R.string.khatam_widget_label),
+                    infoName = stringResource(R.string.khatam_widget_label),
+                    infoSize = stringResource(R.string.khatam_widget_description),
+                    infoIcon = Icons.Default.MenuBook,
+                    preview = { KhatamWidgetPreview() }
                 )
             }
 
@@ -559,6 +575,72 @@ private fun PrayerTrackerWidgetPreview(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun KhatamWidgetPreview(
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .background(
+                color = MaterialTheme.colorScheme.surface,
+                shape = RoundedCornerShape(16.dp)
+            )
+            .padding(12.dp)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.khatam_widget_label),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "42%",
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LinearProgressIndicator(
+                progress = { 0.42f },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(6.dp)
+                    .clip(RoundedCornerShape(3.dp))
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.khatam_juz_position, 13),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = pluralStringResource(R.plurals.khatam_ayahs_remaining, 3617, 3617),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
             }
         }
     }

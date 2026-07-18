@@ -89,11 +89,7 @@ class AdhanPlaybackService : Service() {
                 putExtra(EXTRA_NOTIFICATION_MESSAGE, notificationMessage)
                 putExtra(EXTRA_NOTIFICATION_COLOR, notificationColor)
             }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            context.startForegroundService(intent)
         }
 
         /**
@@ -283,6 +279,7 @@ class AdhanPlaybackService : Service() {
             exoPlayer?.release()
             exoPlayer = null
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
         }
 
@@ -295,56 +292,41 @@ class AdhanPlaybackService : Service() {
                 wakeLock?.release()
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
         }
     }
 
     private fun requestAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest =
-                AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
-                    .setAudioAttributes(
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_ALARM)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
-                            .build()
-                    )
-                    .build()
-            audioFocusRequest?.let { audioManager?.requestAudioFocus(it) }
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager?.requestAudioFocus(
-                null,
-                AudioManager.STREAM_ALARM,
-                AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK
-            )
-        }
+        audioFocusRequest =
+            AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK)
+                .setAudioAttributes(
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_ALARM)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                        .build()
+                )
+                .build()
+        audioFocusRequest?.let { audioManager?.requestAudioFocus(it) }
     }
 
     private fun abandonAudioFocus() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
-        } else {
-            @Suppress("DEPRECATION")
-            audioManager?.abandonAudioFocus(null)
-        }
+        audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Adhan Playback",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Shows when adhan is playing"
-                setShowBadge(false)
-                setSound(null, null) // No sound for this channel
-            }
-
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Adhan Playback",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Shows when adhan is playing"
+            setShowBadge(false)
+            setSound(null, null) // No sound for this channel
         }
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
     }
 
     private fun createPlaybackNotification(prayerName: String): Notification {

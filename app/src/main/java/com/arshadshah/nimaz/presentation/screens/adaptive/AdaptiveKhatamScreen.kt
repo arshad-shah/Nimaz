@@ -31,6 +31,9 @@ fun AdaptiveKhatamScreen(
                 navController.navigate(Route.KhatamDetail(khatamId))
             },
             onNavigateToCreate = onNavigateToCreate,
+            onNavigateToRead = { surahNumber, ayahNumber ->
+                navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+            },
         )
     } else {
         val navigator = rememberListDetailPaneScaffoldNavigator<KhatamDetailNavArgs>()
@@ -51,6 +54,9 @@ fun AdaptiveKhatamScreen(
                             }
                         },
                         onNavigateToCreate = onNavigateToCreate,
+                        onNavigateToRead = { surahNumber, ayahNumber ->
+                            navController.navigate(Route.QuranReader(surahNumber, ayahNumber))
+                        },
                     )
                 }
             },
@@ -65,6 +71,9 @@ fun AdaptiveKhatamScreen(
                                 navController.navigate(
                                     Route.QuranReader(surahNumber, ayahNumber)
                                 )
+                            },
+                            onNavigateToEdit = { khatamId ->
+                                navController.navigate(Route.KhatamEdit(khatamId))
                             },
                         )
                     }

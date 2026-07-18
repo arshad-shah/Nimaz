@@ -110,6 +110,8 @@ class PreferencesDataStore @Inject constructor(
         val PERSISTENT_NOTIFICATION = booleanPreferencesKey("persistent_notification")
         val FRIDAY_REMINDER_ENABLED = booleanPreferencesKey("friday_reminder_enabled")
         val FRIDAY_REMINDER_MINUTES = intPreferencesKey("friday_reminder_minutes")
+        val KHATAM_REMINDER_ENABLED = booleanPreferencesKey("khatam_reminder_enabled")
+        val KHATAM_REMINDER_TIME = stringPreferencesKey("khatam_reminder_time")
         val SELECTED_ADHAN_SOUND = stringPreferencesKey("selected_adhan_sound")
         val FAJR_NOTIFICATION_ENABLED = booleanPreferencesKey("fajr_notification_enabled")
         val SUNRISE_NOTIFICATION_ENABLED = booleanPreferencesKey("sunrise_notification_enabled")
@@ -467,6 +469,18 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setFridayReminderMinutes(minutes: Int) =
         put(PreferencesKeys.FRIDAY_REMINDER_MINUTES, minutes)
+
+    override val khatamReminderEnabled: Flow<Boolean> =
+        preference(PreferencesKeys.KHATAM_REMINDER_ENABLED, false)
+
+    override suspend fun setKhatamReminderEnabled(enabled: Boolean) =
+        put(PreferencesKeys.KHATAM_REMINDER_ENABLED, enabled)
+
+    override val khatamReminderTime: Flow<String> =
+        preference(PreferencesKeys.KHATAM_REMINDER_TIME, "06:00")
+
+    override suspend fun setKhatamReminderTime(time: String) =
+        put(PreferencesKeys.KHATAM_REMINDER_TIME, time)
 
     // Quran Settings
     override val quranTranslatorId: Flow<String> =

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.ai.AiApiClient
 import com.arshadshah.nimaz.data.ai.AiHttpResult
 import com.arshadshah.nimaz.data.ai.DeviceIdProvider
@@ -42,7 +43,11 @@ class AiRepositoryImpl @Inject constructor(
         )
         return when (val result = apiClient.invoke(request, AssistOutput.serializer())) {
             is AiHttpResult.Success -> Result.success(result.output.toDomain())
-            is AiHttpResult.Transport -> failure(AiError.Network)
+            is AiHttpResult.Transport -> {
+                // The throwable is otherwise collapsed into AiError.Network and lost.
+                CrashReporter.recordException(result.cause)
+                failure(AiError.Network)
+            }
             is AiHttpResult.ApiFailure ->
                 failure(
                     mapApiError(

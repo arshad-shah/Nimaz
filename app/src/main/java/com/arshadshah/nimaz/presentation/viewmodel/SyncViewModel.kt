@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.yield
 import kotlinx.serialization.json.Json
+import java.util.Locale
 import javax.inject.Inject
 
 enum class SyncMode { NONE, SEND, RECEIVE }
@@ -474,7 +475,13 @@ class SyncViewModel @Inject constructor(
         fun formatBytes(bytes: Long): String = when {
             bytes < 1024 -> "$bytes B"
             bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-            else -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
+            // Shown in the sync progress UI, so it follows the device locale's
+            // decimal separator - explicit here only to satisfy lint.
+            else -> String.format(
+                Locale.getDefault(),
+                "%.1f MB",
+                bytes / (1024.0 * 1024.0)
+            )
         }
     }
 }

@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.data.sync
 
 import android.content.Context
 import android.util.Log
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.google.android.gms.nearby.Nearby
 import com.google.android.gms.nearby.connection.AdvertisingOptions
@@ -394,7 +395,10 @@ class NearbyConnectionsManager @Inject constructor(
         Log.d(TAG, "readFilePayload: read ${data.size} bytes from ContentResolver")
         try {
             context.contentResolver.delete(uri, null, null)
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            // Best-effort cleanup, but never silently: a leaked payload file here
+            // is the kind of thing only Crashlytics will ever surface.
+            CrashReporter.recordException(e)
         }
         return data
     }
@@ -415,6 +419,8 @@ class NearbyConnectionsManager @Inject constructor(
             Log.d(TAG, "startAdvertising: SUCCESS")
         }.addOnFailureListener { e ->
             Log.e(TAG, "startAdvertising: FAILED", e)
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("sync", "start_advertising", e.message)
             _connectionState.value = ConnectionState.Error("Advertising failed: ${e.message}")
         }
     }
@@ -450,6 +456,8 @@ class NearbyConnectionsManager @Inject constructor(
             Log.d(TAG, "startDiscovery: SUCCESS")
         }.addOnFailureListener { e ->
             Log.e(TAG, "startDiscovery: FAILED", e)
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("sync", "start_discovery", e.message)
             _connectionState.value = ConnectionState.Error("Discovery failed: ${e.message}")
         }
     }
@@ -494,6 +502,8 @@ class NearbyConnectionsManager @Inject constructor(
             connectionsClient.sendPayload(endpointId, payload)
                 .addOnFailureListener { e ->
                     Log.e(TAG, "sendData: BYTES sendPayload FAILED", e)
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("sync", "send_payload_bytes", e.message)
                     _connectionState.value = ConnectionState.Error("Send failed: ${e.message}")
                 }
         } else {
@@ -506,6 +516,8 @@ class NearbyConnectionsManager @Inject constructor(
             connectionsClient.sendPayload(endpointId, payload)
                 .addOnFailureListener { e ->
                     Log.e(TAG, "sendData: FILE sendPayload FAILED", e)
+                    CrashReporter.recordException(e)
+                    AppAnalytics.logError("sync", "send_payload_file", e.message)
                     cleanupSendFile()
                     _connectionState.value = ConnectionState.Error("Send failed: ${e.message}")
                 }

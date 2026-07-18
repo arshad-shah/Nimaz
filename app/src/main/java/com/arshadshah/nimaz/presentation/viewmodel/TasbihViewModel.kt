@@ -10,6 +10,7 @@ import android.os.VibratorManager
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
@@ -117,6 +118,7 @@ class TasbihViewModel @Inject constructor(
     private var toneGenerator: ToneGenerator? = try {
         ToneGenerator(AudioManager.STREAM_MUSIC, 50)  // 50% volume
     } catch (e: Exception) {
+        CrashReporter.recordException(e)
         null
     }
 
@@ -494,12 +496,7 @@ class TasbihViewModel @Inject constructor(
 
     private fun triggerVibration() {
         if (!_counterState.value.vibrationEnabled) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(30)
-        }
+        vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
     private fun playClickSound() {

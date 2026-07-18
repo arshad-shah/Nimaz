@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.core.util
 
 import android.content.Context
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.KhatamPace
 import java.time.LocalTime
 
 /**
@@ -156,7 +157,12 @@ object NotificationContentHelper {
      * Get a pre-reminder notification title.
      */
     fun getPreReminderTitle(context: Context, prayerName: String, minutesBefore: Int): String {
-        return context.getString(R.string.notif_pre_reminder_title, prayerName, minutesBefore)
+        return context.resources.getQuantityString(
+            R.plurals.notif_pre_reminder_title,
+            minutesBefore,
+            prayerName,
+            minutesBefore
+        )
     }
 
     /**
@@ -181,6 +187,33 @@ object NotificationContentHelper {
         context.getString(R.string.notif_friday_2),
         context.getString(R.string.notif_friday_3)
     ).random()
+
+    /** Title for the daily khatam reading reminder. */
+    fun getKhatamReminderTitle(context: Context): String =
+        context.getString(R.string.notif_khatam_title)
+
+    /**
+     * Body for the khatam reminder. The wording is chosen from [pace] so a reader who
+     * has slipped gets a nudge to catch up rather than the same neutral line.
+     */
+    fun getKhatamReminderBody(
+        context: Context,
+        khatamName: String,
+        ayahsToday: Int,
+        pace: KhatamPace
+    ): String = when (pace) {
+        KhatamPace.ON_TRACK -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_on_track, ayahsToday, khatamName, ayahsToday
+        )
+
+        KhatamPace.BEHIND, KhatamPace.SLIGHTLY_BEHIND -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_behind, ayahsToday, khatamName, ayahsToday
+        )
+
+        KhatamPace.NOT_STARTED -> context.resources.getQuantityString(
+            R.plurals.notif_khatam_body_generic, ayahsToday, khatamName, ayahsToday
+        )
+    }
 
     /** Expanded body for the Friday reminder — the Sunnah preparations. */
     fun getFridayReminderBigText(context: Context): String =

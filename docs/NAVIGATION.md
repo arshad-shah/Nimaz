@@ -41,6 +41,7 @@ flowchart LR
 
     subgraph Kh["Khatam"]
         KhatamList --> KhatamDetail & KhatamCreate
+        KhatamDetail --> KhatamEdit
     end
 
     subgraph Qaida["Qaida"]
@@ -198,7 +199,13 @@ All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation
 |-------|------|--------|
 | `KhatamList` | — | KhatamListScreen |
 | `KhatamDetail` | `khatamId: Long` | KhatamDetailScreen |
-| `KhatamCreate` | — | KhatamCreateScreen |
+| `KhatamCreate` | — | KhatamFormScreen (`khatamId = null`) |
+| `KhatamEdit` | `khatamId: Long` | KhatamFormScreen (`khatamId = id`) |
+
+`KhatamCreate` and `KhatamEdit` render the same `KhatamFormScreen`; a null id means
+create. `KhatamEdit` is reached from the edit action in the detail screen's top bar, and
+also hosts archive/delete, which previously lived behind an undiscoverable long-press on
+the list.
 
 ### Settings & misc
 | Route | Args | Screen |

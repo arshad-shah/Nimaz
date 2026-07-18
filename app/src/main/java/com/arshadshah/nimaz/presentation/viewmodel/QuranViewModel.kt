@@ -11,6 +11,8 @@ import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
+import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -27,6 +29,7 @@ import android.content.Context
 import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +39,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -71,6 +79,7 @@ data class QuranHomeUiState(
     // cleared on undo, dismiss, or a subsequent removal.
     val recentlyRemovedFavorite: FavoriteAyahUi? = null,
     val activeKhatam: Khatam? = null,
+    val activeKhatamInsights: KhatamInsights? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
     val completedKhatamCount: Int = 0,
     val pageAyahRanges: List<PageAyahRange> = emptyList(),
@@ -185,6 +194,29 @@ class QuranViewModel @Inject constructor(
     // Debounced search support
     private val searchQueryFlow = MutableStateFlow("")
     private var searchJob: Job? = null
+
+    /**
+     * Active khatam plus everything derived from it, as one stream shared by the reader
+     * and home.
+     *
+     * MUST stay declared above `init`: property initialisers run in declaration order, so
+     * a field declared below `init` is still null when `init` starts these collectors —
+     * including a `by lazy` delegate, which is itself such a field.
+     *
+     * Previously each caller nested `observeReadAyahIds(...).collect` *inside*
+     * `observeActiveKhatam().collect`. `collect` on a Room Flow never returns, so the outer
+     * flow could never process a second emission and both surfaces stayed pinned to the
+     * first khatam until process death. `flatMapLatest` cancels the inner subscription when
+     * the active khatam changes.
+     */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val activeKhatamStream: Flow<KhatamDetailSnapshot?> =
+        khatamUseCases.observeActiveKhatam()
+            .flatMapLatest { khatam ->
+                if (khatam == null) flowOf(null)
+                else khatamUseCases.observeKhatamDetail(khatam.id)
+            }
+            .shareIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), replay = 1)
 
     init {
         loadSurahs()
@@ -487,7 +519,12 @@ class QuranViewModel @Inject constructor(
                             ayahs = surahWithAyahs?.ayahs ?: emptyList(),
                             title = surahWithAyahs?.surah?.nameEnglish ?: "",
                             subtitle = surahWithAyahs?.let { s ->
-                                context.getString(R.string.quran_surah_ayahs_format, s.surah.number, s.surah.numberOfAyahs)
+                                context.resources.getQuantityString(
+                                    R.plurals.quran_surah_ayahs_format,
+                                    s.surah.numberOfAyahs,
+                                    s.surah.number,
+                                    s.surah.numberOfAyahs
+                                )
                             } ?: "",
                             isLoading = false,
                             readingMode = ReadingMode.SURAH
@@ -707,22 +744,28 @@ class QuranViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Active khatam plus its read-ayah set, as one stream shared by the reader and home.
+     *
+     * Previously each caller nested `observeReadAyahIds(...).collect` *inside*
+     * `observeActiveKhatam().collect`. The inner collect on a Room Flow never returns, so
+     * the outer flow could never process a second emission — switching the active khatam
+     * left both surfaces pinned to the first khatam's ayahs until the process restarted.
+     * [flatMapLatest] cancels the inner subscription when the active khatam changes.
+     */
+
     private fun observeActiveKhatam() {
         viewModelScope.launch {
-            khatamUseCases.observeActiveKhatam().collect { khatam ->
-                val khatamId = khatam?.id
-                _readerState.update { it.copy(activeKhatamId = khatamId) }
-                if (khatamId != null) {
-                    // Start observing read ayah IDs for this khatam
-                    khatamUseCases.observeReadAyahIds(khatamId).collect { ids ->
-                        _readerState.update { it.copy(khatamReadAyahIds = ids) }
-                        // Reactive completion check
-                        if (ids.size >= Khatam.TOTAL_QURAN_AYAHS) {
-                            khatamUseCases.completeKhatam(khatamId)
-                        }
-                    }
-                } else {
-                    _readerState.update { it.copy(khatamReadAyahIds = emptySet()) }
+            activeKhatamStream.collect { snapshot ->
+                _readerState.update {
+                    it.copy(
+                        activeKhatamId = snapshot?.khatam?.id,
+                        khatamReadAyahIds = snapshot?.readAyahIds ?: emptySet(),
+                    )
+                }
+                val khatam = snapshot?.khatam
+                if (khatam != null && snapshot.readAyahIds.size >= Khatam.TOTAL_QURAN_AYAHS) {
+                    khatamUseCases.completeKhatam(khatam.id)
                 }
             }
         }
@@ -730,14 +773,13 @@ class QuranViewModel @Inject constructor(
 
     private fun observeActiveKhatamForHome() {
         viewModelScope.launch {
-            khatamUseCases.observeActiveKhatam().collect { khatam ->
-                _homeState.update { it.copy(activeKhatam = khatam) }
-                if (khatam != null) {
-                    khatamUseCases.observeReadAyahIds(khatam.id).collect { ids ->
-                        _homeState.update { it.copy(khatamReadAyahIds = ids) }
-                    }
-                } else {
-                    _homeState.update { it.copy(khatamReadAyahIds = emptySet()) }
+            activeKhatamStream.collect { snapshot ->
+                _homeState.update {
+                    it.copy(
+                        activeKhatam = snapshot?.khatam,
+                        activeKhatamInsights = snapshot?.insights,
+                        khatamReadAyahIds = snapshot?.readAyahIds ?: emptySet(),
+                    )
                 }
             }
         }

@@ -102,6 +102,12 @@ interface SettingsRepository {
     suspend fun setFridayReminderEnabled(enabled: Boolean)
     val fridayReminderMinutes: Flow<Int>
     suspend fun setFridayReminderMinutes(minutes: Int)
+    val khatamReminderEnabled: Flow<Boolean>
+    suspend fun setKhatamReminderEnabled(enabled: Boolean)
+
+    /** Time of day for the khatam reminder, stored as "HH:mm". */
+    val khatamReminderTime: Flow<String>
+    suspend fun setKhatamReminderTime(time: String)
     val quranTranslatorId: Flow<String>
     suspend fun setQuranTranslatorId(translatorId: String)
     val showTranslation: Flow<Boolean>

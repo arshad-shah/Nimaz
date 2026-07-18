@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.screens.adaptive
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.layout.AnimatedPane
 import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
@@ -18,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.arshadshah.nimaz.R
@@ -80,7 +80,7 @@ fun AdaptiveMoreScreen(
                 } else {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        Uri.parse("https://play.google.com/store/apps/details?id=com.arshadshah.nimaz")
+                        "https://play.google.com/store/apps/details?id=com.arshadshah.nimaz".toUri()
                     )
                     context.startActivity(intent)
                 }
@@ -173,14 +173,14 @@ fun AdaptiveMoreScreen(
                                     onNavigateToPrivacyPolicy = {
                                         val intent = Intent(
                                             Intent.ACTION_VIEW,
-                                            Uri.parse("https://nimaz.arshadshah.com/privacy")
+                                            "https://nimaz.arshadshah.com/privacy".toUri()
                                         )
                                         context.startActivity(intent)
                                     },
                                     onNavigateToTerms = {
                                         val intent = Intent(
                                             Intent.ACTION_VIEW,
-                                            Uri.parse("https://nimaz.arshadshah.com/terms")
+                                            "https://nimaz.arshadshah.com/terms".toUri()
                                         )
                                         context.startActivity(intent)
                                     },

@@ -257,6 +257,9 @@ sealed interface Route {
 
     @Serializable
     data object KhatamCreate : Route
+
+    @Serializable
+    data class KhatamEdit(val khatamId: Long) : Route
 }
 
 // Navigation destinations for bottom navigation

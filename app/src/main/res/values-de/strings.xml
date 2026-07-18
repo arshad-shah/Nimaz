@@ -13,7 +13,6 @@
     <string name="widgets">Widgets</string>
     <string name="today">Heute</string>
     <string name="prayed">Gebetet</string>
-    <string name="unknown">Unbekannt</string>
     <string name="no_favorites_yet">Noch keine Favoriten</string>
     <string name="remove_from_favorites">Aus Favoriten entfernen</string>
     <string name="add_to_favorites">Zu Favoriten hinzufügen</string>
@@ -40,19 +39,15 @@
     <string name="update_ready">Update zur Installation bereit</string>
     <string name="restart">Neustart</string>
     <string name="notifications_disabled_title">Benachrichtigungen deaktiviert</string>
-    <string name="notifications_disabled_message">Gebetsbenachrichtigungen benötigen eine Berechtigung, um Sie zu den Gebetszeiten zu benachrichtigen.</string>
     <string name="enable">Aktivieren</string>
     <string name="location_permission_title">Standortberechtigung erforderlich</string>
-    <string name="location_permission_message">Der Standort wird benötigt, um genaue Gebetszeiten für Ihre Region zu berechnen.</string>
     <string name="grant">Erlauben</string>
     <string name="battery_optimization_title">Akkuoptimierung aktiv</string>
-    <string name="battery_optimization_message">Die Akkuoptimierung kann rechtzeitige Gebetsbenachrichtigungen verhindern.</string>
     <string name="fix">Beheben</string>
     <string name="jumuah_mubarak">Jumu\'ah Mubarak</string>
     <string name="khutbah_time">Khutbah-Zeit</string>
     <string name="jumuah_passed">Die Jumu\'ah-Gebetszeit ist vorbei</string>
     <string name="time_until_jumuah">Zeit bis Jumu\'ah</string>
-    <string name="jumuah_hadith">"Der beste Tag, an dem die Sonne aufgeht, ist der Freitag." — Sahih Muslim</string>
     <string name="prayer_settings">Gebetseinstellungen</string>
     <string name="calculation_method">Berechnungsmethode</string>
     <string name="calculation_method_subtitle">Einstellungen zur Gebetszeitberechnung</string>
@@ -101,12 +96,6 @@
     <string name="prayer_times_menu_subtitle">Tägliche Gebetszeiten mit Monatsansicht</string>
     <string name="zakat">Zakat</string>
     <string name="zakat_subtitle">Zakat-Rechner</string>
-    <string name="calculation_method_menu_subtitle">Parameter zur Gebetszeitberechnung</string>
-    <string name="notifications_menu_subtitle">Gebetserinnerungen und Benachrichtigungen</string>
-    <string name="location_menu_subtitle">Standorte für Gebetszeiten verwalten</string>
-    <string name="appearance_menu_subtitle">Design, Farben und Anzeige</string>
-    <string name="language_menu_subtitle">App-Spracheinstellungen</string>
-    <string name="widgets_menu_subtitle">Einstellungen für Startbildschirm-Widgets</string>
     <string name="support">Support</string>
     <string name="about_nimaz">Über Nimaz</string>
     <string name="about_nimaz_subtitle">Version, Danksagungen und Infos</string>
@@ -121,16 +110,12 @@
     <string name="delete_all_data_dialog_title">Alle Daten löschen</string>
     <string name="delete_all_data_dialog_message">Dies löscht dauerhaft alle Ihre Daten, einschließlich Gebetsverfolgung, Lesezeichen, Tasbih-Verlauf und Einstellungen. Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="about">Über</string>
-    <string name="app_description">Eine umfassende islamische Begleit-App mit genauen Gebetszeiten, Qibla-Richtung, Quran-Lesung und mehr.</string>
     <string name="about_tagline">Dein täglicher islamischer Begleiter — genaue Gebetszeiten, Koran, Qibla und mehr.</string>
     <string name="about_rate">Bewerten</string>
     <string name="about_share">Teilen</string>
-    <string name="about_updates">Updates</string>
     <string name="links">Links</string>
     <string name="developer">Entwickler</string>
     <string name="data_sources_credits">Datenquellen &amp; Danksagungen</string>
-    <string name="rate_play_store">Im Play Store bewerten</string>
-    <string name="rate_play_store_subtitle">Helfen Sie uns, mehr Muslime zu erreichen</string>
     <string name="contact_support">Support kontaktieren</string>
     <string name="contact_email">arshad@arshadshah.com</string>
     <string name="website">Webseite</string>
@@ -152,8 +137,6 @@
     <string name="update_tap_to_check">Tippen zum Überprüfen</string>
     <string name="developer_name">Arshad Shah</string>
     <string name="developer_role">Software Engineer bei HMH, Dublin</string>
-    <string name="developer_education">BSc Informatik, TU Dublin</string>
-    <string name="developer_location">Dublin, Ireland</string>
     <string name="credit_quran_text">Quran-Text</string>
     <string name="credit_tanzil">Tanzil.net</string>
     <string name="credit_translations">Übersetzungen</string>
@@ -166,53 +149,16 @@
     <string name="credit_quran_com">Quran.com</string>
     <string name="credit_hijri_calendar">Hidschri-Kalender</string>
     <string name="credit_islamic_finder">Islamic Finder</string>
-    <string name="github">GitHub</string>
-    <string name="linkedin">LinkedIn</string>
-    <string name="email">E-Mail</string>
     <string name="made_with">Erstellt mit </string>
     <string name="for_the_ummah"> für die Ummah</string>
     <string name="copyright_format">© %d Nimaz. Alle Rechte vorbehalten.</string>
-    <string name="help_intro_title">Wie können wir helfen?</string>
-    <string name="help_intro_subtitle">Durchsuche häufige Fragen, lerne die Funktionen kennen und behebe Probleme – oder kontaktiere uns, wir melden uns.</string>
-    <string name="feature_guides">Funktionsanleitungen</string>
-    <string name="contact_us">Kontaktieren Sie uns</string>
-    <string name="email_support">E-Mail-Support</string>
-    <string name="support_email">info@arshadshah.com</string>
     <string name="nimaz_support_request">Nimaz Supportanfrage</string>
-    <string name="send_email">E-Mail senden</string>
-    <string name="troubleshooting_title">Fehlerbehebung</string>
     <string name="guide_qibla_title">Qibla-Kompass</string>
-    <string name="trouble_times_wrong_title">Gebetszeiten erscheinen falsch oder weichen ca. eine Stunde ab</string>
-    <string name="trouble_times_wrong_symptom">Eine oder mehrere Gebetszeiten erscheinen zu früh oder zu spät, manchmal um etwa eine Stunde.</string>
-    <string name="trouble_times_wrong_solution">Öffnen Sie Mehr > Einstellungen > Berechnungsmethode und bestätigen Sie, dass Berechnungsmethode, Asr-Methode und Hochbreitenregel zu Ihrer Region oder Moschee passen. Öffnen Sie dann Mehr > Einstellungen > Standort und stellen Sie sicher, dass Ihre Stadt korrekt ist und kein alter manueller Standort verwendet wird. Eine Abweichung von etwa einer Stunde ist in der Regel ein Problem mit der Zeitzone oder der Sommerzeit; stellen Sie Datum, Uhrzeit und Zeitzone Ihres Telefons auf automatisch. Löschen Sie abschließend alle unbeabsichtigten Werte unter Manuelle Anpassungen (Minuten).</string>
-    <string name="trouble_no_notifications_title">Keine Gebetsbenachrichtigungen oder kein Adhan</string>
-    <string name="trouble_no_notifications_symptom">Gebetsbenachrichtigungen oder der Adhan erscheinen nicht zu den Gebetszeiten.</string>
-    <string name="trouble_no_notifications_solution">Schalten Sie unter Mehr > Einstellungen > Benachrichtigungen Benachrichtigungen aktivieren und die gewünschten Gebete ein. Erteilen Sie unter Android 13 und neuer die Benachrichtigungsberechtigung, wenn Sie dazu aufgefordert werden, oder in den System-App-Einstellungen. Erlauben Sie unter Android 12 und neuer genaue Alarme für Nimaz in der Systemeinstellung Alarme und Erinnerungen. Tippen Sie dann auf Akkuoptimierung deaktivieren auf derselben Seite und stellen Sie sicher, dass Bitte nicht stören deaktiviert oder Bitte-nicht-stören beachten ausgeschaltet ist. Erlauben Sie auf Samsung-, Xiaomi- oder MIUI-, Oppo- und Huawei-Geräten außerdem, dass Nimaz im Hintergrund läuft, und deaktivieren Sie aggressive Akku- oder Task-Killer-Einstellungen. Verwenden Sie Testbenachrichtigung zur Bestätigung.</string>
-    <string name="trouble_adhan_silent_title">Die Adhan-Benachrichtigung erscheint, aber es ist kein Ton zu hören</string>
-    <string name="trouble_adhan_silent_symptom">Eine Gebetsbenachrichtigung wird angezeigt, aber der Adhan spielt keinen Ton ab.</string>
-    <string name="trouble_adhan_silent_solution">Öffnen Sie Mehr > Einstellungen > Benachrichtigungen und stellen Sie sicher, dass Adhan-Klang aktivieren eingeschaltet und ein Muezzin ausgewählt und vollständig heruntergeladen ist. Der Adhan wird über den Alarmkanal abgespielt; erhöhen Sie daher die Alarm- und Medienlautstärke und stellen Sie sicher, dass das Telefon nicht im Lautlos-Modus ist. Wenn Sie nur einen kurzen Ton möchten, wählen Sie Einfacher Piepton. Sie können auch die System-Benachrichtigungseinstellungen für Nimaz öffnen und bestätigen, dass der Ton des Adhan-Kanals nicht deaktiviert ist.</string>
-    <string name="trouble_location_title">Standort lässt sich nicht aktualisieren</string>
-    <string name="trouble_location_symptom">Gebetszeiten oder Qibla verwenden den falschen Ort, oder die automatische Standorterkennung schlägt fehl.</string>
-    <string name="trouble_location_solution">Öffnen Sie Mehr > Einstellungen > Standort und tippen Sie auf Aktuellen Standort verwenden. Erteilen Sie die Standortberechtigung, wenn Sie dazu aufgefordert werden, und stellen Sie sicher, dass GPS oder Ortungsdienste Ihres Telefons eingeschaltet sind. Wenn noch eine manuell gesuchte Stadt ausgewählt ist, überschreibt diese die automatische Erkennung; suchen und wählen Sie daher die richtige Stadt oder verwenden Sie erneut den aktuellen Standort.</string>
-    <string name="trouble_qibla_title">Qibla zeigt in die falsche Richtung</string>
-    <string name="trouble_qibla_symptom">Der Qibla-Kompass zeigt in die falsche Richtung oder driftet ständig ab.</string>
-    <string name="trouble_qibla_solution">Kalibrieren Sie den Kompass, indem Sie Ihr Telefon in einer Acht-Bewegung bewegen, bis die Genauigkeit Mittel oder Hoch anzeigt, und halten Sie Abstand zu Metallgegenständen, Magneten, Lautsprechern und Elektronik, die den Magnetsensor stören. Bestätigen Sie, dass Ihr Standort unter Mehr > Einstellungen > Standort korrekt ist. Einige Telefone haben einen schwachen oder fehlenden Magnetsensor; vergleichen Sie auf diesen Geräten die Anzeige mit einer bekannten Richtung, bevor Sie sich darauf verlassen.</string>
-    <string name="trouble_background_title">Nimaz funktioniert im Hintergrund nicht mehr</string>
-    <string name="trouble_background_symptom">Benachrichtigungen kommen nach längerem Schließen der App nicht mehr an, besonders bei bestimmten Herstellern.</string>
-    <string name="trouble_background_solution">Deaktivieren Sie die Akkuoptimierung für Nimaz unter Mehr > Einstellungen > Benachrichtigungen und erlauben Sie in Ihren Systemeinstellungen, dass die App im Hintergrund läuft, und deaktivieren Sie alle Akku-Spar- oder Task-Killer-Funktionen für Nimaz. Hersteller wie Samsung, Xiaomi oder MIUI, Oppo und Huawei sind besonders aggressiv; die Website dontkillmyapp.com enthält Schritt-für-Schritt-Anleitungen für jede Marke. Nach der Anpassung dieser Einstellungen kehren Sie zu Mehr > Einstellungen > Benachrichtigungen zurück und tippen Sie auf Benachrichtigungen zurücksetzen, um die Planung neu zu starten.</string>
-    <string name="trouble_hijri_title">Das Hijri-Datum ist um einen Tag falsch</string>
-    <string name="trouble_hijri_symptom">Das Hijri-Datum oder ein islamisches Ereignisdatum ist einen Tag früher oder später als erwartet.</string>
-    <string name="trouble_hijri_solution">Nimaz verwendet einen berechneten Hijri-Kalender, der um einen Tag von durch lokale Mondbeobachtung festgelegten Daten abweichen kann, da Berechnung und Beobachtung nicht immer übereinstimmen. Es gibt derzeit keine manuelle Tagesanpassung, sodass die App ihrem berechneten Datum folgt. Verlassen Sie sich für religiöse Angelegenheiten auf Ihre lokale Mondbeobachtungsbehörde. Der Hijri-Kalender ist unter Mehr > Werkzeuge > Kalender verfügbar.</string>
-    <string name="trouble_quran_audio_title">Quran- oder Adhan-Audio lässt sich nicht herunterladen oder abspielen</string>
-    <string name="trouble_quran_audio_symptom">Rezitations- oder Adhan-Audio kann nicht heruntergeladen werden, oder die Wiedergabe startet nicht.</string>
-    <string name="trouble_quran_audio_solution">Audiodateien werden beim ersten Abspielen heruntergeladen; stellen Sie daher sicher, dass Sie eine funktionierende Internetverbindung und ausreichend freien Speicher haben. Öffnen Sie für die Rezitation die Quran-Einstellungen, tippen Sie auf Rezitator und warten Sie, bis der ausgewählte Rezitator vollständig heruntergeladen ist, bevor Sie abspielen. Öffnen Sie für den Adhan Mehr > Einstellungen > Benachrichtigungen und bestätigen Sie, dass der gewählte Muezzin als heruntergeladen angezeigt wird. Wenn ein Download stagniert, wechseln Sie zu einem anderen Netzwerk und versuchen Sie es erneut, oder wählen Sie Einfacher Piepton als Ausweichoption für den Adhan.</string>
     <string name="compass">Kompass</string>
     <string name="ar">AR</string>
     <string name="facing_qibla">Qibla-Richtung erkannt</string>
     <string name="turn_right_format">%d° nach rechts drehen</string>
     <string name="turn_left_format">%d° nach links drehen</string>
-    <string name="qibla_direction_format">%s • Qibla-Richtung</string>
-    <string name="km_to_mecca_format">%s km nach Mekka</string>
     <string name="compass_accuracy">Kompassgenauigkeit</string>
     <string name="calibrate">Kalibrieren</string>
     <string name="calibrate_compass">Kompass kalibrieren</string>
@@ -237,20 +183,7 @@
     <string name="grant_permission">Berechtigung erteilen</string>
     <string name="not_now">Nicht jetzt</string>
     <string name="unknown_error">Unbekannter Fehler</string>
-    <string name="direction_north">Norden</string>
-    <string name="direction_northeast">Nordosten</string>
-    <string name="direction_east">Osten</string>
-    <string name="direction_southeast">Südosten</string>
-    <string name="direction_south">Süden</string>
-    <string name="direction_southwest">Südwesten</string>
-    <string name="direction_west">Westen</string>
-    <string name="direction_northwest">Nordwesten</string>
-    <string name="direction_n">N</string>
-    <string name="direction_e">O</string>
-    <string name="direction_s">S</string>
-    <string name="direction_w">W</string>
     <string name="prayer_settings_title">Gebetseinstellungen</string>
-    <string name="calculation_method_section">BERECHNUNGSMETHODE</string>
     <string name="asr_calculation">Asr-Berechnung</string>
     <string name="asr_standard">Standard (Schafi\'i, Maliki, Hanbali)</string>
     <string name="asr_hanafi">Hanafi</string>
@@ -280,51 +213,129 @@
     <string name="prophets_place">Ort der Verkündung</string>
     <string name="khatam_title">Khatam Quran</string>
     <string name="khatam_active">Aktiver Khatam</string>
-    <string name="khatam_in_progress">In Bearbeitung</string>
-    <string name="khatam_completed">Abgeschlossen</string>
-    <string name="khatam_abandoned">Aufgegeben</string>
-    <string name="khatam_stats_title">Übersicht</string>
-    <string name="khatam_ayahs_read">Gelesene Ayahs</string>
-    <string name="khatam_daily_target">Tagesziel</string>
     <string name="khatam_start_new">Neuen Khatam beginnen</string>
     <string name="khatam_no_in_progress">Keine Khatams in Bearbeitung</string>
     <string name="khatam_no_completed">Keine abgeschlossenen Khatams</string>
-    <string name="khatam_no_abandoned">Keine aufgegebenen Khatams</string>
     <string name="khatam_set_active">Als aktiv setzen</string>
-    <string name="khatam_abandon">Aufgeben</string>
-    <string name="khatam_reactivate">Reaktivieren</string>
     <string name="khatam_delete_title">Khatam löschen</string>
     <string name="khatam_delete_message">Sind Sie sicher, dass Sie \"%s\" löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</string>
-    <string name="khatam_ayahs_format">%1$d / %2$d Ayahs</string>
-    <string name="khatam_ayahs_read_count">%d Ayahs gelesen</string>
-    <string name="khatam_per_day_format">%d / Tag</string>
-    <string name="khatam_created_format">Erstellt am %s</string>
     <string name="khatam_no_started">Kein Khatam begonnen</string>
     <string name="khatam_start_journey">Beginnen Sie Ihre Reise, den Quran zu vollenden</string>
     <string name="khatam_new">Neuer Khatam</string>
     <string name="khatam_name_label">Khatam-Name</string>
     <string name="khatam_name_placeholder">z.B. Ramadan Khatam 2026</string>
-    <string name="khatam_ayahs_unit">%d Ayahs</string>
-    <string name="khatam_estimated_completion">Geschätzte Fertigstellung: ~%d Tage</string>
     <string name="khatam_notes_label">Notizen (Optional)</string>
     <string name="khatam_notes_placeholder">Persönliche Notizen…</string>
-    <string name="khatam_creating">Wird erstellt…</string>
-    <string name="khatam_start">Khatam beginnen</string>
     <string name="khatam_detail">Khatam-Details</string>
     <string name="khatam_continue_reading">Weiterlesen</string>
-    <string name="khatam_juz_progress">Juz-Fortschritt</string>
-    <string name="khatam_daily_reading">Tägliche Lesung</string>
-    <string name="khatam_ayahs_count_format">%d Ayahs</string>
     <string name="khatam_of_ayahs_read">%1$d von %2$d Ayahs gelesen</string>
-    <string name="khatam_days_active">Aktive Tage</string>
     <string name="khatam_avg_pace">Durchschn. Tempo</string>
-    <string name="khatam_target">Ziel</string>
-    <string name="khatam_pace_per_day">%d/Tag</string>
-    <string name="qibla_ar_heading">Richtung</string>
-    <string name="qibla_ar_bearing">Qibla-Peilung</string>
-    <string name="qibla_ar_facing">Qibla-Richtung erkannt</string>
-    <string name="qibla_ar_distance">Entfernung</string>
-    <string name="qibla_ar_accuracy">Genauigkeit</string>
+
+    <!-- Khatam: status and pace -->
+    <string name="khatam_archived">Archiviert</string>
+    <string name="khatam_status_active_badge">Aktiv</string>
+    <string name="khatam_status_completed_badge">Khatam</string>
+    <string name="khatam_pace_on_track">Im Plan</string>
+    <string name="khatam_pace_slightly_behind">Fast im Plan</string>
+    <string name="khatam_pace_behind">Hinter dem Plan</string>
+    <string name="khatam_pace_not_started">Nicht begonnen</string>
+
+    <!-- Khatam: list and hero -->
+    <string name="khatam_section_in_progress">In Bearbeitung</string>
+    <string name="khatam_section_completed">Abgeschlossen</string>
+    <string name="khatam_section_archived">Archiviert</string>
+    <string name="khatam_juz_position">Juz %1$d</string>
+    <string name="khatam_continue_at">Fortsetzen · %1$s %2$d</string>
+    <string name="khatam_started_on">Begonnen am %1$s</string>
+    <string name="khatam_finished_on">Abgeschlossen am %1$s</string>
+    <string name="khatam_no_archived">Keine archivierten Khatams</string>
+
+    <!-- Khatam: detail -->
+    <string name="khatam_section_journey">Ihre Reise</string>
+    <string name="khatam_journey_progress">%1$d / %2$d</string>
+    <string name="khatam_stat_streak">Tage in Folge</string>
+    <string name="khatam_stat_juz_done">Juz geschafft</string>
+    <string name="khatam_edit">Bearbeiten</string>
+    <string name="khatam_not_found">Dieser Khatam ist nicht mehr verfügbar</string>
+    <string name="khatam_a11y_juz_complete">Juz %1$d, abgeschlossen</string>
+    <string name="khatam_a11y_juz_current">Juz %1$d, in Bearbeitung</string>
+    <string name="khatam_a11y_juz_locked">Juz %1$d, nicht begonnen</string>
+    <string name="khatam_a11y_progress_ring">%1$d Prozent abgeschlossen</string>
+
+    <!-- Khatam: create and edit form -->
+    <string name="khatam_edit_title">Khatam bearbeiten</string>
+    <string name="khatam_field_pace">Tempo</string>
+    <string name="khatam_preset_juz_daily">1 Juz / Tag</string>
+    <string name="khatam_preset_half_juz_daily">½ Juz / Tag</string>
+    <string name="khatam_preset_quarter_juz_daily">¼ Juz / Tag</string>
+    <string name="khatam_preset_custom">Benutzerdefiniert</string>
+    <plurals name="khatam_ayahs_per_day">
+        <item quantity="one">%1$d Ayah / Tag</item>
+        <item quantity="other">%1$d Ayahs / Tag</item>
+    </plurals>
+    <string name="khatam_projected_finish">Fertig ~%1$s</string>
+    <string name="khatam_field_deadline">Frist</string>
+    <string name="khatam_field_reminder">Tägliche Erinnerung</string>
+    <string name="khatam_optional">Optional</string>
+    <string name="khatam_deadline_not_set">Nicht festgelegt</string>
+    <string name="khatam_deadline_clear">Frist entfernen</string>
+    <string name="khatam_action_save">Änderungen speichern</string>
+    <string name="khatam_action_begin">Khatam beginnen</string>
+    <string name="khatam_edit_progress_note">Bearbeiten ändert niemals Ihren Fortschritt</string>
+    <string name="khatam_action_archive">Diesen Khatam archivieren</string>
+    <string name="khatam_action_delete">Endgültig löschen</string>
+    <string name="khatam_archive_title">Khatam archivieren</string>
+    <string name="khatam_archive_message">\"%1$s\" archivieren? Ihr Fortschritt bleibt erhalten und Sie können ihn später wiederherstellen.</string>
+    <string name="khatam_error_name_required">Bitte geben Sie einen Namen ein</string>
+    <string name="khatam_error_save_failed">Speichern fehlgeschlagen. Bitte versuchen Sie es erneut.</string>
+
+    <!-- Khatam: counted quantities -->
+    <plurals name="khatam_ayahs_read_plural">
+        <item quantity="one">%1$d Ayah gelesen</item>
+        <item quantity="other">%1$d Ayahs gelesen</item>
+    </plurals>
+    <plurals name="khatam_ayahs_remaining">
+        <item quantity="one">Noch %1$d Ayah</item>
+        <item quantity="other">Noch %1$d Ayahs</item>
+    </plurals>
+    <plurals name="khatam_days_remaining">
+        <item quantity="one">Noch ~%1$d Tag</item>
+        <item quantity="other">Noch ~%1$d Tage</item>
+    </plurals>
+
+    <!-- Khatam: widget -->
+    <plurals name="khatam_completed_lifetime">
+        <item quantity="one">%1$d Khatam abgeschlossen</item>
+        <item quantity="other">%1$d Khatams abgeschlossen</item>
+    </plurals>
+    <string name="notification_settings_khatam_reminder">Khatam-Erinnerung</string>
+    <string name="notification_settings_khatam_subtitle">Eine tägliche Erinnerung, damit Ihr Khatam im Zeitplan bleibt</string>
+    <string name="notification_settings_reminder_time">Erinnerungszeit</string>
+    <string name="khatam_more_actions">Weitere Aktionen</string>
+    <string name="khatam_ayahs_per_day_label">Ayahs pro Tag</string>
+    <string name="time_period_am">AM</string>
+    <string name="time_period_pm">PM</string>
+    <string name="khatam_widget_label">Khatam</string>
+    <string name="khatam_widget_description">Ihr Fortschritt beim Quran-Abschluss</string>
+    <string name="khatam_widget_no_active">Kein aktiver Khatam</string>
+    <string name="khatam_widget_start">Einen beginnen</string>
+
+    <!-- Khatam: daily reminder notification -->
+    <string name="notif_khatam_channel_name">Khatam-Erinnerungen</string>
+    <string name="notif_khatam_channel_description">Tägliche Erinnerungen, damit Ihr Quran-Abschluss im Plan bleibt</string>
+    <string name="notif_khatam_title">Zeit für die heutige Lesung</string>
+    <plurals name="notif_khatam_body_on_track">
+        <item quantity="one">%1$s · Sie sind im Plan. %2$d Ayah, um dranzubleiben.</item>
+        <item quantity="other">%1$s · Sie sind im Plan. %2$d Ayahs, um dranzubleiben.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_behind">
+        <item quantity="one">%1$s · %2$d Ayah heute, um wieder in den Plan zu kommen.</item>
+        <item quantity="other">%1$s · %2$d Ayahs heute, um wieder in den Plan zu kommen.</item>
+    </plurals>
+    <plurals name="notif_khatam_body_generic">
+        <item quantity="one">%1$s · %2$d Ayah heute zu lesen.</item>
+        <item quantity="other">%1$s · %2$d Ayahs heute zu lesen.</item>
+    </plurals>
     <string name="widget_hijri_date_description">Zeigt das aktuelle Hidschri-Datum an</string>
     <string name="widget_next_prayer_description">Zeigt die nächste Gebetszeit und den Countdown an</string>
     <string name="widget_prayer_times_description">Zeigt alle Gebetszeiten für heute an</string>
@@ -343,8 +354,10 @@
     <string name="all_caught_up_message">Sie haben keine versäumten Gebete nachzuholen. Weiter so!</string>
     <string name="prayers_to_make_up">Nachzuholende Gebete</string>
     <string name="all_caught_up_short">Alles erledigt!</string>
-    <string name="missed_prayers_pending">%1$d versäumte%2$s Gebet%2$s ausstehend</string>
-    <string name="plural_s">e</string>
+    <plurals name="missed_prayers_pending">
+        <item quantity="one">%1$d versäumtes Gebet ausstehend</item>
+        <item quantity="other">%1$d versäumte Gebete ausstehend</item>
+    </plurals>
     <string name="current_streak">Aktuelle Serie</string>
     <string name="consecutive_days_all_prayers">aufeinanderfolgende Tage mit allen Gebeten</string>
     <string name="on_time">Pünktlich</string>
@@ -352,14 +365,7 @@
     <string name="missed">Versäumt</string>
     <string name="made_up">Nachgeholt</string>
     <string name="upcoming">Bevorstehend</string>
-    <string name="tasbih">Tasbih</string>
-    <string name="tasbih_title">Tasbih</string>
     <string name="history">Verlauf</string>
-    <string name="add_preset">Vorlage hinzufügen</string>
-    <string name="today_upper">HEUTE</string>
-    <string name="rounds">RUNDEN</string>
-    <string name="sessions_upper">SITZUNGEN</string>
-    <string name="quick_presets">SCHNELLVORLAGEN</string>
     <string name="target_format">Ziel: %d</string>
     <string name="tap_to_count">Tippen zum Zählen</string>
     <string name="reset_action">Zurücksetzen</string>
@@ -371,9 +377,11 @@
     <string name="start_counting_hint">Beginnen Sie zu zählen, um Ihren Verlauf hier zu sehen</string>
     <string name="sessions">Sitzungen</string>
     <string name="custom">Benutzerdefiniert</string>
-    <string name="laps_format">%d Runden</string>
+    <plurals name="laps_format">
+        <item quantity="one">%d Runde</item>
+        <item quantity="other">%d Runden</item>
+    </plurals>
     <string name="done">Fertig</string>
-    <string name="add_preset_title">Vorlage hinzufügen</string>
     <string name="name_required">Name *</string>
     <string name="name_required_error">Name ist erforderlich</string>
     <string name="preset_name_placeholder">z.B. SubhanAllah wa Bihamdihi</string>
@@ -385,16 +393,17 @@
     <string name="translation_placeholder">z.B. Gepriesen sei Allah und Lob sei Ihm</string>
     <string name="target_count">Zielanzahl</string>
     <string name="category">Kategorie</string>
-    <string name="save_preset">Vorlage speichern</string>
     <string name="duas_adhkar">Duas &amp; Adhkar</string>
     <string name="bookmarks">Lesezeichen</string>
     <string name="daily_adhkar">Tägliche Adhkar</string>
     <string name="situational_duas">Situationsbezogene Duas</string>
-    <string name="duas_count_format">%d Duas</string>
+    <plurals name="duas_count_format">
+        <item quantity="one">%d Dua</item>
+        <item quantity="other">%d Duas</item>
+    </plurals>
     <string name="bookmarks_title">Lesezeichen</string>
     <string name="no_bookmarks_yet">Noch keine Lesezeichen</string>
     <string name="no_bookmarks_hint">Speichern Sie Ayahs, Hadithe und Duas für schnellen Zugriff</string>
-    <string name="quran_verses">Quran-Verse</string>
     <string name="share">Teilen</string>
     <string name="added_format">Hinzugefügt am %s</string>
     <string name="quran_type">Quran</string>
@@ -410,7 +419,6 @@
     <string name="read_today">Heute gelesen</string>
     <string name="bookmarked">Lesezeichen gesetzt</string>
     <string name="day_streak">Tages-Serie</string>
-    <string name="share_hadith">Hadith teilen</string>
     <string name="kutub_al_sittah">Kutub al-Sittah</string>
     <string name="bookmark">Lesezeichen</string>
     <string name="hadith_count_format">%s Hadith</string>
@@ -418,15 +426,15 @@
     <string name="search_placeholder">Quran, Hadith, Duas suchen…</string>
     <string name="search_or_ask_placeholder">Suchen oder eine Frage stellen…</string>
     <string name="recent_searches">Letzte Suchen</string>
-    <string name="clear_recent">Letzte löschen</string>
-    <string name="results_found_format">%d Ergebnisse gefunden</string>
     <string name="no_results_format">Keine Ergebnisse für \"%s\"</string>
     <string name="no_results_hint">Versuchen Sie andere Schlüsselwörter oder Filter</string>
     <string name="remove">Entfernen</string>
-    <string name="surah_ayahs_format">%1$s • %2$d Ayahs</string>
+    <plurals name="surah_ayahs_format">
+        <item quantity="one">%1$s • %2$d Ayah</item>
+        <item quantity="other">%1$s • %2$d Ayahs</item>
+    </plurals>
     <string name="zakat_calculator">Zakat-Rechner</string>
     <string name="zakat_due">Fällige Zakat</string>
-    <string name="zakat_rate_hint">2,5%% des anrechenbaren Vermögens</string>
     <string name="assets">Vermögenswerte</string>
     <string name="cash_on_hand">Bargeld</string>
     <string name="bank_balance">Bankguthaben</string>
@@ -439,26 +447,13 @@
     <string name="other_assets">Sonstige Vermögenswerte</string>
     <string name="liabilities">Verbindlichkeiten</string>
     <string name="debts_owed">Ausstehende Schulden</string>
-    <string name="expenses_due">Fällige Ausgaben</string>
     <string name="other_liabilities">Sonstige Verbindlichkeiten</string>
     <string name="total_assets">Gesamtvermögen</string>
     <string name="total_liabilities">Gesamtverbindlichkeiten</string>
     <string name="net_zakatable_wealth">Zakat-pflichtiges Nettovermögen</string>
     <string name="nisab_threshold">Nisab-Schwelle</string>
     <string name="meets_nisab">Nisab erreicht</string>
-    <string name="yes">Ja</string>
-    <string name="no">Nein</string>
-    <string name="zakat_due_rate">Fällige Zakat (2,5%%)</string>
     <string name="save_calculation">Berechnung speichern</string>
-    <string name="zakat_history">Verlauf</string>
-    <string name="enter_amount">Betrag eingeben</string>
-    <string name="gold_nisab">Gold</string>
-    <string name="silver_nisab">Silber</string>
-    <string name="nisab_gold_price_format">Gold (%s/g)</string>
-    <string name="nisab_silver_price_format">Silber (%s/g)</string>
-    <string name="nisab_above_format">Ihr Vermögen liegt über der Nisab-Schwelle. Zakat ist verpflichtend.</string>
-    <string name="nisab_below_format">Ihr Vermögen liegt unter der Nisab-Schwelle. Zakat ist nicht verpflichtend.</string>
-    <string name="breakdown">Aufschlüsselung</string>
     <string name="loans">Darlehen</string>
     <string name="bills_due">Fällige Rechnungen</string>
     <string name="hint_physical_cash">Bargeld, das Sie besitzen</string>
@@ -474,10 +469,6 @@
     <string name="hint_outstanding_bills">Ausstehende Rechnungen</string>
     <string name="hint_other_liabilities">Sonstige Verbindlichkeiten</string>
     <string name="calculation_breakdown">Berechnungsaufschlüsselung</string>
-    <string name="nisab_above_detail_format">Ihr Vermögen übersteigt die %1$s-Nisab-Schwelle von %2$s</string>
-    <string name="nisab_below_detail_format">Nisab-Schwelle (%1$s): %2$s</string>
-    <string name="nisab_gold_subtitle_format">87,48g @ $%d/g</string>
-    <string name="nisab_silver_subtitle_format">612,36g @ $%s/g</string>
     <string name="name_detail">Namensdetail</string>
     <string name="prophet_detail">Prophetendetail</string>
     <string name="language_title">Sprache</string>
@@ -515,23 +506,18 @@
     <string name="quran_home_jump_to_page">Zur Seite springen (1–604)</string>
     <string name="quran_home_enter_page_number">Seitennummer eingeben</string>
     <string name="quran_home_go_to_page">Zur Seite gehen</string>
-    <string name="quran_home_juz_label">Juz</string>
-    <string name="quran_home_juz_pages_format">Juz %1$d (Seiten %2$d–%3$d)</string>
     <string name="quran_home_verse_format">Vers %1$d</string>
     <string name="quran_home_juz_format">Juz %1$d</string>
     <string name="quran_home_page_format">Seite %1$d</string>
     <string name="quran_home_surah_fallback">Sure %1$d</string>
     <string name="quran_home_continue_reading">WEITERLESEN</string>
-    <string name="quran_home_percent_complete">%1$d%% abgeschlossen</string>
     <string name="quran_home_completed">Abgeschlossen</string>
-    <string name="quran_home_completed_count">%1$d abgeschlossen</string>
-    <string name="quran_home_ayahs_read">Gelesene Ayahs</string>
-    <string name="quran_home_remaining">Verbleibend</string>
-    <string name="quran_home_start_khatam">Einen Khatam beginnen</string>
-    <string name="quran_home_track_progress">Verfolgen Sie Ihren Quran-Lesefortschritt</string>
     <string name="quran_home_makkah">Mekka</string>
     <string name="quran_home_madinah">Medina</string>
-    <string name="quran_home_verses_count">%1$d Verse</string>
+    <plurals name="quran_home_verses_count">
+        <item quantity="one">%1$d Vers</item>
+        <item quantity="other">%1$d Verse</item>
+    </plurals>
     <string name="quran_home_surah_info">Sure-Info</string>
     <string name="quran_home_verse_of_the_day">VERS DES TAGES</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
@@ -553,15 +539,12 @@
     <string name="dua_reader_added_tasbih">Zu Tasbih hinzugefügt</string>
     <string name="dua_reader_prev">Zurück</string>
     <string name="dua_reader_next">Weiter</string>
-    <string name="dua_reader_index_format">%1$d von …</string>
-    <string name="dua_reader_first_dua">Dies ist das erste Dua</string>
-    <string name="dua_reader_source">Quelle</string>
-    <string name="dua_reader_recommended">Empfohlen</string>
-    <string name="dua_reader_recite_once">%1$d Mal rezitieren</string>
-    <string name="dua_reader_recite_times">%1$d Mal rezitieren</string>
+    <plurals name="dua_reader_recite_count">
+        <item quantity="one">%1$d Mal rezitieren</item>
+        <item quantity="other">%1$d Mal rezitieren</item>
+    </plurals>
     <string name="dua_reader_virtue">Vorzüge dieses Duas</string>
     <string name="dua_reader_share">Teilen</string>
-    <string name="dua_reader_done">Fertig</string>
     <string name="dua_reader_source_label">Quelle: %1$s</string>
     <string name="dua_reader_not_found">Dua nicht gefunden</string>
     <!-- Dua Settings Screen -->
@@ -576,7 +559,6 @@
     <!-- Fasting Tracker Screen -->
     <string name="fasting_tab_tracker">Übersicht</string>
     <string name="fasting_tab_ramadan">Ramadan</string>
-    <string name="fasting_tab_voluntary">Freiwillig</string>
     <string name="fasting_tab_makeup">Nachholen</string>
     <string name="fasting_title">Fasten</string>
     <string name="fasting_current">AKTUELL</string>
@@ -607,7 +589,10 @@
     <string name="fasting_ayyam_desc">13., 14., 15. des Mondmonats</string>
     <string name="fasting_next_format">Nächster: %1$s</string>
     <string name="fasting_tomorrow">Morgen</string>
-    <string name="fasting_in_days_format">In %1$d Tagen</string>
+    <plurals name="fasting_in_days_format">
+        <item quantity="one">In %1$d Tag</item>
+        <item quantity="other">In %1$d Tagen</item>
+    </plurals>
     <string name="fasting_log_today">Heutigen Fastentag erfassen</string>
     <string name="fasting_no_makeup">Keine nachzuholenden Fastentage</string>
     <string name="fasting_all_up_to_date">Alle Ihre Fastentage sind aktuell!</string>
@@ -618,8 +603,10 @@
     <string name="fasting_total_label">Gesamt</string>
     <string name="fasting_makeup_info">Nachzuholende Fastentage sollten idealerweise vor dem nächsten Ramadan abgeschlossen werden. Das Fasten an Montagen und Donnerstagen wird empfohlen.</string>
     <string name="fasting_pending_count">%1$d ausstehend</string>
-    <string name="fasting_fasts_count">%1$d Fastentage</string>
-    <string name="fasting_edit_coming_soon">Dialog zum Bearbeiten nachzuholender Fastentage folgt in Kürze</string>
+    <plurals name="fasting_fasts_count">
+        <item quantity="one">%1$d Fastentag</item>
+        <item quantity="other">%1$d Fastentage</item>
+    </plurals>
     <string name="fasting_pending">Ausstehend</string>
     <string name="fasting_edit">Bearbeiten</string>
     <string name="fasting_mark_complete">Als erledigt markieren</string>
@@ -642,7 +629,10 @@
     <string name="notification_settings_enable_adhan_subtitle">Adhan zu den Gebetszeiten abspielen</string>
     <string name="notification_settings_additional_section">ZUSÄTZLICHE BENACHRICHTIGUNGEN</string>
     <string name="notification_settings_pre_adhan">Vorab-Erinnerung</string>
-    <string name="notification_settings_pre_adhan_subtitle">%1$d Minuten vorher</string>
+    <plurals name="notification_settings_pre_adhan_subtitle">
+        <item quantity="one">%1$d Minute vorher</item>
+        <item quantity="other">%1$d Minuten vorher</item>
+    </plurals>
     <string name="notification_settings_sunrise">Sonnenaufgangs-Benachrichtigung</string>
     <string name="notification_settings_sunrise_subtitle">Ende der Fajr-Gebetszeit</string>
     <string name="notification_settings_friday_reminder">Freitagsgebet-Erinnerung</string>
@@ -669,9 +659,6 @@
     <string name="notification_settings_prayer_notification">Gebetsbenachrichtigung</string>
     <string name="notification_settings_sound_on">Ton an</string>
     <string name="notification_settings_sound_off">Ton aus</string>
-    <string name="notification_settings_downloaded">Heruntergeladen</string>
-    <string name="notification_settings_stop">Stopp</string>
-    <string name="notification_settings_download_play">Herunterladen und abspielen</string>
     <string name="notification_settings_preview">Vorschau</string>
 
     <!-- Onboarding -->
@@ -699,18 +686,6 @@
     <string name="onboarding_feature_audio">Audio-Rezitationen</string>
     <string name="onboarding_feature_bookmarks">Lesezeichen und Notizen</string>
     <string name="onboarding_feature_search">Suchfunktion</string>
-    <string name="onboarding_feature_auto_location">Automatische Standorterkennung</string>
-    <string name="onboarding_feature_precise_times">Präzise Gebetszeiten</string>
-    <string name="onboarding_feature_qibla">Genaue Qibla-Richtung</string>
-    <string name="onboarding_feature_distance_mecca">Entfernung nach Mekka</string>
-    <string name="onboarding_feature_prayer_alerts">Gebetszeit-Benachrichtigungen</string>
-    <string name="onboarding_feature_adhan_sounds">Benutzerdefinierte Adhan-Klänge</string>
-    <string name="onboarding_feature_pre_reminders">Vorab-Gebetserinnerungen</string>
-    <string name="onboarding_feature_quiet_hours">Ruhezeiten-Unterstützung</string>
-    <string name="onboarding_feature_reliable_notif">Zuverlässige Benachrichtigungen</string>
-    <string name="onboarding_feature_background_alerts">Gebetsbenachrichtigungen im Hintergrund</string>
-    <string name="onboarding_feature_consistent_reminders">Beständige Erinnerungen</string>
-    <string name="onboarding_feature_no_missed">Keine verpassten Gebete</string>
     <string name="onboarding_skip">Überspringen</string>
     <string name="onboarding_back">Zurück</string>
     <string name="onboarding_next">Weiter</string>
@@ -740,10 +715,8 @@
     <string name="adhan_download_failed">Adhan-Download fehlgeschlagen</string>
     <string name="adhan_download_failed_subtitle">Überprüfen Sie Ihre Internetverbindung und versuchen Sie es erneut</string>
     <!-- Fasting sheet / Quran home / free-day labels -->
-    <string name="free_count">Frei</string>
     <string name="free_count_label">Freie Anzahl</string>
     <string name="quran_home_page_range_format">S. %1$d–%2$d</string>
-    <string name="quran_home_surah_starts">▸ %1$s beginnt</string>
     <string name="quran_home_juz_indicator">Juz %1$d</string>
     <string name="fasting_sheet_status">Status</string>
     <string name="fasting_sheet_type">Fastenart</string>
@@ -778,7 +751,10 @@
     <string name="notif_short_isha">Es ist Zeit zu beten. Beschließe deinen Tag mit dem Ischa-Gebet.</string>
     <string name="notif_short_generic">Es ist Zeit für das %s-Gebet.</string>
 
-    <string name="notif_pre_reminder_title">%1$s in %2$d Minuten</string>
+    <plurals name="notif_pre_reminder_title">
+        <item quantity="one">%1$s in %2$d Minute</item>
+        <item quantity="other">%1$s in %2$d Minuten</item>
+    </plurals>
     <string name="notif_pre_reminder_1">Bereite dein Herz vor und vollziehe die Wudu.</string>
     <string name="notif_pre_reminder_2">Zeit, sich für das Gebet bereitzumachen.</string>
     <string name="notif_pre_reminder_3">Eine Erinnerung, sich auf den Gottesdienst vorzubereiten.</string>
@@ -818,7 +794,6 @@
     <string name="cd_delete">Löschen</string>
     <string name="cd_copy">Kopieren</string>
     <string name="cd_translation">Übersetzung</string>
-    <string name="cd_stop_preview">Vorschau stoppen</string>
     <string name="cd_stop_audio">Audio stoppen</string>
     <string name="cd_reset">Zurücksetzen</string>
     <string name="cd_previous_page">Vorherige Seite</string>
@@ -829,8 +804,6 @@
     <string name="cd_new_calculation">Neue Berechnung</string>
     <string name="cd_increase">Erhöhen</string>
     <string name="cd_history">Verlauf</string>
-    <string name="cd_facing_qibla">Richtung Qibla</string>
-    <string name="cd_export_annotations">Anmerkungen exportieren</string>
     <string name="cd_edit">Bearbeiten</string>
     <string name="cd_dismiss">Verwerfen</string>
     <string name="cd_decrease">Verringern</string>
@@ -862,9 +835,6 @@
     <string name="tasbih_stat_today">HEUTE</string>
     <string name="tasbih_stat_laps">RUNDEN</string>
     <string name="tasbih_change_dhikr">Dhikr ändern</string>
-    <string name="tasbih_target_value">Ziel  %d</string>
-    <string name="tasbih_decrease_target">Ziel verringern</string>
-    <string name="tasbih_increase_target">Ziel erhöhen</string>
     <string name="tasbih_bead_wood">Holz</string>
     <string name="tasbih_bead_marble">Marmor</string>
     <string name="tasbih_bead_amethyst">Amethyst</string>
@@ -967,7 +937,6 @@
     <string name="location_search_hint">Stadt oder Adresse suchen…</string>
     <string name="location_search_results">Suchergebnisse</string>
     <string name="location_recent">Kürzlich</string>
-    <string name="location_popular_cities">Beliebte Städte</string>
     <string name="location_detecting">Wird erkannt…</string>
     <string name="location_not_set">Nicht festgelegt</string>
     <string name="location_current">Aktuell</string>
@@ -998,16 +967,16 @@
     <string name="action_tafseer">Tafseer</string>
     <string name="unread">Ungelesen</string>
     <string name="listen">Anhören</string>
-    <string name="days_count_format">%1$d Tage</string>
-    <string name="quran_verses_label">Verse</string>
-    <string name="quran_revelation_label">Offenbarung</string>
+    <plurals name="days_count_format">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
     <string name="quran_order_label">Reihenfolge</string>
     <string name="quran_juz_label">Juz</string>
     <string name="quran_makki">Makki</string>
     <string name="quran_madani">Madani</string>
     <string name="quran_meccan">Meccan</string>
     <string name="quran_medinan">Medinan</string>
-    <string name="quran_ayahs_count_format">%1$d Ayahs</string>
     <string name="juz_page_dot_format">Juz %1$d • Seite %2$d</string>
     <string name="page_range_format">Seiten %1$d–%2$d</string>
     <string name="page_single_format">Seite %1$d</string>
@@ -1017,10 +986,8 @@
     <string name="unknown_date">Unbekanntes Datum</string>
     <string name="hadith_chapter_format">Kapitel %1$d</string>
     <string name="no_hadith_found">Kein Hadith gefunden</string>
-    <string name="hadith_of_count_format">von %1$d</string>
     <string name="hadith_narrated_by_format">Überliefert von %1$s</string>
     <string name="hadith_isnad">Überlieferungskette (Isnad)</string>
-    <string name="hadith_reader_not_found">Hadith nicht gefunden</string>
     <string name="hadith_copied">In die Zwischenablage kopiert</string>
     <string name="hadith_grade_sahih">Sahih</string>
     <string name="hadith_grade_hasan">Hasan</string>
@@ -1034,13 +1001,15 @@
     <string name="hadith_settings_preview_arabic">إِنَّمَا الأَعْمَالُ بِالنِّيَّاتِ</string>
     <string name="hadith_settings_preview_translation">Die Taten werden nur nach den Absichten bewertet.</string>
     <string name="hadith_chapters_title">Kapitel</string>
-    <string name="hadith_chapters_count_format">%1$d Kapitel</string>
+    <plurals name="hadith_chapters_count_format">
+        <item quantity="one">%1$d Kapitel</item>
+        <item quantity="other">%1$d Kapitel</item>
+    </plurals>
     <string name="export_as_pdf">Als PDF exportieren</string>
     <string name="monthly_this_month">Diesen Monat</string>
     <string name="ramadan_year_format">Ramadan %1$d</string>
     <string name="monthly_full_month_subtitle">Ganzer Monat · 1 → letzter Tag</string>
     <string name="ramadan_month_label">RAMADAN-MONAT</string>
-    <string name="cd_prayer_settings">Gebetseinstellungen</string>
     <string name="cd_previous_day">Vorheriger Tag</string>
     <string name="cd_pick_date">Datum auswählen</string>
     <string name="cd_next_day">Nächster Tag</string>
@@ -1058,7 +1027,6 @@
     <string name="tafseer_no_notes">Noch keine Notizen. Tippen und halten Sie den Kommentar, um ihn hervorzuheben und eine Notiz hinzuzufügen.</string>
     <string name="tafseer_read_in_format">Lesen in %1$s</string>
     <string name="tafseer_no_commentary_format">Kein %1$s-Kommentar für diese Ayah</string>
-    <string name="tafseer_page_format">Seite %1$d von %2$d</string>
     <string name="tafseer_add_note">Notiz hinzufügen…</string>
     <string name="prayer_sunrise">Sonnenaufgang</string>
     <string name="high_latitude_method">Methode für hohe Breitengrade</string>
@@ -1170,7 +1138,10 @@
     <string name="qaida_play_letter">Buchstaben abspielen</string>
     <string name="qaida_its_shapes">Seine Formen</string>
     <string name="qaida_where_made">Wo er gebildet wird</string>
-    <string name="quran_surah_ayahs_format">Surah %1$d • %2$d Ayahs</string>
+    <plurals name="quran_surah_ayahs_format">
+        <item quantity="one">Surah %1$d • %2$d Ayah</item>
+        <item quantity="other">Surah %1$d • %2$d Ayahs</item>
+    </plurals>
     <string name="bookmark_surah_ayah_format">Surah %1$d, Ayah %2$d</string>
     <string name="bookmark_hadith_format">Hadith #%1$d</string>
     <string name="dua_label">Dua</string>
@@ -1182,8 +1153,14 @@
     <string name="makhraj_shafatain">die beiden Lippen</string>
     <string name="makhraj_khayshum">die Nase</string>
     <string name="relative_yesterday">Gestern</string>
-    <string name="relative_in_days_format">In %1$d Tagen</string>
-    <string name="relative_days_ago_format">Vor %1$d Tagen</string>
+    <plurals name="relative_in_days_format">
+        <item quantity="one">In %1$d Tag</item>
+        <item quantity="other">In %1$d Tagen</item>
+    </plurals>
+    <plurals name="relative_days_ago_format">
+        <item quantity="one">Vor %1$d Tag</item>
+        <item quantity="other">Vor %1$d Tagen</item>
+    </plurals>
     <string name="calc_region_mwl">Verwendet in Europa, Fernost, Teilen der USA</string>
     <string name="calc_region_egyptian">Verwendet in Afrika, Syrien, Libanon, Malaysia</string>
     <string name="calc_region_karachi">Verwendet in Pakistan, Bangladesch, Indien, Afghanistan</string>
@@ -1239,7 +1216,6 @@
     <string name="tafseer_delete_highlight_title">Hervorhebung löschen?</string>
     <string name="tafseer_delete_highlight_message">Dadurch werden die Hervorhebung und die zugehörige Notiz entfernt. Dies kann nicht rückgängig gemacht werden.</string>
     <string name="cd_share_tafseer">Tafseer teilen</string>
-    <string name="tafseer_share_chooser">Tafseer teilen</string>
     <string name="tafseer_pdf_header">TAFSEER</string>
     <string name="tafseer_pdf_commentary">Kommentar</string>
     <string name="tafseer_pdf_notes">Meine Notizen</string>
@@ -1264,7 +1240,6 @@
     <string name="prayer_settings_notifications_off">Benachrichtigungen aus</string>
     <string name="prayer_settings_prayers_enabled_count">%1$d von %2$d Gebeten aktiviert</string>
     <string name="prayer_settings_reminder_off">Aus</string>
-    <string name="share_card_footer">Geteilt mit Nimaz</string>
     <string name="share_card_tagline">Islamischer Begleiter</string>
     <string name="share_eyebrow_dua">Dua</string>
     <string name="share_eyebrow_hadith">Hadith</string>
@@ -1283,7 +1258,6 @@
     <!-- Search & AI (Ask with Proof) -->
     <string name="search_settings">Suche &amp; KI</string>
     <string name="search_settings_subtitle">KI-Antworten und Datenschutz</string>
-    <string name="dismiss">Schließen</string>
     <string name="ai_answers">KI-Antworten</string>
     <string name="ai_answers_enable">KI-Antworten aktivieren</string>
     <string name="ai_answers_enable_subtitle">Stelle eine Frage und erhalte eine Antwort mit Versen und Hadithen aus deiner Bibliothek als Beleg</string>
@@ -1296,8 +1270,6 @@
     <string name="ai_clear_history_subtitle">Alle gespeicherten KI-Fragen entfernen</string>
     <string name="ai_consent_title">KI-Antworten aktivieren?</string>
     <string name="ai_consent_enable">Aktivieren</string>
-    <string name="ai_ask_a_question">Stelle eine Frage</string>
-    <string name="ai_ask_placeholder">Frage zu Koran, Hadith oder Duas…</string>
     <string name="ai_answer_section">KI-Antwort</string>
     <string name="ai_thinking">Antwort wird gesucht…</string>
     <string name="ai_confidence_high">Hohe Zuverlässigkeit</string>
@@ -1315,7 +1287,10 @@
     <string name="search_try_asking">Frag zum Beispiel</string>
     <string name="search_recent">Zuletzt</string>
     <string name="search_typing_hint">Ergebnisse werden beim Tippen aktualisiert · Enter für eine Antwort mit Quellen</string>
-    <string name="search_matches_format">%d Treffer</string>
+    <plurals name="search_matches_format">
+        <item quantity="one">%d Treffer</item>
+        <item quantity="other">%d Treffer</item>
+    </plurals>
     <string name="search_answer_count_format">%1$d in deiner Bibliothek · %2$d in der Antwort zitiert</string>
     <string name="search_cited_chip">Zitiert</string>
     <string name="ask_example_1">Was sagt der Koran über Geduld?</string>
