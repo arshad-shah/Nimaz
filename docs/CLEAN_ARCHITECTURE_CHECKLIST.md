@@ -171,6 +171,46 @@ This one is **pervasive and lower priority** — listed so it's tracked, not bec
   (the wrapper is the seam the UI depends on), but if a use case adds no value and the feature is
   trivial, that's fine — don't over-engineer net-new tiny features.
 
+### AP-7.1 · Nested `collect` (silently kills reactivity)
+
+- [x] ~~**Khatam observers in `QuranViewModel` and `KhatamViewModel`.**~~ **Resolved.** Both
+  nested a `collect` on one Room Flow *inside* the `collect` of another. `collect` is terminal
+  and suspends until the flow completes — a Room Flow never completes — so the outer flow could
+  never process a second emission. The UI looked reactive and passed review, but Home and the
+  Quran reader stayed pinned to the first active khatam until process death. Use
+  `flatMapLatest` (or `combine`) whenever an inner stream depends on an outer stream's value.
+
+Detect:
+
+```bash
+# Nested collect within ~12 lines — every hit needs a human look
+rg -U --multiline-dotall -n '\.collect\s*\{(?:[^}]|
+){0,400}?\.collect\s*\{'   app/src/main/java --glob '*ViewModel.kt'
+```
+
+### AP-7.2 · `Get*` and `Observe*` variants of the same read
+
+- [x] ~~**Khatam had both `GetActiveKhatamUseCase` and `ObserveActiveKhatamUseCase`**~~ (also
+  `getReadAyahIds`/`observeReadAyahIds`, `getJuzProgress` with no Flow variant). **Resolved** by
+  **deleting** the one-shot variants rather than documenting them. When both exist, a call site
+  can silently pick the stale one and nothing flags it. Keep the one-shot form only where a read
+  genuinely cannot be a Flow (e.g. `getNextUnreadPosition`, which joins the ayah table).
+
+Detect:
+
+```bash
+# A Get* use case whose Observe* twin also exists
+rg -o -N 'class (Get|Observe)(\w+)UseCase' app/src/main/java/com/arshadshah/nimaz/domain/usecase   | sed -E 's/.*class (Get|Observe)(\w+)UseCase//' | sort | uniq -d
+```
+
+### AP-7.3 · Stub implementations that satisfy a signature
+
+- [x] ~~**`KhatamRepositoryImpl.getKhatamStats()` returned all zeros**~~ with a "Simplified
+  stats" comment while being fully wired through DI. **Resolved** with a real Flow-backed
+  implementation. A *missing* method fails at build time; a *lying* one type-checks, ships, and
+  fails silently months later in whichever screen finally consumes it. Prefer `TODO()` over
+  plausible-looking placeholder data.
+
 ---
 
 ## Quick full re-scan
