@@ -173,9 +173,12 @@ private fun KhatamJuzNode(
     description: String,
     modifier: Modifier = Modifier,
 ) {
+    // Every state needs an OPAQUE fill: these nodes sit on top of the drawn trail, so a
+    // translucent one lets the path show through behind the number and it stops being
+    // legible. The current node reads as "current" from its ring, not from a wash.
     val background = when {
         isDone -> accent.complete
-        isCurrent -> accent.progress.copy(alpha = 0.14f)
+        isCurrent -> MaterialTheme.colorScheme.surface
         else -> accent.muted
     }
     val content = when {

@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerDialog
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -25,8 +27,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -35,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,31 +42,40 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
-import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDatePickerDialog
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepperVariant
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamEvent
+import com.arshadshah.nimaz.presentation.viewmodel.KhatamFormMode
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamFormUiState
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamPacePreset
 import com.arshadshah.nimaz.presentation.viewmodel.KhatamViewModel
-import com.arshadshah.nimaz.domain.model.Khatam
 
 /**
  * One form, two modes.
  *
  * Create and Edit differ only in what they preload, what the primary action says, and
- * whether the danger zone is shown — so they share a single composable rather than
+ * whether the overflow menu is shown — so they share a single composable rather than
  * existing as two near-identical screens that drift apart.
  *
  * @param khatamId null to create, non-null to edit.
@@ -80,6 +88,9 @@ fun KhatamFormScreen(
     viewModel: KhatamViewModel = hiltViewModel(),
 ) {
     val state by viewModel.formState.collectAsStateWithLifecycle()
+    var menuExpanded by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var showArchiveConfirm by remember { mutableStateOf(false) }
 
     LaunchedEffect(khatamId) {
         if (khatamId == null) {
@@ -97,6 +108,8 @@ fun KhatamFormScreen(
         }
     }
 
+    val editId = (state.mode as? KhatamFormMode.Edit)?.khatamId
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
@@ -105,41 +118,120 @@ fun KhatamFormScreen(
                     if (state.isEdit) R.string.khatam_edit_title else R.string.khatam_new
                 ),
                 onBackClick = onNavigateBack,
+                actions = {
+                    if (state.isEdit && editId != null) {
+                        Box {
+                            NimazIconButton(
+                                icon = Icons.Default.MoreVert,
+                                onClick = { menuExpanded = true },
+                                contentDescription =
+                                    stringResource(R.string.khatam_more_actions),
+                            )
+                            // Destructive actions live in the overflow menu rather than an
+                            // inline "danger zone", which put delete a full scroll away
+                            // from the save button.
+                            NimazDropdownMenu(
+                                expanded = menuExpanded,
+                                onDismissRequest = { menuExpanded = false },
+                            ) {
+                                if (!state.isActiveKhatam) {
+                                    NimazDropdownRow(
+                                        text = stringResource(R.string.khatam_set_active),
+                                        leadingIcon = Icons.Default.Star,
+                                        onClick = {
+                                            menuExpanded = false
+                                            viewModel.onEvent(
+                                                KhatamEvent.SetActiveKhatam(editId)
+                                            )
+                                        },
+                                    )
+                                }
+                                NimazDropdownRow(
+                                    text = stringResource(R.string.khatam_action_archive),
+                                    leadingIcon = Icons.Default.Archive,
+                                    onClick = {
+                                        menuExpanded = false
+                                        showArchiveConfirm = true
+                                    },
+                                )
+                                NimazDropdownRow(
+                                    text = stringResource(R.string.khatam_action_delete),
+                                    leadingIcon = Icons.Default.Delete,
+                                    destructive = true,
+                                    onClick = {
+                                        menuExpanded = false
+                                        showDeleteConfirm = true
+                                    },
+                                )
+                            }
+                        }
+                    }
+                },
             )
         },
     ) { padding ->
         if (state.isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            NimazLoadingState(modifier = Modifier.padding(padding))
         } else {
             KhatamFormContent(
                 state = state,
                 contentPadding = padding,
                 onEvent = viewModel::onEvent,
-                onArchived = onNavigateBack,
-                onDeleted = onNavigateBack,
             )
         }
     }
+
+    if (showArchiveConfirm && editId != null) {
+        NimazConfirmDialog(
+            title = stringResource(R.string.khatam_archive_title),
+            message = stringResource(R.string.khatam_archive_message, state.name),
+            confirmText = stringResource(R.string.khatam_action_archive),
+            cancelText = stringResource(R.string.cancel),
+            onConfirm = {
+                viewModel.onEvent(KhatamEvent.AbandonKhatam(editId))
+                showArchiveConfirm = false
+                onNavigateBack()
+            },
+            onDismiss = { showArchiveConfirm = false },
+        )
+    }
+
+    if (showDeleteConfirm && editId != null) {
+        NimazConfirmDialog(
+            title = stringResource(R.string.khatam_delete_title),
+            message = stringResource(R.string.khatam_delete_message, state.name),
+            confirmText = stringResource(R.string.delete),
+            cancelText = stringResource(R.string.cancel),
+            isDestructive = true,
+            onConfirm = {
+                viewModel.onEvent(KhatamEvent.DeleteKhatam(editId))
+                showDeleteConfirm = false
+                onNavigateBack()
+            },
+            onDismiss = { showDeleteConfirm = false },
+        )
+    }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun KhatamFormContent(
     state: KhatamFormUiState,
     contentPadding: PaddingValues,
     onEvent: (KhatamEvent) -> Unit,
-    onArchived: () -> Unit,
-    onDeleted: () -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
-    var showDeleteConfirm by remember { mutableStateOf(false) }
-    var showArchiveConfirm by remember { mutableStateOf(false) }
+    var showTimePicker by remember { mutableStateOf(false) }
     val formatter = rememberKhatamDateFormatter()
+
+    val presetItems = KhatamPacePreset.entries.map { preset ->
+        NimazDropdownItem(
+            value = preset,
+            label = stringResource(presetLabelRes(preset)),
+            description = preset.targetAyahs()?.let {
+                stringResource(R.string.khatam_ayahs_per_day, it)
+            },
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -157,7 +249,7 @@ private fun KhatamFormContent(
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
                     colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainerLow
+                        container = MaterialTheme.colorScheme.surfaceContainer
                     ),
                 ) {
                     Row(
@@ -200,6 +292,7 @@ private fun KhatamFormContent(
                 value = state.name,
                 onValueChange = { onEvent(KhatamEvent.UpdateName(it)) },
                 modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(NimazCornerRadius.Medium),
                 placeholder = { Text(stringResource(R.string.khatam_name_placeholder)) },
                 singleLine = true,
                 isError = state.errorRes != null,
@@ -208,26 +301,26 @@ private fun KhatamFormContent(
         }
 
         item(key = "pace") {
-            FieldLabel(stringResource(R.string.khatam_field_pace))
-            Row(horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)) {
-                KhatamPacePreset.entries.forEach { preset ->
-                    NimazChip(
-                        text = stringResource(presetLabelRes(preset)),
-                        selected = state.preset == preset,
-                        onClick = { onEvent(KhatamEvent.SelectPreset(preset)) },
-                    )
-                }
-            }
+            // A dropdown rather than a chip row: four options, each wanting a subtitle,
+            // do not fit one line of chips at larger font scales.
+            NimazDropdownField(
+                items = presetItems,
+                selected = state.preset,
+                onSelected = { onEvent(KhatamEvent.SelectPreset(it)) },
+                label = stringResource(R.string.khatam_field_pace),
+                modifier = Modifier.fillMaxWidth(),
+            )
             Spacer(Modifier.height(NimazSpacing.Small))
-            val context = LocalContext.current
+            // No formatValue on purpose: the stepper's editable field parses its own
+            // display text back to an Int, so a formatted "208 ayahs / day" made direct
+            // entry impossible. The unit lives in the label and the field stays numeric,
+            // which is also what gets the number keyboard on tap.
             NimazNumberStepper(
                 value = state.dailyTarget,
                 onValueChange = { onEvent(KhatamEvent.UpdateDailyTarget(it)) },
                 modifier = Modifier.fillMaxWidth(),
                 variant = NimazNumberStepperVariant.SPREAD,
-                // Resolved through the context rather than inlined: this used to be
-                // a hardcoded "$it ayahs".
-                formatValue = { context.getString(R.string.khatam_ayahs_per_day, it) },
+                label = stringResource(R.string.khatam_ayahs_per_day_label),
                 minValue = 1,
                 maxValue = 1000,
             )
@@ -239,16 +332,14 @@ private fun KhatamFormContent(
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
                     colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainerLow
+                        container = MaterialTheme.colorScheme.surfaceContainer
                     ),
                 ) {
                     Column(Modifier.padding(NimazSpacing.Medium)) {
                         Text(
                             text = stringResource(
                                 R.string.khatam_projected_finish,
-                                formatter.format(
-                                    System.currentTimeMillis() + days * DAY_MILLIS
-                                ),
+                                formatter.format(System.currentTimeMillis() + days * DAY_MILLIS),
                             ),
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.SemiBold,
@@ -282,12 +373,11 @@ private fun KhatamFormContent(
                     modifier = Modifier.weight(1f),
                 )
                 if (state.deadline != null) {
-                    IconButton(onClick = { onEvent(KhatamEvent.UpdateDeadline(null)) }) {
-                        Icon(
-                            imageVector = Icons.Default.Close,
-                            contentDescription = stringResource(R.string.khatam_deadline_clear),
-                        )
-                    }
+                    NimazIconButton(
+                        icon = Icons.Default.Close,
+                        onClick = { onEvent(KhatamEvent.UpdateDeadline(null)) },
+                        contentDescription = stringResource(R.string.khatam_deadline_clear),
+                    )
                 }
             }
         }
@@ -297,7 +387,7 @@ private fun KhatamFormContent(
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
                 colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.surfaceContainerLow
+                    container = MaterialTheme.colorScheme.surfaceContainer
                 ),
             ) {
                 Row(
@@ -307,9 +397,11 @@ private fun KhatamFormContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
+                    NimazButton(
                         text = state.reminderTime ?: DEFAULT_REMINDER_TIME,
-                        style = MaterialTheme.typography.bodyMedium,
+                        onClick = { showTimePicker = true },
+                        variant = NimazButtonVariant.TEXT,
+                        enabled = state.reminderEnabled,
                     )
                     NimazSwitch(
                         checked = state.reminderEnabled,
@@ -331,7 +423,10 @@ private fun KhatamFormContent(
                 onValueChange = { onEvent(KhatamEvent.UpdateNotes(it)) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(100.dp),
+                    .height(120.dp),
+                // Multi-line fields inherit the single-line shape, which reads as
+                // under-rounded at this height.
+                shape = RoundedCornerShape(NimazCornerRadius.Medium),
                 placeholder = { Text(stringResource(R.string.khatam_notes_placeholder)) },
             )
         }
@@ -351,75 +446,29 @@ private fun KhatamFormContent(
                 fullWidth = true,
             )
         }
-
-        // Archive and delete live here rather than behind a long-press on the list,
-        // where they were undiscoverable.
-        if (state.isEdit) {
-            item(key = "danger") {
-                Spacer(Modifier.height(NimazSpacing.Medium))
-                NimazSectionHeader(title = stringResource(R.string.khatam_section_danger))
-                NimazButton(
-                    text = stringResource(R.string.khatam_action_archive),
-                    onClick = { showArchiveConfirm = true },
-                    variant = NimazButtonVariant.OUTLINED,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(Modifier.height(NimazSpacing.Small))
-                NimazButton(
-                    text = stringResource(R.string.khatam_action_delete),
-                    onClick = { showDeleteConfirm = true },
-                    variant = NimazButtonVariant.DESTRUCTIVE,
-                    modifier = Modifier.fillMaxWidth(),
-                )
-            }
-        }
     }
-
-    val editId = (state.mode as? com.arshadshah.nimaz.presentation.viewmodel.KhatamFormMode.Edit)
-        ?.khatamId
 
     if (showDatePicker) {
-        val pickerState = rememberDatePickerState(initialSelectedDateMillis = state.deadline)
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                TextButton(onClick = {
-                    onEvent(KhatamEvent.UpdateDeadline(pickerState.selectedDateMillis))
-                    showDatePicker = false
-                }) { Text(stringResource(android.R.string.ok)) }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(android.R.string.cancel))
-                }
-            },
-        ) { DatePicker(state = pickerState) }
-    }
-
-    if (showArchiveConfirm && editId != null) {
-        NimazConfirmDialog(
-            title = stringResource(R.string.khatam_archive_title),
-            message = stringResource(R.string.khatam_archive_message, state.name),
+        NimazDatePickerDialog(
+            selectedDateMillis = state.deadline,
             onConfirm = {
-                onEvent(KhatamEvent.AbandonKhatam(editId))
-                showArchiveConfirm = false
-                onArchived()
+                onEvent(KhatamEvent.UpdateDeadline(it))
+                showDatePicker = false
             },
-            onDismiss = { showArchiveConfirm = false },
+            onDismiss = { showDatePicker = false },
+            title = stringResource(R.string.khatam_field_deadline),
         )
     }
 
-    if (showDeleteConfirm && editId != null) {
-        NimazConfirmDialog(
-            title = stringResource(R.string.khatam_delete_title),
-            message = stringResource(R.string.khatam_delete_message, state.name),
-            isDestructive = true,
+    if (showTimePicker) {
+        NimazTimePickerDialog(
+            initialTime = NimazTime.parse(state.reminderTime),
             onConfirm = {
-                onEvent(KhatamEvent.DeleteKhatam(editId))
-                showDeleteConfirm = false
-                onDeleted()
+                onEvent(KhatamEvent.UpdateReminderTime(it.toStorageString()))
+                showTimePicker = false
             },
-            onDismiss = { showDeleteConfirm = false },
+            onDismiss = { showTimePicker = false },
+            title = stringResource(R.string.notification_settings_reminder_time),
         )
     }
 }

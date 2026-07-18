@@ -67,7 +67,7 @@ class KhatamWorker @AssistedInject constructor(
                     progressPercent = (khatam.progressPercent * 100).toInt().coerceIn(0, 100),
                     // The reader is *inside* the juz after the completed ones;
                     // cap at 30 for a finished khatam.
-                    currentJuz = ((insights?.juzCompleted ?: 0) + 1).coerceIn(1, 30),
+                    currentJuz = insights?.currentJuz ?: 1,
                     remainingAyahs = insights?.remainingAyahs ?: khatam.remainingAyahs
                 )
             }

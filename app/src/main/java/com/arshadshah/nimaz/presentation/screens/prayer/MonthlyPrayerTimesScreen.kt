@@ -57,6 +57,8 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
@@ -96,6 +98,7 @@ fun MonthlyPrayerTimesScreen(
 
     fun shareRows(rows: List<DayPrayerTimes>) {
         if (rows.isEmpty()) return
+        AppAnalytics.logFeatureUsed("monthly_prayer_times", "export_pdf")
         runCatching {
             val pdfRows = rows.map {
                 PrayerTimesPdfExporter.Row(
@@ -117,7 +120,7 @@ fun MonthlyPrayerTimesScreen(
                 file,
                 mimeType = "application/pdf",
             )
-        }
+        }.onFailure { CrashReporter.recordException(it) }
     }
 
     Scaffold(

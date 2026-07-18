@@ -13,7 +13,15 @@ import kotlinx.coroutines.flow.Flow
 
 data class NextUnreadResult(
     val surahId: Int,
-    val numberInSurah: Int
+    val numberInSurah: Int,
+    val juz: Int
+)
+
+/** Room projection for per-juz progress; mapped to `JuzProgressInfo` in the repository. */
+data class JuzProgressRow(
+    val juzNumber: Int,
+    val totalAyahs: Int,
+    val readAyahs: Int
 )
 
 @Dao
@@ -113,7 +121,7 @@ interface KhatamDao {
 
     @Query(
         """
-        SELECT a.surah_id AS surahId, a.number_in_surah AS numberInSurah FROM ayahs a
+        SELECT a.surah_id AS surahId, a.number_in_surah AS numberInSurah, a.juz AS juz FROM ayahs a
         LEFT JOIN khatam_ayahs ka ON a.id = ka.ayah_id AND ka.khatam_id = :khatamId
         WHERE ka.ayah_id IS NULL ORDER BY a.id ASC LIMIT 1
     """
@@ -166,6 +174,26 @@ interface KhatamDao {
 
     @Query("UPDATE khatams SET status = 'active', updated_at = :timestamp WHERE id = :khatamId")
     suspend fun reactivateKhatam(khatamId: Long, timestamp: Long = System.currentTimeMillis())
+
+    /**
+     * Per-juz read counts, grouped by the ayah table's own `juz` column.
+     *
+     * Authoritative: the previous implementation derived juz membership from hardcoded
+     * ayah-id ranges held in the domain layer, which duplicated knowledge the database
+     * already has and could silently disagree with it.
+     */
+    @Query(
+        """
+        SELECT a.juz AS juzNumber,
+               COUNT(a.id) AS totalAyahs,
+               SUM(CASE WHEN ka.ayah_id IS NULL THEN 0 ELSE 1 END) AS readAyahs
+        FROM ayahs a
+        LEFT JOIN khatam_ayahs ka ON a.id = ka.ayah_id AND ka.khatam_id = :khatamId
+        GROUP BY a.juz
+        ORDER BY a.juz ASC
+    """
+    )
+    fun observeJuzProgress(khatamId: Long): Flow<List<JuzProgressRow>>
 
     // ---- Lifetime stats ----
 

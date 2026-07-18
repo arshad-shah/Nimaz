@@ -403,6 +403,10 @@
     <string name="notification_settings_khatam_reminder">Pengingat Khatam</string>
     <string name="notification_settings_khatam_subtitle">Pengingat harian agar Khatam Anda tetap sesuai target</string>
     <string name="notification_settings_reminder_time">Waktu pengingat</string>
+    <string name="khatam_more_actions">Tindakan lainnya</string>
+    <string name="khatam_ayahs_per_day_label">Ayat per hari</string>
+    <string name="time_period_am">AM</string>
+    <string name="time_period_pm">PM</string>
     <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Progres khatam Al-Quran Anda</string>
     <string name="khatam_widget_no_active">Tidak ada Khatam aktif</string>

@@ -11,7 +11,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -32,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
@@ -78,12 +78,7 @@ fun KhatamListScreen(
         },
     ) { padding ->
         when {
-            state.isLoading -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            state.isLoading -> NimazLoadingState(modifier = Modifier.padding(padding))
 
             !state.hasAnyKhatam -> Box(
                 modifier = Modifier
@@ -211,14 +206,12 @@ private fun KhatamListContent(
 /** "Continue · Surah 8 12", or a plain label when no position is known yet. */
 @Composable
 private fun continueLabel(state: KhatamListUiState): String {
-    val surah = state.nextUnreadSurah
     val ayah = state.nextUnreadAyah
-    return if (surah != null && ayah != null) {
-        stringResource(
-            R.string.khatam_continue_at,
-            stringResource(R.string.surah_number_format, surah),
-            ayah,
-        )
+    // Prefer the surah's name; fall back to "Surah N" only if the lookup failed.
+    val surahLabel = state.nextUnreadSurahName
+        ?: state.nextUnreadSurah?.let { stringResource(R.string.surah_number_format, it) }
+    return if (surahLabel != null && ayah != null) {
+        stringResource(R.string.khatam_continue_at, surahLabel, ayah)
     } else {
         stringResource(R.string.khatam_continue_reading)
     }

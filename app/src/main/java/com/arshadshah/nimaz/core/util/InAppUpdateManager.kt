@@ -4,6 +4,8 @@ import android.app.Activity
 import android.util.Log
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
+import com.arshadshah.nimaz.core.monitoring.AppAnalytics
+import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.appupdate.AppUpdateOptions
@@ -93,6 +95,8 @@ class InAppUpdateManager(private val activity: Activity) {
             }
         }.addOnFailureListener { e ->
             Log.e(TAG, "Update check failed", e)
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("in_app_update", e.javaClass.simpleName, e.message)
             _updateState.value = UpdateState.Error(e.message ?: "Update check failed")
         }
     }
@@ -135,6 +139,8 @@ class InAppUpdateManager(private val activity: Activity) {
             }
         }.addOnFailureListener { e ->
             Log.e(TAG, "Start update failed", e)
+            CrashReporter.recordException(e)
+            AppAnalytics.logError("in_app_update", e.javaClass.simpleName, e.message)
             _updateState.value = UpdateState.Error(e.message ?: "Update failed to start")
         }
     }

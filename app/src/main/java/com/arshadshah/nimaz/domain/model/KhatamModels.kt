@@ -100,6 +100,13 @@ data class KhatamInsights(
     val currentStreak: Int = 0,
     val longestStreak: Int = 0,
     val juzCompleted: Int = 0,
+    /**
+     * The juz the reader is actually on: the first one not yet finished.
+     *
+     * Deliberately NOT `juzCompleted + 1` — that is only correct for someone reading
+     * strictly in order. Finish only juz 30 and "completed + 1" claims you are on juz 2.
+     */
+    val currentJuz: Int = 1,
     val remainingAyahs: Int = Khatam.TOTAL_QURAN_AYAHS,
     val estimatedDaysRemaining: Int? = null,
     val projectedCompletionAt: Long? = null,
@@ -230,6 +237,8 @@ object KhatamProgressCalculator {
             currentStreak = currentStreak(logs, now),
             longestStreak = longestStreak(logs),
             juzCompleted = juzProgress.count { it.isComplete },
+            currentJuz = juzProgress.firstOrNull { !it.isComplete }?.juzNumber
+                ?: Khatam.TOTAL_JUZ,
             remainingAyahs = remaining,
             estimatedDaysRemaining = estDays,
             projectedCompletionAt = estDays?.let { now + it * DAY_MILLIS },

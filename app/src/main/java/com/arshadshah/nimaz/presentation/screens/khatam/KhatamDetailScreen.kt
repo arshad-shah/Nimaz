@@ -8,7 +8,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -18,6 +19,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,9 +29,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
+import com.arshadshah.nimaz.domain.model.KhatamStatus
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
+import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.KhatamJourneyTrail
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
@@ -47,6 +56,7 @@ fun KhatamDetailScreen(
     viewModel: KhatamViewModel = hiltViewModel(),
 ) {
     val state by viewModel.detailState.collectAsStateWithLifecycle()
+    var menuExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(khatamId) {
         viewModel.onEvent(KhatamEvent.LoadKhatamDetail(khatamId))
@@ -67,11 +77,37 @@ fun KhatamDetailScreen(
                 onBackClick = onNavigateBack,
                 actions = {
                     if (khatam != null) {
-                        IconButton(onClick = { onNavigateToEdit(khatam.id) }) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = stringResource(R.string.khatam_edit),
-                            )
+                        NimazIconButton(
+                            icon = Icons.Default.Edit,
+                            onClick = { onNavigateToEdit(khatam.id) },
+                            contentDescription = stringResource(R.string.khatam_edit),
+                        )
+                        // Making a khatam active from here is the only quick path when
+                        // another one is already running.
+                        if (!khatam.isActive && khatam.status == KhatamStatus.ACTIVE) {
+                            Box {
+                                NimazIconButton(
+                                    icon = Icons.Default.MoreVert,
+                                    onClick = { menuExpanded = true },
+                                    contentDescription =
+                                        stringResource(R.string.khatam_more_actions),
+                                )
+                                NimazDropdownMenu(
+                                    expanded = menuExpanded,
+                                    onDismissRequest = { menuExpanded = false },
+                                ) {
+                                    NimazDropdownRow(
+                                        text = stringResource(R.string.khatam_set_active),
+                                        leadingIcon = Icons.Default.Star,
+                                        onClick = {
+                                            menuExpanded = false
+                                            viewModel.onEvent(
+                                                KhatamEvent.SetActiveKhatam(khatam.id)
+                                            )
+                                        },
+                                    )
+                                }
+                            }
                         }
                     }
                 },
@@ -79,12 +115,7 @@ fun KhatamDetailScreen(
         },
     ) { padding ->
         when {
-            state.isLoading -> Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center,
-            ) { CircularProgressIndicator() }
+            state.isLoading -> NimazLoadingState(modifier = Modifier.padding(padding))
 
             khatam == null -> Box(
                 modifier = Modifier
@@ -124,12 +155,10 @@ private fun KhatamDetailContent(
     val insights = state.insights
     val hasNextPosition = state.nextUnreadSurah != null && state.nextUnreadAyah != null
 
-    val continueText = if (hasNextPosition) {
-        stringResource(
-            R.string.khatam_continue_at,
-            stringResource(R.string.surah_number_format, state.nextUnreadSurah!!),
-            state.nextUnreadAyah!!,
-        )
+    val surahLabel = state.nextUnreadSurahName
+        ?: state.nextUnreadSurah?.let { stringResource(R.string.surah_number_format, it) }
+    val continueText = if (hasNextPosition && surahLabel != null) {
+        stringResource(R.string.khatam_continue_at, surahLabel, state.nextUnreadAyah!!)
     } else {
         stringResource(R.string.khatam_continue_reading)
     }

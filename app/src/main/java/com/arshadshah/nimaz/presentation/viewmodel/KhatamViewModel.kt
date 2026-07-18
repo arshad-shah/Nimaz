@@ -12,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
+import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +35,7 @@ data class KhatamListUiState(
     val stats: KhatamStats? = null,
     val nextUnreadSurah: Int? = null,
     val nextUnreadAyah: Int? = null,
+    val nextUnreadSurahName: String? = null,
     val isLoading: Boolean = true
 ) {
     val hasAnyKhatam: Boolean
@@ -49,6 +51,7 @@ data class KhatamDetailUiState(
     val insights: KhatamInsights = KhatamInsights(),
     val nextUnreadSurah: Int? = null,
     val nextUnreadAyah: Int? = null,
+    val nextUnreadSurahName: String? = null,
     val isLoading: Boolean = true,
     /** True once the khatam is known to be gone, so the screen can pop instead of spinning. */
     val notFound: Boolean = false
@@ -101,6 +104,8 @@ data class KhatamFormUiState(
     val reminderTime: String? = null,
     /** Ayahs already read — shown on edit so the reader can see progress is untouched. */
     val totalAyahsRead: Int = 0,
+    /** Drives whether the overflow menu offers "set as active". */
+    val isActiveKhatam: Boolean = false,
     val isSaving: Boolean = false,
     val isLoading: Boolean = false,
     /**
@@ -154,7 +159,9 @@ sealed interface KhatamEvent {
 
 @HiltViewModel
 class KhatamViewModel @Inject constructor(
-    private val khatamUseCases: KhatamUseCases
+    private val khatamUseCases: KhatamUseCases,
+    // Only used to turn the next-unread surah number into its name for the continue label.
+    private val quranUseCases: QuranUseCases
 ) : ViewModel() {
 
     private val _listState = MutableStateFlow(KhatamListUiState())
@@ -316,9 +323,14 @@ class KhatamViewModel @Inject constructor(
     private fun refreshDetailNextUnread(khatamId: Long) {
         viewModelScope.launch {
             val next = khatamUseCases.getNextUnreadPosition(khatamId)
+            val name = next?.first?.let { surahName(it) }
             _detailState.update {
                 if (it.khatam?.id != khatamId) it
-                else it.copy(nextUnreadSurah = next?.first, nextUnreadAyah = next?.second)
+                else it.copy(
+                    nextUnreadSurah = next?.first,
+                    nextUnreadAyah = next?.second,
+                    nextUnreadSurahName = name,
+                )
             }
         }
     }
@@ -326,15 +338,30 @@ class KhatamViewModel @Inject constructor(
     private fun refreshListNextUnread(khatamId: Long) {
         viewModelScope.launch {
             val next = khatamUseCases.getNextUnreadPosition(khatamId)
+            val name = next?.first?.let { surahName(it) }
             _listState.update {
                 if (it.activeKhatam?.id != khatamId) it
-                else it.copy(nextUnreadSurah = next?.first, nextUnreadAyah = next?.second)
+                else it.copy(
+                    nextUnreadSurah = next?.first,
+                    nextUnreadAyah = next?.second,
+                    nextUnreadSurahName = name,
+                )
             }
         }
     }
 
+    private suspend fun surahName(surahNumber: Int): String? =
+        runCatching { quranUseCases.getSurahByNumber(surahNumber)?.nameEnglish }.getOrNull()
+
     private fun setActiveKhatam(khatamId: Long) = launchAction {
         khatamUseCases.setActiveKhatam(khatamId)
+        // Reflect it immediately in the form so the menu entry disappears; the list and
+        // detail screens pick the change up from their own Flows.
+        _formState.update {
+            if ((it.mode as? KhatamFormMode.Edit)?.khatamId == khatamId) {
+                it.copy(isActiveKhatam = true)
+            } else it
+        }
     }
 
     private fun startEdit(khatamId: Long) {
@@ -360,6 +387,7 @@ class KhatamViewModel @Inject constructor(
                 reminderEnabled = khatam.reminderEnabled,
                 reminderTime = khatam.reminderTime,
                 totalAyahsRead = khatam.totalAyahsRead,
+                isActiveKhatam = khatam.isActive,
                 isLoading = false
             )
         }

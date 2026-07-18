@@ -403,6 +403,10 @@
     <string name="notification_settings_khatam_reminder">Hatim hatırlatıcısı</string>
     <string name="notification_settings_khatam_subtitle">Hatiminizin hedefte kalması için günlük hatırlatma</string>
     <string name="notification_settings_reminder_time">Hatırlatma saati</string>
+    <string name="khatam_more_actions">Diğer işlemler</string>
+    <string name="khatam_ayahs_per_day_label">Günlük ayet</string>
+    <string name="time_period_am">OO</string>
+    <string name="time_period_pm">OS</string>
     <string name="khatam_widget_label">Hatim</string>
     <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
     <string name="khatam_widget_no_active">Aktif Hatim yok</string>

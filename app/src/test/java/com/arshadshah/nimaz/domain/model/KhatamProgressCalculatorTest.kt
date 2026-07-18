@@ -231,6 +231,38 @@ class KhatamProgressCalculatorTest {
     }
 
     @Test
+    fun `current juz is the first incomplete one, not completed plus one`() {
+        val khatam = Khatam(id = 1, name = "Out of order", totalAyahsRead = 200,
+            startedAt = now - 5 * day)
+        // Only the LAST juz is finished — reading out of order.
+        val juz = List(30) { i ->
+            JuzProgressInfo(juzNumber = i + 1, totalAyahs = 200,
+                readAyahs = if (i == 29) 200 else 0)
+        }
+
+        val insights = KhatamProgressCalculator.insights(khatam, logs(0), juz, now)
+
+        assertThat(insights.juzCompleted).isEqualTo(1)
+        // completed + 1 would wrongly claim juz 2.
+        assertThat(insights.currentJuz).isEqualTo(1)
+    }
+
+    @Test
+    fun `current juz advances past finished juz read in order`() {
+        val khatam = Khatam(id = 1, name = "In order", totalAyahsRead = 1400,
+            startedAt = now - 7 * day)
+        val juz = List(30) { i ->
+            JuzProgressInfo(juzNumber = i + 1, totalAyahs = 200,
+                readAyahs = if (i < 7) 200 else 0)
+        }
+
+        val insights = KhatamProgressCalculator.insights(khatam, logs(0), juz, now)
+
+        assertThat(insights.juzCompleted).isEqualTo(7)
+        assertThat(insights.currentJuz).isEqualTo(8)
+    }
+
+    @Test
     fun `a finished khatam has no projected completion`() {
         val khatam = Khatam(
             id = 1,
@@ -248,6 +280,8 @@ class KhatamProgressCalculatorTest {
         assertThat(insights.estimatedDaysRemaining).isNull()
         assertThat(insights.projectedCompletionAt).isNull()
         assertThat(insights.juzCompleted).isEqualTo(30)
+        // Nothing left incomplete, so it pins to the last juz rather than 31.
+        assertThat(insights.currentJuz).isEqualTo(30)
     }
 
     // ---- juz mapping ----

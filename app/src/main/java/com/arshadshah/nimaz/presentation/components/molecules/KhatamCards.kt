@@ -170,9 +170,8 @@ fun KhatamHeroCard(
 @Composable
 private fun heroSubtitle(khatam: Khatam, insights: KhatamInsights): String {
     val parts = mutableListOf<String>()
-    val currentJuz = (insights.juzCompleted + 1).coerceAtMost(Khatam.TOTAL_JUZ)
     if (khatam.status != KhatamStatus.COMPLETED) {
-        parts += stringResource(R.string.khatam_juz_position, currentJuz)
+        parts += stringResource(R.string.khatam_juz_position, insights.currentJuz)
     }
     insights.estimatedDaysRemaining?.let { days ->
         parts += pluralStringResource(R.plurals.khatam_days_remaining, days, days)
@@ -208,7 +207,8 @@ fun KhatamRowCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceContainerLow
+            // surfaceContainerLow sits too close to `background` to read as a card.
+            container = MaterialTheme.colorScheme.surfaceContainer
         ),
     ) {
         Row(

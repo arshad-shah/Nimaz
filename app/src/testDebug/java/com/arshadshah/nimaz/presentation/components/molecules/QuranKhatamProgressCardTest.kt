@@ -27,6 +27,9 @@ class QuranKhatamProgressCardTest {
         averagePace = 150f,
         currentStreak = 4,
         juzCompleted = 7,
+        // The juz actually being read — not juzCompleted + 1, which only coincides
+        // when the reader has gone strictly in order.
+        currentJuz = 8,
         remainingAyahs = 4736,
         estimatedDaysRemaining = 32,
         paceStatus = KhatamPace.ON_TRACK,
@@ -70,7 +73,6 @@ class QuranKhatamProgressCardTest {
                 onClickStart = {}
             )
         }
-        // juzCompleted = 7, so the reader is working through juz 8.
         composeRule.onNodeWithText("Juz 8 · ~32 days left").assertExists()
     }
 

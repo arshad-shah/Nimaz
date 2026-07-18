@@ -7,7 +7,6 @@ import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import com.arshadshah.nimaz.domain.model.DailyLogEntry
 import com.arshadshah.nimaz.domain.model.JuzProgressInfo
 import com.arshadshah.nimaz.domain.model.Khatam
-import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
 import com.arshadshah.nimaz.domain.model.KhatamStats
@@ -101,7 +100,15 @@ class KhatamRepositoryImpl @Inject constructor(
      * queries, so this is both live and cheaper than the one-shot version it replaces.
      */
     override fun observeJuzProgress(khatamId: Long): Flow<List<JuzProgressInfo>> {
-        return observeReadAyahIds(khatamId).map { readIds -> juzProgressFrom(readIds) }
+        return khatamDao.observeJuzProgress(khatamId).map { rows ->
+            rows.map {
+                JuzProgressInfo(
+                    juzNumber = it.juzNumber,
+                    totalAyahs = it.totalAyahs,
+                    readAyahs = it.readAyahs,
+                )
+            }
+        }
     }
 
     override fun observeDailyLogs(khatamId: Long): Flow<List<DailyLogEntry>> {
@@ -120,10 +127,10 @@ class KhatamRepositoryImpl @Inject constructor(
             } else {
                 combine(
                     observeReadAyahIds(khatamId),
-                    observeDailyLogs(khatamId)
-                ) { readIds, logs ->
+                    observeDailyLogs(khatamId),
+                    observeJuzProgress(khatamId)
+                ) { readIds, logs, juz ->
                     val khatam = entity.toDomain()
-                    val juz = juzProgressFrom(readIds)
                     KhatamDetailSnapshot(
                         khatam = khatam,
                         juzProgress = juz,
@@ -176,15 +183,6 @@ class KhatamRepositoryImpl @Inject constructor(
             )
         }
     }
-
-    private fun juzProgressFrom(readIds: Set<Int>): List<JuzProgressInfo> =
-        KhatamConstants.JUZ_AYAH_RANGES.mapIndexed { index, (startAyahId, endAyahId) ->
-            JuzProgressInfo(
-                juzNumber = index + 1,
-                totalAyahs = endAyahId - startAyahId + 1,
-                readAyahs = readIds.count { it in startAyahId..endAyahId }
-            )
-        }
 
     private fun KhatamEntity.toDomain() = Khatam(
         id = id,

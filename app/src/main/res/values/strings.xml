@@ -513,6 +513,10 @@
     <string name="notification_settings_khatam_reminder">Khatam reminder</string>
     <string name="notification_settings_khatam_subtitle">A daily nudge to keep your Quran completion on pace</string>
     <string name="notification_settings_reminder_time">Reminder time</string>
+    <string name="khatam_more_actions">More actions</string>
+    <string name="khatam_ayahs_per_day_label">Ayahs per day</string>
+    <string name="time_period_am">AM</string>
+    <string name="time_period_pm">PM</string>
     <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Your Quran completion progress</string>
     <string name="khatam_widget_no_active">No active Khatam</string>

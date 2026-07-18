@@ -203,6 +203,7 @@ class AdhanAudioManager @Inject constructor(
                 release()
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
         }
         mediaPlayer = null

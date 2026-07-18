@@ -279,6 +279,15 @@ class FastingViewModel @Inject constructor(
 
             is FastingEvent.PayFidya -> AppAnalytics.logFeatureUsed("fasting", "pay_fidya")
             is FastingEvent.AddMakeupFast -> AppAnalytics.logFeatureUsed("fasting", "add_makeup")
+            is FastingEvent.CompleteMakeupFast ->
+                AppAnalytics.logFeatureUsed("fasting", "complete_makeup")
+            // Status/type only — never the user's exemption reason or note text.
+            is FastingEvent.SaveFastForDate -> AppAnalytics.logFastTracked(
+                "save_for_date",
+                event.fastType.name
+            )
+
+            is FastingEvent.DeleteFastRecord -> AppAnalytics.logFastTracked("delete")
             else -> {}
         }
         when (event) {

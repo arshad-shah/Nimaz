@@ -44,11 +44,9 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
-import androidx.compose.material3.AlertDialog
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
+import com.arshadshah.nimaz.presentation.components.molecules.NimazTimePickerDialog
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -724,35 +722,23 @@ private fun PrayerNotificationRowDisabledPreview() {
 }
 
 /**
- * Time picker for the Khatam daily reminder.
+ * The Khatam reminder time picker.
  *
- * Stores "HH:mm" in 24-hour form regardless of the device's display format, so the
- * scheduler can parse it without knowing the user's locale.
+ * Uses the app's own [NimazTimePickerDialog] rather than Material3's `TimePicker`, whose
+ * clock dial brings a different visual language to a settings screen built from Nimaz
+ * components. Stores 24-hour "HH:mm" regardless of the device's display format so the
+ * scheduler can parse it without knowing the locale.
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun KhatamReminderTimePicker(
     initialTime: String,
     onConfirm: (String) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    val parts = initialTime.split(":")
-    val state = rememberTimePickerState(
-        initialHour = parts.getOrNull(0)?.toIntOrNull()?.coerceIn(0, 23) ?: 6,
-        initialMinute = parts.getOrNull(1)?.toIntOrNull()?.coerceIn(0, 59) ?: 0,
-        is24Hour = true,
-    )
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = {
-                onConfirm("%02d:%02d".format(state.hour, state.minute))
-            }) { Text(stringResource(android.R.string.ok)) }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
-        },
-        title = { Text(stringResource(R.string.notification_settings_reminder_time)) },
-        text = { TimePicker(state = state) },
+    NimazTimePickerDialog(
+        initialTime = NimazTime.parse(initialTime),
+        onConfirm = { onConfirm(it.toStorageString()) },
+        onDismiss = onDismiss,
+        title = stringResource(R.string.notification_settings_reminder_time),
     )
 }

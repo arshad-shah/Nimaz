@@ -283,6 +283,7 @@ class AdhanPlaybackService : Service() {
             exoPlayer?.release()
             exoPlayer = null
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
         }
 
@@ -295,6 +296,7 @@ class AdhanPlaybackService : Service() {
                 wakeLock?.release()
             }
         } catch (e: Exception) {
+            CrashReporter.recordException(e)
             e.printStackTrace()
         }
     }
