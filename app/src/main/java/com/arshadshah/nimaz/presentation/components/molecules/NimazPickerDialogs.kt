@@ -60,7 +60,7 @@ fun NimazDatePickerDialog(
         titleIcon = Icons.Default.CalendarMonth,
         // The calendar draws its own surface, so the dialog's inset card would
         // double up the container.
-        wrapContent = false,
+        wrapContent = true,
         actions = {
             NimazDialogCancelButton(onClick = onDismiss)
             NimazDialogConfirmButton(

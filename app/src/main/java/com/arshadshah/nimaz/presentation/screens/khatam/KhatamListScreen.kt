@@ -55,7 +55,9 @@ fun KhatamListScreen(
     onNavigateBack: () -> Unit,
     onNavigateToDetail: (Long) -> Unit,
     onNavigateToCreate: () -> Unit,
-    onNavigateToRead: (Int, Int) -> Unit = { _, _ -> },
+    // No default: a no-op default silently swallowed the hero's continue tap when a
+    // call site forgot to wire it. Required means the compiler catches that.
+    onNavigateToRead: (Int, Int) -> Unit,
     viewModel: KhatamViewModel = hiltViewModel(),
 ) {
     val state by viewModel.listState.collectAsStateWithLifecycle()

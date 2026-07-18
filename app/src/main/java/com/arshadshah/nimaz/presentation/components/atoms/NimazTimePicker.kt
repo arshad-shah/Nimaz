@@ -153,7 +153,7 @@ fun NimazTimePicker(
 
         Text(
             text = ":",
-            style = MaterialTheme.typography.headlineSmall,
+            style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = accentColor,
             modifier = Modifier.padding(horizontal = NimazSpacing.Small),
@@ -288,20 +288,24 @@ fun NimazTimeDisplay(
             ),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(
-            imageVector = Icons.Default.Schedule,
-            contentDescription = "Edit Time",
-            tint = accentColor,
-            modifier = Modifier
-                .padding(end = NimazSpacing.Small)
-                .width(20.dp)
-        )
-        Text(
-            text = format(time),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = accentColor,
-        )
+        Row(
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Schedule,
+                contentDescription = "Edit Time",
+                tint = accentColor,
+                modifier = Modifier
+                    .padding(end = NimazSpacing.Small)
+                    .width(20.dp)
+            )
+            Text(
+                text = format(time),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = accentColor,
+            )
+        }
     }
 }
 
