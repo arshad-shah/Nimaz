@@ -330,27 +330,21 @@ private fun HomeTabContent(
                     onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) }
                 )
             }
+        }
 
-            // Khatam Progress Card - uses real Khatam data
-            item(key = "khatam_progress") {
-                KhatamProgressCard(
-                    activeKhatam = state.activeKhatam,
-                    completedCount = state.completedKhatamCount,
-                    onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
-                    onClickStart = onNavigateToKhatam
-                )
-            }
-        } else {
-            // Khatam Progress Card (even without reading progress)
-            item(key = "khatam_progress") {
-                KhatamProgressCard(
-                    activeKhatam = state.activeKhatam,
-                    completedCount = state.completedKhatamCount,
-                    onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
-                    onClickStart = onNavigateToKhatam
-                )
-            }
+        // Khatam card shows regardless of reading progress; it used to be duplicated
+        // in both branches of the if/else above.
+        item(key = "khatam_progress") {
+            KhatamProgressCard(
+                activeKhatam = state.activeKhatam,
+                insights = state.activeKhatamInsights,
+                completedCount = state.completedKhatamCount,
+                onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
+                onClickStart = onNavigateToKhatam
+            )
+        }
 
+        if (state.readingProgress == null) {
             // No reading progress yet - show start reading prompt
             item(key = "start_reading") {
                 NimazCard(

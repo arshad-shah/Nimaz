@@ -13,8 +13,10 @@ import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanPlaybackService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.domain.repository.KhatamRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +43,9 @@ class BootReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var prayerRepository: PrayerRepository
+
+    @Inject
+    lateinit var khatamRepository: KhatamRepository
 
     @Inject
     lateinit var adhanAudioManager: AdhanAudioManager
@@ -72,6 +77,10 @@ class BootReceiver : BroadcastReceiver() {
 
             PrayerNotificationScheduler.ACTION_FRIDAY_REMINDER -> {
                 handleFridayReminder(context)
+            }
+
+            PrayerNotificationScheduler.ACTION_KHATAM_REMINDER -> {
+                handleKhatamReminder(context)
             }
         }
     }
@@ -649,6 +658,93 @@ class BootReceiver : BroadcastReceiver() {
                 e.printStackTrace()
                 CrashReporter.recordException(e)
                 AppAnalytics.logError("friday_reminder", e.javaClass.simpleName, e.message)
+            }
+        }
+    }
+
+    /**
+     * Post the daily khatam reading reminder. Silently does nothing when the reminder is
+     * off or there is no active khatam — there is nothing meaningful to nudge about.
+     */
+    private fun handleKhatamReminder(context: Context) {
+        scope.launch {
+            try {
+                // Re-apply the saved locale first: below API 33 the per-app locale is
+                // process-local and set asynchronously by AppInitializer, so an alarm
+                // that cold-starts the process would otherwise format this notification
+                // in the system language rather than the user's chosen one.
+                val langCode = preferencesDataStore.appLanguage.first()
+                if (langCode.isNotEmpty()) {
+                    LocaleHelper.setLocale(context, langCode)
+                }
+
+                if (!preferencesDataStore.khatamReminderEnabled.first()) return@launch
+
+                val khatam = khatamRepository.observeActiveKhatam().first() ?: return@launch
+
+                val daysActive = KhatamProgressCalculator.daysActive(khatam.startedAt)
+                val averagePace =
+                    KhatamProgressCalculator.averagePace(khatam.totalAyahsRead, daysActive)
+                val pace = KhatamProgressCalculator.paceStatus(
+                    averagePace = averagePace,
+                    dailyTarget = khatam.dailyTarget,
+                    daysActive = daysActive
+                )
+
+                // What to read today: the daily target, plus the accumulated shortfall
+                // when behind so the number actually gets them back on pace. Never more
+                // than what is left of the Quran.
+                val shortfall =
+                    (khatam.dailyTarget * daysActive - khatam.totalAyahsRead).coerceAtLeast(0)
+                val ayahsToday = (khatam.dailyTarget + shortfall)
+                    .coerceAtMost(khatam.remainingAyahs)
+                    .coerceAtLeast(0)
+
+                val title = NotificationContentHelper.getKhatamReminderTitle(context)
+                val body = NotificationContentHelper.getKhatamReminderBody(
+                    context = context,
+                    khatamName = khatam.name,
+                    ayahsToday = ayahsToday,
+                    pace = pace
+                )
+
+                val vibrationEnabled = preferencesDataStore.notificationVibration.first()
+
+                val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val openPendingIntent = mainIntent?.let {
+                    PendingIntent.getActivity(
+                        context,
+                        "khatam_reminder".hashCode(),
+                        it,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                    )
+                }
+
+                val notification = NotificationCompat.Builder(
+                    context,
+                    PrayerNotificationScheduler.CHANNEL_ID_KHATAM
+                )
+                    .setSmallIcon(R.drawable.ic_stat_nimaz)
+                    .setContentTitle(title)
+                    .setContentText(body)
+                    .setStyle(
+                        NotificationCompat.BigTextStyle().bigText(body).setBigContentTitle(title)
+                    )
+                    .setAutoCancel(true)
+                    .setContentIntent(openPendingIntent)
+                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                    .setCategory(NotificationCompat.CATEGORY_REMINDER)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                    .apply { if (!vibrationEnabled) setVibrate(longArrayOf(0L)) }
+                    .build()
+
+                val notificationManager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
+                notificationManager.notify("khatam_reminder".hashCode(), notification)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                CrashReporter.recordException(e)
+                AppAnalytics.logError("khatam_reminder", e.javaClass.simpleName, e.message)
             }
         }
     }

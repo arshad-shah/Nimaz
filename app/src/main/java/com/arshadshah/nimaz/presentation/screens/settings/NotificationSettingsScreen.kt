@@ -44,12 +44,19 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Scaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TimePicker
+import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -105,6 +112,7 @@ fun NotificationSettingsScreen(
 ) {
     val context = LocalContext.current
     val notificationState by viewModel.notificationState.collectAsState()
+    var showKhatamTimePicker by remember { mutableStateOf(false) }
     val downloadState by viewModel.adhanAudioManager.downloadState.collectAsState()
     val isPlaying by viewModel.adhanAudioManager.isPlaying.collectAsState()
     val currentlyPlaying by viewModel.adhanAudioManager.currentlyPlaying.collectAsState()
@@ -405,6 +413,28 @@ fun NotificationSettingsScreen(
                         }
                         NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
+                        // Khatam daily reminder — only fires when a khatam is active
+                        NimazSettingsItem(
+                            title = stringResource(R.string.notification_settings_khatam_reminder),
+                            subtitle = stringResource(R.string.notification_settings_khatam_subtitle),
+                            checked = notificationState.khatamReminderEnabled,
+                            onCheckedChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetKhatamReminderEnabled(!notificationState.khatamReminderEnabled)
+                                )
+                            }
+                        )
+                        if (notificationState.khatamReminderEnabled) {
+                            NimazSettingsItem(
+                                title = stringResource(R.string.notification_settings_reminder_time),
+                                subtitle = notificationState.khatamReminderTime,
+                                onClick = { showKhatamTimePicker = true },
+                                showArrow = true,
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+
                         // Vibration
                         NimazSettingsItem(
                             title = stringResource(R.string.notification_settings_vibration),
@@ -563,6 +593,17 @@ fun NotificationSettingsScreen(
             item { Spacer(modifier = Modifier.height(16.dp)) }
         }
     }
+
+    if (showKhatamTimePicker) {
+        KhatamReminderTimePicker(
+            initialTime = notificationState.khatamReminderTime,
+            onConfirm = { time ->
+                viewModel.onEvent(SettingsEvent.SetKhatamReminderTime(time))
+                showKhatamTimePicker = false
+            },
+            onDismiss = { showKhatamTimePicker = false },
+        )
+    }
 }
 
 @Composable
@@ -680,4 +721,38 @@ private fun PrayerNotificationRowDisabledPreview() {
             globalAdhanEnabled = true
         )
     }
+}
+
+/**
+ * Time picker for the Khatam daily reminder.
+ *
+ * Stores "HH:mm" in 24-hour form regardless of the device's display format, so the
+ * scheduler can parse it without knowing the user's locale.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun KhatamReminderTimePicker(
+    initialTime: String,
+    onConfirm: (String) -> Unit,
+    onDismiss: () -> Unit,
+) {
+    val parts = initialTime.split(":")
+    val state = rememberTimePickerState(
+        initialHour = parts.getOrNull(0)?.toIntOrNull()?.coerceIn(0, 23) ?: 6,
+        initialMinute = parts.getOrNull(1)?.toIntOrNull()?.coerceIn(0, 59) ?: 0,
+        is24Hour = true,
+    )
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm("%02d:%02d".format(state.hour, state.minute))
+            }) { Text(stringResource(android.R.string.ok)) }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
+        title = { Text(stringResource(R.string.notification_settings_reminder_time)) },
+        text = { TimePicker(state = state) },
+    )
 }

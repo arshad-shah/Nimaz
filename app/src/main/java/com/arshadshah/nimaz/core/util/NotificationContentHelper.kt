@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.core.util
 
 import android.content.Context
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.KhatamPace
 import java.time.LocalTime
 
 /**
@@ -181,6 +182,30 @@ object NotificationContentHelper {
         context.getString(R.string.notif_friday_2),
         context.getString(R.string.notif_friday_3)
     ).random()
+
+    /** Title for the daily khatam reading reminder. */
+    fun getKhatamReminderTitle(context: Context): String =
+        context.getString(R.string.notif_khatam_title)
+
+    /**
+     * Body for the khatam reminder. The wording is chosen from [pace] so a reader who
+     * has slipped gets a nudge to catch up rather than the same neutral line.
+     */
+    fun getKhatamReminderBody(
+        context: Context,
+        khatamName: String,
+        ayahsToday: Int,
+        pace: KhatamPace
+    ): String = when (pace) {
+        KhatamPace.ON_TRACK ->
+            context.getString(R.string.notif_khatam_body_on_track, khatamName, ayahsToday)
+
+        KhatamPace.BEHIND, KhatamPace.SLIGHTLY_BEHIND ->
+            context.getString(R.string.notif_khatam_body_behind, khatamName, ayahsToday)
+
+        KhatamPace.NOT_STARTED ->
+            context.getString(R.string.notif_khatam_body_generic, khatamName, ayahsToday)
+    }
 
     /** Expanded body for the Friday reminder — the Sunnah preparations. */
     fun getFridayReminderBigText(context: Context): String =

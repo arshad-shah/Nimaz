@@ -397,6 +397,12 @@
     </plurals>
 
     <!-- Khatam: widget -->
+    <plurals name="khatam_completed_lifetime">
+        <item quantity="other">%1$d Khatam selesai</item>
+    </plurals>
+    <string name="notification_settings_khatam_reminder">Pengingat Khatam</string>
+    <string name="notification_settings_khatam_subtitle">Pengingat harian agar Khatam Anda tetap sesuai target</string>
+    <string name="notification_settings_reminder_time">Waktu pengingat</string>
     <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Progres khatam Al-Quran Anda</string>
     <string name="khatam_widget_no_active">Tidak ada Khatam aktif</string>

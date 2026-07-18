@@ -397,6 +397,12 @@
     </plurals>
 
     <!-- Khatam: widget -->
+    <plurals name="khatam_completed_lifetime">
+        <item quantity="other">%1$d Hatim tamamlandı</item>
+    </plurals>
+    <string name="notification_settings_khatam_reminder">Hatim hatırlatıcısı</string>
+    <string name="notification_settings_khatam_subtitle">Hatiminizin hedefte kalması için günlük hatırlatma</string>
+    <string name="notification_settings_reminder_time">Hatırlatma saati</string>
     <string name="khatam_widget_label">Hatim</string>
     <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
     <string name="khatam_widget_no_active">Aktif Hatim yok</string>

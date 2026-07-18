@@ -117,7 +117,12 @@ data class KhatamDetailSnapshot(
     val khatam: Khatam,
     val juzProgress: List<JuzProgressInfo>,
     val dailyLogs: List<DailyLogEntry>,
-    val insights: KhatamInsights
+    val insights: KhatamInsights,
+    /**
+     * The raw read-ayah set, carried here so the Quran reader's per-ayah ticks and the
+     * home card's progress come from one subscription rather than two.
+     */
+    val readAyahIds: Set<Int>
 )
 
 /**

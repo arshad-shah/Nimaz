@@ -15,10 +15,14 @@ import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -30,7 +34,8 @@ import javax.inject.Singleton
 @Singleton
 class PrayerNotificationScheduler @Inject constructor(
     @ApplicationContext private val context: Context,
-    private val prayerTimeCalculator: PrayerTimeCalculator
+    private val prayerTimeCalculator: PrayerTimeCalculator,
+    private val settingsRepository: SettingsRepository
 ) {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private val notificationManager =
@@ -40,6 +45,7 @@ class PrayerNotificationScheduler @Inject constructor(
         const val CHANNEL_ID_PRAYER = "prayer_notifications"
         const val CHANNEL_ID_ADHAN = "adhan_notifications"
         const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
+        const val CHANNEL_ID_KHATAM = "khatam_notifications"
         // Silent (no-vibration) siblings — Android ignores enableVibration() changes
         // after a channel exists, so the vibration preference is honoured by posting
         // on the matching channel instead. See channelForPrayer/channelForAdhan.
@@ -49,6 +55,7 @@ class PrayerNotificationScheduler @Inject constructor(
         const val ACTION_PRAYER_NOTIFICATION = "com.arshadshah.nimaz.PRAYER_NOTIFICATION"
         const val ACTION_DAILY_SUMMARY = "com.arshadshah.nimaz.DAILY_SUMMARY"
         const val ACTION_FRIDAY_REMINDER = "com.arshadshah.nimaz.FRIDAY_REMINDER"
+        const val ACTION_KHATAM_REMINDER = "com.arshadshah.nimaz.KHATAM_REMINDER"
         const val EXTRA_PRAYER_TYPE = "prayer_type"
         const val EXTRA_PRAYER_NAME = "prayer_name"
         const val EXTRA_PRAYER_TIME = "prayer_time"
@@ -60,6 +67,7 @@ class PrayerNotificationScheduler @Inject constructor(
         private const val TEST_NOTIFICATION_ID = 8888
         private const val DAILY_SUMMARY_REQUEST_CODE = 8889
         private const val FRIDAY_REMINDER_REQUEST_CODE = 8890
+        private const val KHATAM_REMINDER_REQUEST_CODE = 8891
 
         const val ACTION_MIDNIGHT_RESCHEDULE = "com.arshadshah.nimaz.MIDNIGHT_RESCHEDULE"
         private const val MIDNIGHT_REQUEST_CODE = 9999
@@ -133,11 +141,24 @@ class PrayerNotificationScheduler @Inject constructor(
                 enableLights(true)
             }
 
+            // Khatam reminder channel — a gentle nudge to read, not an alarm, so it
+            // stays at DEFAULT importance and never interrupts.
+            val khatamChannel = NotificationChannel(
+                CHANNEL_ID_KHATAM,
+                context.getString(R.string.notif_khatam_channel_name),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                description = context.getString(R.string.notif_khatam_channel_description)
+                enableVibration(true)
+                enableLights(true)
+            }
+
             notificationManager.createNotificationChannels(
                 listOf(
                     prayerChannel,
                     adhanChannel,
                     dailySummaryChannel,
+                    khatamChannel,
                     prayerChannelSilent,
                     adhanChannelSilent
                 )
@@ -241,6 +262,10 @@ class PrayerNotificationScheduler @Inject constructor(
             highLatitudeRule = highLatitudeRule,
             adjustments = adjustments
         )
+
+        // Schedule (or cancel) the daily khatam reading reminder. Must live here so the
+        // midnight reschedule chain and the boot path re-arm this one-shot every day.
+        scheduleKhatamReminder()
 
         PerfMonitor.stop(
             perfTrace,
@@ -363,6 +388,70 @@ class PrayerNotificationScheduler @Inject constructor(
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
         } else {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        }
+    }
+
+    /**
+     * Schedule the daily khatam reading reminder at the user's chosen time, or cancel it
+     * when the preference is off. Re-armed on every reschedule (midnight chain / settings
+     * change / boot), which is what keeps this one-shot alarm recurring.
+     *
+     * The preference is read here rather than passed in so callers of
+     * [scheduleTodaysPrayerNotifications] don't all have to learn about khatam.
+     */
+    private fun scheduleKhatamReminder() {
+        cancelKhatamReminder()
+
+        // Blocking read: scheduling is already an off-main-thread, fire-and-forget step,
+        // and the alarm must be armed before this method returns.
+        val (enabled, timeString) = runBlocking {
+            settingsRepository.khatamReminderEnabled.first() to
+                    settingsRepository.khatamReminderTime.first()
+        }
+        if (!enabled) return
+
+        // Fall back to the default rather than dropping the reminder if the stored
+        // value is ever malformed.
+        val reminderAt = runCatching { LocalTime.parse(timeString) }
+            .getOrDefault(LocalTime.of(6, 0))
+
+        val now = LocalDateTime.now()
+        var trigger = LocalDate.now().atTime(reminderAt)
+        if (now.isAfter(trigger)) {
+            trigger = LocalDate.now().plusDays(1).atTime(reminderAt)
+        }
+
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_KHATAM_REMINDER
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            KHATAM_REMINDER_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        } else {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        }
+    }
+
+    private fun cancelKhatamReminder() {
+        val intent = Intent(context, BootReceiver::class.java).apply {
+            action = ACTION_KHATAM_REMINDER
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            KHATAM_REMINDER_REQUEST_CODE,
+            intent,
+            PendingIntent.FLAG_NO_CREATE or PendingIntent.FLAG_IMMUTABLE
+        )
+        pendingIntent?.let {
+            alarmManager.cancel(it)
+            it.cancel()
         }
     }
 
@@ -545,6 +634,7 @@ class PrayerNotificationScheduler @Inject constructor(
         }
         cancelMidnightReschedule()
         cancelFridayReminder()
+        cancelKhatamReminder()
     }
 
     /**

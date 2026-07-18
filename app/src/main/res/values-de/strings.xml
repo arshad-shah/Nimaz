@@ -403,6 +403,13 @@
     </plurals>
 
     <!-- Khatam: widget -->
+    <plurals name="khatam_completed_lifetime">
+        <item quantity="one">%1$d Khatam abgeschlossen</item>
+        <item quantity="other">%1$d Khatams abgeschlossen</item>
+    </plurals>
+    <string name="notification_settings_khatam_reminder">Khatam-Erinnerung</string>
+    <string name="notification_settings_khatam_subtitle">Eine tägliche Erinnerung, damit Ihr Khatam im Zeitplan bleibt</string>
+    <string name="notification_settings_reminder_time">Erinnerungszeit</string>
     <string name="khatam_widget_label">Khatam</string>
     <string name="khatam_widget_description">Ihr Fortschritt beim Quran-Abschluss</string>
     <string name="khatam_widget_no_active">Kein aktiver Khatam</string>

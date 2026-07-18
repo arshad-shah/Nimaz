@@ -128,7 +128,8 @@ class KhatamRepositoryImpl @Inject constructor(
                         khatam = khatam,
                         juzProgress = juz,
                         dailyLogs = logs,
-                        insights = KhatamProgressCalculator.insights(khatam, logs, juz)
+                        insights = KhatamProgressCalculator.insights(khatam, logs, juz),
+                        readAyahIds = readIds
                     )
                 }
             }

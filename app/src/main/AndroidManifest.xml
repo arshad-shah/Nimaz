@@ -101,6 +101,9 @@
             <intent-filter>
                 <action android:name="com.arshadshah.nimaz.DAILY_SUMMARY" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="com.arshadshah.nimaz.KHATAM_REMINDER" />
+            </intent-filter>
         </receiver>
 
         <!-- Prayer Times Widget -->
