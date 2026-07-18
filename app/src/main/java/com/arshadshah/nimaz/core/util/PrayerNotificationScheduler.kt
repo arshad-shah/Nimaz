@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
@@ -86,84 +85,82 @@ class PrayerNotificationScheduler @Inject constructor(
     }
 
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            // Prayer time notification channel
-            val prayerChannel = NotificationChannel(
-                CHANNEL_ID_PRAYER,
-                "Prayer Time Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifications for prayer times with Islamic reminders"
-                enableVibration(true)
-                enableLights(true)
-            }
-
-            // Adhan notification channel (higher priority)
-            val adhanChannel = NotificationChannel(
-                CHANNEL_ID_ADHAN,
-                "Adhan Notifications",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Adhan sound notifications"
-                enableVibration(true)
-                enableLights(true)
-            }
-
-            // Daily summary notification channel
-            val dailySummaryChannel = NotificationChannel(
-                CHANNEL_ID_DAILY_SUMMARY,
-                "Daily Prayer Summary",
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = "Nightly summary of your daily prayer completion"
-                enableVibration(true)
-                enableLights(true)
-            }
-
-            // Silent (no-vibration) siblings for when the vibration preference is off.
-            val prayerChannelSilent = NotificationChannel(
-                CHANNEL_ID_PRAYER_SILENT,
-                "Prayer Time Notifications (No Vibration)",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Prayer time notifications without vibration"
-                enableVibration(false)
-                enableLights(true)
-            }
-
-            val adhanChannelSilent = NotificationChannel(
-                CHANNEL_ID_ADHAN_SILENT,
-                "Adhan Notifications (No Vibration)",
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Adhan notifications without vibration"
-                enableVibration(false)
-                enableLights(true)
-            }
-
-            // Khatam reminder channel — a gentle nudge to read, not an alarm, so it
-            // stays at DEFAULT importance and never interrupts.
-            val khatamChannel = NotificationChannel(
-                CHANNEL_ID_KHATAM,
-                context.getString(R.string.notif_khatam_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = context.getString(R.string.notif_khatam_channel_description)
-                enableVibration(true)
-                enableLights(true)
-            }
-
-            notificationManager.createNotificationChannels(
-                listOf(
-                    prayerChannel,
-                    adhanChannel,
-                    dailySummaryChannel,
-                    khatamChannel,
-                    prayerChannelSilent,
-                    adhanChannelSilent
-                )
-            )
+        // Prayer time notification channel
+        val prayerChannel = NotificationChannel(
+            CHANNEL_ID_PRAYER,
+            "Prayer Time Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Notifications for prayer times with Islamic reminders"
+            enableVibration(true)
+            enableLights(true)
         }
+
+        // Adhan notification channel (higher priority)
+        val adhanChannel = NotificationChannel(
+            CHANNEL_ID_ADHAN,
+            "Adhan Notifications",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Adhan sound notifications"
+            enableVibration(true)
+            enableLights(true)
+        }
+
+        // Daily summary notification channel
+        val dailySummaryChannel = NotificationChannel(
+            CHANNEL_ID_DAILY_SUMMARY,
+            "Daily Prayer Summary",
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = "Nightly summary of your daily prayer completion"
+            enableVibration(true)
+            enableLights(true)
+        }
+
+        // Silent (no-vibration) siblings for when the vibration preference is off.
+        val prayerChannelSilent = NotificationChannel(
+            CHANNEL_ID_PRAYER_SILENT,
+            "Prayer Time Notifications (No Vibration)",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Prayer time notifications without vibration"
+            enableVibration(false)
+            enableLights(true)
+        }
+
+        val adhanChannelSilent = NotificationChannel(
+            CHANNEL_ID_ADHAN_SILENT,
+            "Adhan Notifications (No Vibration)",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Adhan notifications without vibration"
+            enableVibration(false)
+            enableLights(true)
+        }
+
+        // Khatam reminder channel — a gentle nudge to read, not an alarm, so it
+        // stays at DEFAULT importance and never interrupts.
+        val khatamChannel = NotificationChannel(
+            CHANNEL_ID_KHATAM,
+            context.getString(R.string.notif_khatam_channel_name),
+            NotificationManager.IMPORTANCE_DEFAULT
+        ).apply {
+            description = context.getString(R.string.notif_khatam_channel_description)
+            enableVibration(true)
+            enableLights(true)
+        }
+
+        notificationManager.createNotificationChannels(
+            listOf(
+                prayerChannel,
+                adhanChannel,
+                dailySummaryChannel,
+                khatamChannel,
+                prayerChannelSilent,
+                adhanChannelSilent
+            )
+        )
     }
 
     /**
@@ -312,19 +309,11 @@ class PrayerNotificationScheduler @Inject constructor(
             .toInstant()
             .toEpochMilli()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        }
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerTimeMillis,
+            pendingIntent
+        )
     }
 
     /**
@@ -384,11 +373,7 @@ class PrayerNotificationScheduler @Inject constructor(
         )
         val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
-        }
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
     }
 
     /**
@@ -432,11 +417,7 @@ class PrayerNotificationScheduler @Inject constructor(
         )
         val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
-        } else {
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
-        }
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
     }
 
     private fun cancelKhatamReminder() {
@@ -521,19 +502,11 @@ class PrayerNotificationScheduler @Inject constructor(
             .toInstant()
             .toEpochMilli()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        }
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerTimeMillis,
+            pendingIntent
+        )
     }
 
     /**
@@ -587,19 +560,11 @@ class PrayerNotificationScheduler @Inject constructor(
             .toEpochMilli()
 
         // Use setExactAndAllowWhileIdle for precise timing
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                triggerTimeMillis,
-                pendingIntent
-            )
-        }
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerTimeMillis,
+            pendingIntent
+        )
     }
 
     /**
@@ -705,19 +670,11 @@ class PrayerNotificationScheduler @Inject constructor(
             .toInstant()
             .toEpochMilli()
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(
-                AlarmManager.RTC_WAKEUP,
-                midnight,
-                pendingIntent
-            )
-        } else {
-            alarmManager.setExact(
-                AlarmManager.RTC_WAKEUP,
-                midnight,
-                pendingIntent
-            )
-        }
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            midnight,
+            pendingIntent
+        )
     }
 
     private fun cancelMidnightReschedule() {

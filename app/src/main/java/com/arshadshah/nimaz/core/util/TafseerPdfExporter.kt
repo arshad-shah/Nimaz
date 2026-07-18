@@ -12,6 +12,7 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.withTranslation
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.domain.model.Ayah
@@ -259,11 +260,10 @@ private class PageWriter(
                 )
             }
 
-            c.save()
-            c.translate(MARGIN + indent, y - sliceTop)
-            c.clipRect(0f, sliceTop.toFloat(), PAGE_W.toFloat(), sliceBottom.toFloat())
-            block.draw(c)
-            c.restore()
+            c.withTranslation(MARGIN + indent, y - sliceTop) {
+                clipRect(0f, sliceTop.toFloat(), PAGE_W.toFloat(), sliceBottom.toFloat())
+                block.draw(this)
+            }
 
             y += height
             line = end

@@ -496,12 +496,7 @@ class TasbihViewModel @Inject constructor(
 
     private fun triggerVibration() {
         if (!_counterState.value.vibrationEnabled) return
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(30)
-        }
+        vibrator.vibrate(VibrationEffect.createOneShot(30, VibrationEffect.DEFAULT_AMPLITUDE))
     }
 
     private fun playClickSound() {

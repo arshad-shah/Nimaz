@@ -1133,6 +1133,7 @@
     <string name="audio_position_juz_format">Juz %1$d</string>
     <plurals name="zakat_calculations_recorded">
         <item quantity="one">%1$d calcul enregistré</item>
+        <item quantity="many">%1$d de calculs enregistrés</item>
         <item quantity="other">%1$d calculs enregistrés</item>
     </plurals>
     <string name="sync_item_khatam_daily_logs">Journaux quotidiens du Khatam</string>

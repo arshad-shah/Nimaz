@@ -12,6 +12,8 @@ import android.text.Layout
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.graphics.createBitmap
+import androidx.core.graphics.withTranslation
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import java.io.File
@@ -112,7 +114,7 @@ object ShareCardRenderer {
 
         fun render(): Bitmap {
             val height = draw(null).toInt()
-            val bitmap = Bitmap.createBitmap(W, height, Bitmap.Config.ARGB_8888)
+            val bitmap = createBitmap(W, height)
             draw(Canvas(bitmap))
             return bitmap
         }
@@ -213,10 +215,9 @@ object ShareCardRenderer {
         /** Draws (or just advances past) a text block, returning the new y cursor. */
         private fun drawBlock(canvas: Canvas?, block: StaticLayout, left: Float, y: Float): Float {
             if (canvas != null) {
-                canvas.save()
-                canvas.translate(left, y)
-                block.draw(canvas)
-                canvas.restore()
+                canvas.withTranslation(left, y) {
+                    block.draw(this)
+                }
             }
             return y + block.height
         }

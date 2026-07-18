@@ -62,11 +62,7 @@ class QuranAudioService : Service() {
          */
         fun start(context: Context) {
             val intent = Intent(context, QuranAudioService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
+            context.startForegroundService(intent)
         }
 
         /**
@@ -251,20 +247,18 @@ class QuranAudioService : Service() {
     }
 
     private fun createNotificationChannel() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Quran Audio",
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                description = "Quran audio playback controls"
-                setShowBadge(false)
-                setSound(null, null)
-            }
-
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Quran Audio",
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = "Quran audio playback controls"
+            setShowBadge(false)
+            setSound(null, null)
         }
+
+        val notificationManager = getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
     }
 
     override fun onBind(intent: Intent?): IBinder? = null

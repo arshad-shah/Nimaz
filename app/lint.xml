@@ -11,4 +11,68 @@
     <issue id="RestrictedApi">
         <ignore regexp="ColorProvider can only be called from within the same library group" />
     </issue>
+
+    <!--
+      widget_*_preview.xml and glance_default_loading.xml are not app UI. They are
+      the static previewLayout/initialLayout thumbnails the launcher renders in the
+      widget picker; the live widgets are built with Glance, not by inflating these.
+      That makes the layout performance and sizing checks below inapplicable:
+
+        Overdraw                - assumes the layout is inflated into an activity
+                                  with Theme.Nimaz. These render in the launcher's
+                                  process, with no app theme behind them, so the
+                                  root background is the only thing painting.
+        SmallSp                 - the previews are drawn at thumbnail scale, where
+                                  sub-11sp text is deliberate and never read at 1:1.
+        UseCompoundDrawables,
+        DisableBaselineAlignment,
+        InefficientWeight       - measure/layout micro-optimisations for views that
+                                  inflate once in a picker, not in a scrolling app.
+
+      Scoped to those files by name so the same checks still apply to real app
+      layouts. RtlSymmetry is deliberately NOT suppressed here - padding symmetry
+      is a genuine correctness issue for the app's RTL locales.
+    -->
+    <issue id="Overdraw">
+        <ignore regexp="(widget_.*_preview|glance_default_loading)\.xml" />
+    </issue>
+    <issue id="SmallSp">
+        <ignore regexp="(widget_.*_preview|glance_default_loading)\.xml" />
+    </issue>
+    <issue id="UseCompoundDrawables">
+        <ignore regexp="(widget_.*_preview|glance_default_loading)\.xml" />
+    </issue>
+    <issue id="DisableBaselineAlignment">
+        <ignore regexp="(widget_.*_preview|glance_default_loading)\.xml" />
+    </issue>
+    <issue id="InefficientWeight">
+        <ignore regexp="(widget_.*_preview|glance_default_loading)\.xml" />
+    </issue>
+
+    <!--
+      Two false positives from the English-centric typo dictionary:
+
+        tr "harf harf" - Turkish reduplication meaning "letter by letter", the
+                         intended phrasing for the Qaida subtitle. Not a repeated
+                         word by mistake.
+        de "in Folge"  - "Tage in Folge" is "days in a row" (the Khatam streak
+                         label). Lint suggests "infolge", a different word meaning
+                         "as a result of", which would be wrong here.
+
+      Matched on message text so genuine typos elsewhere are still reported.
+    -->
+    <issue id="Typos">
+        <ignore regexp="Repeated word &quot;harf&quot;" />
+        <ignore regexp="&quot;in Folge&quot; is a common misspelling" />
+    </issue>
+
+    <!--
+      REQUEST_IGNORE_BATTERY_OPTIMIZATIONS is used only to offer an opt-in prompt
+      so adhan alarms fire on time; Doze otherwise defers them past the prayer
+      time, which defeats the app's core function. This is the exact "alarms and
+      reminders that must fire at a precise time" case the Play policy allows, the
+      prompt is user-initiated from Home/Onboarding, and the app works (with less
+      reliable timing) if the user declines.
+    -->
+    <issue id="BatteryLife" severity="ignore" />
 </lint>

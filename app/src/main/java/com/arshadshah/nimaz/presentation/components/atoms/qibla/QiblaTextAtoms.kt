@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import java.util.Locale
 import kotlin.math.abs
 
 /**
@@ -30,12 +31,13 @@ import kotlin.math.abs
 fun formatCoordinates(latitude: Double, longitude: Double): String {
     val ns = if (latitude >= 0) "N" else "S"
     val ew = if (longitude >= 0) "E" else "W"
-    return "${String.format("%.4f", abs(latitude))}°$ns, ${
-        String.format(
-            "%.4f",
-            abs(longitude)
-        )
-    }°$ew"
+    // The coordinates are shown to the user, so they follow the device locale's
+    // decimal separator. Passing it explicitly keeps the behaviour identical to
+    // the previous implicit default while satisfying lint.
+    val locale = Locale.getDefault()
+    val lat = String.format(locale, "%.4f", abs(latitude))
+    val lon = String.format(locale, "%.4f", abs(longitude))
+    return "$lat°$ns, $lon°$ew"
 }
 
 /**
