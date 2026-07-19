@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.screens.quran
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -35,11 +35,9 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.IconButton
@@ -67,7 +65,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
@@ -98,7 +95,6 @@ import com.arshadshah.nimaz.presentation.components.molecules.BookmarkListItem
 import com.arshadshah.nimaz.presentation.components.molecules.ContinueReadingCard
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamProgressCard
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
-import com.arshadshah.nimaz.presentation.components.molecules.QuranQuickActions
 import com.arshadshah.nimaz.presentation.components.molecules.QuranRecommendedSurahs
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.VerseOfTheDayCard
@@ -210,8 +206,13 @@ fun QuranHomeScreen(
                 .padding(paddingValues)
         ) {
 
+            // `topTab` is the authoritative field for this outer row (it also drives the
+            // `when` below); `selectedTab` is the Browse sub-tab (Surah/Juz/Page) and must
+            // not be read here.
+            val topTabIndex = state.topTab.coerceIn(0, 2)
+
             PrimaryTabRow(
-                selectedTabIndex = state.topTab.coerceIn(0, 2),
+                selectedTabIndex = topTabIndex,
                 tabs = {
                     listOf(
                         stringResource(R.string.quran_home_tab_home),
@@ -219,7 +220,7 @@ fun QuranHomeScreen(
                         stringResource(R.string.quran_home_tab_favorites)
                     ).forEachIndexed { index, title ->
                         Tab(
-                            selected = state.selectedTab == index,
+                            selected = topTabIndex == index,
                             onClick = { viewModel.onEvent(QuranEvent.SetTopTab(index)) },
                             text = { Text(title) }
                         )
@@ -235,7 +236,7 @@ fun QuranHomeScreen(
                     CircularProgressIndicator()
                 }
             } else {
-                when (state.topTab.coerceIn(0, 2)) {
+                when (topTabIndex) {
                     0 -> HomeTabContent(
                         state = state,
                         bookmarks = bookmarksState.bookmarks,
@@ -243,16 +244,7 @@ fun QuranHomeScreen(
                         onNavigateToBookmarks = onNavigateToBookmarks,
                         onNavigateToQuranAyah = onNavigateToQuranAyah,
                         onNavigateToKhatam = onNavigateToKhatam,
-                        onNavigateToKhatamDetail = onNavigateToKhatamDetail,
-                        onNavigateToFavorites = { viewModel.onEvent(QuranEvent.SetTopTab(2)) },
-                        onBrowseJuz = {
-                            viewModel.onEvent(QuranEvent.SetTopTab(1))
-                            viewModel.onEvent(QuranEvent.SetTab(1))
-                        },
-                        onBrowsePage = {
-                            viewModel.onEvent(QuranEvent.SetTopTab(1))
-                            viewModel.onEvent(QuranEvent.SetTab(2))
-                        }
+                        onNavigateToKhatamDetail = onNavigateToKhatamDetail
                     )
 
                     1 -> BrowseTabContent(
@@ -287,10 +279,7 @@ private fun HomeTabContent(
     onNavigateToBookmarks: () -> Unit,
     onNavigateToQuranAyah: (Int, Int) -> Unit = { surah, _ -> onNavigateToSurah(surah) },
     onNavigateToKhatam: () -> Unit = {},
-    onNavigateToKhatamDetail: (Long) -> Unit = {},
-    onNavigateToFavorites: () -> Unit = {},
-    onBrowseJuz: () -> Unit = {},
-    onBrowsePage: () -> Unit = {}
+    onNavigateToKhatamDetail: (Long) -> Unit = {}
 ) {
     val isFriday = remember { LocalDate.now().dayOfWeek == DayOfWeek.FRIDAY }
 
@@ -298,7 +287,95 @@ private fun HomeTabContent(
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // Verse of the Day — signature daily ayah
+        // 1. Resume first. Exactly one card on this screen carries the teal gradient:
+        // continue-reading when there is progress, otherwise the start-reading hero.
+        // Rendering both stacked two near-identical "begin" affordances on each other,
+        // and spending the gradient twice meant it signalled nothing.
+        val progress = state.readingProgress
+        if (progress != null) {
+            item(key = "continue_reading") {
+                ContinueReadingCard(
+                    surahNumber = progress.lastSurah,
+                    ayahNumber = progress.lastAyah,
+                    juzNumber = progress.lastReadJuz,
+                    pageNumber = progress.lastReadPage,
+                    totalAyahsRead = progress.totalAyahsRead,
+                    surahName = state.surahs.find { it.number == progress.lastSurah },
+                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) }
+                )
+            }
+        } else {
+            item(key = "start_reading") {
+                val shape = RoundedCornerShape(20.dp)
+                GradientCard(
+                    gradientColors = NimazColors.QuranColors.BannerGradient,
+                    shape = shape,
+                    onClick = { if (state.surahs.isNotEmpty()) onNavigateToSurah(1) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .border(
+                            width = 1.dp,
+                            color = NimazColors.QuranColors.BannerBorder,
+                            shape = shape
+                        )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NimazIcon(
+                            imageVector = Icons.Default.PlayArrow,
+                            contentDescription = null,
+                            tint = NimazColors.QuranColors.BannerAccent,
+                            iconSize = 32.dp
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.quran_home_start_reading),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = stringResource(R.string.quran_home_begin_journey),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = NimazColors.Gray300
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        // 2. Khatam — the only item with a deadline, so it must survive the fold.
+        // Compact row form; collapses to a one-row prompt when no khatam is active.
+        item(key = "khatam_progress") {
+            KhatamProgressCard(
+                activeKhatam = state.activeKhatam,
+                insights = state.activeKhatamInsights,
+                completedCount = state.completedKhatamCount,
+                onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
+                onClickStart = onNavigateToKhatam
+            )
+        }
+
+        // 3. Recommended surahs (contextual — Al-Kahf first on Fridays)
+        item(key = "recommended_header") {
+            HomeSectionTitle(text = stringResource(R.string.quran_home_recommended))
+        }
+        item(key = "recommended_surahs") {
+            QuranRecommendedSurahs(
+                surahs = state.surahs,
+                isFriday = isFriday,
+                onSurahClick = onNavigateToSurah
+            )
+        }
+
+        // 4. Verse of the Day — a daily nudge, not the headline. Demoted below the
+        // resume/khatam/recommended stack and rendered as a normal elevated card.
         val verse = state.verseOfTheDay
         if (verse != null) {
             item(key = "verse_of_the_day") {
@@ -318,113 +395,7 @@ private fun HomeTabContent(
             }
         }
 
-        // Continue Reading Card
-        if (state.readingProgress != null) {
-            val progress = state.readingProgress
-            item(key = "continue_reading") {
-                ContinueReadingCard(
-                    surahNumber = progress.lastSurah,
-                    ayahNumber = progress.lastAyah,
-                    juzNumber = progress.lastReadJuz,
-                    pageNumber = progress.lastReadPage,
-                    totalAyahsRead = progress.totalAyahsRead,
-                    surahName = state.surahs.find { it.number == progress.lastSurah },
-                    onClick = { onNavigateToQuranAyah(progress.lastSurah, progress.lastAyah) }
-                )
-            }
-        }
-
-        // Khatam card shows regardless of reading progress; it used to be duplicated
-        // in both branches of the if/else above.
-        item(key = "khatam_progress") {
-            KhatamProgressCard(
-                activeKhatam = state.activeKhatam,
-                insights = state.activeKhatamInsights,
-                completedCount = state.completedKhatamCount,
-                onClickActive = { khatamId -> onNavigateToKhatamDetail(khatamId) },
-                onClickStart = onNavigateToKhatam
-            )
-        }
-
-        if (state.readingProgress == null) {
-            // No reading progress yet - show start reading prompt
-            item(key = "start_reading") {
-                NimazCard(
-                    style = NimazCardStyle.FILLED,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(20.dp),
-                    tone = NimazTone.TRANSPARENT,
-                    onClick = { if (state.surahs.isNotEmpty()) onNavigateToSurah(1) }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .background(
-                                brush = Brush.linearGradient(
-                                    colors = listOf(
-                                        NimazColors.Primary800,
-                                        NimazColors.Primary950
-                                    )
-                                ),
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .padding(24.dp)
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            NimazIcon(
-                                imageVector = Icons.Default.PlayArrow,
-                                contentDescription = null,
-                                tint = NimazColors.Gold500,
-                                iconSize = 48.dp
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Text(
-                                text = stringResource(R.string.quran_home_start_reading),
-                                style = MaterialTheme.typography.headlineSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                text = stringResource(R.string.quran_home_begin_journey),
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = NimazColors.Gray300
-                            )
-                        }
-                    }
-                }
-            }
-        }
-
-        // Quick Access shortcuts
-        item(key = "quick_actions_header") {
-            HomeSectionTitle(text = stringResource(R.string.quran_home_quick_actions))
-        }
-        item(key = "quick_actions") {
-            QuranQuickActions(
-                onJuzClick = onBrowseJuz,
-                onPageClick = onBrowsePage,
-                onBookmarksClick = onNavigateToBookmarks,
-                onFavoritesClick = onNavigateToFavorites
-            )
-        }
-
-        // Recommended surahs (contextual — Al-Kahf first on Fridays)
-        item(key = "recommended_header") {
-            HomeSectionTitle(text = stringResource(R.string.quran_home_recommended))
-        }
-        item(key = "recommended_surahs") {
-            QuranRecommendedSurahs(
-                surahs = state.surahs,
-                isFriday = isFriday,
-                onSurahClick = onNavigateToSurah
-            )
-        }
-
-        // Bookmarks Horizontal Row
+        // 5. Bookmarks Horizontal Row
         if (bookmarks.isNotEmpty()) {
             item(key = "bookmarks_header") {
                 Row(
@@ -590,8 +561,13 @@ private fun BrowseTabContent(
             )
         }
 
-        // Shared list state for the page tab (used by scrollbar)
-        val pageListState = rememberLazyListState()
+        // One stably-remembered list state per sub-tab. These must be hoisted here rather
+        // than created inside the `state = if (...) ... else rememberLazyListState()`
+        // expression below: a `remember` inside a conditional is not keyed stably across
+        // recompositions, so the Surah/Juz tabs kept losing their scroll position.
+        val surahListState = rememberLazyListState()
+        val juzListState = rememberLazyListState()
+        val pageListState = rememberLazyListState() // also driven by the juz scrollbar
         val coroutineScope = rememberCoroutineScope()
 
         // Pre-compute juz header indices for the scrollbar
@@ -600,7 +576,7 @@ private fun BrowseTabContent(
         }
 
         // Reverse lookup: item index → juz number (find which juz the first visible item belongs to)
-        val currentJuz by remember {
+        val currentJuz by remember(juzHeaderIndices) {
             derivedStateOf {
                 val firstVisibleIndex = pageListState.firstVisibleItemIndex
                 var result = 1
@@ -616,7 +592,11 @@ private fun BrowseTabContent(
         Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier.testTag(ScreenTags.QuranSurahList),
-                state = if (state.selectedTab == 2) pageListState else rememberLazyListState(),
+                state = when (state.selectedTab) {
+                    1 -> juzListState
+                    2 -> pageListState
+                    else -> surahListState
+                },
                 contentPadding = PaddingValues(
                     start = 16.dp,
                     end = if (state.selectedTab == 2) 40.dp else 16.dp,

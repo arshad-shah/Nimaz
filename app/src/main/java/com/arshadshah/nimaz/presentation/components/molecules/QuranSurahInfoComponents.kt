@@ -50,6 +50,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalLayoutApi::class)
@@ -120,7 +121,7 @@ internal fun HeroHeader(
                 )
 
                 // Gold ornamental divider
-                TafseerOrnamentalDivider(
+                QuranOrnamentalDivider(
                     modifier = Modifier.width(160.dp)
                 )
 

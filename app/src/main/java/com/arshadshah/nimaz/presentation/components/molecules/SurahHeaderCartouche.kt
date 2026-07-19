@@ -44,14 +44,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.scallopPath
 import com.arshadshah.nimaz.presentation.components.atoms.toArabicNumber
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /* ------------------------------------------------------------------
  * Theme tokens — the cartouche is a fixed gold-on-teal "manuscript"
- * ornament, so it pins to the brand ramps rather than the running
- * colorScheme.
+ * ornament, so its teal panel pins to the brand ramps rather than the
+ * running colorScheme. Its gold, however, routes through
+ * [QuranSurfaceColors.frameGold] so the ornament stays legible when the page
+ * behind it is light.
  * ------------------------------------------------------------------ */
-private val CartoucheGold = NimazColors.Gold500
 private val CartoucheTeal = NimazColors.Primary400
 private val CartoucheMedallionFill = NimazColors.Primary950
 private val CartouchePanelGradient = listOf(NimazColors.Primary800, NimazColors.Primary950)
@@ -107,7 +109,7 @@ fun SurahHeaderCartouche(
     height: Dp = 96.dp,
     useArabicIndicNumerals: Boolean = false,
     showBismillah: Boolean = false,
-    gold: Color = CartoucheGold,
+    gold: Color = QuranSurfaceColors.frameGold,
     teal: Color = CartoucheTeal,
     medallionFill: Color = CartoucheMedallionFill,
     panelGradient: List<Color> = CartouchePanelGradient,
@@ -319,6 +321,22 @@ private fun SurahHeaderCartoucheBismillahPreview() {
             revelationType = "Medinan",
             showBismillah = true,
         )
+    }
+}
+
+/**
+ * The plaque itself stays a saturated teal manuscript object in light mode
+ * (decision: it is an illuminated header, not a themed card) — only its gold
+ * ornament darkens so it survives sitting on a pale page.
+ */
+@Preview(showBackground = true, widthDp = 420, name = "Cartouche — Light theme page")
+@Composable
+private fun SurahHeaderCartoucheLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
+            SurahHeaderCartouche(surah = sampleSurahFatihah)
+            SurahHeaderCartouche(surah = sampleSurahBaqarah, useArabicIndicNumerals = true)
+        }
     }
 }
 

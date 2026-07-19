@@ -523,7 +523,6 @@
     <string name="quran_home_surah_info">Sure Bilgisi</string>
     <string name="quran_home_verse_of_the_day">GÜNÜN AYETİ</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
-    <string name="quran_home_quick_actions">Hızlı Erişim</string>
     <string name="quran_home_recommended">Önerilen</string>
     <string name="quran_home_reason_friday">Cuma Sünneti</string>
     <string name="quran_home_reason_before_sleep">Uyumadan önce</string>

@@ -10,151 +10,189 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.domain.model.ReadingProgressCalculator
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
+/**
+ * "Resume where you left off" — the Quran home tab's primary action and the **only**
+ * gradient card on that screen. Everything else there uses the normal `NimazCard`
+ * treatment, so this one keeps its signal instead of competing with a second hero.
+ *
+ * Deliberately compact: the label, the surah name (English + Arabic on one line), the
+ * verse/juz/page metadata and an explicit Resume button share a single row, with the
+ * progress bar underneath — roughly half the height of the old stacked layout.
+ */
 @Composable
 internal fun ContinueReadingCard(
     surahNumber: Int,
     ayahNumber: Int,
     juzNumber: Int,
     pageNumber: Int,
-    totalAyahsRead: Int,
+    @Suppress("UNUSED_PARAMETER") totalAyahsRead: Int,
     surahName: Surah?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val totalAyahs = 6236
-    val progressFraction = (totalAyahsRead.toFloat() / totalAyahs).coerceIn(0f, 1f)
-    val progressPercent = (progressFraction * 100).toInt()
+    // The card labels itself with a surah name and "Verse N", so the bar shows progress
+    // through the *current surah*. Falls back to mushaf position by page while the surah
+    // metadata is still loading.
+    val progressFraction = if (surahName != null) {
+        ReadingProgressCalculator.surahFraction(ayahNumber, surahName.ayahCount)
+    } else {
+        ReadingProgressCalculator.pageFraction(pageNumber)
+    }
+    val progressPercent = ReadingProgressCalculator.percent(progressFraction)
+    val shape = RoundedCornerShape(20.dp)
 
-    NimazCard(
-        style = NimazCardStyle.FILLED,
+    GradientCard(
+        gradientColors = NimazColors.QuranColors.BannerGradient,
         onClick = onClick,
-        modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        tone = NimazTone.TRANSPARENT
+        shape = shape,
+        modifier = modifier
+            .fillMaxWidth()
+            .border(
+                width = 1.dp,
+                color = NimazColors.QuranColors.BannerBorder,
+                shape = shape
+            )
     ) {
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(
-                    brush = Brush.linearGradient(NimazColors.QuranColors.BannerGradient),
-                    shape = RoundedCornerShape(20.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = NimazColors.QuranColors.BannerBorder,
-                    shape = RoundedCornerShape(20.dp)
-                )
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(20.dp)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = stringResource(R.string.quran_home_continue_reading),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = NimazColors.Primary400,
-                    letterSpacing = 1.5.sp,
-                    fontWeight = FontWeight.Medium
-                )
-
-                Spacer(modifier = Modifier.height(10.dp))
-
-                Text(
-                    text = surahName?.nameEnglish
-                        ?: stringResource(R.string.quran_home_surah_fallback, surahNumber),
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                if (surahName != null) {
-                    ArabicText(
-                        text = surahName.nameArabic,
-                        size = ArabicTextSize.MEDIUM,
-                        color = NimazColors.QuranColors.BannerAccent
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.quran_home_continue_reading),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = NimazColors.Primary400,
+                        letterSpacing = 1.5.sp,
+                        fontWeight = FontWeight.Medium
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // English and Arabic share a line — stacking them onto separate rows
+                    // was most of the old card's height.
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = surahName?.nameEnglish
+                                ?: stringResource(
+                                    R.string.quran_home_surah_fallback,
+                                    surahNumber
+                                ),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                        if (surahName != null) {
+                            ArabicText(
+                                text = surahName.nameArabic,
+                                size = ArabicTextSize.SMALL,
+                                color = NimazColors.QuranColors.BannerAccent,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(2.dp))
+
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Text(
+                            text = stringResource(R.string.quran_home_verse_format, ayahNumber),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = NimazColors.Gray300
+                        )
+                        Text(
+                            text = stringResource(R.string.quran_home_juz_format, juzNumber),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = NimazColors.Gray300
+                        )
+                        Text(
+                            text = stringResource(R.string.quran_home_page_format, pageNumber),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = NimazColors.Gray300
+                        )
+                    }
                 }
 
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.quran_home_verse_format, ayahNumber),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = NimazColors.Gray300
-                    )
-                    Text(
-                        text = stringResource(R.string.quran_home_juz_format, juzNumber),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = NimazColors.Gray300
-                    )
-                    Text(
-                        text = stringResource(R.string.quran_home_page_format, pageNumber),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = NimazColors.Gray300
-                    )
-                }
+                Spacer(modifier = Modifier.width(12.dp))
 
-                Spacer(modifier = Modifier.height(15.dp))
+                NimazButton(
+                    text = stringResource(R.string.quran_home_resume),
+                    onClick = onClick,
+                    type = NimazButtonType.PILL,
+                    size = NimazButtonSize.SMALL,
+                    leadingIcon = Icons.Default.PlayArrow
+                )
+            }
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(5.dp)
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Color.White.copy(alpha = 0.15f))
                 ) {
                     Box(
                         modifier = Modifier
-                            .weight(1f)
-                            .height(6.dp)
+                            .fillMaxWidth(progressFraction)
+                            .height(5.dp)
                             .clip(RoundedCornerShape(3.dp))
-                            .background(Color.White.copy(alpha = 0.15f))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(progressFraction)
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(NimazColors.QuranColors.BannerAccent)
-                        )
-                    }
-
-                    Text(
-                        text = "$progressPercent%",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = NimazColors.Gray300
+                            .background(NimazColors.QuranColors.BannerAccent)
                     )
                 }
+
+                Text(
+                    text = "$progressPercent%",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NimazColors.Gray300
+                )
             }
         }
     }
@@ -172,7 +210,7 @@ private fun ContinueReadingCardPreview() {
             totalAyahsRead = 150,
             surahName = Surah(
                 number = 1,
-                nameArabic = "\u0627\u0644\u0641\u0627\u062A\u062D\u0629",
+                nameArabic = "الفاتحة",
                 nameEnglish = "Al-Fatihah",
                 nameTransliteration = "The Opening",
                 revelationType = RevelationType.MECCAN,

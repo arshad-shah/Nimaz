@@ -48,7 +48,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
-import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
+import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 
 /**
  * The saved-item card family — one place for the swipe-to-delete plumbing, the overflow
@@ -241,7 +241,7 @@ fun SwipeableSavedCard(
 
                 // Arabic preview, set off by a gold ornamental divider.
                 if (!arabicText.isNullOrBlank()) {
-                    TafseerOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    QuranOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     ArabicText(
                         text = arabicText,
                         size = ArabicTextSize.SMALL,

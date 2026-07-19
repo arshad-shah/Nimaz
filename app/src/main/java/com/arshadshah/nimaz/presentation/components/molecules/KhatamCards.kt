@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +33,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
@@ -161,6 +163,168 @@ fun KhatamHeroCard(
                     fullWidth = true,
                 )
             }
+        }
+    }
+}
+
+/**
+ * The compact form of [KhatamHeroCard] — same numbers (ring, "N of M ayahs read",
+ * juz, days left, pace verdict), laid out as a single row instead of a tall card.
+ *
+ * Used where khatam is a secondary item on a busy screen (the Quran home tab), and it
+ * has to survive above the fold next to the continue-reading card.
+ */
+@Composable
+fun KhatamCompactRow(
+    khatam: Khatam,
+    insights: KhatamInsights,
+    modifier: Modifier = Modifier,
+    accent: KhatamAccent = rememberKhatamAccent(),
+    onClick: (() -> Unit)? = null,
+) {
+    val isComplete = khatam.status == KhatamStatus.COMPLETED
+
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
+        onClick = onClick,
+        tone = NimazTone.NEUTRAL,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(NimazSpacing.Medium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            KhatamProgressRing(
+                progress = khatam.progressPercent,
+                size = 44.dp,
+                strokeWidth = 5.dp,
+                accent = accent,
+                isComplete = isComplete,
+                textStyle = MaterialTheme.typography.labelSmall,
+            )
+            Spacer(Modifier.width(NimazSpacing.Medium))
+            Column(Modifier.weight(1f)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = khatam.name,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    Spacer(Modifier.width(NimazSpacing.Small))
+                    NimazBadge(
+                        text = stringResource(
+                            if (isComplete) R.string.khatam_status_completed_badge
+                            else R.string.khatam_active
+                        ),
+                        tone = NimazTone.ACCENT,
+                        size = NimazBadgeSize.MEDIUM,
+                    )
+                }
+                Spacer(Modifier.height(NimazSpacing.ExtraSmall))
+                Text(
+                    text = stringResource(
+                        R.string.khatam_of_ayahs_read,
+                        khatam.totalAyahsRead,
+                        Khatam.TOTAL_QURAN_AYAHS
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                )
+                Spacer(Modifier.height(NimazSpacing.ExtraSmall))
+                KhatamProgressBar(
+                    progress = khatam.progressPercent,
+                    height = 5.dp,
+                    accent = accent,
+                    isComplete = isComplete,
+                )
+                Spacer(Modifier.height(NimazSpacing.ExtraSmall))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = heroSubtitle(khatam, insights),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    Spacer(Modifier.width(NimazSpacing.Small))
+                    Text(
+                        text = paceLabel(insights.paceStatus),
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = paceColor(insights.paceStatus),
+                        maxLines = 1,
+                    )
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The "you have no khatam" prompt, sized like [KhatamCompactRow] rather than like a
+ * full-height empty state — an inactive khatam should not occupy the same footprint
+ * as an active one.
+ */
+@Composable
+fun KhatamStartPromptRow(
+    title: String,
+    message: String,
+    actionLabel: String,
+    onAction: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(NimazSpacing.Medium),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.MenuBook,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(NimazSpacing.Medium))
+            Column(Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = message,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+            Spacer(Modifier.width(NimazSpacing.Small))
+            NimazButton(
+                text = actionLabel,
+                onClick = onAction,
+                type = NimazButtonType.PILL,
+                size = NimazButtonSize.SMALL,
+            )
         }
     }
 }

@@ -551,9 +551,16 @@ typed route object.
       `ShamsaMedallion(number, size = …)` atom and the finial/Basmala mark is `DiamondFloret(color)`;
       both draw from the shared `internal` path builders in
       `components/atoms/QuranOrnamentGeometry.kt` (`scallopPath` / `cartouchePath` / `diamondPath` /
-      `circlePath`) — **never** re-hand-roll these `Path`s in a component. `MushafFrame`
-      (`MushafPage.kt`) reuses the same medallion for its page number and `DiamondFloret` in its
-      ornamental divider lines; the Juz and Page tab tiles share
+      `circlePath`) — **never** re-hand-roll these `Path`s in a component. The **single**
+      illuminated frame for every Quran reading surface is
+      `QuranFrame(variant = QuranFrameVariant.READER | STUDY)`
+      (`components/molecules/QuranFrame.kt`) — it replaced the mushaf's private `MushafFrame` and
+      the tafseer's `TafseerBookFrame`; the variant changes only padding/height behaviour, never
+      colours or ornament. It reuses the same medallion for its page number and the shared
+      `QuranOrnamentalDivider` atom (a gold hairline + central `DiamondFloret`) above and below its
+      content. All Quran-surface colours (`frameGold`, `frameTeal`, `pageSurface`, `ayahInk`,
+      `medallionInk`) resolve per theme from `presentation/theme/QuranSurfaceColors.kt` — these
+      surfaces are no longer dark-only; the Juz and Page tab tiles share
       `quranTileSurfaceColor` / `quranTileBorder` / `quranTileNumberColor` (`QuranPageGrid.kt`). The
       ayah end-marker is coloured (gold brackets + teal number) through
       `appendAyahEndMarker(number, bracketColor, numberColor)`
@@ -677,6 +684,13 @@ explicitly, and they are deliberate:
 3. `GradientCard` / `PrayerCard` presets — feature gradients (`CardArtColors`, per-prayer hues).
 4. A small number of cards that need a **border**, since a tone carries container + content but
    not a stroke (see §9 Open).
+
+**One gradient per screen.** A gradient card is a priority signal, so it only works if it is
+unique on the surface. On the Quran home tab that budget is spent on **continue-reading** (or,
+when there is no reading progress, the "Start Reading" hero that takes its slot) — every other
+card there, including Verse-of-the-Day and the Khatam row, uses the normal `NimazCard`
+treatment. Verse-of-the-Day and continue-reading previously both carried
+`QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
 ---
 

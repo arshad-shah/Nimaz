@@ -71,13 +71,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetSectionLabel
-import com.arshadshah.nimaz.presentation.components.molecules.TafseerBookFrame
+import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
+import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
 import com.arshadshah.nimaz.presentation.components.molecules.TafseerHighlightableText
-import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.highlightColors
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -239,7 +240,8 @@ fun TafseerPageContent(
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
 
-                TafseerBookFrame(
+                QuranFrame(
+                    variant = QuranFrameVariant.STUDY,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 12.dp)
@@ -256,7 +258,7 @@ fun TafseerPageContent(
                                     .fillMaxWidth()
                                     .padding(vertical = 12.dp)
                             )
-                            TafseerOrnamentalDivider()
+                            QuranOrnamentalDivider()
 
                             if (!ayah.translation.isNullOrBlank()) {
                                 Text(
@@ -268,7 +270,7 @@ fun TafseerPageContent(
                                         .fillMaxWidth()
                                         .padding(vertical = 8.dp)
                                 )
-                                TafseerOrnamentalDivider()
+                                QuranOrnamentalDivider()
                             }
                         }
 
