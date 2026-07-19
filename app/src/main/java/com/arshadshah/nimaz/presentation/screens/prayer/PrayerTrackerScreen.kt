@@ -18,7 +18,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
@@ -32,7 +34,6 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -575,7 +576,8 @@ private fun PrayerCheckItem(
     NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest)
+        tone = NimazCardTone.NEUTRAL,
+        level = NimazCardLevel.NESTED
     ) {
         Row(
             modifier = Modifier

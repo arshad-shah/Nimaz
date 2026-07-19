@@ -62,7 +62,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -538,7 +540,7 @@ private fun TodayFastSection(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(16.dp),
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+            tone = NimazCardTone.MUTED
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 // Header with date and status
@@ -620,8 +622,7 @@ private fun TodayFastSection(
                     NimazCard(
                         modifier = Modifier.weight(1f),
                         style = NimazCardStyle.FILLED,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -656,8 +657,7 @@ private fun TodayFastSection(
                     NimazCard(
                         modifier = Modifier.weight(1f),
                         style = NimazCardStyle.FILLED,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface)
+                        shape = RoundedCornerShape(12.dp)
                     ) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -997,7 +997,7 @@ private fun RecommendedFastCard(
         onClick = onClick,
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazCardTone.MUTED
     ) {
         Row(
             modifier = Modifier.padding(15.dp),
@@ -1290,7 +1290,8 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest),
+                    tone = NimazCardTone.NEUTRAL,
+                    level = NimazCardLevel.NESTED,
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(
@@ -1317,7 +1318,7 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onComplete,
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                    tone = NimazCardTone.ACCENT,
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

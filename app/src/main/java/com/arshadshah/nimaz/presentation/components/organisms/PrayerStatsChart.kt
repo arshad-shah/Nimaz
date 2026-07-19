@@ -44,7 +44,6 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
@@ -87,9 +86,6 @@ fun PrayerStatsChart(
     NimazCard(
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
