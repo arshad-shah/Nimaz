@@ -90,6 +90,8 @@ data class NimazCardColors(
  * - [SUCCESS] — a completed//achieved state (streaks, finished khatam).
  * - [WARNING] — needs attention but is not an error (missed prayer, qada due).
  * - [ERROR] — a destructive or failed state.
+ * - [TRANSPARENT] — no container at all; for cards laid over imagery or a
+ *   gradient, where the backdrop must show through.
  */
 enum class NimazCardTone {
     NEUTRAL,
@@ -97,7 +99,30 @@ enum class NimazCardTone {
     ACCENT,
     SUCCESS,
     WARNING,
-    ERROR
+    ERROR,
+    TRANSPARENT
+}
+
+/**
+ * Elevation rung for a [NimazCardTone.NEUTRAL] card.
+ *
+ * Material 3's `surface` → `surfaceContainer` → `surfaceContainerHigh` roles are an
+ * intentional ladder: a card nested inside another card must step up a rung or its
+ * boundary disappears. Naming the rungs keeps that expressive while stopping call
+ * sites inventing their own — the sweep found the same "plain card" written six
+ * different ways across the app.
+ *
+ * Only [NimazCardTone.NEUTRAL] varies by level; every other tone already has a
+ * dedicated container role and ignores this.
+ *
+ * - [BASE] — a card directly on the screen background.
+ * - [RAISED] — a card on an already-tinted section.
+ * - [NESTED] — a card inside another card.
+ */
+enum class NimazCardLevel {
+    BASE,
+    RAISED,
+    NESTED
 }
 
 object NimazCardDefaults {
@@ -121,16 +146,32 @@ object NimazCardDefaults {
      * modelled here; it stays in the [GradientCard] / [PrayerCard] presets.
      */
     @Composable
-    fun tone(tone: NimazCardTone): NimazCardColors {
+    fun tone(
+        tone: NimazCardTone,
+        level: NimazCardLevel = NimazCardLevel.BASE,
+    ): NimazCardColors {
         val container: Color = when (tone) {
-            NimazCardTone.NEUTRAL -> MaterialTheme.colorScheme.surface
+            NimazCardTone.NEUTRAL -> when (level) {
+                NimazCardLevel.BASE -> MaterialTheme.colorScheme.surface
+                NimazCardLevel.RAISED -> MaterialTheme.colorScheme.surfaceContainer
+                NimazCardLevel.NESTED -> MaterialTheme.colorScheme.surfaceContainerHigh
+            }
+
             NimazCardTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
             NimazCardTone.ACCENT -> MaterialTheme.colorScheme.primaryContainer
             NimazCardTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
             NimazCardTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
             NimazCardTone.ERROR -> MaterialTheme.colorScheme.errorContainer
+            NimazCardTone.TRANSPARENT -> Color.Transparent
         }
-        return colors(container = container)
+        // Transparent has no on-colour of its own; inherit the surface's so text
+        // stays legible against whatever shows through.
+        val content: Color = if (tone == NimazCardTone.TRANSPARENT) {
+            LocalContentColor.current
+        } else {
+            onColorFor(container)
+        }
+        return colors(container = container, content = content)
     }
 
     /**
@@ -220,10 +261,11 @@ fun NimazCard(
     style: NimazCardStyle = NimazCardStyle.FILLED,
     selected: Boolean = false,
     tone: NimazCardTone = NimazCardTone.NEUTRAL,
+    level: NimazCardLevel = NimazCardLevel.BASE,
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = NimazCardDefaults.Shape,
-    colors: NimazCardColors = NimazCardDefaults.tone(tone),
+    colors: NimazCardColors = NimazCardDefaults.tone(tone, level),
     gradient: List<Color>? = null,
     elevation: Dp? = null,
     content: @Composable ColumnScope.() -> Unit,
