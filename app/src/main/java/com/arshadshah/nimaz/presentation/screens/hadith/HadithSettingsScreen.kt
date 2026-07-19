@@ -275,9 +275,10 @@ private fun HadithPreviewCard(
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
-                    style = NimazCardStyle.ELEVATED,
+                    style = NimazCardStyle.OUTLINED,
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.NEUTRAL
+                    tone = NimazTone.NEUTRAL,
+                    elevation = 0.dp
                 ) {
                     Text(
                         text = stringResource(R.string.hadith_settings_preview_translation),

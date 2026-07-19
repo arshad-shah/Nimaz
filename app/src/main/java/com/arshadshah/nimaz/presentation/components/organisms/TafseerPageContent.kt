@@ -706,8 +706,9 @@ private fun HighlightNotesListContent(
 
                 NimazCard(
                     onClick = { onHighlightTapped(highlight) },
-                    style = NimazCardStyle.ELEVATED,
+                    style = NimazCardStyle.OUTLINED,
                     tone = NimazTone.NEUTRAL,
+                    elevation = 0.dp,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {

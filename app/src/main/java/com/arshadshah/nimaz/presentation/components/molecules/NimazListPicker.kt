@@ -229,15 +229,21 @@ private fun <T> PickerRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
+    // Rows sit on the sheet's own surface, so a flat container fill has almost
+    // nothing to read against in light mode. Unselected rows are outlined; the
+    // selected row is the only one that fills, which also makes the selection
+    // obvious at a glance.
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = if (isSelected) NimazCardStyle.FILLED else NimazCardStyle.OUTLINED,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
+        elevation = 0.dp,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
+            border = MaterialTheme.colorScheme.outlineVariant,
             activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {

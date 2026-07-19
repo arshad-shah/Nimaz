@@ -247,7 +247,7 @@ internal fun AyahItem(
         // Translation
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            NimazCard(style = NimazCardStyle.ELEVATED, tone = NimazTone.NEUTRAL) {
+            NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.NEUTRAL, elevation = 0.dp) {
                 Text(
                     text = ayah.translation,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -263,7 +263,7 @@ internal fun AyahItem(
         // Transliteration
         if (showTransliteration && ayah.transliteration != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            NimazCard(tone = NimazTone.SUCCESS) {
+            NimazCard(style = NimazCardStyle.OUTLINED, tone = NimazTone.SUCCESS, elevation = 0.dp) {
                 Text(
                     text = ayah.transliteration,
                     style = MaterialTheme.typography.bodyMedium.copy(

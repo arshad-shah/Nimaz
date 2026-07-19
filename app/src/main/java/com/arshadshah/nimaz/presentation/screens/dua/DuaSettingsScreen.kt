@@ -264,8 +264,10 @@ private fun DuaPreviewCard(
             if (showTransliteration) {
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
+                    style = NimazCardStyle.OUTLINED,
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.SUCCESS
+                    tone = NimazTone.SUCCESS,
+                    elevation = 0.dp
                 ) {
                     Text(
                         text = stringResource(R.string.dua_settings_preview_transliteration),
@@ -283,9 +285,10 @@ private fun DuaPreviewCard(
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(10.dp))
                 NimazCard(
-                    style = NimazCardStyle.ELEVATED,
+                    style = NimazCardStyle.OUTLINED,
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.NEUTRAL
+                    tone = NimazTone.NEUTRAL,
+                    elevation = 0.dp
                 ) {
                     Text(
                         text = stringResource(R.string.dua_settings_preview_translation),

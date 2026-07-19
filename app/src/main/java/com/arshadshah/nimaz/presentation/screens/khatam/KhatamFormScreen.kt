@@ -386,7 +386,8 @@ private fun KhatamFormContent(
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
                 tone = NimazTone.NEUTRAL,
-                style = NimazCardStyle.ELEVATED,
+                style = NimazCardStyle.OUTLINED,
+                elevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier

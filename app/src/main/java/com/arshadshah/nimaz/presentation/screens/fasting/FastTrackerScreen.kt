@@ -1290,8 +1290,9 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
-                    style = NimazCardStyle.ELEVATED,
+                    style = NimazCardStyle.OUTLINED,
                     tone = NimazTone.NEUTRAL,
+                    elevation = 0.dp,
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

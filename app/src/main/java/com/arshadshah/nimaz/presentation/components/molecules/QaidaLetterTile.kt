@@ -25,7 +25,9 @@ import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -42,11 +44,13 @@ fun QaidaLetterTile(
     modifier: Modifier = Modifier,
 ) {
     val desc = "Letter ${letter.nameTransliteration}" + if (heard) ", heard" else ""
-    NimazSurfaceCard(
+    NimazCard(
         modifier = modifier.fillMaxWidth()
             .aspectRatio(1f)
             .semantics { contentDescription = desc }
             .clickable { onClick(letter) },
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(NimazCornerRadius.Large),
     ) {
         Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {

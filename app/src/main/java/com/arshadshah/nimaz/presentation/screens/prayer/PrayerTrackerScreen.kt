@@ -578,8 +578,9 @@ private fun PrayerCheckItem(
     NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        style = NimazCardStyle.ELEVATED,
-        tone = NimazTone.NEUTRAL
+        style = NimazCardStyle.OUTLINED,
+        tone = NimazTone.NEUTRAL,
+        elevation = 0.dp
     ) {
         Row(
             modifier = Modifier

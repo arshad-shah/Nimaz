@@ -19,7 +19,9 @@ import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -52,8 +54,13 @@ fun QaidaLetterForms(
         horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
         forms.forEach { (glyph, label) ->
-            NimazSurfaceCard(
+            // These sit inside the letter detail sheet, so they outline rather
+            // than elevate — a shadow inside a sheet reads as false height.
+            NimazCard(
                 modifier = if (single) Modifier.width(96.dp) else Modifier.weight(1f),
+                style = NimazCardStyle.OUTLINED,
+                tone = NimazTone.NEUTRAL,
+                elevation = 0.dp,
                 shape = RoundedCornerShape(NimazCornerRadius.Medium),
             ) {
                 Column(

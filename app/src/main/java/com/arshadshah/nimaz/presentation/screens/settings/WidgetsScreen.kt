@@ -272,8 +272,8 @@ private fun WidgetSection(
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            style = NimazCardStyle.ELEVATED,
-            tone = NimazTone.NEUTRAL
+            tone = NimazTone.NEUTRAL,
+            elevation = 0.dp
         ) {
         Row(
             modifier = Modifier
@@ -820,8 +820,8 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        style = NimazCardStyle.ELEVATED,
-        tone = NimazTone.NEUTRAL
+        tone = NimazTone.NEUTRAL,
+        elevation = 0.dp
     ) {
     Column(
         modifier = Modifier
