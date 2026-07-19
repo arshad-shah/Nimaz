@@ -727,6 +727,10 @@
     <string name="quran_home_surah_info">Surah Info</string>
     <string name="quran_home_verse_of_the_day">VERSE OF THE DAY</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
+    <!-- Recommended surah card metadata: verse count and starting juz, e.g. "110 Verses · Juz 15" -->
+    <string name="quran_home_recommended_meta">%1$s · Juz %2$d</string>
+    <!-- Spoken label for a recommended surah card, e.g. "Al-Kahf, surah 18, Friday Sunnah" -->
+    <string name="quran_home_recommended_a11y">%1$s, surah %2$d, %3$s</string>
     <string name="quran_home_read_verse">Read</string>
     <string name="quran_home_recommended">Recommended</string>
     <string name="quran_home_reason_friday">Friday Sunnah</string>
@@ -1147,6 +1151,8 @@
     <!-- Quran surah info labels -->
     <string name="quran_order_label">Order</string>
     <string name="quran_juz_label">Juz</string>
+    <string name="quran_verses_label">Verses</string>
+    <string name="quran_page_label">Page</string>
     <string name="quran_makki">Makki</string>
     <string name="quran_madani">Madani</string>
     <string name="quran_meccan">Meccan</string>

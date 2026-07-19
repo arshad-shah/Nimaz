@@ -2,6 +2,7 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -17,8 +18,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.clearAndSetSemantics
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,8 +34,9 @@ import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.SurahNumberBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -100,50 +107,94 @@ private fun RecommendedSurahCard(
     reason: String,
     onClick: () -> Unit
 ) {
+    // The card carries one spoken label for the whole tile. The number is only a
+    // decorative numeral visually, but it still belongs in the announcement —
+    // scanning by surah number is a real way people navigate the Quran.
+    val spokenLabel = stringResource(
+        R.string.quran_home_recommended_a11y,
+        surah.nameEnglish,
+        surah.number,
+        reason
+    )
     NimazCard(
         style = NimazCardStyle.ELEVATED,
         onClick = onClick,
-        modifier = Modifier.width(160.dp),
+        modifier = Modifier
+            .width(144.dp)
+            .semantics(mergeDescendants = true) { contentDescription = spokenLabel },
         shape = RoundedCornerShape(16.dp),
         tone = NimazTone.NEUTRAL
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp)
-        ) {
-            SurahNumberBadge(number = surah.number, size = 32.dp)
-
-            Spacer(modifier = Modifier.height(10.dp))
-
+        Box(modifier = Modifier.fillMaxWidth()) {
+            // The surah number recedes into the card as a large ghost numeral.
+            // It is the least useful thing on the card, so it stops competing
+            // with the name — but stays available for anyone scanning by number.
             Text(
-                text = surah.nameEnglish,
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
+                text = surah.number.toString(),
+                style = MaterialTheme.typography.displayMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = GHOST_NUMERAL_ALPHA),
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(end = 6.dp)
+                    .clearAndSetSemantics { }
             )
 
-            ArabicText(
-                text = surah.nameArabic,
-                size = ArabicTextSize.SMALL,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+            ) {
+                // The reason leads: it is why this surah is being suggested.
+                NimazBadge(
+                    text = reason,
+                    tone = NimazTone.ACCENT,
+                    size = NimazBadgeSize.SMALL
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(14.dp))
 
-            Text(
-                text = reason,
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+                ArabicText(
+                    text = surah.nameArabic,
+                    size = ArabicTextSize.MEDIUM,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Text(
+                    text = surah.nameEnglish,
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Spacer(modifier = Modifier.height(2.dp))
+
+                Text(
+                    text = stringResource(
+                        R.string.quran_home_recommended_meta,
+                        pluralStringResource(
+                            R.plurals.quran_home_verses_count,
+                            surah.ayahCount,
+                            surah.ayahCount
+                        ),
+                        surah.juzStart
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
+
+/** Opacity of the decorative ghost numeral behind each recommended surah card. */
+private const val GHOST_NUMERAL_ALPHA = 0.09f
 
 @Preview(showBackground = true)
 @Composable

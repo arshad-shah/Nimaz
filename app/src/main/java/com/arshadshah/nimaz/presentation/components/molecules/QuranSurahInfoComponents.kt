@@ -2,11 +2,8 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,16 +12,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -33,154 +26,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.domain.model.RevelationType
-import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-internal fun HeroHeader(
-    surah: Surah,
-    onNavigateBack: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.22f))
-            .padding(top = 15.dp, bottom = 28.dp, start = 20.dp, end = 20.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            // Top bar with back button
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(
-                    onClick = onNavigateBack,
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    modifier = Modifier.size(40.dp)
-                ) {
-                    NimazIcon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.cd_back),
-                        variant = NimazIconVariant.MUTED,
-                        size = NimazIconSize.MEDIUM
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            // Surah header content centered
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                // Surah number tile — soft teal
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(RoundedCornerShape(15.dp))
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = surah.number.toString(),
-                        style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(14.dp))
-
-                // Arabic name — teal
-                ArabicText(
-                    text = surah.nameArabic,
-                    size = ArabicTextSize.EXTRA_LARGE,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                // Gold ornamental divider
-                QuranOrnamentalDivider(
-                    modifier = Modifier.width(160.dp)
-                )
-
-                // English name
-                Text(
-                    text = surah.nameEnglish,
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Meaning / transliteration
-                Text(
-                    text = "\"${surah.nameTransliteration}\"",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Stats as soft teal chips: Verses, Revelation, Order
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    HeroStatChip(
-                        text = pluralStringResource(
-                            R.plurals.quran_home_verses_count,
-                            surah.numberOfAyahs,
-                            surah.numberOfAyahs
-                        )
-                    )
-                    HeroStatChip(
-                        text = if (surah.revelationType == RevelationType.MECCAN)
-                            stringResource(R.string.quran_makki)
-                        else stringResource(R.string.quran_madani)
-                    )
-                    HeroStatChip(
-                        text = "${stringResource(R.string.quran_order_label)} ${surah.orderInMushaf}"
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun HeroStatChip(text: String) {
-    NimazBadge(
-        text = text,
-        size = NimazBadgeSize.MEDIUM,
-        tone = NimazTone.ACCENT,
-        emphasis = NimazBadgeEmphasis.SOFT
-    )
-}
-
+/**
+ * Icon / label / value stat tile used by the surah info screen's stats row
+ * (Verses, Juz, Page). Sits directly on the page background, so it is a
+ * page-level card: [NimazCardStyle.ELEVATED] + [NimazTone.NEUTRAL].
+ */
 @Composable
 internal fun DetailCard(
     icon: ImageVector,
@@ -188,13 +51,12 @@ internal fun DetailCard(
     value: String,
     modifier: Modifier = Modifier
 ) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-            .padding(15.dp)
+    NimazCard(
+        modifier = modifier,
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL
     ) {
-        Column {
+        Column(modifier = Modifier.padding(15.dp)) {
             NimazIcon(
                 imageVector = icon,
                 contentDescription = null,
@@ -351,27 +213,6 @@ internal fun SurahAudioControlBar(
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun HeroHeaderPreview() {
-    NimazTheme {
-        HeroHeader(
-            surah = Surah(
-                number = 1,
-                nameArabic = "\u0627\u0644\u0641\u0627\u062A\u062D\u0629",
-                nameEnglish = "Al-Fatihah",
-                nameTransliteration = "The Opening",
-                revelationType = RevelationType.MECCAN,
-                ayahCount = 7,
-                juzStart = 1,
-                orderInMushaf = 5,
-                startPage = 1
-            ),
-            onNavigateBack = {}
-        )
     }
 }
 
