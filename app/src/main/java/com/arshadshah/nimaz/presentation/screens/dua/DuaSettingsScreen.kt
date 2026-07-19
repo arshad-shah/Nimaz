@@ -33,7 +33,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
@@ -264,10 +264,7 @@ private fun DuaPreviewCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
+                    tone = NimazCardTone.SUCCESS
                 ) {
                     Text(
                         text = stringResource(R.string.dua_settings_preview_transliteration),
@@ -286,10 +283,7 @@ private fun DuaPreviewCard(
                 Spacer(modifier = Modifier.height(10.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    tone = NimazCardTone.MUTED
                 ) {
                     Text(
                         text = stringResource(R.string.dua_settings_preview_translation),

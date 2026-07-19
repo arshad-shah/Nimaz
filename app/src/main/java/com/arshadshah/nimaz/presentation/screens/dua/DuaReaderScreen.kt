@@ -313,8 +313,8 @@ private fun VirtueCard(
         style = NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(16.dp),
         colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
-            border = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            container = MaterialTheme.colorScheme.primaryContainer,
+            border = MaterialTheme.colorScheme.primary,
             borderWidth = 1.dp
         )
     ) {

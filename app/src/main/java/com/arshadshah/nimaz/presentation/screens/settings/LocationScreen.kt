@@ -55,6 +55,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -377,7 +378,7 @@ private fun UseCurrentLocationButton(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
+        tone = NimazCardTone.MUTED,
         elevation = 0.dp,
         enabled = !isLoading,
         onClick = onClick
@@ -455,10 +456,7 @@ private fun LocationListItem(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
-        colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ),
+        colors = NimazCardDefaults.selectable(),
         elevation = 0.dp,
         onClick = onClick
     ) {
