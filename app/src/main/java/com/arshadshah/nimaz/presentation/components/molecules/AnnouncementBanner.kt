@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,6 +38,8 @@ import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -84,6 +85,13 @@ private fun AnnouncementBannerCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // The banner's tone carries the announcement type; the icon keeps the matching
+    // accent role so the type still reads at a glance against the tinted container.
+    val tone = when (announcement.type) {
+        AnnouncementType.FEATURE -> NimazCardTone.ACCENT
+        AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazCardTone.SUCCESS
+        AnnouncementType.CHANGELOG -> NimazCardTone.WARNING
+    }
     val accent = when (announcement.type) {
         AnnouncementType.FEATURE -> MaterialTheme.colorScheme.primary
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> MaterialTheme.colorScheme.tertiary
@@ -95,10 +103,11 @@ private fun AnnouncementBannerCard(
         AnnouncementType.CHANGELOG -> Icons.Outlined.Info
     }
 
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        tone = tone,
         shape = RoundedCornerShape(16.dp),
-        color = accent.copy(alpha = 0.1f),
+        elevation = 0.dp,
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
@@ -115,13 +124,11 @@ private fun AnnouncementBannerCard(
                 Text(
                     text = announcement.title,
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = announcement.body,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (showCta && announcement.ctaLabel != null) {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -138,7 +145,6 @@ private fun AnnouncementBannerCard(
                     Icon(
                         imageVector = Icons.Filled.Close,
                         contentDescription = "Dismiss announcement",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp),
                     )
                 }

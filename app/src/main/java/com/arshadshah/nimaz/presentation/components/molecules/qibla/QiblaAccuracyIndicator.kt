@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -36,6 +35,8 @@ import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
@@ -96,11 +97,9 @@ fun QiblaAccuracyBar(
     val (label, color, hint) = accuracyVisuals(accuracy)
     val calibrate = needsCalibration(accuracy)
 
-    Surface(
+    NimazCard(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
-        color = if (calibrate) color.copy(alpha = 0.08f)
-        else MaterialTheme.colorScheme.surfaceVariant
+        tone = if (calibrate) NimazCardTone.ERROR else NimazCardTone.MUTED,
     ) {
         Column(
             modifier = Modifier

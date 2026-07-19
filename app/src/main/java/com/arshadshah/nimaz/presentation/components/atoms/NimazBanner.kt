@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,8 +16,8 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -98,17 +97,11 @@ private fun InfoVariant(
     icon: ImageVector? = null,
     showBorder: Boolean = false
 ) {
-    val primaryColor = MaterialTheme.colorScheme.primary
-
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(if (showBorder) 14.dp else 12.dp),
-        color = primaryColor.copy(alpha = 0.1f),
-        border = if (showBorder) {
-            BorderStroke(1.dp, primaryColor.copy(alpha = 0.3f))
-        } else {
-            null
-        }
+        tone = NimazCardTone.ACCENT,
+        borderColor = if (showBorder) MaterialTheme.colorScheme.primary else null
     ) {
         InfoContent(message = message, icon = icon)
     }
@@ -134,7 +127,6 @@ private fun InfoContent(
         Text(
             text = message,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
             lineHeight = MaterialTheme.typography.bodySmall.lineHeight * 1.2
         )
     }
@@ -154,7 +146,7 @@ private fun WarningVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = warningColor.copy(alpha = 0.1f)
+        tone = NimazCardTone.WARNING
     ) {
         BannerContentRow(
             modifier = Modifier.padding(16.dp),
@@ -163,7 +155,7 @@ private fun WarningVariant(
             iconSpacing = 14.dp,
             title = title,
             titleStyle = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-            titleColor = MaterialTheme.colorScheme.onSurface,
+            titleColor = null,
             titleBottomSpacing = 4.dp,
             message = message,
             actionVariant = NimazButtonVariant.TONAL,
@@ -247,7 +239,7 @@ private fun ErrorVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f),
+        tone = NimazCardTone.ERROR,
         onClick = onClick
     ) {
         BannerContentRow(
@@ -257,7 +249,7 @@ private fun ErrorVariant(
             iconSpacing = 8.dp,
             title = title,
             titleStyle = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            titleColor = errorColor,
+            titleColor = null,
             titleBottomSpacing = 2.dp,
             message = message,
             actionVariant = NimazButtonVariant.DESTRUCTIVE,
@@ -268,37 +260,35 @@ private fun ErrorVariant(
 }
 
 /**
- * The rounded container shell shared by every variant: a full-width [Surface] with
- * the given [shape], [color] and optional [border]. Passing [onClick] makes the
- * whole banner tappable — this is the one place the clickable-vs-static branch lives,
- * so individual variants never repeat it.
+ * The rounded container shell shared by every variant: a full-width [NimazCard] with
+ * the given [shape], semantic [tone] and optional [borderColor]. Passing [onClick]
+ * makes the whole banner tappable — this is the one place the clickable-vs-static
+ * branch lives, so individual variants never repeat it.
+ *
+ * The tone also publishes the matching content colour to the banner's children, so
+ * the title/message inherit it instead of restating an `onXxx` role per variant.
  */
 @Composable
 private fun BannerSurface(
     modifier: Modifier,
     shape: Shape,
-    color: Color,
-    border: BorderStroke? = null,
+    tone: NimazCardTone,
+    borderColor: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit
 ) {
-    if (onClick != null) {
-        Surface(
-            onClick = onClick,
-            modifier = modifier.fillMaxWidth(),
-            shape = shape,
-            color = color,
-            border = border,
-            content = content
-        )
-    } else {
-        Surface(
-            modifier = modifier.fillMaxWidth(),
-            shape = shape,
-            color = color,
-            border = border,
-            content = content
-        )
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        tone = tone,
+        onClick = onClick,
+        shape = shape,
+        colors = NimazCardDefaults.tone(tone).copy(
+            borderColor = borderColor,
+            activeBorderColor = borderColor
+        ),
+        elevation = 0.dp
+    ) {
+        content()
     }
 }
 
@@ -310,6 +300,9 @@ private fun BannerSurface(
  * Container styling (background, shape, border, click) is supplied by [BannerSurface];
  * this composable only lays out the content, taking the inner-padding [modifier] plus
  * the per-variant accent, icon spacing and title style.
+ *
+ * A null [titleColor] inherits the card's published content colour — the default, so a
+ * variant only names a colour when it deliberately deviates from its tone.
  */
 @Composable
 private fun BannerContentRow(
@@ -319,7 +312,7 @@ private fun BannerContentRow(
     iconSpacing: Dp,
     title: String?,
     titleStyle: TextStyle,
-    titleColor: Color,
+    titleColor: Color?,
     titleBottomSpacing: Dp,
     message: String,
     actionVariant: NimazButtonVariant,
@@ -345,14 +338,13 @@ private fun BannerContentRow(
                 Text(
                     text = title,
                     style = titleStyle,
-                    color = titleColor
+                    color = titleColor ?: LocalContentColor.current
                 )
                 Spacer(modifier = Modifier.height(titleBottomSpacing))
             }
             Text(
                 text = message,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodySmall
             )
         }
 
