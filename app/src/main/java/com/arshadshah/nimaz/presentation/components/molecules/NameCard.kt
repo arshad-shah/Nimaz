@@ -39,8 +39,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeColors
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -69,7 +69,7 @@ fun NameCard(
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
         onClick = onClick,
-        level = NimazCardLevel.RAISED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Row(
             modifier = Modifier

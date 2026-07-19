@@ -81,10 +81,10 @@ fun LanguageScreen(
             // Language Card
             item {
                 NimazCard(
-                    style = NimazCardStyle.FILLED,
+                    style = NimazCardStyle.ELEVATED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    tone = NimazTone.MUTED
+                    tone = NimazTone.NEUTRAL
                 ) {
                     Column {
                         AppLanguage.entries.forEachIndexed { index, language ->

@@ -80,8 +80,10 @@ import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
@@ -246,7 +248,11 @@ private fun HadithPage(
                         } else {
                             stringResource(R.string.hadith_narrated_by_format, narrator)
                         }
-                        NimazLabelChip(text = narratorText, highlighted = true)
+                        NimazBadge(
+                            text = narratorText,
+                            tone = NimazTone.ACCENT,
+                            size = NimazBadgeSize.MEDIUM
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
@@ -283,7 +289,11 @@ private fun HadithPage(
 
             if (!hadith.reference.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
-                NimazLabelChip(text = hadith.reference, icon = Icons.Default.Book)
+                NimazBadge(
+                    text = hadith.reference,
+                    icon = Icons.Default.Book,
+                    size = NimazBadgeSize.MEDIUM
+                )
             }
 
             if (state.showChain && !hadith.narratorChain.isNullOrBlank()) {

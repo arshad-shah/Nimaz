@@ -22,7 +22,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -579,8 +578,8 @@ private fun PrayerCheckItem(
     NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazTone.NEUTRAL,
-        level = NimazCardLevel.NESTED
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier

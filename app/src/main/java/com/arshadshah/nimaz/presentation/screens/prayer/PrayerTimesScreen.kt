@@ -338,9 +338,9 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.MUTED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

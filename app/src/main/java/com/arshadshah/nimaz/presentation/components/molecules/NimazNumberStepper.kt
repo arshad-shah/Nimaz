@@ -236,9 +236,9 @@ fun NimazNumberStepper(
 
         NimazNumberStepperVariant.SPREAD -> NimazCard(
             modifier = modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
+            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(size.corner),
-            tone = NimazTone.MUTED
+            tone = NimazTone.NEUTRAL
         ) {
             Row(
                 modifier = Modifier

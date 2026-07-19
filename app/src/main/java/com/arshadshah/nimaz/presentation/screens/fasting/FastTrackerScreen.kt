@@ -66,7 +66,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
@@ -542,9 +541,9 @@ private fun TodayFastSection(
         Spacer(modifier = Modifier.height(12.dp))
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
+            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(16.dp),
-            tone = NimazTone.MUTED
+            tone = NimazTone.NEUTRAL
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 // Header with date and status
@@ -999,9 +998,9 @@ private fun RecommendedFastCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier.padding(15.dp),
@@ -1291,8 +1290,8 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
+                    style = NimazCardStyle.ELEVATED,
                     tone = NimazTone.NEUTRAL,
-                    level = NimazCardLevel.NESTED,
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

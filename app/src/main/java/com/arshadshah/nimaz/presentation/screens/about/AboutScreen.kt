@@ -58,6 +58,7 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -286,8 +287,9 @@ private fun LinksCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -499,8 +501,9 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
       Row(
         modifier = Modifier
@@ -587,8 +590,9 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
 private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
       Column(
         modifier = Modifier

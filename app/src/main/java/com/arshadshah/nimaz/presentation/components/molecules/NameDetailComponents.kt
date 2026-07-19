@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -69,8 +69,8 @@ fun NameDetailSectionCard(
     if (content.isNotBlank()) {
         NimazCard(
             modifier = modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
-            level = NimazCardLevel.RAISED
+            style = NimazCardStyle.ELEVATED,
+            tone = NimazTone.NEUTRAL
         ) {
             Column(
                 modifier = Modifier.padding(NimazSpacing.Large),

@@ -519,11 +519,11 @@ private fun RecentSearchItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier

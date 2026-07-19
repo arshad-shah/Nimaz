@@ -63,13 +63,15 @@ import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
@@ -219,7 +221,11 @@ private fun DuaPage(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             dua.occasion?.let { occasion ->
-                NimazLabelChip(text = occasion.displayName(), highlighted = true)
+                NimazBadge(
+                    text = occasion.displayName(),
+                    tone = NimazTone.ACCENT,
+                    size = NimazBadgeSize.MEDIUM
+                )
                 Spacer(modifier = Modifier.height(22.dp))
             }
 
@@ -290,7 +296,11 @@ private fun DuaMetaChips(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (!reference.isNullOrEmpty()) {
-            NimazLabelChip(text = reference, icon = Icons.Default.Book)
+            NimazBadge(
+                text = reference,
+                icon = Icons.Default.Book,
+                size = NimazBadgeSize.MEDIUM
+            )
         }
         if (repeatCount > 0) {
             val label = pluralStringResource(
@@ -298,7 +308,11 @@ private fun DuaMetaChips(
                 repeatCount,
                 repeatCount
             )
-            NimazLabelChip(text = label, icon = Icons.Default.Refresh)
+            NimazBadge(
+                text = label,
+                icon = Icons.Default.Refresh,
+                size = NimazBadgeSize.MEDIUM
+            )
         }
     }
 }

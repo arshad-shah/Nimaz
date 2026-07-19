@@ -62,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -246,7 +247,7 @@ internal fun AyahItem(
         // Translation
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            NimazCard(tone = NimazTone.MUTED) {
+            NimazCard(style = NimazCardStyle.ELEVATED, tone = NimazTone.NEUTRAL) {
                 Text(
                     text = ayah.translation,
                     style = MaterialTheme.typography.bodyMedium.copy(

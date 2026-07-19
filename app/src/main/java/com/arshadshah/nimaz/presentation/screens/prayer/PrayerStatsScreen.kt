@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -287,10 +286,9 @@ private fun InsightCard(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp),
-        tone = NimazTone.NEUTRAL,
-        level = NimazCardLevel.RAISED
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier.padding(15.dp),

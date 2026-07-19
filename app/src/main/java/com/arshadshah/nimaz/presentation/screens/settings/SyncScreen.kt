@@ -61,7 +61,6 @@ import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -276,10 +275,9 @@ private fun ModeSelectionContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         modifier = Modifier.fillMaxWidth(),
         tone = NimazTone.NEUTRAL,
-        level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -654,9 +652,8 @@ private fun ProgressContent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             NimazCard(
-                style = NimazCardStyle.FILLED,
+                style = NimazCardStyle.ELEVATED,
                 tone = NimazTone.NEUTRAL,
-                level = NimazCardLevel.RAISED,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -719,9 +716,8 @@ private fun ProgressContent(
 @Composable
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         tone = NimazTone.NEUTRAL,
-        level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -797,9 +793,8 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         tone = NimazTone.NEUTRAL,
-        level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {

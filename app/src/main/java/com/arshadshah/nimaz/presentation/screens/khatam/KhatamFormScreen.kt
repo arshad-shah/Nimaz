@@ -49,7 +49,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
@@ -250,7 +250,7 @@ private fun KhatamFormContent(
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
                     tone = NimazTone.NEUTRAL,
-                    level = NimazCardLevel.RAISED,
+                    style = NimazCardStyle.ELEVATED,
                 ) {
                     Row(
                         modifier = Modifier
@@ -332,7 +332,7 @@ private fun KhatamFormContent(
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
                     tone = NimazTone.NEUTRAL,
-                    level = NimazCardLevel.RAISED,
+                    style = NimazCardStyle.ELEVATED,
                 ) {
                     Column(Modifier.padding(NimazSpacing.Medium)) {
                         Text(
@@ -386,7 +386,7 @@ private fun KhatamFormContent(
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
                 tone = NimazTone.NEUTRAL,
-                level = NimazCardLevel.RAISED,
+                style = NimazCardStyle.ELEVATED,
             ) {
                 Row(
                     modifier = Modifier

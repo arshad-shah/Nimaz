@@ -101,11 +101,11 @@ private fun RecommendedSurahCard(
     onClick: () -> Unit
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = Modifier.width(160.dp),
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier

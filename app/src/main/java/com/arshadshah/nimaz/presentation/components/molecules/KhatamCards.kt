@@ -30,12 +30,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.KhatamAccent
 import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressBar
 import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.paceColor
 import com.arshadshah.nimaz.presentation.components.atoms.paceLabel
 import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
@@ -81,12 +82,13 @@ fun KhatamHeroCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (showActiveBadge) {
-                    NimazLabelChip(
+                    NimazBadge(
                         text = stringResource(
                             if (isComplete) R.string.khatam_status_completed_badge
                             else R.string.khatam_active
                         ),
-                        highlighted = true,
+                        tone = NimazTone.ACCENT,
+                        size = NimazBadgeSize.MEDIUM,
                     )
                 } else {
                     Spacer(Modifier.width(0.dp))
@@ -239,18 +241,21 @@ fun KhatamRowCard(
                     )
                     Spacer(Modifier.width(NimazSpacing.Small))
                     when {
-                        isComplete -> NimazLabelChip(
+                        isComplete -> NimazBadge(
                             text = stringResource(R.string.khatam_status_completed_badge),
-                            highlighted = true,
+                            tone = NimazTone.ACCENT,
+                            size = NimazBadgeSize.MEDIUM,
                         )
 
-                        khatam.isActive -> NimazLabelChip(
+                        khatam.isActive -> NimazBadge(
                             text = stringResource(R.string.khatam_status_active_badge),
-                            highlighted = true,
+                            tone = NimazTone.ACCENT,
+                            size = NimazBadgeSize.MEDIUM,
                         )
 
-                        isArchived -> NimazLabelChip(
+                        isArchived -> NimazBadge(
                             text = stringResource(R.string.khatam_archived),
+                            size = NimazBadgeSize.MEDIUM,
                         )
                     }
                 }

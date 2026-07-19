@@ -46,6 +46,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
@@ -389,7 +390,8 @@ private fun PreviewCard(
                 Spacer(modifier = Modifier.height(10.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazTone.MUTED
+                    style = NimazCardStyle.ELEVATED,
+                    tone = NimazTone.NEUTRAL
                 ) {
                     Text(
                         text = stringResource(R.string.quran_settings_preview_translation),

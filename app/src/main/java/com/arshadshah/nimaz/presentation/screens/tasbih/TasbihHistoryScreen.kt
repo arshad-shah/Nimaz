@@ -174,9 +174,9 @@ private fun StatsSummaryCard(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier

@@ -40,12 +40,11 @@ internal fun BookmarkListItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        tone = NimazTone.MUTED,
-        elevation = 0.dp
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier
@@ -100,11 +99,11 @@ internal fun BookmarkCard(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = modifier.width(160.dp),
         shape = RoundedCornerShape(12.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier.padding(12.dp)

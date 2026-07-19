@@ -377,9 +377,9 @@ private fun UseCurrentLocationButton(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp),
-        tone = NimazTone.MUTED,
-        elevation = 0.dp,
+        tone = NimazTone.NEUTRAL,
         enabled = !isLoading,
         onClick = onClick
     ) {

@@ -38,8 +38,8 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.molecules.FavoriteFab
@@ -134,8 +134,8 @@ fun ProphetDetailScreen(
                     item {
                         NimazCard(
                             modifier = Modifier.fillMaxWidth(),
-                            style = NimazCardStyle.FILLED,
-                            level = NimazCardLevel.RAISED
+                            style = NimazCardStyle.ELEVATED,
+                            tone = NimazTone.NEUTRAL
                         ) {
                             Column(
                                 modifier = Modifier.padding(NimazSpacing.Large),
@@ -176,8 +176,8 @@ fun ProphetDetailScreen(
                 item {
                     NimazCard(
                         modifier = Modifier.fillMaxWidth(),
-                        style = NimazCardStyle.FILLED,
-                        level = NimazCardLevel.RAISED
+                        style = NimazCardStyle.ELEVATED,
+                        tone = NimazTone.NEUTRAL
                     ) {
                         Column(
                             modifier = Modifier.padding(NimazSpacing.Large),
@@ -252,8 +252,8 @@ private fun BulletListCard(
 ) {
     NimazCard(
         modifier = Modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
-        level = NimazCardLevel.RAISED
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier.padding(NimazSpacing.Large),

@@ -34,6 +34,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.mikepenz.aboutlibraries.Libs
@@ -107,8 +108,9 @@ private fun LibraryCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
       Column(
         modifier = Modifier

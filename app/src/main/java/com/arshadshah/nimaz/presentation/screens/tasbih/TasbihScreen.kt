@@ -390,10 +390,10 @@ private fun CurrentTasbihPeek(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        tone = NimazTone.MUTED
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier

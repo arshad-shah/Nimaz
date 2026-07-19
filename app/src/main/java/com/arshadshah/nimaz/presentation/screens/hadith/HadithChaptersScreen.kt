@@ -46,7 +46,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
@@ -162,15 +163,17 @@ private fun BookHeaderCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NimazLabelChip(
+                NimazBadge(
                     text = pluralStringResource(
                         R.plurals.hadith_chapters_count_format,
                         chapterCount,
                         chapterCount
-                    )
+                    ),
+                    size = NimazBadgeSize.MEDIUM
                 )
-                NimazLabelChip(
-                    text = stringResource(R.string.hadith_count_format, book.totalHadiths.toString())
+                NimazBadge(
+                    text = stringResource(R.string.hadith_count_format, book.totalHadiths.toString()),
+                    size = NimazBadgeSize.MEDIUM
                 )
             }
         }
