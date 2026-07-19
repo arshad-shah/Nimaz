@@ -76,10 +76,62 @@ data class NimazCardColors(
     internal fun strokeWidth(selected: Boolean) = if (selected) activeBorderWidth else borderWidth
 }
 
+/**
+ * Semantic tone — *what a card signifies*, orthogonal to [NimazCardStyle], which
+ * controls *how it sits on the page* (elevation/border treatment).
+ *
+ * Call sites pick a tone by meaning and never specify raw colours, so the app has
+ * one muted tint rather than the `surfaceVariant` @ 0.4/0.5/0.6 spread this axis
+ * was introduced to replace.
+ *
+ * - [NEUTRAL] — the default card surface.
+ * - [MUTED] — a quiet, recessed surface (inset notes, secondary detail).
+ * - [ACCENT] — brand-tinted, draws the eye (hero/primary actions).
+ * - [SUCCESS] — a completed//achieved state (streaks, finished khatam).
+ * - [WARNING] — needs attention but is not an error (missed prayer, qada due).
+ * - [ERROR] — a destructive or failed state.
+ */
+enum class NimazCardTone {
+    NEUTRAL,
+    MUTED,
+    ACCENT,
+    SUCCESS,
+    WARNING,
+    ERROR
+}
+
 object NimazCardDefaults {
 
     /** Default corner radius for every Nimaz card. */
     val Shape: Shape = RoundedCornerShape(16.dp)
+
+    /**
+     * Resolves a [NimazCardTone] into container/content colours.
+     *
+     * This is the single place the app decides what each tone *looks like* — every
+     * card routes through here, so changing a tone restyles the whole app.
+     *
+     * Every tone resolves to an **opaque** Material container role rather than a
+     * `.copy(alpha = …)` tint. Two reasons: opaque roles are contrast-checked in
+     * light *and* dark, and [contentColorFor] can resolve a real `onXxxContainer`
+     * for them — so [onColorFor] returns the correct content colour instead of
+     * silently falling back to `onSurface` the way an alpha-tinted colour does.
+     *
+     * Feature-specific Islamic palette art (NimazColors/CardArtColors) is not
+     * modelled here; it stays in the [GradientCard] / [PrayerCard] presets.
+     */
+    @Composable
+    fun tone(tone: NimazCardTone): NimazCardColors {
+        val container: Color = when (tone) {
+            NimazCardTone.NEUTRAL -> MaterialTheme.colorScheme.surface
+            NimazCardTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
+            NimazCardTone.ACCENT -> MaterialTheme.colorScheme.primaryContainer
+            NimazCardTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
+            NimazCardTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
+            NimazCardTone.ERROR -> MaterialTheme.colorScheme.errorContainer
+        }
+        return colors(container = container)
+    }
 
     /**
      * A non-selectable card's colours — the active set mirrors the inactive set,
@@ -154,8 +206,11 @@ object NimazCardDefaults {
  *
  * @param selected when the card has an active/selected state, drives which colour
  *   triple from [colors] is used (and the content colour published to children).
- * @param colors container/content/border, via [NimazCardDefaults.colors] /
- *   [NimazCardDefaults.selectable].
+ * @param tone the card's semantic meaning ([NimazCardTone]) — the preferred way to
+ *   colour a card. Prefer this over passing bespoke [colors]: tones are the shared
+ *   vocabulary, raw colours are how surfaces drift apart.
+ * @param colors container/content/border. Defaults to [tone]; override only for a
+ *   selectable card ([NimazCardDefaults.selectable]) or a genuine one-off.
  * @param gradient gradient stops for [NimazCardStyle.GRADIENT].
  * @param elevation overrides the resting elevation (default: Material's per-style).
  */
@@ -164,10 +219,11 @@ fun NimazCard(
     modifier: Modifier = Modifier,
     style: NimazCardStyle = NimazCardStyle.FILLED,
     selected: Boolean = false,
+    tone: NimazCardTone = NimazCardTone.NEUTRAL,
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
     shape: Shape = NimazCardDefaults.Shape,
-    colors: NimazCardColors = NimazCardDefaults.colors(),
+    colors: NimazCardColors = NimazCardDefaults.tone(tone),
     gradient: List<Color>? = null,
     elevation: Dp? = null,
     content: @Composable ColumnScope.() -> Unit,
@@ -356,6 +412,12 @@ private fun NimazCardShowcase() {
         }
         NimazSurfaceCard {
             Text(text = "Surface Card", modifier = Modifier.padding(16.dp))
+        }
+        // Every semantic tone — container and content both come from the tone.
+        NimazCardTone.entries.forEach { tone ->
+            NimazCard(tone = tone) {
+                Text(text = "Tone — ${tone.name}", modifier = Modifier.padding(16.dp))
+            }
         }
         // Selectable — inactive then active, content colour inherited from the card.
         NimazCard(selected = false, colors = NimazCardDefaults.selectable()) {
