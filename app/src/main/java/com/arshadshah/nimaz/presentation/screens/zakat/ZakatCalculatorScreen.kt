@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
@@ -38,7 +37,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -63,7 +61,9 @@ import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
@@ -313,7 +313,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Wallet,
             iconTint = NimazColors.ZakatColors.Cash,
-            iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
             label = stringResource(R.string.cash_on_hand),
             hint = stringResource(R.string.hint_physical_cash),
             value = state.assets.cashOnHand,
@@ -322,7 +321,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.AccountBalance,
             iconTint = NimazColors.ZakatColors.Cash,
-            iconBackground = NimazColors.ZakatColors.Cash.copy(alpha = 0.2f),
             label = stringResource(R.string.bank_balance),
             hint = stringResource(R.string.hint_bank_accounts),
             value = state.assets.bankBalance,
@@ -331,7 +329,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Savings,
             iconTint = NimazColors.ZakatColors.Gold,
-            iconBackground = NimazColors.ZakatColors.Gold.copy(alpha = 0.2f),
             label = stringResource(R.string.gold),
             hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.goldGrams,
@@ -341,7 +338,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Savings,
             iconTint = NimazColors.ZakatColors.Silver,
-            iconBackground = NimazColors.ZakatColors.Silver.copy(alpha = 0.2f),
             label = stringResource(R.string.silver),
             hint = stringResource(R.string.hint_weight_in_grams),
             value = state.assets.silverGrams,
@@ -351,7 +347,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.AutoMirrored.Filled.ShowChart,
             iconTint = NimazColors.ZakatColors.Investment,
-            iconBackground = NimazColors.ZakatColors.Investment.copy(alpha = 0.2f),
             label = stringResource(R.string.investments),
             hint = stringResource(R.string.hint_stocks_bonds),
             value = state.assets.investments,
@@ -360,7 +355,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Business,
             iconTint = MaterialTheme.colorScheme.primary,
-            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             label = stringResource(R.string.business_inventory),
             hint = stringResource(R.string.hint_goods_for_trade),
             value = state.assets.businessInventory,
@@ -369,7 +363,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Receipt,
             iconTint = MaterialTheme.colorScheme.primary,
-            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             label = stringResource(R.string.receivables),
             hint = stringResource(R.string.hint_money_owed_to_you),
             value = state.assets.receivables,
@@ -378,7 +371,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.Home,
             iconTint = MaterialTheme.colorScheme.primary,
-            iconBackground = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
             label = stringResource(R.string.rental_income),
             hint = stringResource(R.string.hint_income_from_properties),
             value = state.assets.rentalIncome,
@@ -387,7 +379,6 @@ private fun AssetInputCards(
         InputCard(
             icon = Icons.Default.MoreHoriz,
             iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
-            iconBackground = MaterialTheme.colorScheme.surfaceVariant,
             label = stringResource(R.string.other_assets),
             hint = stringResource(R.string.hint_other_zakatable_assets),
             value = state.assets.otherAssets,
@@ -405,7 +396,6 @@ private fun LiabilityInputCards(
         InputCard(
             icon = Icons.Default.CreditCard,
             iconTint = MaterialTheme.colorScheme.error,
-            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
             label = stringResource(R.string.debts_owed),
             hint = stringResource(R.string.hint_personal_debts),
             value = state.liabilities.debts,
@@ -414,7 +404,6 @@ private fun LiabilityInputCards(
         InputCard(
             icon = Icons.Default.AccountBalance,
             iconTint = MaterialTheme.colorScheme.error,
-            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
             label = stringResource(R.string.loans),
             hint = stringResource(R.string.hint_bank_personal_loans),
             value = state.liabilities.loans,
@@ -423,7 +412,6 @@ private fun LiabilityInputCards(
         InputCard(
             icon = Icons.Default.Receipt,
             iconTint = MaterialTheme.colorScheme.error,
-            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
             label = stringResource(R.string.bills_due),
             hint = stringResource(R.string.hint_outstanding_bills),
             value = state.liabilities.billsDue,
@@ -432,7 +420,6 @@ private fun LiabilityInputCards(
         InputCard(
             icon = Icons.Default.MoreHoriz,
             iconTint = MaterialTheme.colorScheme.error,
-            iconBackground = MaterialTheme.colorScheme.error.copy(alpha = 0.2f),
             label = stringResource(R.string.other_liabilities),
             hint = stringResource(R.string.hint_other_liabilities),
             value = state.liabilities.otherLiabilities,
@@ -616,7 +603,6 @@ private fun NisabOptionCard(
 private fun InputCard(
     icon: ImageVector,
     iconTint: Color,
-    iconBackground: Color,
     label: String,
     hint: String,
     value: Double,
@@ -638,21 +624,12 @@ private fun InputCard(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Icon box
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = iconBackground,
-                modifier = Modifier.size(40.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    NimazIcon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconTint,
-                        size = NimazIconSize.MEDIUM
-                    )
-                }
-            }
+            NimazIconWell(
+                icon = icon,
+                accent = iconTint,
+                size = NimazIconWellSize.MEDIUM,
+                shape = NimazIconWellShape.ROUNDED
+            )
 
             // Label and hint
             Column(modifier = Modifier.weight(1f)) {

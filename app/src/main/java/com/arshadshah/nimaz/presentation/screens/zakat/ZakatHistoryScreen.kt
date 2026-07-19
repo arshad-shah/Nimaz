@@ -27,7 +27,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,10 +47,12 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -324,29 +325,14 @@ private fun HistoryEntryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!entry.isPaid) {
-                    Surface(
+                    NimazButton(
+                        text = stringResource(R.string.zakat_mark_as_paid),
                         onClick = onMarkAsPaid,
-                        shape = RoundedCornerShape(8.dp),
-                        color = NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            NimazIcon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = NimazColors.StatusColors.Prayed,
-                                size = NimazIconSize.SMALL
-                            )
-                            Text(
-                                text = stringResource(R.string.zakat_mark_as_paid),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = NimazColors.StatusColors.Prayed
-                            )
-                        }
-                    }
+                        variant = NimazButtonVariant.TONAL,
+                        size = NimazButtonSize.SMALL,
+                        leadingIcon = Icons.Default.Check,
+                        accent = NimazColors.StatusColors.Prayed
+                    )
 
                     Spacer(modifier = Modifier.width(8.dp))
                 }

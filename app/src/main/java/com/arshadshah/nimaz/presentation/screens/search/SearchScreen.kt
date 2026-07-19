@@ -76,6 +76,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -784,20 +787,12 @@ private fun SearchResultCard(
                     .padding(12.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(iconColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    NimazIcon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconColor,
-                        iconSize = 20.dp
-                    )
-                }
+                NimazIconWell(
+                    icon = icon,
+                    accent = iconColor,
+                    size = NimazIconWellSize.MEDIUM,
+                    shape = NimazIconWellShape.ROUNDED
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 

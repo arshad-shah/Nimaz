@@ -45,6 +45,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
@@ -235,27 +240,16 @@ private fun ConfidenceChip(confidence: AnswerConfidence) {
         AnswerConfidence.LOW ->
             stringResource(R.string.ai_confidence_low) to MaterialTheme.colorScheme.onSurfaceVariant
     }
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(CircleShape)
-                .background(color),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
+    NimazBadge(
+        text = label,
+        shape = NimazBadgeShape.ROUNDED,
+        size = NimazBadgeSize.MEDIUM,
+        indicatorColor = color,
+        colors = NimazBadgeDefaults.feature(
             color = color,
-            modifier = Modifier.padding(start = 5.dp),
-        )
-    }
+            emphasis = NimazBadgeEmphasis.SOFT,
+        ),
+    )
 }
 
 /**

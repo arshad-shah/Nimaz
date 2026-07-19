@@ -78,6 +78,9 @@ data class NimazBadgeColors(
     val borderColor: Color? = null,
 )
 
+/** Diameter of the optional status dot rendered before a badge's label. */
+private val INDICATOR_DOT_SIZE = 6.dp
+
 object NimazBadgeDefaults {
 
     /** Opacity of the [NimazBadgeEmphasis.CUTOUT] well and its border. */
@@ -255,6 +258,12 @@ object NimazBadgeDefaults {
  *
  * @param onClick makes the badge tappable; leave null for a static label.
  * @param selectedTone the tone used while [selected]; ignored otherwise.
+ * @param indicatorColor draws a small filled dot before the label — a status
+ *   indicator ("Active", a confidence level, an availability state) whose colour
+ *   is independent of the badge's own tone. [icon] cannot express this: a dot is
+ *   not an [ImageVector], and call sites that wanted one hand-rolled the whole
+ *   pill to get it. Pass null for no dot; pass an [icon] instead when a glyph
+ *   carries more meaning than a colour.
  * @param colors escape hatch for feature art — prefer [tone]/[emphasis]. Build it
  *   with [NimazBadgeDefaults.feature], as [StatusBadge] does.
  */
@@ -267,6 +276,7 @@ fun NimazBadge(
     shape: NimazBadgeShape = NimazBadgeShape.PILL,
     size: NimazBadgeSize = NimazBadgeSize.MEDIUM,
     icon: ImageVector? = null,
+    indicatorColor: Color? = null,
     selected: Boolean = false,
     selectedTone: NimazTone = NimazTone.ACCENT,
     onClick: (() -> Unit)? = null,
@@ -291,6 +301,14 @@ fun NimazBadge(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
+        if (indicatorColor != null) {
+            Box(
+                modifier = Modifier
+                    .size(INDICATOR_DOT_SIZE)
+                    .clip(CircleShape)
+                    .background(indicatorColor)
+            )
+        }
         if (icon != null) {
             NimazIcon(
                 imageVector = icon,
