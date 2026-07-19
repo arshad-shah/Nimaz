@@ -233,16 +233,6 @@ object NimazCardDefaults {
         activeBorderWidth = activeBorderWidth,
     )
 
-    /**
-     * The flat "surface card" preset: a [MaterialTheme.colorScheme.surface]
-     * container with a 1.dp outline and no elevation. Used by [NimazSurfaceCard].
-     */
-    @Composable
-    fun surface(
-        container: Color = MaterialTheme.colorScheme.surface,
-        border: Color? = MaterialTheme.colorScheme.outline,
-    ): NimazCardColors = colors(container = container, border = border)
-
     /** [contentColorFor] but falling back to `onSurface` for off-scheme colours. */
     @Composable
     fun onColorFor(background: Color): Color {
@@ -333,15 +323,21 @@ fun NimazCard(
                 containerColor = containerColor,
                 contentColor = contentColor,
             )
+            // Honour `elevation` here too. Previously this branch dropped it, so
+            // an outlined card silently ignored the parameter — callers passing
+            // `elevation = 0.dp` to guarantee flatness were writing a no-op.
+            val cardElevation = elevation?.let { CardDefaults.outlinedCardElevation(defaultElevation = it) }
+                ?: CardDefaults.outlinedCardElevation()
             if (onClick != null) {
                 OutlinedCard(
                     onClick = onClick, modifier = modifier, enabled = enabled, shape = shape,
-                    colors = cardColors, border = borderStroke!!, content = content,
+                    colors = cardColors, elevation = cardElevation, border = borderStroke!!,
+                    content = content,
                 )
             } else {
                 OutlinedCard(
                     modifier = modifier, shape = shape, colors = cardColors,
-                    border = borderStroke!!, content = content,
+                    elevation = cardElevation, border = borderStroke!!, content = content,
                 )
             }
         }
@@ -390,35 +386,6 @@ fun GradientCard(
 }
 
 /**
- * Flat, outlined "content card" preset.
- *
- * Centralises the `surface` container + zero elevation + 1.dp `outline` border +
- * 16.dp corners combination shared by the home/today surfaces (DuaOfTheMomentCard,
- * HadithOfTheDayCard, FastingStatusCard, TodaysProgressCard, JumuahCard). Pass
- * [onClick] to make the whole card tappable, or keep the click handling in the
- * caller's [modifier].
- */
-@Composable
-fun NimazSurfaceCard(
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null,
-    shape: Shape = NimazCardDefaults.Shape,
-    containerColor: Color = MaterialTheme.colorScheme.surface,
-    borderColor: Color? = MaterialTheme.colorScheme.outline,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    NimazCard(
-        modifier = modifier,
-        style = NimazCardStyle.FILLED,
-        onClick = onClick,
-        shape = shape,
-        colors = NimazCardDefaults.surface(container = containerColor, border = borderColor),
-        elevation = 0.dp,
-        content = content,
-    )
-}
-
-/**
  * Prayer-themed gradient card preset.
  */
 @Composable
@@ -443,7 +410,7 @@ fun PrayerCard(
 // ==================== PREVIEWS ====================
 
 /**
- * Showcase of every [NimazCardStyle] plus the gradient/surface/selectable variants,
+ * Showcase of every [NimazCardStyle] plus the gradient/tone/selectable variants,
  * rendered in both light and dark themes by the previews below.
  */
 @Composable
@@ -462,9 +429,6 @@ private fun NimazCardShowcase() {
         }
         NimazCard(style = NimazCardStyle.OUTLINED) {
             Text(text = "Outlined Card", modifier = Modifier.padding(16.dp))
-        }
-        NimazSurfaceCard {
-            Text(text = "Surface Card", modifier = Modifier.padding(16.dp))
         }
         // Every semantic tone — container and content both come from the tone.
         NimazTone.entries.forEach { tone ->

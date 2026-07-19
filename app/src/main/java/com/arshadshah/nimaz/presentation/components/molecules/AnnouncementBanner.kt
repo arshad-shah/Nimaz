@@ -35,10 +35,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -85,18 +87,16 @@ private fun AnnouncementBannerCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // The banner's tone carries the announcement type; the icon keeps the matching
-    // accent role so the type still reads at a glance against the tinted container.
+    // The banner's tone carries the announcement type. Styling matches every other
+    // banner in the app (see NimazBannerDefaults): a quiet container with the tone
+    // in the border and the icon, so an announcement annotates Home rather than
+    // shouting over it.
     val tone = when (announcement.type) {
         AnnouncementType.FEATURE -> NimazTone.ACCENT
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazTone.SUCCESS
         AnnouncementType.CHANGELOG -> NimazTone.WARNING
     }
-    val accent = when (announcement.type) {
-        AnnouncementType.FEATURE -> MaterialTheme.colorScheme.primary
-        AnnouncementType.PRIVACY, AnnouncementType.TOS -> MaterialTheme.colorScheme.tertiary
-        AnnouncementType.CHANGELOG -> MaterialTheme.colorScheme.secondary
-    }
+    val accent = NimazBannerDefaults.accent(tone)
     val icon = when (announcement.type) {
         AnnouncementType.FEATURE -> Icons.Outlined.AutoAwesome
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> Icons.Outlined.Shield
@@ -105,9 +105,10 @@ private fun AnnouncementBannerCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
         tone = tone,
         shape = RoundedCornerShape(16.dp),
-        elevation = 0.dp,
+        colors = NimazBannerDefaults.colors(tone),
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),

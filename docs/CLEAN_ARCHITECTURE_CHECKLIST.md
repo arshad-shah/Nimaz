@@ -132,6 +132,12 @@ design-token / illustration files (see below).
   *is* their design-token file) and `onboarding/OnboardingArt.kt` (illustration art). If you do
   tokenize them, add a `NimazColors.TasbihBeadStyles` group under visual review.
 
+- [x] ~~**Ad-hoc `MaterialTheme.colorScheme.*` container colours passed per card.**~~ **Resolved.**
+  Screens no longer pick a container role by hand (the sweep found the same "muted panel" written
+  as `surfaceVariant.copy(alpha = 0.4f)`, `0.5f` and `0.6f` in different features). Card and badge
+  surfaces now take a semantic `NimazTone` and resolve through `NimazCardDefaults.tone()` /
+  `NimazBadgeDefaults.colors()`. See `ARCHITECTURE.md` §8.1–§8.2.
+
 > Components (`presentation/components/`) also contain literals; many are intentional gradient
 > stops. Prefer named tokens, but a dedicated design-token file (e.g. `BeadDesign.kt`) holding
 > grouped palettes is acceptable — the anti-pattern is *scattered* literals inside screen logic.
@@ -213,6 +219,57 @@ rg -o -N 'class (Get|Observe)(\w+)UseCase' app/src/main/java/com/arshadshah/nima
 
 ---
 
+## AP-8 · Design-system drift (hand-rolled surfaces, bypassed tones)
+
+**Rule:** every card-like surface is a `NimazCard` and every small label is a `NimazBadge`, and
+both are coloured by a semantic `NimazTone` — not by a `colors =` / `containerColor =` argument
+chosen at the call site. See `ARCHITECTURE.md` §8.1–§8.2.
+
+**Why it hurts:** colour decisions spread back out across ~200 call sites, so a theme change stops
+being a one-file edit and light/dark contrast quietly diverges per screen.
+
+**Detect:**
+```bash
+# Hand-rolled card containers that should be a NimazCard tone:
+rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/nimaz/presentation/screens/
+```
+
+- [x] ~~**Hand-rolled `Surface`/`Box(clip+background)` cards.**~~ **Resolved.** `NimazSurfaceCard`
+  and the private per-screen surfaces were removed; separation is now context-driven (page-level
+  `NEUTRAL` + `ELEVATED`, nested `OUTLINED` + `elevation = 0.dp`, selected item = fill).
+- [x] ~~**Hand-rolled badge/pill duplicates.**~~ **Resolved.** `NimazLabelChip` (+ its test),
+  `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge` all collapsed into
+  `NimazBadge`.
+- [ ] **Cards that need a border still bypass `tone`.** A `NimazTone` resolves container + content
+  but **not** a stroke, so any bordered card falls back to an explicit
+  `NimazCardDefaults.colors(container = …, border = …)`. 10 files today. Fix by teaching the tone
+  resolver about borders, then converting these back.
+  ```bash
+  rg -n -A3 'NimazCardDefaults\.colors\(' app/src/main/java/com/arshadshah/nimaz/presentation/ | rg 'border'
+  ```
+- [ ] **`BadgeType` labels are hardcoded English.** Blocks `StatusBadge` adoption anywhere
+  localized strings are needed. Convert `label: String` to `@StringRes Int`.
+  ```bash
+  rg -n 'object \w+ : BadgeType\("' app/src/main/java/com/arshadshah/nimaz/presentation/components/atoms/NimazBadge.kt
+  ```
+- [ ] **`NimazCard(style = OUTLINED)` silently ignores `elevation`.** The OUTLINED branch renders
+  Material's `OutlinedCard`, which has no elevation slot, so the parameter is dropped without a
+  warning — the same "lying signature" failure mode as AP-7.3.
+  ```bash
+  rg -n -B2 -A2 'NimazCardStyle\.OUTLINED' app/src/main/java/com/arshadshah/nimaz/presentation/ | rg 'elevation'
+  ```
+- [ ] **Untriaged explicit `style = NimazCardStyle.FILLED` call sites** (~47). FILLED is already
+  the default; each one is either a deliberate flat card or a page-level card that should be
+  `ELEVATED` (in light mode a filled card barely separates from the background). Triage per screen.
+  ```bash
+  rg -c 'style = NimazCardStyle\.FILLED' app/src/main/java/com/arshadshah/nimaz/presentation/ | sort -t: -k2 -rn
+  ```
+- [ ] **No visual verification of the tone migration.** The sweep is verified by
+  `compileDebugKotlin` + unit tests only. Walk the migrated screens in light and dark (or render
+  the `NimazCard`/`NimazBadge` `@Preview` showcases, which cover both themes) before release.
+
+---
+
 ## Quick full re-scan
 
 ```bash
@@ -222,6 +279,8 @@ echo "AP-2 presentation->dao/entity:"; grep -rlnE "import com.arshadshah.nimaz.d
 echo "AP-2 VM injects Dao/Impl:"; grep -rlnE "private val [a-zA-Z]+: [A-Za-z]+(Dao|RepositoryImpl)" presentation/viewmodel/ || echo "  clean"
 echo "AP-3 domain repo->entity:"; grep -rlnE "import com.arshadshah.nimaz.data.local.database.entity" domain/repository/ || echo "  clean"
 echo "AP-5 screen color literals:"; grep -rlE 'Color\(0x[0-9A-Fa-f]{6,8}\)' presentation/screens/ | wc -l
+echo "AP-8 explicit FILLED cards:";  grep -rc 'style = NimazCardStyle.FILLED' presentation/ | grep -v ':0$' | wc -l
+echo "AP-8 bordered card bypasses:"; grep -rl 'NimazCardDefaults.colors(' presentation/ | wc -l
 ```
 
 *Keep this file honest: tick boxes as you go, and add new anti-patterns/instances when you spot

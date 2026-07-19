@@ -580,11 +580,13 @@ private fun NisabOptionCard(
     NimazCard(
         onClick = onClick,
         modifier = modifier,
-        style = NimazCardStyle.FILLED,
+        // Two peers on the page background: elevation gives each option a card
+        // boundary, the accent fill + border carries the selection.
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
             activeContainer = accentColor.copy(alpha = 0.15f),
             activeBorder = accentColor.copy(alpha = 0.5f),
         )
@@ -624,7 +626,9 @@ private fun InputCard(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        // Each input row is a card on the page background → elevated.
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp)
     ) {
         Row(
@@ -690,14 +694,13 @@ private fun CompactAmountField(
         }
     }
 
-    Surface(
+    // A recessed text-entry well nested inside the input card: outlined, never
+    // elevated, with a MUTED container so it reads as a field rather than a card.
+    NimazCard(
+        modifier = modifier.width(100.dp),
+        style = NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outlineVariant
-        ),
-        modifier = modifier.width(100.dp)
+        tone = NimazTone.MUTED
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -782,7 +785,9 @@ private fun BreakdownCard(
 
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
+            // A section card on the page background → elevated.
+            tone = NimazTone.NEUTRAL,
+            style = NimazCardStyle.ELEVATED,
             shape = RoundedCornerShape(14.dp)
         ) {
             Column(

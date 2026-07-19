@@ -40,6 +40,40 @@ enum class NimazBannerVariant {
     ERROR
 }
 
+/**
+ * Shared styling for every banner in the app — [NimazBanner]'s variants and the
+ * `AnnouncementBanner` molecule alike.
+ *
+ * A banner is *informational*, not a primary surface: it interrupts the page to say
+ * something and then gets out of the way. Resolving its [NimazTone] straight to a
+ * tonal container (as a card does) made every banner read as a fully saturated
+ * panel, louder than the content it annotates. So banners keep a quiet `surface`
+ * container and express their tone in the **border** and **icon** instead — an
+ * [NimazCardStyle.OUTLINED] card. Content colour is `onSurface`, which is contrast
+ * checked in light and dark, so titles and messages stay legible either way.
+ */
+object NimazBannerDefaults {
+
+    /** The tone's accent — the banner's border, and what its icon is tinted with. */
+    @Composable
+    fun accent(tone: NimazTone): Color = when (tone) {
+        NimazTone.ACCENT, NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+        NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiary
+        NimazTone.WARNING -> MaterialTheme.colorScheme.secondary
+        NimazTone.ERROR -> MaterialTheme.colorScheme.error
+        NimazTone.NEUTRAL, NimazTone.MUTED, NimazTone.TRANSPARENT ->
+            MaterialTheme.colorScheme.outlineVariant
+    }
+
+    /** A banner's card colours: quiet `surface` container, tone-coloured border. */
+    @Composable
+    fun colors(tone: NimazTone, border: Color? = null): NimazCardColors =
+        NimazCardDefaults.colors(
+            container = MaterialTheme.colorScheme.surface,
+            border = border ?: accent(tone)
+        )
+}
+
 @Composable
 fun NimazBanner(
     message: String,
@@ -146,7 +180,10 @@ private fun WarningVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazTone.WARNING
+        tone = NimazTone.WARNING,
+        // The warning icon keeps the brand amber rather than the scheme's secondary,
+        // so the border takes the same colour — border and icon always agree.
+        borderColor = warningColor
     ) {
         BannerContentRow(
             modifier = Modifier.padding(16.dp),
@@ -173,13 +210,10 @@ private fun UpdateVariant(
     onAction: (() -> Unit)? = null,
     isLoading: Boolean = false
 ) {
-    NimazCard(
-        style = NimazCardStyle.FILLED,
-        modifier = modifier.fillMaxWidth(),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.primaryContainer
-        ),
-        shape = RoundedCornerShape(16.dp)
+    BannerSurface(
+        modifier = modifier,
+        shape = RoundedCornerShape(16.dp),
+        tone = NimazTone.ACCENT
     ) {
         Row(
             modifier = Modifier
@@ -191,8 +225,7 @@ private fun UpdateVariant(
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = message,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
             if (actionLabel != null && onAction != null) {
@@ -216,7 +249,7 @@ private fun UpdateVariant(
             } else if (isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(32.dp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.primary,
                     strokeWidth = 3.dp
                 )
             }
@@ -260,13 +293,14 @@ private fun ErrorVariant(
 }
 
 /**
- * The rounded container shell shared by every variant: a full-width [NimazCard] with
- * the given [shape], semantic [tone] and optional [borderColor]. Passing [onClick]
- * makes the whole banner tappable — this is the one place the clickable-vs-static
- * branch lives, so individual variants never repeat it.
+ * The rounded container shell shared by every variant: a full-width outlined
+ * [NimazCard] with the given [shape], semantic [tone] and optional [borderColor]
+ * override. Passing [onClick] makes the whole banner tappable — this is the one
+ * place the clickable-vs-static branch lives, so individual variants never repeat it.
  *
- * The tone also publishes the matching content colour to the banner's children, so
- * the title/message inherit it instead of restating an `onXxx` role per variant.
+ * Colours come from [NimazBannerDefaults]: a quiet container with the tone in the
+ * border. The resolved content colour is published to the banner's children, so the
+ * title/message inherit it instead of restating an `onXxx` role per variant.
  */
 @Composable
 private fun BannerSurface(
@@ -279,14 +313,11 @@ private fun BannerSurface(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
         tone = tone,
         onClick = onClick,
         shape = shape,
-        colors = NimazCardDefaults.tone(tone).copy(
-            borderColor = borderColor,
-            activeBorderColor = borderColor
-        ),
-        elevation = 0.dp
+        colors = NimazBannerDefaults.colors(tone = tone, border = borderColor)
     ) {
         content()
     }

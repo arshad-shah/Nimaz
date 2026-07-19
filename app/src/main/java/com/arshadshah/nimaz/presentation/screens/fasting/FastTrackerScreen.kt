@@ -1330,14 +1330,12 @@ private fun MakeupPendingFastCard(
                         NimazIcon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
-                            variant = NimazIconVariant.PRIMARY,
                             size = NimazIconSize.SMALL
                         )
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = stringResource(R.string.fasting_mark_complete),
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.primary
+                            style = MaterialTheme.typography.labelMedium
                         )
                     }
                 }

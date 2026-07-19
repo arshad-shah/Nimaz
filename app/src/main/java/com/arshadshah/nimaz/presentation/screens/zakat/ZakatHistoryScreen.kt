@@ -219,7 +219,9 @@ private fun HistoryEntryCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        // A history row is a card on the page background → elevated.
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp)
     ) {
         Column(

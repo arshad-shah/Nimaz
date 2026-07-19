@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -51,6 +50,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -118,7 +118,8 @@ fun NimazCalendar(
         // changes so consumers get a "real" month transition without any
         // public API change.
         NimazCard(
-            style = NimazCardStyle.FILLED,
+            tone = NimazTone.NEUTRAL,
+            style = NimazCardStyle.ELEVATED,
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp)
         ) {
@@ -339,46 +340,48 @@ private fun NavButton(
 
 @Composable
 private fun WeekdayHeaderRow(modifier: Modifier = Modifier) {
-    // Tinted strip behind the labels makes the header visually distinct from
-    // the date grid below — without it, the labels float on the card surface
-    // and read as just "more cells with no number."
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.surfaceContainerLowest,
-                RoundedCornerShape(10.dp)
-            )
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.8f))
-            .padding(vertical = 8.dp)
+    // The header strip is a *nested* surface — it sits inside the calendar card,
+    // so it separates with an outline + a quiet MUTED fill rather than a
+    // hand-rolled tint. Without it the labels float on the card surface and read
+    // as just "more cells with no number."
+    NimazCard(
+        modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        tone = NimazTone.MUTED,
+        shape = RoundedCornerShape(10.dp),
+        elevation = 0.dp
     ) {
-        WEEKDAY_LABELS.forEachIndexed { index, day ->
-            // Friday gets the primary tint + Bold weight as a small but
-            // intentional nod to Jumu'ah — the most significant day of the
-            // week in Islamic practice.
-            val isFriday = index == 5
-            val labelColor = if (isFriday) {
-                MaterialTheme.colorScheme.primary
-            } else {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            }
-            val weight = if (isFriday) FontWeight.Bold else FontWeight.SemiBold
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp)
+        ) {
+            WEEKDAY_LABELS.forEachIndexed { index, day ->
+                // Friday gets the primary tint + Bold weight as a small but
+                // intentional nod to Jumu'ah — the most significant day of the
+                // week in Islamic practice.
+                val isFriday = index == FRIDAY_INDEX
+                val labelColor = if (isFriday) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                }
+                val weight = if (isFriday) FontWeight.Bold else FontWeight.SemiBold
 
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = day,
-                    style = MaterialTheme.typography.labelMedium,
-                    fontWeight = weight,
-                    color = labelColor,
-                    fontSize = 11.sp,
-                    letterSpacing = 1.sp,
-                    textAlign = TextAlign.Center
-                )
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = day,
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = weight,
+                        color = labelColor,
+                        fontSize = 11.sp,
+                        letterSpacing = 1.sp,
+                        textAlign = TextAlign.Center
+                    )
+                }
             }
         }
     }

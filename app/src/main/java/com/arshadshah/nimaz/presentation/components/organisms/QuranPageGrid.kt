@@ -135,25 +135,13 @@ internal fun LazyListScope.pageGridItems(
                         horizontalArrangement = Arrangement.spacedBy(5.dp)
                     ) {
                         // Start page cutout badge
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                    RoundedCornerShape(6.dp)
-                                )
-                                .padding(horizontal = 8.dp, vertical = 3.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = startPage.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                        NimazBadge(
+                            text = startPage.toString(),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.CUTOUT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
                         // Arrow cutout circle
                         Box(
                             modifier = Modifier
@@ -175,25 +163,13 @@ internal fun LazyListScope.pageGridItems(
                             )
                         }
                         // End page cutout badge
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(6.dp))
-                                .border(
-                                    1.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                    RoundedCornerShape(6.dp)
-                                )
-                                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
-                                .padding(horizontal = 8.dp, vertical = 3.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = endPage.toString(),
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
+                        NimazBadge(
+                            text = endPage.toString(),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.CUTOUT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
                     }
                 }
             }

@@ -21,7 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TafseerNote
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -37,7 +38,11 @@ fun TafseerNoteCard(
     onDelete: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    NimazSurfaceCard(modifier = modifier.fillMaxWidth()) {
+    NimazCard(
+        style = NimazCardStyle.OUTLINED,
+        elevation = 0.dp,
+        modifier = modifier.fillMaxWidth()
+    ) {
         Column(
             modifier = Modifier.padding(12.dp)
         ) {

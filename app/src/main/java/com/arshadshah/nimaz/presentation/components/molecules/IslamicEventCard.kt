@@ -38,9 +38,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -81,7 +83,8 @@ fun IslamicEventCard(
     val (icon, color) = getEventTypeDetails(eventType)
 
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
@@ -220,20 +223,18 @@ private fun DaysUntilBadge(
         else -> pluralStringResource(R.plurals.days_count_format, daysUntil, daysUntil)
     }
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
+    // The event-type colour is Islamic feature art, so it goes through
+    // NimazBadgeDefaults.feature() rather than a tone.
+    NimazBadge(
+        text = text,
+        modifier = modifier,
+        shape = NimazBadgeShape.ROUNDED,
+        size = NimazBadgeSize.MEDIUM,
+        colors = NimazBadgeDefaults.feature(
+            color = color,
+            emphasis = NimazBadgeEmphasis.FILLED
         )
-    }
+    )
 }
 
 @Preview(showBackground = true, name = "Islamic Event Card - Eid")

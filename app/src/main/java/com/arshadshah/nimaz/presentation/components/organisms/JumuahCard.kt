@@ -32,9 +32,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -53,7 +55,9 @@ fun JumuahCard(
     isJumuahPassed: Boolean,
     modifier: Modifier = Modifier
 ) {
-    NimazSurfaceCard(
+    NimazCard(
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
