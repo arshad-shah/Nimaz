@@ -21,7 +21,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -48,6 +47,7 @@ import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
@@ -100,7 +100,7 @@ fun BookmarksScreen(
         }
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -164,7 +164,13 @@ fun BookmarksScreen(
                     ) { bookmark ->
                         BookmarkSavedCard(
                             bookmark = bookmark,
-                            onClick = { bookmark.navigate(onNavigateToQuranAyah, onNavigateToHadith, onNavigateToDua) },
+                            onClick = {
+                                bookmark.navigate(
+                                    onNavigateToQuranAyah,
+                                    onNavigateToHadith,
+                                    onNavigateToDua
+                                )
+                            },
                             onDelete = { viewModel.onEvent(BookmarksEvent.DeleteBookmark(bookmark.id)) },
                             onEditNote = { noteTarget = bookmark },
                             onShare = {

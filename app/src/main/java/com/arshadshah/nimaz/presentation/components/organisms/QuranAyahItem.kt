@@ -33,15 +33,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
-import com.arshadshah.nimaz.core.share.ContentShareManager
-import com.arshadshah.nimaz.core.share.Shareables
-import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -52,6 +49,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
@@ -63,10 +62,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
 import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
@@ -75,6 +74,7 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun AyahItem(
@@ -147,7 +147,9 @@ internal fun AyahItem(
                     ) {
                         NimazIcon(
                             imageVector = if (isKhatamRead) Icons.Filled.CheckCircle else Icons.Outlined.RadioButtonUnchecked,
-                            contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread) else stringResource(R.string.cd_mark_as_read),
+                            contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread) else stringResource(
+                                R.string.cd_mark_as_read
+                            ),
                             tint = if (isKhatamRead) NimazColors.Success else MaterialTheme.colorScheme.onSurfaceVariant,
                             size = NimazIconSize.MEDIUM
                         )
@@ -184,7 +186,9 @@ internal fun AyahItem(
                 )
                 NimazPillActionButton(
                     icon = if (isAudioPlaying) Icons.Default.Pause else Icons.Default.PlayArrow,
-                    contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(R.string.action_play),
+                    contentDescription = if (isAudioPlaying) stringResource(R.string.pause) else stringResource(
+                        R.string.action_play
+                    ),
                     onClick = onPlayAyahClick,
                     active = isAudioPlaying || isHighlighted,
                 )
@@ -289,7 +293,9 @@ internal fun AyahItem(
             ) {
                 if (ayah.sajdaType != null) {
                     NimazBadge(
-                        text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(R.string.sajdah),
+                        text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(
+                            R.string.sajdah
+                        ),
                         shape = NimazBadgeShape.ROUNDED,
                         size = NimazBadgeSize.SMALL,
                         colors = NimazBadgeDefaults.feature(
@@ -301,10 +307,10 @@ internal fun AyahItem(
 
                 if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0)) {
                     val quarterLabel = when (ayah.rubNumber) {
-                        1 -> "Hizb ${ayah.hizbNumber}"
-                        2 -> "\u00BC Hizb ${ayah.hizbNumber}"
-                        3 -> "\u00BD Hizb ${ayah.hizbNumber}"
-                        4 -> "\u00BE Hizb ${ayah.hizbNumber}"
+                        1 -> stringResource(R.string.hizb_format, ayah.hizbNumber)
+                        2 -> stringResource(R.string.hizb_quarter_format, ayah.hizbNumber)
+                        3 -> stringResource(R.string.hizb_half_format, ayah.hizbNumber)
+                        4 -> stringResource(R.string.hizb_three_quarter_format, ayah.hizbNumber)
                         else -> ""
                     }
                     if (quarterLabel.isNotEmpty()) {
@@ -401,7 +407,10 @@ private fun AyahItemShowcase() {
         HorizontalDivider()
         // 4. Transliteration shown
         AyahItem(
-            ayah = ayah(4, transliteration = "Bismi ll\u0101hi r-ra\u1E25m\u0101ni r-ra\u1E25\u012Bm"),
+            ayah = ayah(
+                4,
+                transliteration = "Bismi ll\u0101hi r-ra\u1E25m\u0101ni r-ra\u1E25\u012Bm"
+            ),
             showTranslation = true,
             showTransliteration = true,
             arabicFontSize = 28f,

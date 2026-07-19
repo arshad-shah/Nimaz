@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
@@ -10,11 +11,10 @@ import com.arshadshah.nimaz.domain.model.HadithBookmark
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HadithSearchResult
-import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
-import androidx.compose.ui.text.font.FontFamily
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -122,11 +122,19 @@ class HadithViewModel @Inject constructor(
             is HadithEvent.LoadBook -> AppAnalytics.logFeatureUsed("hadith", "open_book")
             is HadithEvent.LoadChapter -> AppAnalytics.logFeatureUsed("hadith", "open_reader")
             is HadithEvent.LoadHadithById -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
-            is HadithEvent.LoadHadithByNumber -> AppAnalytics.logFeatureUsed("hadith", "open_hadith")
+            is HadithEvent.LoadHadithByNumber -> AppAnalytics.logFeatureUsed(
+                "hadith",
+                "open_hadith"
+            )
+
             is HadithEvent.Search -> AppAnalytics.logFeatureUsed("hadith", "search")
             is HadithEvent.SearchInBook -> AppAnalytics.logFeatureUsed("hadith", "search_in_book")
             is HadithEvent.FilterByGrade -> AppAnalytics.logFeatureUsed("hadith", "filter_by_grade")
-            is HadithEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed("hadith", "toggle_bookmark")
+            is HadithEvent.ToggleBookmark -> AppAnalytics.logFeatureUsed(
+                "hadith",
+                "toggle_bookmark"
+            )
+
             else -> {}
         }
         when (event) {

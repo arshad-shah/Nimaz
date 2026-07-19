@@ -68,7 +68,10 @@ class KhatamWorker @AssistedInject constructor(
                     // The reader is *inside* the juz after the completed ones;
                     // cap at 30 for a finished khatam.
                     currentJuz = insights?.currentJuz ?: 1,
-                    remainingAyahs = insights?.remainingAyahs ?: khatam.remainingAyahs
+                    juzCompleted = insights?.juzCompleted ?: 0,
+                    remainingAyahs = insights?.remainingAyahs ?: khatam.remainingAyahs,
+                    dailyTarget = khatam.dailyTarget,
+                    currentStreak = insights?.currentStreak ?: 0
                 )
             }
 

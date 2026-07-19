@@ -101,9 +101,18 @@ fun DrawScope.drawKaabaGlyph(
 
     val bandDark = lerp(color, Color.Black, 0.28f)
     // cube faces (constant dark kiswah)
-    drawPath(quad(p(20f, 18f), p(34f, 11f), p(52f, 16f), p(38f, 23f)), CompassArtColors.NeedleTop) // top
-    drawPath(quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)), CompassArtColors.NeedleSide) // side
-    drawPath(quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)), CompassArtColors.NeedleFront) // front
+    drawPath(
+        quad(p(20f, 18f), p(34f, 11f), p(52f, 16f), p(38f, 23f)),
+        CompassArtColors.NeedleTop
+    ) // top
+    drawPath(
+        quad(p(38f, 23f), p(52f, 16f), p(52f, 46f), p(38f, 53f)),
+        CompassArtColors.NeedleSide
+    ) // side
+    drawPath(
+        quad(p(20f, 18f), p(38f, 23f), p(38f, 53f), p(20f, 48f)),
+        CompassArtColors.NeedleFront
+    ) // front
     // hizam band (front + side) + door, in the accent colour
     drawPath(
         quad(p(20f, 26f), p(38f, 31f), p(38f, 38f), p(20f, 33f)),

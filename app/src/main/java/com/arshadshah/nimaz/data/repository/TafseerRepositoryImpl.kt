@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.TafseerDao
 import com.arshadshah.nimaz.data.local.database.entity.TafseerHighlightEntity
 import com.arshadshah.nimaz.data.local.database.entity.TafseerNoteEntity
@@ -9,9 +10,7 @@ import com.arshadshah.nimaz.domain.model.TafseerNote
 import com.arshadshah.nimaz.domain.model.TafseerText
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import kotlinx.coroutines.flow.Flow
-import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
 import org.json.JSONArray
 import org.json.JSONObject
 import javax.inject.Inject

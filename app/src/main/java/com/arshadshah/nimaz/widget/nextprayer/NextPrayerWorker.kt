@@ -32,6 +32,7 @@ class NextPrayerWorker @AssistedInject constructor(
     companion object {
         private const val UNIQUE_WORK_NAME = "NextPrayerWorker"
         private const val ONE_TIME_WORK_NAME = "NextPrayerWorkerOneTime"
+
         // WorkManager minimum interval is 15 minutes; per-minute updates use AlarmManager.
         private val REFRESH_INTERVAL: Duration = Duration.ofMinutes(15)
 
@@ -50,7 +51,13 @@ class NextPrayerWorker @AssistedInject constructor(
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: NextPrayerWidgetState
-    ) = updateWidgetState(context, NextPrayerWidget(), NextPrayerStateDefinition, glanceIds, newState)
+    ) = updateWidgetState(
+        context,
+        NextPrayerWidget(),
+        NextPrayerStateDefinition,
+        glanceIds,
+        newState
+    )
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)
@@ -78,7 +85,8 @@ class NextPrayerWorker @AssistedInject constructor(
             val data = if (nextPrayer != null) {
                 val prayerLocalTime = nextPrayer.time.toLocalDateTime(timeZone)
                 val epochMillis = nextPrayer.time.toEpochMilliseconds()
-                val countdown = formatWidgetCountdown((nextPrayer.time - currentTime).inWholeSeconds)
+                val countdown =
+                    formatWidgetCountdown((nextPrayer.time - currentTime).inWholeSeconds)
 
                 NextPrayerData(
                     prayerName = nextPrayer.type.displayName,

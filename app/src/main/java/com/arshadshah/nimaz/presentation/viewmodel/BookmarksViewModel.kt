@@ -1,7 +1,9 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.domain.model.DuaBookmark
 import com.arshadshah.nimaz.domain.model.HadithBookmark
@@ -9,8 +11,6 @@ import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
-import android.content.Context
-import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -71,10 +71,12 @@ data class BookmarkStatsUiState(
 
 sealed interface BookmarksEvent {
     data class SetFilter(val type: BookmarkType?) : BookmarksEvent
+
     /** Delete any bookmark by its unified id (e.g. "quran_12"). Captures it for Undo. */
     data class DeleteBookmark(val id: String) : BookmarksEvent
     data object UndoDelete : BookmarksEvent
     data object DismissUndo : BookmarksEvent
+
     /** Set (or clear, with null) the note on any bookmark by its unified id. */
     data class EditNote(val id: String, val note: String?) : BookmarksEvent
     data object RefreshAll : BookmarksEvent
@@ -105,7 +107,11 @@ class BookmarksViewModel @Inject constructor(
             is BookmarksEvent.DeleteBookmark -> AppAnalytics.logFeatureUsed("bookmarks", "delete")
             BookmarksEvent.UndoDelete -> AppAnalytics.logFeatureUsed("bookmarks", "undo_delete")
             is BookmarksEvent.EditNote -> AppAnalytics.logFeatureUsed("bookmarks", "update_note")
-            BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed("bookmarks", "clear_all")
+            BookmarksEvent.ClearAllBookmarks -> AppAnalytics.logFeatureUsed(
+                "bookmarks",
+                "clear_all"
+            )
+
             else -> {}
         }
         when (event) {
@@ -129,7 +135,8 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             quranUseCases.getBookmarks().collect { bookmarks ->
                 val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = quranUseCases.getAyahById(bm.ayahId)?.textArabic)
+                    bm.toUnified()
+                        .copy(arabicText = quranUseCases.getAyahById(bm.ayahId)?.textArabic)
                 }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.QURAN } +
@@ -155,7 +162,8 @@ class BookmarksViewModel @Inject constructor(
         viewModelScope.launch {
             hadithUseCases.getAllBookmarks().collect { bookmarks ->
                 val mapped = bookmarks.map { bm ->
-                    bm.toUnified().copy(arabicText = hadithUseCases.getHadithById(bm.hadithId)?.textArabic)
+                    bm.toUnified()
+                        .copy(arabicText = hadithUseCases.getHadithById(bm.hadithId)?.textArabic)
                 }
                 _bookmarksState.update { state ->
                     val unified = state.allBookmarks.filter { it.type != BookmarkType.HADITH } +
@@ -266,7 +274,8 @@ class BookmarksViewModel @Inject constructor(
             }
 
             BookmarkType.HADITH -> {
-                val original = state.hadithBookmarks.find { "hadith_${it.hadithId}" == id } ?: return
+                val original =
+                    state.hadithBookmarks.find { "hadith_${it.hadithId}" == id } ?: return
                 pendingRestore = { hadithUseCases.insertBookmark(original) }
                 viewModelScope.launch { hadithUseCases.deleteBookmark(original.hadithId) }
             }

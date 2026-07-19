@@ -9,7 +9,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
@@ -24,7 +23,6 @@ import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
-import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.FontWeight
@@ -34,6 +32,7 @@ import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.widget.WidgetEntryPoint
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
@@ -43,7 +42,6 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 
 class PrayerTrackerWidget : GlanceAppWidget() {
@@ -128,15 +126,26 @@ private fun PrayerTrackerSuccessContent(
         padding = 12.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = data.dateLabel,
-                    style = TextStyle(color = textSecondary, fontSize = 11.sp, fontWeight = FontWeight.Medium),
+                    style = TextStyle(
+                        color = textSecondary,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Medium
+                    ),
                 )
                 Spacer(modifier = GlanceModifier.defaultWeight())
                 Text(
                     text = "${data.prayedCount} / ${data.totalCount}",
-                    style = TextStyle(color = primaryColor, fontSize = 12.sp, fontWeight = FontWeight.Bold),
+                    style = TextStyle(
+                        color = primaryColor,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                 )
             }
             Spacer(modifier = GlanceModifier.height(8.dp))
@@ -193,10 +202,14 @@ private fun PrayerCheckbox(
         } else {
             // Outline ring built from two discs (Glance has no stroke modifier).
             Box(
-                modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp).background(uncheckedColor),
+                modifier = GlanceModifier.size(28.dp).cornerRadius(14.dp)
+                    .background(uncheckedColor),
                 contentAlignment = Alignment.Center,
             ) {
-                Box(modifier = GlanceModifier.size(24.dp).cornerRadius(12.dp).background(backgroundColor)) {}
+                Box(
+                    modifier = GlanceModifier.size(24.dp).cornerRadius(12.dp)
+                        .background(backgroundColor)
+                ) {}
             }
         }
         Spacer(modifier = GlanceModifier.height(5.dp))

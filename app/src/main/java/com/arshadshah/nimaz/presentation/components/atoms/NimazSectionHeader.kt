@@ -8,9 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @Composable
@@ -19,7 +21,7 @@ fun NimazSectionHeader(
     modifier: Modifier = Modifier,
     trailingText: String? = null,
     showSeeAll: Boolean = false,
-    seeAllText: String = "See All",
+    seeAllText: String = stringResource(R.string.quran_home_see_all),
     onSeeAllClick: () -> Unit = {},
     trailingContent: (@Composable () -> Unit)? = null
 ) {

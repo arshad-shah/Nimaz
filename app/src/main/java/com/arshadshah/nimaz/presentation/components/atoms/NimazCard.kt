@@ -32,6 +32,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults.onColorFor
 import com.arshadshah.nimaz.presentation.theme.CardArtColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -71,7 +72,9 @@ data class NimazCardColors(
     val activeBorderColor: Color? = null,
     val activeBorderWidth: Dp = 1.dp,
 ) {
-    internal fun container(selected: Boolean) = if (selected) activeContainerColor else containerColor
+    internal fun container(selected: Boolean) =
+        if (selected) activeContainerColor else containerColor
+
     internal fun content(selected: Boolean) = if (selected) activeContentColor else contentColor
     internal fun border(selected: Boolean) = if (selected) activeBorderColor else borderColor
     internal fun strokeWidth(selected: Boolean) = if (selected) activeBorderWidth else borderWidth
@@ -273,10 +276,11 @@ fun NimazCard(
 ) {
     val containerColor = colors.container(selected)
     val contentColor = colors.content(selected)
-    val borderStroke = colors.border(selected)?.let { BorderStroke(colors.strokeWidth(selected), it) }
-        ?: if (style == NimazCardStyle.OUTLINED) {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-        } else null
+    val borderStroke =
+        colors.border(selected)?.let { BorderStroke(colors.strokeWidth(selected), it) }
+            ?: if (style == NimazCardStyle.OUTLINED) {
+                BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+            } else null
 
     when (style) {
         NimazCardStyle.GRADIENT -> {
@@ -286,9 +290,17 @@ fun NimazCard(
                 modifier = modifier
                     .clip(shape)
                     .background(brush)
-                    .then(if (borderStroke != null) Modifier.border(borderStroke, shape) else Modifier)
                     .then(
-                        if (onClick != null) Modifier.clickable(enabled = enabled, onClick = onClick)
+                        if (borderStroke != null) Modifier.border(
+                            borderStroke,
+                            shape
+                        ) else Modifier
+                    )
+                    .then(
+                        if (onClick != null) Modifier.clickable(
+                            enabled = enabled,
+                            onClick = onClick
+                        )
                         else Modifier
                     )
             ) {
@@ -303,8 +315,9 @@ fun NimazCard(
                 containerColor = containerColor,
                 contentColor = contentColor,
             )
-            val cardElevation = elevation?.let { CardDefaults.elevatedCardElevation(defaultElevation = it) }
-                ?: CardDefaults.elevatedCardElevation()
+            val cardElevation =
+                elevation?.let { CardDefaults.elevatedCardElevation(defaultElevation = it) }
+                    ?: CardDefaults.elevatedCardElevation()
             if (onClick != null) {
                 ElevatedCard(
                     onClick = onClick, modifier = modifier, enabled = enabled, shape = shape,
@@ -326,8 +339,9 @@ fun NimazCard(
             // Honour `elevation` here too. Previously this branch dropped it, so
             // an outlined card silently ignored the parameter — callers passing
             // `elevation = 0.dp` to guarantee flatness were writing a no-op.
-            val cardElevation = elevation?.let { CardDefaults.outlinedCardElevation(defaultElevation = it) }
-                ?: CardDefaults.outlinedCardElevation()
+            val cardElevation =
+                elevation?.let { CardDefaults.outlinedCardElevation(defaultElevation = it) }
+                    ?: CardDefaults.outlinedCardElevation()
             if (onClick != null) {
                 OutlinedCard(
                     onClick = onClick, modifier = modifier, enabled = enabled, shape = shape,
@@ -351,8 +365,14 @@ fun NimazCard(
                 ?: CardDefaults.cardElevation()
             if (onClick != null) {
                 Card(
-                    onClick = onClick, modifier = modifier, enabled = enabled, shape = shape,
-                    colors = cardColors, elevation = cardElevation, border = borderStroke, content = content,
+                    onClick = onClick,
+                    modifier = modifier,
+                    enabled = enabled,
+                    shape = shape,
+                    colors = cardColors,
+                    elevation = cardElevation,
+                    border = borderStroke,
+                    content = content,
                 )
             } else {
                 Card(
@@ -444,7 +464,10 @@ private fun NimazCardShowcase() {
             Text(text = "Selectable (active)", modifier = Modifier.padding(16.dp))
         }
         GradientCard(
-            gradientColors = listOf(CardArtColors.IndigoGradientStart, CardArtColors.IndigoGradientEnd)
+            gradientColors = listOf(
+                CardArtColors.IndigoGradientStart,
+                CardArtColors.IndigoGradientEnd
+            )
         ) {
             Text(
                 text = "Gradient Card",
@@ -473,7 +496,8 @@ private fun NimazCardLightPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Cards — Dark",
+@Preview(
+    showBackground = true, name = "Cards — Dark",
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable

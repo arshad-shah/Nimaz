@@ -66,7 +66,7 @@ Adhan, Qaida tap-to-hear) plus an Adhan **download** pipeline. They share no pla
 
 ## 2. Glance widgets
 
-All in `widget/`. Five Jetpack **Glance** AppWidgets, each in its own subpackage, plus a
+All in `widget/`. Six Jetpack **Glance** AppWidgets, each in its own subpackage, plus a
 shared `widget/core/` package and two top-level helpers.
 
 | Widget | Package | Refresh | State type |
@@ -76,6 +76,7 @@ shared `widget/core/` package and two top-level helpers.
 | Prayer Tracker | `widget/prayertracker/` | Worker 30 min + immediate on toggle | `PrayerTrackerWidgetState` |
 | Hijri Date | `widget/hijridate/` | Worker 6 hr | `HijriDateWidgetState` |
 | Hijri Calendar | `widget/hijricalendar/` | Worker 6 hr | `HijriCalendarWidgetState` |
+| Khatam | `widget/khatam/` | Worker 30 min | `KhatamWidgetState` |
 
 Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
@@ -100,10 +101,20 @@ disc + `ic_widget_check` when prayed and a two-disc outline ring when not (Glanc
 stroke modifier); Prayer Times is a clean 5-cell pill row with the next prayer filled
 teal, past prayers tinted gold (`widget_gold_container` / `widget_on_gold_container`),
 and upcoming ones plain; every state pairs an explicit container with an on-container
-text colour so the text stays legible in both light and dark mode. A JVM regression test (`WidgetGlyphGuardTest`) fails the
-build if any widget source reintroduces a glyph.
+text colour so the text stays legible in both light and dark mode. The **Khatam**
+widget is an editorial stat card: a name eyebrow, a gold **juz medallion** (a
+`cornerRadius`-circled `Box` on `widget_gold_container` with the juz number in
+`widget_on_gold_container`), an ayahs-remaining line and a "N/day · M-day streak"
+pace line, closed by a progress rule with the percentage in `widget_gold`. Glance
+cannot draw the app's serpentine juz trail (no canvas), so the medallion carries the
+"where am I" glance and the numbers fill what used to be a near-empty card. The
+`" · "` separator is a middot (U+00B7), which sits outside the guard's forbidden
+range — emoji such as 🔥 are **not** allowed and would fail the build. A JVM
+regression test (`WidgetGlyphGuardTest`) fails the build if any widget source
+reintroduces a forbidden glyph. Widgets with a static `previewLayout` (Khatam) keep
+a hand-authored XML mirror of the runtime layout in `res/layout/` for the picker.
 
-**Manifest/res.** Five `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
+**Manifest/res.** Six `<receiver>`s + the non-exported `WidgetTickReceiver` in `AndroidManifest.xml`; provider-info XMLs in `res/xml/*_widget_info.xml`.
 
 **Gotchas.**
 - Default state is `Success(emptyData)`, not `Loading` → widgets show em-dash skeletons, not a spinner, before the first worker run.

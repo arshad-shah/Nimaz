@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.home
 
 import android.Manifest
-import android.app.Activity
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,25 +31,22 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.luminance
-import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.AnnouncementBanner
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
@@ -71,7 +67,6 @@ import com.arshadshah.nimaz.presentation.viewmodel.AnnouncementUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HomeUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HomeViewModel
-import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
 
 @Composable
 fun HomeScreen(
@@ -147,7 +142,7 @@ fun HomeScreen(
     // Draw edge-to-edge: the compact hero's living sky extends behind the
     // status bar and the dynamic top bar is an overlay (below) that manages its
     // own status-bar padding. The tablet path adds statusBarsPadding itself.
-    Scaffold(
+    NimazScreenScaffold(
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
     ) { innerPadding ->
         Box(

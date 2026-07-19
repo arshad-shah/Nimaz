@@ -41,7 +41,9 @@ fun NimazQrCode(
         Image(
             bitmap = image,
             contentDescription = null,
-            modifier = modifier.size(size).padding(2.dp),
+            modifier = modifier
+                .size(size)
+                .padding(2.dp),
         )
     }
 }

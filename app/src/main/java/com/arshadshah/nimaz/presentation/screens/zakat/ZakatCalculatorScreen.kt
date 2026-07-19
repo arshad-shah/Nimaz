@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,13 +29,10 @@ import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wallet
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -44,8 +40,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -57,21 +53,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatCurrency
 import com.arshadshah.nimaz.domain.model.NisabType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStat
+import com.arshadshah.nimaz.presentation.components.molecules.ZakatHeroStatus
+import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.presentation.theme.NimazShapes
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
-import com.arshadshah.nimaz.core.util.formatCurrency
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,7 +86,7 @@ fun ZakatCalculatorScreen(
     val state by viewModel.calculatorState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -144,6 +147,7 @@ private fun ZakatCompactContent(
             ZakatResultSummaryCard(
                 zakatDue = state.calculation?.zakatDue ?: 0.0,
                 nisabValue = state.calculation?.nisabValue ?: 0.0,
+                netWealth = state.calculation?.netWorth ?: 0.0,
                 isAboveNisab = state.calculation?.isAboveNisab ?: false,
                 nisabType = state.nisabType,
                 currency = state.currency
@@ -226,6 +230,7 @@ private fun ZakatTabletContent(
         ZakatResultSummaryCard(
             zakatDue = state.calculation?.zakatDue ?: 0.0,
             nisabValue = state.calculation?.nisabValue ?: 0.0,
+            netWealth = state.calculation?.netWorth ?: 0.0,
             isAboveNisab = state.calculation?.isAboveNisab ?: false,
             nisabType = state.nisabType,
             currency = state.currency
@@ -428,97 +433,65 @@ private fun LiabilityInputCards(
     }
 }
 
-// --- Result Summary Card (gold gradient) ---
+// --- Result Summary Hero ---
 
 @Composable
 private fun ZakatResultSummaryCard(
     zakatDue: Double,
     nisabValue: Double,
+    netWealth: Double,
     isAboveNisab: Boolean,
     nisabType: NisabType,
     currency: String,
     modifier: Modifier = Modifier
 ) {
-    val goldGradient = Brush.linearGradient(
-        colors = listOf(
-            NimazColors.ZakatColors.Gold,
-            NimazColors.ZakatColors.GoldAccent
-        )
+    ZakatSummaryHero(
+        modifier = modifier,
+        label = stringResource(R.string.zakat_due),
+        amount = formatCurrency(zakatDue, currency),
+        // Below nisab nothing is owed, so the rate line would be misleading —
+        // say why the figure is zero instead of restating how it is derived.
+        subtitle = if (isAboveNisab) {
+            stringResource(R.string.zakat_rate_subtitle)
+        } else {
+            stringResource(R.string.zakat_below_nisab_subtitle)
+        },
+        // A full-strength $0.00 overstates a number that is not owed.
+        muteAmount = !isAboveNisab,
+        status = ZakatHeroStatus(
+            text = if (isAboveNisab) {
+                stringResource(R.string.zakat_status_above_nisab)
+            } else {
+                stringResource(R.string.zakat_status_below_nisab)
+            },
+            met = isAboveNisab,
+        ),
+        stats = listOf(
+            ZakatHeroStat(
+                value = formatCurrency(netWealth, currency),
+                label = stringResource(R.string.zakat_stat_net),
+            ),
+            ZakatHeroStat(
+                value = formatCurrency(nisabValue, currency),
+                // NisabType.displayName() is hardcoded English ("Gold (87.48g)")
+                // and far too long for a tile caption — use the localised noun.
+                label = stringResource(
+                    R.string.zakat_stat_nisab_format,
+                    stringResource(
+                        when (nisabType) {
+                            NisabType.GOLD -> R.string.gold
+                            NisabType.SILVER -> R.string.silver
+                        }
+                    )
+                ),
+                accented = true,
+            ),
+            ZakatHeroStat(
+                value = stringResource(R.string.zakat_stat_rate_value),
+                label = stringResource(R.string.zakat_stat_rate),
+            ),
+        ),
     )
-
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(20.dp),
-        tone = NimazTone.TRANSPARENT
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(goldGradient)
-                .padding(25.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.zakat_due),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NimazColors.Neutral900.copy(alpha = 0.8f)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = formatCurrency(zakatDue, currency),
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        lineHeight = 36.sp
-                    ),
-                    color = NimazColors.Neutral900
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = stringResource(R.string.zakat_rate_subtitle),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NimazColors.Neutral900.copy(alpha = 0.7f)
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                HorizontalDivider(
-                    color = Color.Black.copy(alpha = 0.15f),
-                    thickness = 1.dp
-                )
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Text(
-                    text = if (isAboveNisab) {
-                        "Your wealth exceeds the ${nisabType.displayName()} nisab threshold of ${
-                            formatCurrency(
-                                nisabValue,
-                                currency
-                            )
-                        }"
-                    } else {
-                        "Nisab threshold (${nisabType.displayName()}): ${
-                            formatCurrency(
-                                nisabValue,
-                                currency
-                            )
-                        }"
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = NimazColors.Neutral900.copy(alpha = 0.8f),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-    }
 }
 
 // --- Nisab Selector ---
@@ -537,7 +510,7 @@ private fun NisabSelector(
     ) {
         NisabOptionCard(
             label = stringResource(R.string.gold),
-            subtitle = "87.48g @ \$${goldPrice.toInt()}/g",
+            subtitle = stringResource(R.string.zakat_nisab_gold_subtitle, goldPrice.toInt()),
             isSelected = selectedType == NisabType.GOLD,
             accentColor = NimazColors.ZakatColors.Gold,
             onClick = { onTypeChange(NisabType.GOLD) },
@@ -546,7 +519,7 @@ private fun NisabSelector(
 
         NisabOptionCard(
             label = stringResource(R.string.silver),
-            subtitle = "612.36g @ \$${silverPrice}/g",
+            subtitle = stringResource(R.string.zakat_nisab_silver_subtitle, silverPrice.toString()),
             isSelected = selectedType == NisabType.SILVER,
             accentColor = NimazColors.ZakatColors.Silver,
             onClick = { onTypeChange(NisabType.SILVER) },
@@ -564,17 +537,27 @@ private fun NisabOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val surface = MaterialTheme.colorScheme.surface
     NimazCard(
         onClick = onClick,
         modifier = modifier,
         // Two peers on the page background: elevation gives each option a card
         // boundary, the accent fill + border carries the selection.
-        style = NimazCardStyle.ELEVATED,
+        // FILLED (not ELEVATED) because only Material's `Card` renders a border —
+        // `ElevatedCard` has no border slot, so an ELEVATED card drops
+        // `activeBorder` silently. Elevation is passed explicitly to keep the lift.
+        style = NimazCardStyle.FILLED,
+        elevation = 1.dp,
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surface,
-            activeContainer = accentColor.copy(alpha = 0.15f),
+            container = surface,
+            // Composited to an OPAQUE colour on purpose. A translucent container on
+            // a shadow-casting surface makes the RenderNode non-opaque, so Android
+            // fills the shadow's interior behind it — that leaked through as a pale
+            // box in the middle of the selected gold/silver card.
+            activeContainer = accentColor.copy(alpha = 0.15f).compositeOver(surface),
+            // Border alpha is safe — it is stroked on top, not behind the shadow.
             activeBorder = accentColor.copy(alpha = 0.5f),
         )
     ) {
@@ -676,8 +659,7 @@ private fun CompactAmountField(
     NimazCard(
         modifier = modifier.width(100.dp),
         style = NimazCardStyle.OUTLINED,
-        shape = RoundedCornerShape(10.dp),
-        tone = NimazTone.MUTED
+        shape = NimazShapes.small
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
@@ -804,7 +786,7 @@ private fun BreakdownCard(
 
                 BreakdownRow(
                     label = stringResource(R.string.meets_nisab),
-                    value = if (isAboveNisab) "Yes" else "No",
+                    value = stringResource(if (isAboveNisab) R.string.yes else R.string.no),
                     valueColor = if (isAboveNisab) {
                         MaterialTheme.colorScheme.primary
                     } else {

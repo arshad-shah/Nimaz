@@ -99,6 +99,7 @@ fun NimazTheme(
     use24HourFormat: Boolean = false,
     useHijriPrimary: Boolean = false,
     showIslamicPatterns: Boolean = true,
+    patternStyle: NimazPatternStyle = NimazPatternStyle.CORNER_MEDALLION,
     localeCode: String = "en",
     content: @Composable () -> Unit
 ) {
@@ -136,7 +137,8 @@ fun NimazTheme(
         LocalAnimationsEnabled provides animationsEnabled,
         LocalUse24HourFormat provides use24HourFormat,
         LocalUseHijriPrimary provides useHijriPrimary,
-        LocalShowIslamicPatterns provides showIslamicPatterns
+        LocalShowIslamicPatterns provides showIslamicPatterns,
+        LocalPatternStyle provides patternStyle
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

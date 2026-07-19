@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.theme
 
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazPalette as P
 
 /**

@@ -43,7 +43,13 @@ class HijriCalendarWorker @AssistedInject constructor(
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: HijriCalendarWidgetState
-    ) = updateWidgetState(context, HijriCalendarWidget(), HijriCalendarStateDefinition, glanceIds, newState)
+    ) = updateWidgetState(
+        context,
+        HijriCalendarWidget(),
+        HijriCalendarStateDefinition,
+        glanceIds,
+        newState
+    )
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)

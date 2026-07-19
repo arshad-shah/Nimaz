@@ -282,9 +282,11 @@ private fun blend(a: Color, b: Color, t: Float) = androidx.compose.ui.graphics.l
 @Composable
 private fun TasbihBeadsPreview() {
     var count by remember { mutableIntStateOf(7) }
-    Box(modifier = Modifier
-        .background(BeadColors.TrayBackground)
-        .size(320.dp, 300.dp)) {
+    Box(
+        modifier = Modifier
+            .background(BeadColors.TrayBackground)
+            .size(320.dp, 300.dp)
+    ) {
         TasbihBeads(
             count = count,
             onIncrement = { count++ },

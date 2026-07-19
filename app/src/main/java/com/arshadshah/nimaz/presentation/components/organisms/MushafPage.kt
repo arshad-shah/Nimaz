@@ -44,12 +44,12 @@ import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import kotlinx.coroutines.launch
 
 /**
  * Main Mushaf page component.
@@ -264,10 +264,18 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: Str
             appendLine(); appendLine(ayah.translation)
         }
         appendLine()
-        append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
+        append(
+            context.getString(
+                R.string.quran_copy_reference_format,
+                ayah.surahNumber,
+                ayah.ayahNumber
+            )
+        )
     }
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(ClipData.newPlainText("Quran Ayah", textToCopy))
+    clipboard.setPrimaryClip(
+        ClipData.newPlainText(context.getString(R.string.quran_clipboard_label), textToCopy)
+    )
     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
 }
 
@@ -286,7 +294,11 @@ private fun MushafPageLightPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A08, name = "Mushaf Page - Al-Fatihah (Dark)")
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF0A0A08,
+    name = "Mushaf Page - Al-Fatihah (Dark)"
+)
 @Composable
 private fun MushafPageDarkPreview() {
     NimazTheme(themeMode = ThemeMode.DARK) {

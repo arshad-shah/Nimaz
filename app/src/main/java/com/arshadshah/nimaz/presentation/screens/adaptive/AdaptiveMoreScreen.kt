@@ -201,9 +201,9 @@ fun AdaptiveMoreScreen(
 
                             MoreDetailPane.HELP -> {
                                 val supportEmail =
-                                    stringResource(com.arshadshah.nimaz.R.string.contact_email)
+                                    stringResource(R.string.contact_email)
                                 val supportSubject =
-                                    stringResource(com.arshadshah.nimaz.R.string.nimaz_support_request)
+                                    stringResource(R.string.nimaz_support_request)
                                 HelpScreen(
                                     onNavigateBack = { scope.launch { navigator.navigateBack() } },
                                     onNavigateToTopic = { topicId ->

@@ -5,16 +5,11 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -26,10 +21,12 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.molecules.QaidaCourseHeader
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.QaidaCoursePath
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QaidaReaderViewModel
@@ -52,19 +49,17 @@ fun QaidaHomeScreen(
     var menuExpanded by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.qaida)) },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        NimazIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
-                    }
-                },
+            NimazBackTopAppBar(
+                title = stringResource(R.string.qaida),
+                onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = onOpenLetters) {
-                        NimazIcon(Icons.Filled.Translate, contentDescription = stringResource(R.string.qaida_letter_explorer))
+                        NimazIcon(
+                            Icons.Filled.Translate,
+                            contentDescription = stringResource(R.string.qaida_letter_explorer)
+                        )
                     }
                     IconButton(onClick = { menuExpanded = true }) {
                         NimazIcon(
@@ -90,12 +85,14 @@ fun QaidaHomeScreen(
             )
         },
     ) { padding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             QaidaCourseHeader(
                 titleArabic = "رِحْلَتِي مَعَ القاعدة",
-                titleEnglish = "My Qaida Journey",
+                titleEnglish = stringResource(R.string.qaida_journey_title),
                 lessonIndex = ((cp?.completedLessons ?: 0) + 1).coerceAtMost(cp?.totalLessons ?: 1),
                 totalLessons = cp?.totalLessons ?: 0,
                 totalStars = cp?.totalStars ?: 0,

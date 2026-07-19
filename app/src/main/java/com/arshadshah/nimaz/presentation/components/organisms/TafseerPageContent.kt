@@ -13,7 +13,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -67,10 +66,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
@@ -311,8 +310,10 @@ fun TafseerPageContent(
                                         // Remapped to page-local; resolve the full highlight by id.
                                         val full = highlights.find { it.id == tapped.id }
                                         if (full != null) {
-                                            val s = full.startOffset.coerceIn(0, tafseerFullText.length)
-                                            val e = full.endOffset.coerceIn(s, tafseerFullText.length)
+                                            val s =
+                                                full.startOffset.coerceIn(0, tafseerFullText.length)
+                                            val e =
+                                                full.endOffset.coerceIn(s, tafseerFullText.length)
                                             editorTarget = EditorTarget.Existing(
                                                 highlight = full,
                                                 snippet = tafseerFullText.substring(s, e)
@@ -772,7 +773,10 @@ private fun TafseerEmptyState(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = stringResource(R.string.tafseer_no_commentary_format, selectedSource.displayName),
+            text = stringResource(
+                R.string.tafseer_no_commentary_format,
+                selectedSource.displayName
+            ),
             style = MaterialTheme.typography.titleSmall,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface,
@@ -780,9 +784,12 @@ private fun TafseerEmptyState(
         )
         Text(
             text = if (alternate != null) {
-                "${alternate.displayName} has commentary for this ayah."
+                stringResource(
+                    R.string.tafseer_alternate_has_commentary_format,
+                    alternate.displayName
+                )
             } else {
-                "Commentary for this ayah isn't available in any installed source yet."
+                stringResource(R.string.tafseer_no_commentary_anywhere)
             },
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

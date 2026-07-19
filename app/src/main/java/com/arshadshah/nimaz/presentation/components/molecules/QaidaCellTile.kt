@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,10 +21,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QaidaCell
 import com.arshadshah.nimaz.domain.model.TokenType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -69,14 +70,18 @@ fun QaidaCellTile(
     val translitColor =
         if (isPlaying) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.onSurfaceVariant
-    val doneSuffix = if (isCompleted) ", done" else ""
+    val cellDescription = if (isCompleted) {
+        stringResource(R.string.qaida_a11y_cell_done_format, cell.transliteration)
+    } else {
+        stringResource(R.string.qaida_a11y_cell_format, cell.transliteration)
+    }
 
     Box(modifier = modifier) {
         NimazCard(
             modifier = Modifier
                 .defaultMinSize(minWidth = 72.dp, minHeight = 84.dp)
                 .semantics {
-                    contentDescription = "${cell.transliteration}, tap to hear$doneSuffix"
+                    contentDescription = cellDescription
                 }
                 .clickable { onTap(cell) },
             selected = isPlaying,

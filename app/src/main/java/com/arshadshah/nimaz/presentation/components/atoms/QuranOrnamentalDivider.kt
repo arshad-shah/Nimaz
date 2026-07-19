@@ -69,7 +69,12 @@ private fun QuranOrnamentalDividerLightPreview() {
     }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A08, widthDp = 320, name = "Quran Ornamental Divider — Dark")
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF0A0A08,
+    widthDp = 320,
+    name = "Quran Ornamental Divider — Dark"
+)
 @Composable
 private fun QuranOrnamentalDividerDarkPreview() {
     NimazTheme(themeMode = ThemeMode.DARK) {

@@ -319,6 +319,12 @@
     <string name="khatam_widget_description">Ihr Fortschritt beim Quran-Abschluss</string>
     <string name="khatam_widget_no_active">Kein aktiver Khatam</string>
     <string name="khatam_widget_start">Einen beginnen</string>
+    <string name="khatam_widget_juz_caption">Juz</string>
+    <string name="khatam_widget_daily_target">%1$d/Tag</string>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d Tag in Folge</item>
+        <item quantity="other">%1$d Tage in Folge</item>
+    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Khatam-Erinnerungen</string>
@@ -888,9 +894,15 @@
     <string name="appearance_home_screen">Startbildschirm</string>
     <string name="theme_dark">Dunkel</string>
     <string name="theme_light">Hell</string>
-    <string name="theme_system">System</string>
-    <string name="appearance_islamic_patterns">Islamische Muster</string>
-    <string name="appearance_islamic_patterns_subtitle">Dekorative Muster anzeigen</string>
+    <string name="theme_follow_device">Gerät folgen</string>
+    <string name="theme_follow_device_subtitle">An die helle oder dunkle Einstellung Ihres Geräts anpassen</string>
+    <string name="appearance_pattern">Hintergrundmuster</string>
+    <string name="appearance_pattern_subtitle">Ein dezentes islamisches Ornament hinter jedem Bildschirm. Wählen Sie einen Stil oder Keines, um es auszuschalten.</string>
+    <string name="pattern_none">Keines</string>
+    <string name="pattern_medallion">Medaillon</string>
+    <string name="pattern_lattice">Gitter</string>
+    <string name="pattern_star_field">Sternenfeld</string>
+    <string name="pattern_atelier">Atelier</string>
     <string name="appearance_animations">Animationen</string>
     <string name="appearance_animations_subtitle">Weiche Übergänge aktivieren</string>
     <string name="appearance_haptic">Haptisches Feedback</string>
@@ -1070,6 +1082,15 @@
     <string name="widget_countdown_format">in %1$s</string>
     <string name="zakat_rate_subtitle" formatted="false">2,5% des zakatpflichtigen Vermögens</string>
     <string name="zakat_due_2_5_percent" formatted="false">Fälliger Zakat (2,5%)</string>
+
+    <!-- Zakat summary hero -->
+    <string name="zakat_status_above_nisab">Über dem Nisab</string>
+    <string name="zakat_status_below_nisab">Unter dem Nisab</string>
+    <string name="zakat_below_nisab_subtitle">Unterhalb der Nisab-Schwelle ist keine Zakat fällig</string>
+    <string name="zakat_stat_net">Netto</string>
+    <string name="zakat_stat_rate">Satz</string>
+    <string name="zakat_stat_rate_value" formatted="false">2,5%</string>
+    <string name="zakat_stat_nisab_format">Nisab · %1$s</string>
     <string name="close">Schließen</string>
     <string name="try_again">Erneut versuchen</string>
     <string name="sync_sending">Senden</string>
@@ -1318,4 +1339,112 @@
     <string name="ai_error_unverified">KI-Antworten sind nur in der offiziellen App von Google Play verfügbar. Die Stichwortsuche im Koran, in Hadithen und Duas funktioniert weiterhin offline.</string>
     <string name="ai_error_invalid_title">Diese Frage konnte nicht verarbeitet werden</string>
     <string name="ai_error_unknown_title">Etwas ist schiefgelaufen</string>
+
+    <!-- Hardcoded-string sweep additions -->
+    <string name="zakat_a11y_stat_format">%1$s, %2$s</string>
+    <string name="zakat_a11y_plinth_status_format">%1$s, %2$s, %3$s</string>
+    <string name="cd_edit_time">Zeit bearbeiten</string>
+    <string name="cd_dismiss_announcement">Ankündigung schließen</string>
+    <string name="cd_page_read">Seite gelesen</string>
+    <string name="cd_mark_page_as_read">Seite als gelesen markieren</string>
+    <string name="cd_collapse">Einklappen</string>
+    <string name="cd_expand">Ausklappen</string>
+    <string name="picker_no_matches">Keine Treffer</string>
+    <plurals name="qaida_a11y_stars_format">
+        <item quantity="one">%1$d von %2$d Stern</item>
+        <item quantity="other">%1$d von %2$d Sternen</item>
+    </plurals>
+    <string name="qaida_continue_format">Fortsetzen · %1$s</string>
+    <string name="qaida_a11y_cell_format">%1$s, zum Anhören tippen</string>
+    <string name="qaida_a11y_cell_done_format">%1$s, zum Anhören tippen, erledigt</string>
+    <string name="qaida_a11y_letter_format">Buchstabe %1$s</string>
+    <string name="qaida_a11y_letter_heard_format">Buchstabe %1$s, gehört</string>
+    <plurals name="qaida_a11y_lesson_complete_format">
+        <item quantity="one">Lektion %1$d, %2$s, abgeschlossen, %3$d von 3 Stern</item>
+        <item quantity="other">Lektion %1$d, %2$s, abgeschlossen, %3$d von 3 Sternen</item>
+    </plurals>
+    <string name="qaida_a11y_lesson_current_format">Lektion %1$d, %2$s, aktuell</string>
+    <string name="qaida_a11y_lesson_locked_format">Lektion %1$d, %2$s, gesperrt</string>
+    <string name="qaida_journey_title">Meine Qaida-Reise</string>
+    <string name="qaida_lesson">Lektion</string>
+    <plurals name="prayer_times_upcoming_format">
+        <item quantity="one">noch %1$d</item>
+        <item quantity="other">noch %1$d</item>
+    </plurals>
+    <string name="prayer_times_all_done_today">heute alles erledigt</string>
+    <plurals name="prayer_times_passed_upcoming_format">
+        <item quantity="one">%1$d vergangen · noch %2$d</item>
+        <item quantity="other">%1$d vergangen · noch %2$d</item>
+    </plurals>
+    <string name="hizb_format">Hizb %1$d</string>
+    <string name="hizb_quarter_format">¼ Hizb %1$d</string>
+    <string name="hizb_half_format">½ Hizb %1$d</string>
+    <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <string name="audio_percent_complete_format">%1$d%% abgeschlossen</string>
+    <string name="audio_now_playing">Wird abgespielt</string>
+    <string name="audio_paused">Pausiert</string>
+    <plurals name="surah_ayah_count_format">
+        <item quantity="one">%1$d Ayah</item>
+        <item quantity="other">%1$d Ayahs</item>
+    </plurals>
+    <string name="calendar_a11y_day_format">%1$s, %2$d. %3$s %4$d</string>
+    <string name="calendar_a11y_day_today_format">%1$s, %2$d. %3$s %4$d, heute</string>
+    <string name="quran_copy_reference_format">- Surah %1$d, Ayah %2$d</string>
+    <string name="quran_clipboard_label">Quran-Ayah</string>
+    <string name="sajdah_glyph_format">۩ %1$s</string>
+    <string name="home_next_prayer_in_format">in %1$s</string>
+    <string name="prayer_statistics">Gebetsstatistiken</string>
+    <string name="chart_legend_format">%1$s: %2$s</string>
+    <string name="tafseer_alternate_has_commentary_format">%1$s enthält einen Kommentar zu dieser Ayah.</string>
+    <string name="tafseer_no_commentary_anywhere">Für diese Ayah ist in keiner installierten Quelle ein Kommentar verfügbar.</string>
+    <string name="qibla_turn_right_hint">Nach rechts drehen\num die Qibla zu finden</string>
+    <string name="qibla_turn_left_hint">Nach links drehen\num die Qibla zu finden</string>
+    <string name="zakat_nisab_gold_subtitle">87,48 g @ $%1$d/g</string>
+    <string name="zakat_nisab_silver_subtitle">612,36 g @ $%1$s/g</string>
+    <string name="yes">Ja</string>
+    <string name="no">Nein</string>
+    <string name="fasting_event_ashura_name">Tag von Aschura</string>
+    <string name="fasting_event_ashura_description">10. Muharram – sehr empfohlenes Fasten</string>
+    <string name="fasting_event_arafah_name">Tag von Arafah</string>
+    <string name="fasting_event_arafah_description">9. Dhul Hijjah – sühnt zwei Jahre</string>
+    <string name="fasting_event_shawwal_name">6 Tage des Shawwal</string>
+    <string name="fasting_event_shawwal_description">Sechs Tage nach Eid al-Fitr fasten</string>
+    <string name="fasting_event_mid_shaban_name">Mitte Sha\'ban</string>
+    <string name="fasting_event_mid_shaban_description">15. Sha\'ban – empfohlenes Fasten</string>
+    <string name="monthly_fast_length_format">%1$s-Fasten</string>
+    <string name="stats_this_month">Diesen Monat</string>
+    <string name="stats_this_year">Dieses Jahr</string>
+    <string name="language_english">Englisch</string>
+    <string name="location_detecting_location">Standort wird erkannt…</string>
+    <string name="location_use_current_location">Aktuellen Standort verwenden</string>
+    <string name="prayer_settings_your_location">Ihr Standort</string>
+    <string name="prayer_settings_high_latitude_notice_format">%1$s liegt möglicherweise in einem hohen Breitengrad. Die Gebetszeiten können in den Sommermonaten stark schwanken. Erwägen Sie die winkelbasierte Methode oder ein Siebtel der Nacht.</string>
+    <string name="version_unknown">Unbekannt</string>
+    <string name="sync_preparing">Wird vorbereitet…</string>
+    <string name="sync_transferred_format">%1$d%% übertragen</string>
+    <string name="widget_prayer_initial_fajr">F</string>
+    <string name="widget_prayer_initial_dhuhr">D</string>
+    <string name="widget_prayer_initial_asr">A</string>
+    <string name="widget_prayer_initial_maghrib">M</string>
+    <string name="widget_prayer_initial_isha">I</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Aufg.</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <string name="widget_countdown_hm_format">%1$dh %2$dm</string>
+    <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
+    <string name="widget_countdown_s_format">%1$ds</string>
+    <string name="help_guide_about_minutes_format">Etwa %1$d Min.</string>
+    <string name="help_guide_about_minutes_lower_format">etwa %1$d Min.</string>
+    <string name="help_guide_step_by_step">Schritt für Schritt</string>
+    <plurals name="help_guide_steps_format">
+        <item quantity="one">%1$d Schritt</item>
+        <item quantity="other">%1$d Schritte</item>
+    </plurals>
+    <string name="error_generic">Ein Fehler ist aufgetreten</string>
+    <string name="dua_repeat_count_format">%1$dx</string>
+    <string name="ai_retry_minutes_format">%1$d Min.</string>
+    <string name="ai_retry_hours_format">%1$d Std.</string>
 </resources>

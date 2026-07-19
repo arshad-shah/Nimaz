@@ -31,12 +31,14 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CompassAccuracy
 import com.arshadshah.nimaz.domain.model.QiblaInfo
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGold
@@ -143,7 +145,8 @@ fun ArQiblaView(
                     )
             )
             Text(
-                text = if (turnRight) "Turn right\nto find Qibla" else "Turn left\nto find Qibla",
+                text = if (turnRight) stringResource(R.string.qibla_turn_right_hint)
+                else stringResource(R.string.qibla_turn_left_hint),
                 color = Color.White,
                 fontWeight = FontWeight.ExtraBold,
                 fontSize = 19.sp,

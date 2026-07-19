@@ -18,7 +18,8 @@ class GetAllHistoryUseCase @Inject constructor(private val repository: ZakatRepo
 }
 
 class InsertCalculationUseCase @Inject constructor(private val repository: ZakatRepository) {
-    suspend operator fun invoke(entry: ZakatHistoryEntry): Long = repository.insertCalculation(entry)
+    suspend operator fun invoke(entry: ZakatHistoryEntry): Long =
+        repository.insertCalculation(entry)
 }
 
 class MarkAsPaidUseCase @Inject constructor(private val repository: ZakatRepository) {

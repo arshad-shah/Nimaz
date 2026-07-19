@@ -24,8 +24,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -82,7 +82,7 @@ internal fun MushafPageBar(
                 )
                 if (juzNumber > 0) {
                     NimazBadge(
-                        text = "Juz $juzNumber",
+                        text = stringResource(R.string.khatam_juz_position, juzNumber),
                         tone = NimazTone.ACCENT,
                         emphasis = NimazBadgeEmphasis.OUTLINED,
                         size = NimazBadgeSize.SMALL
@@ -90,7 +90,7 @@ internal fun MushafPageBar(
                 }
                 if (hizbNumber > 0) {
                     NimazBadge(
-                        text = "Hizb $hizbNumber",
+                        text = stringResource(R.string.hizb_format, hizbNumber),
                         tone = NimazTone.ACCENT,
                         emphasis = NimazBadgeEmphasis.OUTLINED,
                         size = NimazBadgeSize.SMALL
@@ -111,7 +111,8 @@ internal fun MushafPageBar(
                     NimazIcon(
                         imageVector = if (allPageRead) Icons.Filled.CheckCircle
                         else Icons.Outlined.RadioButtonUnchecked,
-                        contentDescription = if (allPageRead) "Page read" else "Mark page as read",
+                        contentDescription = if (allPageRead) stringResource(R.string.cd_page_read)
+                        else stringResource(R.string.cd_mark_page_as_read),
                         tint = if (allPageRead) NimazColors.Success
                         else MaterialTheme.colorScheme.onSurfaceVariant,
                         iconSize = 22.dp

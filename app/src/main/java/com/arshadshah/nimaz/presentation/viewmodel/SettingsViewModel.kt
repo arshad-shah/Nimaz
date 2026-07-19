@@ -11,12 +11,13 @@ import com.arshadshah.nimaz.data.audio.AdhanAudioManager
 import com.arshadshah.nimaz.data.audio.AdhanDownloadService
 import com.arshadshah.nimaz.data.audio.AdhanSound
 import com.arshadshah.nimaz.data.local.database.NimazDatabase
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
+import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -68,6 +69,7 @@ data class GeneralSettingsUiState(
     val showSeconds: Boolean = false,
     val hapticFeedback: Boolean = true,
     val showIslamicPatterns: Boolean = true,
+    val patternStyle: NimazPatternStyle = NimazPatternStyle.CORNER_MEDALLION,
     val animationsEnabled: Boolean = true,
     val showCountdown: Boolean = true,
     val showQuickActions: Boolean = true
@@ -188,6 +190,7 @@ sealed interface SettingsEvent {
     data class SetShowSeconds(val enabled: Boolean) : SettingsEvent
     data class SetHapticFeedback(val enabled: Boolean) : SettingsEvent
     data class SetShowIslamicPatterns(val enabled: Boolean) : SettingsEvent
+    data class SetPatternStyle(val style: NimazPatternStyle) : SettingsEvent
     data class SetAnimationsEnabled(val enabled: Boolean) : SettingsEvent
     data class SetShowCountdown(val enabled: Boolean) : SettingsEvent
     data class SetShowQuickActions(val enabled: Boolean) : SettingsEvent
@@ -213,6 +216,7 @@ sealed interface SettingsEvent {
     data class SetFridayReminderEnabled(val enabled: Boolean) : SettingsEvent
     data class SetFridayReminderMinutes(val minutes: Int) : SettingsEvent
     data class SetKhatamReminderEnabled(val enabled: Boolean) : SettingsEvent
+
     /** Reminder time as "HH:mm". */
     data class SetKhatamReminderTime(val time: String) : SettingsEvent
     data class SetAdhanSound(val sound: String) : SettingsEvent
@@ -462,6 +466,20 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetShowIslamicPatterns -> {
                 _generalState.update { it.copy(showIslamicPatterns = event.enabled) }
                 viewModelScope.launch { settingsRepository.setShowIslamicPatterns(event.enabled) }
+            }
+
+            is SettingsEvent.SetPatternStyle -> {
+                // The style is the single source of truth for the ornament: NONE is
+                // "off". We also keep the legacy boolean in sync so import/export and
+                // any remaining reader of showIslamicPatterns stay correct.
+                val enabled = event.style != NimazPatternStyle.NONE
+                _generalState.update {
+                    it.copy(patternStyle = event.style, showIslamicPatterns = enabled)
+                }
+                viewModelScope.launch {
+                    settingsRepository.setPatternStyle(event.style.name)
+                    settingsRepository.setShowIslamicPatterns(enabled)
+                }
             }
 
             is SettingsEvent.SetAnimationsEnabled -> {
@@ -840,6 +858,8 @@ class SettingsViewModel @Inject constructor(
             val langCode = settingsRepository.appLanguage.first()
             val language = AppLanguage.entries.find { it.code == langCode } ?: AppLanguage.ENGLISH
             val showIslamicPatterns = settingsRepository.showIslamicPatterns.first()
+            val patternStyle = NimazPatternStyle.fromKey(settingsRepository.patternStyle.first())
+                .let { if (showIslamicPatterns) it else NimazPatternStyle.NONE }
             val animationsEnabled = settingsRepository.animationsEnabled.first()
             val showCountdown = settingsRepository.showCountdown.first()
             val showQuickActions = settingsRepository.showQuickActions.first()
@@ -857,7 +877,8 @@ class SettingsViewModel @Inject constructor(
                     showQuickActions = showQuickActions,
                     hapticFeedback = hapticFeedback,
                     use24HourFormat = use24Hour,
-                    useHijriPrimary = useHijri
+                    useHijriPrimary = useHijri,
+                    patternStyle = patternStyle
                 )
             }
 

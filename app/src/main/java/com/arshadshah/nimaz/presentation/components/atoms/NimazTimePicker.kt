@@ -64,10 +64,11 @@ data class NimazTime(val hour: Int, val minute: Int) {
     val isPm: Boolean get() = hour >= 12
 
     /** This time's hour on a 12-hour clock, where midnight and midday are both 12. */
-    val hour12: Int get() = when (val h = hour % 12) {
-        0 -> 12
-        else -> h
-    }
+    val hour12: Int
+        get() = when (val h = hour % 12) {
+            0 -> 12
+            else -> h
+        }
 
     /** Rebuilds a 24-hour [hour] from a 12-hour reading. */
     fun withHour12(hour12: Int, pm: Boolean): NimazTime {
@@ -314,7 +315,7 @@ fun NimazTimeDisplay(
         ) {
             Icon(
                 imageVector = Icons.Default.Schedule,
-                contentDescription = "Edit Time",
+                contentDescription = stringResource(R.string.cd_edit_time),
                 tint = accentColor,
                 modifier = Modifier
                     .padding(end = NimazSpacing.Small)

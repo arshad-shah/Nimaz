@@ -97,7 +97,8 @@ private fun NimazActionPillPreview() {
             active = true
         )
 
-    }}
+    }
+}
 
 @Preview
 @Composable

@@ -410,6 +410,12 @@
     <string name="khatam_widget_description">Your Quran completion progress</string>
     <string name="khatam_widget_no_active">No active Khatam</string>
     <string name="khatam_widget_start">Start one</string>
+    <string name="khatam_widget_juz_caption">Juz</string>
+    <string name="khatam_widget_daily_target">%1$d/day</string>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d-day streak</item>
+        <item quantity="other">%1$d-day streak</item>
+    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Khatam reminders</string>
@@ -1024,9 +1030,15 @@
     <string name="appearance_home_screen">Home Screen</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
-    <string name="theme_system">System</string>
-    <string name="appearance_islamic_patterns">Islamic Patterns</string>
-    <string name="appearance_islamic_patterns_subtitle">Show decorative patterns</string>
+    <string name="theme_follow_device">Follow device</string>
+    <string name="theme_follow_device_subtitle">Match your device\'s light or dark setting</string>
+    <string name="appearance_pattern">Background pattern</string>
+    <string name="appearance_pattern_subtitle">A subtle Islamic ornament behind every screen. Pick a style, or None to turn it off.</string>
+    <string name="pattern_none">None</string>
+    <string name="pattern_medallion">Medallion</string>
+    <string name="pattern_lattice">Lattice</string>
+    <string name="pattern_star_field">Star field</string>
+    <string name="pattern_atelier">Atelier</string>
     <string name="appearance_animations">Animations</string>
     <string name="appearance_animations_subtitle">Enable smooth transitions</string>
     <string name="appearance_haptic">Haptic Feedback</string>
@@ -1289,6 +1301,17 @@
     <string name="zakat_rate_subtitle" formatted="false">2.5% of eligible wealth</string>
     <string name="zakat_due_2_5_percent" formatted="false">Zakat Due (2.5%)</string>
 
+    <!-- Zakat summary hero. These replace English sentences that were previously
+         built by string concatenation in ZakatCalculatorScreen. -->
+    <string name="zakat_status_above_nisab">Above nisab</string>
+    <string name="zakat_status_below_nisab">Below nisab</string>
+    <string name="zakat_below_nisab_subtitle">No zakat is due below the nisab threshold</string>
+    <string name="zakat_stat_net">Net</string>
+    <string name="zakat_stat_rate">Rate</string>
+    <string name="zakat_stat_rate_value" formatted="false">2.5%</string>
+    <!-- %1$s is the nisab basis, e.g. "Gold" or "Silver" -->
+    <string name="zakat_stat_nisab_format">Nisab · %1$s</string>
+
     <!-- Common -->
     <string name="close">Close</string>
     <string name="try_again">Try Again</string>
@@ -1478,4 +1501,100 @@
     <string name="ai_error_invalid">Try rewording the question and ask again.</string>
     <string name="ai_error_unknown_title">Something went wrong</string>
     <string name="ai_error_unknown">The answer couldn\'t be generated. Please try again.</string>
+
+
+    <!-- Accessibility join templates. These carry no English of their own — they
+         only decide the order and separator used when joining values that are
+         already localised, which varies by locale. -->
+    <string name="zakat_a11y_stat_format">%1$s, %2$s</string>
+    <string name="zakat_a11y_plinth_status_format">%1$s, %2$s, %3$s</string>
+
+    <!-- Strings extracted from hardcoded literals in the presentation layer -->
+    <string name="cd_edit_time">Edit Time</string>
+    <string name="cd_dismiss_announcement">Dismiss announcement</string>
+    <string name="cd_page_read">Page read</string>
+    <string name="cd_mark_page_as_read">Mark page as read</string>
+    <string name="picker_no_matches">No matches</string>
+    <plurals name="qaida_a11y_stars_format"><item quantity="one">%1$d of %2$d star</item><item quantity="other">%1$d of %2$d stars</item></plurals>
+    <string name="qaida_continue_format">Continue · %1$s</string>
+    <string name="qaida_a11y_cell_format">%1$s, tap to hear</string>
+    <string name="qaida_a11y_cell_done_format">%1$s, tap to hear, done</string>
+    <string name="qaida_a11y_letter_format">Letter %1$s</string>
+    <string name="qaida_a11y_letter_heard_format">Letter %1$s, heard</string>
+    <plurals name="qaida_a11y_lesson_complete_format"><item quantity="one">Lesson %1$d, %2$s, complete, %3$d of 3 star</item><item quantity="other">Lesson %1$d, %2$s, complete, %3$d of 3 stars</item></plurals>
+    <string name="qaida_a11y_lesson_current_format">Lesson %1$d, %2$s, current</string>
+    <string name="qaida_a11y_lesson_locked_format">Lesson %1$d, %2$s, locked</string>
+    <plurals name="prayer_times_upcoming_format"><item quantity="one">%1$d to go</item><item quantity="other">%1$d to go</item></plurals>
+    <string name="prayer_times_all_done_today">all done for today</string>
+    <plurals name="prayer_times_passed_upcoming_format"><item quantity="one">%1$d passed · %2$d to go</item><item quantity="other">%1$d passed · %2$d to go</item></plurals>
+    <string name="hizb_format">Hizb %1$d</string>
+    <string name="hizb_quarter_format">¼ Hizb %1$d</string>
+    <string name="hizb_half_format">½ Hizb %1$d</string>
+    <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <string name="audio_percent_complete_format">%1$d%% complete</string>
+    <string name="audio_now_playing">Now Playing</string>
+    <string name="audio_paused">Paused</string>
+    <plurals name="surah_ayah_count_format"><item quantity="one">%1$d Ayah</item><item quantity="other">%1$d Ayahs</item></plurals>
+    <string name="calendar_a11y_day_format">%1$s, %2$d %3$s %4$d</string>
+    <string name="calendar_a11y_day_today_format">%1$s, %2$d %3$s %4$d, today</string>
+    <string name="quran_copy_reference_format">- Surah %1$d, Ayah %2$d</string>
+    <string name="quran_clipboard_label">Quran Ayah</string>
+    <string name="sajdah_glyph_format">۩ %1$s</string>
+    <string name="home_next_prayer_in_format">in %1$s</string>
+    <string name="prayer_statistics">Prayer Statistics</string>
+    <string name="chart_legend_format">%1$s: %2$s</string>
+    <string name="tafseer_alternate_has_commentary_format">%1$s has commentary for this ayah.</string>
+    <string name="tafseer_no_commentary_anywhere">Commentary for this ayah isn\'t available in any installed source yet.</string>
+    <string name="qibla_turn_right_hint">Turn right\nto find Qibla</string>
+    <string name="qibla_turn_left_hint">Turn left\nto find Qibla</string>
+    <string name="zakat_nisab_gold_subtitle">87.48g @ $%1$d/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36g @ $%1$s/g</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="fasting_event_ashura_name">Day of Ashura</string>
+    <string name="fasting_event_ashura_description">10th Muharram - highly recommended fast</string>
+    <string name="fasting_event_arafah_name">Day of Arafah</string>
+    <string name="fasting_event_arafah_description">9th Dhul Hijjah - expiates two years</string>
+    <string name="fasting_event_shawwal_name">6 Days of Shawwal</string>
+    <string name="fasting_event_shawwal_description">Fasting 6 days after Eid al-Fitr</string>
+    <string name="fasting_event_mid_shaban_name">Mid-Sha\'ban</string>
+    <string name="fasting_event_mid_shaban_description">15th Sha\'ban - recommended fast</string>
+    <string name="cd_collapse">Collapse</string>
+    <string name="cd_expand">Expand</string>
+    <string name="monthly_fast_length_format">%1$s fast</string>
+    <string name="stats_this_month">This Month</string>
+    <string name="stats_this_year">This Year</string>
+    <string name="language_english">English</string>
+    <string name="location_detecting_location">Detecting Location…</string>
+    <string name="location_use_current_location">Use Current Location</string>
+    <string name="prayer_settings_your_location">Your location</string>
+    <string name="prayer_settings_high_latitude_notice_format">%1$s may be at a high latitude. Prayer times may vary significantly during summer months. Consider using Angle Based or One Seventh methods.</string>
+    <string name="version_unknown">Unknown</string>
+    <string name="sync_preparing">Preparing…</string>
+    <string name="sync_transferred_format">%1$d%% transferred</string>
+
+    <string name="widget_prayer_initial_fajr">F</string>
+    <string name="widget_prayer_initial_dhuhr">D</string>
+    <string name="widget_prayer_initial_asr">A</string>
+    <string name="widget_prayer_initial_maghrib">M</string>
+    <string name="widget_prayer_initial_isha">I</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Rise</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <string name="widget_countdown_hm_format">%1$dh %2$dm</string>
+    <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
+    <string name="widget_countdown_s_format">%1$ds</string>
+    <string name="help_guide_about_minutes_format">About %1$d min</string>
+    <string name="help_guide_about_minutes_lower_format">about %1$d min</string>
+    <string name="help_guide_step_by_step">Step-by-step</string>
+    <plurals name="help_guide_steps_format"><item quantity="one">%1$d step</item><item quantity="other">%1$d steps</item></plurals>
+    <string name="error_generic">An error occurred</string>
+    <string name="dua_repeat_count_format">%1$dx</string>
+    <string name="qaida_journey_title">My Qaida Journey</string>
+    <string name="qaida_lesson">Lesson</string>
+    <string name="ai_retry_minutes_format">%1$d min</string>
+    <string name="ai_retry_hours_format">%1$d h</string>
 </resources>

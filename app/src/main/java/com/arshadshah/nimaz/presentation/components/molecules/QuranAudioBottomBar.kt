@@ -24,7 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.IconButton
@@ -46,12 +45,12 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -85,7 +84,8 @@ internal fun AudioBottomBar(
         (currentAyahInSurah.toFloat() / totalAyahsInSurah).coerceIn(0f, 1f)
     } else 0f
     val isBusy = isDownloading || isPreparing
-    val shownProgress = if (isPreparing && totalToDownload > 0) downloadProgress else readingProgress
+    val shownProgress =
+        if (isPreparing && totalToDownload > 0) downloadProgress else readingProgress
 
     NimazCard(
         modifier = modifier
@@ -122,7 +122,11 @@ internal fun AudioBottomBar(
             Column(modifier = Modifier.weight(1f)) {
                 if (isPreparing && totalToDownload > 0) {
                     Text(
-                        text = stringResource(R.string.audio_downloading_short_format, downloadedCount, totalToDownload),
+                        text = stringResource(
+                            R.string.audio_downloading_short_format,
+                            downloadedCount,
+                            totalToDownload
+                        ),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -153,7 +157,11 @@ internal fun AudioBottomBar(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         NimazBadge(
-                            text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah),
+                            text = stringResource(
+                                R.string.audio_position_ayah_format,
+                                currentAyahInSurah,
+                                totalAyahsInSurah
+                            ),
                             tone = NimazTone.ACCENT,
                             emphasis = NimazBadgeEmphasis.FILLED,
                             size = NimazBadgeSize.SMALL

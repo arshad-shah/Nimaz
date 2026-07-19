@@ -6,11 +6,11 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -238,7 +238,7 @@ class MonthlyPrayerTimesViewModel @Inject constructor(
         val maghribLocal = timesMap[PrayerType.MAGHRIB]?.toLocalDateTime(tz)
         val fastMinutes = if (fajrLocal != null && maghribLocal != null) {
             var mins = (maghribLocal.hour * 60 + maghribLocal.minute) -
-                (fajrLocal.hour * 60 + fajrLocal.minute)
+                    (fajrLocal.hour * 60 + fajrLocal.minute)
             if (mins < 0) mins += 24 * 60
             mins
         } else {

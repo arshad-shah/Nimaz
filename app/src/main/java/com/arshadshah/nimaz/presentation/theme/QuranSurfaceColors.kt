@@ -4,6 +4,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.ui.graphics.Color
+import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors.frameGold
+import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors.medallionInk
 
 /**
  * The single source of truth for the colours of the **Quran reading surfaces** —

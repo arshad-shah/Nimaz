@@ -328,7 +328,7 @@ fun NimazInfoDialog(
     title: String,
     message: String,
     onDismiss: () -> Unit,
-    dismissText: String = "Got it",
+    dismissText: String = stringResource(R.string.got_it),
     titleIcon: ImageVector? = Icons.Default.Info,
     accentColor: Color? = null,
 ) {

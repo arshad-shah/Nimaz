@@ -1,16 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.material3.LinearProgressIndicator
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,10 +23,8 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.MenuBook
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -49,19 +36,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
+import com.arshadshah.nimaz.widget.core.formatWidgetTime
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.datetime.TimeZone
@@ -114,8 +115,7 @@ fun WidgetsScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.widgets),
@@ -275,45 +275,45 @@ private fun WidgetSection(
             tone = NimazTone.NEUTRAL,
             elevation = 0.dp
         ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(15.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.surface,
-                        shape = RoundedCornerShape(12.dp)
-                    ),
-                contentAlignment = Alignment.Center
+                    .fillMaxWidth()
+                    .padding(15.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                NimazIcon(
-                    imageVector = infoIcon,
-                    contentDescription = null,
-                    variant = NimazIconVariant.MUTED,
-                    iconSize = 22.dp
-                )
-            }
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NimazIcon(
+                        imageVector = infoIcon,
+                        contentDescription = null,
+                        variant = NimazIconVariant.MUTED,
+                        iconSize = 22.dp
+                    )
+                }
 
-            Spacer(modifier = Modifier.width(15.dp))
+                Spacer(modifier = Modifier.width(15.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = infoName,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = infoSize,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = infoName,
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = infoSize,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
-        }
         }
     }
 }
@@ -431,7 +431,8 @@ private fun PrayerTimesWidgetPreview(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
-                data.prayers.filter { it.name != "Rise" }.forEach { prayer ->
+                val sunriseShort = stringResource(R.string.widget_prayer_short_sunrise)
+                data.prayers.filter { it.name != sunriseShort }.forEach { prayer ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
                             text = prayer.name,
@@ -549,11 +550,11 @@ private fun PrayerTrackerWidgetPreview(
             ) {
                 // Sample data: Fajr, Dhuhr, Asr checked; Maghrib, Isha unchecked
                 listOf(
-                    "F" to true,
-                    "D" to true,
-                    "A" to true,
-                    "M" to false,
-                    "I" to false
+                    stringResource(R.string.widget_prayer_initial_fajr) to true,
+                    stringResource(R.string.widget_prayer_initial_dhuhr) to true,
+                    stringResource(R.string.widget_prayer_initial_asr) to true,
+                    stringResource(R.string.widget_prayer_initial_maghrib) to false,
+                    stringResource(R.string.widget_prayer_initial_isha) to false
                 ).forEach { (name, isChecked) ->
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         NimazCheckbox(
@@ -689,9 +690,24 @@ private fun HijriCalendarWidgetPreview(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Day-of-week labels
+                // Day-of-week labels (locale-aware narrow names, Sunday first).
+                // Read the locale observably via LocalConfiguration so the labels
+                // recompose when the app language changes, rather than reading a
+                // static Locale.getDefault() (lint: NonObservableLocale).
+                val locale = LocalConfiguration.current.locales[0]
+                val weekdayInitials = remember(locale) {
+                    listOf(
+                        java.time.DayOfWeek.SUNDAY,
+                        java.time.DayOfWeek.MONDAY,
+                        java.time.DayOfWeek.TUESDAY,
+                        java.time.DayOfWeek.WEDNESDAY,
+                        java.time.DayOfWeek.THURSDAY,
+                        java.time.DayOfWeek.FRIDAY,
+                        java.time.DayOfWeek.SATURDAY,
+                    ).map { it.getDisplayName(java.time.format.TextStyle.NARROW, locale) }
+                }
                 Row(modifier = Modifier.fillMaxWidth()) {
-                    listOf("S", "M", "T", "W", "T", "F", "S").forEach { label ->
+                    weekdayInitials.forEach { label ->
                         Box(
                             modifier = Modifier.weight(1f),
                             contentAlignment = Alignment.Center
@@ -823,51 +839,51 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
         tone = NimazTone.NEUTRAL,
         elevation = 0.dp
     ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        val steps = listOf(
-            stringResource(R.string.widgets_how_to_step_1),
-            stringResource(R.string.widgets_how_to_step_2),
-            stringResource(R.string.widgets_how_to_step_3),
-            stringResource(R.string.widgets_how_to_step_4)
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val steps = listOf(
+                stringResource(R.string.widgets_how_to_step_1),
+                stringResource(R.string.widgets_how_to_step_2),
+                stringResource(R.string.widgets_how_to_step_3),
+                stringResource(R.string.widgets_how_to_step_4)
+            )
 
-        steps.forEachIndexed { index, step ->
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.Top
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
+            steps.forEachIndexed { index, step ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top
                 ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape = CircleShape
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "${index + 1}",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+
                     Text(
-                        text = "${index + 1}",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        text = step,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        lineHeight = 20.sp,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
-
-                Text(
-                    text = step,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    lineHeight = 20.sp,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
             }
         }
-    }
     }
 }
 
@@ -899,7 +915,7 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
             if (name.lowercase() == "sunrise") return@mapNotNull null
 
             PrayerPreview(
-                name = getShortPrayerName(name),
+                name = getShortPrayerName(context, name),
                 time = formatWidgetTime(prayerLocalTime.hour, prayerLocalTime.minute),
                 isPassed = isPassed,
                 isNext = false
@@ -913,7 +929,8 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
         }
 
         val nextPrayer = prayerTimes.getOrNull(nextPrayerIndex)
-        val nextPrayerName = nextPrayer?.type?.displayName ?: "Fajr"
+        val nextPrayerName = nextPrayer?.type?.displayName
+            ?: context.getString(R.string.prayer_fajr)
         val nextPrayerLocalTime = nextPrayer?.time?.toLocalDateTime(timeZone)
         val nextPrayerTimeStr = nextPrayerLocalTime?.let {
             formatWidgetTime(it.hour, it.minute)
@@ -927,15 +944,20 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
             val minutes = (totalSeconds % 3600) / 60
             val seconds = totalSeconds % 60
             when {
-                hours > 0 -> "${hours}h ${minutes}m"
-                minutes > 0 -> "${minutes}m ${seconds}s"
-                else -> "${seconds}s"
+                hours > 0 -> context.getString(R.string.widget_countdown_hm_format, hours, minutes)
+                minutes > 0 -> context.getString(
+                    R.string.widget_countdown_ms_format,
+                    minutes,
+                    seconds
+                )
+
+                else -> context.getString(R.string.widget_countdown_s_format, seconds)
             }
         } else "—"
 
         // Mark next prayer in the list
         val prayersWithNext = prayers.map { prayer ->
-            prayer.copy(isNext = prayer.name == getShortPrayerName(nextPrayerName))
+            prayer.copy(isNext = prayer.name == getShortPrayerName(context, nextPrayerName))
         }
 
         // Get dates
@@ -980,15 +1002,31 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
     } catch (e: Exception) {
         // Return fallback data
         WidgetPreviewData(
-            nextPrayerName = "Maghrib",
+            nextPrayerName = context.getString(R.string.prayer_maghrib),
             nextPrayerTime = "6:15 PM",
             countdown = "2h 30m",
             prayers = listOf(
-                PrayerPreview("Fajr", "5:30", isPassed = true),
-                PrayerPreview("Dhuhr", "12:45", isPassed = true),
-                PrayerPreview("Asr", "3:30", isPassed = true),
-                PrayerPreview("Mgrb", "6:15", isNext = true),
-                PrayerPreview("Isha", "7:45")
+                PrayerPreview(
+                    context.getString(R.string.widget_prayer_short_fajr),
+                    "5:30",
+                    isPassed = true
+                ),
+                PrayerPreview(
+                    context.getString(R.string.widget_prayer_short_dhuhr),
+                    "12:45",
+                    isPassed = true
+                ),
+                PrayerPreview(
+                    context.getString(R.string.widget_prayer_short_asr),
+                    "3:30",
+                    isPassed = true
+                ),
+                PrayerPreview(
+                    context.getString(R.string.widget_prayer_short_maghrib),
+                    "6:15",
+                    isNext = true
+                ),
+                PrayerPreview(context.getString(R.string.widget_prayer_short_isha), "7:45")
             ),
             hijriDate = "15 Rajab 1446",
             hijriDay = 15,
@@ -1001,16 +1039,17 @@ private suspend fun loadWidgetPreviewData(context: android.content.Context): Wid
     }
 }
 
-private fun getShortPrayerName(name: String): String {
-    return when (name.lowercase()) {
-        "fajr" -> "Fajr"
-        "sunrise" -> "Rise"
-        "dhuhr" -> "Dhuhr"
-        "asr" -> "Asr"
-        "maghrib" -> "Mgrb"
-        "isha" -> "Isha"
-        else -> name.take(5)
+private fun getShortPrayerName(context: android.content.Context, name: String): String {
+    val res = when (name.lowercase()) {
+        "fajr" -> R.string.widget_prayer_short_fajr
+        "sunrise" -> R.string.widget_prayer_short_sunrise
+        "dhuhr" -> R.string.widget_prayer_short_dhuhr
+        "asr" -> R.string.widget_prayer_short_asr
+        "maghrib" -> R.string.widget_prayer_short_maghrib
+        "isha" -> R.string.widget_prayer_short_isha
+        else -> return name.take(5)
     }
+    return context.getString(res)
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Next Prayer Widget Preview")

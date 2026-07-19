@@ -45,6 +45,7 @@ class PrayerNotificationScheduler @Inject constructor(
         const val CHANNEL_ID_ADHAN = "adhan_notifications"
         const val CHANNEL_ID_DAILY_SUMMARY = "daily_summary_notifications"
         const val CHANNEL_ID_KHATAM = "khatam_notifications"
+
         // Silent (no-vibration) siblings — Android ignores enableVibration() changes
         // after a channel exists, so the vibration preference is honoured by posting
         // on the matching channel instead. See channelForPrayer/channelForAdhan.
@@ -373,7 +374,11 @@ class PrayerNotificationScheduler @Inject constructor(
         )
         val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerMillis,
+            pendingIntent
+        )
     }
 
     /**
@@ -417,7 +422,11 @@ class PrayerNotificationScheduler @Inject constructor(
         )
         val triggerMillis = trigger.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMillis, pendingIntent)
+        alarmManager.setExactAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            triggerMillis,
+            pendingIntent
+        )
     }
 
     private fun cancelKhatamReminder() {

@@ -2,17 +2,19 @@
 
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import android.content.Context
+import androidx.compose.ui.text.font.FontFamily
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.data.audio.AudioState
 import com.arshadshah.nimaz.data.audio.QuranAudioManager
-import com.arshadshah.nimaz.domain.model.PageAyahRange
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
+import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
@@ -20,18 +22,17 @@ import com.arshadshah.nimaz.domain.model.ReadingProgress
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.domain.model.SurahInfo
 import com.arshadshah.nimaz.domain.model.SurahWithAyahs
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
-import androidx.compose.ui.text.font.FontFamily
-import android.content.Context
-import com.arshadshah.nimaz.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -39,14 +40,12 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -442,7 +441,12 @@ class QuranViewModel @Inject constructor(
                 ayahNumber = ayah.ayahNumber
             )
         }
-        val title = _readerState.value.title.ifEmpty { context.getString(R.string.quran_home_surah_fallback, surahNumber) }
+        val title = _readerState.value.title.ifEmpty {
+            context.getString(
+                R.string.quran_home_surah_fallback,
+                surahNumber
+            )
+        }
         // Respect continuousReading setting from QuranReaderScreen
         audioManager.setContinuousPlayback(_readerState.value.continuousReading)
         audioManager.playFromAyah(ayahGlobalId, audioItems, title)
@@ -638,7 +642,10 @@ class QuranViewModel @Inject constructor(
                         if (result.surahName.isEmpty()) {
                             val surahName =
                                 surahs.find { it.number == result.ayah.surahNumber }?.nameEnglish
-                                    ?: context.getString(R.string.quran_home_surah_fallback, result.ayah.surahNumber)
+                                    ?: context.getString(
+                                        R.string.quran_home_surah_fallback,
+                                        result.ayah.surahNumber
+                                    )
                             result.copy(surahName = surahName)
                         } else {
                             result

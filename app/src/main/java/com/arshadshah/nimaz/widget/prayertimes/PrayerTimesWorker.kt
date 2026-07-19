@@ -49,7 +49,13 @@ class PrayerTimesWorker @AssistedInject constructor(
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: PrayerTimesWidgetState
-    ) = updateWidgetState(context, PrayerTimesWidget(), PrayerTimesStateDefinition, glanceIds, newState)
+    ) = updateWidgetState(
+        context,
+        PrayerTimesWidget(),
+        PrayerTimesStateDefinition,
+        glanceIds,
+        newState
+    )
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)

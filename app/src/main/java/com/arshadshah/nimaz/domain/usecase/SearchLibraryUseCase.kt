@@ -5,6 +5,7 @@ import com.arshadshah.nimaz.domain.model.HadithSearchResult
 import com.arshadshah.nimaz.domain.model.LibrarySearchResults
 import com.arshadshah.nimaz.domain.model.QuranSearchResult
 import com.arshadshah.nimaz.domain.model.Surah
+import com.arshadshah.nimaz.domain.usecase.SearchLibraryUseCase.Companion.PHRASE_SCORE
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 

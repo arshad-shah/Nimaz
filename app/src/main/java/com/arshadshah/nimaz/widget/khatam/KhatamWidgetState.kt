@@ -28,5 +28,8 @@ data class KhatamWidgetData(
     val name: String = "",
     val progressPercent: Int = 0,
     val currentJuz: Int = 1,
-    val remainingAyahs: Int = 0
+    val juzCompleted: Int = 0,
+    val remainingAyahs: Int = 0,
+    val dailyTarget: Int = 0,
+    val currentStreak: Int = 0
 )

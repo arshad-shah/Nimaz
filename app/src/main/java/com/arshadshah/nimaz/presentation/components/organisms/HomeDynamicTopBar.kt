@@ -191,7 +191,7 @@ private fun CompactPrayerTitle(
             }
         }
         Text(
-            text = "in $timeUntilNextPrayer",
+            text = stringResource(R.string.home_next_prayer_in_format, timeUntilNextPrayer),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Medium,

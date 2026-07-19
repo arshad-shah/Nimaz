@@ -27,7 +27,14 @@ val defaultPopularCities: List<SearchLocation> = listOf(
     SearchLocation("Riyadh", "Saudi Arabia", 24.7136, 46.6753, CityRegion.MIDDLE_EAST, "🇸🇦"),
     SearchLocation("Jeddah", "Saudi Arabia", 21.4858, 39.1925, CityRegion.MIDDLE_EAST, "🇸🇦"),
     SearchLocation("Dubai", "United Arab Emirates", 25.2048, 55.2708, CityRegion.MIDDLE_EAST, "🇦🇪"),
-    SearchLocation("Abu Dhabi", "United Arab Emirates", 24.4539, 54.3773, CityRegion.MIDDLE_EAST, "🇦🇪"),
+    SearchLocation(
+        "Abu Dhabi",
+        "United Arab Emirates",
+        24.4539,
+        54.3773,
+        CityRegion.MIDDLE_EAST,
+        "🇦🇪"
+    ),
     SearchLocation("Doha", "Qatar", 25.2854, 51.5310, CityRegion.MIDDLE_EAST, "🇶🇦"),
     SearchLocation("Kuwait City", "Kuwait", 29.3759, 47.9774, CityRegion.MIDDLE_EAST, "🇰🇼"),
     SearchLocation("Manama", "Bahrain", 26.2285, 50.5860, CityRegion.MIDDLE_EAST, "🇧🇭"),

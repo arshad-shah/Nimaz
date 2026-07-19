@@ -483,7 +483,11 @@ private fun NimazDropdownFieldShowcase() {
         NimazDropdownItem("scheherazade", "Scheherazade New"),
     )
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        NimazDropdownField(label = "Arabic Font", items = fonts, selected = "amiri", onSelected = {})
+        NimazDropdownField(
+            label = "Arabic Font",
+            items = fonts,
+            selected = "amiri",
+            onSelected = {})
         NimazDropdownField(
             label = "Asr Calculation",
             items = listOf(

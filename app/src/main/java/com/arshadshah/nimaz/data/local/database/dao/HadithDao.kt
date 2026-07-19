@@ -81,7 +81,7 @@ interface HadithDao {
 
     @Query(
         "UPDATE hadiths SET text_arabic = :textArabic, text_english = :textEnglish, " +
-            "narrator = :narrator WHERE id = :id"
+                "narrator = :narrator WHERE id = :id"
     )
     suspend fun backfillHadith(
         id: Int,

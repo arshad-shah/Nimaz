@@ -1,14 +1,12 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.R
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,18 +14,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.NightlightRound
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -35,19 +35,30 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import com.arshadshah.nimaz.core.navigation.ScreenTags
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.LocalIsDarkTheme
+import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.viewmodel.AppTheme
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -61,7 +72,7 @@ fun AppearanceSettingsScreen(
     val generalState by viewModel.generalState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -92,6 +103,17 @@ fun AppearanceSettingsScreen(
                 )
             }
 
+            // Background Pattern Section
+            item {
+                NimazSectionHeader(title = stringResource(R.string.appearance_pattern))
+            }
+            item {
+                PatternStyleCard(
+                    selected = generalState.patternStyle,
+                    onSelect = { viewModel.onEvent(SettingsEvent.SetPatternStyle(it)) }
+                )
+            }
+
             // Display Section
             item {
                 NimazSectionHeader(title = stringResource(R.string.appearance_display))
@@ -100,16 +122,12 @@ fun AppearanceSettingsScreen(
                 DisplaySettingsCard(
                     hapticFeedback = generalState.hapticFeedback,
                     use24HourFormat = generalState.use24HourFormat,
-                    showIslamicPatterns = generalState.showIslamicPatterns,
                     animationsEnabled = generalState.animationsEnabled,
                     onHapticFeedbackToggle = {
                         viewModel.onEvent(SettingsEvent.SetHapticFeedback(!generalState.hapticFeedback))
                     },
                     on24HourToggle = {
                         viewModel.onEvent(SettingsEvent.Set24HourFormat(!generalState.use24HourFormat))
-                    },
-                    onIslamicPatternsToggle = {
-                        viewModel.onEvent(SettingsEvent.SetShowIslamicPatterns(!generalState.showIslamicPatterns))
                     },
                     onAnimationsToggle = {
                         viewModel.onEvent(SettingsEvent.SetAnimationsEnabled(!generalState.animationsEnabled))
@@ -139,161 +157,215 @@ fun AppearanceSettingsScreen(
 
 // --- Theme Selection ---
 
+/**
+ * Bespoke theme picker: two real "sky" preview cards — **Day** (light) and
+ * **Night** (dark) — with a **Follow device** switch below.
+ *
+ * "System" is deliberately *not* a third card: it is a rule, not a colour, so it
+ * reads as a switch that sits above the two concrete looks (the pattern iOS uses).
+ * When following the device, both cards dim and the one the device currently
+ * resolves to is not shown as an explicit pick. Choosing a card turns following
+ * off; the switch turns it back on.
+ */
 @Composable
 private fun ThemeSelectionCard(
     selectedTheme: AppTheme,
-    onThemeSelected: (AppTheme) -> Unit
+    onThemeSelected: (AppTheme) -> Unit,
 ) {
+    val resolvedDark = LocalIsDarkTheme.current
+    val followSystem = selectedTheme == AppTheme.SYSTEM
+    val chosenDark = when (selectedTheme) {
+        AppTheme.DARK -> true
+        AppTheme.LIGHT -> false
+        AppTheme.SYSTEM -> resolvedDark
+    }
+
     NimazMenuGroup {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            ThemePreviewOption(
-                label = stringResource(R.string.theme_dark),
-                isSelected = selectedTheme == AppTheme.DARK,
-                onClick = { onThemeSelected(AppTheme.DARK) },
-                modifier = Modifier.weight(1f)
+        Column {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                // Dark preview
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(NimazColors.Neutral950)
-                ) {
-                    ThemePreviewContent(contentColor = Color.White)
-                }
+                ThemePreviewCard(
+                    modifier = Modifier.weight(1f),
+                    dark = false,
+                    label = stringResource(R.string.theme_light),
+                    icon = Icons.Filled.WbSunny,
+                    selected = !followSystem && !chosenDark,
+                    dimmed = followSystem,
+                    onClick = { onThemeSelected(AppTheme.LIGHT) },
+                )
+                ThemePreviewCard(
+                    modifier = Modifier.weight(1f),
+                    dark = true,
+                    label = stringResource(R.string.theme_dark),
+                    icon = Icons.Filled.NightlightRound,
+                    selected = !followSystem && chosenDark,
+                    dimmed = followSystem,
+                    onClick = { onThemeSelected(AppTheme.DARK) },
+                )
             }
-            ThemePreviewOption(
-                label = stringResource(R.string.theme_light),
-                isSelected = selectedTheme == AppTheme.LIGHT,
-                onClick = { onThemeSelected(AppTheme.LIGHT) },
-                modifier = Modifier.weight(1f)
-            ) {
-                // Light preview
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(NimazColors.Neutral100)
-                ) {
-                    ThemePreviewContent(contentColor = NimazColors.Neutral950)
-                }
-            }
-            ThemePreviewOption(
-                label = stringResource(R.string.theme_system),
-                isSelected = selectedTheme == AppTheme.SYSTEM,
-                onClick = { onThemeSelected(AppTheme.SYSTEM) },
-                modifier = Modifier.weight(1f)
-            ) {
-                // System preview: diagonal split
-                Box(modifier = Modifier.fillMaxSize()) {
-                    Canvas(modifier = Modifier.fillMaxSize()) {
-                        val w = size.width
-                        val h = size.height
-                        drawRect(color = NimazColors.Neutral950)
-                        drawPath(
-                            path = androidx.compose.ui.graphics.Path().apply {
-                                moveTo(w, 0f)
-                                lineTo(w, h)
-                                lineTo(0f, h)
-                                close()
-                            },
-                            color = NimazColors.Neutral100
-                        )
-                    }
-                }
-            }
+            NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+            NimazSettingsItem(
+                title = stringResource(R.string.theme_follow_device),
+                subtitle = stringResource(R.string.theme_follow_device_subtitle),
+                checked = followSystem,
+                onCheckedChange = { on ->
+                    onThemeSelected(
+                        if (on) AppTheme.SYSTEM
+                        else if (resolvedDark) AppTheme.DARK else AppTheme.LIGHT
+                    )
+                },
+            )
         }
     }
 }
 
+/** One theme preview: a mini sky over mock content, labelled, gold-ringed when picked. */
 @Composable
-private fun ThemePreviewOption(
+private fun ThemePreviewCard(
+    dark: Boolean,
     label: String,
-    isSelected: Boolean,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    selected: Boolean,
+    dimmed: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    previewContent: @Composable () -> Unit
 ) {
+    val bg = if (dark) ThemePreviewColors.DarkBg else ThemePreviewColors.LightBg
+    val skyTop = if (dark) ThemePreviewColors.NightSky else ThemePreviewColors.DaySky
+    val celestial = if (dark) ThemePreviewColors.Moon else ThemePreviewColors.Sun
+    val line = if (dark) ThemePreviewColors.DarkLine else ThemePreviewColors.LightLine
+    val cardShape = RoundedCornerShape(16.dp)
+    val border = when {
+        selected -> ThemePreviewColors.Gold
+        dark -> ThemePreviewColors.DarkBorder
+        else -> ThemePreviewColors.LightBorder
+    }
+
     Column(
-        modifier = modifier.clickable(onClick = onClick),
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .clip(RoundedCornerShape(18.dp))
+            .clickable(onClick = onClick)
+            .semantics { role = Role.RadioButton },
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        NimazCard(
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .aspectRatio(0.6f),
-            style = NimazCardStyle.OUTLINED,
-            selected = isSelected,
-            shape = RoundedCornerShape(12.dp),
-            colors = NimazCardDefaults.selectable(
-                container = Color.Transparent,
-                border = MaterialTheme.colorScheme.outlineVariant,
-                borderWidth = 1.dp,
-                activeContainer = Color.Transparent,
-                activeBorder = MaterialTheme.colorScheme.primary,
-                activeBorderWidth = 3.dp,
-            ),
+                .aspectRatio(1.15f)
+                .clip(cardShape)
+                .border(if (selected) 2.dp else 1.dp, border, cardShape)
+                .background(bg)
+                .alpha(if (dimmed) 0.55f else 1f),
         ) {
-            Box(modifier = Modifier.fillMaxSize()) {
-                previewContent()
-                // Selected indicator — display-only circular check.
-                if (isSelected) {
-                    NimazCheckbox(
-                        checked = true,
-                        onCheckedChange = null,
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.52f)
+                        .background(Brush.verticalGradient(listOf(skyTop, bg))),
+                    contentAlignment = Alignment.TopEnd,
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = celestial,
                         modifier = Modifier
-                            .padding(8.dp)
-                            .align(Alignment.TopEnd),
-                        variant = NimazCheckboxVariant.PRIMARY,
-                        size = NimazCheckboxSize.SMALL,
-                        type = NimazCheckboxType.CIRCLE,
+                            .padding(10.dp)
+                            .size(22.dp),
+                    )
+                }
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(0.48f)
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    ThemePreviewBar(fraction = 0.5f, color = ThemePreviewColors.Teal, height = 7.dp)
+                    ThemePreviewBar(fraction = 0.85f, color = line, height = 6.dp)
+                    ThemePreviewBar(fraction = 0.65f, color = line, height = 6.dp)
+                }
+            }
+            if (selected) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(ThemePreviewColors.Gold),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Check,
+                        contentDescription = null,
+                        tint = ThemePreviewColors.OnGold,
+                        modifier = Modifier.size(13.dp),
                     )
                 }
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            val labelColor = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            }
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = labelColor,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                color = labelColor,
+            )
+        }
     }
 }
 
 @Composable
-private fun ThemePreviewContent(contentColor: Color) {
-    Column(modifier = Modifier.padding(8.dp)) {
-        // Header bar
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(contentColor.copy(alpha = 0.2f))
-        )
-        Spacer(modifier = Modifier.height(6.dp))
-        // Card 1
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(20.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(contentColor.copy(alpha = 0.1f))
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        // Card 2
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(20.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(contentColor.copy(alpha = 0.1f))
-        )
-    }
+private fun ThemePreviewBar(fraction: Float, color: Color, height: androidx.compose.ui.unit.Dp) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(fraction)
+            .height(height)
+            .clip(RoundedCornerShape(3.dp))
+            .background(color),
+    )
+}
+
+/**
+ * Literal colours for the theme preview cards. Both the light and dark card are
+ * shown at once, so MaterialTheme (a single active scheme) cannot supply them —
+ * these mirror the real light/dark palette, the same way the onboarding art holds
+ * its own tokens.
+ */
+private object ThemePreviewColors {
+    val LightBg = Color(0xFFFAF7F2)
+    val DarkBg = Color(0xFF1C1917)
+    val DaySky = Color(0xFFFDE8C4)
+    val NightSky = Color(0xFF0B1220)
+    val Sun = Color(0xFFE8A317)
+    val Moon = Color(0xFFF5C84B)
+    val Teal = Color(0xFF14B8A6)
+    val LightLine = Color(0xFFE2DBCF)
+    val DarkLine = Color(0xFF3A3430)
+    val LightBorder = Color(0xFFDDD8CF)
+    val DarkBorder = Color(0xFF3A3430)
+    val Gold = Color(0xFFEAB308)
+    val OnGold = Color(0xFF3A2C00)
 }
 
 // --- Display Settings ---
@@ -302,21 +374,12 @@ private fun ThemePreviewContent(contentColor: Color) {
 private fun DisplaySettingsCard(
     hapticFeedback: Boolean,
     use24HourFormat: Boolean,
-    showIslamicPatterns: Boolean,
     animationsEnabled: Boolean,
     onHapticFeedbackToggle: () -> Unit,
     on24HourToggle: () -> Unit,
-    onIslamicPatternsToggle: () -> Unit,
     onAnimationsToggle: () -> Unit
 ) {
     NimazMenuGroup {
-        NimazSettingsItem(
-            title = stringResource(R.string.appearance_islamic_patterns),
-            subtitle = stringResource(R.string.appearance_islamic_patterns_subtitle),
-            checked = showIslamicPatterns,
-            onCheckedChange = { onIslamicPatternsToggle() }
-        )
-        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
         NimazSettingsItem(
             title = stringResource(R.string.appearance_animations),
             subtitle = stringResource(R.string.appearance_animations_subtitle),
@@ -336,6 +399,124 @@ private fun DisplaySettingsCard(
             subtitle = stringResource(R.string.appearance_24hour_subtitle),
             checked = use24HourFormat,
             onCheckedChange = { on24HourToggle() }
+        )
+    }
+}
+
+// --- Background Pattern ---
+
+/** The user-facing label for each ornament style. */
+private fun NimazPatternStyle.labelRes(): Int = when (this) {
+    NimazPatternStyle.NONE -> R.string.pattern_none
+    NimazPatternStyle.CORNER_MEDALLION -> R.string.pattern_medallion
+    NimazPatternStyle.LATTICE -> R.string.pattern_lattice
+    NimazPatternStyle.STAR_FIELD -> R.string.pattern_star_field
+    NimazPatternStyle.ATELIER -> R.string.pattern_atelier
+}
+
+/**
+ * The ornament picker: a horizontally-scrolling row of live swatches. "None" is the
+ * first swatch, so this row is also the on/off control — there is no separate
+ * toggle. Selecting a swatch updates the app-wide background immediately, and the
+ * Appearance screen itself (shown through the transparent scaffold) is the live
+ * preview.
+ *
+ * Swatches render the real geometry via [NimazPatternBackground] with a raised
+ * [alphaScale] so the styles are distinguishable at thumbnail size; the applied
+ * ornament stays subtle.
+ */
+@Composable
+private fun PatternStyleCard(
+    selected: NimazPatternStyle,
+    onSelect: (NimazPatternStyle) -> Unit,
+) {
+    NimazMenuGroup {
+        Column(modifier = Modifier.padding(vertical = 14.dp)) {
+            Text(
+                text = stringResource(R.string.appearance_pattern_subtitle),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                items(NimazPatternStyle.entries) { style ->
+                    PatternSwatch(
+                        style = style,
+                        label = stringResource(style.labelRes()),
+                        selected = style == selected,
+                        onClick = { onSelect(style) },
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun PatternSwatch(
+    style: NimazPatternStyle,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+) {
+    val swatchShape = RoundedCornerShape(12.dp)
+    val borderColor = if (selected) {
+        MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.outlineVariant
+    }
+    Column(
+        modifier = Modifier
+            .width(96.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(onClick = onClick)
+            .semantics { role = Role.RadioButton },
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f)
+                .clip(swatchShape)
+                .border(
+                    width = if (selected) 2.dp else 1.dp,
+                    color = borderColor,
+                    shape = swatchShape,
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            NimazPatternBackground(
+                modifier = Modifier.fillMaxSize(),
+                style = style,
+                enabled = style != NimazPatternStyle.NONE,
+                surface = MaterialTheme.colorScheme.surface,
+                alphaScale = 6f,
+            ) {
+                if (style == NimazPatternStyle.NONE) {
+                    // An empty swatch reads as broken; a soft dash says "no ornament".
+                    Text(
+                        text = "—",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            color = if (selected) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.onSurfaceVariant
+            },
+            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+            maxLines = 1,
         )
     }
 }

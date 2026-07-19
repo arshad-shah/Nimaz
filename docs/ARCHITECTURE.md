@@ -429,7 +429,18 @@ typed route object.
     reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
     from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
-  Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`.
+  Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`. It also
+  provides the appearance CompositionLocals (`LocalIsDarkTheme`, `LocalHapticEnabled`,
+  `LocalUse24HourFormat`, `LocalShowIslamicPatterns`, and `LocalPatternStyle`). The
+  app-wide **decorative ornament** is drawn once at the root by `NimazPatternBackground`
+  (the single read site for those two pattern locals); screens show it through by using
+  `NimazScreenScaffold` (transparent container) instead of a bare `Scaffold`. The ornament
+  style is a first-class user setting — `NimazPatternStyle` (theme package) persisted as the
+  `pattern_style` DataStore key, chosen on the Appearance screen via a horizontally-scrolling
+  swatch picker whose `NONE` swatch doubles as the off switch. (History: the style was once a
+  `compositionLocalOf` default that nothing ever provided, so every screen was stuck on one
+  corner-only medallion at ~5% alpha and toggling looked dead — the picker + a raised alpha
+  fixed it.)
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
   components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.

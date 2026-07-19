@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -37,6 +36,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TafseerNoteItem
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.SurahListItem
 import com.arshadshah.nimaz.presentation.components.molecules.parseColor
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -60,16 +60,15 @@ fun TafseerChaptersScreen(
     var selectedTab by remember { mutableIntStateOf(0) }
 
     val notesTabLabel = stringResource(R.string.tafseer_tab_notes) +
-        if (state.notes.isNotEmpty()) " · ${state.notes.size}" else ""
+            if (state.notes.isNotEmpty()) " · ${state.notes.size}" else ""
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.tafseer),
                 onBackClick = onNavigateBack
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -134,7 +133,10 @@ fun TafseerChaptersScreen(
                             TafseerNoteCard(
                                 note = note,
                                 surahName = nameBySurah[note.surahNumber]
-                                    ?: "Surah ${note.surahNumber}",
+                                    ?: stringResource(
+                                        R.string.surah_number_format,
+                                        note.surahNumber
+                                    ),
                                 onClick = { onOpenTafseer(note.surahNumber, note.ayahNumber) }
                             )
                         }

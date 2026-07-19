@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,7 +30,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +46,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,11 +54,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
+import com.arshadshah.nimaz.core.util.formatFastLength
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
@@ -72,9 +73,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -84,8 +86,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
-import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
-import com.arshadshah.nimaz.core.util.formatFastLength
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -128,14 +128,17 @@ fun MonthlyPrayerTimesScreen(
         }.onFailure { CrashReporter.recordException(it) }
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.monthly_prayer_times),
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { exportMenuExpanded = true }, enabled = canExport) {
-                        NimazIcon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
+                        NimazIcon(
+                            Icons.Default.Share,
+                            contentDescription = stringResource(R.string.export_as_pdf)
+                        )
                     }
                     // Short export chooser → anchored dropdown menu (was a bottom sheet).
                     NimazDropdownMenu(
@@ -144,7 +147,13 @@ fun MonthlyPrayerTimesScreen(
                     ) {
                         NimazDropdownRow(
                             text = stringResource(R.string.monthly_this_month),
-                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${state.dayPrayerTimes.size} days",
+                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${
+                                pluralStringResource(
+                                    R.plurals.days_count_format,
+                                    state.dayPrayerTimes.size,
+                                    state.dayPrayerTimes.size
+                                )
+                            }",
                             leadingIcon = Icons.Default.CalendarMonth,
                             onClick = {
                                 exportMenuExpanded = false
@@ -332,12 +341,36 @@ private fun DayPrayerCard(
     onClick: () -> Unit
 ) {
     val prayers = listOf(
-        PrayerTimeEntry("Fajr", dayTimes.fajr, NimazColors.PrayerColors.Fajr),
-        PrayerTimeEntry("Sunrise", dayTimes.sunrise, NimazColors.PrayerColors.Sunrise),
-        PrayerTimeEntry("Dhuhr", dayTimes.dhuhr, NimazColors.PrayerColors.Dhuhr),
-        PrayerTimeEntry("Asr", dayTimes.asr, NimazColors.PrayerColors.Asr),
-        PrayerTimeEntry("Maghrib", dayTimes.maghrib, NimazColors.PrayerColors.Maghrib),
-        PrayerTimeEntry("Isha", dayTimes.isha, NimazColors.PrayerColors.Isha)
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_fajr),
+            dayTimes.fajr,
+            NimazColors.PrayerColors.Fajr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_sunrise),
+            dayTimes.sunrise,
+            NimazColors.PrayerColors.Sunrise
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_dhuhr),
+            dayTimes.dhuhr,
+            NimazColors.PrayerColors.Dhuhr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_asr),
+            dayTimes.asr,
+            NimazColors.PrayerColors.Asr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_maghrib),
+            dayTimes.maghrib,
+            NimazColors.PrayerColors.Maghrib
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_isha),
+            dayTimes.isha,
+            NimazColors.PrayerColors.Isha
+        )
     )
 
     val hijri = HijriDateCalculator.toHijri(dayTimes.date)
@@ -374,9 +407,11 @@ private fun DayPrayerCard(
             Modifier
         }
 
-        Column(modifier = Modifier
-            .then(background)
-            .fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .then(background)
+                .fillMaxWidth()
+        ) {
             DayMetaRow(
                 date = dayTimes.date,
                 hijriDay = hijri.day,
@@ -418,10 +453,11 @@ private fun DayMetaRow(
     val hijriShort = "$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth).take(3)}"
 
     val titleLine =
-        (if (isToday) "Today · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
+        (if (isToday) stringResource(R.string.today) + " · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
+    val fastLabel = fast?.let { stringResource(R.string.monthly_fast_length_format, it) }.orEmpty()
     val subLine = buildString {
         append("$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth)} $hijriYear")
-        if (fast != null) append(" · $fast fast")
+        if (fast != null) append(" · " + fastLabel)
     }
 
     val rotation by animateFloatAsState(if (isExpanded) 180f else 0f, label = "chevron")
@@ -459,7 +495,7 @@ private fun DayMetaRow(
 
         NimazIcon(
             imageVector = Icons.Default.ExpandMore,
-            contentDescription = if (isExpanded) "Collapse" else "Expand",
+            contentDescription = stringResource(if (isExpanded) R.string.cd_collapse else R.string.cd_expand),
             tint = onColor.copy(alpha = 0.6f),
             modifier = Modifier.rotate(rotation)
         )

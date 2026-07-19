@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.core.navigation
 
+import com.arshadshah.nimaz.core.navigation.ScreenTags.bottomNav
+
+
 /**
  * Stable Compose `testTag` values for navigation, used by the instrumented UI tests
  * to assert *which* screen is showing — independent of locale or on-screen copy.

@@ -11,15 +11,20 @@ import androidx.glance.action.actionStartActivity
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.LinearProgressIndicator
+import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
+import androidx.glance.background
+import androidx.glance.currentState
 import androidx.glance.layout.Alignment
+import androidx.glance.layout.Box
 import androidx.glance.layout.Column
 import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
-import androidx.glance.currentState
+import androidx.glance.layout.size
+import androidx.glance.layout.width
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -28,7 +33,6 @@ import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.widget.core.WidgetCard
-import com.arshadshah.nimaz.widget.core.WidgetLabel
 import com.arshadshah.nimaz.widget.core.WidgetLoadingBox
 import com.arshadshah.nimaz.widget.core.WidgetMessageBox
 
@@ -53,6 +57,9 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
     val textColor = ColorProvider(R.color.widget_text)
     val textSecondary = ColorProvider(R.color.widget_text_secondary)
     val primaryColor = ColorProvider(R.color.widget_primary)
+    val gold = ColorProvider(R.color.widget_gold)
+    val goldContainer = ColorProvider(R.color.widget_gold_container)
+    val onGoldContainer = ColorProvider(R.color.widget_on_gold_container)
 
     when (state) {
         is KhatamWidgetState.Loading -> WidgetLoadingBox(
@@ -69,7 +76,10 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
                     backgroundColor = backgroundColor,
                     textColor = textColor,
                     textSecondary = textSecondary,
-                    primaryColor = primaryColor
+                    primaryColor = primaryColor,
+                    gold = gold,
+                    goldContainer = goldContainer,
+                    onGoldContainer = onGoldContainer,
                 )
             } else {
                 KhatamEmptyContent(
@@ -108,6 +118,15 @@ private fun KhatamContent(context: Context, state: KhatamWidgetState) {
     }
 }
 
+/**
+ * The active-khatam layout — an editorial stat card: an eyebrow with the khatam's
+ * name, a gold juz medallion paired with the ayahs-remaining and pace line, and a
+ * thin progress rule closing the card.
+ *
+ * Glance cannot draw a Compose canvas, so the app's serpentine juz trail is not
+ * reproduced here; the medallion carries the "where am I" glance instead, and the
+ * numbers (juz, remaining, pace, streak) fill what used to be an empty card.
+ */
 @Composable
 private fun KhatamProgressContent(
     context: Context,
@@ -115,67 +134,136 @@ private fun KhatamProgressContent(
     backgroundColor: ColorProvider,
     textColor: ColorProvider,
     textSecondary: ColorProvider,
-    primaryColor: ColorProvider
+    primaryColor: ColorProvider,
+    gold: ColorProvider,
+    goldContainer: ColorProvider,
+    onGoldContainer: ColorProvider,
 ) {
     WidgetCard(
         background = backgroundColor,
         onClick = actionStartActivity<MainActivity>(),
-        padding = 12.dp,
+        padding = 16.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
+            // Eyebrow — the khatam's name.
+            Text(
+                text = data.name,
+                style = TextStyle(
+                    color = textSecondary,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold,
+                ),
+                maxLines = 1,
+            )
+            Spacer(modifier = GlanceModifier.height(12.dp))
+
+            // Hero row: the gold juz medallion beside the supporting stats.
             Row(
                 modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Text(
-                    text = data.name,
-                    style = TextStyle(
-                        color = textColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    ),
-                    maxLines = 1,
+                Box(
+                    modifier = GlanceModifier
+                        .size(60.dp)
+                        .background(goldContainer)
+                        .cornerRadius(30.dp),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Text(
+                            text = data.currentJuz.toString(),
+                            style = TextStyle(
+                                color = onGoldContainer,
+                                fontSize = 24.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                        )
+                        Text(
+                            text = context.getString(R.string.khatam_widget_juz_caption),
+                            style = TextStyle(
+                                color = onGoldContainer,
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.Medium,
+                            ),
+                        )
+                    }
+                }
+                Spacer(modifier = GlanceModifier.width(14.dp))
+                Column(modifier = GlanceModifier.defaultWeight()) {
+                    Text(
+                        text = context.resources.getQuantityString(
+                            R.plurals.khatam_ayahs_remaining,
+                            data.remainingAyahs,
+                            data.remainingAyahs,
+                        ),
+                        style = TextStyle(
+                            color = textColor,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                        maxLines = 1,
+                    )
+                    Spacer(modifier = GlanceModifier.height(4.dp))
+                    Text(
+                        text = paceLine(context, data),
+                        style = TextStyle(color = textSecondary, fontSize = 12.sp),
+                        maxLines = 1,
+                    )
+                }
+            }
+
+            // Push the rule to the bottom edge so the card fills its height.
+            Spacer(modifier = GlanceModifier.defaultWeight())
+
+            // Progress rule with the percentage in gold.
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                LinearProgressIndicator(
+                    progress = data.progressPercent / 100f,
+                    modifier = GlanceModifier.defaultWeight().height(6.dp),
+                    color = primaryColor,
+                    backgroundColor = ColorProvider(R.color.widget_primary_dim),
                 )
-                Spacer(modifier = GlanceModifier.defaultWeight())
+                Spacer(modifier = GlanceModifier.width(10.dp))
                 Text(
                     text = "${data.progressPercent}%",
                     style = TextStyle(
-                        color = primaryColor,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
+                        color = gold,
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
                     ),
-                )
-            }
-            Spacer(modifier = GlanceModifier.height(8.dp))
-            // Glance cannot draw a Compose canvas, so the app's serpentine juz
-            // trail degrades to a plain bar plus the juz number below it.
-            LinearProgressIndicator(
-                progress = data.progressPercent / 100f,
-                modifier = GlanceModifier.fillMaxWidth().height(6.dp),
-                color = primaryColor,
-                backgroundColor = ColorProvider(R.color.widget_primary_dim),
-            )
-            Spacer(modifier = GlanceModifier.height(8.dp))
-            Row(
-                modifier = GlanceModifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                WidgetLabel(
-                    text = context.getString(R.string.khatam_juz_position, data.currentJuz),
-                    color = textColor,
-                    fontSize = 12.sp,
-                )
-                Spacer(modifier = GlanceModifier.defaultWeight())
-                WidgetLabel(
-                    text = context.resources.getQuantityString(
-                        R.plurals.khatam_ayahs_remaining,
-                        data.remainingAyahs,
-                        data.remainingAyahs
-                    ),
-                    color = textSecondary,
                 )
             }
         }
+    }
+}
+
+/**
+ * Builds the "20/day · 12-day streak" line, dropping either part when it is zero
+ * (a khatam with no daily target, or a reader with no current streak). Falls back
+ * to the plain juz position when there is nothing to say about pace yet.
+ */
+private fun paceLine(context: Context, data: KhatamWidgetData): String {
+    val parts = buildList {
+        if (data.dailyTarget > 0) {
+            add(context.getString(R.string.khatam_widget_daily_target, data.dailyTarget))
+        }
+        if (data.currentStreak > 0) {
+            add(
+                context.resources.getQuantityString(
+                    R.plurals.khatam_widget_streak,
+                    data.currentStreak,
+                    data.currentStreak,
+                )
+            )
+        }
+    }
+    return if (parts.isEmpty()) {
+        context.getString(R.string.khatam_juz_position, data.currentJuz)
+    } else {
+        parts.joinToString(" · ")
     }
 }
 

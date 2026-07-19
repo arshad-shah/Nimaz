@@ -41,15 +41,18 @@ class GetBookByIdUseCase @Inject constructor(private val repository: HadithRepos
 }
 
 class GetChaptersByBookUseCase @Inject constructor(private val repository: HadithRepository) {
-    operator fun invoke(bookId: String): Flow<List<HadithChapter>> = repository.getChaptersByBook(bookId)
+    operator fun invoke(bookId: String): Flow<List<HadithChapter>> =
+        repository.getChaptersByBook(bookId)
 }
 
 class GetChapterByIdUseCase @Inject constructor(private val repository: HadithRepository) {
-    suspend operator fun invoke(chapterId: String): HadithChapter? = repository.getChapterById(chapterId)
+    suspend operator fun invoke(chapterId: String): HadithChapter? =
+        repository.getChapterById(chapterId)
 }
 
 class GetHadithsByChapterUseCase @Inject constructor(private val repository: HadithRepository) {
-    operator fun invoke(chapterId: String): Flow<List<Hadith>> = repository.getHadithsByChapter(chapterId)
+    operator fun invoke(chapterId: String): Flow<List<Hadith>> =
+        repository.getHadithsByChapter(chapterId)
 }
 
 class GetHadithByIdUseCase @Inject constructor(private val repository: HadithRepository) {
@@ -68,7 +71,8 @@ class GetHadithByReferenceUseCase @Inject constructor(private val repository: Ha
 }
 
 class GetHadithsByGradeUseCase @Inject constructor(private val repository: HadithRepository) {
-    operator fun invoke(grade: HadithGrade): Flow<List<Hadith>> = repository.getHadithsByGrade(grade)
+    operator fun invoke(grade: HadithGrade): Flow<List<Hadith>> =
+        repository.getHadithsByGrade(grade)
 }
 
 class GetHadithOfTheDayUseCase @Inject constructor(private val repository: HadithRepository) {
@@ -76,7 +80,8 @@ class GetHadithOfTheDayUseCase @Inject constructor(private val repository: Hadit
 }
 
 class SearchHadithsUseCase @Inject constructor(private val repository: HadithRepository) {
-    operator fun invoke(query: String): Flow<List<HadithSearchResult>> = repository.searchHadiths(query)
+    operator fun invoke(query: String): Flow<List<HadithSearchResult>> =
+        repository.searchHadiths(query)
 }
 
 class SearchHadithsInBookUseCase @Inject constructor(private val repository: HadithRepository) {

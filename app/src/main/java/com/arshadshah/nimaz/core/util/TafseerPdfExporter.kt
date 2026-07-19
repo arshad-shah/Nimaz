@@ -136,7 +136,13 @@ object TafseerPdfExporter {
                 if (snippet.isNotBlank()) {
                     val shown = if (snippet.length > 160) snippet.take(160) + "…" else snippet
                     writer.flow(
-                        layout("“$shown”", snippetPaint, contentWidth - 14, Layout.Alignment.ALIGN_NORMAL, 2f),
+                        layout(
+                            "“$shown”",
+                            snippetPaint,
+                            contentWidth - 14,
+                            Layout.Alignment.ALIGN_NORMAL,
+                            2f
+                        ),
                         spacingBefore = 8f,
                         spacingAfter = 3f,
                         accentColor = accent,
@@ -144,7 +150,13 @@ object TafseerPdfExporter {
                     )
                 }
                 writer.flow(
-                    layout(highlight.note.orEmpty(), notePaint, contentWidth - 14, Layout.Alignment.ALIGN_NORMAL, 2f),
+                    layout(
+                        highlight.note.orEmpty(),
+                        notePaint,
+                        contentWidth - 14,
+                        Layout.Alignment.ALIGN_NORMAL,
+                        2f
+                    ),
                     spacingAfter = 4f,
                     indent = 14f
                 )
@@ -256,7 +268,9 @@ private class PageWriter(
             if (accentColor != null) {
                 c.drawRect(
                     MARGIN, y, MARGIN + 3f, y + height,
-                    Paint().apply { isAntiAlias = true; color = accentColor; style = Paint.Style.FILL }
+                    Paint().apply {
+                        isAntiAlias = true; color = accentColor; style = Paint.Style.FILL
+                    }
                 )
             }
 

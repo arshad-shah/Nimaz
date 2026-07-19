@@ -6,6 +6,10 @@ import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.share.ContentShareManager.sendEmail
+import com.arshadshah.nimaz.core.share.ContentShareManager.shareBranded
+import com.arshadshah.nimaz.core.share.ContentShareManager.shareFile
+import com.arshadshah.nimaz.core.share.ContentShareManager.shareText
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File

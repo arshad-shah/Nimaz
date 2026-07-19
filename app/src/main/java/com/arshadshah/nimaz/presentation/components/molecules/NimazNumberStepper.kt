@@ -62,11 +62,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Layout shape of a [NimazNumberStepper].
@@ -497,7 +496,13 @@ private fun NimazNumberStepperInlinePreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            NimazNumberStepper(label = "Fajr adjustment", value = 5, onValueChange = {}, minValue = -30, maxValue = 30)
+            NimazNumberStepper(
+                label = "Fajr adjustment",
+                value = 5,
+                onValueChange = {},
+                minValue = -30,
+                maxValue = 30
+            )
             NimazNumberStepper(
                 label = "Daily target", value = 20, onValueChange = {},
                 size = NimazNumberStepperSize.MEDIUM,

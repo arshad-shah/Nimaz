@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import android.os.Build
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -31,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlurEffect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -45,7 +47,6 @@ import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInRoot
 import androidx.compose.ui.platform.LocalDensity
@@ -55,7 +56,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import android.os.Build
 import com.arshadshah.nimaz.presentation.theme.GlassColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -171,7 +171,13 @@ fun GlassPill(
         horizontalArrangement = Arrangement.spacedBy(gap),
         modifier = modifier
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
-            .glassSurface(tone = tone, tint = tint, shape = shape, backdrop = backdrop, blurRadius = blurRadius)
+            .glassSurface(
+                tone = tone,
+                tint = tint,
+                shape = shape,
+                backdrop = backdrop,
+                blurRadius = blurRadius
+            )
             .padding(horizontal = hPad, vertical = vPad),
     ) {
         if (leadingIcon != null) {
@@ -318,7 +324,13 @@ fun GlassIconButton(
         onClick = onClick,
         modifier = modifier
             .size(target)
-            .glassSurface(tone = tone, tint = tint, shape = CircleShape, backdrop = backdrop, blurRadius = blurRadius),
+            .glassSurface(
+                tone = tone,
+                tint = tint,
+                shape = CircleShape,
+                backdrop = backdrop,
+                blurRadius = blurRadius
+            ),
     ) {
         NimazIcon(
             imageVector = icon,
@@ -349,13 +361,19 @@ private fun SkyPreview(
 }
 
 private val MiddaySky = listOf(
-    GlassColors.MiddayBlueDeep, GlassColors.MiddayBlueMid, GlassColors.MiddayBlueBright, GlassColors.MiddayBluePale
+    GlassColors.MiddayBlueDeep,
+    GlassColors.MiddayBlueMid,
+    GlassColors.MiddayBlueBright,
+    GlassColors.MiddayBluePale
 )
 private val DuskSky = listOf(
     GlassColors.DuskIndigo, GlassColors.DuskMauve, GlassColors.DuskRose, GlassColors.DuskPeach
 )
 private val NightSky = listOf(
-    GlassColors.NightBlack, GlassColors.NightMidnight, GlassColors.NightIndigo, GlassColors.NightViolet
+    GlassColors.NightBlack,
+    GlassColors.NightMidnight,
+    GlassColors.NightIndigo,
+    GlassColors.NightViolet
 )
 private val DawnSky = listOf(
     GlassColors.DawnNavy, GlassColors.DawnViolet, GlassColors.DawnPlum, GlassColors.DawnAmber
@@ -385,7 +403,11 @@ private fun GlassPill_LeadingIcons() {
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 GlassPill("Manchester, UK", leadingIcon = Icons.Filled.Place)
                 GlassPill("Maghrib", leadingIcon = Icons.Filled.WbSunny, tone = GlassPillTone.Solid)
-                GlassPill("3 reminders", leadingIcon = Icons.Filled.Notifications, tone = GlassPillTone.Ghost)
+                GlassPill(
+                    "3 reminders",
+                    leadingIcon = Icons.Filled.Notifications,
+                    tone = GlassPillTone.Ghost
+                )
             }
         }
     }
@@ -434,9 +456,24 @@ private fun GlassIconButton_Tones() {
         SkyPreview(MiddaySky) {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                 GlassIconButton(Icons.Filled.Settings, "Settings", onClick = {})
-                GlassIconButton(Icons.Filled.Search, "Search", onClick = {}, tone = GlassPillTone.Solid)
-                GlassIconButton(Icons.Filled.Notifications, "Alerts", onClick = {}, tone = GlassPillTone.Ghost)
-                GlassIconButton(Icons.Filled.Place, "Location", onClick = {}, size = GlassPillSize.Small)
+                GlassIconButton(
+                    Icons.Filled.Search,
+                    "Search",
+                    onClick = {},
+                    tone = GlassPillTone.Solid
+                )
+                GlassIconButton(
+                    Icons.Filled.Notifications,
+                    "Alerts",
+                    onClick = {},
+                    tone = GlassPillTone.Ghost
+                )
+                GlassIconButton(
+                    Icons.Filled.Place,
+                    "Location",
+                    onClick = {},
+                    size = GlassPillSize.Small
+                )
             }
         }
     }

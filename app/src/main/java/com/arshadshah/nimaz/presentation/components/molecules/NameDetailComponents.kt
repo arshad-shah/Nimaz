@@ -21,8 +21,8 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -117,14 +117,14 @@ private fun NameDetailComponentsShowcase() {
         NameDetailSectionCard(
             title = "Meaning",
             content = "Ar-Rahman is one of the most beautiful names of Allah, " +
-                "denoting the boundless mercy and compassion that encompasses " +
-                "all of creation, believers and non-believers alike.",
+                    "denoting the boundless mercy and compassion that encompasses " +
+                    "all of creation, believers and non-believers alike.",
             titleColor = NamesAccents.allah().contentTint,
         )
         NameDetailSectionCard(
             title = "Benefits",
             content = "Reciting this name frequently fills the heart with " +
-                "gratitude and softens it toward all of creation.",
+                    "gratitude and softens it toward all of creation.",
         )
     }
 }

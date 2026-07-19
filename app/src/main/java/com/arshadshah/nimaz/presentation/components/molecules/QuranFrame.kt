@@ -165,7 +165,12 @@ private fun QuranFrameLightPreview() {
     NimazTheme(themeMode = ThemeMode.LIGHT) { QuranFrameShowcase() }
 }
 
-@Preview(showBackground = true, backgroundColor = 0xFF0A0A08, widthDp = 380, name = "QuranFrame — Dark")
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF0A0A08,
+    widthDp = 380,
+    name = "QuranFrame — Dark"
+)
 @Composable
 private fun QuranFrameDarkPreview() {
     NimazTheme(themeMode = ThemeMode.DARK) { QuranFrameShowcase() }

@@ -349,7 +349,7 @@ fun ExpandableSearchBar(
     onQueryChange: (String) -> Unit,
     onSearch: (String) -> Unit,
     modifier: Modifier = Modifier,
-    placeholder: String = "Search Quran, Hadith, Duas...",
+    placeholder: String = stringResource(R.string.search_placeholder),
     recentSearches: List<String> = emptyList(),
     suggestions: List<String> = emptyList(),
     isLoading: Boolean = false,

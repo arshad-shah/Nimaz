@@ -138,31 +138,46 @@ internal fun SurahAudioControlBar(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = stringResource(R.string.audio_downloading_format, downloadedCount, totalToDownload),
+                        text = stringResource(
+                            R.string.audio_downloading_format,
+                            downloadedCount,
+                            totalToDownload
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "${(downloadProgress * 100).toInt()}% complete",
+                        text = stringResource(
+                            R.string.audio_percent_complete_format,
+                            (downloadProgress * 100).toInt()
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                 } else {
                     // Show playback status
                     Text(
-                        text = if (isPlaying) "Now Playing" else "Paused",
+                        text = if (isPlaying) stringResource(R.string.audio_now_playing)
+                        else stringResource(R.string.audio_paused),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )
                     Text(
-                        text = stringResource(R.string.audio_ayah_progress_format, currentAyah, totalAyahs),
+                        text = stringResource(
+                            R.string.audio_ayah_progress_format,
+                            currentAyah,
+                            totalAyahs
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
                         color = MaterialTheme.colorScheme.onPrimaryContainer
                     )
                     Text(
-                        text = "${(surahProgress * 100).toInt()}% complete",
+                        text = stringResource(
+                            R.string.audio_percent_complete_format,
+                            (surahProgress * 100).toInt()
+                        ),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f)
                     )

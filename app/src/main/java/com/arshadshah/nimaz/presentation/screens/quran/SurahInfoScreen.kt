@@ -15,8 +15,6 @@ import androidx.compose.material.icons.filled.FormatListNumbered
 import androidx.compose.material.icons.filled.Layers
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -29,6 +27,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.InfoCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.molecules.DetailCard
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
@@ -61,8 +60,7 @@ fun SurahInfoScreen(
     // for the surah they are looking at.
     val isAudioForThisSurah = audioState.isActive && audioState.currentSurahNumber == surahNumber
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazTopAppBar(
                 title = stringResource(R.string.quran_home_surah_info),
@@ -140,7 +138,10 @@ fun SurahInfoScreen(
 
                 // About This Surah
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NimazSectionTitle(text = stringResource(R.string.surah_info_about), uppercase = false)
+                    NimazSectionTitle(
+                        text = stringResource(R.string.surah_info_about),
+                        uppercase = false
+                    )
                     InfoCard(
                         text = surahInfo?.description
                             ?: stringResource(R.string.surah_info_description_fallback)
@@ -149,7 +150,10 @@ fun SurahInfoScreen(
 
                 // Main Themes
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    NimazSectionTitle(text = stringResource(R.string.surah_info_main_themes), uppercase = false)
+                    NimazSectionTitle(
+                        text = stringResource(R.string.surah_info_main_themes),
+                        uppercase = false
+                    )
                     ThemesList(
                         themes = surahInfo?.themes
                             ?: listOf(

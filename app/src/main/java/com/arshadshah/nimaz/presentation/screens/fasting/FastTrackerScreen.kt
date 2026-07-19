@@ -26,7 +26,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -55,19 +54,20 @@ import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -77,10 +77,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShap
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLegendItem
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
@@ -148,8 +148,7 @@ fun FastTrackerScreen(
         onDismiss = { viewModel.onEvent(FastingEvent.DismissFastSheet) }
     )
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.fasting_title),
@@ -191,139 +190,139 @@ fun FastTrackerScreen(
                 contentPadding = PaddingValues(horizontal = 20.dp, vertical = 20.dp),
                 verticalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-            // Content based on selected tab
-            when (selectedTab) {
-                0 -> {
-                    // Tracker — merged Ramadan + Voluntary, context-aware
-                    if (ramadanState.isRamadan) {
-                        // During Ramadan - show banner and stats
-                        item {
-                            RamadanBanner(
-                                fastedDays = ramadanState.fastedDays,
-                                totalDays = ramadanState.fastedDays + ramadanState.missedDays + ramadanState.remainingDays,
-                                currentDay = ramadanState.currentDay
-                            )
-                        }
+                // Content based on selected tab
+                when (selectedTab) {
+                    0 -> {
+                        // Tracker — merged Ramadan + Voluntary, context-aware
+                        if (ramadanState.isRamadan) {
+                            // During Ramadan - show banner and stats
+                            item {
+                                RamadanBanner(
+                                    fastedDays = ramadanState.fastedDays,
+                                    totalDays = ramadanState.fastedDays + ramadanState.missedDays + ramadanState.remainingDays,
+                                    currentDay = ramadanState.currentDay
+                                )
+                            }
 
-                        // Stats Grid
-                        item {
-                            NimazStatsGrid(
-                                stats = listOf(
-                                    NimazStatData(
-                                        ramadanState.fastedDays.toString(),
-                                        stringResource(R.string.fasting_fasted)
-                                    ),
-                                    NimazStatData(
-                                        ramadanState.missedDays.toString(),
-                                        stringResource(R.string.fasting_missed)
-                                    ),
-                                    NimazStatData(
-                                        ramadanState.remainingDays.toString(),
-                                        stringResource(R.string.fasting_remaining)
+                            // Stats Grid
+                            item {
+                                NimazStatsGrid(
+                                    stats = listOf(
+                                        NimazStatData(
+                                            ramadanState.fastedDays.toString(),
+                                            stringResource(R.string.fasting_fasted)
+                                        ),
+                                        NimazStatData(
+                                            ramadanState.missedDays.toString(),
+                                            stringResource(R.string.fasting_missed)
+                                        ),
+                                        NimazStatData(
+                                            ramadanState.remainingDays.toString(),
+                                            stringResource(R.string.fasting_remaining)
+                                        )
                                     )
                                 )
+                            }
+
+                            // Missed Fasts Alert (if any days are missed/not logged)
+                            item {
+                                RamadanMissedFastsTracker(
+                                    currentDay = ramadanState.currentDay,
+                                    fastedDays = ramadanState.fastedDays,
+                                    records = calendarState.records
+                                )
+                            }
+                        } else if (HijriDateCalculator.daysUntilNextRamadan() <= 30) {
+                            // Ramadan approaching (within 30 days) - show countdown
+                            item {
+                                RamadanCountdownCard()
+                            }
+                        }
+
+                        // Today's Fast
+                        item {
+                            TodayFastSection(
+                                isFasting = state.isFastingToday,
+                                fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
+                                fastType = state.selectedFastType,
+                                selectedDate = state.selectedDate,
+                                ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
+                                suhoorTime = state.suhoorTime,
+                                iftarTime = state.iftarTime,
+                                timeUntilIftar = state.timeUntilIftar,
+                                timeUntilSuhoor = state.timeUntilSuhoor,
+                                isSuhoorTime = state.isSuhoorTime,
+                                onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
                             )
                         }
 
-                        // Missed Fasts Alert (if any days are missed/not logged)
+                        // Calendar with Ramadan indicators
                         item {
-                            RamadanMissedFastsTracker(
-                                currentDay = ramadanState.currentDay,
-                                fastedDays = ramadanState.fastedDays,
-                                records = calendarState.records
-                            )
-                        }
-                    } else if (HijriDateCalculator.daysUntilNextRamadan() <= 30) {
-                        // Ramadan approaching (within 30 days) - show countdown
-                        item {
-                            RamadanCountdownCard()
-                        }
-                    }
-
-                    // Today's Fast
-                    item {
-                        TodayFastSection(
-                            isFasting = state.isFastingToday,
-                            fastStatus = state.todayRecord?.status ?: FastStatus.NOT_FASTED,
-                            fastType = state.selectedFastType,
-                            selectedDate = state.selectedDate,
-                            ramadanDay = if (ramadanState.isRamadan) ramadanState.currentDay else null,
-                            suhoorTime = state.suhoorTime,
-                            iftarTime = state.iftarTime,
-                            timeUntilIftar = state.timeUntilIftar,
-                            timeUntilSuhoor = state.timeUntilSuhoor,
-                            isSuhoorTime = state.isSuhoorTime,
-                            onToggleFast = { viewModel.onEvent(FastingEvent.ToggleTodayFast) }
-                        )
-                    }
-
-                    // Calendar with Ramadan indicators
-                    item {
-                        FastingCalendarSection(
-                            records = calendarState.records,
-                            selectedMonth = calendarState.selectedMonth,
-                            selectedYear = calendarState.selectedYear,
-                            onPreviousMonth = {
-                                val newMonth =
-                                    if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
-                                val newYear =
-                                    if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
-                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                            },
-                            onNextMonth = {
-                                val newMonth =
-                                    if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
-                                val newYear =
-                                    if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
-                                viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
-                            },
-                            onSelectDate = { date ->
-                                viewModel.onEvent(FastingEvent.SelectDate(date))
-                                viewModel.onEvent(FastingEvent.OpenFastSheet(date))
-                            },
-                            showRamadanIndicators = ramadanState.isRamadan
-                        )
-                    }
-
-                    // Recommended voluntary fasts - only outside Ramadan
-                    if (!ramadanState.isRamadan) {
-                        item {
-                            RecommendedFastsSection(
+                            FastingCalendarSection(
                                 records = calendarState.records,
-                                onLogFast = { date ->
+                                selectedMonth = calendarState.selectedMonth,
+                                selectedYear = calendarState.selectedYear,
+                                onPreviousMonth = {
+                                    val newMonth =
+                                        if (calendarState.selectedMonth == 1) 12 else calendarState.selectedMonth - 1
+                                    val newYear =
+                                        if (calendarState.selectedMonth == 1) calendarState.selectedYear - 1 else calendarState.selectedYear
+                                    viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                                },
+                                onNextMonth = {
+                                    val newMonth =
+                                        if (calendarState.selectedMonth == 12) 1 else calendarState.selectedMonth + 1
+                                    val newYear =
+                                        if (calendarState.selectedMonth == 12) calendarState.selectedYear + 1 else calendarState.selectedYear
+                                    viewModel.onEvent(FastingEvent.SelectMonth(newMonth, newYear))
+                                },
+                                onSelectDate = { date ->
                                     viewModel.onEvent(FastingEvent.SelectDate(date))
                                     viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                                },
+                                showRamadanIndicators = ramadanState.isRamadan
+                            )
+                        }
+
+                        // Recommended voluntary fasts - only outside Ramadan
+                        if (!ramadanState.isRamadan) {
+                            item {
+                                RecommendedFastsSection(
+                                    records = calendarState.records,
+                                    onLogFast = { date ->
+                                        viewModel.onEvent(FastingEvent.SelectDate(date))
+                                        viewModel.onEvent(FastingEvent.OpenFastSheet(date))
+                                    }
+                                )
+                            }
+                        }
+
+                        // Log Fast Button
+                        item {
+                            LogFastButton(
+                                onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
+                            )
+                        }
+                    }
+
+                    1 -> {
+                        // Makeup Tab - Show makeup fasts inline
+                        item {
+                            MakeupFastsContent(
+                                makeupState = makeupState,
+                                onCompleteMakeupFast = { makeupFastId ->
+                                    viewModel.onEvent(FastingEvent.CompleteMakeupFast(makeupFastId))
+                                },
+                                onUpdateMakeupFast = { updatedFast ->
+                                    viewModel.onEvent(FastingEvent.UpdateMakeupFast(updatedFast))
+                                },
+                                onPayFidya = { id, amount ->
+                                    viewModel.onEvent(FastingEvent.PayFidya(id, amount))
                                 }
                             )
                         }
                     }
-
-                    // Log Fast Button
-                    item {
-                        LogFastButton(
-                            onClick = { viewModel.onEvent(FastingEvent.OpenFastSheet(state.selectedDate)) }
-                        )
-                    }
                 }
-
-                1 -> {
-                    // Makeup Tab - Show makeup fasts inline
-                    item {
-                        MakeupFastsContent(
-                            makeupState = makeupState,
-                            onCompleteMakeupFast = { makeupFastId ->
-                                viewModel.onEvent(FastingEvent.CompleteMakeupFast(makeupFastId))
-                            },
-                            onUpdateMakeupFast = { updatedFast ->
-                                viewModel.onEvent(FastingEvent.UpdateMakeupFast(updatedFast))
-                            },
-                            onPayFidya = { id, amount ->
-                                viewModel.onEvent(FastingEvent.PayFidya(id, amount))
-                            }
-                        )
-                    }
-                }
-            }
 
             }
         }
@@ -817,6 +816,14 @@ private fun RecommendedFastsSection(
 
     // Islamic calendar recommended fasts
     val hijriToday = remember { HijriDateCalculator.today() }
+    val ashuraName = stringResource(R.string.fasting_event_ashura_name)
+    val ashuraDesc = stringResource(R.string.fasting_event_ashura_description)
+    val arafahName = stringResource(R.string.fasting_event_arafah_name)
+    val arafahDesc = stringResource(R.string.fasting_event_arafah_description)
+    val shawwalName = stringResource(R.string.fasting_event_shawwal_name)
+    val shawwalDesc = stringResource(R.string.fasting_event_shawwal_description)
+    val midShabanName = stringResource(R.string.fasting_event_mid_shaban_name)
+    val midShabanDesc = stringResource(R.string.fasting_event_mid_shaban_description)
     val islamicFasts = remember(hijriToday.year) {
         val events = HijriDateCalculator.getIslamicEvents(hijriToday.year) +
                 HijriDateCalculator.getIslamicEvents(hijriToday.year + 1)
@@ -837,9 +844,9 @@ private fun RecommendedFastsSection(
                 ?.let { date ->
                     add(
                         RecommendedIslamicFast(
-                            name = "Day of Ashura",
+                            name = ashuraName,
                             date = date,
-                            description = "10th Muharram - highly recommended fast"
+                            description = ashuraDesc
                         )
                     )
                 }
@@ -851,9 +858,9 @@ private fun RecommendedFastsSection(
                 ?.let { date ->
                     add(
                         RecommendedIslamicFast(
-                            name = "Day of Arafah",
+                            name = arafahName,
                             date = date,
-                            description = "9th Dhul Hijjah - expiates two years"
+                            description = arafahDesc
                         )
                     )
                 }
@@ -863,9 +870,9 @@ private fun RecommendedFastsSection(
                 if (!shawwalStart.isBefore(today)) {
                     add(
                         RecommendedIslamicFast(
-                            name = "6 Days of Shawwal",
+                            name = shawwalName,
                             date = shawwalStart,
-                            description = "Fasting 6 days after Eid al-Fitr"
+                            description = shawwalDesc
                         )
                     )
                 }
@@ -877,9 +884,9 @@ private fun RecommendedFastsSection(
                 if (!midShaban.isBefore(today)) {
                     add(
                         RecommendedIslamicFast(
-                            name = "Mid-Sha'ban",
+                            name = midShabanName,
                             date = midShaban,
-                            description = "15th Sha'ban - recommended fast"
+                            description = midShabanDesc
                         )
                     )
                 }

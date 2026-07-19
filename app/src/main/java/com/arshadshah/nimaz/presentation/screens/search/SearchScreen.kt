@@ -36,7 +36,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -73,13 +72,14 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -130,7 +130,7 @@ fun SearchScreen(
     val askEnabled = enableAsk && askState.aiEnabled
     val answerPhase = if (enableAsk) askState.phase as? AskPhase.Answer else null
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -500,7 +500,11 @@ private fun SectionHeader(
             fontWeight = FontWeight.Bold
         )
         if (actionLabel != null && onAction != null) {
-            Surface(onClick = onAction, shape = RoundedCornerShape(8.dp), color = Color.Transparent) {
+            Surface(
+                onClick = onAction,
+                shape = RoundedCornerShape(8.dp),
+                color = Color.Transparent
+            ) {
                 Text(
                     text = actionLabel,
                     style = MaterialTheme.typography.labelMedium,
@@ -602,7 +606,10 @@ private fun UnifiedResultCard(
             icon = sourceIcon(ProofSource.HADITH),
             iconColor = sourceAccent(ProofSource.HADITH),
             type = stringResource(R.string.hadith_type),
-            title = stringResource(R.string.hadith_result_format, result.result.hadith.hadithNumber),
+            title = stringResource(
+                R.string.hadith_result_format,
+                result.result.hadith.hadithNumber
+            ),
             subtitle = result.result.bookName,
             highlightedText = result.result.matchedText,
             query = query,

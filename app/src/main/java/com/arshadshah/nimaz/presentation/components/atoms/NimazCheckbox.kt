@@ -244,7 +244,11 @@ private fun NimazCheckboxSizesShowcase() {
         }
         NimazCheckbox(checked = false, onCheckedChange = {}, enabled = false)
         // Display-only indicator (no handler).
-        NimazCheckbox(checked = true, onCheckedChange = null, variant = NimazCheckboxVariant.SUCCESS)
+        NimazCheckbox(
+            checked = true,
+            onCheckedChange = null,
+            variant = NimazCheckboxVariant.SUCCESS
+        )
     }
 }
 
@@ -254,7 +258,10 @@ private fun NimazCheckboxShowcase() {
         modifier = Modifier.padding(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Variants (square off · square on · circle on)", style = MaterialTheme.typography.labelMedium)
+        Text(
+            "Variants (square off · square on · circle on)",
+            style = MaterialTheme.typography.labelMedium
+        )
         NimazCheckboxVariantsShowcase()
         Text("Sizes · disabled · indicator", style = MaterialTheme.typography.labelMedium)
         NimazCheckboxSizesShowcase()

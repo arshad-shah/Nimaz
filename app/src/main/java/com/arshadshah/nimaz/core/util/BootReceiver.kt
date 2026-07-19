@@ -619,7 +619,8 @@ class BootReceiver : BroadcastReceiver() {
                     context.getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
-                val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val mainIntent =
+                    context.packageManager.getLaunchIntentForPackage(context.packageName)
                 val openPendingIntent = mainIntent?.let {
                     PendingIntent.getActivity(
                         context,
@@ -710,7 +711,8 @@ class BootReceiver : BroadcastReceiver() {
 
                 val vibrationEnabled = preferencesDataStore.notificationVibration.first()
 
-                val mainIntent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                val mainIntent =
+                    context.packageManager.getLaunchIntentForPackage(context.packageName)
                 val openPendingIntent = mainIntent?.let {
                     PendingIntent.getActivity(
                         context,

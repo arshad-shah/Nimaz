@@ -15,6 +15,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -85,10 +86,16 @@ fun PrayerTimesSectionHeader(
     }
 }
 
+@Composable
 private fun buildSubtitle(passed: Int, upcoming: Int): String = when {
-    passed == 0 -> "$upcoming to go"
-    upcoming == 0 -> "all done for today"
-    else -> "$passed passed · $upcoming to go"
+    passed == 0 -> pluralStringResource(
+        R.plurals.prayer_times_upcoming_format, upcoming, upcoming
+    )
+
+    upcoming == 0 -> stringResource(R.string.prayer_times_all_done_today)
+    else -> pluralStringResource(
+        R.plurals.prayer_times_passed_upcoming_format, upcoming, passed, upcoming
+    )
 }
 
 @Preview(showBackground = true, widthDp = 400, name = "Mid-day (2 passed, 3 to go)")

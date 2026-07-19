@@ -203,7 +203,17 @@ private fun QuranRecommendedSurahsPreview() {
         QuranRecommendedSurahs(
             surahs = listOf(
                 Surah(18, "الكهف", "Al-Kahf", "The Cave", RevelationType.MECCAN, 110, 15, 18, 293),
-                Surah(67, "الملك", "Al-Mulk", "The Sovereignty", RevelationType.MECCAN, 30, 29, 67, 562)
+                Surah(
+                    67,
+                    "الملك",
+                    "Al-Mulk",
+                    "The Sovereignty",
+                    RevelationType.MECCAN,
+                    30,
+                    29,
+                    67,
+                    562
+                )
             ),
             isFriday = true,
             onSurahClick = {}

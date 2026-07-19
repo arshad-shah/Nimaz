@@ -87,7 +87,12 @@ object ShareCardRenderer {
         private val bold = Typeface.create(heading, Typeface.BOLD)
 
         private val arabicLayout = card.arabic?.trim()?.takeIf { it.isNotEmpty() }?.let {
-            layout(ellipsize(it, MAX_ARABIC), textPaint(amiri, 60f, INK), Layout.Alignment.ALIGN_CENTER, 14f)
+            layout(
+                ellipsize(it, MAX_ARABIC),
+                textPaint(amiri, 60f, INK),
+                Layout.Alignment.ALIGN_CENTER,
+                14f
+            )
         }
         private val translitLayout = card.transliteration?.trim()?.takeIf { it.isNotEmpty() }?.let {
             layout(
@@ -97,10 +102,20 @@ object ShareCardRenderer {
             )
         }
         private val bodyLayout = card.body?.trim()?.takeIf { it.isNotEmpty() }?.let {
-            layout(ellipsize(it, MAX_BODY), textPaint(bodyFont, 34f, INK), Layout.Alignment.ALIGN_CENTER, 8f)
+            layout(
+                ellipsize(it, MAX_BODY),
+                textPaint(bodyFont, 34f, INK),
+                Layout.Alignment.ALIGN_CENTER,
+                8f
+            )
         }
         private val attrLayout =
-            layout(card.attribution, textPaint(bold, 32f, TEAL_DARK), Layout.Alignment.ALIGN_CENTER, 4f)
+            layout(
+                card.attribution,
+                textPaint(bold, 32f, TEAL_DARK),
+                Layout.Alignment.ALIGN_CENTER,
+                4f
+            )
         private val footerLayout =
             layout(
                 context.getString(R.string.share_card_qr_caption),
@@ -163,7 +178,9 @@ object ShareCardRenderer {
                 // Wordmark + tagline.
                 canvas.drawText(
                     "Nimaz", left + TILE + 28f, contentTop + 44f,
-                    Paint().apply { isAntiAlias = true; color = INK; typeface = bold; textSize = 50f }
+                    Paint().apply {
+                        isAntiAlias = true; color = INK; typeface = bold; textSize = 50f
+                    }
                 )
                 canvas.drawText(
                     context.getString(R.string.share_card_tagline).uppercase(),
@@ -222,7 +239,12 @@ object ShareCardRenderer {
             return y + block.height
         }
 
-        private fun drawEyebrowPill(canvas: Canvas, text: String, rightEdge: Float, centerY: Float) {
+        private fun drawEyebrowPill(
+            canvas: Canvas,
+            text: String,
+            rightEdge: Float,
+            centerY: Float
+        ) {
             val p = Paint().apply {
                 isAntiAlias = true; typeface = bold; textSize = 24f; letterSpacing = 0.1f
             }

@@ -434,9 +434,16 @@ private fun CalendarDayCell(
     val locale = LocalLocale.current.platformLocale
     val dayName = date.dayOfWeek.getDisplayName(TextStyle.FULL, locale)
     val monthName = date.month.getDisplayName(TextStyle.FULL, locale)
-    val a11yLabel = buildString {
-        append("$dayName, ${date.dayOfMonth} $monthName ${date.year}")
-        if (isToday) append(", today")
+    val a11yLabel = if (isToday) {
+        stringResource(
+            R.string.calendar_a11y_day_today_format,
+            dayName, date.dayOfMonth, monthName, date.year
+        )
+    } else {
+        stringResource(
+            R.string.calendar_a11y_day_format,
+            dayName, date.dayOfMonth, monthName, date.year
+        )
     }
 
     Box(

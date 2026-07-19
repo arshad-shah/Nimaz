@@ -398,11 +398,12 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
 }
 
 /** Turn retry seconds into a coarse "minutes"/"hours" figure for display. */
+@Composable
 private fun formatRetry(seconds: Long): String {
     val minutes = (seconds + 59) / 60
     return if (minutes < 60) {
-        "$minutes min"
+        stringResource(R.string.ai_retry_minutes_format, minutes)
     } else {
-        "${(minutes + 59) / 60} h"
+        stringResource(R.string.ai_retry_hours_format, (minutes + 59) / 60)
     }
 }

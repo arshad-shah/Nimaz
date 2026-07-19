@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -34,9 +33,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.DuaArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -62,7 +62,7 @@ fun DuaSettingsScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val selectedFont = QuranArabicFont.fromId(duaState.selectedArabicFontId)
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -122,7 +122,13 @@ fun DuaSettingsScreen(
                         Spacer(modifier = Modifier.height(15.dp))
                         Slider(
                             value = duaState.arabicFontSize,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetDuaArabicFontSize(it)) },
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetDuaArabicFontSize(
+                                        it
+                                    )
+                                )
+                            },
                             valueRange = 18f..42f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
@@ -187,7 +193,13 @@ fun DuaSettingsScreen(
                         Spacer(modifier = Modifier.height(15.dp))
                         Slider(
                             value = duaState.translationFontSize,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetDuaTranslationFontSize(it)) },
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetDuaTranslationFontSize(
+                                        it
+                                    )
+                                )
+                            },
                             valueRange = 12f..28f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
@@ -214,7 +226,13 @@ fun DuaSettingsScreen(
                         title = stringResource(R.string.show_transliteration),
                         subtitle = stringResource(R.string.show_transliteration_subtitle),
                         checked = duaState.showTransliteration,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetDuaShowTransliteration(!duaState.showTransliteration)) }
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetDuaShowTransliteration(
+                                    !duaState.showTransliteration
+                                )
+                            )
+                        }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(

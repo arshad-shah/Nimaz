@@ -11,4 +11,6 @@
     <!-- Gold tint used for prayers that have already passed -->
     <color name="widget_gold_container">#FBEFC9</color>
     <color name="widget_on_gold_container">#6B4E00</color>
+    <!-- Brand gold accent (khatam medallion, percentage) -->
+    <color name="widget_gold">#CA8A04</color>
 </resources>
