@@ -37,7 +37,9 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -48,7 +50,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 private val SurahNumberSlotWidth = 50.dp
 private val SurahNumberSlotSpacing = 12.dp
-private val ChipShape = RoundedCornerShape(50)
 
 private fun getJuzForPage(page: Int): Int {
     val juzStartPages = listOf(
@@ -175,11 +176,8 @@ internal fun SurahListItem(
                     text = if (isMeccan) stringResource(R.string.quran_home_makkah)
                     else stringResource(R.string.quran_home_madinah),
                     size = NimazBadgeSize.SMALL,
-                    shape = ChipShape,
-                    backgroundColor = if (isMeccan) MaterialTheme.colorScheme.tertiaryContainer
-                    else MaterialTheme.colorScheme.primaryContainer,
-                    textColor = if (isMeccan) MaterialTheme.colorScheme.onTertiaryContainer
-                    else MaterialTheme.colorScheme.onPrimaryContainer
+                    tone = if (isMeccan) NimazTone.SUCCESS else NimazTone.ACCENT,
+                    emphasis = NimazBadgeEmphasis.SOFT
                 )
                 NimazBadge(
                     text = pluralStringResource(
@@ -188,9 +186,8 @@ internal fun SurahListItem(
                         surah.ayahCount
                     ),
                     size = NimazBadgeSize.SMALL,
-                    shape = ChipShape,
-                    backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    outlined = true
+                    tone = NimazTone.NEUTRAL,
+                    emphasis = NimazBadgeEmphasis.OUTLINED
                 )
                 if (startPage > 0) {
                     NimazBadge(
@@ -200,9 +197,8 @@ internal fun SurahListItem(
                             endPage
                         ),
                         size = NimazBadgeSize.SMALL,
-                        shape = ChipShape,
-                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        outlined = true
+                        tone = NimazTone.NEUTRAL,
+                        emphasis = NimazBadgeEmphasis.OUTLINED
                     )
                     NimazBadge(
                         text = stringResource(
@@ -210,9 +206,8 @@ internal fun SurahListItem(
                             getJuzForPage(startPage)
                         ),
                         size = NimazBadgeSize.SMALL,
-                        shape = ChipShape,
-                        backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                        outlined = true
+                        tone = NimazTone.NEUTRAL,
+                        emphasis = NimazBadgeEmphasis.OUTLINED
                     )
                 }
             }

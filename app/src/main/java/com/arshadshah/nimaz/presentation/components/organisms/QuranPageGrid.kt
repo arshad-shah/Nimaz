@@ -19,7 +19,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -31,9 +30,13 @@ import androidx.compose.ui.unit.dp
 import android.content.res.Configuration
 import androidx.compose.foundation.border
 import com.arshadshah.nimaz.domain.model.PageAyahRange
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -114,7 +117,7 @@ internal fun LazyListScope.pageGridItems(
         // Juz header card with cutout page range badges
         item(key = "page_juz_header_$juz") {
             NimazCard(
-                tone = NimazCardTone.ACCENT,
+                tone = NimazTone.ACCENT,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -250,20 +253,13 @@ internal fun LazyListScope.pageGridItems(
                                 horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 surahNames.forEach { name ->
-                                    Surface(
-                                        shape = RoundedCornerShape(4.dp),
-                                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f)
-                                    ) {
-                                        Text(
-                                            text = name,
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            modifier = Modifier.padding(
-                                                horizontal = 6.dp,
-                                                vertical = 1.dp
-                                            )
-                                        )
-                                    }
+                                    NimazBadge(
+                                        text = name,
+                                        tone = NimazTone.MUTED,
+                                        emphasis = NimazBadgeEmphasis.SOFT,
+                                        shape = NimazBadgeShape.ROUNDED,
+                                        size = NimazBadgeSize.SMALL
+                                    )
                                 }
                             }
                         }

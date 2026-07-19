@@ -66,9 +66,14 @@ import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -320,8 +325,15 @@ fun SearchScreen(
                                     stringResource(R.string.ask_example_3),
                                     stringResource(R.string.ask_example_4),
                                 ).forEach { example ->
-                                    ExampleQuestionChip(
+                                    NimazBadge(
                                         text = example,
+                                        icon = Icons.Default.AutoAwesome,
+                                        shape = NimazBadgeShape.ROUNDED,
+                                        size = NimazBadgeSize.LARGE,
+                                        colors = NimazBadgeDefaults.colors(
+                                            tone = NimazTone.ACCENT,
+                                            emphasis = NimazBadgeEmphasis.OUTLINED
+                                        ),
                                         onClick = {
                                             viewModel.onEvent(SearchEvent.UpdateQuery(example))
                                             askViewModel.onEvent(AskEvent.SelectRecent(example))
@@ -498,44 +510,6 @@ private fun SectionHeader(
     }
 }
 
-/** An example question the user can tap to ask straight away. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExampleQuestionChip(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(13.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outlineVariant
-        ),
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                iconSize = 15.dp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RecentSearchItem(
@@ -549,7 +523,7 @@ private fun RecentSearchItem(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        tone = NimazCardTone.MUTED
+        tone = NimazTone.MUTED
     ) {
         Row(
             modifier = Modifier
@@ -841,20 +815,26 @@ private fun SearchResultCard(
                             modifier = Modifier.weight(1f)
                         )
                         if (type != null) {
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = iconColor.copy(alpha = 0.1f)
-                            ) {
-                                Text(
-                                    text = type,
-                                    style = MaterialTheme.typography.labelSmall,
+                            NimazBadge(
+                                text = type,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                colors = NimazBadgeDefaults.feature(
                                     color = iconColor,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    emphasis = NimazBadgeEmphasis.SOFT
                                 )
-                            }
+                            )
                         }
                         if (cited) {
-                            CitedChip(
+                            NimazBadge(
+                                text = stringResource(R.string.search_cited_chip),
+                                icon = Icons.Default.FormatQuote,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                colors = NimazBadgeDefaults.colors(
+                                    tone = NimazTone.ACCENT,
+                                    emphasis = NimazBadgeEmphasis.FILLED
+                                ),
                                 modifier = Modifier.padding(start = if (type != null) 6.dp else 0.dp)
                             )
                         }
@@ -878,35 +858,6 @@ private fun SearchResultCard(
                     )
                 }
             }
-        }
-    }
-}
-
-/** Solid teal marker for results the AI cited — replaces the source tag. */
-@Composable
-private fun CitedChip(modifier: Modifier = Modifier) {
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.FormatQuote,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                iconSize = 11.dp
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = stringResource(R.string.search_cited_chip),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
         }
     }
 }

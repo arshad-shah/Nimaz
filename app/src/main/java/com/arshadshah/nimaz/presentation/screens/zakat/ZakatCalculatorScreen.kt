@@ -32,7 +32,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Savings
 import androidx.compose.material.icons.filled.Wallet
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
@@ -463,7 +463,7 @@ private fun ZakatResultSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        tone = NimazCardTone.TRANSPARENT
+        tone = NimazTone.TRANSPARENT
     ) {
         Box(
             modifier = Modifier
@@ -852,7 +852,7 @@ private fun BreakdownCard(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(14.dp),
-            tone = NimazCardTone.PROMINENT
+            tone = NimazTone.PROMINENT
         ) {
             Text(
                 text = stringResource(R.string.save_calculation),

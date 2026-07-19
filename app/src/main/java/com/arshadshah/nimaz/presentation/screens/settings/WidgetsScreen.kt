@@ -6,7 +6,7 @@ import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -272,7 +272,7 @@ private fun WidgetSection(
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(14.dp),
-            tone = NimazCardTone.MUTED,
+            tone = NimazTone.MUTED,
             elevation = 0.dp
         ) {
         Row(
@@ -820,7 +820,7 @@ private fun HowToAddCard(modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        tone = NimazCardTone.MUTED,
+        tone = NimazTone.MUTED,
         elevation = 0.dp
     ) {
     Column(

@@ -36,7 +36,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.qibla.QiblaGreen
@@ -99,7 +99,7 @@ fun QiblaAccuracyBar(
 
     NimazCard(
         modifier = modifier,
-        tone = if (calibrate) NimazCardTone.ERROR else NimazCardTone.MUTED,
+        tone = if (calibrate) NimazTone.ERROR else NimazTone.MUTED,
     ) {
         Column(
             modifier = Modifier

@@ -44,8 +44,10 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -173,9 +175,8 @@ private fun HeroStatChip(text: String) {
     NimazBadge(
         text = text,
         size = NimazBadgeSize.MEDIUM,
-        shape = RoundedCornerShape(50),
-        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-        textColor = MaterialTheme.colorScheme.onPrimaryContainer
+        tone = NimazTone.ACCENT,
+        emphasis = NimazBadgeEmphasis.SOFT
     )
 }
 

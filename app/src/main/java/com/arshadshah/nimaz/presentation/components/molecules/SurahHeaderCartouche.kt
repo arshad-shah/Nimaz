@@ -33,6 +33,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.DiamondFloret
 import com.arshadshah.nimaz.presentation.components.atoms.cartouchePath
@@ -187,14 +189,18 @@ fun SurahHeaderCartouche(
                     NimazBadge(
                         text = revelationType,
                         size = NimazBadgeSize.SMALL,
-                        backgroundColor = gold,
-                        outlined = true,
+                        colors = NimazBadgeDefaults.feature(
+                            color = gold,
+                            emphasis = NimazBadgeEmphasis.OUTLINED,
+                        ),
                     )
                     NimazBadge(
                         text = "$ayahCount Ayahs",
                         size = NimazBadgeSize.SMALL,
-                        backgroundColor = teal,
-                        outlined = true,
+                        colors = NimazBadgeDefaults.feature(
+                            color = teal,
+                            emphasis = NimazBadgeEmphasis.OUTLINED,
+                        ),
                     )
                 }
             }

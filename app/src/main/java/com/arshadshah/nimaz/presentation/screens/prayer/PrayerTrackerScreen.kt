@@ -17,10 +17,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
@@ -39,7 +43,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -576,7 +579,7 @@ private fun PrayerCheckItem(
     NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazCardTone.NEUTRAL,
+        tone = NimazTone.NEUTRAL,
         level = NimazCardLevel.NESTED
     ) {
         Row(
@@ -632,25 +635,26 @@ private fun PrayerCheckItem(
             }
 
             // Status badge
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = when {
-                    isCompleted -> NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
-                    isMissed -> NimazColors.StatusColors.Missed.copy(alpha = 0.2f)
-                    else -> MaterialTheme.colorScheme.surfaceContainer
+            NimazBadge(
+                text = statusText,
+                size = NimazBadgeSize.LARGE,
+                colors = when {
+                    isCompleted -> NimazBadgeDefaults.feature(
+                        color = NimazColors.StatusColors.Prayed,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+
+                    isMissed -> NimazBadgeDefaults.feature(
+                        color = NimazColors.StatusColors.Missed,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+
+                    else -> NimazBadgeDefaults.colors(
+                        tone = NimazTone.MUTED,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
                 }
-            ) {
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = when {
-                        isCompleted -> NimazColors.StatusColors.Prayed
-                        isMissed -> NimazColors.StatusColors.Missed
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                )
-            }
+            )
         }
     }
 }

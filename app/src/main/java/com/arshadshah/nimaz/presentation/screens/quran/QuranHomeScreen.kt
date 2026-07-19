@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -90,6 +90,8 @@ import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkCard
 import com.arshadshah.nimaz.presentation.components.molecules.BookmarkListItem
@@ -351,7 +353,7 @@ private fun HomeTabContent(
                     style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    tone = NimazCardTone.TRANSPARENT,
+                    tone = NimazTone.TRANSPARENT,
                     onClick = { if (state.surahs.isNotEmpty()) onNavigateToSurah(1) }
                 ) {
                     Box(
@@ -761,10 +763,11 @@ private fun FavoritesTabContent(
                 leading = {
                     NimazBadge(
                         text = stringResource(R.string.favorite_type),
-                        backgroundColor = NimazPalette.Red500,
-                        textColor = Color.White,
                         size = NimazBadgeSize.SMALL,
-                        shape = RoundedCornerShape(50)
+                        colors = NimazBadgeDefaults.feature(
+                            color = NimazPalette.Red500,
+                            emphasis = NimazBadgeEmphasis.FILLED
+                        )
                     )
                 }
             )

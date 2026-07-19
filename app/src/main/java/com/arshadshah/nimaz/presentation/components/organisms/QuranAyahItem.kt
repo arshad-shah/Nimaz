@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.MenuBook
@@ -30,7 +29,6 @@ import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -58,8 +56,13 @@ import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
@@ -243,7 +246,7 @@ internal fun AyahItem(
         // Translation
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            NimazCard(tone = NimazCardTone.MUTED) {
+            NimazCard(tone = NimazTone.MUTED) {
                 Text(
                     text = ayah.translation,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -259,7 +262,7 @@ internal fun AyahItem(
         // Transliteration
         if (showTransliteration && ayah.transliteration != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            NimazCard(tone = NimazCardTone.SUCCESS) {
+            NimazCard(tone = NimazTone.SUCCESS) {
                 Text(
                     text = ayah.transliteration,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -284,18 +287,15 @@ internal fun AyahItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (ayah.sajdaType != null) {
-                    Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = NimazPalette.Red600.copy(alpha = 0.15f)
-                    ) {
-                        Text(
-                            text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(R.string.sajdah),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.SemiBold,
+                    NimazBadge(
+                        text = if (ayah.sajdaType == SajdaType.OBLIGATORY) stringResource(R.string.sajdah_wajib) else stringResource(R.string.sajdah),
+                        shape = NimazBadgeShape.ROUNDED,
+                        size = NimazBadgeSize.SMALL,
+                        colors = NimazBadgeDefaults.feature(
                             color = NimazPalette.Red600,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                            emphasis = NimazBadgeEmphasis.SOFT
                         )
-                    }
+                    )
                 }
 
                 if (ayah.rubNumber > 0 && ayah.numberInSurah == 1 || (ayah.rubNumber > 0)) {
@@ -307,17 +307,13 @@ internal fun AyahItem(
                         else -> ""
                     }
                     if (quarterLabel.isNotEmpty()) {
-                        Surface(
-                            shape = RoundedCornerShape(6.dp),
-                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f)
-                        ) {
-                            Text(
-                                text = quarterLabel,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
-                            )
-                        }
+                        NimazBadge(
+                            text = quarterLabel,
+                            tone = NimazTone.SUCCESS,
+                            emphasis = NimazBadgeEmphasis.SOFT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
                     }
                 }
             }

@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.tasbih
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +27,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -56,9 +53,11 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
@@ -173,8 +172,10 @@ fun ChooseDhikrScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(tabs.size) { i ->
-                    CategoryTab(
-                        label = tabLabel(tabs[i]),
+                    NimazBadge(
+                        text = tabLabel(tabs[i]),
+                        tone = NimazTone.ACCENT,
+                        size = NimazBadgeSize.LARGE,
                         selected = i == tabIndex,
                         onClick = { tabIndex = i })
                 }
@@ -218,7 +219,7 @@ fun ChooseDhikrScreen(
                 style = NimazCardStyle.FILLED,
                 onClick = { onNavigateToAddPreset() },
                 shape = RoundedCornerShape(14.dp),
-                tone = NimazCardTone.ACCENT
+                tone = NimazTone.ACCENT
             ) {
                 Row(
                     modifier = Modifier
@@ -342,27 +343,6 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun CategoryTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(percent = 50),
-        color = if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-        modifier = Modifier.clickable(onClick = onClick)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-        )
     }
 }
 

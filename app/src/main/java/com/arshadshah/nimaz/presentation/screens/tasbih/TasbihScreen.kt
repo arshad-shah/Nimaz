@@ -73,7 +73,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
@@ -393,7 +393,7 @@ private fun CurrentTasbihPeek(
         style = NimazCardStyle.FILLED,
         onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        tone = NimazCardTone.MUTED
+        tone = NimazTone.MUTED
     ) {
         Column(
             modifier = Modifier

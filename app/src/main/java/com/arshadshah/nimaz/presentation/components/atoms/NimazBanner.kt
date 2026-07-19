@@ -100,7 +100,7 @@ private fun InfoVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(if (showBorder) 14.dp else 12.dp),
-        tone = NimazCardTone.ACCENT,
+        tone = NimazTone.ACCENT,
         borderColor = if (showBorder) MaterialTheme.colorScheme.primary else null
     ) {
         InfoContent(message = message, icon = icon)
@@ -146,7 +146,7 @@ private fun WarningVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazCardTone.WARNING
+        tone = NimazTone.WARNING
     ) {
         BannerContentRow(
             modifier = Modifier.padding(16.dp),
@@ -239,7 +239,7 @@ private fun ErrorVariant(
     BannerSurface(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        tone = NimazCardTone.ERROR,
+        tone = NimazTone.ERROR,
         onClick = onClick
     ) {
         BannerContentRow(
@@ -272,7 +272,7 @@ private fun ErrorVariant(
 private fun BannerSurface(
     modifier: Modifier,
     shape: Shape,
-    tone: NimazCardTone,
+    tone: NimazTone,
     borderColor: Color? = null,
     onClick: (() -> Unit)? = null,
     content: @Composable () -> Unit

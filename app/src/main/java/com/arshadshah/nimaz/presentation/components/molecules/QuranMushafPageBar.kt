@@ -21,8 +21,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -74,20 +76,24 @@ internal fun MushafPageBar(
                         stringResource(R.string.page_range_format, pageNumber, secondPageNumber)
                     else
                         stringResource(R.string.page_single_format, pageNumber),
+                    tone = NimazTone.ACCENT,
+                    emphasis = NimazBadgeEmphasis.FILLED,
                     size = NimazBadgeSize.SMALL
                 )
                 if (juzNumber > 0) {
                     NimazBadge(
                         text = "Juz $juzNumber",
-                        size = NimazBadgeSize.SMALL,
-                        outlined = true
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.OUTLINED,
+                        size = NimazBadgeSize.SMALL
                     )
                 }
                 if (hizbNumber > 0) {
                     NimazBadge(
                         text = "Hizb $hizbNumber",
-                        size = NimazBadgeSize.SMALL,
-                        outlined = true
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.OUTLINED,
+                        size = NimazBadgeSize.SMALL
                     )
                 }
             }

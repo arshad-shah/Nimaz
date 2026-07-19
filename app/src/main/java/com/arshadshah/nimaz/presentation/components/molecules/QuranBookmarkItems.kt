@@ -26,7 +26,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -44,7 +44,7 @@ internal fun BookmarkListItem(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        tone = NimazCardTone.MUTED,
+        tone = NimazTone.MUTED,
         elevation = 0.dp
     ) {
         Row(
@@ -104,7 +104,7 @@ internal fun BookmarkCard(
         onClick = onClick,
         modifier = modifier.width(160.dp),
         shape = RoundedCornerShape(12.dp),
-        tone = NimazCardTone.MUTED
+        tone = NimazTone.MUTED
     ) {
         Column(
             modifier = Modifier.padding(12.dp)

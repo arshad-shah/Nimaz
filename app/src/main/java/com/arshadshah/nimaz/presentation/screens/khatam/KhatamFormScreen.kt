@@ -50,7 +50,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
@@ -249,7 +249,7 @@ private fun KhatamFormContent(
             item(key = "progress-note") {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    tone = NimazCardTone.NEUTRAL,
+                    tone = NimazTone.NEUTRAL,
                     level = NimazCardLevel.RAISED,
                 ) {
                     Row(
@@ -331,7 +331,7 @@ private fun KhatamFormContent(
             if (days != null) {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    tone = NimazCardTone.NEUTRAL,
+                    tone = NimazTone.NEUTRAL,
                     level = NimazCardLevel.RAISED,
                 ) {
                     Column(Modifier.padding(NimazSpacing.Medium)) {
@@ -385,7 +385,7 @@ private fun KhatamFormContent(
             FieldLabel(stringResource(R.string.khatam_field_reminder))
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
-                tone = NimazCardTone.NEUTRAL,
+                tone = NimazTone.NEUTRAL,
                 level = NimazCardLevel.RAISED,
             ) {
                 Row(

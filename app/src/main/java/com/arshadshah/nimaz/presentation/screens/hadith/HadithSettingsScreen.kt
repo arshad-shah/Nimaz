@@ -32,7 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
@@ -275,7 +275,7 @@ private fun HadithPreviewCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazCardTone.MUTED
+                    tone = NimazTone.MUTED
                 ) {
                     Text(
                         text = stringResource(R.string.hadith_settings_preview_translation),

@@ -63,7 +63,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.ActivityLogEntry
 import com.arshadshah.nimaz.presentation.viewmodel.SyncDataSummary
@@ -278,7 +278,7 @@ private fun ModeSelectionContent(
     NimazCard(
         style = NimazCardStyle.FILLED,
         modifier = Modifier.fillMaxWidth(),
-        tone = NimazCardTone.NEUTRAL,
+        tone = NimazTone.NEUTRAL,
         level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(16.dp)
     ) {
@@ -373,7 +373,7 @@ private fun AuthTokenContent(
 
     NimazCard(
         style = NimazCardStyle.FILLED,
-        tone = NimazCardTone.ACCENT,
+        tone = NimazTone.ACCENT,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -597,7 +597,7 @@ private fun ProgressContent(
     if (partnerState != null) {
         NimazCard(
             style = NimazCardStyle.FILLED,
-            tone = NimazCardTone.SUCCESS,
+            tone = NimazTone.SUCCESS,
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -655,7 +655,7 @@ private fun ProgressContent(
             Spacer(modifier = Modifier.height(8.dp))
             NimazCard(
                 style = NimazCardStyle.FILLED,
-                tone = NimazCardTone.NEUTRAL,
+                tone = NimazTone.NEUTRAL,
                 level = NimazCardLevel.RAISED,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -720,7 +720,7 @@ private fun ProgressContent(
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        tone = NimazCardTone.NEUTRAL,
+        tone = NimazTone.NEUTRAL,
         level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
@@ -798,7 +798,7 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     NimazCard(
         style = NimazCardStyle.FILLED,
-        tone = NimazCardTone.NEUTRAL,
+        tone = NimazTone.NEUTRAL,
         level = NimazCardLevel.RAISED,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()

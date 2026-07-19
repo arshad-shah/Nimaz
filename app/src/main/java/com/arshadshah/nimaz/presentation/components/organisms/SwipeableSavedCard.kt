@@ -43,7 +43,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -193,7 +193,7 @@ fun SwipeableSavedCard(
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             onClick = onClick,
-            tone = NimazCardTone.NEUTRAL,
+            tone = NimazTone.NEUTRAL,
             level = NimazCardLevel.RAISED,
             elevation = 0.dp
         ) {

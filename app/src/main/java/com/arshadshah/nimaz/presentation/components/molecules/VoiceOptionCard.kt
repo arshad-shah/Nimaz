@@ -42,7 +42,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -50,8 +53,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-
-private val ChipShape = RoundedCornerShape(6.dp)
 
 /**
  * A single "voice" option — a reciter (Quran audio) or a muezzin (adhan) — shown as
@@ -122,17 +123,17 @@ fun VoiceOptionCard(
                     NimazBadge(
                         text = primaryTag,
                         size = NimazBadgeSize.SMALL,
-                        shape = ChipShape,
-                        backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        textColor = MaterialTheme.colorScheme.primary,
+                        shape = NimazBadgeShape.ROUNDED,
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.SOFT,
                     )
                     if (secondaryTag != null) {
                         NimazBadge(
                             text = secondaryTag,
                             size = NimazBadgeSize.SMALL,
-                            shape = ChipShape,
-                            backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            shape = NimazBadgeShape.ROUNDED,
+                            tone = NimazTone.NEUTRAL,
+                            emphasis = NimazBadgeEmphasis.SOFT,
                         )
                     }
                 }

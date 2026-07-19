@@ -39,7 +39,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -88,9 +88,9 @@ private fun AnnouncementBannerCard(
     // The banner's tone carries the announcement type; the icon keeps the matching
     // accent role so the type still reads at a glance against the tinted container.
     val tone = when (announcement.type) {
-        AnnouncementType.FEATURE -> NimazCardTone.ACCENT
-        AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazCardTone.SUCCESS
-        AnnouncementType.CHANGELOG -> NimazCardTone.WARNING
+        AnnouncementType.FEATURE -> NimazTone.ACCENT
+        AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazTone.SUCCESS
+        AnnouncementType.CHANGELOG -> NimazTone.WARNING
     }
     val accent = when (announcement.type) {
         AnnouncementType.FEATURE -> MaterialTheme.colorScheme.primary

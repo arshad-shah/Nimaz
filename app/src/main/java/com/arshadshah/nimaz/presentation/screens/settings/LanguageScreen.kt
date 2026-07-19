@@ -15,7 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -84,7 +84,7 @@ fun LanguageScreen(
                     style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    tone = NimazCardTone.MUTED
+                    tone = NimazTone.MUTED
                 ) {
                     Column {
                         AppLanguage.entries.forEachIndexed { index, language ->

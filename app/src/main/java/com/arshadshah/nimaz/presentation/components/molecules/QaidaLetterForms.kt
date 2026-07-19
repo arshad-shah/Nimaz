@@ -57,7 +57,7 @@ fun QaidaLetterForms(
                 shape = RoundedCornerShape(NimazCornerRadius.Medium),
             ) {
                 Column(
-                    modifier = Modifier.padding(vertical = NimazSpacing.Small),
+                    modifier = Modifier.fillMaxWidth().padding(vertical = NimazSpacing.Small),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     ArabicText(

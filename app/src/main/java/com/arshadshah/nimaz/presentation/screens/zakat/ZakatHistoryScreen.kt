@@ -21,7 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
@@ -44,6 +44,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -163,7 +167,7 @@ private fun TotalPaidSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(20.dp),
-        tone = NimazCardTone.TRANSPARENT
+        tone = NimazTone.TRANSPARENT
     ) {
         Box(
             modifier = Modifier
@@ -235,25 +239,21 @@ private fun HistoryEntryCard(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = if (entry.isPaid) {
-                        NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
+                NimazBadge(
+                    text = if (entry.isPaid) stringResource(R.string.zakat_paid) else stringResource(R.string.zakat_unpaid),
+                    size = NimazBadgeSize.LARGE,
+                    colors = if (entry.isPaid) {
+                        NimazBadgeDefaults.feature(
+                            color = NimazColors.StatusColors.Prayed,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     } else {
-                        MaterialTheme.colorScheme.errorContainer
+                        NimazBadgeDefaults.colors(
+                            tone = NimazTone.ERROR,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     }
-                ) {
-                    Text(
-                        text = if (entry.isPaid) stringResource(R.string.zakat_paid) else stringResource(R.string.zakat_unpaid),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (entry.isPaid) {
-                            NimazColors.StatusColors.Prayed
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))

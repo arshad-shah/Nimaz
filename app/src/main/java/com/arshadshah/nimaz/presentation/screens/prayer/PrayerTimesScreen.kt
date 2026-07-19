@@ -37,7 +37,6 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -56,9 +55,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -124,22 +127,18 @@ fun PrayerTimesScreen(
             if (!state.isToday) {
                 // Sits below the settings pill (status bar + topbar height) so it
                 // doesn't collide with the glass topbar actions.
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(50),
+                NimazBadge(
+                    text = stringResource(R.string.today),
+                    size = NimazBadgeSize.LARGE,
+                    colors = NimazBadgeDefaults.colors(
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.FILLED
+                    ),
+                    onClick = { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = statusBarTop + 60.dp, end = 16.dp)
-                        .clickable { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
-                ) {
-                    Text(
-                        text = stringResource(R.string.today),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                    )
-                }
+                        .padding(top = statusBarTop + 60.dp, end = 16.dp),
+                )
             }
         }
 
@@ -341,7 +340,7 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
             .padding(top = 4.dp),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazCardTone.MUTED,
+        tone = NimazTone.MUTED,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

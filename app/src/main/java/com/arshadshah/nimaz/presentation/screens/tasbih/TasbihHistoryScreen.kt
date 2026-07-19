@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.tasbih
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,7 +24,6 @@ import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.VerticalDivider
@@ -48,9 +45,13 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
@@ -175,7 +176,7 @@ private fun StatsSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        tone = NimazCardTone.MUTED
+        tone = NimazTone.MUTED
     ) {
         Row(
             modifier = Modifier
@@ -251,45 +252,26 @@ private fun HistoryTabRow(
             .padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        TabPill(
-            label = stringResource(R.string.today),
+        NimazBadge(
+            text = stringResource(R.string.today),
+            tone = NimazTone.ACCENT,
+            size = NimazBadgeSize.LARGE,
             selected = selected == HistoryTab.TODAY,
             onClick = { onSelect(HistoryTab.TODAY) }
         )
-        TabPill(
-            label = stringResource(R.string.this_week),
+        NimazBadge(
+            text = stringResource(R.string.this_week),
+            tone = NimazTone.ACCENT,
+            size = NimazBadgeSize.LARGE,
             selected = selected == HistoryTab.THIS_WEEK,
             onClick = { onSelect(HistoryTab.THIS_WEEK) }
         )
-        TabPill(
-            label = stringResource(R.string.all_time),
+        NimazBadge(
+            text = stringResource(R.string.all_time),
+            tone = NimazTone.ACCENT,
+            size = NimazBadgeSize.LARGE,
             selected = selected == HistoryTab.ALL_TIME,
             onClick = { onSelect(HistoryTab.ALL_TIME) }
-        )
-    }
-}
-
-@Composable
-private fun TabPill(
-    label: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Surface(
-        shape = RoundedCornerShape(percent = 50),
-        color = if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-        modifier = Modifier.clickable(onClick = onClick)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
         )
     }
 }
@@ -344,23 +326,14 @@ private fun SessionCard(
 
             if (session.isCompleted) {
                 Spacer(modifier = Modifier.width(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(percent = 50),
-                    color = NimazColors.TasbihColors.Complete.copy(alpha = 0.14f),
-                    border = BorderStroke(
-                        1.dp,
-                        NimazColors.TasbihColors.Complete.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text(
-                        text = stringResource(R.string.done).uppercase(),
-                        style = MaterialTheme.typography.labelSmall,
+                NimazBadge(
+                    text = stringResource(R.string.done).uppercase(),
+                    size = NimazBadgeSize.LARGE,
+                    colors = NimazBadgeDefaults.feature(
                         color = NimazColors.TasbihColors.Complete,
-                        fontWeight = FontWeight.SemiBold,
-                        letterSpacing = 0.5.sp,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        emphasis = NimazBadgeEmphasis.SOFT
                     )
-                }
+                )
             }
         }
     }

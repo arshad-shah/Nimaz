@@ -36,6 +36,8 @@ import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -138,9 +140,11 @@ fun IslamicEventCard(
                 ) {
                     NimazBadge(
                         text = hijriDate,
-                        backgroundColor = color.copy(alpha = 0.15f),
-                        textColor = color,
-                        size = NimazBadgeSize.SMALL
+                        size = NimazBadgeSize.SMALL,
+                        colors = NimazBadgeDefaults.feature(
+                            color = color,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     )
                     Text(
                         text = gregorianDate,

@@ -44,7 +44,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
@@ -152,17 +154,21 @@ internal fun AudioBottomBar(
                     ) {
                         NimazBadge(
                             text = stringResource(R.string.audio_position_ayah_format, currentAyahInSurah, totalAyahsInSurah),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.FILLED,
                             size = NimazBadgeSize.SMALL
                         )
                         NimazBadge(
                             text = stringResource(R.string.audio_position_juz_format, juzNumber),
-                            size = NimazBadgeSize.SMALL,
-                            outlined = true
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.OUTLINED,
+                            size = NimazBadgeSize.SMALL
                         )
                         NimazBadge(
                             text = stringResource(R.string.audio_position_page_format, pageNumber),
-                            size = NimazBadgeSize.SMALL,
-                            outlined = true
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.OUTLINED,
+                            size = NimazBadgeSize.SMALL
                         )
                     }
                 }

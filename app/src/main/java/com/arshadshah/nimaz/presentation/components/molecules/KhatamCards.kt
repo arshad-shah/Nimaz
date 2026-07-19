@@ -34,7 +34,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
 import com.arshadshah.nimaz.presentation.components.atoms.paceColor
 import com.arshadshah.nimaz.presentation.components.atoms.paceLabel
@@ -72,8 +72,7 @@ fun KhatamHeroCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.ELEVATED,
         onClick = onClick,
-        tone = NimazCardTone.NEUTRAL,
-        level = NimazCardLevel.NESTED,
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(Modifier.padding(NimazSpacing.Large)) {
             Row(
@@ -207,8 +206,8 @@ fun KhatamRowCard(
         modifier = modifier.fillMaxWidth(),
         onClick = onClick,
         // surfaceContainerLow sits too close to `background` to read as a card.
-        tone = NimazCardTone.NEUTRAL,
-        level = NimazCardLevel.RAISED,
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
     ) {
         Row(
             modifier = Modifier

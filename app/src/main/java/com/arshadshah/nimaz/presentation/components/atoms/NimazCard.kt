@@ -78,14 +78,19 @@ data class NimazCardColors(
 }
 
 /**
- * Semantic tone — *what a card signifies*, orthogonal to [NimazCardStyle], which
- * controls *how it sits on the page* (elevation/border treatment).
+ * Semantic tone — *what a surface signifies*. Shared across the design system:
+ * [NimazCard] and [NimazBadge] both take a tone, and each resolves it to its own
+ * colours (a card wants a large tonal container; a badge wants contrast at 18.dp
+ * with `labelSmall` text). Same vocabulary, per-primitive rendering.
+ *
+ * Tone is orthogonal to how a surface *sits* — [NimazCardStyle] for cards,
+ * [NimazBadgeEmphasis] for badges.
  *
  * Call sites pick a tone by meaning and never specify raw colours, so the app has
  * one muted tint rather than the `surfaceVariant` @ 0.4/0.5/0.6 spread this axis
  * was introduced to replace.
  *
- * - [NEUTRAL] — the default card surface.
+ * - [NEUTRAL] — the default surface.
  * - [MUTED] — a quiet, recessed surface (inset notes, secondary detail).
  * - [ACCENT] — brand-tinted, draws the eye (highlighted panels, hero surfaces).
  * - [PROMINENT] — the high-emphasis *filled* brand surface, for a card acting as a
@@ -97,7 +102,7 @@ data class NimazCardColors(
  * - [TRANSPARENT] — no container at all; for cards laid over imagery or a
  *   gradient, where the backdrop must show through.
  */
-enum class NimazCardTone {
+enum class NimazTone {
     NEUTRAL,
     MUTED,
     ACCENT,
@@ -109,7 +114,7 @@ enum class NimazCardTone {
 }
 
 /**
- * Elevation rung for a [NimazCardTone.NEUTRAL] card.
+ * Elevation rung for a [NimazTone.NEUTRAL] card.
  *
  * Material 3's `surface` → `surfaceContainer` → `surfaceContainerHigh` roles are an
  * intentional ladder: a card nested inside another card must step up a rung or its
@@ -117,7 +122,7 @@ enum class NimazCardTone {
  * sites inventing their own — the sweep found the same "plain card" written six
  * different ways across the app.
  *
- * Only [NimazCardTone.NEUTRAL] varies by level; every other tone already has a
+ * Only [NimazTone.NEUTRAL] varies by level; every other tone already has a
  * dedicated container role and ignores this.
  *
  * - [BASE] — a card directly on the screen background.
@@ -136,7 +141,7 @@ object NimazCardDefaults {
     val Shape: Shape = RoundedCornerShape(16.dp)
 
     /**
-     * Resolves a [NimazCardTone] into container/content colours.
+     * Resolves a [NimazTone] into container/content colours.
      *
      * This is the single place the app decides what each tone *looks like* — every
      * card routes through here, so changing a tone restyles the whole app.
@@ -152,27 +157,27 @@ object NimazCardDefaults {
      */
     @Composable
     fun tone(
-        tone: NimazCardTone,
+        tone: NimazTone,
         level: NimazCardLevel = NimazCardLevel.BASE,
     ): NimazCardColors {
         val container: Color = when (tone) {
-            NimazCardTone.NEUTRAL -> when (level) {
+            NimazTone.NEUTRAL -> when (level) {
                 NimazCardLevel.BASE -> MaterialTheme.colorScheme.surface
                 NimazCardLevel.RAISED -> MaterialTheme.colorScheme.surfaceContainer
                 NimazCardLevel.NESTED -> MaterialTheme.colorScheme.surfaceContainerHigh
             }
 
-            NimazCardTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
-            NimazCardTone.ACCENT -> MaterialTheme.colorScheme.primaryContainer
-            NimazCardTone.PROMINENT -> MaterialTheme.colorScheme.primary
-            NimazCardTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
-            NimazCardTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
-            NimazCardTone.ERROR -> MaterialTheme.colorScheme.errorContainer
-            NimazCardTone.TRANSPARENT -> Color.Transparent
+            NimazTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
+            NimazTone.ACCENT -> MaterialTheme.colorScheme.primaryContainer
+            NimazTone.PROMINENT -> MaterialTheme.colorScheme.primary
+            NimazTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
+            NimazTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
+            NimazTone.ERROR -> MaterialTheme.colorScheme.errorContainer
+            NimazTone.TRANSPARENT -> Color.Transparent
         }
         // Transparent has no on-colour of its own; inherit the surface's so text
         // stays legible against whatever shows through.
-        val content: Color = if (tone == NimazCardTone.TRANSPARENT) {
+        val content: Color = if (tone == NimazTone.TRANSPARENT) {
             LocalContentColor.current
         } else {
             onColorFor(container)
@@ -253,7 +258,7 @@ object NimazCardDefaults {
  *
  * @param selected when the card has an active/selected state, drives which colour
  *   triple from [colors] is used (and the content colour published to children).
- * @param tone the card's semantic meaning ([NimazCardTone]) — the preferred way to
+ * @param tone the card's semantic meaning ([NimazTone]) — the preferred way to
  *   colour a card. Prefer this over passing bespoke [colors]: tones are the shared
  *   vocabulary, raw colours are how surfaces drift apart.
  * @param colors container/content/border. Defaults to [tone]; override only for a
@@ -266,7 +271,7 @@ fun NimazCard(
     modifier: Modifier = Modifier,
     style: NimazCardStyle = NimazCardStyle.FILLED,
     selected: Boolean = false,
-    tone: NimazCardTone = NimazCardTone.NEUTRAL,
+    tone: NimazTone = NimazTone.NEUTRAL,
     level: NimazCardLevel = NimazCardLevel.BASE,
     onClick: (() -> Unit)? = null,
     enabled: Boolean = true,
@@ -462,7 +467,7 @@ private fun NimazCardShowcase() {
             Text(text = "Surface Card", modifier = Modifier.padding(16.dp))
         }
         // Every semantic tone — container and content both come from the tone.
-        NimazCardTone.entries.forEach { tone ->
+        NimazTone.entries.forEach { tone ->
             NimazCard(tone = tone) {
                 Text(text = "Tone — ${tone.name}", modifier = Modifier.padding(16.dp))
             }

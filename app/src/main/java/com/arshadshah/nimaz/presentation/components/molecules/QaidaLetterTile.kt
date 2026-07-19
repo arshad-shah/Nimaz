@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -42,13 +43,13 @@ fun QaidaLetterTile(
 ) {
     val desc = "Letter ${letter.nameTransliteration}" + if (heard) ", heard" else ""
     NimazSurfaceCard(
-        modifier = modifier
+        modifier = modifier.fillMaxWidth()
             .aspectRatio(1f)
             .semantics { contentDescription = desc }
             .clickable { onClick(letter) },
         shape = RoundedCornerShape(NimazCornerRadius.Large),
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(modifier = Modifier.fillMaxWidth().aspectRatio(1f), contentAlignment = Alignment.Center) {
             ArabicText(
                 text = letter.letterArabic,
                 size = ArabicTextSize.EXTRA_LARGE,

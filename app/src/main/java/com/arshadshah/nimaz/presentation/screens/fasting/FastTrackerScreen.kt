@@ -27,7 +27,6 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -60,11 +59,16 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
@@ -540,7 +544,7 @@ private fun TodayFastSection(
             modifier = Modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(16.dp),
-            tone = NimazCardTone.MUTED
+            tone = NimazTone.MUTED
         ) {
             Column(modifier = Modifier.padding(20.dp)) {
                 // Header with date and status
@@ -997,7 +1001,7 @@ private fun RecommendedFastCard(
         onClick = onClick,
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        tone = NimazCardTone.MUTED
+        tone = NimazTone.MUTED
     ) {
         Row(
             modifier = Modifier.padding(15.dp),
@@ -1265,18 +1269,15 @@ private fun MakeupPendingFastCard(
                     )
                 }
 
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = OrangeAccent.copy(alpha = 0.2f)
-                ) {
-                    Text(
-                        text = stringResource(R.string.fasting_pending),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.SemiBold,
+                NimazBadge(
+                    text = stringResource(R.string.fasting_pending),
+                    shape = NimazBadgeShape.ROUNDED,
+                    size = NimazBadgeSize.LARGE,
+                    colors = NimazBadgeDefaults.feature(
                         color = OrangeAccent,
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+                        emphasis = NimazBadgeEmphasis.SOFT
                     )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(10.dp))
@@ -1290,7 +1291,7 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onEdit,
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazCardTone.NEUTRAL,
+                    tone = NimazTone.NEUTRAL,
                     level = NimazCardLevel.NESTED,
                     modifier = Modifier.weight(1f)
                 ) {
@@ -1318,7 +1319,7 @@ private fun MakeupPendingFastCard(
                 NimazCard(
                     onClick = onComplete,
                     shape = RoundedCornerShape(10.dp),
-                    tone = NimazCardTone.ACCENT,
+                    tone = NimazTone.ACCENT,
                     modifier = Modifier.weight(1f)
                 ) {
                     Row(

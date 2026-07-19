@@ -55,7 +55,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -378,7 +378,7 @@ private fun UseCurrentLocationButton(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        tone = NimazCardTone.MUTED,
+        tone = NimazTone.MUTED,
         elevation = 0.dp,
         enabled = !isLoading,
         onClick = onClick

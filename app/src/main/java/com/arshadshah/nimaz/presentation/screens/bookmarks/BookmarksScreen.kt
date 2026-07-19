@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Delete
@@ -38,7 +37,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -48,7 +46,9 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSheetFooterButtons
@@ -248,8 +248,7 @@ private fun BookmarkSavedCard(
     onShare: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val typeColor = bookmark.type.color()
-    val onTypeColor = bookmark.type.onColor()
+    val typeTone = bookmark.type.tone()
     val typeLabel = bookmark.type.label()
     SwipeableSavedCard(
         title = bookmark.title,
@@ -284,10 +283,9 @@ private fun BookmarkSavedCard(
         leading = {
             NimazBadge(
                 text = typeLabel,
-                backgroundColor = typeColor,
-                textColor = onTypeColor,
-                size = NimazBadgeSize.SMALL,
-                shape = RoundedCornerShape(50)
+                tone = typeTone,
+                emphasis = NimazBadgeEmphasis.FILLED,
+                size = NimazBadgeSize.SMALL
             )
         }
     )
@@ -331,18 +329,11 @@ private fun NoteEditorSheet(
 
 // ---- UnifiedBookmark presentation helpers ----
 
-@Composable
-private fun BookmarkType.color(): Color = when (this) {
-    BookmarkType.QURAN -> MaterialTheme.colorScheme.primary
-    BookmarkType.HADITH -> MaterialTheme.colorScheme.tertiary
-    BookmarkType.DUA -> MaterialTheme.colorScheme.secondary
-}
-
-@Composable
-private fun BookmarkType.onColor(): Color = when (this) {
-    BookmarkType.QURAN -> MaterialTheme.colorScheme.onPrimary
-    BookmarkType.HADITH -> MaterialTheme.colorScheme.onTertiary
-    BookmarkType.DUA -> MaterialTheme.colorScheme.onSecondary
+/** Badge tone per bookmark type — mirrors the old primary/tertiary/secondary trio. */
+private fun BookmarkType.tone(): NimazTone = when (this) {
+    BookmarkType.QURAN -> NimazTone.ACCENT
+    BookmarkType.HADITH -> NimazTone.SUCCESS
+    BookmarkType.DUA -> NimazTone.WARNING
 }
 
 @Composable

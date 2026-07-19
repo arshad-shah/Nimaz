@@ -40,7 +40,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
@@ -289,7 +289,7 @@ private fun InsightCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(14.dp),
-        tone = NimazCardTone.NEUTRAL,
+        tone = NimazTone.NEUTRAL,
         level = NimazCardLevel.RAISED
     ) {
         Row(

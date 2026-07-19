@@ -18,7 +18,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -54,7 +54,7 @@ fun QaidaMakhrajHelper(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        tone = NimazCardTone.WARNING,
+        tone = NimazTone.WARNING,
         shape = RoundedCornerShape(NimazCornerRadius.Medium),
     ) {
         Row(
