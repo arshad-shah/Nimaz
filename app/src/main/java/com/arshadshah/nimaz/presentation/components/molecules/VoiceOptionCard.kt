@@ -92,8 +92,6 @@ fun VoiceOptionCard(
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surface,
             border = MaterialTheme.colorScheme.outlineVariant,
-            borderWidth = 1.dp,
-            activeContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
             activeBorder = MaterialTheme.colorScheme.primary,
             activeBorderWidth = 1.5.dp,
         ),

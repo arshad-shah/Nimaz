@@ -35,7 +35,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -351,9 +351,7 @@ private fun HomeTabContent(
                     style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(20.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = Color.Transparent
-                    ),
+                    tone = NimazCardTone.TRANSPARENT,
                     onClick = { if (state.surahs.isNotEmpty()) onNavigateToSurah(1) }
                 ) {
                     Box(

@@ -49,7 +49,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
@@ -248,9 +249,8 @@ private fun KhatamFormContent(
             item(key = "progress-note") {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainer
-                    ),
+                    tone = NimazCardTone.NEUTRAL,
+                    level = NimazCardLevel.RAISED,
                 ) {
                     Row(
                         modifier = Modifier
@@ -331,9 +331,8 @@ private fun KhatamFormContent(
             if (days != null) {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainer
-                    ),
+                    tone = NimazCardTone.NEUTRAL,
+                    level = NimazCardLevel.RAISED,
                 ) {
                     Column(Modifier.padding(NimazSpacing.Medium)) {
                         Text(
@@ -386,9 +385,8 @@ private fun KhatamFormContent(
             FieldLabel(stringResource(R.string.khatam_field_reminder))
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.surfaceContainer
-                ),
+                tone = NimazCardTone.NEUTRAL,
+                level = NimazCardLevel.RAISED,
             ) {
                 Row(
                     modifier = Modifier
