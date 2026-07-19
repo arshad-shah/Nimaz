@@ -42,13 +42,13 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
-import com.arshadshah.nimaz.presentation.components.molecules.TafseerOrnamentalDivider
 
 /**
  * The saved-item card family — one place for the swipe-to-delete plumbing, the overflow
@@ -192,9 +192,7 @@ fun SwipeableSavedCard(
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             onClick = onClick,
-            colors = NimazCardDefaults.colors(
-                container = MaterialTheme.colorScheme.surfaceContainer
-            ),
+            tone = NimazTone.NEUTRAL,
             elevation = 0.dp
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
@@ -243,7 +241,7 @@ fun SwipeableSavedCard(
 
                 // Arabic preview, set off by a gold ornamental divider.
                 if (!arabicText.isNullOrBlank()) {
-                    TafseerOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                    QuranOrnamentalDivider(modifier = Modifier.padding(vertical = 4.dp))
                     ArabicText(
                         text = arabicText,
                         size = ArabicTextSize.SMALL,

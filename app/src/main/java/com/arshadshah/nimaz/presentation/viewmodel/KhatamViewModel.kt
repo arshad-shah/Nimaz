@@ -40,8 +40,8 @@ data class KhatamListUiState(
 ) {
     val hasAnyKhatam: Boolean
         get() = inProgressKhatams.isNotEmpty() ||
-            completedKhatams.isNotEmpty() ||
-            abandonedKhatams.isNotEmpty()
+                completedKhatams.isNotEmpty() ||
+                abandonedKhatams.isNotEmpty()
 }
 
 data class KhatamDetailUiState(

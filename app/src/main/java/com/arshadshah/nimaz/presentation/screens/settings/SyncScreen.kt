@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -19,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -34,34 +31,35 @@ import androidx.compose.material.icons.filled.PersonOff
 import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.SyncDisabled
-import androidx.compose.material3.ButtonDefaults
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.ActivityLogEntry
 import com.arshadshah.nimaz.presentation.viewmodel.SyncDataSummary
@@ -94,7 +92,7 @@ fun SyncScreen(
         add(Manifest.permission.ACCESS_FINE_LOCATION)
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.sync_data),
@@ -274,9 +272,9 @@ private fun ModeSelectionContent(
     Spacer(modifier = Modifier.height(24.dp))
 
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         modifier = Modifier.fillMaxWidth(),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -370,7 +368,7 @@ private fun AuthTokenContent(
 
     NimazCard(
         style = NimazCardStyle.FILLED,
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.primaryContainer),
+        tone = NimazTone.ACCENT,
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
@@ -567,7 +565,7 @@ private fun ProgressContent(
 
     // Current step description
     Text(
-        text = state.currentStep.ifEmpty { "Preparing..." },
+        text = state.currentStep.ifEmpty { stringResource(R.string.sync_preparing) },
         style = MaterialTheme.typography.titleSmall,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
@@ -594,7 +592,7 @@ private fun ProgressContent(
     if (partnerState != null) {
         NimazCard(
             style = NimazCardStyle.FILLED,
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.tertiaryContainer),
+            tone = NimazTone.SUCCESS,
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -621,7 +619,10 @@ private fun ProgressContent(
                     )
                 }
                 Text(
-                    text = stringResource(R.string.sync_partner_importing_format, partnerState.label),
+                    text = stringResource(
+                        R.string.sync_partner_importing_format,
+                        partnerState.label
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onTertiaryContainer
                 )
@@ -651,8 +652,8 @@ private fun ProgressContent(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
             NimazCard(
-                style = NimazCardStyle.FILLED,
-                colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
+                style = NimazCardStyle.ELEVATED,
+                tone = NimazTone.NEUTRAL,
                 shape = RoundedCornerShape(12.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -675,7 +676,10 @@ private fun ProgressContent(
                         if (it > 0) " (${SyncViewModel.formatBytes(it)})" else ""
                     } ?: ""
                     Text(
-                        text = "${(transferProgress * 100).toInt()}% transferred$dataSizeText",
+                        text = stringResource(
+                            R.string.sync_transferred_format,
+                            (transferProgress * 100).toInt()
+                        ) + dataSizeText,
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -693,7 +697,9 @@ private fun ProgressContent(
         state.dataSummary?.let { summary ->
             DataSummaryCard(
                 summary = summary,
-                title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_being_sent) else stringResource(R.string.sync_data_being_received)
+                title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_being_sent) else stringResource(
+                    R.string.sync_data_being_received
+                )
             )
         }
     }
@@ -715,8 +721,8 @@ private fun ProgressContent(
 @Composable
 private fun ActivityLog(entries: List<ActivityLogEntry>) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -792,8 +798,8 @@ private fun syncCategoryLabel(key: String): String = stringResource(
 @Composable
 private fun DataSummaryCard(summary: SyncDataSummary, title: String) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerLow),
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -889,7 +895,9 @@ private fun CompletedContent(
     )
 
     Text(
-        text = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_sent_success) else stringResource(R.string.sync_imported_success),
+        text = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_sent_success) else stringResource(
+            R.string.sync_imported_success
+        ),
         style = MaterialTheme.typography.bodyMedium,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         textAlign = TextAlign.Center
@@ -900,7 +908,9 @@ private fun CompletedContent(
         Spacer(modifier = Modifier.height(8.dp))
         DataSummaryCard(
             summary = summary,
-            title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_sent_title) else stringResource(R.string.sync_data_imported_title)
+            title = if (state.mode == SyncMode.SEND) stringResource(R.string.sync_data_sent_title) else stringResource(
+                R.string.sync_data_imported_title
+            )
         )
     }
 

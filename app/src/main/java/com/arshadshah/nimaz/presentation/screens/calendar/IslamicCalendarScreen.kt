@@ -15,7 +15,6 @@ import androidx.compose.material.icons.filled.Today
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -30,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.HijriDateCalculator.getHijriMonthName
@@ -40,11 +38,13 @@ import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.IslamicEventCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarLegendItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.currentWindowSizeClass
 import com.arshadshah.nimaz.presentation.theme.isCompact
 import com.arshadshah.nimaz.presentation.viewmodel.CalendarEvent
@@ -61,7 +61,7 @@ fun IslamicCalendarScreen(
     val eventsState by viewModel.eventsState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -226,7 +226,10 @@ private fun CalendarSection(
         }
 
         NimazCalendar(
-            displayedMonth = YearMonth.from(state.selectedDate),
+            // Both the grid and the header title come from `month`, so paging
+            // can never move one without the other. Deriving the grid from
+            // `selectedDate` here is what left it stuck on the current month.
+            displayedMonth = month.displayedMonth ?: YearMonth.from(state.selectedDate),
             selectedDate = state.selectedDate,
             onDateSelected = { viewModel.onEvent(CalendarEvent.SelectDate(it)) },
             onPreviousMonth = { viewModel.onEvent(CalendarEvent.NavigateToPreviousMonth) },

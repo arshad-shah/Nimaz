@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -20,6 +19,9 @@ import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -52,14 +54,19 @@ fun QaidaLetterForms(
         horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small),
     ) {
         forms.forEach { (glyph, label) ->
-            Surface(
+            // These sit inside the letter detail sheet, so they outline rather
+            // than elevate — a shadow inside a sheet reads as false height.
+            NimazCard(
                 modifier = if (single) Modifier.width(96.dp) else Modifier.weight(1f),
+                style = NimazCardStyle.OUTLINED,
+                tone = NimazTone.NEUTRAL,
+                elevation = 0.dp,
                 shape = RoundedCornerShape(NimazCornerRadius.Medium),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-                tonalElevation = 1.dp,
             ) {
                 Column(
-                    modifier = Modifier.padding(vertical = NimazSpacing.Small),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = NimazSpacing.Small),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     ArabicText(

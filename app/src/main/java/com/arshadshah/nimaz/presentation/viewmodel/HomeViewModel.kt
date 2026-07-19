@@ -15,9 +15,12 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
+import com.arshadshah.nimaz.domain.model.Announcement
+import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -26,8 +29,7 @@ import com.arshadshah.nimaz.domain.model.HighLatitudeRule
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
-import com.arshadshah.nimaz.domain.model.Announcement
-import com.arshadshah.nimaz.domain.model.AnnouncementAction
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
@@ -51,8 +53,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.DayOfWeek
-import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
@@ -223,7 +223,8 @@ class HomeViewModel @Inject constructor(
                 // GetDailyHadithUseCase seeds the backfill and applies the Knuth
                 // multiplicative-hash scatter so consecutive days land on very
                 // different hadiths while staying deterministic per day.
-                val hadith = hadithUseCases.getDailyHadith(LocalDate.now().toEpochDay()) ?: return@launch
+                val hadith =
+                    hadithUseCases.getDailyHadith(LocalDate.now().toEpochDay()) ?: return@launch
                 _state.update {
                     it.copy(
                         dailyHadith = hadith.textEnglish.let { text ->
@@ -293,7 +294,11 @@ class HomeViewModel @Inject constructor(
     fun onEvent(event: HomeEvent) {
         when (event) {
             is HomeEvent.UpdateLocation -> AppAnalytics.logFeatureUsed("home", "update_location")
-            is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed("home", "toggle_prayer_status")
+            is HomeEvent.TogglePrayerStatus -> AppAnalytics.logFeatureUsed(
+                "home",
+                "toggle_prayer_status"
+            )
+
             else -> {}
         }
         when (event) {

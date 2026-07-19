@@ -7,8 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -29,11 +27,13 @@ import com.arshadshah.nimaz.data.audio.QuranAudioManager
 import com.arshadshah.nimaz.data.audio.QuranAudioService
 import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
-import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
+import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 import com.arshadshah.nimaz.widget.hijricalendar.HijriCalendarWidget
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 val LocalInAppUpdateManager = staticCompositionLocalOf<InAppUpdateManager?> { null }
@@ -109,7 +109,15 @@ class MainActivity : ComponentActivity() {
             val showIslamicPatterns by settingsRepository.showIslamicPatterns.collectAsState(
                 initial = true
             )
+            val patternStyleKey by settingsRepository.patternStyle.collectAsState(
+                initial = "CORNER_MEDALLION"
+            )
             val localeCode by settingsRepository.appLanguage.collectAsState(initial = "en")
+
+            // NONE is "off": if the reader disabled patterns via the legacy boolean,
+            // honour that regardless of the stored style so the two can't disagree.
+            val patternStyle = NimazPatternStyle.fromKey(patternStyleKey)
+                .takeIf { showIslamicPatterns } ?: NimazPatternStyle.NONE
 
             val themeMode = when (themeModeString) {
                 "light" -> ThemeMode.LIGHT
@@ -128,11 +136,16 @@ class MainActivity : ComponentActivity() {
                     use24HourFormat = use24HourFormat,
                     useHijriPrimary = useHijriPrimary,
                     showIslamicPatterns = showIslamicPatterns,
+                    patternStyle = patternStyle,
                     localeCode = localeCode
                 ) {
-                    Surface(
+                    // The app-wide decorative background. Replaces the plain
+                    // Surface: it paints the same background colour, then draws
+                    // the ornament behind the whole nav graph. Screens show it
+                    // through by using NimazScreenScaffold (whose container is
+                    // transparent) instead of a bare Scaffold.
+                    NimazPatternBackground(
                         modifier = Modifier.fillMaxSize(),
-                        color = MaterialTheme.colorScheme.background
                     ) {
                         NavGraph(
                             pendingQuranSurah = pendingQuranSurah,

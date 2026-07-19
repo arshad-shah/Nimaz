@@ -17,25 +17,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.FiberManualRecord
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -54,6 +41,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.VoiceOptionCard
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -109,7 +105,7 @@ fun SelectReciterScreen(
 
     val currentReciter = popularReciters.find { it.id == selectedReciterId } ?: popularReciters[0]
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -151,9 +147,7 @@ fun SelectReciterScreen(
                     style = NimazCardStyle.FILLED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                    )
+                    tone = NimazTone.ACCENT
                 ) {
                     Row(
                         modifier = Modifier
@@ -191,29 +185,13 @@ fun SelectReciterScreen(
                             )
                         }
 
-                        Surface(
-                            shape = RoundedCornerShape(20.dp),
-                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(5.dp)
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(8.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary)
-                                )
-                                Text(
-                                    text = stringResource(R.string.active),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                        NimazBadge(
+                            text = stringResource(R.string.active),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.SOFT,
+                            size = NimazBadgeSize.LARGE,
+                            icon = Icons.Filled.FiberManualRecord
+                        )
                     }
                 }
             }

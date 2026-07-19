@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +12,6 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,12 +21,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazListPicker
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -63,7 +63,7 @@ fun PrayerSettingsScreen(
     var showAsrMethodDialog by remember { mutableStateOf(false) }
     var showHighLatitudeDialog by remember { mutableStateOf(false) }
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -122,10 +122,11 @@ fun PrayerSettingsScreen(
             // Info Banner
             item {
                 NimazBanner(
-                    message = buildString {
-                        val city = locationState.currentLocation?.city ?: "Your location"
-                        append("$city may be at a high latitude. Prayer times may vary significantly during summer months. Consider using Angle Based or One Seventh methods.")
-                    },
+                    message = stringResource(
+                        R.string.prayer_settings_high_latitude_notice_format,
+                        locationState.currentLocation?.city
+                            ?: stringResource(R.string.prayer_settings_your_location)
+                    ),
                     variant = NimazBannerVariant.INFO,
                     icon = Icons.Default.Info
                 )

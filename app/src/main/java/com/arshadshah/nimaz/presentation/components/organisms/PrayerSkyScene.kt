@@ -12,7 +12,6 @@ import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +30,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -49,13 +47,9 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.graphics.drawscope.CanvasDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.clipPath
@@ -63,7 +57,9 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
@@ -483,9 +479,33 @@ private fun DrawScope.drawCloudLayer() {
     // White→grey luminance so a per-phase ColorFilter.tint shades them correctly.
     val w = size.width
     val h = size.height
-    drawCloud(w * 0.25f, h * 0.49f, scale(), Color.White, SkyColors.CloudShadow, 0.95f, CloudShape.Classic)
-    drawCloud(w * 0.6f, h * 0.37f, scale() * 0.8f, Color.White, SkyColors.CloudShadow, 0.9f, CloudShape.Puffy)
-    drawCloud(w * 0.78f, h * 0.63f, scale() * 0.7f, Color.White, SkyColors.CloudShadow, 0.85f, CloudShape.Wide)
+    drawCloud(
+        w * 0.25f,
+        h * 0.49f,
+        scale(),
+        Color.White,
+        SkyColors.CloudShadow,
+        0.95f,
+        CloudShape.Classic
+    )
+    drawCloud(
+        w * 0.6f,
+        h * 0.37f,
+        scale() * 0.8f,
+        Color.White,
+        SkyColors.CloudShadow,
+        0.9f,
+        CloudShape.Puffy
+    )
+    drawCloud(
+        w * 0.78f,
+        h * 0.63f,
+        scale() * 0.7f,
+        Color.White,
+        SkyColors.CloudShadow,
+        0.85f,
+        CloudShape.Wide
+    )
 }
 
 // ─────────────────────────────────────────────────────────────────────────
@@ -724,7 +744,12 @@ private fun DrawScope.drawCloud(
                     addCircle(cx - 6f * s, cy - 12f * s, 16f * s, dir)
                     addCircle(cx + 12f * s, cy - 8f * s, 13f * s, dir)
                     addCircle(cx + 24f * s, cy - 1f * s, 15f * s, dir)
-                    addRoundRect(RectF(cx - 44f * s, cy, cx + 44f * s, cy + 16f * s), 8f * s, 8f * s, dir)
+                    addRoundRect(
+                        RectF(cx - 44f * s, cy, cx + 44f * s, cy + 16f * s),
+                        8f * s,
+                        8f * s,
+                        dir
+                    )
                 }
                 // Rounder and taller — a fifth puff lifts the crown into a dome.
                 CloudShape.Puffy -> {
@@ -734,7 +759,12 @@ private fun DrawScope.drawCloud(
                     addCircle(cx + 6f * s, cy - 16f * s, 16f * s, dir)
                     addCircle(cx + 18f * s, cy - 9f * s, 14f * s, dir)
                     addCircle(cx + 26f * s, cy - 2f * s, 12f * s, dir)
-                    addRoundRect(RectF(cx - 40f * s, cy + 2f * s, cx + 40f * s, cy + 16f * s), 9f * s, 9f * s, dir)
+                    addRoundRect(
+                        RectF(cx - 40f * s, cy + 2f * s, cx + 40f * s, cy + 16f * s),
+                        9f * s,
+                        9f * s,
+                        dir
+                    )
                 }
                 // Stretched and flat — a low, drifting wisp with smaller bumps.
                 CloudShape.Wide -> {
@@ -744,7 +774,12 @@ private fun DrawScope.drawCloud(
                     addCircle(cx + 4f * s, cy - 10f * s, 14f * s, dir)
                     addCircle(cx + 20f * s, cy - 6f * s, 12f * s, dir)
                     addCircle(cx + 30f * s, cy - 1f * s, 10f * s, dir)
-                    addRoundRect(RectF(cx - 50f * s, cy, cx + 50f * s, cy + 14f * s), 7f * s, 7f * s, dir)
+                    addRoundRect(
+                        RectF(cx - 50f * s, cy, cx + 50f * s, cy + 14f * s),
+                        7f * s,
+                        7f * s,
+                        dir
+                    )
                 }
             }
         }
@@ -988,7 +1023,12 @@ private fun PrayerSkyScene_TopBar_Isha_Preview() {
     }
 }
 
-@Preview(showBackground = true, widthDp = 380, heightDp = 320, name = "Hero + topbar · long location")
+@Preview(
+    showBackground = true,
+    widthDp = 380,
+    heightDp = 320,
+    name = "Hero + topbar · long location"
+)
 @Composable
 private fun PrayerSkyScene_TopBar_LongLocation_Preview() {
     NimazTheme {

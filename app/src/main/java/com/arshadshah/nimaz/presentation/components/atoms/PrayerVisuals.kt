@@ -1,10 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import com.arshadshah.nimaz.domain.model.PrayerType
 import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -15,12 +10,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.domain.model.PrayerType
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -122,7 +122,8 @@ private fun PrayerVisualsLightPreview() {
     }
 }
 
-@Preview(showBackground = true, name = "Prayer Visuals — Dark",
+@Preview(
+    showBackground = true, name = "Prayer Visuals — Dark",
     uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
 )
 @Composable

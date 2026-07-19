@@ -23,19 +23,19 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Calculate
-import androidx.compose.material.icons.filled.DarkMode
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Language
-import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Explore
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.MoreTime
 import androidx.compose.material.icons.filled.NotificationsActive
 import androidx.compose.material.icons.filled.RocketLaunch
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.TaskAlt
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,10 +49,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.arshadshah.nimaz.presentation.theme.NimazColors
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.HelpItem
 import com.arshadshah.nimaz.domain.model.HelpStep
 import com.arshadshah.nimaz.domain.model.HelpTopic
@@ -60,6 +61,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 
 fun helpIcon(key: String?): ImageVector = when (key) {
     "schedule" -> Icons.Filled.Schedule
@@ -194,7 +196,9 @@ fun HelpGuideRow(
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold
                 )
-                val meta = guide.estimatedMinutes?.let { "About $it min" } ?: "Step-by-step"
+                val meta = guide.estimatedMinutes
+                    ?.let { stringResource(R.string.help_guide_about_minutes_format, it) }
+                    ?: stringResource(R.string.help_guide_step_by_step)
                 Text(
                     text = meta,
                     style = MaterialTheme.typography.labelSmall,

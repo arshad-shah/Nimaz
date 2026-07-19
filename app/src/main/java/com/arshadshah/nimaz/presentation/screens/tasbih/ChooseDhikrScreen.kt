@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.tasbih
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Delete
@@ -28,18 +25,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxDefaults
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -56,11 +50,16 @@ import com.arshadshah.nimaz.domain.model.TasbihCategory
 import com.arshadshah.nimaz.domain.model.TasbihPreset
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TasbihViewModel
@@ -140,21 +139,19 @@ fun ChooseDhikrScreen(
         )
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.tasbih_choose_dhikr)) },
-                navigationIcon = {
-                    IconButton(onClick = onBack) {
-                        NimazIcon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))
-                    }
-                }
+            NimazBackTopAppBar(
+                title = stringResource(R.string.tasbih_choose_dhikr),
+                onBackClick = onBack,
             )
         }
     ) { padding ->
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
             OutlinedTextField(
                 value = query,
                 onValueChange = { query = it },
@@ -172,8 +169,10 @@ fun ChooseDhikrScreen(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(tabs.size) { i ->
-                    CategoryTab(
-                        label = tabLabel(tabs[i]),
+                    NimazBadge(
+                        text = tabLabel(tabs[i]),
+                        tone = NimazTone.ACCENT,
+                        size = NimazBadgeSize.LARGE,
                         selected = i == tabIndex,
                         onClick = { tabIndex = i })
                 }
@@ -217,9 +216,7 @@ fun ChooseDhikrScreen(
                 style = NimazCardStyle.FILLED,
                 onClick = { onNavigateToAddPreset() },
                 shape = RoundedCornerShape(14.dp),
-                colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.primaryContainer
-                )
+                tone = NimazTone.ACCENT
             ) {
                 Row(
                     modifier = Modifier
@@ -316,10 +313,7 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-            border = null,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(
@@ -350,27 +344,6 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-private fun CategoryTab(label: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        shape = RoundedCornerShape(percent = 50),
-        color = if (selected) MaterialTheme.colorScheme.primary
-        else MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-        border = if (selected) null
-        else BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)),
-        modifier = Modifier.clickable(onClick = onClick)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
-            color = if (selected) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp)
-        )
-    }
-}
-
-@Composable
 private fun DhikrRow(
     preset: TasbihPreset,
     selected: Boolean,
@@ -386,9 +359,7 @@ private fun DhikrRow(
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surface,
-            border = null,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(

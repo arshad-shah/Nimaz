@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -24,11 +23,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,9 +48,7 @@ fun NimazMenuItem(
         enabled = enabled,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(0.dp),
-        colors = NimazCardDefaults.colors(
-            container = Color.Transparent
-        ),
+        tone = NimazTone.TRANSPARENT,
         elevation = 0.dp
     ) {
         Row(
@@ -107,9 +104,6 @@ fun NimazMenuGroup(
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         elevation = 1.dp
     ) {
         Column(content = content)

@@ -19,6 +19,15 @@ import androidx.core.view.WindowCompat
 /**
  * CompositionLocals for appearance settings that UI components can read.
  */
+/**
+ * Whether the app is currently rendering dark. Resolved by [NimazTheme] from the
+ * user's [ThemeMode] (which may force LIGHT or DARK regardless of the system), so
+ * components must read this rather than calling `isSystemInDarkTheme()` — that
+ * would ignore an explicit override — or inferring it from surface luminance,
+ * which breaks under dynamic colour.
+ */
+val LocalIsDarkTheme = compositionLocalOf { false }
+
 val LocalHapticEnabled = compositionLocalOf { true }
 val LocalAnimationsEnabled = compositionLocalOf { true }
 val LocalUse24HourFormat = compositionLocalOf { false }
@@ -90,6 +99,7 @@ fun NimazTheme(
     use24HourFormat: Boolean = false,
     useHijriPrimary: Boolean = false,
     showIslamicPatterns: Boolean = true,
+    patternStyle: NimazPatternStyle = NimazPatternStyle.CORNER_MEDALLION,
     localeCode: String = "en",
     content: @Composable () -> Unit
 ) {
@@ -122,11 +132,13 @@ fun NimazTheme(
     }
 
     CompositionLocalProvider(
+        LocalIsDarkTheme provides darkTheme,
         LocalHapticEnabled provides hapticEnabled,
         LocalAnimationsEnabled provides animationsEnabled,
         LocalUse24HourFormat provides use24HourFormat,
         LocalUseHijriPrimary provides useHijriPrimary,
-        LocalShowIslamicPatterns provides showIslamicPatterns
+        LocalShowIslamicPatterns provides showIslamicPatterns,
+        LocalPatternStyle provides patternStyle
     ) {
         MaterialTheme(
             colorScheme = colorScheme,

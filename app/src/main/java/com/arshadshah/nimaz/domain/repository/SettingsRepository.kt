@@ -17,6 +17,10 @@ interface SettingsRepository {
     suspend fun setDynamicColor(enabled: Boolean)
     val showIslamicPatterns: Flow<Boolean>
     suspend fun setShowIslamicPatterns(enabled: Boolean)
+
+    /** The ornament style, as a [NimazPatternStyle] name; "NONE" means off. */
+    val patternStyle: Flow<String>
+    suspend fun setPatternStyle(style: String)
     val animationsEnabled: Flow<Boolean>
     suspend fun setAnimationsEnabled(enabled: Boolean)
     val showCountdown: Flow<Boolean>

@@ -114,7 +114,11 @@ class CalendarViewModel @Inject constructor(
         when (event) {
             is CalendarEvent.SelectDate -> AppAnalytics.logFeatureUsed("calendar", "select_date")
             is CalendarEvent.SetViewMode -> AppAnalytics.logFeatureUsed("calendar", "set_view_mode")
-            is CalendarEvent.NavigateToYear -> AppAnalytics.logFeatureUsed("calendar", "navigate_year")
+            is CalendarEvent.NavigateToYear -> AppAnalytics.logFeatureUsed(
+                "calendar",
+                "navigate_year"
+            )
+
             else -> {}
         }
         when (event) {

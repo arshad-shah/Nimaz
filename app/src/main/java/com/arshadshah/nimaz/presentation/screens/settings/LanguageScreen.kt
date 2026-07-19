@@ -15,17 +15,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +31,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckbox
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCheckboxVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.AppLanguage
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
@@ -52,8 +52,7 @@ fun LanguageScreen(
 ) {
     val generalState by viewModel.generalState.collectAsState()
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.surface,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.language_title),
@@ -81,12 +80,10 @@ fun LanguageScreen(
             // Language Card
             item {
                 NimazCard(
-                    style = NimazCardStyle.FILLED,
+                    style = NimazCardStyle.ELEVATED,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceVariant
-                    )
+                    tone = NimazTone.NEUTRAL
                 ) {
                     Column {
                         AppLanguage.entries.forEachIndexed { index, language ->

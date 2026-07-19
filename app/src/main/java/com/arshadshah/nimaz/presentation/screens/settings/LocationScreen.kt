@@ -1,11 +1,10 @@
 package com.arshadshah.nimaz.presentation.screens.settings
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -28,11 +28,7 @@ import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -47,21 +43,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
-import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
-import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChip
 import com.arshadshah.nimaz.presentation.components.atoms.NimazChipVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
 import com.arshadshah.nimaz.presentation.viewmodel.CityRegion
 import com.arshadshah.nimaz.presentation.viewmodel.CurrentLocationState
 import com.arshadshah.nimaz.presentation.viewmodel.LocationEvent
@@ -113,8 +114,7 @@ fun LocationScreen(
         }
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             NimazBackTopAppBar(
@@ -377,7 +377,7 @@ private fun UseCurrentLocationButton(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
+        tone = NimazTone.NEUTRAL,
         elevation = 0.dp,
         enabled = !isLoading,
         onClick = onClick
@@ -405,7 +405,10 @@ private fun UseCurrentLocationButton(
             }
             Spacer(modifier = Modifier.width(10.dp))
             Text(
-                text = if (isLoading) "Detecting Location..." else "Use Current Location",
+                text = stringResource(
+                    if (isLoading) R.string.location_detecting_location
+                    else R.string.location_use_current_location
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -455,10 +458,7 @@ private fun LocationListItem(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
-        colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        ),
+        colors = NimazCardDefaults.selectable(),
         elevation = 0.dp,
         onClick = onClick
     ) {
@@ -468,70 +468,70 @@ private fun LocationListItem(
                 .padding(15.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-        // Icon (country flag for curated cities, glyph otherwise)
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(
-                    color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    else MaterialTheme.colorScheme.surface,
-                    shape = RoundedCornerShape(10.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            if (location.flag != null) {
-                Text(text = location.flag, style = MaterialTheme.typography.titleMedium)
-            } else {
-                NimazIcon(
-                    imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
-                    contentDescription = null,
-                    tint = if (isSelected) MaterialTheme.colorScheme.primary
-                    else MaterialTheme.colorScheme.onSurfaceVariant,
-                    iconSize = 18.dp
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.width(15.dp))
-
-        // Location info
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = location.name,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = location.country,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        // Selection check
-        if (isSelected) {
+            // Icon (country flag for curated cities, glyph otherwise)
             Box(
                 modifier = Modifier
-                    .size(24.dp)
+                    .size(40.dp)
                     .background(
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
+                        color = if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                        else MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(10.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                NimazIcon(
-                    imageVector = Icons.Default.Check,
-                    contentDescription = null,
-                    variant = NimazIconVariant.ON_ACCENT,
-                    iconSize = 14.dp
+                if (location.flag != null) {
+                    Text(text = location.flag, style = MaterialTheme.typography.titleMedium)
+                } else {
+                    NimazIcon(
+                        imageVector = if (showGlobeIcon) Icons.Default.Public else Icons.Default.LocationOn,
+                        contentDescription = null,
+                        tint = if (isSelected) MaterialTheme.colorScheme.primary
+                        else MaterialTheme.colorScheme.onSurfaceVariant,
+                        iconSize = 18.dp
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.width(15.dp))
+
+            // Location info
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = location.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    text = location.country,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
-        }
+
+            // Selection check
+            if (isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    NimazIcon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = null,
+                        variant = NimazIconVariant.ON_ACCENT,
+                        iconSize = 14.dp
+                    )
+                }
+            }
         }
     }
 }

@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.VerticalDivider
@@ -50,8 +49,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import com.arshadshah.nimaz.core.navigation.ScreenTags
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
@@ -60,6 +57,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -69,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
@@ -77,6 +76,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.BeadDesignPickerSheet
 import com.arshadshah.nimaz.presentation.components.molecules.tasbih.CurrentTasbihSheet
 import com.arshadshah.nimaz.presentation.components.organisms.NimazPillTabs
@@ -167,7 +168,7 @@ fun TasbihScreen(
         )
     }
 
-    Scaffold(contentWindowInsets = WindowInsets(0)) { padding ->
+    NimazScreenScaffold(contentWindowInsets = WindowInsets(0)) { padding ->
         val rootModifier = Modifier
             .fillMaxSize()
             .padding(padding)
@@ -177,9 +178,11 @@ fun TasbihScreen(
         if (expandedWidth) {
             // Tablet / expanded-width two-pane layout.
             Column(modifier = rootModifier) {
-                topBar(Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp))
+                topBar(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                )
 
                 Row(modifier = Modifier.fillMaxSize()) {
                     // LEFT pane (~40%): current-tasbih info + count capsule.
@@ -211,9 +214,11 @@ fun TasbihScreen(
                             .padding(horizontal = 12.dp, vertical = 16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        counter(Modifier
-                            .weight(1f)
-                            .fillMaxWidth())
+                        counter(
+                            Modifier
+                                .weight(1f)
+                                .fillMaxWidth()
+                        )
                         controls()
                         Spacer(Modifier.height(12.dp))
                     }
@@ -225,17 +230,21 @@ fun TasbihScreen(
                 modifier = rootModifier,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                topBar(Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp))
+                topBar(
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                )
 
                 Spacer(Modifier.height(4.dp))
 
                 capsule()
 
-                counter(Modifier
-                    .weight(1f)
-                    .fillMaxWidth())
+                counter(
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth()
+                )
 
                 controls()
 
@@ -282,7 +291,10 @@ private fun TasbihTopBar(
         Spacer(Modifier.weight(1f))
         if (beadsMode) {
             IconButton(onClick = onOpenDesign) {
-                NimazIcon(Icons.Default.Palette, contentDescription = stringResource(R.string.tasbih_bead_design))
+                NimazIcon(
+                    Icons.Default.Palette,
+                    contentDescription = stringResource(R.string.tasbih_bead_design)
+                )
             }
         }
         IconButton(onClick = onNavigateToHistory) {
@@ -358,9 +370,11 @@ private fun TasbihCountCapsule(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(modifier = Modifier
-                .size(7.dp)
-                .background(accent, CircleShape))
+            Box(
+                modifier = Modifier
+                    .size(7.dp)
+                    .background(accent, CircleShape)
+            )
             Text(
                 text = "$count / $target",
                 style = MaterialTheme.typography.labelLarge,
@@ -389,12 +403,10 @@ private fun CurrentTasbihPeek(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier
@@ -683,7 +695,8 @@ private fun ControlButtons(
             }
             IconButton(onClick = onToggleVibration, modifier = Modifier.size(44.dp)) {
                 NimazIcon(
-                    Icons.Default.PhoneAndroid, contentDescription = stringResource(R.string.toggle_vibration),
+                    Icons.Default.PhoneAndroid,
+                    contentDescription = stringResource(R.string.toggle_vibration),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (vibrationEnabled) 0.9f else 0.35f),
                     size = NimazIconSize.MEDIUM
                 )

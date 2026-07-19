@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -45,7 +44,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.core.share.ContentShareManager
@@ -53,19 +51,24 @@ import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.core.util.formatGrouped
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.domain.model.HadithBook
-import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatData
 import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
@@ -85,7 +88,7 @@ fun HadithCollectionScreen(
     val context = LocalContext.current
     val shareScope = rememberCoroutineScope()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -220,30 +223,15 @@ private fun HadithOfTheDayCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100))
-                        .background(NimazColors.Gold500.copy(alpha = 0.16f))
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = NimazColors.GoldDark,
-                            iconSize = 14.dp
-                        )
-                        Text(
-                            text = stringResource(R.string.hadith_of_the_day),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = NimazColors.GoldDark,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
+                NimazBadge(
+                    text = stringResource(R.string.hadith_of_the_day),
+                    size = NimazBadgeSize.SMALL,
+                    icon = Icons.Default.Star,
+                    colors = NimazBadgeDefaults.feature(
+                        color = NimazColors.Gold500,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+                )
                 grade?.let { HadithGradeChip(label = it.label, color = it.color) }
             }
 

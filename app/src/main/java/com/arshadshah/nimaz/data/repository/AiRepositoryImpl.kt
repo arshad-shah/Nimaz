@@ -48,6 +48,7 @@ class AiRepositoryImpl @Inject constructor(
                 CrashReporter.recordException(result.cause)
                 failure(AiError.Network)
             }
+
             is AiHttpResult.ApiFailure ->
                 failure(
                     mapApiError(

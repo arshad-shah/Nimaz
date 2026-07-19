@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -25,11 +24,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -40,13 +39,10 @@ internal fun BookmarkListItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
+        tone = NimazTone.NEUTRAL,
         elevation = 0.dp
     ) {
         Row(
@@ -102,13 +98,11 @@ internal fun BookmarkCard(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = modifier.width(160.dp),
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        tone = NimazTone.NEUTRAL
     ) {
         Column(
             modifier = Modifier.padding(12.dp)

@@ -28,7 +28,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -63,6 +62,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.PageSurahSeparator
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
@@ -314,7 +314,7 @@ fun QuranReaderScreen(
         }
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -380,7 +380,9 @@ fun QuranReaderScreen(
                         IconButton(onClick = { usePageView = !usePageView }) {
                             NimazIcon(
                                 imageVector = if (usePageView) Icons.AutoMirrored.Filled.ViewList else Icons.Default.AutoStories,
-                                contentDescription = if (usePageView) stringResource(R.string.cd_switch_to_list_view) else stringResource(R.string.cd_switch_to_page_view)
+                                contentDescription = if (usePageView) stringResource(R.string.cd_switch_to_list_view) else stringResource(
+                                    R.string.cd_switch_to_page_view
+                                )
                             )
                         }
                     }
@@ -470,6 +472,7 @@ fun QuranReaderScreen(
                 onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
             )
         },
+        // Opts out of the app ornament: long-form Arabic needs a plain backdrop.
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
@@ -809,7 +812,10 @@ fun QuranReaderScreen(
                             item(key = "banner") {
                                 SurahHeaderCartouche(
                                     surah = surahWithAyahs.surah,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                    modifier = Modifier.padding(
+                                        horizontal = 12.dp,
+                                        vertical = 8.dp
+                                    ),
                                     showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
                                         ?: 0) != 1
                                 )
@@ -869,7 +875,10 @@ fun QuranReaderScreen(
                                 surahNumber = ayah.surahNumber,
                                 surahNameArabic = surah?.nameArabic ?: "",
                                 surahNameEnglish = surah?.nameEnglish
-                                    ?: "Surah ${ayah.surahNumber}",
+                                    ?: stringResource(
+                                        R.string.surah_number_format,
+                                        ayah.surahNumber
+                                    ),
                                 showBismillah = ayah.numberInSurah == 1 && ayah.surahNumber != 1 && ayah.surahNumber != 9
                             )
                         }

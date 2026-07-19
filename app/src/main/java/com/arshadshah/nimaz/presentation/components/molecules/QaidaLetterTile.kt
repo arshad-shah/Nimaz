@@ -5,26 +5,30 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.MakhrajArea
 import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -40,17 +44,27 @@ fun QaidaLetterTile(
     onClick: (QaidaLetter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val desc = "Letter ${letter.nameTransliteration}" + if (heard) ", heard" else ""
-    Surface(
+    val desc = if (heard) {
+        stringResource(R.string.qaida_a11y_letter_heard_format, letter.nameTransliteration)
+    } else {
+        stringResource(R.string.qaida_a11y_letter_format, letter.nameTransliteration)
+    }
+    NimazCard(
         modifier = modifier
+            .fillMaxWidth()
             .aspectRatio(1f)
             .semantics { contentDescription = desc }
             .clickable { onClick(letter) },
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         shape = RoundedCornerShape(NimazCornerRadius.Large),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 1.dp,
     ) {
-        Box(contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(1f),
+            contentAlignment = Alignment.Center
+        ) {
             ArabicText(
                 text = letter.letterArabic,
                 size = ArabicTextSize.EXTRA_LARGE,

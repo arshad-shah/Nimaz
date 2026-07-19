@@ -12,11 +12,11 @@ import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator
 import com.arshadshah.nimaz.domain.model.KhatamStats
 import com.arshadshah.nimaz.domain.model.KhatamStatus
 import com.arshadshah.nimaz.domain.repository.KhatamRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import javax.inject.Inject
 import javax.inject.Singleton
 

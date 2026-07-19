@@ -1,7 +1,7 @@
-Yang baru sejak 3.0.31:
+Yang baru sejak 3.0.56:
 
-• Tafsir dirombak — pembaca diperbarui, penyorotan gestur, catatan bisa diedit, berbagi PDF berbranding.
-• Pemutar Al-Qur'an mengambang dan cara baru berbagi ayat dan doa.
-• Pencarian dirombak: hasil saat mengetik, plus jawaban AI opsional didukung ayat dan hadis yang dikutip dalam satu daftar hasil, dengan peringatan batas yang lebih jelas.
-• Pelacakan durasi puasa dan "Living Sky" lebih akurat.
-• Layar Lokasi baru, Favorit Al-Qur'an dibangun ulang, poles widget.
+• Pola latar Islami kini tampil di seluruh aplikasi — pilih dari lima gaya, atau Tidak ada, di Tampilan.
+• Tampilan disegarkan: bilah judul mengambang dan kartu yang lebih jelas terpisah, terang dan gelap.
+• Al-Qur'an: beranda ditata ulang, info surah didesain ulang, dan pembaca yang kini cocok mode terang.
+• Ringkasan Zakat baru dan widget Khatam yang lebih kaya.
+• Perbaikan: progres bacaan tidak lagi macet di 0%, dan kalender berpindah bulan dengan benar.

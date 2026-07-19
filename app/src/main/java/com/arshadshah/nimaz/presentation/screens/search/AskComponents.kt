@@ -45,6 +45,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.AiError
 import com.arshadshah.nimaz.domain.model.AnswerConfidence
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBanner
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
@@ -235,27 +240,16 @@ private fun ConfidenceChip(confidence: AnswerConfidence) {
         AnswerConfidence.LOW ->
             stringResource(R.string.ai_confidence_low) to MaterialTheme.colorScheme.onSurfaceVariant
     }
-    Row(
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .background(color.copy(alpha = 0.12f))
-            .padding(horizontal = 10.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .size(6.dp)
-                .clip(CircleShape)
-                .background(color),
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
+    NimazBadge(
+        text = label,
+        shape = NimazBadgeShape.ROUNDED,
+        size = NimazBadgeSize.MEDIUM,
+        indicatorColor = color,
+        colors = NimazBadgeDefaults.feature(
             color = color,
-            modifier = Modifier.padding(start = 5.dp),
-        )
-    }
+            emphasis = NimazBadgeEmphasis.SOFT,
+        ),
+    )
 }
 
 /**
@@ -286,28 +280,30 @@ internal fun AskDiscoveryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                Row(
+                NimazCard(
                     modifier = Modifier
                         .padding(top = 12.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .fillMaxWidth(),
+                    style = NimazCardStyle.OUTLINED,
+                    shape = RoundedCornerShape(11.dp),
+                    elevation = 0.dp,
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Shield,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(top = 1.dp)
-                            .size(14.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.ai_discover_privacy),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
+                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                        Icon(
+                            imageVector = Icons.Outlined.Shield,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .size(14.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.ai_discover_privacy),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
                 }
                 Row(
                     modifier = Modifier.padding(top = 14.dp),
@@ -402,11 +398,12 @@ internal fun AskErrorCard(error: AiError, onRetry: () -> Unit) {
 }
 
 /** Turn retry seconds into a coarse "minutes"/"hours" figure for display. */
+@Composable
 private fun formatRetry(seconds: Long): String {
     val minutes = (seconds + 59) / 60
     return if (minutes < 60) {
-        "$minutes min"
+        stringResource(R.string.ai_retry_minutes_format, minutes)
     } else {
-        "${(minutes + 59) / 60} h"
+        stringResource(R.string.ai_retry_hours_format, (minutes + 59) / 60)
     }
 }

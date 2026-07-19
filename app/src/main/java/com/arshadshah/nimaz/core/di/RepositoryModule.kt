@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.core.di
 
+import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.local.dua.AndroidDuaAssetReader
 import com.arshadshah.nimaz.data.local.dua.DataStoreDuaContentVersionStore
 import com.arshadshah.nimaz.data.local.dua.DuaAssetReader
@@ -16,7 +17,6 @@ import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
-import com.arshadshah.nimaz.data.local.datastore.PreferencesDataStore
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -33,7 +33,6 @@ import com.arshadshah.nimaz.data.repository.TafseerRepositoryImpl
 import com.arshadshah.nimaz.data.repository.TasbihRepositoryImpl
 import com.arshadshah.nimaz.data.repository.ZakatRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AsmaUlHusnaRepository
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.repository.AsmaUnNabiRepository
 import com.arshadshah.nimaz.domain.repository.DuaRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
@@ -45,41 +44,97 @@ import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import com.arshadshah.nimaz.domain.repository.QaidaRepository
 import com.arshadshah.nimaz.domain.repository.QuranRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.repository.TafseerRepository
 import com.arshadshah.nimaz.domain.repository.TasbihRepository
 import com.arshadshah.nimaz.domain.repository.ZakatRepository
 import com.arshadshah.nimaz.domain.usecase.AbandonKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.AddHighlightUseCase
+import com.arshadshah.nimaz.domain.usecase.AddNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.AsmaUlHusnaUseCases
 import com.arshadshah.nimaz.domain.usecase.AsmaUnNabiUseCases
 import com.arshadshah.nimaz.domain.usecase.CompleteKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.CompleteSessionUseCase
 import com.arshadshah.nimaz.domain.usecase.CreateKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteCalculationUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteCustomPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteFastRecordByDateUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteHighlightUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.DeleteNoteUseCase
 import com.arshadshah.nimaz.domain.usecase.DeleteQuranBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertQuranBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertHadithBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertDuaBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.DuaUseCases
+import com.arshadshah.nimaz.domain.usecase.ExportAnnotationsUseCase
+import com.arshadshah.nimaz.domain.usecase.FastingUseCases
+import com.arshadshah.nimaz.domain.usecase.GetActiveSessionUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUlHusnaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllAsmaUnNabiUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllHistoryUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllLocationsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAllProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUlHusnaByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAsmaUnNabiByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAvailableTranslatorsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahsByJuzUseCase
 import com.arshadshah.nimaz.domain.usecase.GetAyahsByPageUseCase
+import com.arshadshah.nimaz.domain.usecase.GetAyahsBySurahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCategoryByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChapterByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetChaptersByBookUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCompletedSessionsInRangeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetCourseProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCurrentLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCurrentStreakUseCase
+import com.arshadshah.nimaz.domain.usecase.GetCustomPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyDuaUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDailyHadithUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDefaultPresetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaBookmarksUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuaByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByCategoryUseCase
+import com.arshadshah.nimaz.domain.usecase.GetDuasByOccasionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastRecordsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFastingStatsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteAsmaUlHusnaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteAsmaUnNabiUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFavoriteDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.GetFavoriteLocationsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetFavoriteProphetsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByNumberUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithOfTheDayUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByChapterUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpGuideUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.GetHelpTopicsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetLessonProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.GetLongestStreakUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
 import com.arshadshah.nimaz.domain.usecase.GetNextUnreadPositionUseCase
+import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
 import com.arshadshah.nimaz.domain.usecase.GetPageAyahRangesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPrayerTimesForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetPresetByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetProgressForDateUseCase
 import com.arshadshah.nimaz.domain.usecase.GetProphetByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaCellUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQaidaLessonContentUseCase
@@ -88,19 +143,48 @@ import com.arshadshah.nimaz.domain.usecase.GetQaidaLettersUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranBookmarksUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranFavoriteAyahIdsUseCase
 import com.arshadshah.nimaz.domain.usecase.GetQuranFavoritesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetRamadanFastedCountUseCase
 import com.arshadshah.nimaz.domain.usecase.GetReadingProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSajdaAyahsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetVerseOfTheDayUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionByIdUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsForDateUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetSurahByNumberUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahInfoUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahListUseCase
 import com.arshadshah.nimaz.domain.usecase.GetSurahWithAyahsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTafseerNotesUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTasbihStatsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTodayPrayerRecordsUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalCountInRangeUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.GetTotalPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.GetVerseOfTheDayUseCase
+import com.arshadshah.nimaz.domain.usecase.GetVoluntaryFastCountUseCase
+import com.arshadshah.nimaz.domain.usecase.HadithUseCases
 import com.arshadshah.nimaz.domain.usecase.HelpUseCases
 import com.arshadshah.nimaz.domain.usecase.IncrementAyahsReadUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertCalculationUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertDuaBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertFastRecordUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertHadithBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertPresetUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertQuranBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.InsertSessionUseCase
 import com.arshadshah.nimaz.domain.usecase.IsAyahBookmarkedUseCase
+import com.arshadshah.nimaz.domain.usecase.IsDuaFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.IsHadithBookmarkedUseCase
+import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
 import com.arshadshah.nimaz.domain.usecase.KhatamUseCases
 import com.arshadshah.nimaz.domain.usecase.LogDailyProgressUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkAsPaidUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkAyahsReadUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkCellHeardUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkFidyaPaidUseCase
+import com.arshadshah.nimaz.domain.usecase.MarkMakeupFastCompletedUseCase
 import com.arshadshah.nimaz.domain.usecase.MarkSurahAsReadUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveAbandonedKhatamsUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveActiveKhatamUseCase
@@ -113,8 +197,8 @@ import com.arshadshah.nimaz.domain.usecase.ObserveJuzProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamByIdUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamDetailUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveKhatamStatsUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveReadAyahIdsUseCase
+import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.domain.usecase.ProphetUseCases
 import com.arshadshah.nimaz.domain.usecase.QaidaUseCases
 import com.arshadshah.nimaz.domain.usecase.QuranUseCases
@@ -122,125 +206,41 @@ import com.arshadshah.nimaz.domain.usecase.ReactivateKhatamUseCase
 import com.arshadshah.nimaz.domain.usecase.ResetQaidaProgressUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchAsmaUlHusnaUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchAsmaUnNabiUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
+import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchHelpUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchProphetsUseCase
 import com.arshadshah.nimaz.domain.usecase.SearchQuranUseCase
+import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
 import com.arshadshah.nimaz.domain.usecase.SetActiveKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.SetCurrentLocationUseCase
+import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
+import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
 import com.arshadshah.nimaz.domain.usecase.ToggleAsmaUlHusnaFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleAsmaUnNabiFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleDuaFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.ToggleLocationFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleProphetFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleQuranBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.ToggleQuranFavoriteUseCase
 import com.arshadshah.nimaz.domain.usecase.UnlockNextLessonUseCase
 import com.arshadshah.nimaz.domain.usecase.UnmarkAyahReadUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateQuranBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateReadingPositionUseCase
-import com.arshadshah.nimaz.domain.usecase.CompleteSessionUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteCustomPresetUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteFastRecordByDateUseCase
-import com.arshadshah.nimaz.domain.usecase.DuaUseCases
-import com.arshadshah.nimaz.domain.usecase.FastingUseCases
-import com.arshadshah.nimaz.domain.usecase.GetActiveSessionUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllBookmarksUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllBooksUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllCategoriesUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllMakeupFastsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetBookByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetCategoryByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetChapterByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetChaptersByBookUseCase
-import com.arshadshah.nimaz.domain.usecase.GetCompletedSessionsInRangeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetCustomPresetsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDefaultPresetsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDuaByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDuasByCategoryUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDuasByOccasionUseCase
-import com.arshadshah.nimaz.domain.usecase.GetFastRecordForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetFastRecordsInRangeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetFastingStatsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetFavoriteDuasUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithByNumberUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithByReferenceUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithOfTheDayUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithsByChapterUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHadithsByGradeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetMakeupFastCountForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPendingMakeupFastsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPresetByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetProgressForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetRamadanFastedCountUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSessionByIdUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSessionsForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetSessionsInRangeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTasbihStatsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTotalCountInRangeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTotalFidyaPaidUseCase
-import com.arshadshah.nimaz.domain.usecase.GetVoluntaryFastCountUseCase
-import com.arshadshah.nimaz.domain.usecase.HadithUseCases
-import com.arshadshah.nimaz.domain.usecase.InsertFastRecordUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertMakeupFastUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertPresetUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertSessionUseCase
-import com.arshadshah.nimaz.domain.usecase.IsDuaFavoriteUseCase
-import com.arshadshah.nimaz.domain.usecase.IsHadithBookmarkedUseCase
-import com.arshadshah.nimaz.domain.usecase.MarkFidyaPaidUseCase
-import com.arshadshah.nimaz.domain.usecase.MarkMakeupFastCompletedUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchDuasUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchHadithsInBookUseCase
-import com.arshadshah.nimaz.domain.usecase.SearchHadithsUseCase
-import com.arshadshah.nimaz.domain.usecase.SeedMissingDefaultsUseCase
-import com.arshadshah.nimaz.domain.usecase.TasbihUseCases
-import com.arshadshah.nimaz.domain.usecase.ToggleBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.ToggleDuaFavoriteUseCase
-import com.arshadshah.nimaz.domain.usecase.ToggleLocationFavoriteUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateDuaBookmarkUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateFastRecordUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateFastStatusUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateMakeupFastUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdatePresetUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateSessionCountUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteCalculationUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteLocationUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllHistoryUseCase
-import com.arshadshah.nimaz.domain.usecase.GetAllLocationsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetCurrentLocationUseCase
-import com.arshadshah.nimaz.domain.usecase.GetCurrentStreakUseCase
-import com.arshadshah.nimaz.domain.usecase.GetFavoriteLocationsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetLongestStreakUseCase
-import com.arshadshah.nimaz.domain.usecase.GetMissedPrayersRequiringQadaUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPrayerRecordsInRangeUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPrayerStatsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetPrayerTimesForDateUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTodayPrayerRecordsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTotalPaidUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertCalculationUseCase
-import com.arshadshah.nimaz.domain.usecase.InsertLocationUseCase
-import com.arshadshah.nimaz.domain.usecase.MarkAsPaidUseCase
-import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
-import com.arshadshah.nimaz.domain.usecase.SetCurrentLocationUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdatePrayerStatusUseCase
-import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
-import com.arshadshah.nimaz.domain.usecase.TafseerUseCases
-import com.arshadshah.nimaz.domain.usecase.GetTafseerForAyahUseCase
-import com.arshadshah.nimaz.domain.usecase.GetTafseerNotesUseCase
-import com.arshadshah.nimaz.domain.usecase.GetHighlightsForAyahUseCase
-import com.arshadshah.nimaz.domain.usecase.AddHighlightUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateHighlightUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteHighlightUseCase
-import com.arshadshah.nimaz.domain.usecase.GetNotesForAyahUseCase
-import com.arshadshah.nimaz.domain.usecase.AddNoteUseCase
-import com.arshadshah.nimaz.domain.usecase.UpdateNoteUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteNoteUseCase
-import com.arshadshah.nimaz.domain.usecase.ExportAnnotationsUseCase
 import com.arshadshah.nimaz.domain.usecase.UpdateHadithBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteHadithBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDuaBookmarksUseCase
-import com.arshadshah.nimaz.domain.usecase.DeleteDuaBookmarkUseCase
-import com.arshadshah.nimaz.domain.usecase.IslamicEventUseCases
-import com.arshadshah.nimaz.domain.usecase.GetAllIslamicEventsUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDailyHadithUseCase
-import com.arshadshah.nimaz.domain.usecase.GetDailyDuaUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateHighlightUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateKhatamUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateMakeupFastUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateNoteUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdatePrayerStatusUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdatePresetUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateQuranBookmarkUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateReadingPositionUseCase
+import com.arshadshah.nimaz.domain.usecase.UpdateSessionCountUseCase
+import com.arshadshah.nimaz.domain.usecase.ZakatUseCases
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -567,6 +567,7 @@ object UseCaseModule {
             getCompletedSessionsInRange = GetCompletedSessionsInRangeUseCase(repository)
         )
     }
+
     @Provides
     @Singleton
     fun provideDuaUseCases(
@@ -590,6 +591,7 @@ object UseCaseModule {
             getDailyDua = GetDailyDuaUseCase(repository)
         )
     }
+
     @Provides
     @Singleton
     fun provideHadithUseCases(
@@ -617,6 +619,7 @@ object UseCaseModule {
             getDailyHadith = GetDailyHadithUseCase(repository)
         )
     }
+
     @Provides
     @Singleton
     fun provideFastingUseCases(
@@ -667,6 +670,7 @@ object UseCaseModule {
             toggleFavorite = ToggleLocationFavoriteUseCase(repository)
         )
     }
+
     @Provides
     @Singleton
     fun provideZakatUseCases(

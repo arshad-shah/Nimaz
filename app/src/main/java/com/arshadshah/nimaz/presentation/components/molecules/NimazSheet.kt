@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,10 +39,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.BottomSheetHandle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
@@ -232,7 +233,7 @@ fun NimazSheetHeader(
             ) {
                 NimazIcon(
                     imageVector = Icons.Default.Close,
-                    contentDescription = "Close",
+                    contentDescription = stringResource(R.string.cd_close),
                     variant = NimazIconVariant.MUTED,
                     iconSize = 18.dp,
                     modifier = Modifier
@@ -476,7 +477,12 @@ private fun NimazSheetActionRowPreview() {
         Surface {
             NimazSheetActionRow(
                 actions = listOf(
-                    NimazSheetAction(Icons.Default.PlayArrow, "Play", {}, tint = MaterialTheme.colorScheme.primary),
+                    NimazSheetAction(
+                        Icons.Default.PlayArrow,
+                        "Play",
+                        {},
+                        tint = MaterialTheme.colorScheme.primary
+                    ),
                     NimazSheetAction(Icons.Default.Share, "Share", {}),
                     NimazSheetAction(Icons.Default.Close, "Close", {}, selected = true)
                 ),

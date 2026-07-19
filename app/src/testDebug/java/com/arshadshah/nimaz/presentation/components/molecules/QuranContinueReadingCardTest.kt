@@ -47,8 +47,9 @@ class QuranContinueReadingCardTest {
         composeRule.onNodeWithText("Verse 5").assertExists()
         composeRule.onNodeWithText("Juz 1").assertExists()
         composeRule.onNodeWithText("Page 1").assertExists()
-        // 150/6236 * 100 = 2
-        composeRule.onNodeWithText("2%").assertExists()
+        composeRule.onNodeWithText("Resume").assertExists()
+        // Progress is through the current surah: ayah 5 of Al-Fatihah's 7.
+        composeRule.onNodeWithText("71%").assertExists()
     }
 
     @Test
@@ -67,22 +68,23 @@ class QuranContinueReadingCardTest {
         // R.string.quran_home_surah_fallback -> "Surah %1$d"
         composeRule.onNodeWithText("Surah 36").assertExists()
         composeRule.onNodeWithText("Verse 10").assertExists()
-        composeRule.onNodeWithText("0%").assertExists()
+        // No surah metadata -> falls back to mushaf position by page: 440/604.
+        composeRule.onNodeWithText("73%").assertExists()
         // Arabic name only rendered when surahName != null; the fallback path
         // omits it. (No specific arabic assertion needed; existence of fallback
         // english name confirms the null branch.)
     }
 
     @Test
-    fun `progress is clamped to 100 percent when read exceeds total`() {
+    fun `progress is clamped to 100 percent at the end of the surah`() {
         composeRule.setThemedContent {
             ContinueReadingCard(
                 surahNumber = 1,
-                ayahNumber = 1,
+                ayahNumber = 7,
                 juzNumber = 1,
                 pageNumber = 1,
                 totalAyahsRead = 99999,
-                surahName = null,
+                surahName = sampleSurah(),
                 onClick = {}
             )
         }

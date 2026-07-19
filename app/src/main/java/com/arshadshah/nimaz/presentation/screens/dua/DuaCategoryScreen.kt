@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -31,19 +30,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Dua
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
@@ -63,14 +70,16 @@ fun DuaCategoryScreen(
         viewModel.onEvent(DuaEvent.LoadCategory(categoryId))
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
-                title = state.category?.nameEnglish ?: "Duas",
+                title = state.category?.nameEnglish ?: stringResource(R.string.duas),
                 onBackClick = onNavigateBack,
                 scrollBehavior = scrollBehavior,
-                subtitle = state.category?.let { "${it.duaCount} duas" }
+                subtitle = state.category?.let {
+                    pluralStringResource(R.plurals.duas_count_format, it.duaCount, it.duaCount)
+                }
             )
         }
     ) { paddingValues ->
@@ -84,7 +93,7 @@ fun DuaCategoryScreen(
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = state.error ?: "An error occurred",
+                    text = state.error ?: stringResource(R.string.error_generic),
                     color = MaterialTheme.colorScheme.error
                 )
             }
@@ -136,7 +145,7 @@ private fun CategoryHeaderCard(
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = NimazCardDefaults.colors(container = Color.Transparent)
+        tone = NimazTone.TRANSPARENT
     ) {
         Box(
             modifier = Modifier
@@ -246,19 +255,13 @@ private fun DuaListItem(
                 // Repeat count badge
                 dua.repeatCount?.let { count ->
                     if (count > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "${count}x",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
+                        NimazBadge(
+                            text = stringResource(R.string.dua_repeat_count_format, count),
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.SOFT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
                     }
                 }
             }

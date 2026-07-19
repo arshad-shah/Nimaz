@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
@@ -37,14 +35,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStats
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
@@ -80,16 +79,13 @@ fun PrayerStatsChart(
     stats: PrayerStats,
     modifier: Modifier = Modifier,
     chartType: PrayerChartType = PrayerChartType.DONUT,
-    title: String = "Prayer Statistics",
+    title: String = stringResource(R.string.prayer_statistics),
     subtitle: String? = null,
     summaryItems: List<ChartStatItem>? = null
 ) {
     NimazCard(
         style = NimazCardStyle.FILLED,
         modifier = modifier.fillMaxWidth(),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         shape = RoundedCornerShape(20.dp)
     ) {
         Column(
@@ -600,7 +596,7 @@ private fun LegendItem(
         )
         Spacer(modifier = Modifier.width(6.dp))
         Text(
-            text = "$label: $value",
+            text = stringResource(R.string.chart_legend_format, label, value),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )

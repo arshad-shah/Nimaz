@@ -78,6 +78,52 @@ data class ReadingProgress(
     val lastAyah: Int get() = lastReadAyah
 }
 
+/**
+ * Pure progress maths for the "Continue Reading" card. Android-free so it can be unit
+ * tested directly.
+ *
+ * The card labels itself with a surah name and "Verse N", so the progress it shows is
+ * **progress through the current surah**, not through the whole Quran. The previous
+ * implementation divided [ReadingProgress.totalAyahsRead] by 6236 — and nothing in the
+ * app ever calls `incrementAyahsRead`, so that counter is permanently 0 and the bar
+ * always rendered 0%.
+ */
+object ReadingProgressCalculator {
+
+    /** Total pages in the standard Madani mushaf, used for the no-surah fallback. */
+    const val TOTAL_QURAN_PAGES = 604
+
+    /**
+     * Fraction (0f..1f) of the way through a surah, given the last-read ayah number and
+     * the surah's ayah count. Returns 0f when the surah size is unknown/invalid.
+     */
+    fun surahFraction(ayahNumber: Int, surahAyahCount: Int): Float {
+        if (surahAyahCount <= 0) return 0f
+        return (ayahNumber.toFloat() / surahAyahCount).coerceIn(0f, 1f)
+    }
+
+    /**
+     * Fallback used when the surah metadata has not loaded yet: position in the mushaf
+     * by page number.
+     */
+    fun pageFraction(pageNumber: Int): Float =
+        (pageNumber.toFloat() / TOTAL_QURAN_PAGES).coerceIn(0f, 1f)
+
+    /**
+     * Whole-percent label for a fraction.
+     *
+     * Rounds to nearest, but never reports 0% for genuine progress nor 100% before the
+     * fraction actually reaches 1 — a reader one ayah in should not see "0%", and a
+     * reader one ayah from the end should not see "100%".
+     */
+    fun percent(fraction: Float): Int {
+        val clamped = fraction.coerceIn(0f, 1f)
+        if (clamped <= 0f) return 0
+        if (clamped >= 1f) return 100
+        return Math.round(clamped * 100).coerceIn(1, 99)
+    }
+}
+
 data class QuranFavorite(
     val ayahId: Int,
     val surahNumber: Int,

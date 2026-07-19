@@ -335,9 +335,9 @@ fun <T> NimazDropdownField(
                 onClick = { expanded = true },
                 enabled = enabled,
                 shape = RoundedCornerShape(14.dp),
+                // NEUTRAL/BASE container; kept on `colors` because the trigger's border
+                // is state-driven (focus/error) and tones do not carry borders.
                 colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.surface,
-                    content = MaterialTheme.colorScheme.onSurface,
                     border = borderColor,
                     borderWidth = 1.5.dp,
                 ),
@@ -483,7 +483,11 @@ private fun NimazDropdownFieldShowcase() {
         NimazDropdownItem("scheherazade", "Scheherazade New"),
     )
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        NimazDropdownField(label = "Arabic Font", items = fonts, selected = "amiri", onSelected = {})
+        NimazDropdownField(
+            label = "Arabic Font",
+            items = fonts,
+            selected = "amiri",
+            onSelected = {})
         NimazDropdownField(
             label = "Asr Calculation",
             items = listOf(

@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.presentation.theme.NimazColors
-import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,12 +11,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -29,17 +24,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 
@@ -52,7 +52,7 @@ fun QadaPrayersScreen(
     val qadaState by viewModel.qadaState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -148,9 +148,13 @@ private fun QadaSummaryCard(totalMissed: Int) {
                 )
                 Text(
                     text = if (totalMissed == 0) {
-                        "All caught up!"
+                        stringResource(R.string.all_caught_up_short)
                     } else {
-                        "$totalMissed missed prayer${if (totalMissed != 1) "s" else ""} pending"
+                        pluralStringResource(
+                            R.plurals.missed_prayers_pending,
+                            totalMissed,
+                            totalMissed
+                        )
                     },
                     style = MaterialTheme.typography.bodyMedium,
                     color = Color.White.copy(alpha = 0.9f)

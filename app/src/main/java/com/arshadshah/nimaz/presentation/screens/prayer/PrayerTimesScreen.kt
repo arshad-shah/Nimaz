@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -25,7 +22,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -34,11 +30,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.CalendarMonth
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -52,16 +46,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
 import com.arshadshah.nimaz.presentation.components.molecules.PrayerTimeCard
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.NimazCalendar
@@ -124,22 +126,18 @@ fun PrayerTimesScreen(
             if (!state.isToday) {
                 // Sits below the settings pill (status bar + topbar height) so it
                 // doesn't collide with the glass topbar actions.
-                Surface(
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(50),
+                NimazBadge(
+                    text = stringResource(R.string.today),
+                    size = NimazBadgeSize.LARGE,
+                    colors = NimazBadgeDefaults.colors(
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.FILLED
+                    ),
+                    onClick = { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(top = statusBarTop + 60.dp, end = 16.dp)
-                        .clickable { viewModel.onEvent(PrayerTimesEvent.GoToToday) },
-                ) {
-                    Text(
-                        text = stringResource(R.string.today),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 5.dp),
-                    )
-                }
+                        .padding(top = statusBarTop + 60.dp, end = 16.dp),
+                )
             }
         }
 
@@ -160,7 +158,6 @@ fun PrayerTimesScreen(
                 },
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(20.dp),
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
             elevation = 4.dp,
         ) {
             DayNavBar(
@@ -261,7 +258,10 @@ private fun DayNavBar(
         verticalAlignment = Alignment.CenterVertically,
     ) {
         FilledTonalIconButton(onClick = onPrev) {
-            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowLeft, contentDescription = stringResource(R.string.cd_previous_day))
+            NimazIcon(
+                Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                contentDescription = stringResource(R.string.cd_previous_day)
+            )
         }
         Row(
             modifier = Modifier
@@ -274,7 +274,9 @@ private fun DayNavBar(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = if (isToday) stringResource(R.string.today_uppercase) else relativeLabel(selectedDate).uppercase(),
+                    text = if (isToday) stringResource(R.string.today_uppercase) else relativeLabel(
+                        selectedDate
+                    ).uppercase(),
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp,
@@ -299,7 +301,10 @@ private fun DayNavBar(
             }
         }
         FilledTonalIconButton(onClick = onNext) {
-            NimazIcon(Icons.AutoMirrored.Filled.KeyboardArrowRight, contentDescription = stringResource(R.string.cd_next_day))
+            NimazIcon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = stringResource(R.string.cd_next_day)
+            )
         }
     }
 }
@@ -340,9 +345,9 @@ private fun DayInfoCard(sunrise: String, sunset: String, daylight: String, metho
         modifier = Modifier
             .fillMaxWidth()
             .padding(top = 4.dp),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant),
+        tone = NimazTone.NEUTRAL,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             InfoRow(stringResource(R.string.prayer_info_daylight), daylight)

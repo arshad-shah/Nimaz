@@ -36,7 +36,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -66,12 +65,21 @@ import com.arshadshah.nimaz.domain.model.Proof
 import com.arshadshah.nimaz.domain.model.ProofSource
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazSearchBar
@@ -122,7 +130,7 @@ fun SearchScreen(
     val askEnabled = enableAsk && askState.aiEnabled
     val answerPhase = if (enableAsk) askState.phase as? AskPhase.Answer else null
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -320,8 +328,15 @@ fun SearchScreen(
                                     stringResource(R.string.ask_example_3),
                                     stringResource(R.string.ask_example_4),
                                 ).forEach { example ->
-                                    ExampleQuestionChip(
+                                    NimazBadge(
                                         text = example,
+                                        icon = Icons.Default.AutoAwesome,
+                                        shape = NimazBadgeShape.ROUNDED,
+                                        size = NimazBadgeSize.LARGE,
+                                        colors = NimazBadgeDefaults.colors(
+                                            tone = NimazTone.ACCENT,
+                                            emphasis = NimazBadgeEmphasis.OUTLINED
+                                        ),
                                         onClick = {
                                             viewModel.onEvent(SearchEvent.UpdateQuery(example))
                                             askViewModel.onEvent(AskEvent.SelectRecent(example))
@@ -485,7 +500,11 @@ private fun SectionHeader(
             fontWeight = FontWeight.Bold
         )
         if (actionLabel != null && onAction != null) {
-            Surface(onClick = onAction, shape = RoundedCornerShape(8.dp), color = Color.Transparent) {
+            Surface(
+                onClick = onAction,
+                shape = RoundedCornerShape(8.dp),
+                color = Color.Transparent
+            ) {
                 Text(
                     text = actionLabel,
                     style = MaterialTheme.typography.labelMedium,
@@ -494,44 +513,6 @@ private fun SectionHeader(
                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
             }
-        }
-    }
-}
-
-/** An example question the user can tap to ask straight away. */
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun ExampleQuestionChip(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Surface(
-        onClick = onClick,
-        shape = RoundedCornerShape(13.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outlineVariant
-        ),
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 13.dp, vertical = 11.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.AutoAwesome,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                iconSize = 15.dp
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Medium
-            )
         }
     }
 }
@@ -545,13 +526,11 @@ private fun RecentSearchItem(
     modifier: Modifier = Modifier
 ) {
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        )
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier
@@ -627,7 +606,10 @@ private fun UnifiedResultCard(
             icon = sourceIcon(ProofSource.HADITH),
             iconColor = sourceAccent(ProofSource.HADITH),
             type = stringResource(R.string.hadith_type),
-            title = stringResource(R.string.hadith_result_format, result.result.hadith.hadithNumber),
+            title = stringResource(
+                R.string.hadith_result_format,
+                result.result.hadith.hadithNumber
+            ),
             subtitle = result.result.bookName,
             highlightedText = result.result.matchedText,
             query = query,
@@ -713,9 +695,6 @@ private fun SurahSearchResultCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         elevation = 1.dp
     ) {
         Row(
@@ -794,9 +773,6 @@ private fun SearchResultCard(
         onClick = onClick,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         elevation = 1.dp
     ) {
         Row(
@@ -818,20 +794,12 @@ private fun SearchResultCard(
                     .padding(12.dp),
                 verticalAlignment = Alignment.Top
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(iconColor.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    NimazIcon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = iconColor,
-                        iconSize = 20.dp
-                    )
-                }
+                NimazIconWell(
+                    icon = icon,
+                    accent = iconColor,
+                    size = NimazIconWellSize.MEDIUM,
+                    shape = NimazIconWellShape.ROUNDED
+                )
 
                 Spacer(modifier = Modifier.width(12.dp))
 
@@ -849,20 +817,26 @@ private fun SearchResultCard(
                             modifier = Modifier.weight(1f)
                         )
                         if (type != null) {
-                            Surface(
-                                shape = RoundedCornerShape(4.dp),
-                                color = iconColor.copy(alpha = 0.1f)
-                            ) {
-                                Text(
-                                    text = type,
-                                    style = MaterialTheme.typography.labelSmall,
+                            NimazBadge(
+                                text = type,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                colors = NimazBadgeDefaults.feature(
                                     color = iconColor,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
+                                    emphasis = NimazBadgeEmphasis.SOFT
                                 )
-                            }
+                            )
                         }
                         if (cited) {
-                            CitedChip(
+                            NimazBadge(
+                                text = stringResource(R.string.search_cited_chip),
+                                icon = Icons.Default.FormatQuote,
+                                shape = NimazBadgeShape.ROUNDED,
+                                size = NimazBadgeSize.SMALL,
+                                colors = NimazBadgeDefaults.colors(
+                                    tone = NimazTone.ACCENT,
+                                    emphasis = NimazBadgeEmphasis.FILLED
+                                ),
                                 modifier = Modifier.padding(start = if (type != null) 6.dp else 0.dp)
                             )
                         }
@@ -886,35 +860,6 @@ private fun SearchResultCard(
                     )
                 }
             }
-        }
-    }
-}
-
-/** Solid teal marker for results the AI cited — replaces the source tag. */
-@Composable
-private fun CitedChip(modifier: Modifier = Modifier) {
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = MaterialTheme.colorScheme.primary,
-        modifier = modifier
-    ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 7.dp, vertical = 2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            NimazIcon(
-                imageVector = Icons.Default.FormatQuote,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary,
-                iconSize = 11.dp
-            )
-            Spacer(modifier = Modifier.width(4.dp))
-            Text(
-                text = stringResource(R.string.search_cited_chip),
-                style = MaterialTheme.typography.labelSmall,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
         }
     }
 }

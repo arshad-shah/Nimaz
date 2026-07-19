@@ -1,7 +1,7 @@
-Nouveautés depuis la 3.0.31 :
+Nouveautés depuis la 3.0.56 :
 
-• Tafseer repensé — lecteur rafraîchi, surlignage gestuel, notes modifiables, partage PDF de marque.
-• Lecteur de Coran flottant et nouveau partage de versets et duas.
-• Recherche repensée : résultats à la frappe, plus des réponses IA optionnelles appuyées de versets et hadiths cités dans une même liste, avec des limites plus claires.
-• Suivi du jeûne et un « Living Sky » plus précis.
-• Localisation repensée, Favoris du Coran refaits, widget amélioré.
+• Les motifs islamiques en arrière-plan s'affichent partout — cinq styles au choix, ou Aucun, dans Apparence.
+• Un design rafraîchi : barres de titre flottantes et cartes mieux distinguées, en clair et en sombre.
+• Coran : accueil réorganisé, infos de sourate redessinées et un lecteur adapté au mode clair.
+• Résumé de la Zakat redessiné et widget Khatam enrichi.
+• Corrections : la progression de lecture ne reste plus à 0 % et le calendrier change bien de mois.

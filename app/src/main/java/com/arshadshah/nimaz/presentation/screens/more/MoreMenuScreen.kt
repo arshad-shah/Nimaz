@@ -15,8 +15,8 @@ import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.CalendarViewMonth
-import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Fastfood
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Mosque
@@ -27,20 +27,20 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
-import com.arshadshah.nimaz.core.navigation.ScreenTags
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuItem
@@ -71,7 +71,7 @@ fun MoreMenuScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazTopAppBar(

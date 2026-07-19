@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Mosque
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -23,7 +20,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,9 +28,11 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -53,7 +51,9 @@ fun JumuahCard(
     isJumuahPassed: Boolean,
     modifier: Modifier = Modifier
 ) {
-    NimazSurfaceCard(
+    NimazCard(
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         modifier = modifier
             .fillMaxWidth()
             .padding(top = 12.dp),
@@ -130,18 +130,18 @@ fun JumuahCard(
                         .padding(horizontal = 13.dp, vertical = 11.dp)
                 ) {
                     if (isJumuahPassed) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ){
-                                Text(
-                                    text = stringResource(R.string.jumuah_passed),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = JumuahGreen,
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = stringResource(R.string.jumuah_passed),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = JumuahGreen,
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     } else if (timeUntilJumuah.isNotEmpty()) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),

@@ -429,16 +429,33 @@ typed route object.
     reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
     from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
-  Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`.
+  Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`. It also
+  provides the appearance CompositionLocals (`LocalIsDarkTheme`, `LocalHapticEnabled`,
+  `LocalUse24HourFormat`, `LocalShowIslamicPatterns`, and `LocalPatternStyle`). The
+  app-wide **decorative ornament** is drawn once at the root by `NimazPatternBackground`
+  (the single read site for those two pattern locals); screens show it through by using
+  `NimazScreenScaffold` (transparent container) instead of a bare `Scaffold`. The ornament
+  style is a first-class user setting — `NimazPatternStyle` (theme package) persisted as the
+  `pattern_style` DataStore key, chosen on the Appearance screen via a horizontally-scrolling
+  swatch picker whose `NONE` swatch doubles as the off switch. (History: the style was once a
+  `compositionLocalOf` default that nothing ever provided, so every screen was stuck on one
+  corner-only medallion at ~5% alpha and toggling looked dead — the picker + a raised alpha
+  fixed it.)
 - **Components follow Atomic Design** (`atoms` → `molecules` → `organisms`). Reuse shared
-  components (e.g. `NimazCard`, `NimazSurfaceCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
+  components (e.g. `NimazCard`, `PrayerTimeCard`, `NimazBackTopAppBar`,
   `NimazEmptyState`, `NimazLoadingState`, `NimazCalendar`) rather than re-rolling generic UI.
   In particular:
     - a full-screen centred spinner is `NimazLoadingState(modifier = Modifier.padding(padding))`,
       **not** an inline `Box(fillMaxSize, Center) { CircularProgressIndicator() }`;
-    - a flat, outlined "content card" (surface container + 0 elevation + 1.dp `outline`
-      border + 16.dp corners) is `NimazSurfaceCard { … }`, not a hand-rolled `Card(...)` with
-      those four params repeated;
+    - **card separation is chosen by context, never by hand-rolled colours** — three strategies:
+      a card sitting on the page background is
+      `NimazCard(tone = NimazTone.NEUTRAL, style = NimazCardStyle.ELEVATED)` (the shadow reads in
+      both light and dark); a surface nested inside another card or a sheet is
+      `NimazCard(style = NimazCardStyle.OUTLINED, …)` with `elevation = 0.dp` (no false height, no
+      stacked shadows); a selected item among peers lets the fill carry the selection state. The
+      old `NimazSurfaceCard` preset (`surface` fill + 1.dp outline + 0 elevation) is **removed** —
+      in light mode `surface` and `background` are near-identical luminance, so those cards barely
+      read as cards;
     - a per-prayer accent colour is `prayerName.color()`
       (`presentation/theme/PrayerColorExtensions.kt`), not a local `when (prayerName) { … }`.
     - sharing content (ayah/hadith/dua/bookmark/prayer-times PDF/app-invite/feedback email) goes
@@ -469,10 +486,12 @@ typed route object.
       left arrow to advance. Default `size` is 48dp; steppers use 44dp. (Issue #227.)
     - a card is `NimazCard(style = NimazCardStyle.FILLED | ELEVATED | OUTLINED | GRADIENT, …)`
       (`components/atoms/NimazCard.kt`), **not** a raw Material 3 `Card`/`ElevatedCard`/
-      `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`/`border`,
-      so existing call sites convert by swapping the constructor and adding `style`. Don't set a
+      `OutlinedCard`. It passes through `onClick`/`enabled`/`shape`/`colors`/`elevation`, so
+      existing call sites convert by swapping the constructor and adding `style`. Don't set a
       `containerColor` of `MaterialTheme.colorScheme.surfaceContainerHigh` — omit `colors` and let
-      the card default stand (use `NimazSurfaceCard` for the flat outlined content-card look).
+      the card default stand, picking `tone`/`style` per the separation rule above. Note the
+      `OUTLINED` branch renders an `OutlinedCard`, which has no elevation slot — it **silently
+      ignores** the `elevation` parameter (see §9 Open).
     - a minus/value/plus number control is `NimazNumberStepper(value, onValueChange, variant = …,
       size = …, type = …)` (`components/molecules/NimazNumberStepper.kt`), **not** a hand-rolled
       row of `IconButton`s around a `Text`. `variant` is the layout: `INLINE` (a `label` on the
@@ -543,9 +562,16 @@ typed route object.
       `ShamsaMedallion(number, size = …)` atom and the finial/Basmala mark is `DiamondFloret(color)`;
       both draw from the shared `internal` path builders in
       `components/atoms/QuranOrnamentGeometry.kt` (`scallopPath` / `cartouchePath` / `diamondPath` /
-      `circlePath`) — **never** re-hand-roll these `Path`s in a component. `MushafFrame`
-      (`MushafPage.kt`) reuses the same medallion for its page number and `DiamondFloret` in its
-      ornamental divider lines; the Juz and Page tab tiles share
+      `circlePath`) — **never** re-hand-roll these `Path`s in a component. The **single**
+      illuminated frame for every Quran reading surface is
+      `QuranFrame(variant = QuranFrameVariant.READER | STUDY)`
+      (`components/molecules/QuranFrame.kt`) — it replaced the mushaf's private `MushafFrame` and
+      the tafseer's `TafseerBookFrame`; the variant changes only padding/height behaviour, never
+      colours or ornament. It reuses the same medallion for its page number and the shared
+      `QuranOrnamentalDivider` atom (a gold hairline + central `DiamondFloret`) above and below its
+      content. All Quran-surface colours (`frameGold`, `frameTeal`, `pageSurface`, `ayahInk`,
+      `medallionInk`) resolve per theme from `presentation/theme/QuranSurfaceColors.kt` — these
+      surfaces are no longer dark-only; the Juz and Page tab tiles share
       `quranTileSurfaceColor` / `quranTileBorder` / `quranTileNumberColor` (`QuranPageGrid.kt`). The
       ayah end-marker is coloured (gold brackets + teal number) through
       `appendAyahEndMarker(number, bracketColor, numberColor)`
@@ -553,6 +579,129 @@ typed route object.
       `ArabicText(AnnotatedString)` overload — **not** a plain single-colour marker string.
   Screen-local private composables are fine for **feature-specific** layout that isn't reused
   elsewhere; promote anything reused across screens into `components/`.
+
+### 8.1 Semantic tone (`NimazTone`) — the shared surface vocabulary
+
+`NimazTone` (declared in `components/atoms/NimazCard.kt`) is the **one** vocabulary for what a
+surface *signifies*. It is shared across primitives: `NimazCard` and `NimazBadge` both take a
+`tone`, and each resolves it to colours appropriate to its own scale.
+
+| Tone | Means | Card container | Badge `FILLED` / `SOFT` |
+|------|-------|----------------|-------------------------|
+| `NEUTRAL` | the default surface | `surface` / `surfaceContainer` / `surfaceContainerHigh` (by `level`) | `surfaceContainerHighest` |
+| `MUTED` | quiet, recessed (inset notes, secondary detail) | `surfaceContainer` | `surfaceContainer` |
+| `ACCENT` | brand-tinted, draws the eye | `primaryContainer` | `primary` / `primaryContainer` |
+| `PROMINENT` | high-emphasis filled brand CTA | `primary` | `primary` / `primaryContainer` |
+| `SUCCESS` | completed / achieved (streaks, finished khatam) | `tertiaryContainer` | `tertiary` / `tertiaryContainer` |
+| `WARNING` | needs attention, not an error (missed prayer, qada due) | `secondaryContainer` | `secondary` / `secondaryContainer` |
+| `ERROR` | destructive or failed | `errorContainer` | `error` / `errorContainer` |
+| `TRANSPARENT` | no container; the backdrop shows through (cards over art) | `Color.Transparent` | `Color.Transparent` |
+
+**Call sites pick a tone by meaning and never pass raw colours.** Before/after:
+
+```kotlin
+// Before — every screen invented its own muted tint
+NimazCard(
+    colors = NimazCardDefaults.colors(
+        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+    )
+) { … }
+
+// After
+NimazCard(tone = NimazTone.MUTED) { … }
+```
+
+The two resolvers are the **only** places the app decides what a tone looks like:
+`NimazCardDefaults.tone(tone, level)` and `NimazBadgeDefaults.colors(tone, emphasis)`. Change a
+tone there and the whole app restyles.
+
+- **Cards use tonal container roles; badges reach for the solid role at `FILLED` emphasis.** A
+  card is a large surface where a tonal container reads clearly; a badge is 18–26.dp tall with
+  `labelSmall`/`labelMedium` text, where the same container reads too faint.
+- **Every tone resolves to an opaque Material role, never a `.copy(alpha = …)` tint.** Opaque
+  roles are contrast-checked in both themes, and `contentColorFor` resolves a real `onXxx` for
+  them, so `LocalContentColor` propagates the correct content colour to children instead of
+  falling back to `onSurface` the way an alpha-tinted colour does. (`NimazCardDefaults.onColorFor`
+  is the `contentColorFor` wrapper that applies that `onSurface` fallback.)
+- **`NimazCardLevel` (`BASE`/`RAISED`/`NESTED`)** names the Material `surface` →
+  `surfaceContainer` → `surfaceContainerHigh` ladder so a nested neutral card steps up a rung
+  instead of dissolving. Only `NEUTRAL` varies by level; every other tone already owns a
+  dedicated container role and ignores it.
+
+**Card separation — three strategies, by context** (the same rule stated in the bullet list
+above, with the reasoning):
+
+```kotlin
+// Page-level card, sitting on the screen background
+NimazCard(tone = NimazTone.NEUTRAL, style = NimazCardStyle.ELEVATED) { … }
+
+// A surface nested inside a card or a bottom sheet
+NimazCard(style = NimazCardStyle.OUTLINED, elevation = 0.dp) { … }
+
+// A selected item among peers — the fill carries the selection state
+NimazCard(selected = isSelected, colors = NimazCardDefaults.selectable()) { … }
+```
+
+In light mode `surface`, `surfaceContainer*` and `background` sit within a few percent luminance
+of one another, so fill-only separation is nearly invisible. Elevation reads in both themes — but
+stacks shadows when cards nest, so nesting uses an outline instead.
+
+### 8.2 Badges (`NimazBadge`)
+
+`NimazBadge` (`components/atoms/NimazBadge.kt`) is the **single** badge/pill/status-label
+primitive — status pills, tab pills, filter pills, grade chips and cutout page markers all build
+from it, never a hand-rolled `Surface`/`Box`. Four orthogonal axes:
+
+- **`tone: NimazTone`** — what it means (§8.1).
+- **`emphasis: NimazBadgeEmphasis`** — how much weight it carries: `FILLED` (the tone's solid
+  role + its on-colour), `SOFT` (the tonal container — the quiet default), `OUTLINED` (no fill,
+  tone-coloured text and border), `CUTOUT` (a translucent "well" — semi-opaque `surface` with a
+  tone-tinted border, for badges sitting over art such as the gradient juz tiles).
+- **`shape: NimazBadgeShape`** — `PILL` (default) or `ROUNDED` (flush inside tighter art).
+- **`size: NimazBadgeSize`** — `SMALL`/`MEDIUM`/`LARGE`; typography tracks the size
+  (`labelSmall`/`labelMedium`/`labelLarge`) so migrating a large pill onto the atom doesn't
+  silently shrink its text.
+
+`selected` + `selectedTone` collapse the tab-pill pattern: the resting look comes from
+`tone`/`emphasis`, the selected look from `selectedTone` at `FILLED`. The defaults match every
+tab pill in the app, so a tab needs no colour arguments at all:
+
+```kotlin
+// Before — a private TabPill per screen, with hand-picked colours
+Surface(
+    color = if (selected) MaterialTheme.colorScheme.primary
+            else MaterialTheme.colorScheme.surfaceVariant,
+    shape = RoundedCornerShape(50)
+) { Text(text, color = if (selected) …) }
+
+// After
+NimazBadge(text = text, selected = selected, onClick = onClick)
+```
+
+`BadgeType` + `StatusBadge` remain for **Islamic domain semantics** (Sahih/Hasan/Da'if/Mawdu',
+Meccan/Medinan, Prayed/Missed/Pending/Qada/Jama'ah, Fasted/Not Fasted/Makeup/Exempted). These are
+feature *art*, not tones — the Material scheme has no role for "Meccan" — so they resolve through
+`NimazBadgeDefaults.feature(color, emphasis)` instead. `SurahNumberBadge` is the separate
+fixed-size circular numeral.
+
+**Not consolidated, on purpose:** `NimazChip` (Material interactive filter/assist chips) and
+`NimazActionPill` (a button) do different jobs and were left untouched.
+
+**Sanctioned raw-colour exceptions** — these are the only places colours are still passed
+explicitly, and they are deliberate:
+
+1. `NimazCardDefaults.selectable(…)` — distinct active/inactive container/content/border.
+2. `NimazBadgeDefaults.feature(…)` — the Islamic palette behind `BadgeType`.
+3. `GradientCard` / `PrayerCard` presets — feature gradients (`CardArtColors`, per-prayer hues).
+4. A small number of cards that need a **border**, since a tone carries container + content but
+   not a stroke (see §9 Open).
+
+**One gradient per screen.** A gradient card is a priority signal, so it only works if it is
+unique on the surface. On the Quran home tab that budget is spent on **continue-reading** (or,
+when there is no reading progress, the "Start Reading" hero that takes its slot) — every other
+card there, including Verse-of-the-Day and the Khatam row, uses the normal `NimazCard`
+treatment. Verse-of-the-Day and continue-reading previously both carried
+`QuranColors.BannerGradient` and consumed the whole first screenful between them.
 
 ---
 
@@ -582,6 +731,9 @@ copy anything listed as Open.
 | Theming (screens) | Raw `Color(0xFF…)` literals removed from ~20 feature screens into `NimazColors` tokens (exact hex; added `Success`/`Warning`/`Info`/etc. and `HadithCollectionColors`). Only bespoke design-token files remain (`tasbih/BeadDesign.kt`, `TasbihBeads.kt`, `onboarding/OnboardingArt.kt`). |
 | Colour system (two-tier + centralised art) | Split colour into **Tier 1 `Palette.kt` (`NimazPalette`)** — the brand/semantic hue ramps (`Family+shade`) — and **Tier 2 `Color.kt` (`NimazColors`)** — semantic tokens that *reference* the palette. Removed 11 dead props (6 prayer `*GradientEnd`, `SajdaAyah`, `BookmarkSecondary`, `Voluntary`, `Late`, `Counter`); collapsed ~20 duplicate-hex groups to one palette entry each; migrated ~29 duplicate inline literals to pixel-exact tokens. Then **centralised ALL remaining art literals** out of component/screen files into the `theme/` package: `SkyColors.kt` (sky scene), `BeadColors.kt` (tasbih beads), `GlassColors.kt` (glass auroras), and `ArtColors.kt` (card/compass/names/onboarding/misc). **Zero static `Color(0xFF…)` literals remain outside `theme/`** (grep-verified; only computed-ARGB `Color(0x… or rgbLong)` forms remain). **No pixel changed** — structure/naming/dedup only; hues preserved verbatim. |
 | Khatam realtime + duplication | Two nested-`collect` leaks removed: `QuranViewModel` nested `observeReadAyahIds(...).collect` **inside** `observeActiveKhatam().collect`, and since `collect` on a Room Flow never returns, the outer flow could never process a second emission — Home and the reader stayed pinned to the first active khatam until process death. `KhatamViewModel.loadKhatamDetail` likewise stacked a new, never-cancelled collector per call and left `isLoading` stuck true for a deleted khatam. Both now use `flatMapLatest`. The all-zeros `getKhatamStats()` stub became a real Flow. `observeJuzProgress` was added so `QuranJuzGrid` no longer recomputes juz progress client-side (two implementations that could drift). One-shot `Get*` use cases that had `Observe*` equivalents were **deleted rather than documented** — leaving both available is what let call sites silently opt into stale data. 14 inline private composables across the Khatam screens collapsed into 4 shared components (`KhatamProgressRing`/`KhatamProgressBar` atoms, `KhatamHeroCard`/`KhatamRowCard` molecules, `KhatamJourneyTrail` organism) plus a `KhatamAccent` in the shape of `NamesAccent`. Create and Edit share one `KhatamFormScreen(mode)`. |
+| Design system — semantic tones | Card surfaces no longer carry hand-rolled colours. `NimazCardTone` was renamed **`NimazTone`** and promoted to a vocabulary shared by `NimazCard` *and* `NimazBadge` (NEUTRAL/MUTED/ACCENT/PROMINENT/SUCCESS/WARNING/ERROR/TRANSPARENT), resolved in exactly two places — `NimazCardDefaults.tone()` and `NimazBadgeDefaults.colors()`. Every tone maps to an **opaque** Material role rather than a `surfaceVariant.copy(alpha = 0.4/0.5/0.6)` tint, so contrast is checked in both themes and `contentColorFor` yields a real `onXxx` for `LocalContentColor`. A `NimazCardLevel` (BASE/RAISED/NESTED) axis names the `surface`→`surfaceContainer`→`surfaceContainerHigh` ladder for NEUTRAL cards. ~14 feature areas (quran, khatam, prayer, fasting, settings, dua, hadith, tasbih, zakat, qaida, qibla, banners, about, search) were swept onto tones. See §8.1. |
+| Design system — card separation | Separation is now chosen by **context**, not by fill: page-level `NEUTRAL` + `ELEVATED`; nested-in-a-card/sheet `OUTLINED` + `elevation = 0.dp`; selected-among-peers lets the fill carry state. `NimazSurfaceCard` (`surface` fill + 1.dp outline + 0 elevation) was **deleted** — in light mode `surface` and `background` are within a few percent luminance, so those cards barely read as cards. See §8.1. |
+| Design system — badges/pills | `NimazBadge` absorbed the badge/pill/status-label family: `tone` × `NimazBadgeEmphasis` (FILLED/SOFT/OUTLINED/CUTOUT) × `NimazBadgeShape` (PILL/ROUNDED) × `NimazBadgeSize`, with `selected`/`selectedTone` collapsing the tab-pill pattern. `NimazLabelChip` (and its test) was deleted, as were the private duplicates `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge`. `BadgeType`/`StatusBadge` keep the Islamic domain palette as feature art via `NimazBadgeDefaults.feature()`. `NimazChip` and `NimazActionPill` were intentionally left alone — different jobs. See §8.2. |
 | Preferences abstraction | ViewModels no longer inject the `PreferencesDataStore` data class — they depend on the `domain/repository/SettingsRepository` interface (implemented by `PreferencesDataStore`, bound via `@Binds`). `UserPreferences` moved to `domain/model`. |
 
 ### Open (still to do — do not copy)
@@ -590,6 +742,11 @@ copy anything listed as Open.
 |---|------|-----------|---------------|
 | 1 | Layer bypass | `HomeViewModel` injects `FastingDao`, `HadithDao`, `DuaDao` directly for its "daily hadith / daily dua of the day" features. This logic reads entity-level fields and uses prepopulated-DB integer ids + seeders, so it is **not** a mechanical swap — the domain models differ (`Hadith.grade` is an enum, `DuaCategory.iconName` vs `icon`, String vs Int ids). | Extract `GetDailyHadithUseCase` / `GetDailyDuaUseCase` that own the daily-rotation business logic (and the seeders), returning domain models. Needs runtime/visual validation. |
 | 2 | Theming | Bespoke per-item gradient palettes still hold raw `Color(0xFF…)` literals: `hadith/HadithCollectionScreen.kt` (`getBookGradient`, per-collection pairs) and `tasbih/BeadDesign.kt` (bead style gradients). These are centralized design tokens, not scattered ad-hoc colors. | Relocate into `NimazColors` (e.g. `HadithCollectionColors`, `TasbihBeadStyles`) preserving exact hex; do under visual review. |
+| 3 | Design system | **A tone carries container + content, but not a border.** A card that needs a stroke therefore falls back to an explicit `colors = NimazCardDefaults.colors(container = …, border = …)` — 10 files do this today. This is the most likely re-entry point for colour drift. | Add a border to the tone resolver (e.g. a `bordered: Boolean` / `outline` argument on `NimazCardDefaults.tone()`), then convert those call sites back onto `tone`. |
+| 4 | Design system | **`BadgeType` hardcodes English labels** (`BadgeType("Sahih", …)`, `"Not Fasted"`, …) as a plain `String` on the sealed class. That blocks `StatusBadge` adoption anywhere localized strings are required, so those places still hand-roll a badge. | Change `BadgeType.label` to a `@StringRes Int` resolved at the composable, add the strings to `strings.xml` (plus translations), and migrate the remaining hand-rolled status labels onto `StatusBadge`. |
+| 5 | Design system | **`NimazCard`'s `OUTLINED` branch silently ignores `elevation`.** It renders Material's `OutlinedCard`, which has no elevation slot, so `NimazCard(style = OUTLINED, elevation = 0.dp)` compiles and does nothing (harmless today because 0.dp is what OutlinedCard already does — but `elevation = 4.dp` would also be a no-op). | Either honour `elevation` by routing OUTLINED through `Card(border = …)`, or make the parameter unrepresentable for that style. |
+| 6 | Design system | **~47 call sites still pass `style = NimazCardStyle.FILLED` explicitly** and have not been triaged against the light-mode visibility problem (§8.1) — some are deliberate flat cards, some are probably page-level cards that should be `ELEVATED`. | Triage per screen under visual review; convert the page-level ones to `NEUTRAL` + `ELEVATED` and drop the redundant `style =` from the rest (FILLED is already the default). |
+| 7 | Design system | **The tone/badge migration is verified by the Kotlin compiler and unit tests only.** No visual or on-device verification has been done, so a tone that resolves to the wrong role on a particular screen would not have been caught. | Walk the migrated screens in light *and* dark on a device (or drive the `NimazCard`/`NimazBadge` `@Preview` showcases, which render both themes) before this reaches a release branch. |
 
 > **Accepted patterns (NOT deviations):**
 > - **Flag emoji on the Location screen** — the Location screen renders country flags as emoji,

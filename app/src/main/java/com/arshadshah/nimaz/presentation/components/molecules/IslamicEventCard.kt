@@ -1,12 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -26,24 +21,29 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -80,13 +80,11 @@ fun IslamicEventCard(
     val (icon, color) = getEventTypeDetails(eventType)
 
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
+        tone = NimazTone.NEUTRAL,
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface
-        ),
         shape = RoundedCornerShape(16.dp)
     ) {
         Row(
@@ -142,9 +140,11 @@ fun IslamicEventCard(
                 ) {
                     NimazBadge(
                         text = hijriDate,
-                        backgroundColor = color.copy(alpha = 0.15f),
-                        textColor = color,
-                        size = NimazBadgeSize.SMALL
+                        size = NimazBadgeSize.SMALL,
+                        colors = NimazBadgeDefaults.feature(
+                            color = color,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     )
                     Text(
                         text = gregorianDate,
@@ -220,20 +220,18 @@ private fun DaysUntilBadge(
         else -> pluralStringResource(R.plurals.days_count_format, daysUntil, daysUntil)
     }
 
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(color)
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
+    // The event-type colour is Islamic feature art, so it goes through
+    // NimazBadgeDefaults.feature() rather than a tone.
+    NimazBadge(
+        text = text,
+        modifier = modifier,
+        shape = NimazBadgeShape.ROUNDED,
+        size = NimazBadgeSize.MEDIUM,
+        colors = NimazBadgeDefaults.feature(
+            color = color,
+            emphasis = NimazBadgeEmphasis.FILLED
         )
-    }
+    )
 }
 
 @Preview(showBackground = true, name = "Islamic Event Card - Eid")

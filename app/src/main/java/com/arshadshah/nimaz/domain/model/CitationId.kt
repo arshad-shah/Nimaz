@@ -1,5 +1,8 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.CitationId.Companion.parse
+
+
 /**
  * The citation-ID grammar shared with the AI Worker. IDs round-trip cleanly so
  * a citation returned by the model can be resolved back to a local record:

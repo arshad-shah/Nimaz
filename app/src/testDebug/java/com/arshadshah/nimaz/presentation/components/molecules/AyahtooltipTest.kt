@@ -215,8 +215,8 @@ class AyahtooltipTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Mark read").assertDoesNotExist()
-        composeRule.onNodeWithContentDescription("Mark unread").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Mark as read").assertDoesNotExist()
+        composeRule.onNodeWithContentDescription("Mark as unread").assertDoesNotExist()
     }
 
     @Test
@@ -235,7 +235,7 @@ class AyahtooltipTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Mark read").performClick()
+        composeRule.onNodeWithContentDescription("Mark as read").performClick()
         assertThat(fired).isTrue()
     }
 
@@ -253,7 +253,7 @@ class AyahtooltipTest {
             }
         }
 
-        composeRule.onNodeWithContentDescription("Mark unread").assertExists()
+        composeRule.onNodeWithContentDescription("Mark as unread").assertExists()
     }
 
     @Test

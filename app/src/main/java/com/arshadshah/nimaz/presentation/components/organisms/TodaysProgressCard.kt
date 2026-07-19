@@ -31,9 +31,11 @@ import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTimeDisplay
 
@@ -64,7 +66,9 @@ fun TodaysProgressCard(
     val completedCount = mainPrayers.count { it.prayerStatus == PrayerStatus.PRAYED }
     val totalCount = mainPrayers.size
 
-    NimazSurfaceCard(
+    NimazCard(
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         modifier = modifier
             .fillMaxWidth()
             .then(if (fillHeight) Modifier.fillMaxHeight() else Modifier),

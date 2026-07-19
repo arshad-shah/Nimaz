@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -41,12 +40,14 @@ import com.arshadshah.nimaz.domain.model.HadithBook
 import com.arshadshah.nimaz.domain.model.HadithChapter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
@@ -66,7 +67,7 @@ fun HadithChaptersScreen(
         viewModel.onEvent(HadithEvent.LoadBook(bookId))
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -162,15 +163,20 @@ private fun BookHeaderCard(
             )
             Spacer(modifier = Modifier.height(12.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                NimazLabelChip(
+                NimazBadge(
                     text = pluralStringResource(
                         R.plurals.hadith_chapters_count_format,
                         chapterCount,
                         chapterCount
-                    )
+                    ),
+                    size = NimazBadgeSize.MEDIUM
                 )
-                NimazLabelChip(
-                    text = stringResource(R.string.hadith_count_format, book.totalHadiths.toString())
+                NimazBadge(
+                    text = stringResource(
+                        R.string.hadith_count_format,
+                        book.totalHadiths.toString()
+                    ),
+                    size = NimazBadgeSize.MEDIUM
                 )
             }
         }

@@ -12,11 +12,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
@@ -34,13 +36,14 @@ fun QaidaStarRow(
     filledColor: Color = MaterialTheme.colorScheme.secondary,
     emptyColor: Color = MaterialTheme.colorScheme.outline,
 ) {
+    val starsLabel = pluralStringResource(R.plurals.qaida_a11y_stars_format, max, filled, max)
     Row(
         // Merge the children into a single accessibility node that announces the
         // "$filled of $max stars" summary (rather than reading each star icon).
         // Unlike clearAndSetSemantics this keeps the per-star testTags present in
         // the unmerged semantics tree so the row stays inspectable in tests.
         modifier = modifier.semantics(mergeDescendants = true) {
-            contentDescription = "$filled of $max stars"
+            contentDescription = starsLabel
         },
         horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {

@@ -21,11 +21,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -43,16 +40,18 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.KhatamProgressRing
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSwitch
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTime
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDatePickerDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
@@ -110,8 +109,7 @@ fun KhatamFormScreen(
 
     val editId = (state.mode as? KhatamFormMode.Edit)?.khatamId
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(
@@ -248,9 +246,8 @@ private fun KhatamFormContent(
             item(key = "progress-note") {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainer
-                    ),
+                    tone = NimazTone.NEUTRAL,
+                    style = NimazCardStyle.ELEVATED,
                 ) {
                     Row(
                         modifier = Modifier
@@ -260,7 +257,7 @@ private fun KhatamFormContent(
                     ) {
                         KhatamProgressRing(
                             progress = state.totalAyahsRead.toFloat() /
-                                Khatam.TOTAL_QURAN_AYAHS,
+                                    Khatam.TOTAL_QURAN_AYAHS,
                             size = 44.dp,
                             strokeWidth = 5.dp,
                         )
@@ -331,9 +328,8 @@ private fun KhatamFormContent(
             if (days != null) {
                 NimazCard(
                     modifier = Modifier.fillMaxWidth(),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceContainer
-                    ),
+                    tone = NimazTone.NEUTRAL,
+                    style = NimazCardStyle.ELEVATED,
                 ) {
                     Column(Modifier.padding(NimazSpacing.Medium)) {
                         Text(
@@ -361,7 +357,7 @@ private fun KhatamFormContent(
         item(key = "deadline") {
             FieldLabel(
                 stringResource(R.string.khatam_field_deadline) +
-                    " · " + stringResource(R.string.khatam_optional)
+                        " · " + stringResource(R.string.khatam_optional)
             )
             Row(verticalAlignment = Alignment.CenterVertically) {
                 NimazButton(
@@ -386,9 +382,9 @@ private fun KhatamFormContent(
             FieldLabel(stringResource(R.string.khatam_field_reminder))
             NimazCard(
                 modifier = Modifier.fillMaxWidth(),
-                colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.surfaceContainer
-                ),
+                tone = NimazTone.NEUTRAL,
+                style = NimazCardStyle.OUTLINED,
+                elevation = 0.dp,
             ) {
                 Row(
                     modifier = Modifier

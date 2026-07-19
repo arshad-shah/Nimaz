@@ -314,6 +314,11 @@
     <string name="khatam_widget_description">Kemajuan khatam Al-Quran anda</string>
     <string name="khatam_widget_no_active">Tiada Khatam aktif</string>
     <string name="khatam_widget_start">Mulakan satu</string>
+    <string name="khatam_widget_juz_caption">Juz</string>
+    <string name="khatam_widget_daily_target">%1$d/hari</string>
+    <plurals name="khatam_widget_streak">
+        <item quantity="other">%1$d hari berturut-turut</item>
+    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Peringatan khatam</string>
@@ -508,7 +513,13 @@
     <string name="quran_home_surah_info">Info Surah</string>
     <string name="quran_home_verse_of_the_day">AYAT HARI INI</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
-    <string name="quran_home_quick_actions">Akses Pantas</string>
+    <!-- Recommended surah card metadata: verse count and starting juz -->
+    <string name="quran_home_recommended_meta">%1$s · Juzuk %2$d</string>
+    <string name="quran_home_read_verse">Baca</string>
+    <string name="quran_home_resume">Sambung</string>
+    <string name="quran_verses_label">Ayat</string>
+    <string name="quran_home_recommended_a11y">%1$s, surah %2$d, %3$s</string>
+    <string name="quran_page_label">Halaman</string>
     <string name="quran_home_recommended">Disyorkan</string>
     <string name="quran_home_reason_friday">Sunnah Jumaat</string>
     <string name="quran_home_reason_before_sleep">Sebelum tidur</string>
@@ -867,9 +878,15 @@
     <string name="appearance_home_screen">Skrin Utama</string>
     <string name="theme_dark">Gelap</string>
     <string name="theme_light">Cerah</string>
-    <string name="theme_system">Sistem</string>
-    <string name="appearance_islamic_patterns">Corak Islam</string>
-    <string name="appearance_islamic_patterns_subtitle">Tunjukkan corak hiasan</string>
+    <string name="theme_follow_device">Ikut peranti</string>
+    <string name="theme_follow_device_subtitle">Padankan dengan tetapan cerah atau gelap peranti anda</string>
+    <string name="appearance_pattern">Corak latar belakang</string>
+    <string name="appearance_pattern_subtitle">Hiasan Islam yang halus di sebalik setiap skrin. Pilih gaya, atau Tiada untuk mematikannya.</string>
+    <string name="pattern_none">Tiada</string>
+    <string name="pattern_medallion">Medalion</string>
+    <string name="pattern_lattice">Kekisi</string>
+    <string name="pattern_star_field">Medan bintang</string>
+    <string name="pattern_atelier">Atelier</string>
     <string name="appearance_animations">Animasi</string>
     <string name="appearance_animations_subtitle">Dayakan peralihan lancar</string>
     <string name="appearance_haptic">Maklum Balas Haptik</string>
@@ -1047,6 +1064,15 @@
     <string name="widget_countdown_format">dalam %1$s</string>
     <string name="zakat_rate_subtitle" formatted="false">2.5% daripada harta yang layak</string>
     <string name="zakat_due_2_5_percent" formatted="false">Zakat Perlu Dibayar (2.5%)</string>
+
+    <!-- Zakat summary hero -->
+    <string name="zakat_status_above_nisab">Melebihi Nisab</string>
+    <string name="zakat_status_below_nisab">Bawah Nisab</string>
+    <string name="zakat_below_nisab_subtitle">Tiada zakat perlu dibayar di bawah ambang Nisab</string>
+    <string name="zakat_stat_net">Bersih</string>
+    <string name="zakat_stat_rate">Kadar</string>
+    <string name="zakat_stat_rate_value" formatted="false">2.5%</string>
+    <string name="zakat_stat_nisab_format">Nisab · %1$s</string>
     <string name="close">Tutup</string>
     <string name="try_again">Cuba Lagi</string>
     <string name="sync_sending">Menghantar</string>
@@ -1290,4 +1316,106 @@
     <string name="ai_error_unverified">Jawapan AI hanya tersedia pada aplikasi rasmi daripada Google Play. Carian kata kunci merentas Quran, Hadis dan doa masih berfungsi secara luar talian.</string>
     <string name="ai_error_invalid_title">Soalan itu tidak dapat diproses</string>
     <string name="ai_error_unknown_title">Berlaku ralat</string>
+
+    <!-- Hardcoded-string sweep additions -->
+    <string name="zakat_a11y_stat_format">%1$s, %2$s</string>
+    <string name="zakat_a11y_plinth_status_format">%1$s, %2$s, %3$s</string>
+    <string name="cd_edit_time">Ubah Masa</string>
+    <string name="cd_dismiss_announcement">Tutup pengumuman</string>
+    <string name="cd_page_read">Halaman telah dibaca</string>
+    <string name="cd_mark_page_as_read">Tanda halaman sebagai telah dibaca</string>
+    <string name="cd_collapse">Kuncupkan</string>
+    <string name="cd_expand">Kembangkan</string>
+    <string name="picker_no_matches">Tiada padanan</string>
+    <plurals name="qaida_a11y_stars_format">
+        <item quantity="other">%1$d daripada %2$d bintang</item>
+    </plurals>
+    <string name="qaida_continue_format">Teruskan · %1$s</string>
+    <string name="qaida_a11y_cell_format">%1$s, ketik untuk mendengar</string>
+    <string name="qaida_a11y_cell_done_format">%1$s, ketik untuk mendengar, selesai</string>
+    <string name="qaida_a11y_letter_format">Huruf %1$s</string>
+    <string name="qaida_a11y_letter_heard_format">Huruf %1$s, telah didengar</string>
+    <plurals name="qaida_a11y_lesson_complete_format">
+        <item quantity="other">Pelajaran %1$d, %2$s, selesai, %3$d daripada 3 bintang</item>
+    </plurals>
+    <string name="qaida_a11y_lesson_current_format">Pelajaran %1$d, %2$s, sedang berjalan</string>
+    <string name="qaida_a11y_lesson_locked_format">Pelajaran %1$d, %2$s, berkunci</string>
+    <string name="qaida_journey_title">Perjalanan Qaida Saya</string>
+    <string name="qaida_lesson">Pelajaran</string>
+    <plurals name="prayer_times_upcoming_format">
+        <item quantity="other">%1$d lagi</item>
+    </plurals>
+    <string name="prayer_times_all_done_today">semua selesai untuk hari ini</string>
+    <plurals name="prayer_times_passed_upcoming_format">
+        <item quantity="other">%1$d berlalu · %2$d lagi</item>
+    </plurals>
+    <string name="hizb_format">Hizb %1$d</string>
+    <string name="hizb_quarter_format">¼ Hizb %1$d</string>
+    <string name="hizb_half_format">½ Hizb %1$d</string>
+    <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <string name="audio_percent_complete_format">%1$d%% selesai</string>
+    <string name="audio_now_playing">Sedang Dimainkan</string>
+    <string name="audio_paused">Dijeda</string>
+    <plurals name="surah_ayah_count_format">
+        <item quantity="other">%1$d Ayah</item>
+    </plurals>
+    <string name="calendar_a11y_day_format">%1$s, %2$d %3$s %4$d</string>
+    <string name="calendar_a11y_day_today_format">%1$s, %2$d %3$s %4$d, hari ini</string>
+    <string name="quran_copy_reference_format">- Surah %1$d, Ayah %2$d</string>
+    <string name="quran_clipboard_label">Ayah Al-Quran</string>
+    <string name="sajdah_glyph_format">۩ %1$s</string>
+    <string name="home_next_prayer_in_format">dalam %1$s</string>
+    <string name="prayer_statistics">Statistik Solat</string>
+    <string name="chart_legend_format">%1$s: %2$s</string>
+    <string name="tafseer_alternate_has_commentary_format">%1$s mempunyai tafsir untuk Ayah ini.</string>
+    <string name="tafseer_no_commentary_anywhere">Tafsir untuk Ayah ini belum tersedia dalam mana-mana sumber yang dipasang.</string>
+    <string name="qibla_turn_right_hint">Pusing ke kanan\nuntuk mencari Kiblat</string>
+    <string name="qibla_turn_left_hint">Pusing ke kiri\nuntuk mencari Kiblat</string>
+    <string name="zakat_nisab_gold_subtitle">87.48 g @ $%1$d/g</string>
+    <string name="zakat_nisab_silver_subtitle">612.36 g @ $%1$s/g</string>
+    <string name="yes">Ya</string>
+    <string name="no">Tidak</string>
+    <string name="fasting_event_ashura_name">Hari Asyura</string>
+    <string name="fasting_event_ashura_description">10 Muharram - puasa yang sangat digalakkan</string>
+    <string name="fasting_event_arafah_name">Hari Arafah</string>
+    <string name="fasting_event_arafah_description">9 Zulhijjah - menghapus dosa dua tahun</string>
+    <string name="fasting_event_shawwal_name">6 Hari Syawal</string>
+    <string name="fasting_event_shawwal_description">Berpuasa 6 hari selepas Aidilfitri</string>
+    <string name="fasting_event_mid_shaban_name">Nisfu Sya\'ban</string>
+    <string name="fasting_event_mid_shaban_description">15 Sya\'ban - puasa yang digalakkan</string>
+    <string name="monthly_fast_length_format">puasa %1$s</string>
+    <string name="stats_this_month">Bulan Ini</string>
+    <string name="stats_this_year">Tahun Ini</string>
+    <string name="language_english">Inggeris</string>
+    <string name="location_detecting_location">Mengesan Lokasi…</string>
+    <string name="location_use_current_location">Guna Lokasi Semasa</string>
+    <string name="prayer_settings_your_location">Lokasi anda</string>
+    <string name="prayer_settings_high_latitude_notice_format">%1$s mungkin berada di latitud tinggi. Waktu solat boleh berbeza dengan ketara pada bulan-bulan musim panas. Pertimbangkan kaedah berasaskan sudut atau satu per tujuh malam.</string>
+    <string name="version_unknown">Tidak diketahui</string>
+    <string name="sync_preparing">Menyediakan…</string>
+    <string name="sync_transferred_format">%1$d%% dipindahkan</string>
+    <string name="widget_prayer_initial_fajr">F</string>
+    <string name="widget_prayer_initial_dhuhr">D</string>
+    <string name="widget_prayer_initial_asr">A</string>
+    <string name="widget_prayer_initial_maghrib">M</string>
+    <string name="widget_prayer_initial_isha">I</string>
+    <string name="widget_prayer_short_fajr">Fajr</string>
+    <string name="widget_prayer_short_sunrise">Terbit</string>
+    <string name="widget_prayer_short_dhuhr">Dhuhr</string>
+    <string name="widget_prayer_short_asr">Asr</string>
+    <string name="widget_prayer_short_maghrib">Mgrb</string>
+    <string name="widget_prayer_short_isha">Isha</string>
+    <string name="widget_countdown_hm_format">%1$dj %2$dm</string>
+    <string name="widget_countdown_ms_format">%1$dm %2$ds</string>
+    <string name="widget_countdown_s_format">%1$ds</string>
+    <string name="help_guide_about_minutes_format">Kira-kira %1$d min</string>
+    <string name="help_guide_about_minutes_lower_format">kira-kira %1$d min</string>
+    <string name="help_guide_step_by_step">Langkah demi langkah</string>
+    <plurals name="help_guide_steps_format">
+        <item quantity="other">%1$d langkah</item>
+    </plurals>
+    <string name="error_generic">Ralat telah berlaku</string>
+    <string name="dua_repeat_count_format">%1$dx</string>
+    <string name="ai_retry_minutes_format">%1$d min</string>
+    <string name="ai_retry_hours_format">%1$d jam</string>
 </resources>

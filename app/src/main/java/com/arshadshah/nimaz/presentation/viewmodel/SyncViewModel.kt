@@ -8,13 +8,13 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.data.sync.CancelReason
 import com.arshadshah.nimaz.data.sync.ConnectionState
-import com.arshadshah.nimaz.data.sync.SyncCategory
-import com.arshadshah.nimaz.data.sync.categories
 import com.arshadshah.nimaz.data.sync.NearbyConnectionsManager
+import com.arshadshah.nimaz.data.sync.SyncCategory
 import com.arshadshah.nimaz.data.sync.SyncDataExporter
 import com.arshadshah.nimaz.data.sync.SyncDataImporter
 import com.arshadshah.nimaz.data.sync.SyncPayload
 import com.arshadshah.nimaz.data.sync.SyncSignal
+import com.arshadshah.nimaz.data.sync.categories
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

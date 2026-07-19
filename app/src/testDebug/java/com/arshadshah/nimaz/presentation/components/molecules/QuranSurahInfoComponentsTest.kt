@@ -5,8 +5,6 @@ import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import com.arshadshah.nimaz.domain.model.RevelationType
-import com.arshadshah.nimaz.domain.model.Surah
 import com.google.common.truth.Truth.assertThat
 import org.junit.Rule
 import org.junit.Test
@@ -18,71 +16,6 @@ class QuranSurahInfoComponentsTest {
 
     @get:Rule
     val composeRule = createComponentComposeRule()
-
-    private fun surah(
-        number: Int = 1,
-        nameEnglish: String = "Al-Fatihah",
-        revelationType: RevelationType = RevelationType.MECCAN,
-        ayahCount: Int = 7,
-        orderInMushaf: Int = 5
-    ) = Surah(
-        number = number,
-        nameArabic = "الفاتحة",
-        nameEnglish = nameEnglish,
-        nameTransliteration = "The Opening",
-        revelationType = revelationType,
-        ayahCount = ayahCount,
-        juzStart = 1,
-        orderInMushaf = orderInMushaf,
-        startPage = 1
-    )
-
-    // ----- HeroHeader -----
-
-    @Test
-    fun heroHeader_meccan_showsNamesStatsAndMakki() {
-        composeRule.setThemedContent {
-            HeroHeader(surah = surah(), onNavigateBack = {})
-        }
-
-        composeRule.onNodeWithText("Al-Fatihah").assertExists()
-        composeRule.onNodeWithText("\"The Opening\"").assertExists()
-        // stats render as combined chips: "<count> Verses", Makki/Madani, "Order <n>"
-        composeRule.onNodeWithText("7 Verses").assertExists()
-        composeRule.onNodeWithText("Makki").assertExists()
-        composeRule.onNodeWithText("Order 5").assertExists()
-        // surah number badge
-        composeRule.onNodeWithText("1").assertExists()
-        composeRule.onNodeWithContentDescription("Back").assertExists()
-    }
-
-    @Test
-    fun heroHeader_medinan_showsMadani() {
-        composeRule.setThemedContent {
-            HeroHeader(
-                surah = surah(
-                    number = 2,
-                    nameEnglish = "Al-Baqarah",
-                    revelationType = RevelationType.MEDINAN,
-                    ayahCount = 286
-                ),
-                onNavigateBack = {}
-            )
-        }
-
-        composeRule.onNodeWithText("Madani").assertExists()
-    }
-
-    @Test
-    fun heroHeader_backClick_invokesCallback() {
-        var back = false
-        composeRule.setThemedContent {
-            HeroHeader(surah = surah(), onNavigateBack = { back = true })
-        }
-
-        composeRule.onNodeWithContentDescription("Back").performClick()
-        assertThat(back).isTrue()
-    }
 
     // ----- DetailCard -----
 

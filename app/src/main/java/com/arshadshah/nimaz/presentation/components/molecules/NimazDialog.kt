@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -45,6 +44,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWell
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconWellSize
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -126,20 +128,12 @@ fun NimazDialog(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (titleIcon != null) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(resolvedAccent.copy(alpha = 0.15f)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            NimazIcon(
-                                imageVector = titleIcon,
-                                contentDescription = null,
-                                tint = resolvedAccent,
-                                iconSize = 22.dp
-                            )
-                        }
+                        NimazIconWell(
+                            icon = titleIcon,
+                            accent = resolvedAccent,
+                            size = NimazIconWellSize.MEDIUM,
+                            shape = NimazIconWellShape.ROUNDED
+                        )
                         Spacer(modifier = Modifier.width(14.dp))
                     }
 
@@ -334,7 +328,7 @@ fun NimazInfoDialog(
     title: String,
     message: String,
     onDismiss: () -> Unit,
-    dismissText: String = "Got it",
+    dismissText: String = stringResource(R.string.got_it),
     titleIcon: ImageVector? = Icons.Default.Info,
     accentColor: Color? = null,
 ) {

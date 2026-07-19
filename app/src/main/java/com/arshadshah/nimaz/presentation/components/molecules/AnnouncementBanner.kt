@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.Shield
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,16 +30,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBannerDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
 /**
@@ -84,21 +89,28 @@ private fun AnnouncementBannerCard(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val accent = when (announcement.type) {
-        AnnouncementType.FEATURE -> MaterialTheme.colorScheme.primary
-        AnnouncementType.PRIVACY, AnnouncementType.TOS -> MaterialTheme.colorScheme.tertiary
-        AnnouncementType.CHANGELOG -> MaterialTheme.colorScheme.secondary
+    // The banner's tone carries the announcement type. Styling matches every other
+    // banner in the app (see NimazBannerDefaults): a quiet container with the tone
+    // in the border and the icon, so an announcement annotates Home rather than
+    // shouting over it.
+    val tone = when (announcement.type) {
+        AnnouncementType.FEATURE -> NimazTone.ACCENT
+        AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazTone.SUCCESS
+        AnnouncementType.CHANGELOG -> NimazTone.WARNING
     }
+    val accent = NimazBannerDefaults.accent(tone)
     val icon = when (announcement.type) {
         AnnouncementType.FEATURE -> Icons.Outlined.AutoAwesome
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> Icons.Outlined.Shield
         AnnouncementType.CHANGELOG -> Icons.Outlined.Info
     }
 
-    Surface(
+    NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.OUTLINED,
+        tone = tone,
         shape = RoundedCornerShape(16.dp),
-        color = accent.copy(alpha = 0.1f),
+        colors = NimazBannerDefaults.colors(tone),
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, top = 12.dp, bottom = 12.dp, end = 4.dp),
@@ -115,13 +127,11 @@ private fun AnnouncementBannerCard(
                 Text(
                     text = announcement.title,
                     style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
-                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = announcement.body,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 if (showCta && announcement.ctaLabel != null) {
                     Spacer(modifier = Modifier.height(10.dp))
@@ -137,8 +147,7 @@ private fun AnnouncementBannerCard(
                 IconButton(onClick = onDismiss) {
                     Icon(
                         imageVector = Icons.Filled.Close,
-                        contentDescription = "Dismiss announcement",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        contentDescription = stringResource(R.string.cd_dismiss_announcement),
                         modifier = Modifier.size(18.dp),
                     )
                 }

@@ -1,8 +1,5 @@
 package com.arshadshah.nimaz.presentation.screens.prayer
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,18 +9,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.Warning
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -33,16 +27,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconContainerShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconType
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.ChartStatItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.components.organisms.PrayerChartType
@@ -52,7 +51,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.StatsPeriod
-import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import java.time.Instant
 import java.time.ZoneId
 
@@ -65,7 +63,7 @@ fun PrayerStatsScreen(
     val state by viewModel.statsState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -110,6 +108,10 @@ fun PrayerStatsScreen(
             // Donut Chart — replaces OverviewCard + StreakCard
             item {
                 state.stats?.let { stats ->
+                    val weekLabel = stringResource(R.string.this_week)
+                    val monthLabel = stringResource(R.string.stats_this_month)
+                    val yearLabel = stringResource(R.string.stats_this_year)
+                    val allTimeLabel = stringResource(R.string.all_time)
                     val periodLabel = try {
                         val formatter = MONTH_YEAR_FORMATTER
                         val startDate = Instant.ofEpochMilli(stats.startDate)
@@ -118,10 +120,10 @@ fun PrayerStatsScreen(
                         startDate.format(formatter)
                     } catch (_: Exception) {
                         when (state.period) {
-                            StatsPeriod.WEEK -> "This Week"
-                            StatsPeriod.MONTH -> "This Month"
-                            StatsPeriod.YEAR -> "This Year"
-                            StatsPeriod.ALL_TIME -> "All Time"
+                            StatsPeriod.WEEK -> weekLabel
+                            StatsPeriod.MONTH -> monthLabel
+                            StatsPeriod.YEAR -> yearLabel
+                            StatsPeriod.ALL_TIME -> allTimeLabel
                         }
                     }
 
@@ -237,7 +239,11 @@ private fun InsightsSection(
                     iconBackgroundColor = NimazColors.PrayerColors.Asr.copy(alpha = 0.2f),
                     iconTint = NimazColors.PrayerColors.Asr,
                     title = stringResource(R.string.prayer_insight_needs_attention, name),
-                    description = stringResource(R.string.prayer_insight_needs_attention_desc, name, percent)
+                    description = stringResource(
+                        R.string.prayer_insight_needs_attention_desc,
+                        name,
+                        percent
+                    )
                 )
                 Spacer(modifier = Modifier.height(10.dp))
             }
@@ -251,7 +257,11 @@ private fun InsightsSection(
                 iconBackgroundColor = NimazColors.Success.copy(alpha = 0.2f),
                 iconTint = NimazColors.Success,
                 title = stringResource(R.string.prayer_insight_overall, overallPercent),
-                description = stringResource(R.string.prayer_insight_overall_desc, stats.totalPrayed, totalPrayers)
+                description = stringResource(
+                    R.string.prayer_insight_overall_desc,
+                    stats.totalPrayed,
+                    totalPrayers
+                )
             )
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -286,11 +296,9 @@ private fun InsightCard(
 ) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceContainer
-        )
+        tone = NimazTone.NEUTRAL
     ) {
         Row(
             modifier = Modifier.padding(15.dp),

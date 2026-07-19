@@ -9,21 +9,17 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
-import androidx.glance.action.clickable
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
-import androidx.glance.background
 import androidx.glance.currentState
 import androidx.glance.layout.Alignment
-import androidx.glance.layout.Box
 import androidx.glance.layout.Column
+import androidx.glance.layout.Row
 import androidx.glance.layout.Spacer
 import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.height
-import androidx.glance.layout.padding
+import androidx.glance.layout.width
 import androidx.glance.state.GlanceStateDefinition
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -31,8 +27,6 @@ import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
 import com.arshadshah.nimaz.MainActivity
 import com.arshadshah.nimaz.R
-import androidx.glance.layout.Row
-import androidx.glance.layout.width
 import com.arshadshah.nimaz.widget.core.WidgetCard
 import com.arshadshah.nimaz.widget.core.WidgetIcon
 import com.arshadshah.nimaz.widget.core.WidgetLabel
@@ -117,11 +111,19 @@ private fun HijriDateSuccessContent(
             Spacer(modifier = GlanceModifier.height(6.dp))
             Text(
                 text = data.hijriDay.toString(),
-                style = TextStyle(color = primaryColor, fontSize = 52.sp, fontWeight = FontWeight.Bold),
+                style = TextStyle(
+                    color = primaryColor,
+                    fontSize = 52.sp,
+                    fontWeight = FontWeight.Bold
+                ),
             )
             Text(
                 text = "${data.hijriMonth.ifEmpty { "—" }} ${data.hijriYear}",
-                style = TextStyle(color = textColor, fontSize = 14.sp, fontWeight = FontWeight.Medium),
+                style = TextStyle(
+                    color = textColor,
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium
+                ),
             )
             Spacer(modifier = GlanceModifier.height(4.dp))
             Text(

@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.util.mapItems
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.data.local.database.dao.LocationDao
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
@@ -16,9 +18,7 @@ import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTimes
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
 import kotlinx.coroutines.flow.Flow
-import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.map
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -62,7 +62,8 @@ class PrayerRepositoryImpl @Inject constructor(
     }
 
     override fun getPrayerRecordsByStatus(status: PrayerStatus): Flow<List<PrayerRecord>> {
-        return prayerDao.getPrayerRecordsByStatus(status.name.lowercase()).mapItems { it.toDomain() }
+        return prayerDao.getPrayerRecordsByStatus(status.name.lowercase())
+            .mapItems { it.toDomain() }
     }
 
     override fun getMissedPrayersRequiringQada(): Flow<List<PrayerRecord>> {

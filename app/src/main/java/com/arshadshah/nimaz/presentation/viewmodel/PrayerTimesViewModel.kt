@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
@@ -13,6 +12,7 @@ import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerTime
 import com.arshadshah.nimaz.domain.model.PrayerType
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.presentation.components.organisms.MoonPhase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -108,10 +108,18 @@ class PrayerTimesViewModel @Inject constructor(
 
     fun onEvent(event: PrayerTimesEvent) {
         when (event) {
-            PrayerTimesEvent.PreviousDay -> AppAnalytics.logFeatureUsed("prayer_times", "previous_day")
+            PrayerTimesEvent.PreviousDay -> AppAnalytics.logFeatureUsed(
+                "prayer_times",
+                "previous_day"
+            )
+
             PrayerTimesEvent.NextDay -> AppAnalytics.logFeatureUsed("prayer_times", "next_day")
             PrayerTimesEvent.GoToToday -> AppAnalytics.logFeatureUsed("prayer_times", "go_to_today")
-            is PrayerTimesEvent.TogglePrayer -> AppAnalytics.logFeatureUsed("prayer_times", "toggle_prayer")
+            is PrayerTimesEvent.TogglePrayer -> AppAnalytics.logFeatureUsed(
+                "prayer_times",
+                "toggle_prayer"
+            )
+
             else -> {}
         }
         when (event) {
@@ -415,7 +423,6 @@ class PrayerTimesViewModel @Inject constructor(
             else -> "${abs(diff)} days ago"
         }
     }
-
 
 
     companion object {

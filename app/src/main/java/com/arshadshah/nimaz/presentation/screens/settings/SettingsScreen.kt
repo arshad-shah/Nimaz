@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -33,15 +32,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.testTag
-import com.arshadshah.nimaz.core.navigation.ScreenTags
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.navigation.ScreenTags
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -75,7 +75,7 @@ fun SettingsScreen(
         if (shouldRestart) onRestartApp()
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -241,10 +241,11 @@ fun SettingsScreen(
 @Composable
 private fun AppVersionInfo() {
     val context = LocalContext.current
+    val unknownVersion = stringResource(R.string.version_unknown)
     val versionName = try {
-        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "Unknown"
+        context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: unknownVersion
     } catch (_: Exception) {
-        "Unknown"
+        unknownVersion
     }
 
     Text(

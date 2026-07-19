@@ -5,16 +5,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -35,6 +31,10 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.util.TafseerPdfExporter
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.organisms.TafseerPageContent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.TafseerViewModel
@@ -88,7 +88,7 @@ fun TafseerScreen(
         }
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             TopAppBar(
                 title = {
@@ -131,6 +131,7 @@ fun TafseerScreen(
                 )
             )
         },
+        // Opts out of the app ornament: long-form Arabic needs a plain backdrop.
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(

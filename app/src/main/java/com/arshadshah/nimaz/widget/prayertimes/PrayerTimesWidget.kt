@@ -9,8 +9,6 @@ import androidx.glance.GlanceModifier
 import androidx.glance.GlanceTheme
 import androidx.glance.LocalContext
 import androidx.glance.action.actionStartActivity
-import androidx.glance.action.clickable
-import androidx.glance.appwidget.CircularProgressIndicator
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
 import androidx.glance.appwidget.cornerRadius
@@ -132,10 +130,17 @@ private fun PrayerTimesSuccessContent(
         padding = 12.dp,
     ) {
         Column(modifier = GlanceModifier.fillMaxSize()) {
-            Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = GlanceModifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     text = data.locationName.ifEmpty { "Location" },
-                    style = TextStyle(color = textColor, fontSize = 13.sp, fontWeight = FontWeight.Bold),
+                    style = TextStyle(
+                        color = textColor,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    ),
                     modifier = GlanceModifier.defaultWeight(),
                 )
                 Text(
@@ -205,15 +210,26 @@ private fun PrayerPill(
         .let { if (container != null) it.background(container).cornerRadius(12.dp) else it }
         .padding(vertical = 6.dp, horizontal = 4.dp)
     Box(modifier = modifier, contentAlignment = Alignment.Center) {
-        Column(modifier = inner.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            modifier = inner.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(
                 text = name,
-                style = TextStyle(color = nameColor, fontSize = 10.sp, fontWeight = FontWeight.Medium),
+                style = TextStyle(
+                    color = nameColor,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Medium
+                ),
                 maxLines = 1,
             )
             Text(
                 text = time,
-                style = TextStyle(color = timeColor, fontSize = 15.sp, fontWeight = FontWeight.Bold),
+                style = TextStyle(
+                    color = timeColor,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                ),
                 maxLines = 1,
             )
         }

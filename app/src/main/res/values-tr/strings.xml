@@ -321,6 +321,12 @@
     <string name="khatam_widget_description">Kur\'an hatim ilerlemeniz</string>
     <string name="khatam_widget_no_active">Aktif Hatim yok</string>
     <string name="khatam_widget_start">Bir tane başlat</string>
+    <string name="khatam_widget_juz_caption">Cüz</string>
+    <string name="khatam_widget_daily_target">%1$d/gün</string>
+    <plurals name="khatam_widget_streak">
+        <item quantity="one">%1$d günlük seri</item>
+        <item quantity="other">%1$d günlük seri</item>
+    </plurals>
 
     <!-- Khatam: daily reminder notification -->
     <string name="notif_khatam_channel_name">Hatim hatırlatmaları</string>
@@ -523,7 +529,13 @@
     <string name="quran_home_surah_info">Sure Bilgisi</string>
     <string name="quran_home_verse_of_the_day">GÜNÜN AYETİ</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
-    <string name="quran_home_quick_actions">Hızlı Erişim</string>
+    <!-- Recommended surah card metadata: verse count and starting juz -->
+    <string name="quran_home_recommended_meta">%1$s · Cüz %2$d</string>
+    <string name="quran_home_read_verse">Oku</string>
+    <string name="quran_home_resume">Devam et</string>
+    <string name="quran_verses_label">Ayetler</string>
+    <string name="quran_home_recommended_a11y">%1$s, sure %2$d, %3$s</string>
+    <string name="quran_page_label">Sayfa</string>
     <string name="quran_home_recommended">Önerilen</string>
     <string name="quran_home_reason_friday">Cuma Sünneti</string>
     <string name="quran_home_reason_before_sleep">Uyumadan önce</string>
@@ -888,9 +900,15 @@
     <string name="appearance_home_screen">Ana Ekran</string>
     <string name="theme_dark">Koyu</string>
     <string name="theme_light">Açık</string>
-    <string name="theme_system">Sistem</string>
-    <string name="appearance_islamic_patterns">İslami Desenler</string>
-    <string name="appearance_islamic_patterns_subtitle">Dekoratif desenleri göster</string>
+    <string name="theme_follow_device">Cihazı takip et</string>
+    <string name="theme_follow_device_subtitle">Cihazınızın açık veya koyu ayarıyla eşleşir</string>
+    <string name="appearance_pattern">Arka plan deseni</string>
+    <string name="appearance_pattern_subtitle">Her ekranın arkasında ince bir İslami süsleme. Bir stil seçin ya da kapatmak için Yok seçeneğini kullanın.</string>
+    <string name="pattern_none">Yok</string>
+    <string name="pattern_medallion">Madalyon</string>
+    <string name="pattern_lattice">Kafes</string>
+    <string name="pattern_star_field">Yıldız alanı</string>
+    <string name="pattern_atelier">Atölye</string>
     <string name="appearance_animations">Animasyonlar</string>
     <string name="appearance_animations_subtitle">Akıcı geçişleri etkinleştir</string>
     <string name="appearance_haptic">Dokunsal Geri Bildirim</string>
@@ -1070,6 +1088,15 @@
     <string name="widget_countdown_format">%1$s içinde</string>
     <string name="zakat_rate_subtitle" formatted="false">Uygun servetin %2,5\'i</string>
     <string name="zakat_due_2_5_percent" formatted="false">Ödenecek Zekat (%2,5)</string>
+
+    <!-- Zakat summary hero -->
+    <string name="zakat_status_above_nisab">Nisab üzerinde</string>
+    <string name="zakat_status_below_nisab">Nisab altında</string>
+    <string name="zakat_below_nisab_subtitle">Nisab eşiğinin altında zekat gerekmez</string>
+    <string name="zakat_stat_net">Net</string>
+    <string name="zakat_stat_rate">Oran</string>
+    <string name="zakat_stat_rate_value" formatted="false">%2,5</string>
+    <string name="zakat_stat_nisab_format">Nisab · %1$s</string>
     <string name="close">Kapat</string>
     <string name="try_again">Tekrar Dene</string>
     <string name="sync_sending">Gönderiliyor</string>
@@ -1318,4 +1345,112 @@
     <string name="ai_error_unverified">Yapay zekâ yanıtları yalnızca Google Play\'deki resmî uygulamada kullanılabilir. Quran, hadis ve dualarda anahtar kelime araması çevrimdışı çalışmaya devam eder.</string>
     <string name="ai_error_invalid_title">Bu soru işlenemedi</string>
     <string name="ai_error_unknown_title">Bir şeyler ters gitti</string>
+
+    <!-- Hardcoded-string sweep additions -->
+    <string name="zakat_a11y_stat_format">%1$s, %2$s</string>
+    <string name="zakat_a11y_plinth_status_format">%1$s, %2$s, %3$s</string>
+    <string name="cd_edit_time">Saati düzenle</string>
+    <string name="cd_dismiss_announcement">Duyuruyu kapat</string>
+    <string name="cd_page_read">Sayfa okundu</string>
+    <string name="cd_mark_page_as_read">Sayfayı okundu olarak işaretle</string>
+    <string name="cd_collapse">Daralt</string>
+    <string name="cd_expand">Genişlet</string>
+    <string name="picker_no_matches">Eşleşme yok</string>
+    <plurals name="qaida_a11y_stars_format">
+        <item quantity="one">%2$d yıldızdan %1$d tanesi</item>
+        <item quantity="other">%2$d yıldızdan %1$d tanesi</item>
+    </plurals>
+    <string name="qaida_continue_format">Devam et · %1$s</string>
+    <string name="qaida_a11y_cell_format">%1$s, dinlemek için dokunun</string>
+    <string name="qaida_a11y_cell_done_format">%1$s, dinlemek için dokunun, tamamlandı</string>
+    <string name="qaida_a11y_letter_format">Harf %1$s</string>
+    <string name="qaida_a11y_letter_heard_format">Harf %1$s, dinlendi</string>
+    <plurals name="qaida_a11y_lesson_complete_format">
+        <item quantity="one">Ders %1$d, %2$s, tamamlandı, 3 yıldızdan %3$d tanesi</item>
+        <item quantity="other">Ders %1$d, %2$s, tamamlandı, 3 yıldızdan %3$d tanesi</item>
+    </plurals>
+    <string name="qaida_a11y_lesson_current_format">Ders %1$d, %2$s, devam ediyor</string>
+    <string name="qaida_a11y_lesson_locked_format">Ders %1$d, %2$s, kilitli</string>
+    <string name="qaida_journey_title">Qaida Yolculuğum</string>
+    <string name="qaida_lesson">Ders</string>
+    <plurals name="prayer_times_upcoming_format">
+        <item quantity="one">%1$d kaldı</item>
+        <item quantity="other">%1$d kaldı</item>
+    </plurals>
+    <string name="prayer_times_all_done_today">bugün için hepsi tamam</string>
+    <plurals name="prayer_times_passed_upcoming_format">
+        <item quantity="one">%1$d geçti · %2$d kaldı</item>
+        <item quantity="other">%1$d geçti · %2$d kaldı</item>
+    </plurals>
+    <string name="hizb_format">Hizb %1$d</string>
+    <string name="hizb_quarter_format">¼ Hizb %1$d</string>
+    <string name="hizb_half_format">½ Hizb %1$d</string>
+    <string name="hizb_three_quarter_format">¾ Hizb %1$d</string>
+    <string name="audio_percent_complete_format">%%%1$d tamamlandı</string>
+    <string name="audio_now_playing">Şimdi Çalıyor</string>
+    <string name="audio_paused">Duraklatıldı</string>
+    <plurals name="surah_ayah_count_format">
+        <item quantity="one">%1$d Ayet</item>
+        <item quantity="other">%1$d Ayet</item>
+    </plurals>
+    <string name="calendar_a11y_day_format">%1$s, %2$d %3$s %4$d</string>
+    <string name="calendar_a11y_day_today_format">%1$s, %2$d %3$s %4$d, bugün</string>
+    <string name="quran_copy_reference_format">- Sure %1$d, Ayet %2$d</string>
+    <string name="quran_clipboard_label">Kur\'an Ayeti</string>
+    <string name="sajdah_glyph_format">۩ %1$s</string>
+    <string name="home_next_prayer_in_format">%1$s sonra</string>
+    <string name="prayer_statistics">Namaz İstatistikleri</string>
+    <string name="chart_legend_format">%1$s: %2$s</string>
+    <string name="tafseer_alternate_has_commentary_format">%1$s bu Ayet için tefsir içeriyor.</string>
+    <string name="tafseer_no_commentary_anywhere">Bu Ayet için yüklü kaynakların hiçbirinde henüz tefsir bulunmuyor.</string>
+    <string name="qibla_turn_right_hint">Kıble\'yi bulmak için\nsağa dönün</string>
+    <string name="qibla_turn_left_hint">Kıble\'yi bulmak için\nsola dönün</string>
+    <string name="zakat_nisab_gold_subtitle">87,48 g @ $%1$d/g</string>
+    <string name="zakat_nisab_silver_subtitle">612,36 g @ $%1$s/g</string>
+    <string name="yes">Evet</string>
+    <string name="no">Hayır</string>
+    <string name="fasting_event_ashura_name">Aşure Günü</string>
+    <string name="fasting_event_ashura_description">10 Muharrem - çok tavsiye edilen oruç</string>
+    <string name="fasting_event_arafah_name">Arefe Günü</string>
+    <string name="fasting_event_arafah_description">9 Zilhicce - iki yılın günahlarına kefaret</string>
+    <string name="fasting_event_shawwal_name">Şevval\'in 6 Günü</string>
+    <string name="fasting_event_shawwal_description">Ramazan Bayramı\'ndan sonra 6 gün oruç</string>
+    <string name="fasting_event_mid_shaban_name">Şaban\'ın Ortası</string>
+    <string name="fasting_event_mid_shaban_description">15 Şaban - tavsiye edilen oruç</string>
+    <string name="monthly_fast_length_format">%1$s orucu</string>
+    <string name="stats_this_month">Bu Ay</string>
+    <string name="stats_this_year">Bu Yıl</string>
+    <string name="language_english">İngilizce</string>
+    <string name="location_detecting_location">Konum Algılanıyor…</string>
+    <string name="location_use_current_location">Mevcut Konumu Kullan</string>
+    <string name="prayer_settings_your_location">Konumunuz</string>
+    <string name="prayer_settings_high_latitude_notice_format">%1$s yüksek enlemde olabilir. Yaz aylarında namaz vakitleri önemli ölçüde değişebilir. Açı tabanlı veya gecenin yedide biri yöntemini kullanmayı düşünün.</string>
+    <string name="version_unknown">Bilinmiyor</string>
+    <string name="sync_preparing">Hazırlanıyor…</string>
+    <string name="sync_transferred_format">%%%1$d aktarıldı</string>
+    <string name="widget_prayer_initial_fajr">S</string>
+    <string name="widget_prayer_initial_dhuhr">Ö</string>
+    <string name="widget_prayer_initial_asr">İ</string>
+    <string name="widget_prayer_initial_maghrib">A</string>
+    <string name="widget_prayer_initial_isha">Y</string>
+    <string name="widget_prayer_short_fajr">Sabah</string>
+    <string name="widget_prayer_short_sunrise">Doğuş</string>
+    <string name="widget_prayer_short_dhuhr">Öğle</string>
+    <string name="widget_prayer_short_asr">İkin.</string>
+    <string name="widget_prayer_short_maghrib">Akşam</string>
+    <string name="widget_prayer_short_isha">Yatsı</string>
+    <string name="widget_countdown_hm_format">%1$dsa %2$ddk</string>
+    <string name="widget_countdown_ms_format">%1$ddk %2$dsn</string>
+    <string name="widget_countdown_s_format">%1$dsn</string>
+    <string name="help_guide_about_minutes_format">Yaklaşık %1$d dk</string>
+    <string name="help_guide_about_minutes_lower_format">yaklaşık %1$d dk</string>
+    <string name="help_guide_step_by_step">Adım adım</string>
+    <plurals name="help_guide_steps_format">
+        <item quantity="one">%1$d adım</item>
+        <item quantity="other">%1$d adım</item>
+    </plurals>
+    <string name="error_generic">Bir hata oluştu</string>
+    <string name="dua_repeat_count_format">%1$dx</string>
+    <string name="ai_retry_minutes_format">%1$d dk</string>
+    <string name="ai_retry_hours_format">%1$d sa</string>
 </resources>

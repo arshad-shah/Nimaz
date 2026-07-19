@@ -1,13 +1,13 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
 import android.text.format.DateFormat
-import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,7 +30,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -65,10 +64,11 @@ data class NimazTime(val hour: Int, val minute: Int) {
     val isPm: Boolean get() = hour >= 12
 
     /** This time's hour on a 12-hour clock, where midnight and midday are both 12. */
-    val hour12: Int get() = when (val h = hour % 12) {
-        0 -> 12
-        else -> h
-    }
+    val hour12: Int
+        get() = when (val h = hour % 12) {
+            0 -> 12
+            else -> h
+        }
 
     /** Rebuilds a 24-hour [hour] from a 12-hour reading. */
     fun withHour12(hour12: Int, pm: Boolean): NimazTime {
@@ -217,47 +217,61 @@ private fun WheelSlot(
             }
     }
 
-    Box(
-        modifier = modifier
-            .height(ItemHeight * VISIBLE_ITEMS)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest),
-        contentAlignment = Alignment.Center,
+    // Nested surface (the picker lives inside a dialog/sheet/settings card), so the
+    // slot is outlined and flat rather than a hand-rolled tonal fill.
+    NimazCard(
+        modifier = modifier.height(ItemHeight * VISIBLE_ITEMS),
+        style = NimazCardStyle.OUTLINED,
+        shape = RoundedCornerShape(16.dp),
+        elevation = 0.dp,
     ) {
-        // The selection band, inset so the slot's own corners stay visible.
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 6.dp)
-                .height(ItemHeight)
-                .clip(RoundedCornerShape(12.dp))
-                .background(accentColor.copy(alpha = 0.16f))
-        )
-
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxWidth(),
-            flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
-            contentPadding = PaddingValues(vertical = ItemHeight),
-            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
-            items(items.size) { index ->
-                val itemValue = items[index]
-                val isSelected = itemValue == selected
-                Box(
-                    modifier = Modifier
-                        .height(ItemHeight)
-                        .fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = label(itemValue),
-                        style = if (isSelected) MaterialTheme.typography.titleLarge
-                        else MaterialTheme.typography.titleMedium,
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        color = if (isSelected) accentColor
-                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
-                    )
+            // The selection band — "selected among peers", so the fill is correct
+            // here; it just routes through the design system instead of raw alpha.
+            NimazCard(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 6.dp)
+                    .height(ItemHeight),
+                style = NimazCardStyle.FILLED,
+                shape = RoundedCornerShape(12.dp),
+                selected = true,
+                colors = NimazCardDefaults.selectable(
+                    activeContainer = accentColor.copy(alpha = 0.16f),
+                    activeContent = accentColor,
+                ),
+                elevation = 0.dp,
+                content = {},
+            )
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxWidth(),
+                flingBehavior = rememberSnapFlingBehavior(lazyListState = listState),
+                contentPadding = PaddingValues(vertical = ItemHeight),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                items(items.size) { index ->
+                    val itemValue = items[index]
+                    val isSelected = itemValue == selected
+                    Box(
+                        modifier = Modifier
+                            .height(ItemHeight)
+                            .fillMaxWidth(),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Text(
+                            text = label(itemValue),
+                            style = if (isSelected) MaterialTheme.typography.titleLarge
+                            else MaterialTheme.typography.titleMedium,
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            color = if (isSelected) accentColor
+                            else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.55f),
+                        )
+                    }
                 }
             }
         }
@@ -276,24 +290,32 @@ fun NimazTimeDisplay(
     contentDescription: String? = null,
 ) {
     val format = rememberTimeFormatter()
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(accentColor.copy(alpha = 0.12f))
-            .padding(horizontal = NimazSpacing.Medium, vertical = NimazSpacing.Small)
-            .then(
-                if (contentDescription != null) {
-                    Modifier.clearAndSetSemantics { this.contentDescription = contentDescription }
-                } else Modifier
-            ),
-        contentAlignment = Alignment.Center,
+    // The accent tint marks the *current* value, so the fill stays — routed through
+    // the design system rather than a raw `.copy(alpha = …)` background.
+    NimazCard(
+        modifier = modifier.then(
+            if (contentDescription != null) {
+                Modifier.clearAndSetSemantics { this.contentDescription = contentDescription }
+            } else Modifier
+        ),
+        style = NimazCardStyle.FILLED,
+        shape = RoundedCornerShape(12.dp),
+        colors = NimazCardDefaults.colors(
+            container = accentColor.copy(alpha = 0.12f),
+            content = accentColor,
+        ),
+        elevation = 0.dp,
     ) {
         Row(
-            horizontalArrangement = Arrangement.Center
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(horizontal = NimazSpacing.Medium, vertical = NimazSpacing.Small),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
                 imageVector = Icons.Default.Schedule,
-                contentDescription = "Edit Time",
+                contentDescription = stringResource(R.string.cd_edit_time),
                 tint = accentColor,
                 modifier = Modifier
                     .padding(end = NimazSpacing.Small)

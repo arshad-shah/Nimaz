@@ -19,9 +19,12 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.LessonStatus
 import com.arshadshah.nimaz.domain.model.QaidaLesson
 import com.arshadshah.nimaz.domain.model.QaidaLessonState
@@ -115,12 +118,27 @@ fun QaidaCoursePath(
                     LessonStatus.LOCKED -> QaidaMedallionState.LOCKED
                     else -> QaidaMedallionState.CURRENT
                 }
-                val desc = "Lesson ${ls.lesson.lessonNumber}, ${ls.lesson.titleEnglish}, " +
-                        when (state) {
-                            QaidaMedallionState.DONE -> "complete, ${ls.stars} of 3 stars"
-                            QaidaMedallionState.CURRENT -> "current"
-                            QaidaMedallionState.LOCKED -> "locked"
-                        }
+                val desc = when (state) {
+                    QaidaMedallionState.DONE -> pluralStringResource(
+                        R.plurals.qaida_a11y_lesson_complete_format,
+                        ls.stars,
+                        ls.lesson.lessonNumber,
+                        ls.lesson.titleEnglish,
+                        ls.stars,
+                    )
+
+                    QaidaMedallionState.CURRENT -> stringResource(
+                        R.string.qaida_a11y_lesson_current_format,
+                        ls.lesson.lessonNumber,
+                        ls.lesson.titleEnglish,
+                    )
+
+                    QaidaMedallionState.LOCKED -> stringResource(
+                        R.string.qaida_a11y_lesson_locked_format,
+                        ls.lesson.lessonNumber,
+                        ls.lesson.titleEnglish,
+                    )
+                }
                 val centerX = widthPx * frac(i)
                 val centerY = rowPx * i + rowPx / 2f
                 Box(

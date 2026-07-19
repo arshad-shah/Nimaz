@@ -23,8 +23,10 @@ class AnnouncementPayloadMapper @Inject constructor() {
         val title = data[KEY_TITLE]?.trim().orEmpty().ifEmpty { return null }
         val body = data[KEY_BODY]?.trim().orEmpty().ifEmpty { return null }
 
-        val minVersionCode = data[KEY_MIN_VERSION_CODE]?.let { it.trim().toIntOrNull() ?: return null }
-        val maxVersionCode = data[KEY_MAX_VERSION_CODE]?.let { it.trim().toIntOrNull() ?: return null }
+        val minVersionCode =
+            data[KEY_MIN_VERSION_CODE]?.let { it.trim().toIntOrNull() ?: return null }
+        val maxVersionCode =
+            data[KEY_MAX_VERSION_CODE]?.let { it.trim().toIntOrNull() ?: return null }
         val expiresAtMillis = data[KEY_EXPIRES_AT]?.let { raw ->
             runCatching { Instant.parse(raw.trim()).toEpochMilli() }.getOrNull() ?: return null
         }

@@ -1,14 +1,13 @@
 package com.arshadshah.nimaz.data.repository
 
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.ProphetDao
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
 import com.arshadshah.nimaz.domain.model.Prophet
 import com.arshadshah.nimaz.domain.repository.ProphetRepository
 import kotlinx.coroutines.flow.Flow
-import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import org.json.JSONArray
 import javax.inject.Inject
 import javax.inject.Singleton

@@ -10,11 +10,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,8 +27,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamStatus
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.atoms.rememberKhatamAccent
 import com.arshadshah.nimaz.presentation.components.molecules.KhatamHeroCard
@@ -69,8 +67,7 @@ fun KhatamDetailScreen(
 
     val khatam = state.khatam
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = khatam?.name ?: stringResource(R.string.khatam_detail),

@@ -1,7 +1,7 @@
-Neu seit 3.0.31:
+Neu seit 3.0.56:
 
-• Tafseer neu gedacht — überarbeiteter Reader, Gesten-Hervorhebung, bearbeitbare Notizen, PDF-Teilen im Markendesign.
-• Schwebender Koran-Player und neues Teilen von Versen und Duas.
-• Suche, neu gebaut: Ergebnisse beim Tippen, plus optionale KI-Antworten mit zitierten Versen und Hadithen in einer Ergebnisliste, mit klareren Limit-Hinweisen.
-• Fastendauer-Erfassung und ein genauerer „Living Sky“.
-• Neuer Standort-Bildschirm, neue Koran-Favoriten, Widget-Feinschliff.
+• Islamische Hintergrundmuster erscheinen jetzt überall — fünf Stile oder „Keine“ unter Darstellung.
+• Aufgefrischtes Design: schwebende Titelleisten und klarer abgegrenzte Karten in Hell und Dunkel.
+• Koran: neu geordnete Startseite, überarbeitete Sure-Infos und ein Reader, der nun auch hell passt.
+• Neu gestaltete Zakat-Übersicht und ein reichhaltigeres Khatam-Widget.
+• Fehlerbehebungen: Lesefortschritt bleibt nicht mehr bei 0 %, der Kalender blättert Monate korrekt.

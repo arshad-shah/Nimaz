@@ -1,8 +1,6 @@
 package com.arshadshah.nimaz.presentation.screens.zakat
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -11,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,13 +18,10 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.History
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -35,8 +29,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.pluralStringResource
@@ -45,18 +37,27 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.formatCurrency
+import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
+import com.arshadshah.nimaz.presentation.components.molecules.ZakatSummaryHero
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatEvent
-import com.arshadshah.nimaz.domain.model.ZakatHistoryEntry
 import com.arshadshah.nimaz.presentation.viewmodel.ZakatViewModel
-import com.arshadshah.nimaz.core.util.formatCurrency
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -70,7 +71,7 @@ fun ZakatHistoryScreen(
     val historyState by viewModel.historyState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -153,55 +154,18 @@ private fun TotalPaidSummaryCard(
     totalEntries: Int,
     modifier: Modifier = Modifier
 ) {
-    val goldGradient = Brush.linearGradient(
-        colors = listOf(
-            NimazColors.ZakatColors.Gold,
-            NimazColors.ZakatColors.GoldAccent
-        )
+    // The plinth-only form of the shared hero: a history total has no nisab
+    // verdict and no per-figure breakdown to put in tiles.
+    ZakatSummaryHero(
+        modifier = modifier,
+        label = stringResource(R.string.zakat_history_total_paid),
+        amount = formatCurrency(totalPaid),
+        subtitle = pluralStringResource(
+            R.plurals.zakat_calculations_recorded,
+            totalEntries,
+            totalEntries
+        ),
     )
-
-    NimazCard(
-        modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
-        shape = RoundedCornerShape(20.dp),
-        colors = NimazCardDefaults.colors(container = Color.Transparent)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(goldGradient)
-                .padding(25.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text(
-                    text = stringResource(R.string.zakat_history_total_paid),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NimazColors.Neutral900.copy(alpha = 0.8f)
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = formatCurrency(totalPaid),
-                    style = MaterialTheme.typography.displaySmall.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = NimazColors.Neutral900
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = pluralStringResource(R.plurals.zakat_calculations_recorded, totalEntries, totalEntries),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = NimazColors.Neutral900.copy(alpha = 0.7f)
-                )
-            }
-        }
-    }
 }
 
 @Composable
@@ -216,7 +180,9 @@ private fun HistoryEntryCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
-        style = NimazCardStyle.FILLED,
+        // A history row is a card on the page background → elevated.
+        tone = NimazTone.NEUTRAL,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(14.dp)
     ) {
         Column(
@@ -236,25 +202,23 @@ private fun HistoryEntryCard(
                     fontWeight = FontWeight.SemiBold
                 )
 
-                Surface(
-                    shape = RoundedCornerShape(20.dp),
-                    color = if (entry.isPaid) {
-                        NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
+                NimazBadge(
+                    text = if (entry.isPaid) stringResource(R.string.zakat_paid) else stringResource(
+                        R.string.zakat_unpaid
+                    ),
+                    size = NimazBadgeSize.LARGE,
+                    colors = if (entry.isPaid) {
+                        NimazBadgeDefaults.feature(
+                            color = NimazColors.StatusColors.Prayed,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     } else {
-                        MaterialTheme.colorScheme.errorContainer
+                        NimazBadgeDefaults.colors(
+                            tone = NimazTone.ERROR,
+                            emphasis = NimazBadgeEmphasis.SOFT
+                        )
                     }
-                ) {
-                    Text(
-                        text = if (entry.isPaid) stringResource(R.string.zakat_paid) else stringResource(R.string.zakat_unpaid),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = if (entry.isPaid) {
-                            NimazColors.StatusColors.Prayed
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        },
-                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                    )
-                }
+                )
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -308,7 +272,10 @@ private fun HistoryEntryCard(
             // Paid date if applicable
             entry.paidAt?.let { paidAt ->
                 Text(
-                    text = stringResource(R.string.zakat_paid_on_format, dateFormat.format(Date(paidAt))),
+                    text = stringResource(
+                        R.string.zakat_paid_on_format,
+                        dateFormat.format(Date(paidAt))
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = NimazColors.StatusColors.Prayed
                 )
@@ -323,29 +290,14 @@ private fun HistoryEntryCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (!entry.isPaid) {
-                    Surface(
+                    NimazButton(
+                        text = stringResource(R.string.zakat_mark_as_paid),
                         onClick = onMarkAsPaid,
-                        shape = RoundedCornerShape(8.dp),
-                        color = NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            NimazIcon(
-                                imageVector = Icons.Default.Check,
-                                contentDescription = null,
-                                tint = NimazColors.StatusColors.Prayed,
-                                size = NimazIconSize.SMALL
-                            )
-                            Text(
-                                text = stringResource(R.string.zakat_mark_as_paid),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = NimazColors.StatusColors.Prayed
-                            )
-                        }
-                    }
+                        variant = NimazButtonVariant.TONAL,
+                        size = NimazButtonSize.SMALL,
+                        leadingIcon = Icons.Default.Check,
+                        accent = NimazColors.StatusColors.Prayed
+                    )
 
                     Spacer(modifier = Modifier.width(8.dp))
                 }

@@ -1,7 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.res.stringResource
-import com.arshadshah.nimaz.R
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -16,10 +14,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -79,7 +79,7 @@ fun AyahTranslationContent(
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         NimazSheetHeader(
-            title = surahName ?: "Surah ${ayah.surahNumber}",
+            title = surahName ?: stringResource(R.string.surah_number_format, ayah.surahNumber),
             subtitle = stringResource(R.string.ayah_number_format, ayah.ayahNumber),
             badge = stringResource(R.string.juz_page_format, ayah.juzNumber, ayah.pageNumber)
         )

@@ -25,7 +25,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,12 +38,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPill
 import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
-import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.StatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
@@ -161,7 +156,6 @@ fun HomeHero(
                 .padding(horizontal = 20.dp)
                 .offset(y = (-10).dp),
             shape = RoundedCornerShape(20.dp),
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
             elevation = 4.dp,
         ) {
             Row(
@@ -178,7 +172,10 @@ fun HomeHero(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         letterSpacing = 2.sp,
                     )
-                    Row(verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.Bottom,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
                         Text(
                             text = nextPrayer?.displayName ?: "—",
                             style = MaterialTheme.typography.headlineSmall,
@@ -233,6 +230,6 @@ private fun HomeHero_Preview() {
             nextPrayerTime = "4:30 PM",
             timeUntilNextPrayer = "1h 12m",
 
-        )
+            )
     }
 }

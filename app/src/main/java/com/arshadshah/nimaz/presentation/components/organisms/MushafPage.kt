@@ -4,23 +4,16 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,11 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
@@ -48,22 +37,19 @@ import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Surah
-import com.arshadshah.nimaz.presentation.components.atoms.DiamondFloret
-import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.components.molecules.AyahTooltip
 import com.arshadshah.nimaz.presentation.components.molecules.MushafContinuousText
+import com.arshadshah.nimaz.presentation.components.molecules.QuranFrame
+import com.arshadshah.nimaz.presentation.components.molecules.QuranFrameVariant
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
 import com.arshadshah.nimaz.presentation.components.molecules.sampleFatihahAyahs
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahBaqarah
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.presentation.components.molecules.sampleSurahFatihah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-
-// Frame palette — gold outer keyline + teal inner keyline, matching the cartouche.
-private val MushafFrameTeal = NimazColors.Primary700
-private val MushafGoldAccent = NimazColors.Gold500
+import com.arshadshah.nimaz.presentation.theme.QuranSurfaceColors
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
+import kotlinx.coroutines.launch
 
 /**
  * Main Mushaf page component.
@@ -143,8 +129,9 @@ fun MushafPage(
             }
     ) {
         // Mushaf frame fills all available space; content scrolls inside
-        MushafFrame(
-            pageNumber = pageNumber,
+        QuranFrame(
+            variant = QuranFrameVariant.READER,
+            number = pageNumber,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -190,6 +177,7 @@ fun MushafPage(
                             arabicFontSize = arabicFontSize,
                             arabicFontFamily = arabicFontFamily,
                             showTajweed = showTajweed,
+                            textColor = QuranSurfaceColors.ayahInk,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
                     }
@@ -269,79 +257,6 @@ fun MushafPage(
     }
 }
 
-// ---------------------------------------------------------------------------
-// Internal sub-components
-// ---------------------------------------------------------------------------
-
-@Composable
-private fun MushafFrame(
-    pageNumber: Int,
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(5.dp))
-            .border(1.5.dp, MushafGoldAccent, RoundedCornerShape(5.dp))
-            .padding(3.dp)
-            .border(1.dp, MushafFrameTeal, RoundedCornerShape(3.dp))
-            .padding(2.dp)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            MushafOrnamentalLine()
-            Box(modifier = Modifier
-                .weight(1f)
-                .fillMaxWidth()) {
-                content()
-            }
-            MushafOrnamentalLine()
-
-            // Page number footer — shamsa medallion, matching the surah number ornament
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 6.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                ShamsaMedallion(
-                    number = pageNumber,
-                    size = 45.dp,
-                    numberStyle = MaterialTheme.typography.labelSmall
-                )
-            }
-        }
-    }
-}
-
-/**
- * Ornamental divider line: a gold hairline fading out to both margins with a
- * central diamond floret — the same floret as the cartouche's Basmala line.
- */
-@Composable
-private fun MushafOrnamentalLine(modifier: Modifier = Modifier) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(1.dp)
-                .background(Brush.horizontalGradient(listOf(Color.Transparent, MushafGoldAccent)))
-        )
-        DiamondFloret(color = MushafGoldAccent, size = 7.dp)
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(1.dp)
-                .background(Brush.horizontalGradient(listOf(MushafGoldAccent, Color.Transparent)))
-        )
-    }
-}
-
 private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: String) {
     val textToCopy = buildString {
         appendLine(ayah.textArabic)
@@ -349,19 +264,44 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: Str
             appendLine(); appendLine(ayah.translation)
         }
         appendLine()
-        append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
+        append(
+            context.getString(
+                R.string.quran_copy_reference_format,
+                ayah.surahNumber,
+                ayah.ayahNumber
+            )
+        )
     }
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    clipboard.setPrimaryClip(ClipData.newPlainText("Quran Ayah", textToCopy))
+    clipboard.setPrimaryClip(
+        ClipData.newPlainText(context.getString(R.string.quran_clipboard_label), textToCopy)
+    )
     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()
 }
 
 // ==================== PREVIEWS ====================
 
-@Preview(showBackground = true, name = "Mushaf Page - Al-Fatihah")
+@Preview(showBackground = true, name = "Mushaf Page - Al-Fatihah (Light)")
 @Composable
-private fun MushafPagePreview() {
-    NimazTheme {
+private fun MushafPageLightPreview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        MushafPage(
+            pageNumber = 604,
+            ayahs = sampleFatihahAyahs,
+            surahMap = mapOf(1 to sampleSurahFatihah),
+            arabicFontSize = 28f
+        )
+    }
+}
+
+@Preview(
+    showBackground = true,
+    backgroundColor = 0xFF0A0A08,
+    name = "Mushaf Page - Al-Fatihah (Dark)"
+)
+@Composable
+private fun MushafPageDarkPreview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
         MushafPage(
             pageNumber = 604,
             ayahs = sampleFatihahAyahs,

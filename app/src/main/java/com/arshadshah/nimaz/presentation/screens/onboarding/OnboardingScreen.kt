@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -67,6 +66,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPageIndicator
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -174,7 +174,8 @@ fun OnboardingScreen(
     val totalPages = infoPages.size + 1 // +1 for permissions page
     val pagerState = rememberNimazPagerState(pageCount = { totalPages })
 
-    Scaffold(
+    NimazScreenScaffold(
+        // Opts out of the app ornament: onboarding owns its own gradient backdrop.
         containerColor = NimazColors.OnboardingBgTop,
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) { paddingValues ->
@@ -605,9 +606,11 @@ private fun FeatureRow(
 @Composable
 private fun InfoPagePreview() {
     NimazTheme {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(illuminatedBackground)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(illuminatedBackground)
+        ) {
             InfoPageContent(
                 page = InfoPage(
                     title = "Welcome to Nimaz",
@@ -629,9 +632,11 @@ private fun InfoPagePreview() {
 @Composable
 private fun PermissionsPagePreview() {
     NimazTheme {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(illuminatedBackground)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(illuminatedBackground)
+        ) {
             PermissionsPageContent(
                 locationGranted = true,
                 notificationGranted = false,

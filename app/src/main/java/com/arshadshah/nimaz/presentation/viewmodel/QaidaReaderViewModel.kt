@@ -129,7 +129,11 @@ class QaidaReaderViewModel @Inject constructor(
 
     fun onEvent(event: QaidaReaderEvent) {
         when (event) {
-            is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed("qaida", "select_lesson")
+            is QaidaReaderEvent.SelectLesson -> AppAnalytics.logFeatureUsed(
+                "qaida",
+                "select_lesson"
+            )
+
             is QaidaReaderEvent.CellTapped -> AppAnalytics.logFeatureUsed("qaida", "play_cell")
             is QaidaReaderEvent.PlayLine -> AppAnalytics.logFeatureUsed("qaida", "play_line")
             is QaidaReaderEvent.PlayLetter -> AppAnalytics.logFeatureUsed("qaida", "play_letter")

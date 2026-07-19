@@ -38,10 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
@@ -103,10 +105,10 @@ fun <T> NimazListPicker(
     modifier: Modifier = Modifier,
     searchable: Boolean = items.size >= 8,
     autoDismiss: Boolean = true,
-    confirmText: String = "Done",
-    cancelText: String = "Cancel",
-    searchPlaceholder: String = "Search",
-    emptySearchText: String = "No matches",
+    confirmText: String = stringResource(R.string.done),
+    cancelText: String = stringResource(R.string.cancel),
+    searchPlaceholder: String = stringResource(R.string.search),
+    emptySearchText: String = stringResource(R.string.picker_no_matches),
 ) {
     var query by remember { mutableStateOf("") }
 
@@ -229,16 +231,21 @@ private fun <T> PickerRow(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
+    // Rows sit on the sheet's own surface, so a flat container fill has almost
+    // nothing to read against in light mode. Unselected rows are outlined; the
+    // selected row is the only one that fills, which also makes the selection
+    // obvious at a glance.
     NimazCard(
-        style = NimazCardStyle.FILLED,
+        style = if (isSelected) NimazCardStyle.FILLED else NimazCardStyle.OUTLINED,
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
         shape = RoundedCornerShape(14.dp),
         selected = isSelected,
+        elevation = 0.dp,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer,
+            container = MaterialTheme.colorScheme.surface,
+            border = MaterialTheme.colorScheme.outlineVariant,
             activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {

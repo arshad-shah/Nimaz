@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -32,9 +31,11 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -60,7 +61,7 @@ fun HadithSettingsScreen(
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     val selectedFont = QuranArabicFont.fromId(hadithState.selectedArabicFontId)
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -118,7 +119,13 @@ fun HadithSettingsScreen(
                         Spacer(modifier = Modifier.height(15.dp))
                         Slider(
                             value = hadithState.arabicFontSize,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetHadithArabicFontSize(it)) },
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetHadithArabicFontSize(
+                                        it
+                                    )
+                                )
+                            },
                             valueRange = 18f..42f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
@@ -182,7 +189,13 @@ fun HadithSettingsScreen(
                         Spacer(modifier = Modifier.height(15.dp))
                         Slider(
                             value = hadithState.translationFontSize,
-                            onValueChange = { viewModel.onEvent(SettingsEvent.SetHadithTranslationFontSize(it)) },
+                            onValueChange = {
+                                viewModel.onEvent(
+                                    SettingsEvent.SetHadithTranslationFontSize(
+                                        it
+                                    )
+                                )
+                            },
                             valueRange = 12f..28f,
                             colors = SliderDefaults.colors(
                                 thumbColor = MaterialTheme.colorScheme.primary,
@@ -208,7 +221,13 @@ fun HadithSettingsScreen(
                         title = stringResource(R.string.show_translation),
                         subtitle = stringResource(R.string.show_translation_subtitle),
                         checked = hadithState.showTranslation,
-                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetHadithShowTranslation(!hadithState.showTranslation)) }
+                        onCheckedChange = {
+                            viewModel.onEvent(
+                                SettingsEvent.SetHadithShowTranslation(
+                                    !hadithState.showTranslation
+                                )
+                            )
+                        }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     NimazSettingsItem(
@@ -256,7 +275,10 @@ private fun HadithPreviewCard(
                     fontWeight = FontWeight.Medium
                 )
                 if (showGrade) {
-                    HadithGradeChip(label = stringResource(R.string.hadith_grade_sahih), color = SahihGreen)
+                    HadithGradeChip(
+                        label = stringResource(R.string.hadith_grade_sahih),
+                        color = SahihGreen
+                    )
                 }
             }
 
@@ -274,11 +296,10 @@ private fun HadithPreviewCard(
             if (showTranslation) {
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
+                    style = NimazCardStyle.OUTLINED,
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    tone = NimazTone.NEUTRAL,
+                    elevation = 0.dp
                 ) {
                     Text(
                         text = stringResource(R.string.hadith_settings_preview_translation),

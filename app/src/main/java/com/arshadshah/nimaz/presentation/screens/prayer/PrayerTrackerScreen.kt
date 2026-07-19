@@ -16,13 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -32,13 +25,10 @@ import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Warning
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SecondaryTabRow
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
@@ -62,9 +52,25 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
+import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
+import com.arshadshah.nimaz.core.util.formatClock
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerRecord
 import com.arshadshah.nimaz.domain.model.PrayerStatus
+import com.arshadshah.nimaz.presentation.components.atoms.GradientCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazEmptyState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazQadaPrayerItem
 import com.arshadshah.nimaz.presentation.components.molecules.calendar.CalendarDayState
@@ -77,9 +83,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerEvent
 import com.arshadshah.nimaz.presentation.viewmodel.PrayerTrackerViewModel
 import kotlinx.coroutines.launch
-import com.arshadshah.nimaz.core.util.FULL_DATE_FORMATTER
-import com.arshadshah.nimaz.core.util.formatClock
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.YearMonth
@@ -101,7 +104,7 @@ fun PrayerTrackerScreen(
         stringResource(R.string.qada) to Icons.Default.Restore
     )
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -575,7 +578,9 @@ private fun PrayerCheckItem(
     NimazCard(
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceContainerHighest)
+        style = NimazCardStyle.OUTLINED,
+        tone = NimazTone.NEUTRAL,
+        elevation = 0.dp
     ) {
         Row(
             modifier = Modifier
@@ -630,25 +635,26 @@ private fun PrayerCheckItem(
             }
 
             // Status badge
-            Surface(
-                shape = RoundedCornerShape(20.dp),
-                color = when {
-                    isCompleted -> NimazColors.StatusColors.Prayed.copy(alpha = 0.2f)
-                    isMissed -> NimazColors.StatusColors.Missed.copy(alpha = 0.2f)
-                    else -> MaterialTheme.colorScheme.surfaceContainer
+            NimazBadge(
+                text = statusText,
+                size = NimazBadgeSize.LARGE,
+                colors = when {
+                    isCompleted -> NimazBadgeDefaults.feature(
+                        color = NimazColors.StatusColors.Prayed,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+
+                    isMissed -> NimazBadgeDefaults.feature(
+                        color = NimazColors.StatusColors.Missed,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+
+                    else -> NimazBadgeDefaults.colors(
+                        tone = NimazTone.MUTED,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
                 }
-            ) {
-                Text(
-                    text = statusText,
-                    style = MaterialTheme.typography.labelSmall,
-                    color = when {
-                        isCompleted -> NimazColors.StatusColors.Prayed
-                        isMissed -> NimazColors.StatusColors.Missed
-                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
-                )
-            }
+            )
         }
     }
 }

@@ -55,9 +55,17 @@ class ProphetViewModel @Inject constructor(
     fun onEvent(event: ProphetEvent) {
         when (event) {
             is ProphetEvent.LoadDetail -> AppAnalytics.logFeatureUsed("prophet", "open_detail")
-            is ProphetEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed("prophet", "toggle_favorite")
+            is ProphetEvent.ToggleFavorite -> AppAnalytics.logFeatureUsed(
+                "prophet",
+                "toggle_favorite"
+            )
+
             is ProphetEvent.Search -> AppAnalytics.logFeatureUsed("prophet", "search")
-            ProphetEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed("prophet", "toggle_favorites_filter")
+            ProphetEvent.ToggleFavoritesFilter -> AppAnalytics.logFeatureUsed(
+                "prophet",
+                "toggle_favorites_filter"
+            )
+
             else -> {}
         }
         when (event) {

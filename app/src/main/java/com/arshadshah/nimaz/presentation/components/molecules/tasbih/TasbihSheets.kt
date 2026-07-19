@@ -6,9 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -181,7 +181,8 @@ fun CurrentTasbihSheet(
                 Spacer(Modifier.height(2.dp))
             }
             Text(
-                text = preset?.translation ?: preset?.name ?: "Free Count",
+                text = preset?.translation ?: preset?.name
+                ?: stringResource(R.string.free_count_label),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center

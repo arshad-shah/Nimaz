@@ -1,11 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
@@ -22,9 +18,14 @@ import com.arshadshah.nimaz.presentation.theme.ThemeMode
 /**
  * The Quran tab's entry point into Khatam.
  *
- * Was a third bespoke hero layout with its own hand-rolled gradient bar and stat columns;
- * it now delegates to the shared [KhatamHeroCard] so Home, the Khatam list and the Khatam
- * detail screen cannot drift apart.
+ * Shows the same numbers as the shared [KhatamHeroCard] — progress ring, "N of M ayahs
+ * read", juz, days left and the pace verdict — but in the compact row form
+ * ([KhatamCompactRow]), because on the Quran home tab khatam sits below the
+ * continue-reading card and still has to be visible in the first screenful.
+ *
+ * When there is no active khatam the slot collapses to a one-row prompt rather than a
+ * full-height empty state, so an inactive khatam no longer costs as much space as an
+ * active one.
  */
 @Composable
 internal fun KhatamProgressCard(
@@ -34,20 +35,16 @@ internal fun KhatamProgressCard(
     onClickActive: (Long) -> Unit,
     onClickStart: () -> Unit,
     modifier: Modifier = Modifier,
-    continueLabel: String? = null,
-    onContinue: (() -> Unit)? = null,
 ) {
     if (activeKhatam != null) {
-        KhatamHeroCard(
+        KhatamCompactRow(
             khatam = activeKhatam,
             insights = insights ?: KhatamInsights(),
             modifier = modifier,
-            continueLabel = continueLabel,
-            onContinue = onContinue,
             onClick = { onClickActive(activeKhatam.id) },
         )
     } else {
-        NimazEmptyState(
+        KhatamStartPromptRow(
             title = stringResource(R.string.khatam_no_started),
             message = if (completedCount > 0) {
                 pluralStringResource(
@@ -58,11 +55,9 @@ internal fun KhatamProgressCard(
             } else {
                 stringResource(R.string.khatam_start_journey)
             },
-            icon = Icons.AutoMirrored.Filled.MenuBook,
-            iconTint = MaterialTheme.colorScheme.primary,
             actionLabel = stringResource(R.string.khatam_start_new),
             onAction = onClickStart,
-            modifier = modifier.fillMaxWidth(),
+            modifier = modifier,
         )
     }
 }
@@ -94,8 +89,6 @@ private fun KhatamProgressCardShowcase() {
             completedCount = 1,
             onClickActive = {},
             onClickStart = {},
-            continueLabel = "Continue · Surah 8, 12",
-            onContinue = {},
         )
     }
 }

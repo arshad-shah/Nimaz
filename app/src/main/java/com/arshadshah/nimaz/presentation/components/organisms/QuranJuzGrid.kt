@@ -10,28 +10,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.domain.model.KhatamConstants
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.ShamsaMedallion
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -67,7 +67,6 @@ internal fun getJuzEndPage(juz: Int): Int = if (juz < 30) juzStartPages[juz] - 1
 /** Name of a juz (Arabic first-word), 1-based. */
 internal fun getJuzName(juz: Int): String = juzNames.getOrElse(juz - 1) { "" }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun JuzGrid(
     onNavigateToJuz: (Int) -> Unit,
@@ -104,13 +103,12 @@ internal fun JuzGrid(
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
                     val isSelected = selectedJuzNumber == juzNumber
 
-                    Surface(
+                    NimazCard(
                         onClick = { onNavigateToJuz(juzNumber) },
                         modifier = Modifier.weight(1f),
-                        shape = RoundedCornerShape(14.dp),
+                        selected = isSelected || isComplete,
                         // Shared tile language with the Pages tab grid
-                        color = quranTileSurfaceColor(isSelected, isComplete),
-                        border = quranTileBorder(isSelected)
+                        colors = quranTileCardColors()
                     ) {
                         Column(
                             modifier = Modifier
@@ -159,12 +157,17 @@ internal fun JuzGrid(
 @Composable
 private fun JuzRangeBadges(startPage: Int, endPage: Int) {
     val fill = MaterialTheme.colorScheme.primary.copy(alpha = 0.10f)
-    val fg = MaterialTheme.colorScheme.primary
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(5.dp)
     ) {
-        CutoutBadge(text = startPage.toString(), fill = fill, fg = fg)
+        NimazBadge(
+            text = startPage.toString(),
+            tone = NimazTone.ACCENT,
+            emphasis = NimazBadgeEmphasis.CUTOUT,
+            shape = NimazBadgeShape.ROUNDED,
+            size = NimazBadgeSize.SMALL
+        )
         Box(
             modifier = Modifier
                 .size(22.dp)
@@ -179,24 +182,12 @@ private fun JuzRangeBadges(startPage: Int, endPage: Int) {
                 iconSize = 13.dp
             )
         }
-        CutoutBadge(text = endPage.toString(), fill = fill, fg = fg)
-    }
-}
-
-@Composable
-private fun CutoutBadge(text: String, fill: Color, fg: Color) {
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(fill)
-            .padding(horizontal = 8.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Bold,
-            color = fg
+        NimazBadge(
+            text = endPage.toString(),
+            tone = NimazTone.ACCENT,
+            emphasis = NimazBadgeEmphasis.CUTOUT,
+            shape = NimazBadgeShape.ROUNDED,
+            size = NimazBadgeSize.SMALL
         )
     }
 }

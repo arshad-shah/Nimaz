@@ -319,7 +319,8 @@ private fun TooltipCard(
                 TooltipIconButton(
                     icon = if (isKhatamRead) Icons.Filled.CheckCircle
                     else Icons.Outlined.RadioButtonUnchecked,
-                    contentDescription = if (isKhatamRead) "Mark unread" else "Mark read",
+                    contentDescription = if (isKhatamRead) stringResource(R.string.cd_mark_as_unread)
+                    else stringResource(R.string.cd_mark_as_read),
                     tint = if (isKhatamRead) NimazColors.Success else contentColor,
                     onClick = onKhatamToggle
                 )

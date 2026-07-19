@@ -1,6 +1,5 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
-import androidx.compose.ui.res.stringResource
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -31,8 +30,8 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -300,7 +299,7 @@ internal fun SajdaIndicator(
         modifier = modifier
     ) {
         Text(
-            text = if (withGlyph) "۩ $label" else label,
+            text = if (withGlyph) stringResource(R.string.sajdah_glyph_format, label) else label,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.SemiBold,
             color = NimazPalette.Red600,
@@ -320,11 +319,17 @@ private fun copyAyahToClipboard(context: Context, ayah: Ayah, copiedMessage: Str
             appendLine(ayah.translation)
         }
         appendLine()
-        append("- Surah ${ayah.surahNumber}, Ayah ${ayah.ayahNumber}")
+        append(
+            context.getString(
+                R.string.quran_copy_reference_format,
+                ayah.surahNumber,
+                ayah.ayahNumber
+            )
+        )
     }
 
     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-    val clip = ClipData.newPlainText("Quran Ayah", textToCopy)
+    val clip = ClipData.newPlainText(context.getString(R.string.quran_clipboard_label), textToCopy)
     clipboard.setPrimaryClip(clip)
 
     Toast.makeText(context, copiedMessage, Toast.LENGTH_SHORT).show()

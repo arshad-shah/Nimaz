@@ -7,7 +7,7 @@ import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
 import com.arshadshah.nimaz.core.util.formatClockTime
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.ExemptionReason
 import com.arshadshah.nimaz.domain.model.FastRecord
 import com.arshadshah.nimaz.domain.model.FastStatus
@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.domain.model.FastType
 import com.arshadshah.nimaz.domain.model.FastingStats
 import com.arshadshah.nimaz.domain.model.MakeupFast
 import com.arshadshah.nimaz.domain.model.MakeupFastStatus
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
@@ -27,7 +28,6 @@ import kotlinx.coroutines.launch
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.Duration
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 import java.time.LocalDateTime
 import javax.inject.Inject

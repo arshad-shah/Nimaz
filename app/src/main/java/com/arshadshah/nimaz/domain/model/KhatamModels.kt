@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.domain.model.KhatamProgressCalculator.averagePace
 import java.util.concurrent.TimeUnit
 
 data class Khatam(

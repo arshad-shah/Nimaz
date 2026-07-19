@@ -6,23 +6,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -104,7 +97,14 @@ fun FastManagementBottomSheet(
                 }
                 NimazButton(
                     text = stringResource(R.string.fasting_sheet_save),
-                    onClick = { onSave(selectedStatus, selectedFastType, selectedExemptionReason, note) },
+                    onClick = {
+                        onSave(
+                            selectedStatus,
+                            selectedFastType,
+                            selectedExemptionReason,
+                            note
+                        )
+                    },
                     modifier = Modifier.weight(1f),
                     variant = NimazButtonVariant.TONAL,
                     type = NimazButtonType.PILL,

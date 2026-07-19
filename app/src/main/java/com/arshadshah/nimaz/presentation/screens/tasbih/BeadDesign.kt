@@ -104,7 +104,11 @@ object BeadDesigns {
         key = "amethyst",
         label = "Amethyst",
         cord = BeadColors.AmethystCord,
-        resting = listOf(BeadColors.AmethystHighlight, BeadColors.AmethystMid, BeadColors.AmethystShadow),
+        resting = listOf(
+            BeadColors.AmethystHighlight,
+            BeadColors.AmethystMid,
+            BeadColors.AmethystShadow
+        ),
     )
 
     val Onyx = BeadDesign(
@@ -125,7 +129,11 @@ object BeadDesigns {
         key = "jade",
         label = "Jade",
         cord = BeadColors.JadeCord,
-        resting = listOf(BeadColors.JadeRestHighlight, BeadColors.JadeRestMid, BeadColors.JadeRestShadow),
+        resting = listOf(
+            BeadColors.JadeRestHighlight,
+            BeadColors.JadeRestMid,
+            BeadColors.JadeRestShadow
+        ),
         // jade beads would hide a jade imame — mark the lap in gold instead
         imame = GoldActive,
     )

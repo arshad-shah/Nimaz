@@ -34,7 +34,8 @@ class GetAllCategoriesUseCase @Inject constructor(private val repository: DuaRep
 }
 
 class GetCategoryByIdUseCase @Inject constructor(private val repository: DuaRepository) {
-    suspend operator fun invoke(categoryId: String): DuaCategory? = repository.getCategoryById(categoryId)
+    suspend operator fun invoke(categoryId: String): DuaCategory? =
+        repository.getCategoryById(categoryId)
 }
 
 class GetDuaByIdUseCase @Inject constructor(private val repository: DuaRepository) {
@@ -42,11 +43,13 @@ class GetDuaByIdUseCase @Inject constructor(private val repository: DuaRepositor
 }
 
 class GetDuasByCategoryUseCase @Inject constructor(private val repository: DuaRepository) {
-    operator fun invoke(categoryId: String): Flow<List<Dua>> = repository.getDuasByCategory(categoryId)
+    operator fun invoke(categoryId: String): Flow<List<Dua>> =
+        repository.getDuasByCategory(categoryId)
 }
 
 class GetDuasByOccasionUseCase @Inject constructor(private val repository: DuaRepository) {
-    operator fun invoke(occasion: DuaOccasion): Flow<List<Dua>> = repository.getDuasByOccasion(occasion)
+    operator fun invoke(occasion: DuaOccasion): Flow<List<Dua>> =
+        repository.getDuasByOccasion(occasion)
 }
 
 class GetFavoriteDuasUseCase @Inject constructor(private val repository: DuaRepository) {
@@ -66,7 +69,8 @@ class SearchDuasUseCase @Inject constructor(private val repository: DuaRepositor
 }
 
 class ToggleDuaFavoriteUseCase @Inject constructor(private val repository: DuaRepository) {
-    suspend operator fun invoke(duaId: String, categoryId: String) = repository.toggleFavorite(duaId, categoryId)
+    suspend operator fun invoke(duaId: String, categoryId: String) =
+        repository.toggleFavorite(duaId, categoryId)
 }
 
 class GetDuaBookmarksUseCase @Inject constructor(private val repository: DuaRepository) {

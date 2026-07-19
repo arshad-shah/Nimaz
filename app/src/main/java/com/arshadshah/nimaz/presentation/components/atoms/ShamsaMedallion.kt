@@ -55,7 +55,11 @@ fun ShamsaMedallion(
             val med = scallopPath(c, r, lobes = 12, anchor = 0.86f, control = 1.17f)
             drawPath(med, gold.copy(alpha = 0.08f))
             drawPath(med, gold, style = Stroke(1.4.dp.toPx(), join = StrokeJoin.Round))
-            drawPath(circlePath(c, r * 0.66f), teal.copy(alpha = 0.8f), style = Stroke(0.9.dp.toPx()))
+            drawPath(
+                circlePath(c, r * 0.66f),
+                teal.copy(alpha = 0.8f),
+                style = Stroke(0.9.dp.toPx())
+            )
         }
         Text(
             text = label,

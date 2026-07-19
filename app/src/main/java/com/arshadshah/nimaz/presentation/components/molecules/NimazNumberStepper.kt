@@ -1,7 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -64,9 +63,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
-import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Layout shape of a [NimazNumberStepper].
@@ -236,11 +235,10 @@ fun NimazNumberStepper(
 
         NimazNumberStepperVariant.SPREAD -> NimazCard(
             modifier = modifier.fillMaxWidth(),
-            style = NimazCardStyle.FILLED,
+            style = NimazCardStyle.OUTLINED,
             shape = RoundedCornerShape(size.corner),
-            colors = NimazCardDefaults.colors(
-                container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            tone = NimazTone.NEUTRAL,
+            elevation = 0.dp
         ) {
             Row(
                 modifier = Modifier
@@ -291,21 +289,27 @@ private fun EditableValue(
     val shape = RoundedCornerShape(10.dp)
 
     if (!editable) {
-        Box(
-            modifier = Modifier
-                .widthIn(min = minFieldWidth)
-                .clip(shape)
-                .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-                .padding(horizontal = 14.dp, vertical = 8.dp),
-            contentAlignment = Alignment.Center
+        // Nested inside a settings row / SPREAD card, so: outlined and flat.
+        NimazCard(
+            modifier = Modifier.widthIn(min = minFieldWidth),
+            style = NimazCardStyle.OUTLINED,
+            shape = shape,
+            elevation = 0.dp
         ) {
-            Text(
-                text = displayText,
-                style = valueStyle,
-                fontWeight = FontWeight.SemiBold,
-                color = valueColor,
-                textAlign = TextAlign.Center
-            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = displayText,
+                    style = valueStyle,
+                    fontWeight = FontWeight.SemiBold,
+                    color = valueColor,
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         return
     }
@@ -374,22 +378,33 @@ private fun EditableValue(
                 }
             },
         decorationBox = { inner ->
-            Box(
+            // Nested field: flat `surface` in both states, with the border (not a
+            // tonal fill) carrying focus. Click handling stays on the modifier so
+            // the node keeps the text-field's semantics rather than a card's.
+            NimazCard(
                 modifier = Modifier
                     .clip(shape)
-                    .clickable(onClick = activate)
-                    .background(
-                        if (focused) MaterialTheme.colorScheme.surface
-                        else MaterialTheme.colorScheme.surfaceContainerHighest
-                    )
-                    .border(
-                        width = if (focused) 1.5.dp else 1.dp,
-                        color = if (focused) primary else MaterialTheme.colorScheme.outlineVariant,
-                        shape = shape
-                    )
-                    .padding(horizontal = 14.dp, vertical = 8.dp),
-                contentAlignment = Alignment.Center
-            ) { inner() }
+                    .clickable(onClick = activate),
+                style = NimazCardStyle.OUTLINED,
+                shape = shape,
+                selected = focused,
+                colors = NimazCardDefaults.selectable(
+                    container = MaterialTheme.colorScheme.surface,
+                    content = valueColor,
+                    border = MaterialTheme.colorScheme.outlineVariant,
+                    borderWidth = 1.dp,
+                    activeContainer = MaterialTheme.colorScheme.surface,
+                    activeContent = primary,
+                    activeBorder = primary,
+                    activeBorderWidth = 1.5.dp
+                ),
+                elevation = 0.dp
+            ) {
+                Box(
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) { inner() }
+            }
         }
     )
 }
@@ -481,7 +496,13 @@ private fun NimazNumberStepperInlinePreview() {
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            NimazNumberStepper(label = "Fajr adjustment", value = 5, onValueChange = {}, minValue = -30, maxValue = 30)
+            NimazNumberStepper(
+                label = "Fajr adjustment",
+                value = 5,
+                onValueChange = {},
+                minValue = -30,
+                maxValue = 30
+            )
             NimazNumberStepper(
                 label = "Daily target", value = 20, onValueChange = {},
                 size = NimazNumberStepperSize.MEDIUM,

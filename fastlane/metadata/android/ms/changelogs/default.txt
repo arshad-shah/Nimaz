@@ -1,7 +1,7 @@
-Yang baharu sejak 3.0.31:
+Yang baharu sejak 3.0.56:
 
-• Tafsir direka semula — pembaca diperbaharui, penyerlahan gerak isyarat, nota boleh edit, perkongsian PDF berjenama.
-• Pemain Al-Quran terapung dan cara baharu berkongsi ayat dan doa.
-• Carian direka semula: hasil semasa menaip, serta jawapan AI pilihan disokong ayat dan hadis dipetik dalam satu senarai, dengan amaran had lebih jelas.
-• Penjejakan tempoh puasa dan "Living Sky" lebih tepat.
-• Skrin Lokasi baharu, Kegemaran Al-Quran dibina semula, widget diperhalusi.
+• Corak latar Islamik kini dipaparkan di seluruh apl — pilih lima gaya, atau Tiada, dalam Penampilan.
+• Rupa disegarkan: bar tajuk terapung dan kad yang lebih jelas dipisahkan, mod cerah dan gelap.
+• Al-Quran: laman utama disusun semula, info surah direka semula, dan pembaca yang kini sesuai mod cerah.
+• Ringkasan Zakat direka semula dan widget Khatam yang lebih kaya.
+• Pembaikan: kemajuan bacaan tidak lagi tersekat pada 0%, dan kalendar menukar bulan dengan betul.

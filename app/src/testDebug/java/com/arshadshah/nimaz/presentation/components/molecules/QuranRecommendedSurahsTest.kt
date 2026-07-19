@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.molecules
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.arshadshah.nimaz.domain.model.RevelationType
@@ -21,7 +22,7 @@ class QuranRecommendedSurahsTest {
         Surah(67, "الملك", "Al-Mulk", "The Sovereignty", RevelationType.MECCAN, 30, 29, 67, 562)
 
     @Test
-    fun `renders recommended surah name and number`() {
+    fun `announces surah name, number and reason as one label`() {
         composeRule.setThemedContent {
             QuranRecommendedSurahs(
                 surahs = listOf(alKahf, alMulk),
@@ -29,9 +30,24 @@ class QuranRecommendedSurahsTest {
                 onSurahClick = {},
             )
         }
-        composeRule.onNodeWithText("Al-Kahf").assertExists()
-        composeRule.onNodeWithText("18").assertExists()
-        composeRule.onNodeWithText("Friday Sunnah").assertExists()
+        // The number renders as a decorative ghost numeral, so it is not its own
+        // node — but it must still reach a screen reader via the card's label.
+        composeRule.onNodeWithContentDescription("Al-Kahf, surah 18, Friday Sunnah")
+            .assertExists()
+    }
+
+    @Test
+    fun `renders the surah name, reason and verse metadata`() {
+        composeRule.setThemedContent {
+            QuranRecommendedSurahs(
+                surahs = listOf(alKahf),
+                isFriday = true,
+                onSurahClick = {},
+            )
+        }
+        composeRule.onNodeWithText("Al-Kahf", useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithText("Friday Sunnah", useUnmergedTree = true).assertExists()
+        composeRule.onNodeWithText("110 Verses · Juz 15", useUnmergedTree = true).assertExists()
     }
 
     @Test
@@ -44,7 +60,7 @@ class QuranRecommendedSurahsTest {
                 onSurahClick = { clicked = it },
             )
         }
-        composeRule.onNodeWithText("Al-Kahf").performClick()
+        composeRule.onNodeWithContentDescription("Al-Kahf, surah 18, Friday Sunnah").performClick()
         assertThat(clicked).isEqualTo(18)
     }
 }

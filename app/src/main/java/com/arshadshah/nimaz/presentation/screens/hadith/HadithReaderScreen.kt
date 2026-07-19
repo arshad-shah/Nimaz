@@ -26,18 +26,14 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
-import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
-import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Settings
@@ -47,7 +43,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +57,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
@@ -74,17 +68,24 @@ import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
 import com.arshadshah.nimaz.domain.model.Hadith
 import com.arshadshah.nimaz.presentation.components.atoms.HadithArabicText
-import com.arshadshah.nimaz.presentation.components.atoms.NimazLabelChip
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
+import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerState
 import com.arshadshah.nimaz.presentation.components.molecules.NimazReaderBottomBar
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.AdaptiveSpacing
+import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
@@ -125,7 +126,7 @@ fun HadithReaderScreen(
 
     val currentHadith = hadiths.getOrNull(pagerState.currentPage)
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = state.chapter?.nameEnglish ?: stringResource(R.string.loading),
@@ -144,6 +145,7 @@ fun HadithReaderScreen(
                 }
             )
         },
+        // Opts out of the app ornament: long-form Arabic needs a plain backdrop.
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
@@ -234,7 +236,10 @@ private fun HadithPage(
         ) {
             if (grade != null || !hadith.narratorName.isNullOrEmpty()) {
                 FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally),
+                    horizontalArrangement = Arrangement.spacedBy(
+                        6.dp,
+                        Alignment.CenterHorizontally
+                    ),
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     grade?.let { HadithGradeChip(label = it.label, color = it.color) }
@@ -246,7 +251,11 @@ private fun HadithPage(
                         } else {
                             stringResource(R.string.hadith_narrated_by_format, narrator)
                         }
-                        NimazLabelChip(text = narratorText, highlighted = true)
+                        NimazBadge(
+                            text = narratorText,
+                            tone = NimazTone.ACCENT,
+                            size = NimazBadgeSize.MEDIUM
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(20.dp))
@@ -283,7 +292,11 @@ private fun HadithPage(
 
             if (!hadith.reference.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(20.dp))
-                NimazLabelChip(text = hadith.reference, icon = Icons.Default.Book)
+                NimazBadge(
+                    text = hadith.reference,
+                    icon = Icons.Default.Book,
+                    size = NimazBadgeSize.MEDIUM
+                )
             }
 
             if (state.showChain && !hadith.narratorChain.isNullOrBlank()) {
@@ -366,7 +379,11 @@ private fun ChainOfNarrationSection(
                     ) {
                         narrators.forEach { narrator ->
                             Row(
-                                modifier = Modifier.padding(start = 15.dp, top = 10.dp, bottom = 10.dp),
+                                modifier = Modifier.padding(
+                                    start = 15.dp,
+                                    top = 10.dp,
+                                    bottom = 10.dp
+                                ),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(

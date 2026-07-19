@@ -11,10 +11,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
-import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
 import com.arshadshah.nimaz.domain.model.Location
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -112,6 +112,7 @@ class LocationViewModel @Inject constructor(
                 AppAnalytics.logFeatureUsed("location", "search")
                 searchLocations(_state.value.searchQuery)
             }
+
             LocationEvent.ClearSearch -> _state.update {
                 it.copy(searchQuery = "", searchResults = emptyList())
             }
@@ -125,10 +126,12 @@ class LocationViewModel @Inject constructor(
                 AppAnalytics.logFeatureUsed("location", "select_location")
                 selectLocation(event.location)
             }
+
             LocationEvent.UseCurrentGpsLocation -> {
                 AppAnalytics.logFeatureUsed("location", "use_gps")
                 detectCurrentLocation()
             }
+
             LocationEvent.LoadCurrentLocation -> loadCurrentLocation()
             LocationEvent.DismissError -> _state.update { it.copy(error = null) }
         }

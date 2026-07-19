@@ -15,12 +15,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -41,6 +39,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
 import com.arshadshah.nimaz.presentation.components.molecules.qibla.QiblaCalibrationDialog
 import com.arshadshah.nimaz.presentation.components.organisms.qibla.ArQiblaView
@@ -126,7 +125,7 @@ fun QiblaScreen(
 
     val isArMode = state.isArMode && cameraPermissionGranted
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             QiblaTopBar(
                 locationName = state.qiblaInfo?.locationName,

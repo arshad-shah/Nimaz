@@ -3,7 +3,6 @@ package com.arshadshah.nimaz.core.navigation
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import androidx.core.net.toUri
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,7 +13,6 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material3.CircularProgressIndicator
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
@@ -32,9 +30,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -49,8 +49,8 @@ import androidx.navigation.toRoute
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.share.Shareables
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.ShareAppSheet
-import kotlinx.coroutines.launch
 import com.arshadshah.nimaz.presentation.screens.about.AboutScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicenseDetailScreen
 import com.arshadshah.nimaz.presentation.screens.about.LicensesScreen
@@ -73,11 +73,11 @@ import com.arshadshah.nimaz.presentation.screens.dua.DuaSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.dua.DuasCollectionScreen
 import com.arshadshah.nimaz.presentation.screens.fasting.FastTrackerScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithChaptersScreen
-import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.hadith.HadithReaderScreen
+import com.arshadshah.nimaz.presentation.screens.hadith.HadithSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.home.HomeScreen
-import com.arshadshah.nimaz.presentation.screens.khatam.KhatamFormScreen
 import com.arshadshah.nimaz.presentation.screens.khatam.KhatamDetailScreen
+import com.arshadshah.nimaz.presentation.screens.khatam.KhatamFormScreen
 import com.arshadshah.nimaz.presentation.screens.onboarding.OnboardingScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.MonthlyPrayerTimesScreen
 import com.arshadshah.nimaz.presentation.screens.prayer.PrayerStatsScreen
@@ -94,13 +94,13 @@ import com.arshadshah.nimaz.presentation.screens.quran.SurahInfoScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerChaptersScreen
 import com.arshadshah.nimaz.presentation.screens.quran.TafseerScreen
 import com.arshadshah.nimaz.presentation.screens.search.SearchScreen
-import com.arshadshah.nimaz.presentation.screens.settings.SearchSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.settings.SearchSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.WidgetsScreen
 import com.arshadshah.nimaz.presentation.screens.tasbih.TasbihScreen
 import com.arshadshah.nimaz.presentation.screens.zakat.ZakatCalculatorScreen
@@ -109,6 +109,7 @@ import com.arshadshah.nimaz.presentation.theme.isTablet
 import com.arshadshah.nimaz.presentation.viewmodel.OnboardingViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.SearchFilter
 import com.google.android.play.core.review.ReviewManagerFactory
+import kotlinx.coroutines.launch
 import kotlin.system.exitProcess
 
 @Composable
@@ -253,6 +254,14 @@ fun NavGraph(
 
     NavigationSuiteScaffold(
         layoutType = navLayoutType,
+        // Transparent container so the app-wide NimazPatternBackground (drawn at the
+        // root in MainActivity) shows through. The default is an OPAQUE
+        // colorScheme.background, which painted over the ornament between the root
+        // and every screen — the reason patterns appeared nowhere despite the
+        // per-screen scaffolds being transparent. contentColor is pinned explicitly
+        // since it would otherwise derive from the (now transparent) container.
+        containerColor = Color.Transparent,
+        contentColor = MaterialTheme.colorScheme.onBackground,
         navigationSuiteColors = NavigationSuiteDefaults.colors(
             navigationRailContainerColor = MaterialTheme.colorScheme.surfaceContainer,
         ),
@@ -410,7 +419,12 @@ fun NavGraph(
                 TafseerChaptersScreen(
                     onNavigateBack = { navController.popBackStack() },
                     onOpenTafseer = { surah, ayah ->
-                        navController.navigate(Route.Tafseer(surahNumber = surah, ayahNumber = ayah))
+                        navController.navigate(
+                            Route.Tafseer(
+                                surahNumber = surah,
+                                ayahNumber = ayah
+                            )
+                        )
                     }
                 )
             }
@@ -1127,7 +1141,9 @@ private inline fun <reified T : Any> NavGraphBuilder.taggedComposable(
 ) {
     composable<T> { entry ->
         val scope = this
-        Box(modifier = Modifier.fillMaxSize().testTag(tag)) {
+        Box(modifier = Modifier
+            .fillMaxSize()
+            .testTag(tag)) {
             scope.content(entry)
         }
     }

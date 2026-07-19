@@ -1,7 +1,7 @@
-What's new since 3.0.31:
+What's new since 3.0.56:
 
-• Tafseer, reimagined — refreshed reader, gesture highlighting, editable notes and branded PDF sharing.
-• A floating Qur'an player and branded verse and dua sharing.
-• Search, rebuilt: results as you type, plus optional AI answers backed by cited Qur'an verses and hadith in one connected results list, with clearer limit warnings.
-• Fasting duration tracking and a more accurate Living Sky.
-• Redesigned Location screen, rebuilt Qur'an Favourites and widget polish.
+• Islamic background patterns now show across the app — pick from five styles, or None, in Appearance.
+• A refreshed look throughout: floating top bars and clearer card separation in both light and dark.
+• Qur'an: reorganised home, redesigned surah info, and a reader that now suits light mode.
+• Redesigned Zakat summary and a richer Khatam widget.
+• Fixes: reading progress no longer stuck at 0%, and the calendar now pages months correctly.

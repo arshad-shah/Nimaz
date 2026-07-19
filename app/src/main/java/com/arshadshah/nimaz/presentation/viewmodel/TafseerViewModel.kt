@@ -54,6 +54,7 @@ sealed interface TafseerEvent {
         val color: String,
         val note: String?
     ) : TafseerEvent
+
     data class AddNote(val text: String) : TafseerEvent
     data class UpdateNote(val note: TafseerNote) : TafseerEvent
     data class DeleteNote(val noteId: Long) : TafseerEvent
@@ -75,10 +76,18 @@ class TafseerViewModel @Inject constructor(
             is TafseerEvent.LoadSurah -> AppAnalytics.logFeatureUsed("tafseer", "open_surah")
             is TafseerEvent.SwitchSource -> AppAnalytics.logFeatureUsed("tafseer", "switch_source")
             is TafseerEvent.AddHighlight -> AppAnalytics.logFeatureUsed("tafseer", "add_highlight")
-            is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed("tafseer", "delete_highlight")
+            is TafseerEvent.DeleteHighlight -> AppAnalytics.logFeatureUsed(
+                "tafseer",
+                "delete_highlight"
+            )
+
             is TafseerEvent.AddNote -> AppAnalytics.logFeatureUsed("tafseer", "add_note")
             is TafseerEvent.DeleteNote -> AppAnalytics.logFeatureUsed("tafseer", "delete_note")
-            is TafseerEvent.ExportAnnotations -> AppAnalytics.logFeatureUsed("tafseer", "export_annotations")
+            is TafseerEvent.ExportAnnotations -> AppAnalytics.logFeatureUsed(
+                "tafseer",
+                "export_annotations"
+            )
+
             else -> {}
         }
         when (event) {

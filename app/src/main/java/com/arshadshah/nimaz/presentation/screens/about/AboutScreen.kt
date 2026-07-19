@@ -38,7 +38,6 @@ import androidx.compose.material.icons.filled.WorkOutline
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -57,11 +56,16 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import java.time.LocalDate
 
@@ -91,8 +95,7 @@ fun AboutScreen(
         Unit
     }
 
-    Scaffold(
-        containerColor = MaterialTheme.colorScheme.background,
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(title = stringResource(R.string.about), onBackClick = onNavigateBack)
         }
@@ -175,31 +178,17 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(100))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                .padding(horizontal = 11.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            NimazIcon(
-                imageVector = Icons.Filled.Verified,
-                contentDescription = null,
-                variant = NimazIconVariant.PRIMARY,
-                iconSize = 13.dp
-            )
-            Text(
-                text = stringResource(
-                    R.string.version_detail_format,
-                    BuildConfig.VERSION_NAME,
-                    BuildConfig.VERSION_CODE
-                ),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        NimazBadge(
+            text = stringResource(
+                R.string.version_detail_format,
+                BuildConfig.VERSION_NAME,
+                BuildConfig.VERSION_CODE
+            ),
+            tone = NimazTone.ACCENT,
+            emphasis = NimazBadgeEmphasis.SOFT,
+            size = NimazBadgeSize.MEDIUM,
+            icon = Icons.Filled.Verified
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(
             text = stringResource(R.string.about_tagline),
@@ -244,31 +233,36 @@ private fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bg =
-        if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val fg =
         if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(bg)
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+    NimazCard(
+        modifier = modifier,
+        style = NimazCardStyle.FILLED,
+        tone = if (primary) NimazTone.PROMINENT else NimazTone.MUTED,
+        shape = RoundedCornerShape(14.dp),
+        elevation = 0.dp,
+        onClick = onClick
     ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = fg,
-            iconSize = 21.dp
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = fg
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            NimazIcon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = fg,
+                iconSize = 21.dp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = fg
+            )
+        }
     }
 }
 
@@ -286,8 +280,9 @@ private fun LinksCard(
 
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazTone.NEUTRAL
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -499,46 +494,47 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
     val uriHandler = LocalUriHandler.current
     NimazCard(
         modifier = modifier.fillMaxWidth(),
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazTone.NEUTRAL
     ) {
-      Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(13.dp)
-    ) {
-        Box(
+        Row(
             modifier = Modifier
-                .size(46.dp)
-                .clip(RoundedCornerShape(100))
-                .background(MaterialTheme.colorScheme.primary),
-            contentAlignment = Alignment.Center
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(13.dp)
         ) {
-            Text(
-                text = "AS",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
-            )
+            Box(
+                modifier = Modifier
+                    .size(46.dp)
+                    .clip(RoundedCornerShape(100))
+                    .background(MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "AS",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onPrimary
+                )
+            }
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.developer_name),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = stringResource(R.string.developer_role),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            DeveloperSocial(Icons.Default.Code) { uriHandler.openUri("https://github.com/arshad-shah") }
+            DeveloperSocial(Icons.Default.WorkOutline) { uriHandler.openUri("https://linkedin.com/in/arshadshah") }
         }
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.developer_name),
-                style = MaterialTheme.typography.titleSmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = stringResource(R.string.developer_role),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        DeveloperSocial(Icons.Default.Code) { uriHandler.openUri("https://github.com/arshad-shah") }
-        DeveloperSocial(Icons.Default.WorkOutline) { uriHandler.openUri("https://linkedin.com/in/arshadshah") }
-      }
     }
 }
 
@@ -587,26 +583,27 @@ private fun CreditsGrid(modifier: Modifier = Modifier) {
 private fun CreditCell(label: String, provider: String, modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier,
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazTone.NEUTRAL
     ) {
-      Column(
-        modifier = Modifier
-            .padding(12.dp)
-    ) {
-        Text(
-            text = label.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(modifier = Modifier.height(3.dp))
-        Text(
-            text = provider,
-            style = MaterialTheme.typography.bodyMedium,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-      }
+        Column(
+            modifier = Modifier
+                .padding(12.dp)
+        ) {
+            Text(
+                text = label.uppercase(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(3.dp))
+            Text(
+                text = provider,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
     }
 }
 

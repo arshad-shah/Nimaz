@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextOverflow
@@ -99,6 +100,16 @@ enum class NimazButtonType {
  * @param trailingIcon optional icon shown after the label.
  * @param loading when true, swaps the content for a spinner and blocks clicks.
  * @param fullWidth when true, stretches to the available width.
+ * @param accent escape hatch for **Islamic feature art** — a palette colour the
+ *   Material scheme has no role for (`NimazColors.StatusColors.Prayed`,
+ *   `FastingColors.*`, a per-prayer colour). The [variant] still decides the
+ *   emphasis; only the hue is replaced, so a `TONAL` accent button is a soft
+ *   tint of that colour and an `OUTLINED` one borders in it.
+ *
+ *   Without this, an action carrying a semantic colour — "Mark as paid" in
+ *   success-green — had to be hand-rolled as a clickable `Surface`, which is
+ *   exactly how the design system springs a leak. Do NOT use it to pass a
+ *   Material role; pick the right [variant] instead.
  */
 @Composable
 fun NimazButton(
@@ -112,7 +123,8 @@ fun NimazButton(
     trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
     loading: Boolean = false,
-    fullWidth: Boolean = false
+    fullWidth: Boolean = false,
+    accent: Color? = null
 ) {
     val shape = when (type) {
         NimazButtonType.STANDARD -> RoundedCornerShape(size.corner)
@@ -143,7 +155,14 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.buttonColors(),
+            colors = if (accent != null) {
+                ButtonDefaults.buttonColors(
+                    containerColor = accent,
+                    contentColor = NimazCardDefaults.onColorFor(accent)
+                )
+            } else {
+                ButtonDefaults.buttonColors()
+            },
             contentPadding = contentPadding,
             content = content
         )
@@ -153,7 +172,14 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.filledTonalButtonColors(),
+            colors = if (accent != null) {
+                ButtonDefaults.filledTonalButtonColors(
+                    containerColor = accent.copy(alpha = ACCENT_TONAL_ALPHA),
+                    contentColor = accent
+                )
+            } else {
+                ButtonDefaults.filledTonalButtonColors()
+            },
             contentPadding = contentPadding,
             content = content
         )
@@ -163,8 +189,16 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.outlinedButtonColors(),
-            border = outlinedBorder(isEnabled),
+            colors = if (accent != null) {
+                ButtonDefaults.outlinedButtonColors(contentColor = accent)
+            } else {
+                ButtonDefaults.outlinedButtonColors()
+            },
+            border = if (accent != null) {
+                BorderStroke(1.dp, if (isEnabled) accent else accent.copy(alpha = 0.38f))
+            } else {
+                outlinedBorder(isEnabled)
+            },
             contentPadding = contentPadding,
             content = content
         )
@@ -174,7 +208,11 @@ fun NimazButton(
             modifier = sizedModifier,
             enabled = isEnabled,
             shape = shape,
-            colors = ButtonDefaults.textButtonColors(),
+            colors = if (accent != null) {
+                ButtonDefaults.textButtonColors(contentColor = accent)
+            } else {
+                ButtonDefaults.textButtonColors()
+            },
             contentPadding = contentPadding,
             content = content
         )
@@ -193,6 +231,13 @@ fun NimazButton(
         )
     }
 }
+
+/**
+ * Tint strength for an accented [NimazButtonVariant.TONAL] container. Feature-art
+ * colours have no `onXxxContainer` counterpart, so the label keeps the accent hue
+ * and the container is a soft wash of it.
+ */
+private const val ACCENT_TONAL_ALPHA = 0.15f
 
 @Composable
 private fun outlinedBorder(enabled: Boolean): BorderStroke {

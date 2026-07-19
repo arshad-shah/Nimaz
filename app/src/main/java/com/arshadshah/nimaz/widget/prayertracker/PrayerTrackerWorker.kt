@@ -7,13 +7,13 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.data.local.database.dao.PrayerDao
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import java.time.Duration
-import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import java.time.LocalDate
 
 @HiltWorker
@@ -43,7 +43,13 @@ class PrayerTrackerWorker @AssistedInject constructor(
     private suspend fun setWidgetState(
         glanceIds: List<GlanceId>,
         newState: PrayerTrackerWidgetState
-    ) = updateWidgetState(context, PrayerTrackerWidget(), PrayerTrackerStateDefinition, glanceIds, newState)
+    ) = updateWidgetState(
+        context,
+        PrayerTrackerWidget(),
+        PrayerTrackerStateDefinition,
+        glanceIds,
+        newState
+    )
 
     override suspend fun doWork(): Result {
         val manager = GlanceAppWidgetManager(context)

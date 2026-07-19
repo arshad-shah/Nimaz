@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -31,7 +30,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -48,6 +46,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLocale
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -55,21 +54,29 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.core.util.HijriDateCalculator
-import com.arshadshah.nimaz.core.share.ContentShareManager
 import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
+import com.arshadshah.nimaz.core.share.ContentShareManager
+import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
 import com.arshadshah.nimaz.core.util.PrayerTimesPdfExporter
+import com.arshadshah.nimaz.core.util.formatFastLength
 import com.arshadshah.nimaz.domain.model.IslamicEvent
 import com.arshadshah.nimaz.domain.model.IslamicEventType
 import com.arshadshah.nimaz.domain.model.IslamicEvents
 import com.arshadshah.nimaz.presentation.components.atoms.NavArrowDirection
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazNavArrowButton
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
@@ -79,8 +86,6 @@ import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.viewmodel.DayPrayerTimes
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesEvent
 import com.arshadshah.nimaz.presentation.viewmodel.MonthlyPrayerTimesViewModel
-import com.arshadshah.nimaz.core.util.MONTH_YEAR_FORMATTER
-import com.arshadshah.nimaz.core.util.formatFastLength
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -123,14 +128,17 @@ fun MonthlyPrayerTimesScreen(
         }.onFailure { CrashReporter.recordException(it) }
     }
 
-    Scaffold(
+    NimazScreenScaffold(
         topBar = {
             NimazBackTopAppBar(
                 title = stringResource(R.string.monthly_prayer_times),
                 onBackClick = onNavigateBack,
                 actions = {
                     IconButton(onClick = { exportMenuExpanded = true }, enabled = canExport) {
-                        NimazIcon(Icons.Default.Share, contentDescription = stringResource(R.string.export_as_pdf))
+                        NimazIcon(
+                            Icons.Default.Share,
+                            contentDescription = stringResource(R.string.export_as_pdf)
+                        )
                     }
                     // Short export chooser → anchored dropdown menu (was a bottom sheet).
                     NimazDropdownMenu(
@@ -139,7 +147,13 @@ fun MonthlyPrayerTimesScreen(
                     ) {
                         NimazDropdownRow(
                             text = stringResource(R.string.monthly_this_month),
-                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${state.dayPrayerTimes.size} days",
+                            description = "${state.currentMonth.format(MONTH_YEAR_FORMATTER)} · ${
+                                pluralStringResource(
+                                    R.plurals.days_count_format,
+                                    state.dayPrayerTimes.size,
+                                    state.dayPrayerTimes.size
+                                )
+                            }",
                             leadingIcon = Icons.Default.CalendarMonth,
                             onClick = {
                                 exportMenuExpanded = false
@@ -296,21 +310,17 @@ private fun MonthNavigationHeader(
             }
 
             if (isRamadan) {
-                Box(
+                NimazBadge(
+                    text = stringResource(R.string.ramadan_month_label),
                     modifier = Modifier
                         .padding(top = NimazSpacing.Small)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(NimazColors.Secondary.copy(alpha = 0.18f))
-                        .align(Alignment.CenterHorizontally)
-                        .padding(horizontal = 10.dp, vertical = 3.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.ramadan_month_label),
-                        style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = NimazColors.Secondary
+                        .align(Alignment.CenterHorizontally),
+                    size = NimazBadgeSize.SMALL,
+                    colors = NimazBadgeDefaults.feature(
+                        color = NimazColors.Secondary,
+                        emphasis = NimazBadgeEmphasis.SOFT
                     )
-                }
+                )
             }
         }
     }
@@ -331,12 +341,36 @@ private fun DayPrayerCard(
     onClick: () -> Unit
 ) {
     val prayers = listOf(
-        PrayerTimeEntry("Fajr", dayTimes.fajr, NimazColors.PrayerColors.Fajr),
-        PrayerTimeEntry("Sunrise", dayTimes.sunrise, NimazColors.PrayerColors.Sunrise),
-        PrayerTimeEntry("Dhuhr", dayTimes.dhuhr, NimazColors.PrayerColors.Dhuhr),
-        PrayerTimeEntry("Asr", dayTimes.asr, NimazColors.PrayerColors.Asr),
-        PrayerTimeEntry("Maghrib", dayTimes.maghrib, NimazColors.PrayerColors.Maghrib),
-        PrayerTimeEntry("Isha", dayTimes.isha, NimazColors.PrayerColors.Isha)
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_fajr),
+            dayTimes.fajr,
+            NimazColors.PrayerColors.Fajr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_sunrise),
+            dayTimes.sunrise,
+            NimazColors.PrayerColors.Sunrise
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_dhuhr),
+            dayTimes.dhuhr,
+            NimazColors.PrayerColors.Dhuhr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_asr),
+            dayTimes.asr,
+            NimazColors.PrayerColors.Asr
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_maghrib),
+            dayTimes.maghrib,
+            NimazColors.PrayerColors.Maghrib
+        ),
+        PrayerTimeEntry(
+            stringResource(R.string.prayer_isha),
+            dayTimes.isha,
+            NimazColors.PrayerColors.Isha
+        )
     )
 
     val hijri = HijriDateCalculator.toHijri(dayTimes.date)
@@ -347,10 +381,15 @@ private fun DayPrayerCard(
 
     NimazCard(
         onClick = onClick,
+        // A day row sits directly on the page background: elevation carries the card
+        // boundary (in light mode `surfaceContainer` on `background` is nearly
+        // invisible), while the fill carries the "today" selection state.
+        style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(NimazCornerRadius.Large),
         selected = isToday,
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceContainer,
+            container = MaterialTheme.colorScheme.surface,
+            // Transparent so the "today" gradient drawn inside shows through.
             activeContainer = Color.Transparent
         ),
         modifier = Modifier.fillMaxWidth()
@@ -368,9 +407,11 @@ private fun DayPrayerCard(
             Modifier
         }
 
-        Column(modifier = Modifier
-            .then(background)
-            .fillMaxWidth()) {
+        Column(
+            modifier = Modifier
+                .then(background)
+                .fillMaxWidth()
+        ) {
             DayMetaRow(
                 date = dayTimes.date,
                 hijriDay = hijri.day,
@@ -412,10 +453,11 @@ private fun DayMetaRow(
     val hijriShort = "$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth).take(3)}"
 
     val titleLine =
-        (if (isToday) "Today · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
+        (if (isToday) stringResource(R.string.today) + " · " else "") + "$weekdayShort, ${date.dayOfMonth} $monthName"
+    val fastLabel = fast?.let { stringResource(R.string.monthly_fast_length_format, it) }.orEmpty()
     val subLine = buildString {
         append("$hijriDay ${HijriDateCalculator.getHijriMonthName(hijriMonth)} $hijriYear")
-        if (fast != null) append(" · $fast fast")
+        if (fast != null) append(" · " + fastLabel)
     }
 
     val rotation by animateFloatAsState(if (isExpanded) 180f else 0f, label = "chevron")
@@ -453,7 +495,7 @@ private fun DayMetaRow(
 
         NimazIcon(
             imageVector = Icons.Default.ExpandMore,
-            contentDescription = if (isExpanded) "Collapse" else "Expand",
+            contentDescription = stringResource(if (isExpanded) R.string.cd_collapse else R.string.cd_expand),
             tint = onColor.copy(alpha = 0.6f),
             modifier = Modifier.rotate(rotation)
         )
@@ -465,20 +507,15 @@ private fun EventTag(event: IslamicEvent) {
     val color = eventAccent(event.eventType)
     val label =
         if (event.eventType == IslamicEventType.HOLIDAY) "★ ${event.nameEnglish}" else event.nameEnglish
-    Box(
-        modifier = Modifier
-            .padding(top = 4.dp)
-            .clip(RoundedCornerShape(20.dp))
-            .background(color.copy(alpha = 0.18f))
-            .padding(horizontal = 8.dp, vertical = 2.dp)
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.SemiBold,
-            color = color
+    NimazBadge(
+        text = label,
+        modifier = Modifier.padding(top = 4.dp),
+        size = NimazBadgeSize.SMALL,
+        colors = NimazBadgeDefaults.feature(
+            color = color,
+            emphasis = NimazBadgeEmphasis.SOFT
         )
-    }
+    )
 }
 
 private fun eventAccent(type: IslamicEventType): Color = when (type) {
@@ -495,11 +532,6 @@ private fun DayBadge(
     hijri: String,
     isToday: Boolean
 ) {
-    val bgColor = if (isToday) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.surfaceContainerHighest
-    }
     val textColor = if (isToday) {
         MaterialTheme.colorScheme.onPrimary
     } else {
@@ -508,32 +540,44 @@ private fun DayBadge(
     val hijriColor =
         if (isToday) textColor.copy(alpha = 0.85f) else MaterialTheme.colorScheme.primary
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(52.dp)
-            .clip(RoundedCornerShape(NimazCornerRadius.Medium))
-            .background(bgColor)
-            .padding(vertical = NimazSpacing.Small, horizontal = NimazSpacing.ExtraSmall)
+    // Nested inside the day card → outlined, no elevation. The primary fill is
+    // reserved for the "today" selection.
+    NimazCard(
+        modifier = Modifier.width(52.dp),
+        style = NimazCardStyle.OUTLINED,
+        shape = RoundedCornerShape(NimazCornerRadius.Medium),
+        selected = isToday,
+        colors = NimazCardDefaults.selectable(
+            container = MaterialTheme.colorScheme.surface,
+            activeContainer = MaterialTheme.colorScheme.primary,
+            activeBorder = MaterialTheme.colorScheme.primary,
+        )
     ) {
-        Text(
-            text = dayNumber,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold,
-            color = textColor
-        )
-        Text(
-            text = dayOfWeek,
-            style = MaterialTheme.typography.labelSmall,
-            color = textColor.copy(alpha = 0.8f)
-        )
-        Text(
-            text = hijri,
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = FontWeight.Medium,
-            color = hijriColor,
-            maxLines = 1,
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = NimazSpacing.Small, horizontal = NimazSpacing.ExtraSmall)
+        ) {
+            Text(
+                text = dayNumber,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = textColor
+            )
+            Text(
+                text = dayOfWeek,
+                style = MaterialTheme.typography.labelSmall,
+                color = textColor.copy(alpha = 0.8f)
+            )
+            Text(
+                text = hijri,
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.Medium,
+                color = hijriColor,
+                maxLines = 1,
+            )
+        }
     }
 }
 
@@ -604,35 +648,47 @@ private fun PrayerTimeItem(
     textColor: Color,
     modifier: Modifier = Modifier
 ) {
-    Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(NimazCornerRadius.Small))
-            .background(textColor.copy(alpha = 0.05f))
-            .padding(horizontal = NimazSpacing.Small, vertical = NimazSpacing.Small),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
-    ) {
-        // Color indicator bar
-        Box(
-            modifier = Modifier
-                .width(3.dp)
-                .height(28.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(entry.color)
+    // A cell nested inside the day card → outlined, no fill. A 5% tint was invisible
+    // in light mode, and a transparent container lets the "today" gradient show through.
+    NimazCard(
+        modifier = modifier,
+        style = NimazCardStyle.OUTLINED,
+        shape = RoundedCornerShape(NimazCornerRadius.Small),
+        colors = NimazCardDefaults.colors(
+            container = Color.Transparent,
+            content = textColor,
+            border = textColor.copy(alpha = 0.25f)
         )
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = NimazSpacing.Small, vertical = NimazSpacing.Small),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(NimazSpacing.Small)
+        ) {
+            // Color indicator bar
+            Box(
+                modifier = Modifier
+                    .width(3.dp)
+                    .height(28.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(entry.color)
+            )
 
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = entry.name,
-                style = MaterialTheme.typography.labelSmall,
-                color = textColor.copy(alpha = 0.7f)
-            )
-            Text(
-                text = entry.time,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = textColor
-            )
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = entry.name,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = textColor.copy(alpha = 0.7f)
+                )
+                Text(
+                    text = entry.time,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = textColor
+                )
+            }
         }
     }
 }

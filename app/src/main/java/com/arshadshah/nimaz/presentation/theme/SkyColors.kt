@@ -69,6 +69,7 @@ object SkyColors {
     val DuskZenith = Color(0xFF04060F)
     val DuskUpper = Color(0xFF0E1330)
     val DuskMid = Color(0xFF241A45)
+
     // DuskLower shares MidnightHorizon (0xFF33285E)
     val DuskHorizon = Color(0xFF3A2A55)
     val DuskCloud = Color(0xFF3A3F66)

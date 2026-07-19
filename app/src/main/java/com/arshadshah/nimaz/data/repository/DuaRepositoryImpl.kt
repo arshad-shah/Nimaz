@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.data.repository
 
+import com.arshadshah.nimaz.core.util.mapItems
 import com.arshadshah.nimaz.data.local.database.dao.DuaDao
 import com.arshadshah.nimaz.data.local.database.entity.DuaBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.DuaCategoryEntity
@@ -17,9 +18,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.first
-import com.arshadshah.nimaz.core.util.mapItems
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 

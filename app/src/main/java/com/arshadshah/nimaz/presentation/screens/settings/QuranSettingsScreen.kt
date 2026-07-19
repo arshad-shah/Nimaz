@@ -20,11 +20,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.ExperimentalMaterial3Api
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
-import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
@@ -36,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -43,12 +40,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazDivider
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownField
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
@@ -97,7 +98,7 @@ fun QuranSettingsScreen(
 
     val selectedFont = QuranArabicFont.fromId(quranState.selectedArabicFontId)
 
-    Scaffold(
+    NimazScreenScaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
             NimazBackTopAppBar(
@@ -146,7 +147,10 @@ fun QuranSettingsScreen(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = stringResource(R.string.arabic_font_size_value, quranState.arabicFontSize.toInt()),
+                                text = stringResource(
+                                    R.string.arabic_font_size_value,
+                                    quranState.arabicFontSize.toInt()
+                                ),
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.primary
@@ -249,7 +253,7 @@ fun QuranSettingsScreen(
                         val isSelected = quranState.selectedTranslatorId == value
                         TranslationItem(
                             name = displayName,
-                            language = "English",
+                            language = stringResource(R.string.language_english),
                             isSelected = isSelected,
                             onClick = { viewModel.onEvent(SettingsEvent.SetTranslator(value)) }
                         )
@@ -372,10 +376,7 @@ private fun PreviewCard(
                 Spacer(modifier = Modifier.height(12.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onTertiaryContainer
-                    )
+                    tone = NimazTone.SUCCESS
                 ) {
                     Text(
                         text = stringResource(R.string.quran_settings_preview_transliteration),
@@ -392,10 +393,8 @@ private fun PreviewCard(
                 Spacer(modifier = Modifier.height(10.dp))
                 NimazCard(
                     shape = RoundedCornerShape(10.dp),
-                    colors = NimazCardDefaults.colors(
-                        container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-                        content = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    style = NimazCardStyle.ELEVATED,
+                    tone = NimazTone.NEUTRAL
                 ) {
                     Text(
                         text = stringResource(R.string.quran_settings_preview_translation),

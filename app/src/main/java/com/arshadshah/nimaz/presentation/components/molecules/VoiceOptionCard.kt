@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,7 +27,6 @@ import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -42,16 +40,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
-
-private val ChipShape = RoundedCornerShape(6.dp)
 
 /**
  * A single "voice" option — a reciter (Quran audio) or a muezzin (adhan) — shown as
@@ -92,8 +91,6 @@ fun VoiceOptionCard(
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surface,
             border = MaterialTheme.colorScheme.outlineVariant,
-            borderWidth = 1.dp,
-            activeContainer = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
             activeBorder = MaterialTheme.colorScheme.primary,
             activeBorderWidth = 1.5.dp,
         ),
@@ -124,17 +121,17 @@ fun VoiceOptionCard(
                     NimazBadge(
                         text = primaryTag,
                         size = NimazBadgeSize.SMALL,
-                        shape = ChipShape,
-                        backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        textColor = MaterialTheme.colorScheme.primary,
+                        shape = NimazBadgeShape.ROUNDED,
+                        tone = NimazTone.ACCENT,
+                        emphasis = NimazBadgeEmphasis.SOFT,
                     )
                     if (secondaryTag != null) {
                         NimazBadge(
                             text = secondaryTag,
                             size = NimazBadgeSize.SMALL,
-                            shape = ChipShape,
-                            backgroundColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f),
-                            textColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                            shape = NimazBadgeShape.ROUNDED,
+                            tone = NimazTone.NEUTRAL,
+                            emphasis = NimazBadgeEmphasis.SOFT,
                         )
                     }
                 }
@@ -262,18 +259,21 @@ private fun PreviewButton(
                     strokeWidth = 2.dp,
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
+
                 isPlaying -> NimazIcon(
                     imageVector = Icons.Filled.Pause,
                     contentDescription = contentDescription,
                     variant = NimazIconVariant.ON_ACCENT,
                     iconSize = 18.dp,
                 )
+
                 isDownloaded -> NimazIcon(
                     imageVector = Icons.Filled.PlayArrow,
                     contentDescription = contentDescription,
                     variant = NimazIconVariant.ON_ACCENT,
                     iconSize = 18.dp,
                 )
+
                 else -> NimazIcon(
                     imageVector = Icons.Filled.Download,
                     contentDescription = contentDescription,

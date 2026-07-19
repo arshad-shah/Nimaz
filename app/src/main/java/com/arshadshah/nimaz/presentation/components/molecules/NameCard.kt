@@ -19,7 +19,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,10 +34,14 @@ import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeColors
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.theme.NimazSpacing
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -66,9 +69,7 @@ fun NameCard(
         style = NimazCardStyle.ELEVATED,
         shape = RoundedCornerShape(16.dp),
         onClick = onClick,
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceContainerLow
-        ),
+        tone = NimazTone.NEUTRAL,
     ) {
         Row(
             modifier = Modifier
@@ -147,21 +148,16 @@ fun NameCard(
                         )
                     }
                     if (eraChip != null) {
-                        Surface(
-                            shape = RoundedCornerShape(NimazSpacing.Small),
-                            color = accent.chipContainer,
-                            modifier = Modifier.padding(top = 4.dp)
-                        ) {
-                            Text(
-                                text = eraChip,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = accent.onChipContainer,
-                                modifier = Modifier.padding(
-                                    horizontal = NimazSpacing.Small,
-                                    vertical = 2.dp
-                                )
+                        NimazBadge(
+                            text = eraChip,
+                            modifier = Modifier.padding(top = 4.dp),
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL,
+                            colors = NimazBadgeColors(
+                                containerColor = accent.chipContainer,
+                                contentColor = accent.onChipContainer
                             )
-                        }
+                        )
                     }
                 }
 
