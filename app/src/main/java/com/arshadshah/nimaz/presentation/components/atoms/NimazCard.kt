@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -86,7 +87,10 @@ data class NimazCardColors(
  *
  * - [NEUTRAL] — the default card surface.
  * - [MUTED] — a quiet, recessed surface (inset notes, secondary detail).
- * - [ACCENT] — brand-tinted, draws the eye (hero/primary actions).
+ * - [ACCENT] — brand-tinted, draws the eye (highlighted panels, hero surfaces).
+ * - [PROMINENT] — the high-emphasis *filled* brand surface, for a card acting as a
+ *   primary call to action. [ACCENT]'s `primaryContainer` is the low-emphasis tonal
+ *   counterpart; collapsing the two demotes CTAs, so they stay distinct.
  * - [SUCCESS] — a completed//achieved state (streaks, finished khatam).
  * - [WARNING] — needs attention but is not an error (missed prayer, qada due).
  * - [ERROR] — a destructive or failed state.
@@ -97,6 +101,7 @@ enum class NimazCardTone {
     NEUTRAL,
     MUTED,
     ACCENT,
+    PROMINENT,
     SUCCESS,
     WARNING,
     ERROR,
@@ -159,6 +164,7 @@ object NimazCardDefaults {
 
             NimazCardTone.MUTED -> MaterialTheme.colorScheme.surfaceContainer
             NimazCardTone.ACCENT -> MaterialTheme.colorScheme.primaryContainer
+            NimazCardTone.PROMINENT -> MaterialTheme.colorScheme.primary
             NimazCardTone.SUCCESS -> MaterialTheme.colorScheme.tertiaryContainer
             NimazCardTone.WARNING -> MaterialTheme.colorScheme.secondaryContainer
             NimazCardTone.ERROR -> MaterialTheme.colorScheme.errorContainer
@@ -292,7 +298,7 @@ fun NimazCard(
                     )
             ) {
                 CompositionLocalProvider(LocalContentColor provides contentColor) {
-                    Column(content = content)
+                    Column(modifier = Modifier.fillMaxSize(), content = content)
                 }
             }
         }
