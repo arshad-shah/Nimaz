@@ -1,7 +1,7 @@
-3.0.31 sonrası yenilikler:
+3.0.56 sonrası yenilikler:
 
-• Yeniden tasarlanan Tefsir — yenilenen okuyucu, hareketle vurgulama, düzenlenebilir notlar ve markalı PDF paylaşımı.
-• Yüzen Kur'an oynatıcı ve ayet ile duaları paylaşmanın yeni yolu.
-• Arama yenilendi: yazdıkça sonuçlar; isteğe bağlı yapay zekâ yanıtları, alıntılanan ayet ve hadislerle tek listede — daha net limit uyarıları.
-• Oruç süresi takibi ve daha isabetli bir "Canlı Gökyüzü".
-• Yeni Konum ekranı, yenilenen Kur'an Favorileri, widget rötuşları.
+• İslami arka plan desenleri artık uygulamanın her yerinde — Görünüm'de beş stilden birini ya da Yok'u seçin.
+• Yenilenen tasarım: yüzen başlık çubukları ve açık/koyu temada daha net ayrılan kartlar.
+• Kur'an: yeniden düzenlenen ana sayfa, yenilenen sure bilgisi ve artık açık temaya da uyan okuyucu.
+• Yeniden tasarlanan Zekât özeti ve daha zengin Hatim widget'ı.
+• Düzeltmeler: okuma ilerlemesi artık %0'da takılmıyor ve takvim ayları doğru çeviriyor.
