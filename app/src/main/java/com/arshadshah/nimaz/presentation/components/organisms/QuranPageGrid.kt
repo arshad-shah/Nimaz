@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.ui.res.stringResource
 import com.arshadshah.nimaz.R
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -33,6 +31,9 @@ import androidx.compose.ui.unit.dp
 import android.content.res.Configuration
 import androidx.compose.foundation.border
 import com.arshadshah.nimaz.domain.model.PageAyahRange
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -74,36 +75,19 @@ internal fun computeJuzHeaderIndices(
 }
 
 /**
- * Resolves the surface fill colour for a page tile based on its state.
+ * The shared card colours for a Quran page/juz tile: a quiet inactive surface with
+ * a hairline outline, switching to the primary container plus a 2.dp primary border
+ * once the tile is selected or its khatam progress is complete. Content colour is
+ * published by [NimazCard], so tile labels inherit it.
  */
 @Composable
-internal fun quranTileSurfaceColor(isSelected: Boolean, isComplete: Boolean) = when {
-    isSelected -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
-    isComplete -> MaterialTheme.colorScheme.primaryContainer
-    else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.06f)
-}
-
-/**
- * Resolves the border for a page tile.
- */
-@Composable
-internal fun quranTileBorder(isSelected: Boolean) = BorderStroke(
-    width = if (isSelected) 2.dp else 1.dp,
-    color = if (isSelected)
-        MaterialTheme.colorScheme.primary
-    else
-        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+internal fun quranTileCardColors() = NimazCardDefaults.selectable(
+    border = MaterialTheme.colorScheme.outlineVariant,
+    activeBorder = MaterialTheme.colorScheme.primary,
+    activeBorderWidth = 2.dp
 )
 
-/**
- * Resolves the text colour for the page number.
- */
-@Composable
-internal fun quranTileNumberColor(highlighted: Boolean) =
-    if (highlighted) MaterialTheme.colorScheme.onPrimaryContainer
-    else MaterialTheme.colorScheme.primary
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalLayoutApi::class)
 internal fun LazyListScope.pageGridItems(
     onNavigateToPage: (Int) -> Unit,
     khatamReadAyahIds: Set<Int> = emptySet(),
@@ -129,13 +113,8 @@ internal fun LazyListScope.pageGridItems(
 
         // Juz header card with cutout page range badges
         item(key = "page_juz_header_$juz") {
-            Surface(
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(14.dp),
-                border = BorderStroke(
-                    1.dp,
-                    MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)
-                ),
+            NimazCard(
+                tone = NimazCardTone.ACCENT,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Row(
@@ -146,8 +125,7 @@ internal fun LazyListScope.pageGridItems(
                     Text(
                         text = stringResource(R.string.quran_juz_number_format, juz),
                         style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        fontWeight = FontWeight.Bold
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -234,11 +212,10 @@ internal fun LazyListScope.pageGridItems(
                     val isComplete = isKhatamActive && totalCount > 0 && readCount == totalCount
                     val isSelected = selectedPageNumber == pageNumber
 
-                    Surface(
+                    NimazCard(
                         onClick = { onNavigateToPage(pageNumber) },
-                        shape = RoundedCornerShape(12.dp),
-                        color = quranTileSurfaceColor(isSelected, isComplete),
-                        border = quranTileBorder(isSelected)
+                        selected = isSelected || isComplete,
+                        colors = quranTileCardColors()
                     ) {
                         Row(
                             modifier = Modifier.padding(8.dp),
@@ -265,8 +242,7 @@ internal fun LazyListScope.pageGridItems(
                                 Text(
                                     text = pageNumber.toString(),
                                     style = MaterialTheme.typography.titleSmall,
-                                    fontWeight = FontWeight.Bold,
-                                    color = quranTileNumberColor(isComplete || isSelected)
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
                             // Surah chips
@@ -317,11 +293,11 @@ internal fun LazyListScope.pageGridItems(
                                 isKhatamActive && totalCount > 0 && readCount == totalCount
                             val isSelected = selectedPageNumber == pg
 
-                            Surface(
+                            NimazCard(
                                 onClick = { onNavigateToPage(pg) },
+                                selected = isSelected || isComplete,
                                 shape = RoundedCornerShape(8.dp),
-                                color = quranTileSurfaceColor(isSelected, isComplete),
-                                border = quranTileBorder(isSelected)
+                                colors = quranTileCardColors()
                             ) {
                                 Box(
                                     modifier = Modifier.size(44.dp),
@@ -339,8 +315,7 @@ internal fun LazyListScope.pageGridItems(
                                     Text(
                                         text = pg.toString(),
                                         style = MaterialTheme.typography.labelLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = quranTileNumberColor(isComplete || isSelected)
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }

@@ -65,6 +65,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
@@ -701,10 +703,9 @@ private fun HighlightNotesListContent(
                 val end = highlight.endOffset.coerceIn(start, tafseerText.length)
                 val snippet = if (start < end) tafseerText.substring(start, end) else ""
 
-                Surface(
+                NimazCard(
                     onClick = { onHighlightTapped(highlight) },
-                    shape = RoundedCornerShape(12.dp),
-                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                    tone = NimazCardTone.MUTED,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column(modifier = Modifier.padding(12.dp)) {

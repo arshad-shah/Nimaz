@@ -58,6 +58,8 @@ import com.arshadshah.nimaz.core.util.TajweedParser
 import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.SajdaType
 import com.arshadshah.nimaz.presentation.components.atoms.NimazActionPill
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
@@ -241,10 +243,7 @@ internal fun AyahItem(
         // Translation
         if (showTranslation && ayah.translation != null) {
             Spacer(modifier = Modifier.height(12.dp))
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-            ) {
+            NimazCard(tone = NimazCardTone.MUTED) {
                 Text(
                     text = ayah.translation,
                     style = MaterialTheme.typography.bodyMedium.copy(
@@ -260,17 +259,13 @@ internal fun AyahItem(
         // Transliteration
         if (showTransliteration && ayah.transliteration != null) {
             Spacer(modifier = Modifier.height(8.dp))
-            Surface(
-                shape = RoundedCornerShape(10.dp),
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f)
-            ) {
+            NimazCard(tone = NimazCardTone.SUCCESS) {
                 Text(
                     text = ayah.transliteration,
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontSize = fontSize.sp,
                         lineHeight = (fontSize * 1.5f).sp
                     ),
-                    color = MaterialTheme.colorScheme.onTertiaryContainer,
                     modifier = Modifier.padding(12.dp)
                 )
             }
