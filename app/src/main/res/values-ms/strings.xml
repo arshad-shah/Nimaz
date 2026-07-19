@@ -508,6 +508,13 @@
     <string name="quran_home_surah_info">Info Surah</string>
     <string name="quran_home_verse_of_the_day">AYAT HARI INI</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
+    <!-- Recommended surah card metadata: verse count and starting juz -->
+    <string name="quran_home_recommended_meta">%1$s · Juzuk %2$d</string>
+    <string name="quran_home_read_verse">Baca</string>
+    <string name="quran_home_resume">Sambung</string>
+    <string name="quran_verses_label">Ayat</string>
+    <string name="quran_home_recommended_a11y">%1$s, surah %2$d, %3$s</string>
+    <string name="quran_page_label">Halaman</string>
     <string name="quran_home_recommended">Disyorkan</string>
     <string name="quran_home_reason_friday">Sunnah Jumaat</string>
     <string name="quran_home_reason_before_sleep">Sebelum tidur</string>

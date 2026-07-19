@@ -65,6 +65,9 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import java.time.LocalDate
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -176,31 +179,17 @@ private fun AppInfoHero(modifier: Modifier = Modifier) {
             color = MaterialTheme.colorScheme.onBackground
         )
         Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            modifier = Modifier
-                .clip(RoundedCornerShape(100))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                .padding(horizontal = 11.dp, vertical = 4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            NimazIcon(
-                imageVector = Icons.Filled.Verified,
-                contentDescription = null,
-                variant = NimazIconVariant.PRIMARY,
-                iconSize = 13.dp
-            )
-            Text(
-                text = stringResource(
-                    R.string.version_detail_format,
-                    BuildConfig.VERSION_NAME,
-                    BuildConfig.VERSION_CODE
-                ),
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
+        NimazBadge(
+            text = stringResource(
+                R.string.version_detail_format,
+                BuildConfig.VERSION_NAME,
+                BuildConfig.VERSION_CODE
+            ),
+            tone = NimazTone.ACCENT,
+            emphasis = NimazBadgeEmphasis.SOFT,
+            size = NimazBadgeSize.MEDIUM,
+            icon = Icons.Filled.Verified
+        )
         Spacer(modifier = Modifier.height(11.dp))
         Text(
             text = stringResource(R.string.about_tagline),
@@ -245,31 +234,36 @@ private fun QuickActionButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val bg =
-        if (primary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
     val fg =
         if (primary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
-            .background(bg)
-            .clickable(onClick = onClick)
-            .padding(vertical = 12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp)
+    NimazCard(
+        modifier = modifier,
+        style = NimazCardStyle.FILLED,
+        tone = if (primary) NimazTone.PROMINENT else NimazTone.MUTED,
+        shape = RoundedCornerShape(14.dp),
+        elevation = 0.dp,
+        onClick = onClick
     ) {
-        NimazIcon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = fg,
-            iconSize = 21.dp
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = fg
-        )
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            NimazIcon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = fg,
+                iconSize = 21.dp
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = fg
+            )
+        }
     }
 }
 

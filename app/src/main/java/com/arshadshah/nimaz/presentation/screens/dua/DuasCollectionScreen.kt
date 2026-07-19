@@ -93,6 +93,11 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
+import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -399,22 +404,17 @@ private fun AdhkarListItem(
             Spacer(modifier = Modifier.width(12.dp))
 
             // Badge
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(MaterialTheme.colorScheme.primaryContainer)
-                    .padding(horizontal = 10.dp, vertical = 4.dp)
-            ) {
-                Text(
-                    text = pluralStringResource(
+            NimazBadge(
+                text = pluralStringResource(
                     R.plurals.duas_count_format,
                     category.duaCount,
                     category.duaCount
                 ),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            }
+                tone = NimazTone.ACCENT,
+                emphasis = NimazBadgeEmphasis.SOFT,
+                shape = NimazBadgeShape.ROUNDED,
+                size = NimazBadgeSize.SMALL
+            )
         }
     }
 }

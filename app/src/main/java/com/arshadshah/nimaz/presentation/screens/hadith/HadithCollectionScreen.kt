@@ -69,6 +69,10 @@ import com.arshadshah.nimaz.presentation.components.organisms.NimazStatsGrid
 import com.arshadshah.nimaz.presentation.viewmodel.HadithEvent
 import com.arshadshah.nimaz.presentation.viewmodel.HadithViewModel
 import kotlinx.coroutines.launch
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -220,30 +224,15 @@ private fun HadithOfTheDayCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(100))
-                        .background(NimazColors.Gold500.copy(alpha = 0.16f))
-                        .padding(horizontal = 12.dp, vertical = 5.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        NimazIcon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = NimazColors.GoldDark,
-                            iconSize = 14.dp
-                        )
-                        Text(
-                            text = stringResource(R.string.hadith_of_the_day),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = NimazColors.GoldDark,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
+                NimazBadge(
+                    text = stringResource(R.string.hadith_of_the_day),
+                    size = NimazBadgeSize.SMALL,
+                    icon = Icons.Default.Star,
+                    colors = NimazBadgeDefaults.feature(
+                        color = NimazColors.Gold500,
+                        emphasis = NimazBadgeEmphasis.SOFT
+                    )
+                )
                 grade?.let { HadithGradeChip(label = it.label, color = it.color) }
             }
 

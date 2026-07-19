@@ -131,8 +131,8 @@ private fun RecommendedSurahCard(
             // with the name — but stays available for anyone scanning by number.
             Text(
                 text = surah.number.toString(),
-                style = MaterialTheme.typography.displayMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.displaySmall,
+                fontWeight = FontWeight.ExtraBold,
                 color = MaterialTheme.colorScheme.primary.copy(alpha = GHOST_NUMERAL_ALPHA),
                 maxLines = 1,
                 modifier = Modifier
@@ -194,7 +194,7 @@ private fun RecommendedSurahCard(
 }
 
 /** Opacity of the decorative ghost numeral behind each recommended surah card. */
-private const val GHOST_NUMERAL_ALPHA = 0.09f
+private const val GHOST_NUMERAL_ALPHA = 0.3f
 
 @Preview(showBackground = true)
 @Composable

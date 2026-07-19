@@ -523,6 +523,13 @@
     <string name="quran_home_surah_info">Sure Bilgisi</string>
     <string name="quran_home_verse_of_the_day">GÜNÜN AYETİ</string>
     <string name="quran_home_verse_reference">%1$s · %2$d:%3$d</string>
+    <!-- Recommended surah card metadata: verse count and starting juz -->
+    <string name="quran_home_recommended_meta">%1$s · Cüz %2$d</string>
+    <string name="quran_home_read_verse">Oku</string>
+    <string name="quran_home_resume">Devam et</string>
+    <string name="quran_verses_label">Ayetler</string>
+    <string name="quran_home_recommended_a11y">%1$s, sure %2$d, %3$s</string>
+    <string name="quran_page_label">Sayfa</string>
     <string name="quran_home_recommended">Önerilen</string>
     <string name="quran_home_reason_friday">Cuma Sünneti</string>
     <string name="quran_home_reason_before_sleep">Uyumadan önce</string>

@@ -47,6 +47,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.viewmodel.DuaEvent
 import com.arshadshah.nimaz.presentation.viewmodel.DuaViewModel
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeEmphasis
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeShape
+import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -246,19 +250,13 @@ private fun DuaListItem(
                 // Repeat count badge
                 dua.repeatCount?.let { count ->
                     if (count > 0) {
-                        Box(
-                            modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(MaterialTheme.colorScheme.secondaryContainer)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            Text(
-                                text = "${count}x",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.SemiBold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
-                            )
-                        }
+                        NimazBadge(
+                            text = "${count}x",
+                            tone = NimazTone.ACCENT,
+                            emphasis = NimazBadgeEmphasis.SOFT,
+                            shape = NimazBadgeShape.ROUNDED,
+                            size = NimazBadgeSize.SMALL
+                        )
                     }
                 }
             }

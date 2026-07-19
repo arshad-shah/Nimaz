@@ -226,7 +226,10 @@ private fun CalendarSection(
         }
 
         NimazCalendar(
-            displayedMonth = YearMonth.from(state.selectedDate),
+            // Both the grid and the header title come from `month`, so paging
+            // can never move one without the other. Deriving the grid from
+            // `selectedDate` here is what left it stuck on the current month.
+            displayedMonth = month.displayedMonth ?: YearMonth.from(state.selectedDate),
             selectedDate = state.selectedDate,
             onDateSelected = { viewModel.onEvent(CalendarEvent.SelectDate(it)) },
             onPreviousMonth = { viewModel.onEvent(CalendarEvent.NavigateToPreviousMonth) },

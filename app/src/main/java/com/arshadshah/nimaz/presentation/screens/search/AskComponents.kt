@@ -286,28 +286,30 @@ internal fun AskDiscoveryCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 12.dp),
                 )
-                Row(
+                NimazCard(
                     modifier = Modifier
                         .padding(top = 12.dp)
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(11.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                        .fillMaxWidth(),
+                    style = NimazCardStyle.OUTLINED,
+                    shape = RoundedCornerShape(11.dp),
+                    elevation = 0.dp,
                 ) {
-                    Icon(
-                        imageVector = Icons.Outlined.Shield,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(top = 1.dp)
-                            .size(14.dp),
-                    )
-                    Text(
-                        text = stringResource(R.string.ai_discover_privacy),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
+                    Row(modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+                        Icon(
+                            imageVector = Icons.Outlined.Shield,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .padding(top = 1.dp)
+                                .size(14.dp),
+                        )
+                        Text(
+                            text = stringResource(R.string.ai_discover_privacy),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(start = 8.dp),
+                        )
+                    }
                 }
                 Row(
                     modifier = Modifier.padding(top = 14.dp),

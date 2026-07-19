@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.domain.model
 
 import java.time.LocalDate
+import java.time.YearMonth
 
 data class HijriDate(
     val day: Int,
@@ -118,7 +119,19 @@ data class CalendarMonth(
     val hijriYear: Int,
     val days: List<CalendarDay>,
     val events: List<IslamicEvent>
-)
+) {
+    /**
+     * The Gregorian month this page represents, taken from the days it actually
+     * contains.
+     *
+     * This is the single source of truth for "which month is on screen". The
+     * header title and the day grid must both derive from it: they were
+     * previously driven by `currentMonth` and `selectedDate` respectively, so
+     * paging the calendar moved the title while the grid stayed on today.
+     */
+    val displayedMonth: YearMonth?
+        get() = days.firstOrNull()?.gregorianDate?.let { YearMonth.from(it) }
+}
 
 // Pre-defined Islamic Events
 object IslamicEvents {
