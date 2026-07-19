@@ -50,6 +50,7 @@ import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.TasbihSession
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazLoadingState
@@ -174,9 +175,7 @@ private fun StatsSummaryCard(
         modifier = modifier.fillMaxWidth(),
         style = NimazCardStyle.FILLED,
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
-        )
+        tone = NimazCardTone.MUTED
     ) {
         Row(
             modifier = Modifier
@@ -305,8 +304,7 @@ private fun SessionCard(
         style = NimazCardStyle.OUTLINED,
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.colors(
-            container = MaterialTheme.colorScheme.surface,
-            border = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+            border = MaterialTheme.colorScheme.outlineVariant
         )
     ) {
         Row(

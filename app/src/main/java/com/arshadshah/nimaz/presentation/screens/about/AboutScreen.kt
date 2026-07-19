@@ -58,7 +58,7 @@ import com.arshadshah.nimaz.LocalInAppUpdateManager
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.core.util.UpdateState
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionTitle
@@ -287,7 +287,7 @@ private fun LinksCard(
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazCardTone.MUTED
     ) {
         LinkItem(
             Icons.Default.Email,
@@ -500,7 +500,7 @@ private fun DeveloperCard(modifier: Modifier = Modifier) {
     NimazCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazCardTone.MUTED
     ) {
       Row(
         modifier = Modifier
@@ -588,7 +588,7 @@ private fun CreditCell(label: String, provider: String, modifier: Modifier = Mod
     NimazCard(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surfaceVariant)
+        tone = NimazCardTone.MUTED
     ) {
       Column(
         modifier = Modifier

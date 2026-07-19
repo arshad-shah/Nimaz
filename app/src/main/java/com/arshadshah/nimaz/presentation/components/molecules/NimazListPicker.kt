@@ -238,7 +238,6 @@ private fun <T> PickerRow(
         selected = isSelected,
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surfaceContainer,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer,
             activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {

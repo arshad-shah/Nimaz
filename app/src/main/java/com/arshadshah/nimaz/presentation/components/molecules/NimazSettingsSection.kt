@@ -14,7 +14,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardLevel
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 
@@ -39,9 +39,7 @@ fun NimazSettingsSection(
                 style = NimazCardStyle.FILLED,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
-                colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.surfaceContainer
-                ),
+                level = NimazCardLevel.RAISED,
                 elevation = 0.dp
             ) {
                 Column(content = content)

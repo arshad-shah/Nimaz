@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -185,8 +186,13 @@ private fun CutoutBadge(text: String, fill: Color, fg: Color) {
     Box(
         modifier = Modifier
             .clip(RoundedCornerShape(6.dp))
-            .background(fill)
-            .padding(horizontal = 8.dp, vertical = 2.dp),
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.6f))
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                RoundedCornerShape(6.dp)
+            )
+            .padding(horizontal = 8.dp, vertical = 3.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(

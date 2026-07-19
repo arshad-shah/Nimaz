@@ -61,8 +61,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -238,9 +238,7 @@ fun NimazNumberStepper(
             modifier = modifier.fillMaxWidth(),
             style = NimazCardStyle.FILLED,
             shape = RoundedCornerShape(size.corner),
-            colors = NimazCardDefaults.colors(
-                container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-            )
+            tone = NimazCardTone.MUTED
         ) {
             Row(
                 modifier = Modifier

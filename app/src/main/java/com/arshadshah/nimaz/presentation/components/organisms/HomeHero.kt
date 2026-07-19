@@ -42,7 +42,6 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadge
 import com.arshadshah.nimaz.presentation.components.atoms.NimazBadgeSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
-import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.StatusBadge
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
@@ -161,7 +160,6 @@ fun HomeHero(
                 .padding(horizontal = 20.dp)
                 .offset(y = (-10).dp),
             shape = RoundedCornerShape(20.dp),
-            colors = NimazCardDefaults.colors(container = MaterialTheme.colorScheme.surface),
             elevation = 4.dp,
         ) {
             Row(

@@ -58,6 +58,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.molecules.NimazConfirmDialog
@@ -217,9 +218,7 @@ fun ChooseDhikrScreen(
                 style = NimazCardStyle.FILLED,
                 onClick = { onNavigateToAddPreset() },
                 shape = RoundedCornerShape(14.dp),
-                colors = NimazCardDefaults.colors(
-                    container = MaterialTheme.colorScheme.primaryContainer
-                )
+                tone = NimazCardTone.ACCENT
             ) {
                 Row(
                     modifier = Modifier
@@ -316,10 +315,7 @@ private fun FreeCountRow(selected: Boolean, onClick: () -> Unit) {
         onClick = onClick,
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.selectable(
-            container = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f),
-            border = null,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(
@@ -386,9 +382,7 @@ private fun DhikrRow(
         shape = RoundedCornerShape(12.dp),
         colors = NimazCardDefaults.selectable(
             container = MaterialTheme.colorScheme.surface,
-            border = null,
-            activeContainer = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            activeBorder = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+            activeBorder = MaterialTheme.colorScheme.primary
         )
     ) {
         Row(
