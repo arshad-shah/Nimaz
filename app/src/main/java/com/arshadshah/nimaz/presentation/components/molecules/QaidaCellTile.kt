@@ -2,7 +2,6 @@ package com.arshadshah.nimaz.presentation.components.molecules
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,7 +16,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,6 +30,8 @@ import com.arshadshah.nimaz.domain.model.QaidaCell
 import com.arshadshah.nimaz.domain.model.TokenType
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.HarakatArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
+import com.arshadshah.nimaz.presentation.components.atoms.NimazCardDefaults
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIconVariant
@@ -63,29 +63,33 @@ fun QaidaCellTile(
     val elevation by animateDpAsState(if (isPlaying) 6.dp else 1.dp, label = "cellElevation")
     // A heard-but-not-playing tile carries a teal hairline so a returning
     // learner can see at a glance which sounds they've already practised.
-    val border = when {
-        isPlaying -> null
-        isCompleted -> BorderStroke(1.dp, MaterialTheme.colorScheme.primary)
-        else -> BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
-    }
+    val borderColor =
+        if (isCompleted) MaterialTheme.colorScheme.primary
+        else MaterialTheme.colorScheme.outline
     val translitColor =
         if (isPlaying) MaterialTheme.colorScheme.onPrimary
         else MaterialTheme.colorScheme.onSurfaceVariant
     val doneSuffix = if (isCompleted) ", done" else ""
 
     Box(modifier = modifier) {
-        Surface(
+        NimazCard(
             modifier = Modifier
                 .defaultMinSize(minWidth = 72.dp, minHeight = 84.dp)
                 .semantics {
                     contentDescription = "${cell.transliteration}, tap to hear$doneSuffix"
                 }
                 .clickable { onTap(cell) },
+            selected = isPlaying,
             shape = RoundedCornerShape(NimazCornerRadius.Large),
-            color = container,
-            tonalElevation = elevation,
-            shadowElevation = elevation,
-            border = border,
+            colors = NimazCardDefaults.selectable(
+                container = container,
+                content = MaterialTheme.colorScheme.onSurface,
+                border = borderColor,
+                activeContainer = container,
+                activeContent = MaterialTheme.colorScheme.onPrimary,
+                activeBorder = null,
+            ),
+            elevation = elevation,
         ) {
             Column(
                 modifier = Modifier.padding(

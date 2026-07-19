@@ -12,7 +12,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +24,7 @@ import com.arshadshah.nimaz.domain.model.QaidaLetter
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
+import com.arshadshah.nimaz.presentation.components.atoms.NimazSurfaceCard
 import com.arshadshah.nimaz.presentation.theme.NimazCornerRadius
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
 import com.arshadshah.nimaz.presentation.theme.ThemeMode
@@ -41,14 +41,12 @@ fun QaidaLetterTile(
     modifier: Modifier = Modifier,
 ) {
     val desc = "Letter ${letter.nameTransliteration}" + if (heard) ", heard" else ""
-    Surface(
+    NimazSurfaceCard(
         modifier = modifier
             .aspectRatio(1f)
             .semantics { contentDescription = desc }
             .clickable { onClick(letter) },
         shape = RoundedCornerShape(NimazCornerRadius.Large),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 1.dp,
     ) {
         Box(contentAlignment = Alignment.Center) {
             ArabicText(
