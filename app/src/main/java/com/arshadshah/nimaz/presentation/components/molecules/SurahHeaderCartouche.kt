@@ -21,13 +21,11 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arshadshah.nimaz.R
 import com.arshadshah.nimaz.domain.model.RevelationType
 import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
@@ -63,8 +61,8 @@ private val CartouchePanelGradient = listOf(NimazColors.Primary800, NimazColors.
  * Surah header in the style of a manuscript unwan cartouche:
  * an ogee-pointed panel with a gold outer stroke and teal echo stroke,
  * a 12-lobe shamsa number medallion anchored on the left tip,
- * and a bud finial on the right tip. Ayah count and revelation type
- * render as small badges under the surah name.
+ * and a bud finial on the right tip. Revelation type renders as
+ * a small badge under the surah name.
  *
  * Reuses [ArabicText] for the surah name, [NimazBadge] for the badges,
  * [toArabicNumber] for optional Arabic-Indic numerals and the
@@ -85,7 +83,6 @@ fun SurahHeaderCartouche(
         number = surah.number,
         englishName = surah.nameEnglish,
         arabicName = surah.nameArabic,
-        ayahCount = surah.ayahCount,
         revelationType = surah.revelationType.displayLabel(),
         modifier = modifier,
         height = height,
@@ -104,7 +101,6 @@ fun SurahHeaderCartouche(
     number: Int,
     englishName: String,
     arabicName: String,
-    ayahCount: Int,
     revelationType: String,
     modifier: Modifier = Modifier,
     height: Dp = 96.dp,
@@ -182,7 +178,7 @@ fun SurahHeaderCartouche(
                 Text(label, color = teal, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
             }
 
-            // name + badges, Arabic name at the end
+            // name + revelation badge, Arabic name at the end
             Row(
                 Modifier
                     .fillMaxSize()
@@ -205,18 +201,6 @@ fun SurahHeaderCartouche(
                             size = NimazBadgeSize.SMALL,
                             colors = NimazBadgeDefaults.feature(
                                 color = gold,
-                                emphasis = NimazBadgeEmphasis.OUTLINED,
-                            ),
-                        )
-                        NimazBadge(
-                            text = pluralStringResource(
-                                R.plurals.surah_ayah_count_format,
-                                ayahCount,
-                                ayahCount,
-                            ),
-                            size = NimazBadgeSize.SMALL,
-                            colors = NimazBadgeDefaults.feature(
-                                color = teal,
                                 emphasis = NimazBadgeEmphasis.OUTLINED,
                             ),
                         )
@@ -290,21 +274,18 @@ private fun SurahHeaderCartouchePreview() {
                 number = 1,
                 englishName = "Al-Fatiha",
                 arabicName = "الفاتحة",
-                ayahCount = 7,
                 revelationType = "Meccan",
             )
             SurahHeaderCartouche(
                 number = 2,
                 englishName = "Al-Baqarah",
                 arabicName = "البقرة",
-                ayahCount = 286,
                 revelationType = "Medinan",
             )
             SurahHeaderCartouche(
                 number = 114,
                 englishName = "An-Nas",
                 arabicName = "الناس",
-                ayahCount = 6,
                 revelationType = "Meccan",
                 useArabicIndicNumerals = true,
             )
@@ -340,7 +321,6 @@ private fun SurahHeaderCartoucheBismillahPreview() {
             number = 2,
             englishName = "Al-Baqarah",
             arabicName = "البقرة",
-            ayahCount = 286,
             revelationType = "Medinan",
             showBismillah = true,
         )
