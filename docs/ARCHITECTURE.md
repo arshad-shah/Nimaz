@@ -542,16 +542,17 @@ typed route object.
       Pass `onCheckedChange = null` when an enclosing clickable row owns the toggle (the
       `NimazSettingsItem` pattern — the row toggles, the switch just renders state). It centralised
       the settings/notification toggles, the tasbih left-handed switch and the calendar preview.
-    - a **swipe-to-delete saved-item row** (a stored ayah/hadith/dua reference shown with a badge,
-      relative timestamp, Arabic preview and overflow menu) is `SwipeableSavedCard(title, timestamp,
-      menuActions, onClick, onDelete, subtitle = …, arabicText = …, note = …) { leading }`
+    - a **saved-item row** (a stored ayah/hadith/dua reference shown with a badge, relative
+      timestamp, Arabic preview and overflow menu) is
+      `SwipeableSavedCard(title, timestamp, menuActions, onClick, onDelete, enableSwipeToDelete = …,
+      subtitle = …, arabicText = …, note = …) { leading }`
       (`components/organisms/SwipeableSavedCard.kt`), **not** a hand-rolled `SwipeToDismissBox` +
       `NimazCard` per screen. The same file owns the two pieces it is built from, reusable on their
-      own: `SwipeToDeleteBox(onDelete) { … }` (the end→start swipe gesture + error-tinted backdrop —
-      back it with an Undo snackbar) and `NimazOverflowMenu(actions = listOf(NimazMenuAction(text,
+      own: `SwipeToDeleteBox(onDelete) { … }` (the end→start swipe gesture + error-tinted backdrop,
+      enabled only where the screen opts in) and `NimazOverflowMenu(actions = listOf(NimazMenuAction(text,
       icon, onClick, destructive = …)))` (the `⋮` button + anchored action menu over `NimazDropdownMenu`).
-      It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render and
-      behave identically.
+      It centralised the **Bookmarks** screen and the **Quran Favourites** tab so both render
+      identically while keeping delete in the overflow menu.
     - the **Quran "manuscript" ornaments** share one geometry and one set of atoms so the surah
       header, surah list, Juz/Page grids and mushaf page frame read as a single system. The surah
       header is `SurahHeaderCartouche(surah, showBismillah = …)`
