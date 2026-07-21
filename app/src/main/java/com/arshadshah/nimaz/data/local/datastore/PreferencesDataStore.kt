@@ -399,7 +399,7 @@ class PreferencesDataStore @Inject constructor(
         put(PreferencesKeys.ADHAN_ENABLED, enabled)
 
     override val selectedAdhanSound: Flow<String> =
-        preference(PreferencesKeys.SELECTED_ADHAN_SOUND, "MISHARY")
+        preference(PreferencesKeys.SELECTED_ADHAN_SOUND, "ABDUL_BASIT")
 
     override suspend fun setSelectedAdhanSound(sound: String) =
         put(PreferencesKeys.SELECTED_ADHAN_SOUND, sound)

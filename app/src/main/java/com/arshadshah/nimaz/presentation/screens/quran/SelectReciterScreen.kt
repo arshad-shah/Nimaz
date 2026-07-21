@@ -66,7 +66,6 @@ data class ReciterInfo(
 )
 
 private val popularReciters = listOf(
-    ReciterInfo("mishary", "Mishary Rashid Alafasy", "Kuwait", "Murattal"),
     ReciterInfo("sudais", "Abdul Rahman Al-Sudais", "Saudi Arabia", "Murattal"),
     ReciterInfo("abdulbasit", "Abdul Basit Abdul Samad", "Egypt", "Mujawwad"),
     ReciterInfo("maher", "Maher Al Muaiqly", "Saudi Arabia", "Murattal"),
@@ -86,7 +85,7 @@ fun SelectReciterScreen(
     quranViewModel: QuranViewModel = hiltViewModel()
 ) {
     val quranState by viewModel.quranState.collectAsState()
-    val selectedReciterId = quranState.selectedReciterId ?: "mishary"
+    val selectedReciterId = quranState.selectedReciterId ?: "sudais"
     var searchQuery by remember { mutableStateOf("") }
     LocalContext.current
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()

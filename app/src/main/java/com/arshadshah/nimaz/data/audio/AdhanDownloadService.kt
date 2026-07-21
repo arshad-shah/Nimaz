@@ -162,7 +162,7 @@ class AdhanDownloadService : Service() {
         serviceScope.launch {
             try {
                 adhanAudioManager.cleanupTempFiles()
-                val sound = AdhanSound.MISHARY
+                val sound = AdhanSound.ABDUL_BASIT
                 val results = downloadBothVariants(sound)
                 ensureBeepExists()
                 showCompletionNotification(sound.displayName, results)

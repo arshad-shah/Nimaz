@@ -114,7 +114,7 @@ data class NotificationSettingsUiState(
     val fridayReminderMinutes: Int = 60,
     val khatamReminderEnabled: Boolean = false,
     val khatamReminderTime: String = "06:00",
-    val selectedAdhanSound: String = "MISHARY"
+    val selectedAdhanSound: String = "ABDUL_BASIT"
 )
 
 /**

@@ -144,7 +144,7 @@ class AppInitializer @Inject constructor(
             adhanAudioManager.cleanupTempFiles()
             adhanAudioManager.invalidateStaleDownloads()
 
-            val defaultSound = AdhanSound.MISHARY
+            val defaultSound = AdhanSound.ABDUL_BASIT
             val beepReady = adhanAudioManager.isDownloaded(AdhanSound.SIMPLE_BEEP, false)
 
             if (!adhanAudioManager.isFullyDownloaded(defaultSound) || !beepReady) {
