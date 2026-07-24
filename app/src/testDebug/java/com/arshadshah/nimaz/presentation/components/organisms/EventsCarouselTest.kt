@@ -13,20 +13,20 @@ class EventsCarouselTest {
     val composeRule = createComponentComposeRule()
 
     @Test
-    fun `renders the first page headline`() {
+    fun `renders the first page eyebrow and body`() {
         composeRule.setThemedContent {
             EventsCarousel(
                 events = listOf(
                     EventCardUi(
                         occasion = EventOccasion.GENERIC,
                         eyebrow = "Occasion",
-                        headline = "Blessed day",
                         body = "A warm line.",
                     )
                 )
             )
         }
-        composeRule.onNodeWithText("Blessed day").assertExists()
+        composeRule.onNodeWithText("Occasion").assertExists()
+        composeRule.onNodeWithText("A warm line.").assertExists()
     }
 
     @Test
@@ -34,6 +34,6 @@ class EventsCarouselTest {
         composeRule.setThemedContent {
             EventsCarousel(events = emptyList())
         }
-        composeRule.onNodeWithText("Blessed day").assertDoesNotExist()
+        composeRule.onNodeWithText("Occasion").assertDoesNotExist()
     }
 }

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Close
@@ -23,7 +22,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -71,17 +69,13 @@ fun EventCard(
     icon: ImageVector,
     eyebrow: String,
     arabic: String?,
-    headline: String? = null,
     body: String,
     modifier: Modifier = Modifier,
     containerAccent: Color = accent,
-    transliteration: String? = null,
-    proof: Pair<String, String>? = null,
     trailing: (@Composable () -> Unit)? = null,
     highlight: (@Composable () -> Unit)? = null,
     ornament: EventOrnament = EventOrnament.None,
     primaryAction: EventAction? = null,
-    secondaryAction: EventAction? = null,
     onDismiss: (() -> Unit)? = null,
     fillHeight: Boolean = false,
 ) {
@@ -161,17 +155,6 @@ fun EventCard(
                     Spacer(Modifier.height(8.dp))
                 }
 
-                if (headline != null) {
-                    Text(
-                        text = headline,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.height(4.dp))
-                }
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodySmall,
@@ -179,17 +162,6 @@ fun EventCard(
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (transliteration != null) {
-                    Spacer(Modifier.height(4.dp))
-                    Text(
-                        text = transliteration,
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Medium,
-                        color = accent,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
 
                 if (fillHeight) Spacer(Modifier.weight(1f))
 
@@ -198,35 +170,7 @@ fun EventCard(
                     it()
                 }
 
-                if (proof != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(11.dp))
-                            .background(accent.copy(alpha = 0.08f))
-                            .padding(horizontal = 12.dp, vertical = 9.dp)
-                    ) {
-                        Text(
-                            text = proof.first,
-                            style = MaterialTheme.typography.labelSmall,
-                            fontWeight = FontWeight.Bold,
-                            color = accent,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            text = proof.second,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                if (primaryAction != null || secondaryAction != null) {
+                if (primaryAction != null) {
                     Spacer(Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
@@ -236,20 +180,11 @@ fun EventCard(
                     )
                     Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        primaryAction?.let {
+                        primaryAction.let {
                             NimazButton(
                                 text = it.label,
                                 onClick = it.onClick,
                                 variant = NimazButtonVariant.TONAL,
-                                size = NimazButtonSize.SMALL,
-                                accent = accent,
-                            )
-                        }
-                        secondaryAction?.let {
-                            NimazButton(
-                                text = it.label,
-                                onClick = it.onClick,
-                                variant = NimazButtonVariant.TEXT,
                                 size = NimazButtonSize.SMALL,
                                 accent = accent,
                             )
@@ -295,13 +230,9 @@ private fun EventCard_Full_Light_Preview() {
             icon = Icons.Filled.Celebration,
             eyebrow = "Eid al-Fitr",
             arabic = "عيد مبارك",
-            headline = "Eid Mubarak",
             body = "Thirty days behind you. May every one of them be accepted.",
-            transliteration = "taqabbal Allāhu minnā wa minkum",
-            proof = "Al-Baqarah 2:185" to "…that you may complete the count and glorify God.",
             ornament = EventOrnament.Burst(play = false),
             primaryAction = EventAction("Eid prayer time") {},
-            secondaryAction = EventAction("Later") {},
             onDismiss = {},
             modifier = Modifier.padding(16.dp),
         )
@@ -321,13 +252,9 @@ private fun EventCard_Full_Dark_Preview() {
             icon = Icons.Filled.Celebration,
             eyebrow = "Eid al-Fitr",
             arabic = "عيد مبارك",
-            headline = "Eid Mubarak",
             body = "Thirty days behind you. May every one of them be accepted.",
-            transliteration = "taqabbal Allāhu minnā wa minkum",
-            proof = "Al-Baqarah 2:185" to "…that you may complete the count and glorify God.",
             ornament = EventOrnament.Burst(play = false),
             primaryAction = EventAction("Eid prayer time") {},
-            secondaryAction = EventAction("Later") {},
             onDismiss = {},
             modifier = Modifier.padding(16.dp),
         )
@@ -343,7 +270,6 @@ private fun EventCard_Minimal_Light_Preview() {
             icon = Icons.Filled.Celebration,
             eyebrow = "Occasion",
             arabic = null,
-            headline = "A blessed day",
             body = "A short, warm line with no Arabic, proof, or actions.",
             modifier = Modifier.padding(16.dp),
         )

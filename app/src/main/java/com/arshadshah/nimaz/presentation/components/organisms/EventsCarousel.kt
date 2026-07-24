@@ -15,23 +15,20 @@ import com.arshadshah.nimaz.presentation.theme.NimazTheme
 data class EventCardUi(
     val occasion: EventOccasion,
     val eyebrow: String,
-    val headline: String,
     val body: String,
     val arabic: String? = null,
-    val transliteration: String? = null,
-    val proof: Pair<String, String>? = null,
     val primaryAction: EventAction? = null,
-    val secondaryAction: EventAction? = null,
     val onDismiss: (() -> Unit)? = null,
     val jumuahTime: String = "",
     val timeUntilJumuah: String = "",
     val isJumuahPassed: Boolean = false,
 )
 
-// Tune this after eyeballing previews: tall enough for the richest bounded card (Eid: eyebrow
-// 1 + arabic 1 + divider + headline 1 + body 2 + proof (1 + 2) + CTA row, all maxLines-capped),
-// short enough that Jumu'ah does not look sparse. Uniform for all cards (carousel constraint).
-private val EventCardPageHeight = 268.dp
+// Direction A: every event card is the compact Jumu'ah shape — icon well + name (eyebrow) +
+// arabic + one body line + one action (or the Jumu'ah countdown). Home cards do not render
+// headline/transliteration/proof/second-action, so this height matches Jumu'ah's content and
+// leaves no empty space. Uniform for all cards (carousel constraint); tune here if needed.
+private val EventCardPageHeight = 200.dp
 
 /**
  * Horizontal carousel of occasion cards, reusing [NimazCarousel] (edge-peek + dots,
@@ -69,12 +66,8 @@ fun EventsCarousel(
                 ornament = v.ornament,
                 eyebrow = e.eyebrow,
                 arabic = e.arabic,
-                headline = e.headline,
                 body = e.body,
-                transliteration = e.transliteration,
-                proof = e.proof,
                 primaryAction = e.primaryAction,
-                secondaryAction = e.secondaryAction,
                 onDismiss = e.onDismiss,
                 fillHeight = true,
             )
@@ -92,16 +85,12 @@ private fun EventsCarousel_Preview() {
                     occasion = EventOccasion.EID_AL_FITR,
                     eyebrow = "Eid al-Fitr",
                     arabic = "عيد مبارك",
-                    headline = "Eid Mubarak",
                     body = "Thirty days behind you. May every one be accepted.",
-                    transliteration = "taqabbal Allāhu minnā wa minkum",
-                    proof = "Al-Baqarah 2:185" to "…complete the count and glorify God.",
                     primaryAction = EventAction("Eid prayer time") {},
                 ),
                 EventCardUi(
                     occasion = EventOccasion.JUMUAH,
                     eyebrow = "Jumu'ah",
-                    headline = "Jumu'ah Mubarak",
                     body = "\"The best day on which the sun rises is Friday.\"",
                     jumuahTime = "1:30 PM",
                     timeUntilJumuah = "3h 15m",

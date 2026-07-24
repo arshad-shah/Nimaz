@@ -117,12 +117,8 @@ private fun EventCardOccasionSample(occasion: EventOccasion) {
         ornament = v.ornament,
         eyebrow = occasion.name.lowercase().replaceFirstChar { it.uppercase() },
         arabic = "عيد مبارك",
-        headline = "Blessed occasion",
         body = "A short, warm line about the day and what it means.",
-        transliteration = "taqabbal Allāhu minnā wa minkum",
-        proof = "Al-Baqarah 2:185" to "…that you may complete the count and glorify God.",
         primaryAction = EventAction("Learn more") {},
-        secondaryAction = EventAction("Later") {},
         modifier = Modifier.padding(16.dp),
     )
 }

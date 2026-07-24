@@ -19,46 +19,18 @@ class EventCardTest {
     val composeRule = createComponentComposeRule()
 
     @Test
-    fun `renders headline and body`() {
+    fun `renders eyebrow and body`() {
         composeRule.setThemedContent {
             EventCard(
                 accent = Color(0xFF2E7D32),
                 icon = Icons.Filled.Celebration,
                 eyebrow = "Eid al-Fitr",
                 arabic = "عيد مبارك",
-                headline = "Eid Mubarak",
                 body = "Thirty days behind you.",
             )
         }
-        composeRule.onNodeWithText("Eid Mubarak").assertExists()
+        composeRule.onNodeWithText("Eid al-Fitr").assertExists()
         composeRule.onNodeWithText("Thirty days behind you.").assertExists()
-    }
-
-    @Test
-    fun `proof chip is hidden when proof is null`() {
-        composeRule.setThemedContent {
-            EventCard(
-                accent = Color(0xFF2E7D32),
-                icon = Icons.Filled.Celebration,
-                eyebrow = "e", arabic = null, headline = "h", body = "b",
-                proof = null,
-            )
-        }
-        composeRule.onNodeWithText("Al-Baqarah 2:185", substring = true).assertDoesNotExist()
-    }
-
-    @Test
-    fun `proof chip renders ref and text when present`() {
-        composeRule.setThemedContent {
-            EventCard(
-                accent = Color(0xFF2E7D32),
-                icon = Icons.Filled.Celebration,
-                eyebrow = "e", arabic = null, headline = "h", body = "b",
-                proof = "Al-Baqarah 2:185" to "…complete the count.",
-            )
-        }
-        composeRule.onNodeWithText("Al-Baqarah 2:185", substring = true).assertExists()
-        composeRule.onNodeWithText("…complete the count.", substring = true).assertExists()
     }
 
     @Test
@@ -68,7 +40,7 @@ class EventCardTest {
             EventCard(
                 accent = Color(0xFF2E7D32),
                 icon = Icons.Filled.Celebration,
-                eyebrow = "e", arabic = null, headline = "h", body = "b",
+                eyebrow = "e", arabic = null, body = "b",
                 primaryAction = EventAction("Go") { clicked = true },
             )
         }
@@ -83,7 +55,7 @@ class EventCardTest {
             EventCard(
                 accent = Color(0xFF2E7D32),
                 icon = Icons.Filled.Celebration,
-                eyebrow = "e", arabic = null, headline = "h", body = "b",
+                eyebrow = "e", arabic = null, body = "b",
                 onDismiss = { dismissed = true },
             )
         }

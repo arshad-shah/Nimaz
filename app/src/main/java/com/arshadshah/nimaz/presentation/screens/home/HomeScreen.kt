@@ -316,7 +316,6 @@ private fun HomeCompactContent(
                     EventCardUi(
                         occasion = EventOccasion.JUMUAH,
                         eyebrow = jumuahMubarak,
-                        headline = jumuahMubarak,
                         body = jumuahHadithQuote,
                         jumuahTime = state.jumuahTime,
                         timeUntilJumuah = state.timeUntilJumuah,
@@ -329,15 +328,12 @@ private fun HomeCompactContent(
                     EventCardUi(
                         occasion = c.event.toOccasion(),
                         eyebrow = c.eyebrow,
-                        headline = c.headline,
+                        // Direction A: compact card — name (eyebrow) + arabic + one body line + one
+                        // action, matching the Jumu'ah card's height.
                         body = c.body,
                         arabic = c.arabic,
-                        transliteration = c.transliteration,
-                        proof = if (c.proofRef != null && c.proofText != null) c.proofRef to c.proofText else null,
                         primaryAction = if (c.ctaLabel != null && c.route != null)
                             EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        secondaryAction = if (c.cta2Label != null && c.route2 != null)
-                            EventAction(c.cta2Label) { onOpenAnnouncementRoute(c.route2) } else null,
                         onDismiss = if (c.dismissable && c.announcementId != null)
                             { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
                     )
@@ -470,7 +466,6 @@ private fun HomeTabletContent(
                     EventCardUi(
                         occasion = EventOccasion.JUMUAH,
                         eyebrow = stringResource(R.string.jumuah_mubarak),
-                        headline = stringResource(R.string.jumuah_mubarak),
                         body = stringResource(R.string.jumuah_hadith_quote),
                         jumuahTime = state.jumuahTime,
                         timeUntilJumuah = state.timeUntilJumuah,
@@ -483,15 +478,12 @@ private fun HomeTabletContent(
                     EventCardUi(
                         occasion = c.event.toOccasion(),
                         eyebrow = c.eyebrow,
-                        headline = c.headline,
+                        // Direction A: compact card — name (eyebrow) + arabic + one body line + one
+                        // action, matching the Jumu'ah card's height.
                         body = c.body,
                         arabic = c.arabic,
-                        transliteration = c.transliteration,
-                        proof = if (c.proofRef != null && c.proofText != null) c.proofRef to c.proofText else null,
                         primaryAction = if (c.ctaLabel != null && c.route != null)
                             EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
-                        secondaryAction = if (c.cta2Label != null && c.route2 != null)
-                            EventAction(c.cta2Label) { onOpenAnnouncementRoute(c.route2) } else null,
                         onDismiss = if (c.dismissable && c.announcementId != null)
                             { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
                     )
