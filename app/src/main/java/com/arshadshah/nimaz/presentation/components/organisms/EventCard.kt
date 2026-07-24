@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.components.organisms
 
+import android.content.res.Configuration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Celebration
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -39,7 +42,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QaidaCelebrationBurst
 import com.arshadshah.nimaz.presentation.components.atoms.QuranOrnamentalDivider
+import com.arshadshah.nimaz.presentation.theme.NimazPalette
 import com.arshadshah.nimaz.presentation.theme.NimazPatternStyle
+import com.arshadshah.nimaz.presentation.theme.NimazTheme
+import com.arshadshah.nimaz.presentation.theme.ThemeMode
 
 /** Background/emphasis treatment for an [EventCard]. */
 sealed interface EventOrnament {
@@ -257,5 +263,70 @@ private fun EventCardOrnamentScope(
             }
 
         EventOrnament.None, EventOrnament.Divider -> content()
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "EventCard — full (light)")
+@Composable
+private fun EventCard_Full_Light_Preview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        EventCard(
+            accent = NimazPalette.GoldDark,
+            containerAccent = NimazPalette.Gold500,
+            icon = Icons.Filled.Celebration,
+            eyebrow = "Eid al-Fitr",
+            arabic = "عيد مبارك",
+            headline = "Eid Mubarak",
+            body = "Thirty days behind you. May every one of them be accepted.",
+            transliteration = "taqabbal Allāhu minnā wa minkum",
+            proof = "Al-Baqarah 2:185" to "…that you may complete the count and glorify God.",
+            ornament = EventOrnament.Burst(play = false),
+            primaryAction = EventAction("Eid prayer time") {},
+            secondaryAction = EventAction("Later") {},
+            onDismiss = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(
+    showBackground = true, widthDp = 400, name = "EventCard — full (dark)",
+    uiMode = Configuration.UI_MODE_NIGHT_YES or Configuration.UI_MODE_TYPE_NORMAL
+)
+@Composable
+private fun EventCard_Full_Dark_Preview() {
+    NimazTheme(themeMode = ThemeMode.DARK) {
+        EventCard(
+            accent = NimazPalette.GoldDark,
+            containerAccent = NimazPalette.Gold500,
+            icon = Icons.Filled.Celebration,
+            eyebrow = "Eid al-Fitr",
+            arabic = "عيد مبارك",
+            headline = "Eid Mubarak",
+            body = "Thirty days behind you. May every one of them be accepted.",
+            transliteration = "taqabbal Allāhu minnā wa minkum",
+            proof = "Al-Baqarah 2:185" to "…that you may complete the count and glorify God.",
+            ornament = EventOrnament.Burst(play = false),
+            primaryAction = EventAction("Eid prayer time") {},
+            secondaryAction = EventAction("Later") {},
+            onDismiss = {},
+            modifier = Modifier.padding(16.dp),
+        )
+    }
+}
+
+@Preview(showBackground = true, widthDp = 400, name = "EventCard — minimal (light)")
+@Composable
+private fun EventCard_Minimal_Light_Preview() {
+    NimazTheme(themeMode = ThemeMode.LIGHT) {
+        EventCard(
+            accent = NimazPalette.Teal700,
+            icon = Icons.Filled.Celebration,
+            eyebrow = "Occasion",
+            arabic = null,
+            headline = "A blessed day",
+            body = "A short, warm line with no Arabic, proof, or actions.",
+            modifier = Modifier.padding(16.dp),
+        )
     }
 }
