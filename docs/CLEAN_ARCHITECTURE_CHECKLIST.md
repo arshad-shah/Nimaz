@@ -240,6 +240,9 @@ rg -n 'Card\(|Surface\(|Box\(.*\.background\(' app/src/main/java/com/arshadshah/
 - [x] ~~**Hand-rolled badge/pill duplicates.**~~ **Resolved.** `NimazLabelChip` (+ its test),
   `TabPill`, `CategoryTab`, `ExampleQuestionChip`, `CitedChip` and `CutoutBadge` all collapsed into
   `NimazBadge`.
+- [x] ~~**`JumuahCard`'s hand-rolled `Box` icon well and `Box` divider.**~~ **Resolved.** Replaced
+  with `NimazIcon(CONTAINED)` well and `QuranOrnamentalDivider` atoms, improving design-system
+  consistency.
 - [ ] **Cards that need a border still bypass `tone`.** A `NimazTone` resolves container + content
   but **not** a stroke, so any bordered card falls back to an explicit
   `NimazCardDefaults.colors(container = …, border = …)`. 10 files today. Fix by teaching the tone
