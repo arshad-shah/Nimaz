@@ -115,11 +115,11 @@ object HijriDateCalculator {
     }
 
     /**
-     * Get today's Hijri date.
+     * Get today's Hijri date, optionally offset by [offsetDays] to correct for local
+     * moon-sighting differences from the tabular (Umm al-Qura) calendar.
      */
-    fun today(): HijriDate {
-        return toHijri(LocalDate.now())
-    }
+    fun today(offsetDays: Int = 0): HijriDate =
+        toHijri(LocalDate.now().plusDays(offsetDays.toLong()))
 
     /**
      * Check if a given Hijri date falls in Ramadan.
