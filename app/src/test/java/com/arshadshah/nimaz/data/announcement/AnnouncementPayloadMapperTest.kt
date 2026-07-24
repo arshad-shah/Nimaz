@@ -1,6 +1,7 @@
 package com.arshadshah.nimaz.data.announcement
 
 import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.CelebrationEvent
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 
@@ -131,5 +132,67 @@ class AnnouncementPayloadMapperTest {
         val announcement = mapper.fromPayload(payload)!!
         assertThat(announcement.ctaLabel).isNull()
         assertThat(announcement.route).isNull()
+    }
+
+    @Test
+    fun `celebration payload parses event and rich fields`() {
+        val a = mapper.fromPayload(
+            mapOf(
+                "id" to "2027-eid", "type" to "celebration", "event" to "eid_al_fitr",
+                "title" to "Eid Mubarak", "body" to "…",
+                "arabic" to "تقبل الله", "transliteration" to "taqabbal Allah",
+                "proof_ref" to "Al-Baqarah 2:185", "proof_text" to "…complete the count.",
+                "cta_label" to "Eid prayer", "route" to "prayer/times",
+                "cta2_label" to "Takbir", "route2" to "dua/reader/takbir",
+                "starts_at" to "2027-03-07T18:00:00Z",
+            )
+        )
+        assertThat(a).isNotNull()
+        assertThat(a!!.type).isEqualTo(AnnouncementType.CELEBRATION)
+        assertThat(a.event).isEqualTo(CelebrationEvent.EID_AL_FITR)
+        assertThat(a.arabic).isEqualTo("تقبل الله")
+        assertThat(a.proofRef).isEqualTo("Al-Baqarah 2:185")
+        assertThat(a.cta2Label).isEqualTo("Takbir")
+        assertThat(a.route2).isEqualTo("dua/reader/takbir")
+        assertThat(a.startsAtMillis).isNotNull()
+    }
+
+    @Test
+    fun `unknown event degrades to GENERIC not null`() {
+        val a = mapper.fromPayload(
+            mapOf("id" to "x", "type" to "celebration", "event" to "wat",
+                  "title" to "t", "body" to "b")
+        )
+        assertThat(a).isNotNull()
+        assertThat(a!!.event).isEqualTo(CelebrationEvent.GENERIC)
+    }
+
+    @Test
+    fun `event ignored for non-celebration types`() {
+        val a = mapper.fromPayload(
+            mapOf("id" to "x", "type" to "feature", "event" to "eid_al_fitr",
+                  "title" to "t", "body" to "b")
+        )
+        assertThat(a!!.event).isNull()
+    }
+
+    @Test
+    fun `half a proof pair is dropped, rest survives`() {
+        val a = mapper.fromPayload(
+            mapOf("id" to "x", "type" to "celebration", "title" to "t", "body" to "b",
+                  "proof_ref" to "only ref")
+        )
+        assertThat(a).isNotNull()
+        assertThat(a!!.proofRef).isNull()
+        assertThat(a.proofText).isNull()
+    }
+
+    @Test
+    fun `malformed starts_at rejects the whole payload`() {
+        val a = mapper.fromPayload(
+            mapOf("id" to "x", "type" to "celebration", "title" to "t", "body" to "b",
+                  "starts_at" to "not-a-date")
+        )
+        assertThat(a).isNull()
     }
 }
