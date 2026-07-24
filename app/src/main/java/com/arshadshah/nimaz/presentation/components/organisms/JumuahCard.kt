@@ -41,7 +41,6 @@ fun JumuahCard(
         ornament = v.ornament,
         eyebrow = stringResource(R.string.jumuah_mubarak),
         arabic = stringResource(R.string.jumuah_arabic),
-        headline = stringResource(R.string.jumuah_mubarak),
         body = stringResource(R.string.jumuah_hadith_quote),
         fillHeight = fillHeight,
         trailing = if (jumuahTime.isNotEmpty()) {

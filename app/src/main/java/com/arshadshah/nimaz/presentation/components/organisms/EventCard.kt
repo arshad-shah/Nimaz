@@ -70,7 +70,7 @@ fun EventCard(
     icon: ImageVector,
     eyebrow: String,
     arabic: String?,
-    headline: String,
+    headline: String? = null,
     body: String,
     modifier: Modifier = Modifier,
     containerAccent: Color = accent,
@@ -156,13 +156,15 @@ fun EventCard(
                     Spacer(Modifier.height(12.dp))
                 }
 
-                Text(
-                    text = headline,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Spacer(Modifier.height(4.dp))
+                if (headline != null) {
+                    Text(
+                        text = headline,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(4.dp))
+                }
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodySmall,
