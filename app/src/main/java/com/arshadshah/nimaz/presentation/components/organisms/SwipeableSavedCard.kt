@@ -51,12 +51,13 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownMenu
 import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownRow
 
 /**
- * The saved-item card family — one place for the swipe-to-delete plumbing, the overflow
+ * The saved-item card family — one place for optional swipe-to-delete plumbing, the overflow
  * action menu and the card layout shared by the Bookmarks screen and the Quran Favourites
  * tab. Two features that store ayah/hadith/dua references render identically because they
- * lean on the same three pieces here:
+ * lean on the same pieces here:
  *
- * - [SwipeToDeleteBox] — the end→start swipe-to-delete gesture and its error-tinted backdrop.
+ * - [SwipeToDeleteBox] — the end→start swipe-to-delete gesture and its error-tinted backdrop
+ *   (used only when swipe deletion is enabled by the caller).
  * - [NimazOverflowMenu] — the `⋮` overflow button + anchored action menu, driven by a list
  *   of [NimazMenuAction]s.
  * - [SwipeableSavedCard] — the full card (swipe wrapper + header with a leading badge,
@@ -163,8 +164,8 @@ fun SwipeToDeleteBox(
 }
 
 /**
- * The shared saved-item card: a [SwipeToDeleteBox] wrapping a [NimazCard] whose header is a
- * [leading] badge slot + relative "Added …" timestamp + [NimazOverflowMenu], followed by a
+ * The shared saved-item card: an optional [SwipeToDeleteBox] around a [NimazCard] whose header
+ * is a [leading] badge slot + relative "Added …" timestamp + [NimazOverflowMenu], followed by a
  * bold [title], an optional [subtitle], an optional gold-divided [arabicText] preview and an
  * optional italic [note] preview.
  *
@@ -172,7 +173,9 @@ fun SwipeToDeleteBox(
  * @param timestamp epoch millis the item was saved, rendered as a relative "Added …" label.
  * @param menuActions overflow-menu commands (share, edit note, delete/remove…).
  * @param onClick tap on the card body (typically navigates to the item).
- * @param onDelete fired by the swipe gesture; back it with an Undo snackbar.
+ * @param onDelete fired by the swipe gesture when [enableSwipeToDelete] is true; back it with an
+ * Undo snackbar.
+ * @param enableSwipeToDelete whether to enable the end→start swipe-to-delete gesture.
  * @param leading the header badge slot, drawn at the start of the header row.
  */
 @Composable
@@ -182,13 +185,14 @@ fun SwipeableSavedCard(
     menuActions: List<NimazMenuAction>,
     onClick: () -> Unit,
     onDelete: () -> Unit,
+    enableSwipeToDelete: Boolean = true,
     modifier: Modifier = Modifier,
     subtitle: String? = null,
     arabicText: String? = null,
     note: String? = null,
     leading: @Composable () -> Unit,
 ) {
-    SwipeToDeleteBox(onDelete = onDelete, modifier = modifier) {
+    val card: @Composable () -> Unit = {
         NimazCard(
             modifier = Modifier.fillMaxWidth(),
             onClick = onClick,
@@ -266,5 +270,10 @@ fun SwipeableSavedCard(
                 }
             }
         }
+    }
+    if (enableSwipeToDelete) {
+        SwipeToDeleteBox(onDelete = onDelete, modifier = modifier) { card() }
+    } else {
+        Box(modifier = modifier) { card() }
     }
 }

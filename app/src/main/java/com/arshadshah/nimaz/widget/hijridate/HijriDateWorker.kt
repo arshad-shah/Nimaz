@@ -8,10 +8,12 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.widget.core.WidgetWork
 import com.arshadshah.nimaz.widget.core.updateWidgetState
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -20,7 +22,8 @@ import java.util.Locale
 @HiltWorker
 class HijriDateWorker @AssistedInject constructor(
     @Assisted private val context: Context,
-    @Assisted workerParams: WorkerParameters
+    @Assisted workerParams: WorkerParameters,
+    private val settingsRepository: SettingsRepository
 ) : CoroutineWorker(context, workerParams) {
 
     companion object {
@@ -54,8 +57,9 @@ class HijriDateWorker @AssistedInject constructor(
         }
 
         return try {
-            val hijriDate = HijriDateCalculator.today()
-            val today = LocalDate.now()
+            val offset = settingsRepository.hijriDayOffset.first()
+            val hijriDate = HijriDateCalculator.today(offset)
+            val today = LocalDate.now().plusDays(offset.toLong())
             val dayOfWeek = today.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault())
             val gregorianDate = "${today.dayOfMonth} ${
                 today.month.getDisplayName(

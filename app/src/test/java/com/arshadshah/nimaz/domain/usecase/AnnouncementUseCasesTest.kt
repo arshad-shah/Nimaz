@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.core.navigation.Route
+import com.arshadshah.nimaz.core.navigation.announcementRoute
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AnnouncementType
@@ -108,18 +110,35 @@ class AnnouncementUseCasesTest {
         assertThat(repo.dismissed).contains(announcement.id)
     }
 
-    @Test
-    fun `resolve route classifies url, known key, unknown key and blank`() {
-        val resolve = ResolveAnnouncementRouteUseCase(
-            isKnownFeatureKey = { it == "search/ask" },
-        )
+    // helper resolver mirroring the real one
+    private val resolve = ResolveAnnouncementRouteUseCase(resolveFeatureKey = ::announcementRoute)
 
+    @Test
+    fun `known feature key resolves to NavigateToFeature with route`() {
+        val action = resolve("quran/surah/18")
+        assertThat(action).isEqualTo(
+            AnnouncementAction.NavigateToFeature("quran/surah/18", Route.QuranReader(18))
+        )
+    }
+
+    @Test
+    fun `https url resolves to OpenUrl`() {
         assertThat(resolve("https://nimaz.arshadshah.com/privacy"))
             .isEqualTo(AnnouncementAction.OpenUrl("https://nimaz.arshadshah.com/privacy"))
-        assertThat(resolve("search/ask"))
-            .isEqualTo(AnnouncementAction.NavigateToFeature("search/ask"))
-        assertThat(resolve("brand/new/key")).isEqualTo(AnnouncementAction.None)
+    }
+
+    @Test
+    fun `unknown key resolves to None`() {
+        assertThat(resolve("brand/new")).isEqualTo(AnnouncementAction.None)
+        assertThat(resolve("")).isEqualTo(AnnouncementAction.None)
         assertThat(resolve(null)).isEqualTo(AnnouncementAction.None)
+    }
+
+    @Test
+    fun `resolve route classifies url, known key, unknown key and blank`() {
+        assertThat(resolve("search/ask"))
+            .isEqualTo(AnnouncementAction.NavigateToFeature("search/ask", Route.GlobalSearch))
+        assertThat(resolve("brand/new/key")).isEqualTo(AnnouncementAction.None)
         assertThat(resolve("  ")).isEqualTo(AnnouncementAction.None)
         // http (non-TLS) is not allowlisted
         assertThat(resolve("http://example.com")).isEqualTo(AnnouncementAction.None)

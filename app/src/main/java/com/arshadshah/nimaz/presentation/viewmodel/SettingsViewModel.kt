@@ -65,6 +65,7 @@ data class GeneralSettingsUiState(
     val theme: AppTheme = AppTheme.SYSTEM,
     val language: AppLanguage = AppLanguage.ENGLISH,
     val useHijriPrimary: Boolean = false,
+    val hijriDayOffset: Int = 0,
     val use24HourFormat: Boolean = false,
     val showSeconds: Boolean = false,
     val hapticFeedback: Boolean = true,
@@ -186,6 +187,7 @@ sealed interface SettingsEvent {
     data class SetTheme(val theme: AppTheme) : SettingsEvent
     data class SetLanguage(val language: AppLanguage) : SettingsEvent
     data class SetHijriPrimary(val enabled: Boolean) : SettingsEvent
+    data class SetHijriDayOffset(val days: Int) : SettingsEvent
     data class Set24HourFormat(val enabled: Boolean) : SettingsEvent
     data class SetShowSeconds(val enabled: Boolean) : SettingsEvent
     data class SetHapticFeedback(val enabled: Boolean) : SettingsEvent
@@ -450,6 +452,11 @@ class SettingsViewModel @Inject constructor(
             is SettingsEvent.SetHijriPrimary -> {
                 _generalState.update { it.copy(useHijriPrimary = event.enabled) }
                 viewModelScope.launch { settingsRepository.setUseHijriPrimary(event.enabled) }
+            }
+
+            is SettingsEvent.SetHijriDayOffset -> {
+                _generalState.update { it.copy(hijriDayOffset = event.days) }
+                viewModelScope.launch { settingsRepository.setHijriDayOffset(event.days) }
             }
 
             is SettingsEvent.Set24HourFormat -> {
@@ -866,6 +873,7 @@ class SettingsViewModel @Inject constructor(
             val hapticFeedback = settingsRepository.hapticFeedback.first()
             val use24Hour = settingsRepository.use24HourFormat.first()
             val useHijri = settingsRepository.useHijriPrimary.first()
+            val hijriOffset = settingsRepository.hijriDayOffset.first()
 
             _generalState.update {
                 it.copy(
@@ -878,6 +886,7 @@ class SettingsViewModel @Inject constructor(
                     hapticFeedback = hapticFeedback,
                     use24HourFormat = use24Hour,
                     useHijriPrimary = useHijri,
+                    hijriDayOffset = hijriOffset,
                     patternStyle = patternStyle
                 )
             }

@@ -73,6 +73,10 @@ class PreferencesDataStore @Inject constructor(
         val USE_24_HOUR_FORMAT = booleanPreferencesKey("use_24_hour_format")
         val USE_HIJRI_PRIMARY = booleanPreferencesKey("use_hijri_primary")
 
+        // Signed day offset (-2..+2) correcting the tabular Hijri date for local
+        // moon-sighting differences.
+        val HIJRI_DAY_OFFSET = intPreferencesKey("hijri_day_offset")
+
         // Language
         val APP_LANGUAGE = stringPreferencesKey("app_language")
         val ARABIC_FONT_SIZE = stringPreferencesKey("arabic_font_size")
@@ -256,6 +260,12 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setUseHijriPrimary(enabled: Boolean) =
         put(PreferencesKeys.USE_HIJRI_PRIMARY, enabled)
+
+    override val hijriDayOffset: Flow<Int> =
+        preference(PreferencesKeys.HIJRI_DAY_OFFSET, 0)
+
+    override suspend fun setHijriDayOffset(days: Int) =
+        put(PreferencesKeys.HIJRI_DAY_OFFSET, days.coerceIn(-2, 2))
 
     // Language
     override val appLanguage: Flow<String> = preference(PreferencesKeys.APP_LANGUAGE, "en")
@@ -722,7 +732,7 @@ class PreferencesDataStore @Inject constructor(
                     // Try numeric types
                     value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains(
                         "location_id"
-                    )) -> {
+                    ) || key.contains("offset")) -> {
                         preferences[intPreferencesKey(key)] = value.toInt()
                     }
 

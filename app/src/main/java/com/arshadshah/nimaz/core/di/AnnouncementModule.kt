@@ -4,9 +4,12 @@ import com.arshadshah.nimaz.BuildConfig
 import com.arshadshah.nimaz.core.navigation.announcementRoute
 import com.arshadshah.nimaz.data.repository.AnnouncementRepositoryImpl
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
+import com.arshadshah.nimaz.domain.repository.SettingsRepository
 import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DismissAnnouncementUseCase
 import com.arshadshah.nimaz.domain.usecase.ObserveActiveAnnouncementUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveEventCardsUseCase
+import com.arshadshah.nimaz.domain.usecase.ObserveLocalEventsUseCase
 import com.arshadshah.nimaz.domain.usecase.ResolveAnnouncementRouteUseCase
 import com.arshadshah.nimaz.domain.usecase.SetAnnouncementUseCase
 import dagger.Module
@@ -35,7 +38,23 @@ object AnnouncementModule {
             setAnnouncement = SetAnnouncementUseCase(repository),
             dismissAnnouncement = DismissAnnouncementUseCase(repository),
             resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(
-                isKnownFeatureKey = { key -> announcementRoute(key) != null },
+                resolveFeatureKey = ::announcementRoute,
             ),
         )
+
+    @Provides
+    @Singleton
+    fun provideObserveLocalEventsUseCase(
+        settingsRepository: SettingsRepository,
+    ): ObserveLocalEventsUseCase = ObserveLocalEventsUseCase(settingsRepository)
+
+    @Provides
+    @Singleton
+    fun provideObserveEventCardsUseCase(
+        observeLocalEvents: ObserveLocalEventsUseCase,
+        announcementUseCases: AnnouncementUseCases,
+    ): ObserveEventCardsUseCase = ObserveEventCardsUseCase(
+        local = { observeLocalEvents() },
+        observe = { announcementUseCases.observeActiveAnnouncement() },
+    )
 }
