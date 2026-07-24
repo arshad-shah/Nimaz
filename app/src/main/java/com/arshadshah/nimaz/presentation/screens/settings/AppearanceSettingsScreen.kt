@@ -55,6 +55,7 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazPatternBackground
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
 import com.arshadshah.nimaz.presentation.components.atoms.NimazSectionHeader
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
+import com.arshadshah.nimaz.presentation.components.molecules.NimazNumberStepper
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
 import com.arshadshah.nimaz.presentation.theme.LocalIsDarkTheme
@@ -144,6 +145,10 @@ fun AppearanceSettingsScreen(
                     useHijriPrimary = generalState.useHijriPrimary,
                     onHijriPrimaryToggle = {
                         viewModel.onEvent(SettingsEvent.SetHijriPrimary(!generalState.useHijriPrimary))
+                    },
+                    hijriDayOffset = generalState.hijriDayOffset,
+                    onHijriDayOffsetChange = {
+                        viewModel.onEvent(SettingsEvent.SetHijriDayOffset(it))
                     }
                 )
             }
@@ -526,7 +531,9 @@ private fun PatternSwatch(
 @Composable
 private fun HomeScreenSettingsCard(
     useHijriPrimary: Boolean,
-    onHijriPrimaryToggle: () -> Unit
+    onHijriPrimaryToggle: () -> Unit,
+    hijriDayOffset: Int,
+    onHijriDayOffsetChange: (Int) -> Unit
 ) {
     NimazMenuGroup {
         NimazSettingsItem(
@@ -534,6 +541,14 @@ private fun HomeScreenSettingsCard(
             subtitle = stringResource(R.string.appearance_show_islamic_date_subtitle),
             checked = useHijriPrimary,
             onCheckedChange = { onHijriPrimaryToggle() }
+        )
+        NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        NimazNumberStepper(
+            label = stringResource(R.string.hijri_day_offset_label),
+            value = hijriDayOffset,
+            onValueChange = onHijriDayOffsetChange,
+            minValue = -2,
+            maxValue = 2,
         )
     }
 }

@@ -1047,6 +1047,7 @@
     <string name="appearance_24hour_subtitle">Use 24-hour format</string>
     <string name="appearance_show_islamic_date">Show Islamic Date</string>
     <string name="appearance_show_islamic_date_subtitle">Display Hijri calendar</string>
+    <string name="hijri_day_offset_label">Adjust Hijri date</string>
 
     <!-- Select Reciter Screen -->
     <string name="select_reciter_title">Select Reciter</string>
