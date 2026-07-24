@@ -4,14 +4,12 @@ import android.content.res.Configuration
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -26,6 +24,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,8 +57,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.arshadshah.nimaz.R
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButton
-import com.arshadshah.nimaz.presentation.components.atoms.NimazButtonVariant
 import com.arshadshah.nimaz.presentation.components.atoms.NimazIcon
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPager
 import com.arshadshah.nimaz.presentation.components.atoms.NimazScreenScaffold
@@ -472,6 +469,53 @@ fun QuranReaderScreen(
                 onStopClick = { viewModel.onEvent(QuranEvent.StopAudio) }
             )
         },
+        floatingActionButton = {
+            // Khatam bulk-completion action. Floated (rather than an item pinned to
+            // the top of the list) so it stays reachable on long surahs without
+            // scrolling back up — issue #260. Only meaningful in the surah list view;
+            // page view drives khatam per page from MushafPageBar.
+            val khatamSurah = state.surahWithAyahs
+            if (
+                state.activeKhatamId != null &&
+                state.readingMode == ReadingMode.SURAH &&
+                !usePageView &&
+                khatamSurah != null
+            ) {
+                val surahAyahIds = remember(khatamSurah.ayahs) {
+                    khatamSurah.ayahs.map { it.id }.toSet()
+                }
+                val allRead = surahAyahIds.isNotEmpty() &&
+                    surahAyahIds.all { it in state.khatamReadAyahIds }
+
+                when {
+                    !allRead -> ExtendedFloatingActionButton(
+                        onClick = {
+                            viewModel.onEvent(
+                                QuranEvent.MarkSurahAsReadForKhatam(khatamSurah.surah.number)
+                            )
+                        },
+                        icon = {
+                            NimazIcon(
+                                imageVector = Icons.Filled.CheckCircle,
+                                contentDescription = null,
+                            )
+                        },
+                        text = { Text(stringResource(R.string.quran_mark_all_read)) },
+                    )
+
+                    khatamSurah.surah.number < 114 -> ExtendedFloatingActionButton(
+                        onClick = { onNavigateToNextSurah(khatamSurah.surah.number + 1) },
+                        icon = {
+                            NimazIcon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                                contentDescription = null,
+                            )
+                        },
+                        text = { Text(stringResource(R.string.quran_continue_next_surah)) },
+                    )
+                }
+            }
+        },
         // Opts out of the app ornament: long-form Arabic needs a plain backdrop.
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
@@ -801,10 +845,19 @@ fun QuranReaderScreen(
                     }
                 }
 
+                // Leave room under the last ayah for the floating khatam action so it
+                // never covers content (issue #260).
+                val listBottomPadding =
+                    if (state.activeKhatamId != null && state.readingMode == ReadingMode.SURAH) {
+                        88.dp
+                    } else {
+                        16.dp
+                    }
+
                 LazyColumn(
                     state = listState,
                     modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(bottom = 16.dp)
+                    contentPadding = PaddingValues(bottom = listBottomPadding)
                 ) {
                     // Surah Banner or Juz Banner
                     if (state.readingMode == ReadingMode.SURAH) {
@@ -819,47 +872,6 @@ fun QuranReaderScreen(
                                     showBismillah = (surahNumber ?: 0) != 9 && (surahNumber
                                         ?: 0) != 1
                                 )
-                            }
-
-                            // Khatam mode: "Mark all as read" or "Continue to next surah"
-                            if (state.activeKhatamId != null) {
-                                item(key = "khatam_mark_surah") {
-                                    val surahAyahIds = surahWithAyahs.ayahs.map { it.id }.toSet()
-                                    val allRead =
-                                        surahAyahIds.isNotEmpty() && surahAyahIds.all { it in state.khatamReadAyahIds }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(horizontal = 15.dp),
-                                        horizontalArrangement = Arrangement.Center
-                                    ) {
-                                        if (allRead) {
-                                            if (surahWithAyahs.surah.number < 114) {
-                                                NimazButton(
-                                                    text = stringResource(R.string.quran_continue_next_surah),
-                                                    onClick = {
-                                                        onNavigateToNextSurah(surahWithAyahs.surah.number + 1)
-                                                    },
-                                                    variant = NimazButtonVariant.TEXT,
-                                                    leadingIcon = Icons.AutoMirrored.Filled.ArrowForward
-                                                )
-                                            }
-                                        } else {
-                                            NimazButton(
-                                                text = stringResource(R.string.quran_mark_all_read),
-                                                onClick = {
-                                                    viewModel.onEvent(
-                                                        QuranEvent.MarkSurahAsReadForKhatam(
-                                                            surahWithAyahs.surah.number
-                                                        )
-                                                    )
-                                                },
-                                                variant = NimazButtonVariant.TEXT,
-                                                leadingIcon = Icons.Filled.CheckCircle
-                                            )
-                                        }
-                                    }
-                                }
                             }
                         }
                     }
