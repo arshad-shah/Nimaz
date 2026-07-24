@@ -27,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicText
 import com.arshadshah.nimaz.presentation.components.atoms.ArabicTextSize
@@ -94,7 +95,7 @@ fun EventCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .then(if (fillHeight) Modifier.fillMaxSize() else Modifier)
-                    .padding(15.dp)
+                    .padding(12.dp)
             ) {
                 // Header: well + eyebrow/arabic + trailing + dismiss
                 Row(
@@ -121,13 +122,17 @@ fun EventCard(
                                 text = eyebrow,
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             if (arabic != null) {
                                 ArabicText(
                                     text = arabic,
                                     size = ArabicTextSize.SMALL,
-                                    color = accent
+                                    color = accent,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -150,10 +155,10 @@ fun EventCard(
                     QuranOrnamentalDivider(
                         color = accent.copy(alpha = 0.5f),
                         horizontalPadding = 8.dp,
-                        verticalPadding = 10.dp,
+                        verticalPadding = 6.dp,
                     )
                 } else {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                 }
 
                 if (headline != null) {
@@ -161,14 +166,18 @@ fun EventCard(
                         text = headline,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     Spacer(Modifier.height(4.dp))
                 }
                 Text(
                     text = body,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
                 if (transliteration != null) {
                     Spacer(Modifier.height(4.dp))
@@ -176,48 +185,56 @@ fun EventCard(
                         text = transliteration,
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Medium,
-                        color = accent
+                        color = accent,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
 
+                if (fillHeight) Spacer(Modifier.weight(1f))
+
                 highlight?.let {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                     it()
                 }
 
                 if (proof != null) {
-                    Spacer(Modifier.height(12.dp))
+                    Spacer(Modifier.height(8.dp))
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(11.dp))
                             .background(accent.copy(alpha = 0.08f))
-                            .padding(horizontal = 13.dp, vertical = 11.dp)
+                            .padding(horizontal = 12.dp, vertical = 9.dp)
                     ) {
                         Text(
                             text = proof.first,
                             style = MaterialTheme.typography.labelSmall,
                             fontWeight = FontWeight.Bold,
-                            color = accent
+                            color = accent,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(Modifier.height(2.dp))
                         Text(
                             text = proof.second,
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
 
                 if (primaryAction != null || secondaryAction != null) {
-                    Spacer(Modifier.height(11.dp))
+                    Spacer(Modifier.height(8.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(1.dp)
                             .background(MaterialTheme.colorScheme.outline.copy(alpha = 0.6f))
                     )
-                    Spacer(Modifier.height(11.dp))
+                    Spacer(Modifier.height(8.dp))
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         primaryAction?.let {
                             NimazButton(

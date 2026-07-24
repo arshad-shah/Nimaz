@@ -28,6 +28,11 @@ data class EventCardUi(
     val isJumuahPassed: Boolean = false,
 )
 
+// Tune this after eyeballing previews: tall enough for the richest bounded card (Eid: eyebrow
+// 1 + arabic 1 + divider + headline 1 + body 2 + proof (1 + 2) + CTA row, all maxLines-capped),
+// short enough that Jumu'ah does not look sparse. Uniform for all cards (carousel constraint).
+private val EventCardPageHeight = 268.dp
+
 /**
  * Horizontal carousel of occasion cards, reusing [NimazCarousel] (edge-peek + dots,
  * swipe-only). One fixed [pageHeight] for every page. Renders nothing when empty.
@@ -36,7 +41,7 @@ data class EventCardUi(
 fun EventsCarousel(
     events: List<EventCardUi>,
     modifier: Modifier = Modifier,
-    pageHeight: Dp = 352.dp,
+    pageHeight: Dp = EventCardPageHeight,
     horizontalPadding: Dp = 20.dp,
 ) {
     if (events.isEmpty()) return
@@ -77,7 +82,7 @@ fun EventsCarousel(
     }
 }
 
-@Preview(showBackground = true, widthDp = 400, heightDp = 380)
+@Preview(showBackground = true, widthDp = 400, heightDp = 300)
 @Composable
 private fun EventsCarousel_Preview() {
     NimazTheme {
