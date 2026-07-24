@@ -110,6 +110,82 @@ nimaz-pro-data/
 - Pickthall (optional)
 - Yusuf Ali (optional)
 
+## 16-line IndoPak Mushaf data (issue #265 — sub-task 1/7 of #263)
+
+> **Status: sourcing plan + schema only, data not yet acquired.** This automated pass ran with no
+> outbound network access, so it could not download, validate, or license-clear the actual
+> dataset — that work still needs a run with network access plus a human sign-off on licensing
+> (the parent issue's own estimate — "3–5 days, dominated by data validation + license
+> verification" — assumes a human in the loop). What follows is the sourcing research, target
+> schema, and an acquisition script scaffold so that follow-up work doesn't start from zero. See
+> `nimaz-pro-data/scripts/download_indopak_mushaf_data.py` and
+> `nimaz-pro-data/json/LICENSES_INDOPAK.md`.
+
+**Why existing `ayahs.json` isn't enough.** `ayahs.json` / `AyahEntity` (`text_arabic` /
+`text_uthmani`, `page`) is keyed to the **604-page Madani Mushaf** in Uthmani script. A
+line-accurate "16-line" IndoPak display needs, per the printed 16-line Mushaf: IndoPak glyph text
+for every ayah, and a **548-page, ≤16-lines-per-page** layout map (page, line, line type,
+word/segment position). Neither exists anywhere in this repo today.
+
+**Candidate sources** (re-verify license terms live at acquisition time — not re-checked in this
+pass):
+
+| Source | What it provides | License note |
+|---|---|---|
+| [Quranic Universal Library (QUL) / Tarteel.ai](https://qul.tarteel.ai/docs/mushaf-layout) | Mushaf-layout exports (SQLite/JSON) for multiple standard editions, including a 16-line IndoPak layout across 548 pages | Positioned for building open Quran apps, but requires requesting/downloading from QUL and reading their current terms before redistributing content in-app. |
+| [Quran Foundation Content API](https://api-docs.quran.foundation/docs/tutorials/fonts/page-layout/) | `page-layout` endpoint, including an `INDOPAK_16_LINES` mushaf type across 548 pages | Requires registering an app for OAuth2 client credentials. Confirm whether the ToS permits **baking a full bulk extract into a shipped app** vs. only live per-request calls before using this as the shipped-data source. |
+| Tanzil.net | Uthmani Arabic text (already the source for `ayahs.json`) | Does **not** provide IndoPak script glyphs or any line-layout data — not sufficient alone for this task. |
+
+**Do not copy a specific commercial edition's typesetting** (e.g. Taj Company) as the layout
+source — the issue itself flags this as copyrighted. QUL's and Quran Foundation's own
+line-break determinations (structured data, not scanned page images) are the safer path, but
+their redistribution terms still need explicit confirmation.
+
+**Target files & schema**, reconciled against the existing 6,236-ayah id space
+(`AyahEntity.id`):
+
+`nimaz-pro-data/json/ayahs_indopak.json` — one row per existing ayah id:
+```json
+[
+  { "ayah_id": 1, "text_indopak": "..." }
+]
+```
+
+`nimaz-pro-data/json/mushaf_layout_indopak16.json` — one row per line-segment (a line may hold
+one or more ayahs/partial ayahs, a surah header, or a basmalah):
+```json
+[
+  {
+    "page_number": 1,
+    "line_number": 1,
+    "line_type": "surah_header",
+    "surah_id": 1,
+    "ayah_id": null,
+    "first_word_position": null,
+    "last_word_position": null
+  },
+  {
+    "page_number": 1,
+    "line_number": 3,
+    "line_type": "ayah",
+    "surah_id": 1,
+    "ayah_id": 1,
+    "first_word_position": 1,
+    "last_word_position": 4
+  }
+]
+```
+`line_type` is one of `ayah` / `surah_header` / `basmalah`. `ayah_id` is null for `surah_header`
+lines. Word positions are 1-based within the ayah, so a line spanning part of a long ayah records
+just the word range it covers.
+
+**Acceptance criteria (from #265, not yet met by this pass):**
+- [ ] `ayahs_indopak.json` covers all 6,236 ayah ids.
+- [ ] `mushaf_layout_indopak16.json` covers all 548 pages, each with ≤16 lines.
+- [ ] `nimaz-pro-data/json/LICENSES_INDOPAK.md` records the exact source, version/commit, and
+  license actually used — this pass ships a template only; fields must be filled in from the real
+  source at acquisition time, not assumed.
+
 ---
 
 # 2. Hadith Data
