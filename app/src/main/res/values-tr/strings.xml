@@ -917,6 +917,7 @@
     <string name="appearance_24hour_subtitle">24 saat biçimini kullan</string>
     <string name="appearance_show_islamic_date">İslami Tarihi Göster</string>
     <string name="appearance_show_islamic_date_subtitle">Hicri takvimi göster</string>
+    <string name="hijri_day_offset_label">Hicri tarihi ayarla</string>
     <string name="select_reciter_title">Okuyucu Seç</string>
     <string name="select_reciter_search_hint">Okuyucu ara…</string>
     <string name="select_reciter_currently_selected">ŞU AN SEÇİLİ</string>
