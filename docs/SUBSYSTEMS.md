@@ -81,7 +81,7 @@ shared `widget/core/` package and two top-level helpers.
 Each widget = a `GlanceAppWidget` subclass (`provideGlance` → `provideContent { GlanceTheme { … } }`, reads `currentState<T>()`) + a `GlanceAppWidgetReceiver` (the manifest-registered `BroadcastReceiver`; `onEnabled` starts refresh, `onDisabled` cancels). State is a `@Serializable sealed interface` with `Loading`/`Success(data)`/`Error(message)`. Colors come from `res/color` via `ColorProvider(R.color.widget_*)` — no hardcoded colors.
 
 **Data access — two patterns.**
-1. **`@HiltWorker` injection (main path).** Workers inject real deps directly (e.g. `NextPrayerWorker` injects `PrayerTimeCalculator` + `PreferencesDataStore`; `PrayerTrackerWorker` injects `PrayerDao`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure persists `Error` + `Result.retry()` for the first 3 attempts. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
+1. **`@HiltWorker` injection (main path).** Workers inject real deps directly (e.g. `NextPrayerWorker` injects `PrayerTimeCalculator` + `PreferencesDataStore`; `PrayerTrackerWorker` injects `PrayerDao`; `HijriDateWorker` + `HijriCalendarWorker` inject `PreferencesDataStore` to read the `hijriDayOffset`). Each `doWork()` returns `Result.success()` early if no widgets are placed, computes fresh data, persists via `setWidgetState(...) → Success`, and on failure persists `Error` + `Result.retry()` for the first 3 attempts. This only works because `NimazApp` provides the `HiltWorkerFactory` (§3).
 2. **Hilt `@EntryPoint`** — `widget/WidgetEntryPoint.kt` exposes `prayerDao()` via `EntryPointAccessors.fromApplication(...)`. Used by the **only interactive widget** (Prayer Tracker): its checkbox click handler (`togglePrayerStatus` in `PrayerTrackerWidget.kt`) writes to Room from inside the composable click callback (not a Worker), then re-renders via `PrayerTrackerWorker.enqueueImmediateWork(context)`.
 
 **Update mechanism — three layers.**
@@ -235,6 +235,8 @@ suspend fun setCalculationMethod(method: String) = put(PreferencesKeys.CALCULATI
 ```
 Getters expose `Flow<…>` only (never `MutableStateFlow`/`LiveData`); writes are `suspend`. Internal helpers `preference(key, default)` / `preference(key)` / `put(key, value)` keep the surface uniform. `private object PreferencesKeys` holds all typed keys and is private to the class — consumers never touch raw keys.
 
+**Hijri date offset.** `hijri_day_offset: Int` (range −2 to +2, default 0) allows users to adjust the displayed Hijri date relative to the system calculation. Stored in `PreferencesDataStore`, read by both Hijri widgets (`HijriDateWorker`, `HijriCalendarWorker`) and passed to `HijriDateCalculator.today(offsetDays)` to compute today's Hijri date for event matching and display. Wired via the "Adjust Hijri date" stepper in `AppearanceSettingsScreen`.
+
 **Aggregate.** `val userPreferences: Flow<UserPreferences>` maps a curated subset of keys into a top-level `data class UserPreferences(...)` for one-shot reads of the common cross-cutting settings (used by `SettingsViewModel`, `LocationViewModel`, `AppInitializer`, `BootReceiver`, `WidgetsScreen`).
 
 **Bulk ops.** `clearAllData()`, `exportAllPreferences(): Map<String,String>`, `importPreferences(map)` (type-infers values back to keys, skips `onboarding_completed`) — used by the sync subsystem (§10).
@@ -295,7 +297,7 @@ no deps). All third-party usage is isolated here.
 
 **Inputs/outputs.** `getPrayerTimes(lat, lon, date, method, asr, highLat, adjustments)` → `List<PrayerTime>` (raw `Instant`s; supports per-prayer minute `adjustments`). `calculatePrayerTimes(date, location)` / `…ForRange(...)` take a domain `Location` and return `PrayerTimes`/`List<PrayerTimes>` (Adhan `Instant`s converted to `LocalDateTime` in the location's zone). Returns **domain models** (`domain/model/PrayerModels.kt`), never Adhan types. Settings come from `PreferencesDataStore` (string prefs parsed to enums by the caller).
 
-**Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`).
+**Hijri conversion** — `core/util/HijriDateCalculator.kt`, a stateless Kotlin `object` (no Hilt). It does **not** use `ummalqura`; it delegates to the platform `java.time.chrono.HijrahChronology.INSTANCE` (OS-updated Umm al-Qura). Provides `toHijri`/`toGregorian`, Ramadan helpers, validity checks, and a hardcoded Islamic-events calendar (`getIslamicEvents`/`getUpcomingEvents`). **Day-offset support:** `today(offsetDays = 0)` returns today's Hijri date adjusted by the user's `hijriDayOffset` preference (§6), used for local event matching and both Hijri widgets. Other `now()` helpers (`isTodayRamadan`, `daysUntilNextRamadan`, …) currently ignore the offset — see deferred follow-up in §9.
 
 **Wiring.** No module — both are constructor-injected / static. `PrayerTimeCalculator` is injected into `PrayerRepositoryImpl` and (a deviation from the use-case rule) directly into several ViewModels, widget workers, and `PrayerNotificationScheduler`.
 
@@ -455,10 +457,21 @@ message ever sent there is zero behaviour change — the feature is inert by def
 silent, and strictly separate from the prayer/adhan channels (§4), which are never touched.
 
 **Payload contract** (console → Additional options → Custom data): required `id`, `type`
-(`feature|privacy|tos|changelog`), `title`, `body`; optional `cta_label`, `route` (allowlist key
+(`feature|privacy|tos|changelog|celebration`), `title`, `body`; optional `cta_label`, `route` (allowlist key
 or `https://…`), `min_version_code`, `max_version_code`, `expires_at` (ISO-8601 UTC),
 `dismissable` (default `true`). Never use reserved keys (`from`, `message_type`, `google.*`,
 `gcm.*`). FCM is not E2E-encrypted — public content only.
+
+**Celebration type (new).** When `type = celebration`, the following **8 optional payload keys** 
+are parsed and stored in the `Announcement` domain model + `AnnouncementEntity` (both via `AnnouncementPayloadMapper`):
+`event` (key matching `CelebrationEvent` enum, e.g. `eid_al_fitr`), `arabic` (event name Arabic), 
+`transliteration` (romanized name), `proof_ref` (Quranic/Hadith reference), `proof_text` (proof snippet), 
+`cta2_label` (secondary CTA text), `route2` (secondary navigation destination), `starts_at` (ISO-8601 or 
+Unix epoch ms; validates and gates display). All 8 keys are registered in `PAYLOAD_KEYS` alongside 
+the existing keys. Malformed `starts_at` rejects the entire payload (mapper returns `null`). Missing/blank 
+`event` is accepted (payload may be title/body only, no event type). Proof pairs (ref/text) drop both if 
+only one is present (all-or-nothing). Celebrations are **excluded from the banner** — they render as 
+`EventCard`s in Home's `EventsCarousel` instead, avoiding double-render against pushed announcements.
 
 **Analytics.** `announcement_shown` / `announcement_cta_clicked` / `announcement_dismissed`
 (helpers in `AppAnalytics`), on top of FCM's own delivery/open reports. A new event
@@ -466,6 +479,11 @@ or `https://…`), `min_version_code`, `max_version_code`, `expires_at` (ISO-860
 when a non-empty announcement route resolves to `null` (e.g. unparseable key or integer
 out of range); this tracks incomplete content or malformed payloads without coupling the domain
 use case to analytics.
+
+**Home event cards (local + pushed celebrations).** The Home screen's `EventsCarousel` displays celebration occasions from two sources, merged by `ObserveEventCardsUseCase`: 
+1. **Local events** — `ObserveLocalEventsUseCase` matches the static `IslamicEvents.events` calendar against today's Hijri date (via `HijriDateCalculator.today(hijriDayOffset)`) and emits `CelebrationEvent.toOccasion()` presentation models. 
+2. **Pushed celebrations** — FCM announcements with `type = celebration` are mapped to `EventOccasion` and merged by the use case; **pushed wins on same-event match** (by event key). 
+The merge caps at 2 total cards. Celebrations are rendered as cards only — they are **never included in the dismissable `AnnouncementBanner`** to avoid double-rendering the same occasion.
 
 **Gotchas.**
 - The console can only send notification-bearing messages, so the foreground banner and the
