@@ -1,5 +1,7 @@
 package com.arshadshah.nimaz.domain.model
 
+import com.arshadshah.nimaz.core.navigation.Route
+
 /**
  * An engagement announcement delivered via FCM (topic broadcast from the
  * Firebase console). Rendered as a dismissable banner on the Home screen;
@@ -50,7 +52,7 @@ sealed interface AnnouncementAction {
     data class OpenUrl(val url: String) : AnnouncementAction
 
     /** Navigate to an allowlisted in-app feature (see announcementRoute). */
-    data class NavigateToFeature(val routeKey: String) : AnnouncementAction
+    data class NavigateToFeature(val routeKey: String, val route: Route) : AnnouncementAction
 
     /** Unknown or missing route — the banner hides its CTA. */
     data object None : AnnouncementAction

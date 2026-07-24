@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.domain.usecase
 
+import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
@@ -40,20 +41,21 @@ class DismissAnnouncementUseCase(private val repository: AnnouncementRepository)
 
 /**
  * Classifies an announcement's `route` payload value into a validated
- * [AnnouncementAction]. Feature keys are checked against the navigation
- * allowlist via the injected [isKnownFeatureKey] (see `announcementRoute` in
+ * [AnnouncementAction]. Feature keys are resolved against the navigation
+ * allowlist via the injected [resolveFeatureKey] (see `announcementRoute` in
  * `core/navigation`) so old app versions safely no-op on keys they don't know.
  */
 class ResolveAnnouncementRouteUseCase(
-    private val isKnownFeatureKey: (String) -> Boolean,
+    private val resolveFeatureKey: (String) -> Route?,
 ) {
     operator fun invoke(route: String?): AnnouncementAction {
         val value = route?.trim().orEmpty()
         return when {
             value.isEmpty() -> AnnouncementAction.None
             value.startsWith("https://") -> AnnouncementAction.OpenUrl(value)
-            isKnownFeatureKey(value) -> AnnouncementAction.NavigateToFeature(value)
-            else -> AnnouncementAction.None
+            else -> resolveFeatureKey(value)
+                ?.let { AnnouncementAction.NavigateToFeature(value, it) }
+                ?: AnnouncementAction.None
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.arshadshah.nimaz.presentation.viewmodel
 
+import com.arshadshah.nimaz.core.navigation.Route
 import com.arshadshah.nimaz.domain.repository.AnnouncementRepository
 import com.arshadshah.nimaz.domain.repository.FastingRepository
 import com.arshadshah.nimaz.domain.repository.PrayerRepository
@@ -15,7 +16,7 @@ fun buildAnnouncementUseCases(
     repository: AnnouncementRepository,
     currentVersionCode: Int = 1,
     nowMillis: () -> Long = { System.currentTimeMillis() },
-    isKnownFeatureKey: (String) -> Boolean = { false },
+    resolveFeatureKey: (String) -> Route? = { null },
 ) = AnnouncementUseCases(
     observeActiveAnnouncement = ObserveActiveAnnouncementUseCase(
         repository,
@@ -24,7 +25,7 @@ fun buildAnnouncementUseCases(
     ),
     setAnnouncement = SetAnnouncementUseCase(repository),
     dismissAnnouncement = DismissAnnouncementUseCase(repository),
-    resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(isKnownFeatureKey)
+    resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(resolveFeatureKey)
 )
 
 fun buildFastingUseCases(repository: FastingRepository) = FastingUseCases(
