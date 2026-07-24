@@ -732,7 +732,7 @@ class PreferencesDataStore @Inject constructor(
                     // Try numeric types
                     value.toLongOrNull() != null && (key.contains("adjustment") || key.contains("minutes") || key.contains(
                         "location_id"
-                    )) -> {
+                    ) || key.contains("offset")) -> {
                         preferences[intPreferencesKey(key)] = value.toInt()
                     }
 
