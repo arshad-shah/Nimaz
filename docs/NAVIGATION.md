@@ -92,6 +92,44 @@ flowchart LR
 > via deep links and cross-feature actions). `Home`, `Quran`, `Tasbih`, `Qibla`, and `More` are
 > the five bottom-nav roots; `More` is the hub for everything else.
 
+## Announcement route grammar
+
+The announcement system (`core/navigation/AnnouncementRoutes.kt`) resolves feature keys into
+`Route` objects in two tiers:
+
+**Static allowlist** (exact matches, checked first): `bookmarks`, `fasting/tracker`,
+`fasting/stats`, `prayer/monthly`, `zakat/history`, `tasbih/presets`, `tasbih/stats`,
+`tasbih/history`, `hadith/search`, `hadith/bookmarks`, `dua/favorites`, `dua/search`,
+`settings/appearance`, `settings/location`, `settings/language`, `settings/prayer-calculation`,
+`settings/widgets`, `settings/sync`, `qaida/letters`.
+
+**Parameterised grammar** (pattern-matched after static allowlist):
+| Key pattern | Route | Range/format |
+|---|---|---|
+| `quran/surah/{n}` | `QuranReader` | 1–114 (surah number) |
+| `quran/surah/{n}/ayah/{m}` | `QuranReader` | 1–114 surah; 1–286 ayah per surah |
+| `quran/page/{n}` | `QuranPage` | 1–604 (mushaf page number) |
+| `quran/juz/{n}` | `QuranJuz` | 1–30 (juz/part number) |
+| `tafseer/{n}` | `Tafseer` | 1–114 (surah number) |
+| `dua/category/{slug}` | `DuaCategory` | category id (string) |
+| `dua/reader/{slug}` | `DuaReader` | dua id (string) |
+| `hadith/book/{id}` | `HadithBook` | book id (string) |
+| `hadith/book/{id}/chapter/{cid}` | `HadithChapter` | book id + chapter id (string) |
+| `hadith/{id}` | `HadithReader` | hadith id (string) |
+| `tasbih/counter[/{presetId}]` | `TasbihCounter` | optional preset id (long) |
+| `prayer/tracker/{tab}` | `PrayerTracker` | tab index (0–3) |
+| `qaida/lesson/{n}` | `QaidaReader` | lesson number (int) |
+| `calendar/{month}/{year}` | `IslamicMonth` | month 1–12, year (int) |
+| `names/allah/{n}` | `AsmaUlHusnaDetail` | name id 1–99 |
+| `names/prophet/{n}` | `AsmaUnNabiDetail` | name id 1–99 |
+| `prophets/{id}` | `ProphetDetail` | prophet id (int) |
+| `khatam/{id}` | `KhatamDetail` | khatam id (long) |
+
+Malformed keys or out-of-range integers resolve to `null`; the CTA is hidden (announcement
+remains visible but cannot navigate). Keys not matching the allowlist or grammar are never
+assumed — `announcementRoute(key)` always succeeds in parsing but safely returns `null` on
+semantic failure.
+
 ## Route reference
 
 All routes live in `core/navigation/Routes.kt` and are wired in `core/navigation/NavGraph.kt`

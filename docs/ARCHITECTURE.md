@@ -758,6 +758,8 @@ copy anything listed as Open.
 > - Audio-playback ViewModels (`QaidaReaderViewModel`, `QuranViewModel`) expose the audio engine's
 >   `StateFlow` (`audioManager.state`) directly to the UI for live highlight/progress. This is an
 >   intentional, consistent pattern for playback features — not a leak to "fix".
+> - **Domain→`core.navigation.Route` coupling (announcement routing)** — `AnnouncementAction.NavigateToFeature(route: Route)` and `ResolveAnnouncementRouteUseCase(resolveFeatureKey: (String) -> Route?)` introduce a domain-layer dependency on `core.navigation.Route`. This is **permitted** because `Route` is a core/navigation type, not a data-layer entity or DAO; it is a **pure Kotlin value type** (serializable). The coupling is intentional: the domain use case resolves the abstract grammar into a typed navigation target; DI passes `::announcementRoute` as the resolver function.
+> - **`announcement_route_rejected` fired from presentation, not domain** — the `announcement_route_rejected` analytics event is logged from `HomeViewModel`, not from `ResolveAnnouncementRouteUseCase`, to keep the domain layer free of `AppAnalytics` dependencies. HomeViewModel fires it when a non-empty announcement route resolves to `null` (unparseable or out-of-range).
 
 ---
 

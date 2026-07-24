@@ -440,9 +440,13 @@ message ever sent there is zero behaviour change — the feature is inert by def
 - `domain/model/Announcement.kt`, `domain/usecase/AnnouncementUseCases.kt` —
   `ObserveActiveAnnouncementUseCase` gates on dismissed (repo) + expiry + `versionCode` window;
   `ResolveAnnouncementRouteUseCase` classifies `route` into https-URL / allowlisted feature key / none.
-- `core/navigation/AnnouncementRoutes.kt` — `announcementRoute(key)` **allowlist** (mirrors
-  `helpDeepLinkRoute`); unknown keys → CTA hidden, never a blind navigation. URLs open via
-  `ACTION_VIEW`.
+- `core/navigation/AnnouncementRoutes.kt` — `announcementRoute(key)` resolves feature keys via
+  **two tiers**: static allowlist (exact matches like `settings/appearance`, `tasbih/stats`)
+  checked first, then parameterised grammar (e.g. `quran/surah/{1-114}`, `tafseer/{n}`,
+  `prayer/tracker/{tab}`, `dua/category/{slug}`, …). Integer parameters are range-checked;
+  malformed/out-of-range keys resolve to `null` (CTA hidden). URLs (https://) open via
+  `ACTION_VIEW`. See [`NAVIGATION.md` announcement-route-grammar](NAVIGATION.md#announcement-route-grammar)
+  for the complete grammar table.
 - `core/di/AnnouncementModule.kt`; banner UI in
   `presentation/components/molecules/AnnouncementBanner.kt`, state in `HomeViewModel.announcement`
   (`StateFlow<AnnouncementUiState>`).
@@ -457,7 +461,11 @@ or `https://…`), `min_version_code`, `max_version_code`, `expires_at` (ISO-860
 `gcm.*`). FCM is not E2E-encrypted — public content only.
 
 **Analytics.** `announcement_shown` / `announcement_cta_clicked` / `announcement_dismissed`
-(helpers in `AppAnalytics`), on top of FCM's own delivery/open reports.
+(helpers in `AppAnalytics`), on top of FCM's own delivery/open reports. A new event
+`announcement_route_rejected` (params: `announcement_id`, `route`) is logged from `HomeViewModel`
+when a non-empty announcement route resolves to `null` (e.g. unparseable key or integer
+out of range); this tracks incomplete content or malformed payloads without coupling the domain
+use case to analytics.
 
 **Gotchas.**
 - The console can only send notification-bearing messages, so the foreground banner and the
