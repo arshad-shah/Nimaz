@@ -57,7 +57,9 @@ import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
-import com.arshadshah.nimaz.presentation.components.organisms.JumuahCard
+import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
+import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
+import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
@@ -243,6 +245,8 @@ private fun HomeCompactContent(
         java.time.LocalDate.now().format(FULL_DATE_FORMATTER)
     }
     val nextPrayerTime = state.prayerTimes.find { it.type == state.nextPrayer }?.time ?: ""
+    val jumuahMubarak = stringResource(R.string.jumuah_mubarak)
+    val jumuahHadithQuote = stringResource(R.string.jumuah_hadith_quote)
 
     // Compact horizontal banner pills — never push content down by more than
     // one pill height regardless of how many banners are active. Built once
@@ -300,14 +304,27 @@ private fun HomeCompactContent(
             }
         }
 
-        if (state.isFriday) {
-            item {
-                JumuahCard(
-                    jumuahTime = state.jumuahTime,
-                    timeUntilJumuah = state.timeUntilJumuah,
-                    isJumuahPassed = state.isJumuahPassed,
-                    modifier = Modifier.padding(horizontal = 20.dp)
+        val eventCards = buildList {
+            if (state.isFriday) {
+                add(
+                    EventCardUi(
+                        occasion = EventOccasion.JUMUAH,
+                        eyebrow = jumuahMubarak,
+                        headline = jumuahMubarak,
+                        body = jumuahHadithQuote,
+                        jumuahTime = state.jumuahTime,
+                        timeUntilJumuah = state.timeUntilJumuah,
+                        isJumuahPassed = state.isJumuahPassed,
+                    )
                 )
+            }
+        }
+        if (eventCards.isNotEmpty()) {
+            item(key = "events") {
+                EventsCarousel(events = eventCards)
+            }
+            item(key = "events_spacer") {
+                Spacer(Modifier.height(16.dp))
             }
         }
 
@@ -420,6 +437,23 @@ private fun HomeTabletContent(
             )
         }
 
+        if (state.isFriday) {
+            EventsCarousel(
+                events = listOf(
+                    EventCardUi(
+                        occasion = EventOccasion.JUMUAH,
+                        eyebrow = stringResource(R.string.jumuah_mubarak),
+                        headline = stringResource(R.string.jumuah_mubarak),
+                        body = stringResource(R.string.jumuah_hadith_quote),
+                        jumuahTime = state.jumuahTime,
+                        timeUntilJumuah = state.timeUntilJumuah,
+                        isJumuahPassed = state.isJumuahPassed,
+                    )
+                ),
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+
         Row(
             modifier = Modifier
                 .fillMaxSize()
@@ -462,15 +496,6 @@ private fun HomeTabletContent(
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                if (state.isFriday) {
-                    JumuahCard(
-                        jumuahTime = state.jumuahTime,
-                        timeUntilJumuah = state.timeUntilJumuah,
-                        isJumuahPassed = state.isJumuahPassed,
-                        modifier = Modifier.padding(horizontal = 4.dp)
-                    )
-                }
-
                 TodaysProgressCard(
                     prayerTimes = state.prayerTimes,
                     timelineProgress = state.prayerTimelineProgress,
