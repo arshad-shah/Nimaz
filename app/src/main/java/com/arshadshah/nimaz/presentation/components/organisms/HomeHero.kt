@@ -41,6 +41,8 @@ import com.arshadshah.nimaz.presentation.components.atoms.GlassPillTone
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCard
 import com.arshadshah.nimaz.presentation.components.atoms.NimazCardStyle
 import com.arshadshah.nimaz.presentation.components.atoms.getArabicPrayerName
+import com.arshadshah.nimaz.presentation.components.atoms.glassBackdropSource
+import com.arshadshah.nimaz.presentation.components.atoms.rememberGlassBackdrop
 import com.arshadshah.nimaz.presentation.theme.LocalUse24HourFormat
 import com.arshadshah.nimaz.presentation.theme.LocalUseHijriPrimary
 import com.arshadshah.nimaz.presentation.theme.NimazTheme
@@ -76,6 +78,8 @@ fun HomeHero(
     var clock by remember(use24Hour) {
         mutableStateOf(LocalTime.now().let { formatClockTime(it.hour, it.minute, use24Hour) })
     }
+
+    val backdrop = rememberGlassBackdrop()
     LaunchedEffect(use24Hour) {
         while (true) {
             val now = LocalTime.now()
@@ -107,7 +111,7 @@ fun HomeHero(
             SkyBackground(
                 timeOfDay = timeOfDay,
                 moonFraction = moonFraction,
-                modifier = Modifier.matchParentSize(),
+                modifier = Modifier.matchParentSize().glassBackdropSource(backdrop),
                 shape = RoundedCornerShape(
                     bottomStart = HERO_BOTTOM_RADIUS,
                     bottomEnd = HERO_BOTTOM_RADIUS
@@ -126,21 +130,24 @@ fun HomeHero(
             ) {
                 GlassPill(
                     text = clock,
-                    tone = GlassPillTone.Solid,
+                    tone = GlassPillTone.Ghost,
                     style = MaterialTheme.typography.displaySmall.copy(
                         fontWeight = FontWeight.Bold,
                         shadow = shadow
                     ),
+                    backdrop = backdrop,
                 )
 
                 GlassPill(
                     text = if (useHijriPrimary) hijriDate.ifEmpty { gregorianDate } else gregorianDate,
                     style = MaterialTheme.typography.bodyMedium.copy(shadow = shadow),
+                    backdrop = backdrop,
                 )
                 if (useHijriPrimary && gregorianDate.isNotEmpty()) {
                     GlassPill(
                         text = gregorianDate,
                         style = MaterialTheme.typography.bodySmall.copy(shadow = shadow),
+                        backdrop = backdrop,
                     )
 
 
