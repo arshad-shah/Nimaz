@@ -159,15 +159,29 @@ class HomeViewModel @Inject constructor(
     // on every recomposition/re-emission.
     private var lastShownAnnouncementId: String? = null
 
+    // Last announcement id logged as a route rejection — the map below can
+    // re-run on every re-emission of observeActiveAnnouncement(), so this
+    // guards against logging the same rejection more than once per id.
+    private var lastRejectedAnnouncementId: String? = null
+
     /** Active FCM engagement announcement (already dismissal/expiry/version-gated). */
     val announcement: StateFlow<AnnouncementUiState> =
         announcementUseCases.observeActiveAnnouncement()
             .map { active ->
+                val routeAction = active?.let {
+                    announcementUseCases.resolveAnnouncementRoute(it.route)
+                }
+                if (active != null &&
+                    !active.route.isNullOrBlank() &&
+                    routeAction == AnnouncementAction.None &&
+                    active.id != lastRejectedAnnouncementId
+                ) {
+                    lastRejectedAnnouncementId = active.id
+                    AppAnalytics.logAnnouncementRouteRejected(active.id, active.route)
+                }
                 AnnouncementUiState(
                     announcement = active,
-                    showCta = active?.ctaLabel != null &&
-                            announcementUseCases.resolveAnnouncementRoute(active.route) !=
-                            AnnouncementAction.None,
+                    showCta = active?.ctaLabel != null && routeAction != AnnouncementAction.None,
                 )
             }
             .onEach { uiState ->

@@ -205,6 +205,11 @@ object AppAnalytics {
         logEvent("announcement_dismissed", "announcement_id" to id)
     }
 
+    /** Logged when an announcement carries a non-empty route that fails to resolve. */
+    fun logAnnouncementRouteRejected(id: String, route: String?) {
+        logEvent("announcement_route_rejected", "announcement_id" to id, "route" to route)
+    }
+
     // ---------------------------------------------------------------------
     // Adhan
     // ---------------------------------------------------------------------
