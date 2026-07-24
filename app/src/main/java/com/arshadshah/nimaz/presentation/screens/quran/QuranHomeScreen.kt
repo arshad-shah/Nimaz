@@ -715,6 +715,7 @@ private fun FavoritesTabContent(
                 arabicText = favorite.arabicText,
                 onClick = { onNavigateToQuranAyah(favorite.surahNumber, favorite.ayahNumber) },
                 onDelete = { onRemoveFavorite(favorite) },
+                enableSwipeToDelete = false,
                 menuActions = listOf(
                     NimazMenuAction(
                         text = stringResource(R.string.share),

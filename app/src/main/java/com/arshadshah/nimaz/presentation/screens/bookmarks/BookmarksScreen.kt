@@ -267,6 +267,7 @@ private fun BookmarkSavedCard(
         note = bookmark.note,
         onClick = onClick,
         onDelete = onDelete,
+        enableSwipeToDelete = false,
         menuActions = listOf(
             NimazMenuAction(
                 text = stringResource(R.string.edit_note),
@@ -366,4 +367,3 @@ private fun UnifiedBookmark.navigate(
         BookmarkType.DUA -> duaId?.let(onNavigateToDua)
     }
 }
-
