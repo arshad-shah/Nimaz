@@ -10,14 +10,34 @@ on:
   pull_request_review:
     types: [submitted]
 
+# Guardrail: default to no token scopes; the job opts in to exactly what it needs.
+permissions: {}
+
+# Guardrail: one Claude run at a time per issue/PR thread, but don't cancel an
+# in-flight run (a reply may already be posting) — just queue the next one.
+concurrency:
+  group: claude-${{ github.event.issue.number || github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   claude:
+    # Guardrail: only the repo owner can trigger Claude, AND the trigger must
+    # contain an explicit @claude mention. github.actor is the login that fired
+    # the event, so this covers comments, reviews, and issues in one check and
+    # stops anyone else (or a bot) from spending credits / running in a trusted
+    # context. To widen access later, prefer author_association over logins.
     if: |
-      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
-      (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
-      (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      github.actor == 'arshad-shah' &&
+      github.actor != 'dependabot[bot]' &&
+      (
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@claude')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@claude')) ||
+        (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
+      )
     runs-on: ubuntu-latest
+    # Guardrail: cap runaway jobs so a stuck run can't hold resources indefinitely.
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read
