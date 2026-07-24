@@ -933,6 +933,7 @@
     <string name="appearance_24hour_subtitle">Utiliser le format 24 heures</string>
     <string name="appearance_show_islamic_date">Afficher la date islamique</string>
     <string name="appearance_show_islamic_date_subtitle">Afficher le calendrier hégirien</string>
+    <string name="hijri_day_offset_label">Ajuster la date hégirienne</string>
     <string name="select_reciter_title">Choisir un récitateur</string>
     <string name="select_reciter_search_hint">Rechercher des récitateurs…</string>
     <string name="select_reciter_currently_selected">ACTUELLEMENT SÉLECTIONNÉ</string>

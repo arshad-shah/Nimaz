@@ -895,6 +895,7 @@
     <string name="appearance_24hour_subtitle">Gunakan format 24 jam</string>
     <string name="appearance_show_islamic_date">Tunjukkan Tarikh Islam</string>
     <string name="appearance_show_islamic_date_subtitle">Paparkan kalendar Hijri</string>
+    <string name="hijri_day_offset_label">Laraskan tarikh Hijri</string>
     <string name="select_reciter_title">Pilih Pembaca</string>
     <string name="select_reciter_search_hint">Cari pembaca…</string>
     <string name="select_reciter_currently_selected">DIPILIH SEKARANG</string>

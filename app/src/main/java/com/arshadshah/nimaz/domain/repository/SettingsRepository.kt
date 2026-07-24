@@ -33,6 +33,11 @@ interface SettingsRepository {
     suspend fun setUse24HourFormat(enabled: Boolean)
     val useHijriPrimary: Flow<Boolean>
     suspend fun setUseHijriPrimary(enabled: Boolean)
+
+    /** Signed day offset (-2..+2, default 0) applied to the tabular Hijri date to correct
+     *  for local moon-sighting differences (see HijriDateCalculator.today(offsetDays)). */
+    val hijriDayOffset: Flow<Int>
+    suspend fun setHijriDayOffset(days: Int)
     val appLanguage: Flow<String>
     suspend fun setAppLanguage(language: String)
     val helpContentVersion: Flow<Int>

@@ -911,6 +911,7 @@
     <string name="appearance_24hour_subtitle">24-Stunden-Format verwenden</string>
     <string name="appearance_show_islamic_date">Islamisches Datum anzeigen</string>
     <string name="appearance_show_islamic_date_subtitle">Hidschri-Kalender anzeigen</string>
+    <string name="hijri_day_offset_label">Hidschri-Datum anpassen</string>
     <string name="select_reciter_title">Rezitator auswählen</string>
     <string name="select_reciter_search_hint">Rezitatoren suchen…</string>
     <string name="select_reciter_currently_selected">DERZEIT AUSGEWÄHLT</string>

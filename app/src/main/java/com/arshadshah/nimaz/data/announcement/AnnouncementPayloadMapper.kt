@@ -3,6 +3,7 @@ package com.arshadshah.nimaz.data.announcement
 import android.os.Bundle
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.CelebrationEvent
 import java.time.Instant
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -33,6 +34,14 @@ class AnnouncementPayloadMapper @Inject constructor() {
         val dismissable = data[KEY_DISMISSABLE]?.let {
             it.trim().lowercase().toBooleanStrictOrNull() ?: return null
         } ?: true
+        val startsAtMillis = data[KEY_STARTS_AT]?.let { raw ->
+            runCatching { Instant.parse(raw.trim()).toEpochMilli() }.getOrNull() ?: return null
+        }
+        val event = if (type == AnnouncementType.CELEBRATION)
+            CelebrationEvent.fromKey(data[KEY_EVENT]) else null
+        val proofRef = data[KEY_PROOF_REF]?.trim()?.ifEmpty { null }
+        val proofText = data[KEY_PROOF_TEXT]?.trim()?.ifEmpty { null }
+        val bothProof = if (proofRef != null && proofText != null) proofRef to proofText else null
 
         return Announcement(
             id = id,
@@ -45,6 +54,14 @@ class AnnouncementPayloadMapper @Inject constructor() {
             maxVersionCode = maxVersionCode,
             expiresAtMillis = expiresAtMillis,
             dismissable = dismissable,
+            event = event,
+            arabic = data[KEY_ARABIC]?.trim()?.ifEmpty { null },
+            transliteration = data[KEY_TRANSLITERATION]?.trim()?.ifEmpty { null },
+            proofRef = bothProof?.first,
+            proofText = bothProof?.second,
+            cta2Label = data[KEY_CTA2_LABEL]?.trim()?.ifEmpty { null },
+            route2 = data[KEY_ROUTE2]?.trim()?.ifEmpty { null },
+            startsAtMillis = startsAtMillis,
         )
     }
 
@@ -72,10 +89,20 @@ class AnnouncementPayloadMapper @Inject constructor() {
         const val KEY_MAX_VERSION_CODE = "max_version_code"
         const val KEY_EXPIRES_AT = "expires_at"
         const val KEY_DISMISSABLE = "dismissable"
+        const val KEY_EVENT = "event"
+        const val KEY_ARABIC = "arabic"
+        const val KEY_TRANSLITERATION = "transliteration"
+        const val KEY_PROOF_REF = "proof_ref"
+        const val KEY_PROOF_TEXT = "proof_text"
+        const val KEY_CTA2_LABEL = "cta2_label"
+        const val KEY_ROUTE2 = "route2"
+        const val KEY_STARTS_AT = "starts_at"
 
         val PAYLOAD_KEYS = listOf(
             KEY_ID, KEY_TYPE, KEY_TITLE, KEY_BODY, KEY_CTA_LABEL, KEY_ROUTE,
             KEY_MIN_VERSION_CODE, KEY_MAX_VERSION_CODE, KEY_EXPIRES_AT, KEY_DISMISSABLE,
+            KEY_EVENT, KEY_ARABIC, KEY_TRANSLITERATION, KEY_PROOF_REF, KEY_PROOF_TEXT,
+            KEY_CTA2_LABEL, KEY_ROUTE2, KEY_STARTS_AT,
         )
     }
 }
