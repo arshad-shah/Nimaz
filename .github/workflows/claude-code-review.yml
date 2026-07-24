@@ -10,15 +10,29 @@ on:
     #   - "src/**/*.js"
     #   - "src/**/*.jsx"
 
+# Guardrail: never run more than one review per PR at a time. A new push
+# cancels the in-flight review so we don't burn credits reviewing stale diffs.
+concurrency:
+  group: claude-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+# Guardrail: default to no token scopes; each job opts in to exactly what it needs.
+permissions: {}
+
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # Guardrail: only review the repo owner's own PRs, and never bot PRs.
+    # This blocks forked/external and bot-authored PRs (e.g. dependabot) from
+    # triggering Claude runs that consume credits or execute in a trusted context.
+    # To open this up later, prefer author_association (OWNER / MEMBER / COLLABORATOR)
+    # over hard-coded logins.
+    if: |
+      github.event.pull_request.user.login == 'arshad-shah' &&
+      github.event.pull_request.user.login != 'dependabot[bot]'
 
     runs-on: ubuntu-latest
+    # Guardrail: cap runaway jobs so a stuck run can't hold resources indefinitely.
+    timeout-minutes: 30
     permissions:
       contents: read
       pull-requests: read
