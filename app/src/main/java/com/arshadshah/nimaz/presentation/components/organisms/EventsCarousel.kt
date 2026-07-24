@@ -28,7 +28,7 @@ data class EventCardUi(
 // arabic + one body line + one action (or the Jumu'ah countdown). Home cards do not render
 // headline/transliteration/proof/second-action, so this height matches Jumu'ah's content and
 // leaves no empty space. Uniform for all cards (carousel constraint); tune here if needed.
-private val EventCardPageHeight = 200.dp
+private val EventCardPageHeight = 170.dp
 
 /**
  * Horizontal carousel of occasion cards, reusing [NimazCarousel] (edge-peek + dots,
