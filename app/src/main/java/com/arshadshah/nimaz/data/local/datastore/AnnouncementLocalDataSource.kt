@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementType
+import com.arshadshah.nimaz.domain.model.CelebrationEvent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -78,6 +79,14 @@ internal data class AnnouncementEntity(
     val maxVersionCode: Int? = null,
     val expiresAtMillis: Long? = null,
     val dismissable: Boolean = true,
+    val event: String? = null,
+    val arabic: String? = null,
+    val transliteration: String? = null,
+    val proofRef: String? = null,
+    val proofText: String? = null,
+    val cta2Label: String? = null,
+    val route2: String? = null,
+    val startsAtMillis: Long? = null,
 )
 
 internal fun AnnouncementEntity.toDomain(): Announcement? {
@@ -93,6 +102,14 @@ internal fun AnnouncementEntity.toDomain(): Announcement? {
         maxVersionCode = maxVersionCode,
         expiresAtMillis = expiresAtMillis,
         dismissable = dismissable,
+        event = CelebrationEvent.fromKey(event).takeIf { announcementType == AnnouncementType.CELEBRATION },
+        arabic = arabic,
+        transliteration = transliteration,
+        proofRef = proofRef,
+        proofText = proofText,
+        cta2Label = cta2Label,
+        route2 = route2,
+        startsAtMillis = startsAtMillis,
     )
 }
 
@@ -107,4 +124,12 @@ internal fun Announcement.toEntity(): AnnouncementEntity = AnnouncementEntity(
     maxVersionCode = maxVersionCode,
     expiresAtMillis = expiresAtMillis,
     dismissable = dismissable,
+    event = event?.key,
+    arabic = arabic,
+    transliteration = transliteration,
+    proofRef = proofRef,
+    proofText = proofText,
+    cta2Label = cta2Label,
+    route2 = route2,
+    startsAtMillis = startsAtMillis,
 )

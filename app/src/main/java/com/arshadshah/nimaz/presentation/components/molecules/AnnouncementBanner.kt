@@ -97,12 +97,16 @@ private fun AnnouncementBannerCard(
         AnnouncementType.FEATURE -> NimazTone.ACCENT
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> NimazTone.SUCCESS
         AnnouncementType.CHANGELOG -> NimazTone.WARNING
+        // Celebration banners get their own dedicated card (Task 6); this generic
+        // banner path is a fallback and shouldn't normally render CELEBRATION.
+        AnnouncementType.CELEBRATION -> NimazTone.ACCENT
     }
     val accent = NimazBannerDefaults.accent(tone)
     val icon = when (announcement.type) {
         AnnouncementType.FEATURE -> Icons.Outlined.AutoAwesome
         AnnouncementType.PRIVACY, AnnouncementType.TOS -> Icons.Outlined.Shield
         AnnouncementType.CHANGELOG -> Icons.Outlined.Info
+        AnnouncementType.CELEBRATION -> Icons.Outlined.AutoAwesome
     }
 
     NimazCard(
