@@ -73,16 +73,20 @@ class HomeViewModelTest {
         Dispatchers.resetMain()
     }
 
-    private fun createViewModel() = HomeViewModel(
-        context = context,
-        prayerTimeCalculator = prayerTimeCalculator,
-        prayerUseCases = buildPrayerUseCases(prayerRepository),
-        fastingUseCases = buildFastingUseCases(fastingRepository),
-        hadithUseCases = buildHadithUseCases(hadithRepository),
-        duaUseCases = buildDuaUseCases(duaRepository),
-        settingsRepository = settingsRepository,
-        announcementUseCases = buildAnnouncementUseCases(announcementRepository)
-    )
+    private fun createViewModel(): HomeViewModel {
+        val announcementUseCases = buildAnnouncementUseCases(announcementRepository)
+        return HomeViewModel(
+            context = context,
+            prayerTimeCalculator = prayerTimeCalculator,
+            prayerUseCases = buildPrayerUseCases(prayerRepository),
+            fastingUseCases = buildFastingUseCases(fastingRepository),
+            hadithUseCases = buildHadithUseCases(hadithRepository),
+            duaUseCases = buildDuaUseCases(duaRepository),
+            settingsRepository = settingsRepository,
+            announcementUseCases = announcementUseCases,
+            observeEventCards = buildObserveEventCardsUseCase(announcementUseCases),
+        )
+    }
 
     /**
      * Constructs the ViewModel while capturing any exception that escapes a

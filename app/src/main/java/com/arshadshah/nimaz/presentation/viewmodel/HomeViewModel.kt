@@ -23,9 +23,11 @@ import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
 import com.arshadshah.nimaz.domain.model.AsrCalculation
 import com.arshadshah.nimaz.domain.model.CalculationMethod
+import com.arshadshah.nimaz.domain.model.AnnouncementType
 import com.arshadshah.nimaz.domain.model.FastStatus
 import com.arshadshah.nimaz.domain.model.HadithGrade
 import com.arshadshah.nimaz.domain.model.HighLatitudeRule
+import com.arshadshah.nimaz.domain.model.HomeEventCard
 import com.arshadshah.nimaz.domain.model.PrayerName
 import com.arshadshah.nimaz.domain.model.PrayerStatus
 import com.arshadshah.nimaz.domain.model.PrayerType
@@ -34,6 +36,7 @@ import com.arshadshah.nimaz.domain.usecase.AnnouncementUseCases
 import com.arshadshah.nimaz.domain.usecase.DuaUseCases
 import com.arshadshah.nimaz.domain.usecase.FastingUseCases
 import com.arshadshah.nimaz.domain.usecase.HadithUseCases
+import com.arshadshah.nimaz.domain.usecase.ObserveEventCardsUseCase
 import com.arshadshah.nimaz.domain.usecase.PrayerUseCases
 import com.arshadshah.nimaz.widget.prayertracker.PrayerTrackerWorker
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -91,7 +94,10 @@ data class HomeUiState(
     // Permission states
     val hasNotificationPermission: Boolean = true,
     val hasLocationPermission: Boolean = true,
-    val isBatteryOptimized: Boolean = false
+    val isBatteryOptimized: Boolean = false,
+    // Local calendar occasions merged with any pushed CELEBRATION announcement,
+    // rendered as cards in the Home events carousel (after the Jumu'ah card).
+    val celebrationCards: List<HomeEventCard> = emptyList(),
 )
 
 /**
@@ -149,7 +155,8 @@ class HomeViewModel @Inject constructor(
     private val hadithUseCases: HadithUseCases,
     private val duaUseCases: DuaUseCases,
     private val settingsRepository: SettingsRepository,
-    private val announcementUseCases: AnnouncementUseCases
+    private val announcementUseCases: AnnouncementUseCases,
+    private val observeEventCards: ObserveEventCardsUseCase,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -164,9 +171,15 @@ class HomeViewModel @Inject constructor(
     // guards against logging the same rejection more than once per id.
     private var lastRejectedAnnouncementId: String? = null
 
-    /** Active FCM engagement announcement (already dismissal/expiry/version-gated). */
+    /**
+     * Active FCM engagement announcement (already dismissal/expiry/version-gated),
+     * for the banner only. CELEBRATION-typed announcements are excluded here —
+     * they render as carousel cards via [ObserveEventCardsUseCase] instead, so
+     * showing them in the banner too would double-render the same occasion.
+     */
     val announcement: StateFlow<AnnouncementUiState> =
         announcementUseCases.observeActiveAnnouncement()
+            .map { it?.takeIf { a -> a.type != AnnouncementType.CELEBRATION } }
             .map { active ->
                 val routeAction = active?.let {
                     announcementUseCases.resolveAnnouncementRoute(it.route)
@@ -207,7 +220,17 @@ class HomeViewModel @Inject constructor(
         observeFastingStatus()
         loadDailyHadith()
         loadDailyDua()
+        observeCelebrationCards()
         startTimeUpdates()
+    }
+
+    /** Local calendar occasions merged with any pushed CELEBRATION announcement. */
+    private fun observeCelebrationCards() {
+        viewModelScope.launch {
+            observeEventCards().collect { cards ->
+                _state.update { it.copy(celebrationCards = cards) }
+            }
+        }
     }
 
     private fun loadPrayerRecords() {

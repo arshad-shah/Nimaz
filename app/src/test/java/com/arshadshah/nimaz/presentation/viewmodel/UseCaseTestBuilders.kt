@@ -28,6 +28,16 @@ fun buildAnnouncementUseCases(
     resolveAnnouncementRoute = ResolveAnnouncementRouteUseCase(resolveFeatureKey)
 )
 
+/** Mirrors the production DI wiring: local events source defaults to "none" for tests. */
+fun buildObserveEventCardsUseCase(
+    announcementUseCases: AnnouncementUseCases,
+    local: () -> kotlinx.coroutines.flow.Flow<List<com.arshadshah.nimaz.domain.model.HomeEventCard>> =
+        { kotlinx.coroutines.flow.flowOf(emptyList()) },
+) = ObserveEventCardsUseCase(
+    local = local,
+    observe = { announcementUseCases.observeActiveAnnouncement() },
+)
+
 fun buildFastingUseCases(repository: FastingRepository) = FastingUseCases(
     getFastRecordForDate = GetFastRecordForDateUseCase(repository),
     getFastRecordsInRange = GetFastRecordsInRangeUseCase(repository),

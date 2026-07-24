@@ -57,9 +57,11 @@ import com.arshadshah.nimaz.presentation.components.organisms.HomeBannerVariant
 import com.arshadshah.nimaz.presentation.components.organisms.HomeDynamicTopBar
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHeader
 import com.arshadshah.nimaz.presentation.components.organisms.HomeHero
+import com.arshadshah.nimaz.presentation.components.organisms.EventAction
 import com.arshadshah.nimaz.presentation.components.organisms.EventCardUi
 import com.arshadshah.nimaz.presentation.components.organisms.EventOccasion
 import com.arshadshah.nimaz.presentation.components.organisms.EventsCarousel
+import com.arshadshah.nimaz.presentation.components.organisms.toOccasion
 import com.arshadshah.nimaz.presentation.components.organisms.TodayCarousel
 import com.arshadshah.nimaz.presentation.components.organisms.TodayInfoCards
 import com.arshadshah.nimaz.presentation.components.organisms.TodaysProgressCard
@@ -177,6 +179,7 @@ fun HomeScreen(
                             onNavigateToPrayerTracker = onNavigateToPrayerTracker,
                             onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                             onOpenHadith = onOpenHadith,
+                            onOpenAnnouncementRoute = onOpenAnnouncementRoute,
                             onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                             notificationPermissionLauncher = notificationPermissionLauncher,
                             locationPermissionLauncher = locationPermissionLauncher,
@@ -208,6 +211,7 @@ fun HomeScreen(
                         onNavigateToPrayerTracker = onNavigateToPrayerTracker,
                         onNavigateToPrayerTimes = onNavigateToPrayerTimes,
                         onOpenHadith = onOpenHadith,
+                        onOpenAnnouncementRoute = onOpenAnnouncementRoute,
                         onTogglePrayer = { viewModel.onEvent(HomeEvent.TogglePrayerStatus(it)) },
                         notificationPermissionLauncher = notificationPermissionLauncher,
                         locationPermissionLauncher = locationPermissionLauncher,
@@ -235,6 +239,7 @@ private fun HomeCompactContent(
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
+    onOpenAnnouncementRoute: (String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -319,6 +324,25 @@ private fun HomeCompactContent(
                     )
                 )
             }
+            state.celebrationCards.forEach { c ->
+                add(
+                    EventCardUi(
+                        occasion = c.event.toOccasion(),
+                        eyebrow = c.eyebrow,
+                        headline = c.headline,
+                        body = c.body,
+                        arabic = c.arabic,
+                        transliteration = c.transliteration,
+                        proof = if (c.proofRef != null && c.proofText != null) c.proofRef to c.proofText else null,
+                        primaryAction = if (c.ctaLabel != null && c.route != null)
+                            EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
+                        secondaryAction = if (c.cta2Label != null && c.route2 != null)
+                            EventAction(c.cta2Label) { onOpenAnnouncementRoute(c.route2) } else null,
+                        onDismiss = if (c.dismissable && c.announcementId != null)
+                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
+                    )
+                )
+            }
         }
         if (eventCards.isNotEmpty()) {
             item(key = "events") {
@@ -384,6 +408,7 @@ private fun HomeTabletContent(
     onNavigateToPrayerTracker: () -> Unit,
     onNavigateToPrayerTimes: () -> Unit,
     onOpenHadith: (hadithId: String) -> Unit,
+    onOpenAnnouncementRoute: (String) -> Unit,
     onTogglePrayer: (PrayerType) -> Unit,
     notificationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<String>,
     locationPermissionLauncher: androidx.activity.result.ActivityResultLauncher<Array<String>>,
@@ -438,10 +463,10 @@ private fun HomeTabletContent(
             )
         }
 
-        if (state.isFriday) {
-            // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
-            EventsCarousel(
-                events = listOf(
+        val tabletEventCards = buildList {
+            if (state.isFriday) {
+                // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
+                add(
                     EventCardUi(
                         occasion = EventOccasion.JUMUAH,
                         eyebrow = stringResource(R.string.jumuah_mubarak),
@@ -451,7 +476,31 @@ private fun HomeTabletContent(
                         timeUntilJumuah = state.timeUntilJumuah,
                         isJumuahPassed = state.isJumuahPassed,
                     )
-                ),
+                )
+            }
+            state.celebrationCards.forEach { c ->
+                add(
+                    EventCardUi(
+                        occasion = c.event.toOccasion(),
+                        eyebrow = c.eyebrow,
+                        headline = c.headline,
+                        body = c.body,
+                        arabic = c.arabic,
+                        transliteration = c.transliteration,
+                        proof = if (c.proofRef != null && c.proofText != null) c.proofRef to c.proofText else null,
+                        primaryAction = if (c.ctaLabel != null && c.route != null)
+                            EventAction(c.ctaLabel) { onOpenAnnouncementRoute(c.route) } else null,
+                        secondaryAction = if (c.cta2Label != null && c.route2 != null)
+                            EventAction(c.cta2Label) { onOpenAnnouncementRoute(c.route2) } else null,
+                        onDismiss = if (c.dismissable && c.announcementId != null)
+                            { { viewModel.onEvent(HomeEvent.DismissAnnouncement) } } else null,
+                    )
+                )
+            }
+        }
+        if (tabletEventCards.isNotEmpty()) {
+            EventsCarousel(
+                events = tabletEventCards,
                 modifier = Modifier.padding(top = 8.dp),
             )
         }
