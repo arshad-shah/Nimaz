@@ -36,7 +36,7 @@ data class EventCardUi(
 fun EventsCarousel(
     events: List<EventCardUi>,
     modifier: Modifier = Modifier,
-    pageHeight: Dp = 320.dp,
+    pageHeight: Dp = 352.dp,
     horizontalPadding: Dp = 20.dp,
 ) {
     if (events.isEmpty()) return

@@ -306,6 +306,7 @@ private fun HomeCompactContent(
 
         val eventCards = buildList {
             if (state.isFriday) {
+                // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
                 add(
                     EventCardUi(
                         occasion = EventOccasion.JUMUAH,
@@ -438,6 +439,7 @@ private fun HomeTabletContent(
         }
 
         if (state.isFriday) {
+            // Jumu'ah routes to JumuahCard, which sources its own strings; eyebrow/headline/body here are unused.
             EventsCarousel(
                 events = listOf(
                     EventCardUi(
