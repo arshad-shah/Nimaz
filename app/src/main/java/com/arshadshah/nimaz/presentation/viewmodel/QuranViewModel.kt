@@ -110,9 +110,18 @@ data class QuranReaderUiState(
     val showTajweed: Boolean = false,
     val activeKhatamId: Long? = null,
     val khatamReadAyahIds: Set<Int> = emptySet(),
-    // Line-accurate 16-line IndoPak layout for the current page, loaded on demand when the
-    // 16-line Mushaf view is active (4/7). Null until requested / for pages without layout.
-    val mushafPageLayout: MushafPageLayout? = null
+    // Line-accurate 16-line IndoPak layout for the most-recently requested page, loaded on
+    // demand when the 16-line Mushaf view is active (4/7). Null until requested / for pages
+    // without layout.
+    val mushafPageLayout: MushafPageLayout? = null,
+    // Per-page cache of line-accurate layouts (5/7). The reader pager keeps several pages
+    // resident at once, so — mirroring [pageCache] — each visible page's layout is cached by
+    // page number rather than a single field.
+    val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
+    // Whether the reader renders the line-accurate 16-line IndoPak layout instead of the
+    // default Uthmani/604 page. This is the seam the settings toggle drives in 6/7 (#270);
+    // it stays false here so the default view is unchanged until that persistence lands.
+    val use16LineLayout: Boolean = false
 )
 
 data class QuranSearchUiState(
@@ -621,9 +630,16 @@ class QuranViewModel @Inject constructor(
      * only runs when the 16-line view is actually used — not on every Quran page open.
      */
     private fun loadMushafPageLayout(pageNumber: Int) {
+        // Already cached (e.g. a neighbouring pager page pre-loaded it) — nothing to do.
+        if (_readerState.value.mushafPageLayoutCache.containsKey(pageNumber)) return
         viewModelScope.launch {
             val layout = quranUseCases.getMushafPageLayout(pageNumber)
-            _readerState.update { it.copy(mushafPageLayout = layout) }
+            _readerState.update {
+                it.copy(
+                    mushafPageLayout = layout,
+                    mushafPageLayoutCache = it.mushafPageLayoutCache + (pageNumber to layout)
+                )
+            }
         }
     }
 
