@@ -231,7 +231,7 @@ wrong teaches incorrect recitation). Status:
 | Tafkhim/Tarqiq of Raa (`tk`/`tq`) | derived (position + vowel) | ✅ **wired** — `raa_rule`; validated 18/18 against authoritative examples (10,842 tk) |
 | Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | ✅ **wired** — `lam_of_name_rule` (ٱللَّه form; `لله` is a known gap) |
 | Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | engine implemented (`is_istila`); **not wired** (`apply_derived_rules` would colour a huge fraction of letters — pass `tafkhim=False`/extend to change) |
-| Madd Tabee'i for the remaining 22 unannotated | derived | **not derived** — see below |
+| Madd Tabee'i for the remaining 22 unannotated | n/a | **correctly uncoloured by convention** — see below |
 | Sakt · Imalah 11:41 · Ishmam 12:11 · Tasheel 41:44 · Naql 49:11 | enumerated | recorded in `tajweed_special_rules.json`; not wired |
 
 **`apply_derived_rules`** (in `preparse_tajweed.py`) overlays the derived rules
@@ -243,24 +243,41 @@ the Lam of the Name (deterministic position+vowel rules, no pause dependence,
 validated in `test_tajweed_rules.py`). These fill **41 of the original 63**
 unannotated ayahs (#298: 63 → 22).
 
-**Madd Tabee'i is *not* derived** for the remaining 22. This is a deliberate,
-evidence-based limit: the aarid/tabee'i distinction depends on pause points that
-only cpfair's trained model or a scholar can resolve, and **cpfair itself has the
-same gap** — running its engine (`cpfair/quran-tajweed`) on our text confirms it
-produces zero annotations for these ayahs, and a hand deriver validated against
-cpfair's `madd_2` could not exceed ~50% recall / ~38% precision. No public
-dataset (cpfair or its derivatives) covers them; they need manual scholarly
-annotation. **Isti'la** and the enumerated special pronunciations remain in the
+**The remaining 22 ayahs are correctly uncoloured — this is not a data gap.**
+Investigation (2026-07) established that their *only* tajweed features are ones
+the KFGQPC colouring convention — shared by **every** source we checked
+(quran.com `uthmani_tajweed`, alquran.cloud `quran-tajweed`, and cpfair) —
+deliberately leaves uncoloured:
+
+1. **Natural madd written with a plain full alif** (e.g. 47:5 `بَالَهُمْ`, `يَهْدِيهِمْ`).
+   The convention only colours madd tabee'i when it is written with a *dagger
+   alif* (ٰ), *small waw/ya* (ۥ ۦ) or a *maddah* sign (ٓ) — never a plain ا.
+2. **Word-final / ayah-final (stop) madd** (e.g. 80:1 `تَوَلَّىٰٓ`, 75:34 `أَوْلَىٰ`).
+3. **Izhar** — noon-sakin / tanwin before a throat letter (e.g. 51:9 `عَنْهُ`,
+   `مَنْ أُفِكَ`; 88:5 `مِنْ عَيْنٍ`), which is never coloured.
+
+This is proven *from the shipped corpus itself*: `mn` (Madd Tabee'i) is painted
+on a word-**medial** dagger-alif **7 135** times but on a plain full-alif
+**0 / 6 236** times and on a word-**final** dagger-alif **0 / 6 236** times
+(guarded by `test_madd_tabeei_convention_is_consistent`). Colouring the 22 would
+therefore make them *inconsistent* with the other 6 214 ayahs. All four sources
+independently annotate none of them — verified by fetching alquran.cloud live and
+by running cpfair's own engine (`tajweed_classifier.py`) over our text
+(0 annotations for all 22); cpfair's `madd_2` rule tree explicitly gates on
+`is_dagger_alif`/`is_small_waw`/`has_maddah` and labels dagger-alif that
+`is_final` as *not* madd — the same convention. The allow-list
+(`fixtures/unannotated_ayahs.json`) simply records these as expected-empty.
+**Isti'la** and the enumerated special pronunciations remain in the
 engine / `json/tajweed_special_rules.json`, unwired, for the same review reason. Notable reconciliation recorded there: the **7 occurrences
 of U+06DC** in `text_arabic` are 4 canonical Hafs sakt (18:1, 36:52, 75:27, 83:14)
 + 1 additional sakt (69:28, مَالِيَهْ→هَلَكَ) + 2 non-sakt uses of the same sign as
 the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answering the
 "where do the extra 3 come from" question.
 
-> Still open in sibling sub-issues of epic #287: the extended rules above
-> (#291, with mandatory scholarly review), the in-app legend + accessibility UI
-> half (#294), the 63 fully-unannotated ayahs (#298), and the grapheme-boundary
-> decision (#299). The in-app legend will consume `TajweedParser.rules` directly.
+> Epic #287 sub-issues: the extended rules above (#291), the in-app legend +
+> accessibility UI (#294), the unannotated-ayah audit (#298 — resolved: 63 → 22
+> convention-correct empties, see above), and the grapheme-boundary decision
+> (#299). The in-app legend consumes `TajweedParser.rules` directly.
 
 ## translations.json Format
 

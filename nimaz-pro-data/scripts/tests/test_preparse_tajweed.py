@@ -444,6 +444,41 @@ class TestUnannotatedAyahsFixture(unittest.TestCase):
                          f"new uncoloured ayahs not in the fixture: {sorted(current - allow)}")
         self.assertEqual(len(current), fixture["count"])
 
+    def test_madd_tabeei_convention_is_consistent(self):
+        """The remaining gap is correct-by-convention, not missing data.
+
+        The KFGQPC colouring convention (shared by quran.com, alquran.cloud and
+        cpfair) never colours basic madd tabee'i written with a plain full alif,
+        nor a word-final dagger-alif madd — only word-medial dagger/small-letter
+        forms. This pins that invariant so the allow-listed 22 ayahs (whose only
+        madd is exactly these uncoloured forms) can't be called a data defect."""
+        with open(JSON_DIR / "tajweed_parsed.json", encoding="utf-8") as fh:
+            parsed = json.load(fh)
+        DAGGER = "ٰ"
+        plain_alif_mn = 0
+        wordfinal_dagger_mn = 0
+        medial_dagger_mn = 0
+        for _key, blob in parsed.items():
+            segs = json.loads(blob)
+            chars = [(ch, s.get("r")) for s in segs for ch in s["t"]]
+            text = "".join(c for c, _ in chars)
+            for i, (ch, r) in enumerate(chars):
+                if r != "mn":
+                    continue
+                if ch == "ا":  # full alif
+                    plain_alif_mn += 1
+                elif ch == DAGGER:
+                    nxt = text[i + 1] if i + 1 < len(text) else ""
+                    if nxt in ("", " "):
+                        wordfinal_dagger_mn += 1
+                    else:
+                        medial_dagger_mn += 1
+        # the convention: medial dagger madd is coloured; plain-alif and
+        # word-final dagger madd are NOT — corpus-wide, with no exceptions.
+        self.assertGreater(medial_dagger_mn, 5000)
+        self.assertEqual(plain_alif_mn, 0)
+        self.assertEqual(wordfinal_dagger_mn, 0)
+
 
 class TestFullSourceTaxonomy(unittest.TestCase):
     """Whole-corpus #289 guarantees over the shipped data."""
