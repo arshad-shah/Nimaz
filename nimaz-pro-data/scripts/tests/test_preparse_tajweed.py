@@ -463,5 +463,47 @@ class TestFullSourceTaxonomy(unittest.TestCase):
         self.assertGreater(counts["qs"], 0)       # qalqalah sughra
 
 
+class TestGraphemeBoundaryMetric(unittest.TestCase):
+    """Guard the grapheme-cluster boundary metric (issue #299): it must not grow.
+
+    A rule span may legitimately begin on a combining mark that phonetically
+    belongs to the rule (the decided semantics — see
+    ``align_segments_to_canonical``). What must not happen is the alignment
+    silently splitting *more* clusters over time, so the counts are pinned.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        import unicodedata
+        cls.unicodedata = unicodedata
+        with open(JSON_DIR / "tajweed.json", encoding="utf-8") as f:
+            cls.taj = json.load(f)
+        with open(JSON_DIR / "ayahs.json", encoding="utf-8") as f:
+            cls.canon = {f"{a['surah_id']}:{a['number_in_surah']}":
+                         a["text_arabic"] for a in json.load(f)}
+        with open(JSON_DIR / "tajweed_cpfair.json", encoding="utf-8") as f:
+            cls.cpfair = {f"{e['surah']}:{e['ayah']}": e for e in json.load(f)}
+        with open(SCRIPTS_DIR / "tests" / "fixtures"
+                  / "grapheme_boundary_baseline.json", encoding="utf-8") as f:
+            cls.baseline = json.load(f)
+
+    def test_cluster_split_metric_does_not_grow(self):
+        combining = self.unicodedata.combining
+        starts = splits = 0
+        for key, html in self.taj.items():
+            segs = align_segments_to_canonical(
+                preparse_tajweed(html, key=key, cpfair_entry=self.cpfair.get(key)),
+                normalise_uthmani(self.canon[key]),
+            )
+            for i, s in enumerate(segs):
+                if s["t"] and combining(s["t"][0]) and s["r"]:
+                    starts += 1
+                nxt = segs[i + 1] if i + 1 < len(segs) else None
+                if nxt and nxt["t"] and combining(nxt["t"][0]) and s["r"] != nxt["r"]:
+                    splits += 1
+        self.assertLessEqual(starts, self.baseline["combining_start_spans"])
+        self.assertLessEqual(splits, self.baseline["cluster_split_boundaries"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)

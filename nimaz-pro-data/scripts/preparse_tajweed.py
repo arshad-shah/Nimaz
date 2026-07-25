@@ -435,6 +435,17 @@ def align_segments_to_canonical(segments, canonical_text):
     """
     Re-derive coloured segments over ``canonical_text`` from ``segments``.
 
+    **Boundary semantics (issue #299).** A rule span covers exactly the
+    characters the *source* tagged, transferred 1:1 onto the canonical text — the
+    **phonetic unit**, not "base letter + all its marks". So a span may begin on
+    a combining mark that phonetically belongs to the rule: e.g. in ``1:1`` the
+    madd span is ``ِي`` (the kasra + yā that together form the madd), which starts
+    on the kasra positioned under the previous letter. This is deliberate: the
+    rule genuinely applies to that vowel→letter pair. The cluster-split count is
+    tracked as a metric (``tests/fixtures/grapheme_boundary_baseline.json``) so it
+    cannot silently grow; on-device mark-placement verification with the shipping
+    Arabic font is the remaining part of #299.
+
     The returned segments are built out of ``canonical_text``'s own characters
     (so their concatenation equals ``canonical_text`` exactly) while carrying
     the tajweed rule of the aligned source character. A character-level diff
