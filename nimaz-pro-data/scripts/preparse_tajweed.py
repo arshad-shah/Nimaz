@@ -34,11 +34,19 @@ This module uses a **stack-based tokenizer** instead. Semantics:
   ``madda_obligatory`` code; see the V3 taxonomy below) — rather than one
   mislabelled span with leaked markup.
 
-Because of this, per-*segment* code counts do not equal raw *tag* counts for
-overlapping tags (an outer tag split by an inner produces 2+ segments; an
-outer tag fully covered by an inner produces 0). The guaranteed invariant is
-character-level: concatenating every segment's text reconstructs the source
-text exactly (tags and verse markers removed), so no character is ever lost.
+Because of this, per-*segment* (or per-*code*) span counts are **not** a
+conservation invariant — an outer tag split by an inner produces 2+ segments,
+an outer tag fully covered by an inner produces 0, and the later alignment
+stage (issue #290) merges adjacent same-rule segments. The correct invariant
+is **character coverage**, at two levels:
+
+1. concatenating every segment's text reconstructs the source text exactly
+   (tags and verse markers removed), so no character is ever dropped; and
+2. every character that carried a rule keeps a rule through the whole pipeline
+   (tokenize → taxonomy split → canonical alignment) and no character gains
+   one — see ``align_segments_to_canonical`` (rules are conserved on the
+   delete path too). Assert this at the *end* of the pipeline, not after the
+   tokenizer alone.
 """
 
 import difflib
@@ -440,9 +448,16 @@ def align_segments_to_canonical(segments, canonical_text):
       from the tajweed source) → inherit the preceding canonical rule, since
       such characters are combining marks attached to the base before them;
     * **delete** run (source-only characters — tatweel, ZWNJ, or a small-waw
-      madd with no canonical glyph) → nothing to place.
+      madd with no canonical glyph) → the run carries no glyph in the canonical
+      text, but if it carried a *rule* that would otherwise vanish, that rule is
+      transferred to a surviving neighbour (issue #290 follow-up: **rules are
+      conserved** — every character that carried a rule in the source keeps a
+      home). Purely non-semantic deletes (tatweel/ZWNJ, no rule) place nothing.
 
-    Adjacent characters with the same rule are merged into one segment.
+    Rules are conserved character-for-character: no source character's rule is
+    silently dropped. Adjacent characters with the same rule are then merged
+    into one segment (so per-*segment* counts may shrink vs the source, but the
+    coloured character coverage is identical).
     """
     source_text = ''.join(seg['t'] for seg in segments)
     source_rules = []
@@ -450,6 +465,7 @@ def align_segments_to_canonical(segments, canonical_text):
         source_rules.extend([seg['r']] * len(seg['t']))
 
     canon_rules = [None] * len(canonical_text)
+    deleted_rules = []  # (boundary_index, rule) for the conservation pass
     matcher = difflib.SequenceMatcher(None, source_text, canonical_text, autojunk=False)
     for op, i1, i2, j1, j2 in matcher.get_opcodes():
         if op == 'equal':
@@ -463,7 +479,27 @@ def align_segments_to_canonical(segments, canonical_text):
         elif op == 'insert':
             for k in range(j1, j2):
                 canon_rules[k] = canon_rules[k - 1] if k > 0 else None
-        # 'delete': source-only characters, nothing to place.
+        elif op == 'delete':
+            region = [r for r in source_rules[i1:i2] if r is not None]
+            if region:
+                deleted_rules.append((j1, region[-1]))
+
+    # Conservation pass for deletes. A source-only character carries no canonical
+    # glyph, but if it carried a rule that would otherwise vanish, transfer that
+    # rule to a surviving neighbour — UNLESS the rule already survives on an
+    # adjacent character (e.g. a deleted tatweel inside a madd whose superscript
+    # alef keeps the rule; no transfer needed). Runs after the main pass so both
+    # neighbours are known. Prefer the preceding character (the base/vowel the
+    # elongation attaches to); fall back to the following one.
+    for j1, rule in deleted_rules:
+        before = canon_rules[j1 - 1] if j1 - 1 >= 0 else None
+        after = canon_rules[j1] if j1 < len(canon_rules) else None
+        if rule in (before, after):
+            continue  # rule already has a home on a neighbour
+        if before is None and j1 - 1 >= 0:
+            canon_rules[j1 - 1] = rule
+        elif after is None and j1 < len(canon_rules):
+            canon_rules[j1] = rule
 
     merged = []
     for ch, rule in zip(canonical_text, canon_rules):

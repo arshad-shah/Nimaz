@@ -362,6 +362,76 @@ class TestQalqalahSplit(unittest.TestCase):
         self.assertEqual(segs[1]["r"], "qk")
 
 
+class TestPipelineConservation(unittest.TestCase):
+    """End-to-end character-coverage conservation (issue #290 follow-up).
+
+    This is the test that would have caught the alignment span-drop: it runs the
+    FULL pipeline (tokenize → taxonomy split → canonical alignment) and asserts
+    that every rule code present in the source segments still has a home after
+    alignment, for every ayah — not just `g`/`sl`, and not before alignment.
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        with open(JSON_DIR / "tajweed.json", encoding="utf-8") as fh:
+            cls.taj = json.load(fh)
+        with open(JSON_DIR / "ayahs.json", encoding="utf-8") as fh:
+            cls.canon = {f"{a['surah_id']}:{a['number_in_surah']}":
+                         a["text_arabic"] for a in json.load(fh)}
+        with open(JSON_DIR / "tajweed_cpfair.json", encoding="utf-8") as fh:
+            cls.cpfair = {f"{e['surah']}:{e['ayah']}": e for e in json.load(fh)}
+
+    def test_every_source_rule_code_survives_alignment(self):
+        offenders = []
+        for key, html in self.taj.items():
+            pre = preparse_tajweed(html, key=key, cpfair_entry=self.cpfair.get(key))
+            post = align_segments_to_canonical(
+                pre, normalise_uthmani(self.canon[key])
+            )
+            pre_codes = {s["r"] for s in pre if s["r"]}
+            post_codes = {s["r"] for s in post if s["r"]}
+            if pre_codes - post_codes:
+                offenders.append((key, sorted(pre_codes - post_codes)))
+        self.assertEqual(offenders, [], f"rule codes lost in alignment: {offenders[:10]}")
+
+    def test_small_waw_madd_is_conserved(self):
+        # 34:14 has a small-waw (U+06E5) madd absent from text_arabic; its rule
+        # must transfer to a surviving neighbour, not vanish.
+        post = align_segments_to_canonical(
+            preparse_tajweed(self.taj["34:14"], key="34:14",
+                             cpfair_entry=self.cpfair.get("34:14")),
+            normalise_uthmani(self.canon["34:14"]),
+        )
+        self.assertIn("mn", {s["r"] for s in post})
+
+    def test_delete_path_transfers_rule_to_neighbour(self):
+        # a ruled source char with no canonical counterpart transfers its rule
+        segs = [{"t": "a", "r": None}, {"t": "b", "r": "mn"}]
+        out = align_segments_to_canonical(segs, "a")  # 'b' deleted
+        self.assertEqual({s["r"] for s in out}, {"mn"})  # 'a' inherits mn
+
+
+class TestUnannotatedAyahsFixture(unittest.TestCase):
+    """Guard the 63-ayah gap (sub-issue A of #287): the count must only shrink."""
+
+    def test_gap_count_does_not_grow(self):
+        import re
+        fixture = json.load(
+            open(SCRIPTS_DIR / "tests" / "fixtures" / "unannotated_ayahs.json",
+                 encoding="utf-8"))
+        allow = set(fixture["ayahs"])
+        with open(JSON_DIR / "tajweed.json", encoding="utf-8") as fh:
+            taj = json.load(fh)
+        span = re.compile(r"<span\s+class=end>.*?</span>")
+        tag = re.compile(r"<tajweed\s+class=", re.S)
+        current = {k for k, v in taj.items() if not tag.search(span.sub("", v))}
+        # every currently-unannotated ayah must be in the allow-list (no new gaps)
+        self.assertEqual(current - allow, set(),
+                         f"new unannotated ayahs not in the fixture: {sorted(current - allow)}")
+        # the fixture count matches the recorded number
+        self.assertEqual(len(current), fixture["count"])
+
+
 class TestFullSourceTaxonomy(unittest.TestCase):
     """Whole-corpus #289 guarantees over the shipped data."""
 
