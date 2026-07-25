@@ -242,16 +242,17 @@ fun QuranReaderScreen(
     }
     val headerLoading = state.isLoading && state.readingMode != ReadingMode.PAGE
 
-    // Page mode state — HorizontalPager with RTL layout so swipe-left = next page
-    val totalPages = 604
+    // Page mode state — HorizontalPager with RTL layout so swipe-left = next page.
+    // Page count follows the active Mushaf edition (604 Uthmani vs 548 IndoPak-16, #270).
+    val totalPages = state.mushafScript.totalPages
 
     // Dual-page mode: tablet (sw >= 600dp) in landscape orientation
     val configuration = LocalConfiguration.current
     val isDualPageMode = configuration.smallestScreenWidthDp >= 600
             && configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
 
-    // In dual mode: 302 spreads (spread i → right page = 2i+1, left page = 2i+2)
-    val pagerPageCount = if (isDualPageMode) 302 else totalPages
+    // In dual mode: one spread per two pages (spread i → right page = 2i+1, left page = 2i+2)
+    val pagerPageCount = if (isDualPageMode) (totalPages + 1) / 2 else totalPages
 
     // Stable initial page — computed once when entering page view
     val initialPageForPager = remember(state.readingMode, usePageView) {

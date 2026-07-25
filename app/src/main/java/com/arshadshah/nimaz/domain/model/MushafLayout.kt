@@ -70,5 +70,15 @@ enum class MushafScript(val totalPages: Int) {
 
     companion object {
         val DEFAULT = MADANI
+
+        /** The largest page count across editions — the safe upper bound for a page number
+         *  whose target edition isn't known yet (e.g. a deep-link resolved before the user's
+         *  script preference is read). The reader clamps to the active edition afterwards. */
+        val MAX_TOTAL_PAGES: Int = entries.maxOf { it.totalPages }
+
+        /** Parse a stored enum name (see PreferencesDataStore.quranMushafScript), falling
+         *  back to [DEFAULT] for null / legacy / unknown values so the reader never breaks. */
+        fun fromName(name: String?): MushafScript =
+            entries.firstOrNull { it.name == name } ?: DEFAULT
     }
 }

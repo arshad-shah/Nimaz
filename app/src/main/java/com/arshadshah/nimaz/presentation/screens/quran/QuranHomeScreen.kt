@@ -531,7 +531,7 @@ private fun BrowseTabContent(
                 keyboardActions = KeyboardActions(
                     onGo = {
                         jumpToPage.toIntOrNull()?.let { page ->
-                            if (page in 1..604) {
+                            if (page in 1..state.mushafScript.totalPages) {
                                 onNavigateToPage(page)
                             }
                         }
@@ -541,7 +541,7 @@ private fun BrowseTabContent(
                     IconButton(
                         onClick = {
                             jumpToPage.toIntOrNull()?.let { page ->
-                                if (page in 1..604) {
+                                if (page in 1..state.mushafScript.totalPages) {
                                     onNavigateToPage(page)
                                 }
                             }

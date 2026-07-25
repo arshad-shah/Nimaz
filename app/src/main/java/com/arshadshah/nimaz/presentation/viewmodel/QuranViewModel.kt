@@ -15,6 +15,7 @@ import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
 import com.arshadshah.nimaz.domain.model.MushafPageLayout
+import com.arshadshah.nimaz.domain.model.MushafScript
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -84,6 +85,9 @@ data class QuranHomeUiState(
     val completedKhatamCount: Int = 0,
     val pageAyahRanges: List<PageAyahRange> = emptyList(),
     val verseOfTheDay: Ayah? = null,
+    // The active Mushaf edition, so the Page tab's jump-to-page validates against the right
+    // page count (604 Uthmani vs 548 IndoPak-16, #270).
+    val mushafScript: MushafScript = MushafScript.DEFAULT,
     val isLoading: Boolean = true,
     val error: String? = null
 )
@@ -118,11 +122,18 @@ data class QuranReaderUiState(
     // resident at once, so — mirroring [pageCache] — each visible page's layout is cached by
     // page number rather than a single field.
     val mushafPageLayoutCache: Map<Int, MushafPageLayout> = emptyMap(),
-    // Whether the reader renders the line-accurate 16-line IndoPak layout instead of the
-    // default Uthmani/604 page. This is the seam the settings toggle drives in 6/7 (#270);
-    // it stays false here so the default view is unchanged until that persistence lands.
-    val use16LineLayout: Boolean = false
-)
+    // The Mushaf edition the reader renders, driven by the persisted settings toggle (6/7,
+    // #270). MADANI (default) keeps the Uthmani/604 page; INDOPAK_16 switches to the
+    // line-accurate 16-line IndoPak layout (548 pages). Page counts / pager bounds read
+    // [MushafScript.totalPages] off this so a script switch reflows the pager correctly.
+    val mushafScript: MushafScript = MushafScript.DEFAULT
+) {
+    /** Whether to render the line-accurate 16-line IndoPak layout instead of the Uthmani page. */
+    val use16LineLayout: Boolean get() = mushafScript == MushafScript.INDOPAK_16
+
+    /** Number of pages in the active edition — the pager/nav bounds source of truth. */
+    val totalPages: Int get() = mushafScript.totalPages
+}
 
 data class QuranSearchUiState(
     val query: String = "",
@@ -353,10 +364,12 @@ class QuranViewModel @Inject constructor(
             combine(
                 displayFlow,
                 behaviorFlow,
-                settingsRepository.showTajweed
-            ) { display, behavior, showTajweed ->
-                Triple(display, behavior, showTajweed)
-            }.collect { (display, behavior, showTajweed) ->
+                settingsRepository.showTajweed,
+                settingsRepository.quranMushafScript
+            ) { display, behavior, showTajweed, mushafScript ->
+                QuranReaderSettings(display, behavior, showTajweed, MushafScript.fromName(mushafScript))
+            }.collect { settings ->
+                val (display, behavior, showTajweed, mushafScript) = settings
                 audioManager.setReciter(behavior.reciterId)
                 // Push continuous-reading reactively so toggling the setting while
                 // in the reader takes effect immediately, not on next play-start.
@@ -371,9 +384,11 @@ class QuranViewModel @Inject constructor(
                         fontSize = behavior.translationFontSize,
                         continuousReading = behavior.continuousReading,
                         keepScreenOn = behavior.keepScreenOn,
-                        showTajweed = showTajweed
+                        showTajweed = showTajweed,
+                        mushafScript = mushafScript
                     )
                 }
+                _homeState.update { it.copy(mushafScript = mushafScript) }
             }
         }
     }
@@ -391,6 +406,15 @@ class QuranViewModel @Inject constructor(
         val continuousReading: Boolean,
         val keepScreenOn: Boolean,
         val reciterId: String?
+    )
+
+    /** Aggregate of the reader settings observed in [observeQuranSettings]; combine() tops out
+     *  at five sources, so the display/behavior sub-groups are folded together here. */
+    private data class QuranReaderSettings(
+        val display: QuranDisplaySettings,
+        val behavior: QuranBehaviorSettings,
+        val showTajweed: Boolean,
+        val mushafScript: MushafScript
     )
 
     fun refreshSettings() {

@@ -23,6 +23,22 @@ class MushafScriptTest {
     }
 
     @Test
+    fun `fromName parses stored enum names and falls back to the default`() {
+        assertThat(MushafScript.fromName("MADANI")).isEqualTo(MushafScript.MADANI)
+        assertThat(MushafScript.fromName("INDOPAK_16")).isEqualTo(MushafScript.INDOPAK_16)
+        // null / legacy / unknown values must never break the reader — default to MADANI.
+        assertThat(MushafScript.fromName(null)).isEqualTo(MushafScript.DEFAULT)
+        assertThat(MushafScript.fromName("")).isEqualTo(MushafScript.DEFAULT)
+        assertThat(MushafScript.fromName("madani")).isEqualTo(MushafScript.DEFAULT)
+        assertThat(MushafScript.fromName("GALAXY")).isEqualTo(MushafScript.DEFAULT)
+    }
+
+    @Test
+    fun `max total pages is the largest edition`() {
+        assertThat(MushafScript.MAX_TOTAL_PAGES).isEqualTo(604)
+    }
+
+    @Test
     fun `line type parsing is tolerant of casing and unknown values`() {
         assertThat(MushafLineType.fromString("surah_header")).isEqualTo(MushafLineType.SURAH_HEADER)
         assertThat(MushafLineType.fromString("BASMALAH")).isEqualTo(MushafLineType.BASMALAH)
