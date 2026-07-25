@@ -45,6 +45,7 @@ import com.arshadshah.nimaz.data.local.database.entity.KhatamDailyLogEntity
 import com.arshadshah.nimaz.data.local.database.entity.KhatamEntity
 import com.arshadshah.nimaz.data.local.database.entity.LocationEntity
 import com.arshadshah.nimaz.data.local.database.entity.MakeupFastEntity
+import com.arshadshah.nimaz.data.local.database.entity.MushafLayoutIndopak16Entity
 import com.arshadshah.nimaz.data.local.database.entity.PrayerRecordEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetBookmarkEntity
 import com.arshadshah.nimaz.data.local.database.entity.ProphetEntity
@@ -72,7 +73,7 @@ import com.arshadshah.nimaz.data.local.database.entity.ZakatHistoryEntity
  * migration) for any schema change — it drives both the Room `@Database(version = …)`
  * annotation below and `NimazDatabase.SCHEMA_VERSION` (used to tag crash reports).
  */
-const val NIMAZ_DATABASE_VERSION = 17
+const val NIMAZ_DATABASE_VERSION = 18
 
 @Database(
     entities = [
@@ -84,6 +85,7 @@ const val NIMAZ_DATABASE_VERSION = 17
         QuranFavoriteEntity::class,
         ReadingProgressEntity::class,
         SurahInfoEntity::class,
+        MushafLayoutIndopak16Entity::class,
         // Hadith
         HadithBookEntity::class,
         HadithEntity::class,
@@ -237,6 +239,37 @@ abstract class NimazDatabase : RoomDatabase() {
         val MIGRATION_16_17 = object : Migration(16, 17) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.addColumnIfMissing("hadiths", "narrator_chain", "TEXT")
+            }
+        }
+
+        // 16-line IndoPak Quran (sub-task 2/7 of #263). Adds the nullable
+        // `text_indopak` column to `ayahs` and creates the `mushaf_layout_indopak16`
+        // table that holds the line-accurate 548-page layout. Both are created empty
+        // here for BOTH fresh installs and upgrades — the prepackaged DB asset is not
+        // regenerated (it is a ~147 MB Git-LFS blob that `createFromAsset` never
+        // re-copies on upgrade), so the IndoPak text + layout are shipped as bundled
+        // JSON assets and populated at runtime by QuranIndopakSeeder, exactly like the
+        // Dua/Help/Qaida content. This keeps the APK impact to a few MB of compressible
+        // JSON instead of adding tens of MB to the LFS asset. Every statement is
+        // idempotent so running it after createFromAsset (fresh install) is safe.
+        val MIGRATION_17_18 = object : Migration(17, 18) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.addColumnIfMissing("ayahs", "text_indopak", "TEXT")
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS `mushaf_layout_indopak16` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `page` INTEGER NOT NULL,
+                        `line` INTEGER NOT NULL,
+                        `line_type` TEXT NOT NULL,
+                        `surah_id` INTEGER NOT NULL,
+                        `ayah_id` INTEGER,
+                        `first_word_position` INTEGER,
+                        `last_word_position` INTEGER
+                    )
+                """.trimIndent()
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_mushaf_layout_indopak16_page_line` ON `mushaf_layout_indopak16` (`page`, `line`)")
             }
         }
 

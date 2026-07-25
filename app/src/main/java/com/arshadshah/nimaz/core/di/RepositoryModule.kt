@@ -17,6 +17,10 @@ import com.arshadshah.nimaz.data.local.qaida.AndroidQaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.DataStoreQaidaContentVersionStore
 import com.arshadshah.nimaz.data.local.qaida.QaidaAssetReader
 import com.arshadshah.nimaz.data.local.qaida.QaidaContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.AndroidQuranAssetReader
+import com.arshadshah.nimaz.data.local.quran.DataStoreIndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.IndopakContentVersionStore
+import com.arshadshah.nimaz.data.local.quran.QuranAssetReader
 import com.arshadshah.nimaz.data.repository.AsmaUlHusnaRepositoryImpl
 import com.arshadshah.nimaz.data.repository.AsmaUnNabiRepositoryImpl
 import com.arshadshah.nimaz.data.repository.DuaRepositoryImpl
@@ -359,6 +363,18 @@ abstract class RepositoryModule {
     abstract fun bindQaidaAssetReader(
         impl: AndroidQaidaAssetReader
     ): QaidaAssetReader
+
+    @Binds
+    @Singleton
+    abstract fun bindIndopakContentVersionStore(
+        impl: DataStoreIndopakContentVersionStore
+    ): IndopakContentVersionStore
+
+    @Binds
+    @Singleton
+    abstract fun bindQuranAssetReader(
+        impl: AndroidQuranAssetReader
+    ): QuranAssetReader
 
     @Binds
     @Singleton

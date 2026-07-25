@@ -60,6 +60,8 @@ interface SettingsRepository {
     suspend fun setDuaContentVersion(version: Int)
     val qaidaContentVersion: Flow<Int>
     suspend fun setQaidaContentVersion(version: Int)
+    val indopakContentVersion: Flow<Int>
+    suspend fun setIndopakContentVersion(version: Int)
     val arabicFontSize: Flow<String>
     suspend fun setArabicFontSize(size: String)
     val calculationMethod: Flow<String>

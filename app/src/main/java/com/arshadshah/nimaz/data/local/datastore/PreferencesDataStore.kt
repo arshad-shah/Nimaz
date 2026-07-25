@@ -94,6 +94,7 @@ class PreferencesDataStore @Inject constructor(
 
         // Qaida content (data-driven; bumped when qaida_content.json changes)
         val QAIDA_CONTENT_VERSION = intPreferencesKey("qaida_content_version")
+        val INDOPAK_CONTENT_VERSION = intPreferencesKey("indopak_content_version")
 
         // Prayer Settings
         val CALCULATION_METHOD = stringPreferencesKey("calculation_method")
@@ -342,6 +343,13 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setQaidaContentVersion(version: Int) =
         put(PreferencesKeys.QAIDA_CONTENT_VERSION, version)
+
+    // IndoPak 16-line Quran content version (0 = never seeded)
+    override val indopakContentVersion: Flow<Int> =
+        preference(PreferencesKeys.INDOPAK_CONTENT_VERSION, 0)
+
+    override suspend fun setIndopakContentVersion(version: Int) =
+        put(PreferencesKeys.INDOPAK_CONTENT_VERSION, version)
 
     override val arabicFontSize: Flow<String> =
         preference(PreferencesKeys.ARABIC_FONT_SIZE, "medium")
