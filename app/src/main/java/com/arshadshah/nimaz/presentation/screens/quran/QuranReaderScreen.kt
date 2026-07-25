@@ -65,9 +65,13 @@ import com.arshadshah.nimaz.presentation.components.atoms.rememberNimazPagerStat
 import com.arshadshah.nimaz.presentation.components.molecules.AudioBottomBar
 import com.arshadshah.nimaz.presentation.components.molecules.MushafPageBar
 import com.arshadshah.nimaz.presentation.components.molecules.SurahHeaderCartouche
+import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
+import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
+import com.arshadshah.nimaz.presentation.viewmodel.QuranReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
 import com.arshadshah.nimaz.presentation.viewmodel.ReadingMode
 import kotlinx.coroutines.launch
@@ -535,6 +539,13 @@ fun QuranReaderScreen(
                 // Page mode with HorizontalPager (RTL so swipe-left = next page)
                 val surahMap = surahByNumber
 
+                // Full-ayah lookup (by global id) used only by the 16-line renderer to resolve
+                // translation/copy/share content for a tapped word. Best-effort from the
+                // Madani page cache; 6/7 makes the ayah source fully script-aware.
+                val ayahById = remember(state.pageCache) {
+                    state.pageCache.values.flatten().associateBy { it.id }
+                }
+
                 // Current Quran page numbers (1-based)
                 val currentRightPage = if (isDualPageMode) {
                     pagerState.settledPage * 2 + 1
@@ -620,59 +631,16 @@ fun QuranReaderScreen(
                                     Row(modifier = Modifier.fillMaxSize()) {
                                         // Left page (higher page number — displayed on the left in a physical Mushaf)
                                         if (leftPageNum != rightPageNum) {
-                                            MushafPage(
+                                            ReaderMushafPage(
                                                 pageNumber = leftPageNum,
                                                 ayahs = leftPageAyahs,
                                                 surahMap = surahMap,
-                                                arabicFontSize = state.arabicFontSize,
-                                                arabicFontFamily = state.arabicFontFamily,
+                                                state = state,
                                                 highlightedAyahId = highlightedAyahId,
                                                 favoriteAyahIds = favoriteAyahIds,
-                                                showTajweed = state.showTajweed,
-                                                showTranslation = state.showTranslation,
-                                                showTransliteration = state.showTransliteration,
-                                                onBookmarkClick = { ayah ->
-                                                    viewModel.onEvent(
-                                                        QuranEvent.ToggleBookmark(
-                                                            ayah.id,
-                                                            ayah.surahNumber,
-                                                            ayah.numberInSurah
-                                                        )
-                                                    )
-                                                },
-                                                onFavoriteClick = { ayah ->
-                                                    viewModel.onEvent(
-                                                        QuranEvent.ToggleFavorite(
-                                                            ayah.id,
-                                                            ayah.surahNumber,
-                                                            ayah.numberInSurah
-                                                        )
-                                                    )
-                                                },
-                                                onPlayClick = { ayah ->
-                                                    viewModel.onEvent(
-                                                        QuranEvent.PlayAyahAudio(
-                                                            ayah.id,
-                                                            ayah.surahNumber,
-                                                            ayah.numberInSurah
-                                                        )
-                                                    )
-                                                },
-                                                onShareClick = { },
-                                                onCopyClick = { },
-                                                onTafseerClick = { ayah ->
-                                                    onNavigateToTafseer(
-                                                        ayah.surahNumber,
-                                                        ayah.numberInSurah
-                                                    )
-                                                },
-                                                isKhatamActive = state.activeKhatamId != null,
-                                                khatamReadAyahIds = state.khatamReadAyahIds,
-                                                onKhatamToggle = { ayah ->
-                                                    viewModel.onEvent(
-                                                        QuranEvent.ToggleKhatamAyah(ayah.id)
-                                                    )
-                                                },
+                                                ayahById = ayahById,
+                                                onEvent = viewModel::onEvent,
+                                                onNavigateToTafseer = onNavigateToTafseer,
                                                 modifier = Modifier
                                                     .weight(1f)
                                                     .fillMaxHeight()
@@ -688,61 +656,16 @@ fun QuranReaderScreen(
                                         )
 
                                         // Right page (lower page number — displayed on the right in a physical Mushaf)
-                                        MushafPage(
+                                        ReaderMushafPage(
                                             pageNumber = rightPageNum,
                                             ayahs = rightPageAyahs,
                                             surahMap = surahMap,
-                                            arabicFontSize = state.arabicFontSize,
-                                            arabicFontFamily = state.arabicFontFamily,
+                                            state = state,
                                             highlightedAyahId = highlightedAyahId,
                                             favoriteAyahIds = favoriteAyahIds,
-                                            showTajweed = state.showTajweed,
-                                            showTranslation = state.showTranslation,
-                                            showTransliteration = state.showTransliteration,
-                                            onBookmarkClick = { ayah ->
-                                                viewModel.onEvent(
-                                                    QuranEvent.ToggleBookmark(
-                                                        ayah.id,
-                                                        ayah.surahNumber,
-                                                        ayah.numberInSurah
-                                                    )
-                                                )
-                                            },
-                                            onFavoriteClick = { ayah ->
-                                                viewModel.onEvent(
-                                                    QuranEvent.ToggleFavorite(
-                                                        ayah.id,
-                                                        ayah.surahNumber,
-                                                        ayah.numberInSurah
-                                                    )
-                                                )
-                                            },
-                                            onPlayClick = { ayah ->
-                                                viewModel.onEvent(
-                                                    QuranEvent.PlayAyahAudio(
-                                                        ayah.id,
-                                                        ayah.surahNumber,
-                                                        ayah.numberInSurah
-                                                    )
-                                                )
-                                            },
-                                            onShareClick = { },
-                                            onCopyClick = { },
-                                            onTafseerClick = { ayah ->
-                                                onNavigateToTafseer(
-                                                    ayah.surahNumber,
-                                                    ayah.numberInSurah
-                                                )
-                                            },
-                                            isKhatamActive = state.activeKhatamId != null,
-                                            khatamReadAyahIds = state.khatamReadAyahIds,
-                                            onKhatamToggle = { ayah ->
-                                                viewModel.onEvent(
-                                                    QuranEvent.ToggleKhatamAyah(
-                                                        ayah.id
-                                                    )
-                                                )
-                                            },
+                                            ayahById = ayahById,
+                                            onEvent = viewModel::onEvent,
+                                            onNavigateToTafseer = onNavigateToTafseer,
                                             modifier = Modifier
                                                 .weight(1f)
                                                 .fillMaxHeight()
@@ -764,61 +687,16 @@ fun QuranReaderScreen(
                                         }
                                     }
 
-                                    MushafPage(
+                                    ReaderMushafPage(
                                         pageNumber = pageNum,
                                         ayahs = pageAyahs,
                                         surahMap = surahMap,
-                                        arabicFontSize = state.arabicFontSize,
-                                        arabicFontFamily = state.arabicFontFamily,
+                                        state = state,
                                         highlightedAyahId = highlightedAyahId,
                                         favoriteAyahIds = favoriteAyahIds,
-                                        showTajweed = state.showTajweed,
-                                        showTranslation = state.showTranslation,
-                                        showTransliteration = state.showTransliteration,
-                                        onBookmarkClick = { ayah ->
-                                            viewModel.onEvent(
-                                                QuranEvent.ToggleBookmark(
-                                                    ayah.id,
-                                                    ayah.surahNumber,
-                                                    ayah.numberInSurah
-                                                )
-                                            )
-                                        },
-                                        onFavoriteClick = { ayah ->
-                                            viewModel.onEvent(
-                                                QuranEvent.ToggleFavorite(
-                                                    ayah.id,
-                                                    ayah.surahNumber,
-                                                    ayah.numberInSurah
-                                                )
-                                            )
-                                        },
-                                        onPlayClick = { ayah ->
-                                            viewModel.onEvent(
-                                                QuranEvent.PlayAyahAudio(
-                                                    ayah.id,
-                                                    ayah.surahNumber,
-                                                    ayah.numberInSurah
-                                                )
-                                            )
-                                        },
-                                        onShareClick = { },
-                                        onCopyClick = { },
-                                        onTafseerClick = { ayah ->
-                                            onNavigateToTafseer(
-                                                ayah.surahNumber,
-                                                ayah.numberInSurah
-                                            )
-                                        },
-                                        isKhatamActive = state.activeKhatamId != null,
-                                        khatamReadAyahIds = state.khatamReadAyahIds,
-                                        onKhatamToggle = { ayah ->
-                                            viewModel.onEvent(
-                                                QuranEvent.ToggleKhatamAyah(
-                                                    ayah.id
-                                                )
-                                            )
-                                        },
+                                        ayahById = ayahById,
+                                        onEvent = viewModel::onEvent,
+                                        onNavigateToTafseer = onNavigateToTafseer,
                                         modifier = Modifier
                                             .fillMaxSize()
                                             .background(MaterialTheme.colorScheme.background)
@@ -950,5 +828,111 @@ fun QuranReaderScreen(
                 }
             }
         }
+    }
+}
+
+/**
+ * Renders one Quran page inside the reader pager, choosing the renderer by the active Mushaf
+ * script: the line-accurate 16-line IndoPak page ([MushafLinePage], 5/7 of #263) when
+ * [QuranReaderUiState.use16LineLayout] is set, otherwise the default Uthmani page
+ * ([MushafPage]). Centralises the (identical) interaction wiring the single- and dual-page
+ * call sites used to duplicate.
+ *
+ * In 16-line mode it lazily loads the page's [com.arshadshah.nimaz.domain.model.MushafPageLayout]
+ * into the cache and shows a spinner until it arrives; [ayahById] supplies full-ayah content
+ * (translation/copy/share) when available.
+ */
+@Composable
+private fun ReaderMushafPage(
+    pageNumber: Int,
+    ayahs: List<Ayah>,
+    surahMap: Map<Int, Surah>,
+    state: QuranReaderUiState,
+    highlightedAyahId: Int?,
+    favoriteAyahIds: Set<Int>,
+    ayahById: Map<Int, Ayah>,
+    onEvent: (QuranEvent) -> Unit,
+    onNavigateToTafseer: (Int, Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    if (state.use16LineLayout) {
+        val layout = state.mushafPageLayoutCache[pageNumber]
+        LaunchedEffect(pageNumber) {
+            if (pageNumber !in state.mushafPageLayoutCache) {
+                onEvent(QuranEvent.LoadMushafPageLayout(pageNumber))
+            }
+        }
+        if (layout == null) {
+            Box(modifier = modifier, contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+            }
+        } else {
+            MushafLinePage(
+                pageNumber = pageNumber,
+                layout = layout,
+                surahMap = surahMap,
+                arabicFontSize = state.arabicFontSize,
+                highlightedAyahId = highlightedAyahId,
+                favoriteAyahIds = favoriteAyahIds,
+                showTranslation = state.showTranslation,
+                showTransliteration = state.showTransliteration,
+                ayahLookup = { ayahById[it] },
+                onBookmarkClick = { ayah ->
+                    onEvent(
+                        QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onFavoriteClick = { ayah ->
+                    onEvent(
+                        QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onPlayClick = { ayah ->
+                    onEvent(
+                        QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah)
+                    )
+                },
+                onShareClick = { },
+                onCopyClick = { },
+                onTafseerClick = { ayah ->
+                    onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+                },
+                isKhatamActive = state.activeKhatamId != null,
+                khatamReadAyahIds = state.khatamReadAyahIds,
+                onKhatamToggle = { ayah -> onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+                modifier = modifier,
+            )
+        }
+    } else {
+        MushafPage(
+            pageNumber = pageNumber,
+            ayahs = ayahs,
+            surahMap = surahMap,
+            arabicFontSize = state.arabicFontSize,
+            arabicFontFamily = state.arabicFontFamily,
+            highlightedAyahId = highlightedAyahId,
+            favoriteAyahIds = favoriteAyahIds,
+            showTajweed = state.showTajweed,
+            showTranslation = state.showTranslation,
+            showTransliteration = state.showTransliteration,
+            onBookmarkClick = { ayah ->
+                onEvent(QuranEvent.ToggleBookmark(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+            },
+            onFavoriteClick = { ayah ->
+                onEvent(QuranEvent.ToggleFavorite(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+            },
+            onPlayClick = { ayah ->
+                onEvent(QuranEvent.PlayAyahAudio(ayah.id, ayah.surahNumber, ayah.numberInSurah))
+            },
+            onShareClick = { },
+            onCopyClick = { },
+            onTafseerClick = { ayah ->
+                onNavigateToTafseer(ayah.surahNumber, ayah.numberInSurah)
+            },
+            isKhatamActive = state.activeKhatamId != null,
+            khatamReadAyahIds = state.khatamReadAyahIds,
+            onKhatamToggle = { ayah -> onEvent(QuranEvent.ToggleKhatamAyah(ayah.id)) },
+            modifier = modifier,
+        )
     }
 }
