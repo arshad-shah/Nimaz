@@ -151,21 +151,39 @@ object TajweedParser {
                 ruleInfo[current]?.let { old to Pair(it.light, it.dark) }
             }
 
+    // Malformed-input signatures already reported, so a bad ayah is reported
+    // once per process instead of once per composition × ayahs-on-page (#293).
+    private val reportedErrors = java.util.Collections.synchronizedSet(HashSet<String>())
+
+    private fun reportOnce(tajweedText: String, e: Exception) {
+        if (reportedErrors.add(tajweedText)) {
+            CrashReporter.recordException(e)
+        }
+    }
+
     /**
      * Parse pre-parsed tajweed JSON and return an AnnotatedString with colored spans.
      *
      * @param tajweedText The pre-parsed JSON string: [{"t":"text","r":"code"},...]
      * @param isDarkTheme Whether the app is in dark theme mode
      * @param defaultColor The default text color for plain text (r=null)
+     * @param stripPrefix When non-null, drop this leading text (plus any trailing
+     *   whitespace) from the parsed segments — used to strip the bismillah header
+     *   from surah-opening ayahs (#293). Matches on the segment text, which since
+     *   #290 equals the canonical `text_arabic`.
      * @return AnnotatedString with colored spans for tajweed rules
      */
     fun parse(
         tajweedText: String,
         isDarkTheme: Boolean,
-        defaultColor: Color = Color.Unspecified
+        defaultColor: Color = Color.Unspecified,
+        stripPrefix: String? = null
     ): AnnotatedString {
         return try {
-            val segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
+            var segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
+            if (stripPrefix != null) {
+                segments = stripLeadingPrefix(segments, stripPrefix)
+            }
             buildAnnotatedString {
                 for (segment in segments) {
                     val startIdx = length
@@ -193,12 +211,40 @@ object TajweedParser {
                 }
             }
         } catch (e: Exception) {
-            CrashReporter.recordException(e)
+            reportOnce(tajweedText, e)
             // If parsing fails, return the raw text without colors
             buildAnnotatedString {
                 append(stripJson(tajweedText))
             }
         }
+    }
+
+    /**
+     * Drop [prefix] (plus any following whitespace) from the front of a segment
+     * list, trimming a segment that straddles the boundary. Returns the list
+     * unchanged when the concatenated text does not start with [prefix].
+     */
+    internal fun stripLeadingPrefix(
+        segments: List<TajweedSegment>,
+        prefix: String
+    ): List<TajweedSegment> {
+        val full = segments.joinToString("") { it.t }
+        if (!full.startsWith(prefix)) return segments
+        var cut = prefix.length
+        while (cut < full.length && full[cut].isWhitespace()) cut++
+
+        val out = ArrayList<TajweedSegment>(segments.size)
+        var pos = 0
+        for (seg in segments) {
+            val end = pos + seg.t.length
+            when {
+                end <= cut -> Unit                                    // fully consumed
+                pos >= cut -> out.add(seg)                            // fully kept
+                else -> out.add(seg.copy(t = seg.t.substring(cut - pos)))  // boundary
+            }
+            pos = end
+        }
+        return out
     }
 
     /**
@@ -213,7 +259,7 @@ object TajweedParser {
             val segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
             segments.joinToString("") { it.t }
         } catch (e: Exception) {
-            CrashReporter.recordException(e)
+            reportOnce(tajweedText, e)
             stripJson(tajweedText)
         }
     }

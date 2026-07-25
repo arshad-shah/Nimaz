@@ -277,10 +277,20 @@ fun QuranSettingsScreen(
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetKeepScreenOn(!quranState.keepScreenOn)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Tajweed colours are only available for the Madani (Uthmani)
+                    // script — the 16-line IndoPak layout has no per-letter spans
+                    // (see MushafLineLayout). Disable the toggle with a reason
+                    // rather than let it silently do nothing (#293).
+                    val tajweedAvailable = quranState.mushafScript == MushafScript.MADANI
                     NimazSettingsItem(
                         title = stringResource(R.string.show_tajweed_colors),
-                        subtitle = stringResource(R.string.show_tajweed_colors_subtitle),
+                        subtitle = if (tajweedAvailable) {
+                            stringResource(R.string.show_tajweed_colors_subtitle)
+                        } else {
+                            stringResource(R.string.show_tajweed_colors_unavailable)
+                        },
                         checked = quranState.showTajweed,
+                        enabled = tajweedAvailable,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
                 }

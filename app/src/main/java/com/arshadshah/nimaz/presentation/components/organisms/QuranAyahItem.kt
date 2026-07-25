@@ -67,8 +67,10 @@ import com.arshadshah.nimaz.presentation.components.atoms.NimazIconSize
 import com.arshadshah.nimaz.presentation.components.atoms.NimazPillActionButton
 import com.arshadshah.nimaz.presentation.components.atoms.NimazTone
 import com.arshadshah.nimaz.presentation.components.atoms.QuranVerseText
+import com.arshadshah.nimaz.presentation.components.atoms.BISMILLAH_TEXT
 import com.arshadshah.nimaz.presentation.components.atoms.appendAyahEndMarker
 import com.arshadshah.nimaz.presentation.components.atoms.getDisplayArabicText
+import com.arshadshah.nimaz.presentation.components.atoms.hasLeadingBismillah
 import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.arshadshah.nimaz.presentation.theme.NimazColors
 import com.arshadshah.nimaz.presentation.theme.NimazPalette
@@ -214,12 +216,13 @@ internal fun AyahItem(
             // Render with tajweed colors using BasicText
             val tajweedAnnotated = remember(
                 ayah.textTajweed, isDarkTheme, ayah.numberInSurah,
-                markerBracketColor, markerNumberColor
+                textColor, markerBracketColor, markerNumberColor
             ) {
                 val parsed = TajweedParser.parse(
                     tajweedText = ayah.textTajweed,
                     isDarkTheme = isDarkTheme,
-                    defaultColor = textColor
+                    defaultColor = textColor,
+                    stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null
                 )
                 // Append the coloured end marker to the tajweed text
                 buildAnnotatedString {
