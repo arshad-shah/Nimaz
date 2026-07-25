@@ -130,4 +130,54 @@ class MushafLayoutMapperTest {
         assertThat(layout.isEmpty).isTrue()
         assertThat(layout.lines).isEmpty()
     }
+
+    @Test
+    fun `header and basmalah sharing a line number both survive as their own lines`() {
+        // 81 of the 112 basmalah-bearing surahs ship their surah_header and basmalah on the
+        // same line_number (e.g. p.290, surah 21). The old groupBy{line}.first() collapsed
+        // this to a header only, silently dropping the basmalah for those surahs — a #271
+        // fidelity defect. Each structural row must now map to its own line, header first.
+        val rows = listOf(
+            headerRow(page = 290, line = 1, type = "surah_header", surahId = 21),
+            headerRow(page = 290, line = 1, type = "basmalah", surahId = 21),
+            ayahRow(
+                page = 290, line = 3, ayahId = 2484, ayahNumber = 1,
+                first = 1, last = 2, textIndopak = "w1 w2"
+            )
+        )
+
+        val layout = MushafLayoutMapper.toPageLayout(page = 290, rows = rows)
+
+        assertThat(layout.lines.map { it.type }).containsExactly(
+            MushafLineType.SURAH_HEADER,
+            MushafLineType.BASMALAH,
+            MushafLineType.AYAH,
+        ).inOrder()
+        // Both structural lines keep the shared line number and their surah id.
+        assertThat(layout.lines[0].lineNumber).isEqualTo(1)
+        assertThat(layout.lines[1].lineNumber).isEqualTo(1)
+        assertThat(layout.lines[0].surahId).isEqualTo(21)
+        assertThat(layout.lines[1].surahId).isEqualTo(21)
+        assertThat(layout.lines[0].words).isEmpty()
+        assertThat(layout.lines[1].words).isEmpty()
+    }
+
+    @Test
+    fun `ayah segments still concatenate when they share a line with a preceding header`() {
+        // A header is never on the same line as ayah words in the shipped data, but the mapper
+        // must stay total: structural rows come first, then the concatenated ayah line.
+        val rows = listOf(
+            headerRow(page = 7, line = 5, type = "surah_header", surahId = 3),
+            ayahRow(page = 7, line = 5, ayahId = 300, ayahNumber = 1, first = 1, last = 1, textIndopak = "a b"),
+            ayahRow(page = 7, line = 5, ayahId = 301, ayahNumber = 2, first = 1, last = 1, textIndopak = "c d")
+        )
+
+        val layout = MushafLayoutMapper.toPageLayout(page = 7, rows = rows)
+
+        assertThat(layout.lines).hasSize(2)
+        assertThat(layout.lines[0].type).isEqualTo(MushafLineType.SURAH_HEADER)
+        val ayahLine = layout.lines[1]
+        assertThat(ayahLine.type).isEqualTo(MushafLineType.AYAH)
+        assertThat(ayahLine.words.map { it.text }).containsExactly("a", "c").inOrder()
+    }
 }
