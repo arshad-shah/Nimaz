@@ -47,11 +47,12 @@ class WorshipReminderCalculator {
         now: LocalDateTime,
         offsetMinutes: Int,
         timesFor: (LocalDate) -> DayWorshipTimes?,
-        hijriFor: (LocalDate) -> HijriDayInfo?
+        hijriFor: (LocalDate) -> HijriDayInfo?,
+        maxSearchDays: Long = forwardSearchDays
     ): WorshipReminderOccurrence? {
         val startDay = now.toLocalDate().minusDays(1)
         var day = startDay
-        val end = startDay.plusDays(forwardSearchDays + 1)
+        val end = startDay.plusDays(maxSearchDays + 1)
         var best: WorshipReminderOccurrence? = null
 
         while (day.isBefore(end)) {

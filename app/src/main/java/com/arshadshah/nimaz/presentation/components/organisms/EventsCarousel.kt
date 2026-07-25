@@ -22,6 +22,8 @@ data class EventCardUi(
     val jumuahTime: String = "",
     val timeUntilJumuah: String = "",
     val isJumuahPassed: Boolean = false,
+    /** When set, this page renders the "Next Worship" card via [WorshipEventCard]. */
+    val worship: WorshipCardUi? = null,
 )
 
 // Direction A: every event card is the compact Jumu'ah shape — icon well + name (eyebrow) +
@@ -50,7 +52,20 @@ fun EventsCarousel(
         pageSpacing = 12.dp,
     ) { pageIndex ->
         val e = events[pageIndex]
-        if (e.occasion == EventOccasion.JUMUAH) {
+        val worship = e.worship
+        if (worship != null) {
+            WorshipEventCard(
+                type = worship.type,
+                name = worship.name,
+                arabic = worship.arabic,
+                body = worship.body,
+                eventTime = worship.eventTime,
+                timeLabel = worship.timeLabel,
+                countdown = worship.countdown,
+                countdownLabel = worship.countdownLabel,
+                fillHeight = true,
+            )
+        } else if (e.occasion == EventOccasion.JUMUAH) {
             JumuahCard(
                 jumuahTime = e.jumuahTime,
                 timeUntilJumuah = e.timeUntilJumuah,

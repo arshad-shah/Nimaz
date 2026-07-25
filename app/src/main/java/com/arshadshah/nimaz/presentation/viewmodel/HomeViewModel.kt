@@ -16,8 +16,13 @@ import com.arshadshah.nimaz.core.monitoring.AppAnalytics
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.core.util.HijriDateCalculator
 import com.arshadshah.nimaz.core.util.MILLIS_PER_DAY
+import com.arshadshah.nimaz.core.util.NextWorshipResolver
 import com.arshadshah.nimaz.core.util.PrayerTimeCalculator
+import com.arshadshah.nimaz.core.util.WorshipReminderContent
 import com.arshadshah.nimaz.core.util.formatClockTime
+import com.arshadshah.nimaz.domain.model.WorshipReminderType
+import com.arshadshah.nimaz.presentation.components.organisms.WorshipCardUi
+import kotlinx.coroutines.flow.first
 import com.arshadshah.nimaz.core.util.toUtcMidnightMillis
 import com.arshadshah.nimaz.domain.model.Announcement
 import com.arshadshah.nimaz.domain.model.AnnouncementAction
@@ -57,6 +62,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 import kotlin.time.Clock
@@ -98,6 +104,9 @@ data class HomeUiState(
     // Local calendar occasions merged with any pushed CELEBRATION announcement,
     // rendered as cards in the Home events carousel (after the Jumu'ah card).
     val celebrationCards: List<HomeEventCard> = emptyList(),
+    // The single nearest upcoming *enabled* extended worship reminder, rendered as the
+    // "Next Worship" card in the events carousel. Null when nothing is enabled/near.
+    val worshipCard: WorshipCardUi? = null,
 )
 
 /**
@@ -157,6 +166,7 @@ class HomeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val announcementUseCases: AnnouncementUseCases,
     private val observeEventCards: ObserveEventCardsUseCase,
+    private val nextWorshipResolver: NextWorshipResolver,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(HomeUiState())
@@ -711,6 +721,8 @@ class HomeViewModel @Inject constructor(
                     }
                 } else ""
 
+                val worshipCard = runCatching { buildWorshipCard(LocalDateTime.now()) }.getOrNull()
+
                 _state.update {
                     it.copy(
                         prayerTimes = displaysWithStatus,
@@ -725,6 +737,7 @@ class HomeViewModel @Inject constructor(
                         jumuahTime = jumuahTime,
                         timeUntilJumuah = timeUntilJumuah,
                         isJumuahPassed = isJumuahPassed,
+                        worshipCard = worshipCard,
                         isLoading = false,
                         error = null
                     )
@@ -763,5 +776,33 @@ class HomeViewModel @Inject constructor(
     private fun calculateHijriDate(): String {
         val hijriDate = HijriDateCalculator.today()
         return hijriDate.formatted()
+    }
+
+    /**
+     * Resolve the nearest upcoming enabled worship reminder into ready-to-render card data, or
+     * null when none is enabled/near. Countdown is to the event instant ([eventAt]); the time
+     * label is shown only where it adds meaning (Tahajjud's "Begins").
+     */
+    private suspend fun buildWorshipCard(now: LocalDateTime): WorshipCardUi? {
+        val occ = nextWorshipResolver.nearest(now) ?: return null
+        val use24 = settingsRepository.use24HourFormat.first()
+        val et = occ.eventAt.toLocalTime()
+        val eventTime = formatClockTime(et.hour, et.minute, use24)
+        val secs = java.time.Duration.between(now, occ.eventAt).seconds.coerceAtLeast(0)
+        val hours = secs / 3600
+        val minutes = (secs % 3600) / 60
+        val countdown = if (hours > 0) "${hours}h ${minutes}m" else "${minutes}m"
+        val timeLabel = if (occ.type == WorshipReminderType.TAHAJJUD)
+            context.getString(R.string.worship_card_begins) else ""
+        return WorshipCardUi(
+            type = occ.type,
+            name = WorshipReminderContent.name(context, occ.type),
+            arabic = WorshipReminderContent.arabic(context, occ.type),
+            body = WorshipReminderContent.body(context, occ.type, occ.subKey),
+            eventTime = eventTime,
+            timeLabel = timeLabel,
+            countdown = countdown,
+            countdownLabel = context.getString(R.string.worship_card_in)
+        )
     }
 }

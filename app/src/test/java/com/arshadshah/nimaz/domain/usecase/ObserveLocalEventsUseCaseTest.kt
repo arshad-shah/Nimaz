@@ -40,6 +40,10 @@ class ObserveLocalEventsUseCaseTest {
  * this use case never touches.
  */
 private class FakeSettings(private val offset: Int) : SettingsRepository {
+    override fun worshipReminderEnabled(key: String): Flow<Boolean> = flowOf(false)
+    override suspend fun setWorshipReminderEnabled(key: String, enabled: Boolean) {}
+    override fun worshipReminderOffset(key: String, default: Int): Flow<Int> = flowOf(default)
+    override suspend fun setWorshipReminderOffset(key: String, minutes: Int) {}
     override suspend fun clearAllData() {}
     override val onboardingCompleted: Flow<Boolean> = flowOf(true)
     override suspend fun setOnboardingCompleted(completed: Boolean) {}

@@ -100,8 +100,9 @@ class WorshipReminderCalculatorTest {
         val calc26 = calc.nextOccurrence(
             WorshipReminderType.LAYLATUL_QADR,
             LocalDate.of(2026, 3, 26).atTime(21, 0),
-            0, ::timesForDay
-        ) { d -> HijriDayInfo(9, d.dayOfMonth) }
+            0, ::timesForDay,
+            hijriFor = { d -> HijriDayInfo(9, d.dayOfMonth) }
+        )
         // From the eve of the 26th the next odd night is the 27th.
         assertThat(calc26!!.triggerAt.toLocalDate()).isEqualTo(LocalDate.of(2026, 3, 27))
     }
@@ -143,8 +144,9 @@ class WorshipReminderCalculatorTest {
     fun `arafah fast fires on the eve of 9 dhul-hijjah tagged arafah`() {
         val now = LocalDate.of(2026, 3, 1).atTime(12, 0)
         val occ = calc.nextOccurrence(
-            WorshipReminderType.ARAFAH_ASHURA_FAST, now, 0, ::timesForDay
-        ) { d -> HijriDayInfo(month = 12, day = ((d.dayOfMonth - 1) % 30) + 1) }!!
+            WorshipReminderType.ARAFAH_ASHURA_FAST, now, 0, ::timesForDay,
+            hijriFor = { d -> HijriDayInfo(month = 12, day = ((d.dayOfMonth - 1) % 30) + 1) }
+        )!!
         assertThat(occ.subKey).isEqualTo("arafah")
         assertThat(occ.triggerAt.toLocalDate()).isEqualTo(LocalDate.of(2026, 3, 8)) // eve of the 9th
     }
