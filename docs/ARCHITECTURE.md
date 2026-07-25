@@ -429,8 +429,10 @@ typed route object.
     reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
     from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
 - **Tajweed rule colours & contrast (issue #294).** `NimazColors.TajweedColors` holds a
-  light + dark tone for each of the 20 v3 tajweed rules (consumed by `TajweedParser`; the rule
-  names/explanations live in `TajweedParser.rules`, the single source of truth for the legend).
+  light + dark tone for each of the 24 v3 tajweed rules (consumed by `TajweedParser`; the rule
+  order/colour/code live in `TajweedParser.rules`, the single source of truth for the legend,
+  while the localized display name + explanation resolve from `R.string.tajweed_rule_<code>_*`
+  via `tajweedRuleName`/`tajweedRuleExplanation`, translated into the 5 shipped locales — #294).
   Every colour is held to **≥ 4.5:1 WCAG contrast** against the reader background it renders on
   (`#FAFAFA` light / `#1C1917` dark). `scripts/check_tajweed_contrast.py` reads the hex values
   straight from `Palette.kt`/`Color.kt`, verifies the ratios, and fails CI
