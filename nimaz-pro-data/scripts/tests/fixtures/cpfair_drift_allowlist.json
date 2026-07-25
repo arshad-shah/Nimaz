@@ -1,0 +1,107 @@
+{
+  "_comment": "Expected signed deltas: (sum of quran.com source tags) - (sum of cpfair annotations) per rule category. These are shared-provenance gaps documented in #287, NOT independent validation. verify_tajweed.py fails if a live delta differs from the expected value here (drift detection). Update deliberately with a reason.",
+  "deltas": {
+    "ghunnah": {
+      "quran": 4923,
+      "cpfair": 4946,
+      "delta": -23,
+      "reason": "documented in #287 audit"
+    },
+    "ikhfa": {
+      "quran": 5291,
+      "cpfair": 5301,
+      "delta": -10,
+      "reason": "documented in #287 audit"
+    },
+    "ikhfa_shafawi": {
+      "quran": 496,
+      "cpfair": 496,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "idgham_ghunnah": {
+      "quran": 3933,
+      "cpfair": 3933,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "idgham_no_ghunnah": {
+      "quran": 1036,
+      "cpfair": 1035,
+      "delta": 1,
+      "reason": "documented in #287 audit"
+    },
+    "idgham_shafawi": {
+      "quran": 832,
+      "cpfair": 832,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "idgham_mutajanisayn": {
+      "quran": 58,
+      "cpfair": 58,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "idgham_mutaqaribayn": {
+      "quran": 13,
+      "cpfair": 13,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "iqlab": {
+      "quran": 562,
+      "cpfair": 562,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "lam_shamsiyyah": {
+      "quran": 2608,
+      "cpfair": 2733,
+      "delta": -125,
+      "reason": "documented in #287 audit"
+    },
+    "silent": {
+      "quran": 4159,
+      "cpfair": 4174,
+      "delta": -15,
+      "reason": "documented in #287 audit"
+    },
+    "hamzat_wasl": {
+      "quran": 13252,
+      "cpfair": 13252,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "madd_2": {
+      "quran": 9028,
+      "cpfair": 9028,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "madd_246": {
+      "quran": 4543,
+      "cpfair": 4543,
+      "delta": 0,
+      "reason": "exact match"
+    },
+    "madd_6": {
+      "quran": 143,
+      "cpfair": 148,
+      "delta": -5,
+      "reason": "documented in #287 audit"
+    },
+    "madd_obligatory_split": {
+      "quran": 5166,
+      "cpfair": 5169,
+      "delta": -3,
+      "reason": "documented in #287 audit"
+    },
+    "qalqalah": {
+      "quran": 3834,
+      "cpfair": 3834,
+      "delta": 0,
+      "reason": "exact match"
+    }
+  }
+}

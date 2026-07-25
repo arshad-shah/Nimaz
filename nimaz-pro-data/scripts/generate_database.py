@@ -1003,5 +1003,13 @@ def main():
     print(f"\nDatabase created: {OUTPUT_DB}")
     print(f"Size: {OUTPUT_DB.stat().st_size / 1024 / 1024:.2f} MB")
 
+    # Tajweed verification (issue #292) — fail the build on any violation.
+    print("\nVerifying tajweed data in the generated DB...")
+    from verify_tajweed import verify_db
+    report = verify_db(OUTPUT_DB)
+    report.print_summary()
+    if not report.ok():
+        raise SystemExit("Tajweed verification failed — see failures above.")
+
 if __name__ == "__main__":
     main()

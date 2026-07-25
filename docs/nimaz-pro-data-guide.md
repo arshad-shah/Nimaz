@@ -151,6 +151,19 @@ passes `canonical_text=text_arabic` into `preparse_single`, and also stores the
 python3 nimaz-pro-data/scripts/verify_tajweed_orthography.py   # exits non-zero on drift
 ```
 
+**Validation harness (issue #292).** `scripts/verify_tajweed.py` is the full gate.
+In **pipeline mode** (default) it runs the pre-parser + taxonomy split + alignment
+over the JSON sources in memory (no Git-LFS DB needed — CI-friendly) and asserts:
+coverage (every ayah has spans, except the pinned #298 allow-list), well-formedness
+(no leaked `<`/`>`/`tajweed`), the #290 round-trip, the v3 code whitelist (no legacy
+`mo`/`mp`/`q`), character-coverage conservation, cross-source **drift** vs cpfair
+(signed per-category deltas checked against `tests/fixtures/cpfair_drift_allowlist.json`
+— this is drift detection, *not* independent validation: the two datasets share the
+identical 63-ayah gap), and a pinned golden-ayah fixture. In **db mode**
+(`--db out.db`) it verifies a generated `nimaz_prepopulated.db`. It is invoked as a
+fail-the-build post-step by both `generate_database.py` and `verify_database.py`, and
+by the `tajweed_data_checks.yml` CI workflow on PRs touching `nimaz-pro-data/**`.
+
 > **DB regeneration note.** These pipeline changes only affect the shipped DB
 > when `nimaz_prepopulated.db` is regenerated; the `text_arabic` column changes
 > (BOM removed on 1:1) so a regeneration is required for the fix to reach the
