@@ -14,6 +14,11 @@ class AnnouncementRoutesTest {
         assertThat(announcementRoute("prayer/tracker")).isEqualTo(Route.PrayerTracker())
         assertThat(announcementRoute("settings/about")).isEqualTo(Route.SettingsAbout)
         assertThat(announcementRoute("khatam")).isEqualTo(Route.KhatamList)
+        // Existing notifications deep-link still resolves to the hub (unchanged) …
+        assertThat(announcementRoute("settings/notifications")).isEqualTo(Route.SettingsNotifications)
+        // … and the new worship-reminders subscreen keys resolve.
+        assertThat(announcementRoute("settings/notifications/worship")).isEqualTo(Route.SettingsWorshipReminders)
+        assertThat(announcementRoute("settings/worship")).isEqualTo(Route.SettingsWorshipReminders)
     }
 
     @Test

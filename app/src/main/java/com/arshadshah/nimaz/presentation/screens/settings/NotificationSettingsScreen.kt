@@ -98,6 +98,7 @@ private data class PrayerNotificationData(
 @Composable
 fun NotificationSettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToWorshipReminders: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -445,6 +446,18 @@ fun NotificationSettingsScreen(
                             onCheckedChange = {
                                 viewModel.onEvent(SettingsEvent.SetRespectDnd(!notificationState.respectDnd))
                             }
+                        )
+                    }
+                }
+
+                // Worship reminders entry point → dedicated subscreen
+                item {
+                    NimazMenuGroup {
+                        NimazSettingsItem(
+                            title = stringResource(R.string.worship_settings_title),
+                            subtitle = stringResource(R.string.worship_settings_subtitle),
+                            onClick = onNavigateToWorshipReminders,
+                            showArrow = true
                         )
                     }
                 }

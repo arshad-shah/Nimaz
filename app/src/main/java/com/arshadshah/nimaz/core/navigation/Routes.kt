@@ -159,6 +159,10 @@ sealed interface Route {
     @Serializable
     data object SettingsNotifications : Route
 
+    /** Extended worship & fasting reminders (Tahajjud, Suhoor, Iftar, adhkar …). */
+    @Serializable
+    data object SettingsWorshipReminders : Route
+
     @Serializable
     data object SettingsAppearance : Route
 

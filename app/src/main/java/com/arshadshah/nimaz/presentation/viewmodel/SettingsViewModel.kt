@@ -116,7 +116,10 @@ data class NotificationSettingsUiState(
     val fridayReminderMinutes: Int = 60,
     val khatamReminderEnabled: Boolean = false,
     val khatamReminderTime: String = "06:00",
-    val selectedAdhanSound: String = "MISHARY"
+    val selectedAdhanSound: String = "MISHARY",
+    // Extended worship reminders, keyed by WorshipReminderType.key.
+    val worshipReminders: Map<String, Boolean> = emptyMap(),
+    val worshipOffsets: Map<String, Int> = emptyMap(),
 )
 
 /**
@@ -225,6 +228,10 @@ sealed interface SettingsEvent {
     /** Reminder time as "HH:mm". */
     data class SetKhatamReminderTime(val time: String) : SettingsEvent
     data class SetAdhanSound(val sound: String) : SettingsEvent
+
+    /** Extended worship reminders, keyed by WorshipReminderType.key. */
+    data class SetWorshipReminderEnabled(val key: String, val enabled: Boolean) : SettingsEvent
+    data class SetWorshipReminderOffset(val key: String, val minutes: Int) : SettingsEvent
     data object PreviewAdhanSound : SettingsEvent
     data object StopAdhanPreview : SettingsEvent
 
@@ -646,6 +653,26 @@ class SettingsViewModel @Inject constructor(
                 }
             }
 
+            is SettingsEvent.SetWorshipReminderEnabled -> {
+                _notificationState.update {
+                    it.copy(worshipReminders = it.worshipReminders + (event.key to event.enabled))
+                }
+                viewModelScope.launch {
+                    settingsRepository.setWorshipReminderEnabled(event.key, event.enabled)
+                    rescheduleNotifications()
+                }
+            }
+
+            is SettingsEvent.SetWorshipReminderOffset -> {
+                _notificationState.update {
+                    it.copy(worshipOffsets = it.worshipOffsets + (event.key to event.minutes))
+                }
+                viewModelScope.launch {
+                    settingsRepository.setWorshipReminderOffset(event.key, event.minutes)
+                    rescheduleNotifications()
+                }
+            }
+
             is SettingsEvent.SetAdhanSound -> {
                 _notificationState.update { it.copy(selectedAdhanSound = event.sound) }
                 viewModelScope.launch {
@@ -967,6 +994,12 @@ class SettingsViewModel @Inject constructor(
             val maghribAdhan = settingsRepository.maghribAdhanEnabled.first()
             val ishaAdhan = settingsRepository.ishaAdhanEnabled.first()
 
+            // Extended worship reminders — enabled flags + offsets keyed by type.
+            val worshipEnabled = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
+                .associate { it.key to settingsRepository.worshipReminderEnabled(it.key).first() }
+            val worshipOffsets = com.arshadshah.nimaz.domain.model.WorshipReminderType.entries
+                .associate { it.key to settingsRepository.worshipReminderOffset(it.key, it.defaultOffsetMinutes).first() }
+
             _notificationState.update {
                 it.copy(
                     notificationsEnabled = notifEnabled,
@@ -991,7 +1024,9 @@ class SettingsViewModel @Inject constructor(
                     dhuhrNotification = dhuhrNotif,
                     asrNotification = asrNotif,
                     maghribNotification = maghribNotif,
-                    ishaNotification = ishaNotif
+                    ishaNotification = ishaNotif,
+                    worshipReminders = worshipEnabled,
+                    worshipOffsets = worshipOffsets
                 )
             }
 

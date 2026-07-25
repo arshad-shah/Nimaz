@@ -98,6 +98,7 @@ import com.arshadshah.nimaz.presentation.screens.settings.AppearanceSettingsScre
 import com.arshadshah.nimaz.presentation.screens.settings.LanguageScreen
 import com.arshadshah.nimaz.presentation.screens.settings.LocationScreen
 import com.arshadshah.nimaz.presentation.screens.settings.NotificationSettingsScreen
+import com.arshadshah.nimaz.presentation.screens.settings.WorshipRemindersScreen
 import com.arshadshah.nimaz.presentation.screens.settings.PrayerSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.QuranSettingsScreen
 import com.arshadshah.nimaz.presentation.screens.settings.SearchSettingsScreen
@@ -811,6 +812,13 @@ fun NavGraph(
 
             taggedComposable<Route.SettingsNotifications>(ScreenTags.SettingsNotifications) {
                 NotificationSettingsScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToWorshipReminders = { navController.navigate(Route.SettingsWorshipReminders) }
+                )
+            }
+
+            composable<Route.SettingsWorshipReminders> {
+                WorshipRemindersScreen(
                     onNavigateBack = { navController.popBackStack() }
                 )
             }

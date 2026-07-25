@@ -42,6 +42,7 @@ private fun staticAnnouncementRoute(key: String): Route? = when (key) {
     "search/settings" -> Route.SearchSettings
     "settings" -> Route.Settings
     "settings/notifications" -> Route.SettingsNotifications
+    "settings/notifications/worship", "settings/worship" -> Route.SettingsWorshipReminders
     "settings/about" -> Route.SettingsAbout
     "settings/help" -> Route.SettingsHelp
     "bookmarks" -> Route.AllBookmarks
