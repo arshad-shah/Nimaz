@@ -27,6 +27,7 @@ from preparse_tajweed import (  # noqa: E402
     TAG_OPEN_PATTERN,
     END_SPAN_PATTERN,
     align_segments_to_canonical,
+    apply_derived_rules,
     apply_source_fixups,
     cpfair_madd_sequence,
     normalise_uthmani,
@@ -412,23 +413,35 @@ class TestPipelineConservation(unittest.TestCase):
 
 
 class TestUnannotatedAyahsFixture(unittest.TestCase):
-    """Guard the 63-ayah gap (sub-issue A of #287): the count must only shrink."""
+    """Guard the unannotated-ayah gap (sub-issue A of #287): the set of ayahs
+    that render with NO colour after the *full* pipeline (incl. the #291 derived
+    overlay) must only shrink and stay within the allow-list."""
 
     def test_gap_count_does_not_grow(self):
-        import re
         fixture = json.load(
             open(SCRIPTS_DIR / "tests" / "fixtures" / "unannotated_ayahs.json",
                  encoding="utf-8"))
         allow = set(fixture["ayahs"])
         with open(JSON_DIR / "tajweed.json", encoding="utf-8") as fh:
             taj = json.load(fh)
-        span = re.compile(r"<span\s+class=end>.*?</span>")
-        tag = re.compile(r"<tajweed\s+class=", re.S)
-        current = {k for k, v in taj.items() if not tag.search(span.sub("", v))}
-        # every currently-unannotated ayah must be in the allow-list (no new gaps)
+        with open(JSON_DIR / "ayahs.json", encoding="utf-8") as fh:
+            canon = {f"{a['surah_id']}:{a['number_in_surah']}": a["text_arabic"]
+                     for a in json.load(fh)}
+        with open(JSON_DIR / "tajweed_cpfair.json", encoding="utf-8") as fh:
+            cpfair = {f"{e['surah']}:{e['ayah']}": e for e in json.load(fh)}
+
+        current = set()
+        for key, html in taj.items():
+            norm = normalise_uthmani(canon[key])
+            segs = apply_derived_rules(
+                align_segments_to_canonical(
+                    preparse_tajweed(html, key=key, cpfair_entry=cpfair.get(key)), norm),
+                norm)
+            if not any(s["r"] for s in segs):
+                current.add(key)
+        # every still-uncoloured ayah must be in the allow-list (no new gaps)
         self.assertEqual(current - allow, set(),
-                         f"new unannotated ayahs not in the fixture: {sorted(current - allow)}")
-        # the fixture count matches the recorded number
+                         f"new uncoloured ayahs not in the fixture: {sorted(current - allow)}")
         self.assertEqual(len(current), fixture["count"])
 
 

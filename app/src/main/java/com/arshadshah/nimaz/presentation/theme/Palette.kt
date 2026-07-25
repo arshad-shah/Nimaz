@@ -70,7 +70,9 @@ object NimazPalette {
     val Amber500 = Color(0xFFF59E0B)
     val Amber600 = Color(0xFFD97706)
     val Amber700 = Color(0xFFB45309)
+    val Amber200 = Color(0xFFFDE68A)
     val Amber800 = Color(0xFF92400E)
+    val Amber900 = Color(0xFF78350F)
     val AmberDeep = Color(0xFFFFA000)    // secondary-dark (Material)
     val AmberSoft = Color(0xFFFFECB3)    // secondary-container (Material)
     val MatAmber = Color(0xFFFFC107)     // Material amber — bookmarks/milestones/pending

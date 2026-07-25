@@ -521,6 +521,90 @@ def align_segments_to_canonical(segments, canonical_text):
     return merged
 
 
+# Sun letters (for deriving Lam Shamsiyyah in the backfill).
+_SUN_LETTERS = set('تثدذرزسشصضطظلن')
+_ALEF_WASLA = 'ٱ'
+
+
+def apply_derived_rules(segments, canonical_text):
+    """
+    Overlay the **unambiguous** derived rules (issue #291) that neither shipped
+    source marks. Operates on aligned segments (whose text equals
+    ``canonical_text``); only sets a rule on a character that is currently plain
+    (``r is None``), or splits an existing ``ma`` ('Aarid) run into ``ml`` (Lin)
+    — it never overrides a source rule, and never changes the text, so the #290
+    round-trip is preserved.
+
+    Applied rules (all deterministic and validated in test_tajweed_rules.py):
+
+    * **Madd Lin** (``ml``) — an 'Aarid run whose elongated letter is a layn
+      letter (و/ي sakin after fatha at a stop) is Lin, not 'Aarid.
+    * **Waqf signs** (``wq``) — the 7 stop signs, previously unstyled.
+    * **Idgham Mutamathilayn** (``dm``) — identical adjacent letters, first sakin.
+    * **Hamzat al-Wasl** (``hw``) and **Lam Shamsiyyah** (``ls``) — derived where
+      the source left them unmarked (this also backfills the 63 fully-unannotated
+      ayahs, #298).
+
+    The context-sensitive rules (raa/lam tafkhim-tarqiq, isti'la) live in
+    ``tajweed_rules.py`` but are **not** applied here — colouring them is a
+    product + scholarly-review decision (they would colour a large fraction of
+    all letters).
+    """
+    import tajweed_rules as TR  # lazy import (tajweed_rules imports this module)
+
+    chars = []
+    rules = []
+    for seg in segments:
+        for ch in seg['t']:
+            chars.append(ch)
+            rules.append(seg['r'])
+    n = len(chars)
+
+    # Madd Lin: relabel a 'ma' run whose layn letter qualifies.
+    i = 0
+    while i < n:
+        if rules[i] == 'ma':
+            j = i
+            while j < n and rules[j] == 'ma':
+                j += 1
+            if any(TR.is_madd_lin(canonical_text, k) for k in range(i, j)):
+                for k in range(i, j):
+                    rules[k] = 'ml'
+            i = j
+        else:
+            i += 1
+
+    # Waqf signs (only where plain).
+    for k, ch in enumerate(chars):
+        if rules[k] is None and TR.classify_waqf(ch):
+            rules[k] = 'wq'
+
+    # Idgham Mutamathilayn (first letter of the pair, only where plain).
+    for start, length in TR.idgham_mutamathilayn(canonical_text):
+        for k in range(start, start + length):
+            if rules[k] is None:
+                rules[k] = 'dm'
+
+    # Hamzat al-Wasl (only where plain) — the ٱ character IS the connecting hamza.
+    for k, ch in enumerate(chars):
+        if rules[k] is None and ch == _ALEF_WASLA:
+            rules[k] = 'hw'
+
+    # NB: Lam Shamsiyyah is intentionally NOT derived here. The naive
+    # "ٱ + ل + sun letter" rule can't tell the definite article from a root lam
+    # (e.g. the verb ٱلْتَقَى), so it over-fires badly. The source already marks
+    # Lam Shamsiyyah for annotated ayahs; deriving it for the unannotated ones
+    # (#298) needs the reviewed engine.
+
+    merged = []
+    for ch, r in zip(chars, rules):
+        if merged and merged[-1]['r'] == r:
+            merged[-1]['t'] += ch
+        else:
+            merged.append({'t': ch, 'r': r})
+    return merged
+
+
 def load_cpfair(cpfair_path):
     """Load ``tajweed_cpfair.json`` into a ``{"surah:ayah": entry}`` lookup."""
     with open(cpfair_path, 'r', encoding='utf-8') as f:
@@ -571,7 +655,9 @@ def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None,
                                     cpfair_entry=cpfair_by_key.get(key))
         canonical = canonical_by_key.get(key)
         if canonical is not None:
-            segments = align_segments_to_canonical(segments, normalise_uthmani(canonical))
+            norm = normalise_uthmani(canonical)
+            segments = align_segments_to_canonical(segments, norm)
+            segments = apply_derived_rules(segments, norm)
         # Store as JSON string for direct insertion into database
         parsed_data[key] = json.dumps(segments, ensure_ascii=False)
 
@@ -601,7 +687,11 @@ def preparse_single(html_text, key=None, canonical_text=None, cpfair_entry=None)
     """
     segments = preparse_tajweed(html_text, key=key, cpfair_entry=cpfair_entry)
     if canonical_text is not None:
-        segments = align_segments_to_canonical(segments, normalise_uthmani(canonical_text))
+        norm = normalise_uthmani(canonical_text)
+        segments = align_segments_to_canonical(segments, norm)
+        # Overlay the unambiguous derived rules (Madd Lin, waqf, idgham
+        # mutamathilayn, hamzat wasl) — issue #291.
+        segments = apply_derived_rules(segments, norm)
     return json.dumps(segments, ensure_ascii=False)
 
 

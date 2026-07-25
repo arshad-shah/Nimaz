@@ -127,8 +127,8 @@ class TajweedParserTest {
 
     @Test
     fun `every v3 rule code resolves to a colour`() {
-        val codes = listOf("g", "if", "is", "dg", "dn", "ds", "dj", "dk",
-            "qs", "qk", "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw")
+        val codes = listOf("g", "if", "is", "dg", "dn", "ds", "dj", "dk", "dm",
+            "qs", "qk", "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw", "wq")
         for (code in codes) {
             val json = """[{"t":"x","r":"$code"}]"""
             val result = TajweedParser.parse(json, isDarkTheme = false)

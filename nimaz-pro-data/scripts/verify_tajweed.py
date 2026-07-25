@@ -52,15 +52,18 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 
 from preparse_tajweed import (  # noqa: E402
     align_segments_to_canonical,
+    apply_derived_rules,
     load_cpfair,
     normalise_uthmani,
     preparse_tajweed,
 )
 
-# Final v3 codes that may appear in shipped output.
+# Final v3 codes that may appear in shipped output. wq (waqf) and dm (idgham
+# mutamathilayn) are added by apply_derived_rules (#291).
 V3_CODES = {
     "g", "if", "is", "dg", "dn", "ds", "dj", "dk", "qs", "qk",
     "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw",
+    "wq", "dm",
 }
 # Deprecated codes that must NOT appear in freshly generated data.
 LEGACY_CODES = {"mo", "mp", "q", "i", "d", "m", "s"}
@@ -222,17 +225,21 @@ def verify_pipeline():
             report.fail("coverage", f"{key}: no tajweed source row")
             continue
         pre = preparse_tajweed(raw, key=key, cpfair_entry=cpfair_by_key.get(key))
-        post = align_segments_to_canonical(pre, normalise_uthmani(canon_by_key[key]))
+        norm = normalise_uthmani(canon_by_key[key])
+        aligned = align_segments_to_canonical(pre, norm)
+        post = apply_derived_rules(aligned, norm)
         segments_by_key[key] = post
         _check_segments(report, key, post, canon_by_key[key], empty_allow)
 
-        # 5. conservation — every source rule code survives the pipeline.
+        # 5. conservation — every source rule code survives the ALIGNMENT stage
+        # (#290). Checked before the #291 derived-rule overlay, which only adds
+        # codes or relabels ma→ml (so it can't lose coverage).
         pre_codes = {s["r"] for s in pre if s["r"]}
-        post_codes = {s["r"] for s in post if s["r"]}
-        if pre_codes - post_codes:
+        aligned_codes = {s["r"] for s in aligned if s["r"]}
+        if pre_codes - aligned_codes:
             report.fail("conservation",
                         f"{key}: rule code(s) lost in alignment: "
-                        f"{sorted(pre_codes - post_codes)}")
+                        f"{sorted(pre_codes - aligned_codes)}")
 
     # coverage allow-list must only shrink (no ayah outside it may be empty)
     current_empty = {k for k, segs in segments_by_key.items()

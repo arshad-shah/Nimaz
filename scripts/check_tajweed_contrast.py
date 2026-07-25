@@ -43,6 +43,7 @@ RULES = [
     ("Idgham Shafawi", "IdghamShafawi"),
     ("Idgham Mutajanisayn", "IdghamMutajanisayn"),
     ("Idgham Mutaqaribayn", "IdghamMutaqaribay"),
+    ("Idgham Mutamathilayn", "IdghamMutamathilayn"),
     ("Qalqalah Sughra", "QalqalahSughra"),
     ("Qalqalah Kubra", "QalqalahKubra"),
     ("Madd Tabee'i", "MaddNormal"),
@@ -55,6 +56,7 @@ RULES = [
     ("Lam Shamsiyyah", "LamShamsiyyah"),
     ("Silent", "Silent"),
     ("Hamza al-Wasl", "HamzaWasl"),
+    ("Waqf sign", "Waqf"),
 ]
 
 # Same-hue families whose members must stay tellable apart.
@@ -62,7 +64,7 @@ FAMILIES = {
     "madd": ["MaddNormal", "MaddMunfasil", "MaddMuttasil", "MaddAarid",
              "MaddLin", "MaddNecessary"],
     "idgham": ["IdghamGhunnah", "IdghamNoGhunnah", "IdghamShafawi",
-               "IdghamMutajanisayn", "IdghamMutaqaribay"],
+               "IdghamMutajanisayn", "IdghamMutaqaribay", "IdghamMutamathilayn"],
 }
 
 

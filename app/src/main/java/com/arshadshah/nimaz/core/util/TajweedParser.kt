@@ -95,6 +95,8 @@ object TajweedParser {
             TajweedColors.IdghamMutajanisaynLight, TajweedColors.IdghamMutajanisaynDark),
         TajweedRuleInfo("dk", "Idgham Mutaqaribayn", "Two letters of close articulation points merged.",
             TajweedColors.IdghamMutaqaribayLight, TajweedColors.IdghamMutaqaribayDark),
+        TajweedRuleInfo("dm", "Idgham Mutamathilayn", "Two identical letters merged, the first silent.",
+            TajweedColors.IdghamMutamathilaynLight, TajweedColors.IdghamMutamathilaynDark),
         TajweedRuleInfo("qs", "Qalqalah Sughra", "Light echo on a qalqalah letter in the middle of a word.",
             TajweedColors.QalqalahSughraLight, TajweedColors.QalqalahSughraDark),
         TajweedRuleInfo("qk", "Qalqalah Kubra", "Stronger echo on a qalqalah letter stopped upon.",
@@ -119,6 +121,8 @@ object TajweedParser {
             TajweedColors.SilentLight, TajweedColors.SilentDark),
         TajweedRuleInfo("hw", "Hamza al-Wasl", "Connecting hamza, dropped when continuing from before.",
             TajweedColors.HamzaWaslLight, TajweedColors.HamzaWaslDark),
+        TajweedRuleInfo("wq", "Waqf sign", "A stop mark: guidance on whether to pause here.",
+            TajweedColors.WaqfLight, TajweedColors.WaqfDark),
     )
 
     /** Lookup of a v3 rule by its code. */

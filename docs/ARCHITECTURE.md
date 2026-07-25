@@ -447,6 +447,7 @@ typed route object.
   | Idgham Shafawi | `#B45309` | 4.81:1 | `#FCD34D` | 12.13:1 |
   | Idgham Mutajanisayn | `#C2410C` | 4.96:1 | `#FB923C` | 7.73:1 |
   | Idgham Mutaqaribayn | `#9A3412` | 7.00:1 | `#FDBA74` | 10.37:1 |
+  | Idgham Mutamathilayn | `#78350F` | 8.69:1 | `#FDE68A` | 14.04:1 |
   | Qalqalah Sughra | `#2563EB` | 4.95:1 | `#60A5FA` | 6.88:1 |
   | Qalqalah Kubra | `#1D4ED8` | 6.42:1 | `#93C5FD` | 9.70:1 |
   | Madd Tabee'i | `#E11D48` | 4.50:1 | `#FB7185` | 6.50:1 |
@@ -459,8 +460,8 @@ typed route object.
   | Lam Shamsiyyah | `#4F46E5` | 6.02:1 | `#818CF8` | 5.86:1 |
   | Silent | `#64748B` | 4.56:1 | `#94A3B8` | 6.82:1 |
   | Hamza al-Wasl | `#475569` | 7.26:1 | `#CBD5E1` | 11.78:1 |
-
-  Because all 20 colours must sit in a dark band to clear 4.5:1 against a near-white background,
+  | Waqf sign | `#57534E` | 7.31:1 | `#A8A29E` | 6.93:1 |
+  Because all 22 colours must sit in a dark band to clear 4.5:1 against a near-white background,
   same-hue **near-neighbours** (the six madd rules; the five idgham rules) have low pairwise
   contrast (~1.0:1) — they are told apart by position, the in-app legend, and (future work in
   #294) an optional decoration channel / colour-blind-safe mode rather than by hue alone.
