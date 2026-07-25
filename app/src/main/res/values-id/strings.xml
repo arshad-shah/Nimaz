@@ -868,6 +868,7 @@
     <string name="keep_screen_on_subtitle">Cegah layar dari mati</string>
     <string name="show_tajweed_colors">Tampilkan Warna Tajwid</string>
     <string name="show_tajweed_colors_subtitle">Aturan pelafalan dengan kode warna</string>
+    <string name="show_tajweed_colors_unavailable">Tersedia di tata letak Madani</string>
     <string name="audio">Audio</string>
     <string name="reciter">Qari</string>
     <string name="quran_settings_preview">PRATINJAU</string>

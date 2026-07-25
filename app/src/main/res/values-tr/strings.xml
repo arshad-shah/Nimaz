@@ -891,6 +891,7 @@
     <string name="keep_screen_on_subtitle">Ekranın kapanmasını engelle</string>
     <string name="show_tajweed_colors">Tecvid Renklerini Göster</string>
     <string name="show_tajweed_colors_subtitle">Renk kodlu okunuş kuralları</string>
+    <string name="show_tajweed_colors_unavailable">Madani düzeninde kullanılabilir</string>
     <string name="audio">Ses</string>
     <string name="reciter">Okuyucu</string>
     <string name="quran_settings_preview">ÖNİZLEME</string>

@@ -869,6 +869,7 @@
     <string name="keep_screen_on_subtitle">Halang skrin daripada terpadam</string>
     <string name="show_tajweed_colors">Tunjukkan Warna Tajwid</string>
     <string name="show_tajweed_colors_subtitle">Peraturan sebutan berkod warna</string>
+    <string name="show_tajweed_colors_unavailable">Tersedia dalam susun atur Madani</string>
     <string name="audio">Audio</string>
     <string name="reciter">Pembaca</string>
     <string name="quran_settings_preview">PRATONTON</string>

@@ -907,6 +907,7 @@
     <string name="keep_screen_on_subtitle">Empêcher l\'écran de s\'éteindre</string>
     <string name="show_tajweed_colors">Afficher les couleurs du Tajweed</string>
     <string name="show_tajweed_colors_subtitle">Règles de prononciation codées par couleur</string>
+    <string name="show_tajweed_colors_unavailable">Disponible dans la disposition Madani</string>
     <string name="audio">Audio</string>
     <string name="reciter">Récitateur</string>
     <string name="quran_settings_preview">APERÇU</string>

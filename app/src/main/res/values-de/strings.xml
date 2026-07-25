@@ -885,6 +885,7 @@
     <string name="keep_screen_on_subtitle">Verhindern, dass sich der Bildschirm ausschaltet</string>
     <string name="show_tajweed_colors">Tadschwid-Farben anzeigen</string>
     <string name="show_tajweed_colors_subtitle">Farbcodierte Ausspracheregeln</string>
+    <string name="show_tajweed_colors_unavailable">Verfügbar im Madani-Layout</string>
     <string name="audio">Audio</string>
     <string name="reciter">Rezitator</string>
     <string name="quran_settings_preview">VORSCHAU</string>
