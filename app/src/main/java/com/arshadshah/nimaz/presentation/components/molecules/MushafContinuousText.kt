@@ -71,7 +71,8 @@ fun MushafContinuousText(
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
-    showTajweed: Boolean = false
+    showTajweed: Boolean = false,
+    onRuleTap: (String) -> Unit = {}
 ) {
     val isDarkTheme = isSystemInDarkTheme()
 
@@ -95,7 +96,8 @@ fun MushafContinuousText(
                         tajweedText = tajweed,
                         isDarkTheme = isDarkTheme,
                         defaultColor = textColor,
-                        stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null
+                        stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
+                        annotateRules = true  // enable tap-to-explain (#294)
                     )
                 }
             }.toMap()
@@ -139,6 +141,15 @@ fun MushafContinuousText(
                         detectTapGestures { position ->
                             val layout = textLayoutResult ?: return@detectTapGestures
                             val offset = layout.getOffsetForPosition(position)
+                            // A tap on a coloured tajweed span explains the rule;
+                            // taps elsewhere fall through to ayah selection (#294).
+                            val ruleTag = annotatedText.getStringAnnotations(
+                                tag = TajweedParser.RULE_TAG, start = offset, end = offset
+                            ).firstOrNull()
+                            if (ruleTag != null) {
+                                onRuleTap(ruleTag.item)
+                                return@detectTapGestures
+                            }
                             annotatedText.getStringAnnotations(
                                 tag = AYAH_TAG, start = offset, end = offset
                             ).firstOrNull()?.let { annotation ->
@@ -191,7 +202,8 @@ fun MushafContinuousText(
     highlightColor: Color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 1f),
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
-    showTajweed: Boolean = false
+    showTajweed: Boolean = false,
+    onRuleTap: (String) -> Unit = {}
 ) {
     MushafContinuousText(
         ayahs = ayahs,
@@ -206,7 +218,8 @@ fun MushafContinuousText(
         highlightColor = highlightColor,
         selectedColor = selectedColor,
         textColor = textColor,
-        showTajweed = showTajweed
+        showTajweed = showTajweed,
+        onRuleTap = onRuleTap
     )
 }
 

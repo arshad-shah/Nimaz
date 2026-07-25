@@ -124,6 +124,16 @@ object TajweedParser {
     /** Lookup of a v3 rule by its code. */
     val ruleInfo: Map<String, TajweedRuleInfo> = rules.associateBy { it.code }
 
+    /** String-annotation tag marking a coloured rule span (for tap-to-explain, #294). */
+    const val RULE_TAG = "tajweed_rule"
+
+    /**
+     * Resolve a stored rule code (v3, or a legacy v1/v2 code) to its legend
+     * entry, or null if the code is unknown/unexplained.
+     */
+    fun resolveRule(code: String): TajweedRuleInfo? =
+        ruleInfo[code] ?: legacyAliases[code]?.let { ruleInfo[it] }
+
     /**
      * Deprecated code → current code, kept so an older prepackaged DB still
      * renders (no crash, sensible colour). v2 `mo`/`mp`/`q` and v1 single-letter
@@ -177,7 +187,8 @@ object TajweedParser {
         tajweedText: String,
         isDarkTheme: Boolean,
         defaultColor: Color = Color.Unspecified,
-        stripPrefix: String? = null
+        stripPrefix: String? = null,
+        annotateRules: Boolean = false
     ): AnnotatedString {
         return try {
             var segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
@@ -203,6 +214,17 @@ object TajweedParser {
                         if (color != Color.Unspecified) {
                             addStyle(
                                 style = SpanStyle(color = color),
+                                start = startIdx,
+                                end = length
+                            )
+                        }
+                        // Tag the span with its rule so a tap can resolve it to
+                        // the legend entry (#294 tap-to-explain). Only for codes
+                        // we can explain (resolveRule non-null).
+                        if (annotateRules && resolveRule(ruleCode) != null) {
+                            addStringAnnotation(
+                                tag = RULE_TAG,
+                                annotation = ruleCode,
                                 start = startIdx,
                                 end = length
                             )

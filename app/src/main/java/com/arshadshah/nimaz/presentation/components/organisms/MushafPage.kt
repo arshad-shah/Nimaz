@@ -93,6 +93,8 @@ fun MushafPage(
     var tooltipAyah by remember { mutableStateOf<Ayah?>(null) }
     var tooltipTapY by remember { mutableFloatStateOf(0f) }
     var parentHeight by remember { mutableFloatStateOf(0f) }
+    // Rule tapped in the reader → show its legend entry (#294 tap-to-explain).
+    var tappedRuleCode by remember { mutableStateOf<String?>(null) }
 
     // Translation bottom sheet state
     var translationAyah by remember { mutableStateOf<Ayah?>(null) }
@@ -177,6 +179,7 @@ fun MushafPage(
                             arabicFontSize = arabicFontSize,
                             arabicFontFamily = arabicFontFamily,
                             showTajweed = showTajweed,
+                            onRuleTap = { code -> tappedRuleCode = code },
                             textColor = QuranSurfaceColors.ayahInk,
                             modifier = Modifier.padding(horizontal = 4.dp)
                         )
@@ -253,6 +256,14 @@ fun MushafPage(
             showTransliteration = showTransliteration,
             sheetState = sheetState,
             onDismissRequest = { translationAyah = null }
+        )
+    }
+
+    // Tajweed rule explanation (tap a coloured word) — #294.
+    tappedRuleCode?.let { code ->
+        TajweedRuleSheet(
+            ruleCode = code,
+            onDismiss = { tappedRuleCode = null }
         )
     }
 }

@@ -28,6 +28,9 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -56,6 +59,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazDropdownItem
 import com.arshadshah.nimaz.presentation.components.molecules.NimazMenuGroup
 import com.arshadshah.nimaz.presentation.components.molecules.NimazSettingsItem
 import com.arshadshah.nimaz.presentation.components.organisms.NimazBackTopAppBar
+import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.theme.QuranArabicFont
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsEvent
 import com.arshadshah.nimaz.presentation.viewmodel.SettingsViewModel
@@ -69,6 +73,7 @@ fun QuranSettingsScreen(
 ) {
     val quranState by viewModel.quranState.collectAsState()
     val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    var showTajweedLegend by remember { mutableStateOf(false) }
 
     // === ADDING NEW TRANSLATIONS ===
     // To add a new translation:
@@ -293,6 +298,15 @@ fun QuranSettingsScreen(
                         enabled = tajweedAvailable,
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Colour legend — reachable regardless of script so users can
+                    // learn what the colours mean (#294).
+                    NimazSettingsItem(
+                        title = stringResource(R.string.tajweed_colour_guide),
+                        subtitle = stringResource(R.string.tajweed_colour_guide_subtitle),
+                        showArrow = true,
+                        onClick = { showTajweedLegend = true }
+                    )
                 }
             }
 
@@ -368,6 +382,10 @@ fun QuranSettingsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }
+    }
+
+    if (showTajweedLegend) {
+        TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
     }
 }
 

@@ -1018,6 +1018,10 @@
     <string name="show_tajweed_colors">Show Tajweed Colors</string>
     <string name="show_tajweed_colors_subtitle">Color-coded pronunciation rules</string>
     <string name="show_tajweed_colors_unavailable">Available in the Madani layout</string>
+    <string name="tajweed_legend_title">Tajweed colour guide</string>
+    <string name="tajweed_legend_subtitle">What each colour means</string>
+    <string name="tajweed_colour_guide">Tajweed colour guide</string>
+    <string name="tajweed_colour_guide_subtitle">Legend for the pronunciation colours</string>
     <string name="audio">Audio</string>
     <string name="reciter">Reciter</string>
     <string name="quran_settings_preview">PREVIEW</string>
