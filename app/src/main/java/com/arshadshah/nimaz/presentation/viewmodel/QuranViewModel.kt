@@ -14,6 +14,7 @@ import com.arshadshah.nimaz.domain.model.Ayah
 import com.arshadshah.nimaz.domain.model.Khatam
 import com.arshadshah.nimaz.domain.model.KhatamDetailSnapshot
 import com.arshadshah.nimaz.domain.model.KhatamInsights
+import com.arshadshah.nimaz.domain.model.MushafPageLayout
 import com.arshadshah.nimaz.domain.model.PageAyahRange
 import com.arshadshah.nimaz.domain.model.QuranBookmark
 import com.arshadshah.nimaz.domain.model.QuranFavorite
@@ -108,7 +109,10 @@ data class QuranReaderUiState(
     val pageCache: Map<Int, List<Ayah>> = emptyMap(),
     val showTajweed: Boolean = false,
     val activeKhatamId: Long? = null,
-    val khatamReadAyahIds: Set<Int> = emptySet()
+    val khatamReadAyahIds: Set<Int> = emptySet(),
+    // Line-accurate 16-line IndoPak layout for the current page, loaded on demand when the
+    // 16-line Mushaf view is active (4/7). Null until requested / for pages without layout.
+    val mushafPageLayout: MushafPageLayout? = null
 )
 
 data class QuranSearchUiState(
@@ -126,6 +130,9 @@ sealed interface QuranEvent {
     data class LoadSurah(val surahNumber: Int) : QuranEvent
     data class LoadJuz(val juzNumber: Int) : QuranEvent
     data class LoadPage(val pageNumber: Int) : QuranEvent
+
+    /** Load the line-accurate 16-line IndoPak layout for a page (used by the 16-line view). */
+    data class LoadMushafPageLayout(val pageNumber: Int) : QuranEvent
     data class Search(val query: String) : QuranEvent
     data class SetTopTab(val index: Int) : QuranEvent
     data class SetTab(val index: Int) : QuranEvent
@@ -253,6 +260,7 @@ class QuranViewModel @Inject constructor(
             is QuranEvent.LoadSurah -> loadSurah(event.surahNumber)
             is QuranEvent.LoadJuz -> loadJuz(event.juzNumber)
             is QuranEvent.LoadPage -> loadPage(event.pageNumber)
+            is QuranEvent.LoadMushafPageLayout -> loadMushafPageLayout(event.pageNumber)
             is QuranEvent.Search -> search(event.query)
             is QuranEvent.SetTopTab -> _homeState.update { it.copy(topTab = event.index) }
             is QuranEvent.SetTab -> _homeState.update { it.copy(selectedTab = event.index) }
@@ -604,6 +612,18 @@ class QuranViewModel @Inject constructor(
                         )
                     }
                 }
+        }
+    }
+
+    /**
+     * Loads the line-accurate 16-line IndoPak layout for [pageNumber] into the reader state.
+     * First invocation triggers the one-time IndoPak seeding inside the repository, so this
+     * only runs when the 16-line view is actually used — not on every Quran page open.
+     */
+    private fun loadMushafPageLayout(pageNumber: Int) {
+        viewModelScope.launch {
+            val layout = quranUseCases.getMushafPageLayout(pageNumber)
+            _readerState.update { it.copy(mushafPageLayout = layout) }
         }
     }
 
