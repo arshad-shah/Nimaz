@@ -735,8 +735,9 @@ def populate_database(conn):
         # Get tajweed text using "surah:ayah" key format and pre-parse it
         tajweed_key = f"{a['surah_id']}:{a['number_in_surah']}"
         raw_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
-        # Pre-parse HTML tajweed to JSON format for efficient rendering
-        text_tajweed = preparse_single(raw_tajweed) if raw_tajweed else None
+        # Pre-parse HTML tajweed to JSON format for efficient rendering.
+        # Pass the key so SOURCE_FIXUPS (e.g. the malformed 32:3 source) apply.
+        text_tajweed = preparse_single(raw_tajweed, key=tajweed_key) if raw_tajweed else None
 
         cursor.execute('''
             INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)

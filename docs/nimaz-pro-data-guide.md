@@ -92,6 +92,44 @@ nimaz-pro-data/
 **Sajda Verses** (mark `sajda: true`):
 - 7:206, 13:15, 16:50, 17:109, 19:58, 22:18, 22:77, 25:60, 27:26, 32:15, 38:24, 41:38, 53:62, 84:21, 96:19
 
+## Tajweed colouring pipeline (`text_tajweed`, issue #288 — sub-task 1/8 of #287)
+
+The `ayahs.text_tajweed` column holds a compact JSON array of segments
+(`[{"t": "…", "r": "code"}]`, `r = null` for plain text) that the Android
+renderer colours per rule. It is produced at DB-build time by
+`scripts/generate_database.py`, which calls
+`preparse_tajweed.preparse_single(raw, key="surah:ayah")` on the quran.com
+markup in `json/tajweed.json`.
+
+**Pre-parser (`scripts/preparse_tajweed.py`).** The markup contains
+arbitrarily **nested** `<tajweed>` tags (33 in the current source, e.g. `2:190`
+has a `slnt` span inside a `madda_obligatory` span). The parser is a
+**stack-based tokenizer**, not a regex:
+
+- The **innermost** rule wins for the characters it covers; the enclosing rule
+  is kept for the rest. `2:190` → `ُوٓ` = `mo`, `اْ` = `sl`, `‌ۚ` = `mo`.
+- **Invariant:** concatenating every segment's `t` reconstructs the source text
+  exactly (tags + verse markers removed) — no character is ever dropped.
+  Because of nesting, per-*segment* code counts do not equal raw *tag* counts.
+- Unknown class, stray/unbalanced tag, or unclosed tag → **`ValueError`**
+  (fail loud), so corrupt source can never silently ship the wrong colours.
+- **`SOURCE_FIXUPS`** (keyed by `surah:ayah`) patches ayahs malformed at
+  source *before* tokenizing — currently only `32:3`, whose opening
+  `madda_normal` tag was corrupted to a stray `>`. Keying by fragment means a
+  corrected upstream re-fetch simply no-ops.
+
+`scripts/preparse_tajweed.py` can also be run standalone to regenerate the
+`json/tajweed_parsed.json` reference artifact (not consumed by the build —
+`generate_database.py` parses inline). Tests live in
+`scripts/tests/test_preparse_tajweed.py` (`python3 -m unittest`), covering the
+nested/malformed/unknown/whitespace cases plus the whole-corpus round-trip
+invariant.
+
+> The rule taxonomy (Madd Munfasil/Muttasil/'Aarid split), orthography
+> normalisation against `text_arabic`, extended rules, the renderer, the
+> in-app legend, and CI validation are handled in the sibling sub-issues
+> #289–#295 of the tajweed overhaul epic (#287).
+
 ## translations.json Format
 
 ```json

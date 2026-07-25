@@ -9,6 +9,31 @@ This eliminates runtime regex parsing in the Android app.
 
 V2 rule codes — each tajweed sub-type gets its own code so the app can
 assign distinct colors matching a standard colour-coded mushaf.
+
+Nested tags
+-----------
+The quran.com source (``json/tajweed.json``) contains 33 *nested* tags —
+one tajweed span wrapped inside another — e.g. ``2:190``::
+
+    ...تَعْتَد<tajweed class=madda_obligatory>ُوٓ<tajweed class=slnt>اْ</tajweed>‌ۚ</tajweed> إِ...
+
+Here ``slnt`` (silent) is nested inside ``madda_obligatory``. A single-level
+non-greedy regex cannot represent this: it stops at the first ``</tajweed>``,
+so the inner tag leaks into the text payload (literal ``<tajweed …>`` markup
+rendered in the Mushaf) and the inner rule span is silently dropped.
+
+This module uses a **stack-based tokenizer** instead. Semantics:
+
+* the **innermost** rule wins for the characters it covers, and the outer
+  rule is kept for the remaining characters. For ``2:190`` above that yields
+  three segments — ``ُوٓ`` = ``mo``, ``اْ`` = ``sl``, ``‌ۚ`` = ``mo`` — rather
+  than one mislabelled ``ُوٓاْ‌ۚ`` = ``mo`` span with leaked markup.
+
+Because of this, per-*segment* code counts do not equal raw *tag* counts for
+overlapping tags (an outer tag split by an inner produces 2+ segments; an
+outer tag fully covered by an inner produces 0). The guaranteed invariant is
+character-level: concatenating every segment's text reconstructs the source
+text exactly (tags and verse markers removed), so no character is ever lost.
 """
 
 import json
@@ -95,63 +120,122 @@ RULE_CODES = {
     'end': None,
 }
 
-# Pattern to match tajweed tags (handles both quoted and unquoted class values)
-TAG_PATTERN = re.compile(r'<tajweed\s+class=(["\']?)([^"\'>\s]+)\1>(.*?)</tajweed>')
+# Pattern to match a tajweed opening tag (handles quoted and unquoted class values)
+TAG_OPEN_PATTERN = re.compile(r'<tajweed\s+class=(["\']?)([^"\'>\s]+)\1\s*>')
+TAG_CLOSE = '</tajweed>'
 
 # Pattern to match span end markers (verse numbers)
 END_SPAN_PATTERN = re.compile(r'<span\s+class=end>.*?</span>')
 
+# ── Source fix-ups ────────────────────────────────────────────────────
+# The upstream quran.com source has a small number of ayahs that are
+# malformed at source (broken/absent markup). Each entry is a list of
+# (broken_fragment, corrected_fragment) replacements applied to that ayah's
+# raw HTML *before* tokenizing. Keying by fragment (not the whole string)
+# means a corrected upstream re-fetch simply no-ops instead of silently
+# re-introducing the bug or clobbering unrelated upstream edits.
+#
+# 32:3 — `ٱفْتَرَ>ٮٰهُ`: the opening `<tajweed class=madda_normal>` for the
+# dagger-alif elongation (`ٮٰ`) was corrupted to a stray `>`, leaving an
+# unbalanced `</tajweed>` and a literal `>` in the rendered text. The rule
+# is confirmed as a natural madd (`madd_2`) by the independent
+# `tajweed_cpfair.json` dataset at the same position.
+SOURCE_FIXUPS = {
+    '32:3': [
+        ('فْتَرَ>ٮٰ', 'فْتَرَ<tajweed class=madda_normal>ٮٰ'),
+    ],
+}
 
-def preparse_tajweed(html_text):
+
+def apply_source_fixups(key, html_text):
+    """Apply any registered SOURCE_FIXUPS for ``key`` (``"surah:ayah"``)."""
+    for broken, fixed in SOURCE_FIXUPS.get(key, []):
+        html_text = html_text.replace(broken, fixed)
+    return html_text
+
+
+def preparse_tajweed(html_text, key=None):
     """
     Convert HTML tajweed text to simplified JSON segments.
 
+    Uses a stack-based tokenizer so arbitrarily nested ``<tajweed>`` tags are
+    handled correctly (see the module docstring). The innermost rule wins for
+    the characters it covers; the enclosing rule is kept for the rest.
+
     Args:
-        html_text: Text with <tajweed class="rule">text</tajweed> markup
+        html_text: Text with <tajweed class="rule">text</tajweed> markup.
+        key: Optional "surah:ayah" key used to (a) apply SOURCE_FIXUPS and
+             (b) produce actionable error messages.
 
     Returns:
         List of segments: [{"t": "text", "r": "code"}, ...]
-        where r is None for plain text, or a single-letter rule code
+        where r is None for plain text, or a rule code string.
+
+    Raises:
+        ValueError: on an unknown tajweed class, a stray/unbalanced tag, or an
+            unclosed tag — malformed input fails loud rather than silently
+            corrupting the output.
     """
     if not html_text:
         return []
 
-    # Remove end span markers (verse numbers) - they're not needed in the parsed format
+    where = f" in {key}" if key else ""
+
+    if key is not None:
+        html_text = apply_source_fixups(key, html_text)
+
+    # Remove end span markers (verse numbers) - they're not needed in the parsed format.
+    # Strip once at the boundary; internal whitespace (word spacing) is preserved.
     html_text = END_SPAN_PATTERN.sub('', html_text).strip()
 
     segments = []
-    last_end = 0
+    stack = []  # active rule codes, innermost last
+    pos = 0
+    length = len(html_text)
 
-    for match in TAG_PATTERN.finditer(html_text):
-        # Add plain text before this match
-        if match.start() > last_end:
-            plain = html_text[last_end:match.start()]
-            if plain:
-                segments.append({"t": plain, "r": None})
+    while pos < length:
+        # Closing tag → pop the innermost active rule.
+        if html_text.startswith(TAG_CLOSE, pos):
+            if not stack:
+                raise ValueError(
+                    f"Unbalanced </tajweed>{where} at position {pos}: "
+                    f"{html_text[pos:pos + 30]!r}"
+                )
+            stack.pop()
+            pos += len(TAG_CLOSE)
+            continue
 
-        # Get rule class and text content
-        rule_class = match.group(2).lower()
-        text_content = match.group(3)
+        # Opening tag → validate the class and push its rule code.
+        match = TAG_OPEN_PATTERN.match(html_text, pos)
+        if match:
+            rule_class = match.group(2).lower()
+            if rule_class not in RULE_CODES:
+                raise ValueError(
+                    f"Unknown tajweed class {rule_class!r}{where}. "
+                    f"Add it to RULE_CODES or fix the source."
+                )
+            stack.append(RULE_CODES[rule_class])
+            pos = match.end()
+            continue
 
-        # Map to single-letter code
-        rule_code = RULE_CODES.get(rule_class)
-        if rule_code is None and rule_class not in RULE_CODES:
-            # Unknown rule - try first letter as fallback
-            print(f"Warning: Unknown tajweed class '{rule_class}', using first letter")
-            rule_code = rule_class[0] if rule_class else None
+        # Plain text run up to the next '<'.
+        nxt = html_text.find('<', pos)
+        if nxt == -1:
+            nxt = length
+        if nxt == pos:
+            # A '<' that is neither a valid open nor close tag → malformed source.
+            raise ValueError(
+                f"Stray '<' / malformed tag{where} at position {pos}: "
+                f"{html_text[pos:pos + 30]!r}"
+            )
+        text_content = html_text[pos:nxt]
+        # rule is the innermost active code, or None for plain text.
+        # 'end' maps to None, so those characters are emitted as plain text.
+        segments.append({"t": text_content, "r": stack[-1] if stack else None})
+        pos = nxt
 
-        if text_content:
-            # Only add segment with rule if there's a valid rule code
-            # For 'end' class (verse markers), rule_code will be None
-            segments.append({"t": text_content, "r": rule_code})
-
-        last_end = match.end()
-
-    # Add remaining plain text
-    if last_end < len(html_text):
-        remaining = html_text[last_end:].strip()
-        if remaining:
-            segments.append({"t": remaining, "r": None})
+    if stack:
+        raise ValueError(f"Unclosed tajweed tag(s) {stack}{where}: {html_text!r}")
 
     return segments
 
@@ -177,7 +261,7 @@ def preparse_tajweed_file(input_path, output_path=None):
     print(f"Pre-parsing {len(tajweed_data)} entries...")
     parsed_data = {}
     for key, html_text in tajweed_data.items():
-        segments = preparse_tajweed(html_text)
+        segments = preparse_tajweed(html_text, key=key)
         # Store as JSON string for direct insertion into database
         parsed_data[key] = json.dumps(segments, ensure_ascii=False)
 
@@ -189,12 +273,15 @@ def preparse_tajweed_file(input_path, output_path=None):
     return parsed_data
 
 
-def preparse_single(html_text):
+def preparse_single(html_text, key=None):
     """
     Pre-parse a single HTML tajweed string and return JSON string.
     Used by generate_database.py for inline conversion.
+
+    Pass ``key`` ("surah:ayah") so SOURCE_FIXUPS are applied on the actual
+    shipped-DB generation path.
     """
-    segments = preparse_tajweed(html_text)
+    segments = preparse_tajweed(html_text, key=key)
     return json.dumps(segments, ensure_ascii=False)
 
 
