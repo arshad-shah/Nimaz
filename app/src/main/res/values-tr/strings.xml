@@ -892,6 +892,10 @@
     <string name="show_tajweed_colors">Tecvid Renklerini Göster</string>
     <string name="show_tajweed_colors_subtitle">Renk kodlu okunuş kuralları</string>
     <string name="show_tajweed_colors_unavailable">Madani düzeninde kullanılabilir</string>
+    <string name="tajweed_legend_title">Tecvid renk kılavuzu</string>
+    <string name="tajweed_legend_subtitle">Her rengin anlamı</string>
+    <string name="tajweed_colour_guide">Tecvid renk kılavuzu</string>
+    <string name="tajweed_colour_guide_subtitle">Telaffuz renkleri için açıklama</string>
     <string name="audio">Ses</string>
     <string name="reciter">Okuyucu</string>
     <string name="quran_settings_preview">ÖNİZLEME</string>

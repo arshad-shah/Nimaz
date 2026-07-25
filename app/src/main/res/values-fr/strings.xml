@@ -908,6 +908,10 @@
     <string name="show_tajweed_colors">Afficher les couleurs du Tajweed</string>
     <string name="show_tajweed_colors_subtitle">Règles de prononciation codées par couleur</string>
     <string name="show_tajweed_colors_unavailable">Disponible dans la disposition Madani</string>
+    <string name="tajweed_legend_title">Guide des couleurs du Tajwid</string>
+    <string name="tajweed_legend_subtitle">Ce que signifie chaque couleur</string>
+    <string name="tajweed_colour_guide">Guide des couleurs du Tajwid</string>
+    <string name="tajweed_colour_guide_subtitle">Légende des couleurs de prononciation</string>
     <string name="audio">Audio</string>
     <string name="reciter">Récitateur</string>
     <string name="quran_settings_preview">APERÇU</string>

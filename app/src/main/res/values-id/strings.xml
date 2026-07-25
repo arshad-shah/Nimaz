@@ -869,6 +869,10 @@
     <string name="show_tajweed_colors">Tampilkan Warna Tajwid</string>
     <string name="show_tajweed_colors_subtitle">Aturan pelafalan dengan kode warna</string>
     <string name="show_tajweed_colors_unavailable">Tersedia di tata letak Madani</string>
+    <string name="tajweed_legend_title">Panduan warna tajwid</string>
+    <string name="tajweed_legend_subtitle">Arti setiap warna</string>
+    <string name="tajweed_colour_guide">Panduan warna tajwid</string>
+    <string name="tajweed_colour_guide_subtitle">Legenda untuk warna pengucapan</string>
     <string name="audio">Audio</string>
     <string name="reciter">Qari</string>
     <string name="quran_settings_preview">PRATINJAU</string>

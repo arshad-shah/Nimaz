@@ -223,20 +223,25 @@ wrong teaches incorrect recitation). Status:
 
 | Rule | Kind | Status |
 |---|---|---|
-| Tafkhim/Tarqiq of Raa (ر) | derived (position + vowel) | **not implemented** — needs review |
-| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | **not implemented** — needs review |
-| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | recorded in `tajweed_special_rules.json` (not wired) |
-| Madd al-Lin (`ml`) | derived (و/ي sakinah after fatha before a stop) | code/colour defined (#289); **population needs review** |
+| Tafkhim/Tarqiq of Raa (ر) | derived (position + vowel) | **engine implemented + tested** (`tajweed_rules.raa_rule`); not wired |
+| Tafkhim/Tarqiq of Lam in لفظ الجلالة | derived | **engine implemented + tested** (`lam_of_name_rule`); not wired (ٱللَّه form; `لله` form is a known gap) |
+| Isti'la letters (خ ص ض غ ط ق ظ) always heavy | deterministic | **engine implemented** (`is_istila`); not wired (would colour many letters — a product choice) |
+| Madd al-Lin (`ml`) | derived (و/ي sakinah after fatha before a stop) | code/colour defined (#289); **detection implemented + tested** (`is_madd_lin`); population not wired |
 | Sakt (السكت) | enumerated | recorded + reconciled (see below); not wired |
-| Idgham Mutamathilayn | derived | **not implemented** |
+| Idgham Mutamathilayn | derived | **engine implemented + tested** (`idgham_mutamathilayn`); not wired |
 | Imalah 11:41 · Ishmam 12:11 · Tasheel 41:44 · Naql 49:11 | enumerated | recorded in `tajweed_special_rules.json`; not wired |
-| Qalqalah Sughra/Kubra | derived (positional) | **implemented** — `split_qalqalah`, word-final → kubra (a simplified heuristic; a waqf-mark-aware version is future) |
-| Waqf / stop signs (7 signs) | present-but-unstyled | classified in `tajweed_special_rules.json`; styling not wired |
+| Qalqalah Sughra/Kubra | derived (positional) | **implemented + wired** — `split_qalqalah`, word-final → kubra (simplified; a waqf-mark-aware version is future) |
+| Waqf / stop signs (7 signs) | present-but-unstyled | classified (`classify_waqf` + `tajweed_special_rules.json`); styling not wired |
 
-The enumerated, citable facts (fixed in Hafs) are recorded in
-**`json/tajweed_special_rules.json`** as a reference for a future *reviewed*
-implementation — that file is deliberately **not** consumed by
-`generate_database.py`. Notable reconciliation recorded there: the **7 occurrences
+`scripts/tajweed_rules.py` is a **tested rule engine** (`scripts/tests/test_tajweed_rules.py`)
+for the derived rules above. It is **deliberately not consumed by
+`generate_database.py`**: the derived recitation rules encode fiqh-of-recitation
+decisions and must be **reviewed against a printed tajweed mushaf by a qualified
+reviewer** before they colour the Qur'an in the app, and *which* rules to enable
+(e.g. isti'la tafkhim would colour a large fraction of all letters) is a product
+decision. The engine + the enumerated facts in
+**`json/tajweed_special_rules.json`** make that review a wiring step, not a
+rewrite. Notable reconciliation recorded there: the **7 occurrences
 of U+06DC** in `text_arabic` are 4 canonical Hafs sakt (18:1, 36:52, 75:27, 83:14)
 + 1 additional sakt (69:28, مَالِيَهْ→هَلَكَ) + 2 non-sakt uses of the same sign as
 the *small-seen-over-ṣād* alternate-reading marker (2:245, 7:69) — answering the

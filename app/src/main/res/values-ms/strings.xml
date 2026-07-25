@@ -870,6 +870,10 @@
     <string name="show_tajweed_colors">Tunjukkan Warna Tajwid</string>
     <string name="show_tajweed_colors_subtitle">Peraturan sebutan berkod warna</string>
     <string name="show_tajweed_colors_unavailable">Tersedia dalam susun atur Madani</string>
+    <string name="tajweed_legend_title">Panduan warna tajwid</string>
+    <string name="tajweed_legend_subtitle">Maksud setiap warna</string>
+    <string name="tajweed_colour_guide">Panduan warna tajwid</string>
+    <string name="tajweed_colour_guide_subtitle">Legenda untuk warna sebutan</string>
     <string name="audio">Audio</string>
     <string name="reciter">Pembaca</string>
     <string name="quran_settings_preview">PRATONTON</string>
