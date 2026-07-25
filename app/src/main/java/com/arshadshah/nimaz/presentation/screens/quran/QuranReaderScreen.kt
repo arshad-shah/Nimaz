@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.CheckCircle
@@ -75,6 +76,7 @@ import com.arshadshah.nimaz.domain.model.Surah
 import com.arshadshah.nimaz.presentation.components.organisms.AyahItem
 import com.arshadshah.nimaz.presentation.components.organisms.MushafLinePage
 import com.arshadshah.nimaz.presentation.components.organisms.MushafPage
+import com.arshadshah.nimaz.presentation.components.organisms.TajweedLegendSheet
 import com.arshadshah.nimaz.presentation.viewmodel.QuranEvent
 import com.arshadshah.nimaz.presentation.viewmodel.QuranReaderUiState
 import com.arshadshah.nimaz.presentation.viewmodel.QuranViewModel
@@ -103,6 +105,7 @@ fun QuranReaderScreen(
     val listState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
     var usePageView by rememberSaveable { mutableStateOf(false) }
+    var showTajweedLegend by remember { mutableStateOf(false) }
     var savedListIndex by rememberSaveable { mutableIntStateOf(0) }
     var savedListOffset by rememberSaveable { mutableIntStateOf(0) }
     var pendingScrollRestore by rememberSaveable { mutableStateOf(false) }
@@ -424,6 +427,16 @@ fun QuranReaderScreen(
                                 onClick = {
                                     usePageView = !usePageView
                                     menuExpanded = false
+                                },
+                            )
+                        }
+                        if (state.showTajweed) {
+                            NimazDropdownRow(
+                                text = stringResource(R.string.tajweed_colour_guide),
+                                leadingIcon = Icons.AutoMirrored.Filled.MenuBook,
+                                onClick = {
+                                    menuExpanded = false
+                                    showTajweedLegend = true
                                 },
                             )
                         }
@@ -873,6 +886,11 @@ fun QuranReaderScreen(
                 }
             }
         }
+    }
+
+    // Tajweed colour guide, reachable from the reader's overflow menu (#294).
+    if (showTajweedLegend) {
+        TajweedLegendSheet(onDismiss = { showTajweedLegend = false })
     }
 }
 

@@ -36,7 +36,7 @@ import com.arshadshah.nimaz.presentation.components.molecules.NimazBottomSheet
  * source of truth shared with the renderer — so the legend can never fall out
  * of sync with what is painted on the page.
  *
- * Reachable from Quran settings; reusable in the reader.
+ * Reachable from Quran settings and the reader's overflow menu.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
