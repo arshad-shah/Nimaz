@@ -189,8 +189,12 @@ or more ayahs/partial ayahs, a surah header, or a basmalah):
 line covering part of a long ayah records just its word range. Rows are ordered by
 `(page_number, line_number)`; multiple rows can share a line (e.g. two ayahs, or a header and its
 basmalah band). QUL marks bismillah bands inconsistently, so basmalah rows are reconciled to
-exactly one per surah (owner = the surah whose first ayah follows the band; the one surah whose
-bismillah QUL folds into the name banner gets a basmalah synthesised onto its header line).
+exactly one per surah (owner = the surah whose first ayah follows the band). Where QUL folds a
+surah's bismillah into the name banner, the reconciled basmalah row is emitted on the **same
+`line_number` as that surah's `surah_header`** — this happens for **81 of the 112** basmalah-bearing
+surahs (the other 31 get a dedicated basmalah line). The consumer must therefore treat a
+header-and-basmalah pair sharing a `line_number` as two logical lines, not collapse them: see the
+7/7 fidelity note below and `MushafLayoutMapper`.
 
 **Acceptance criteria (from #265 — all met):**
 - [x] `ayahs_indopak.json` covers all 6,236 ayah ids (ids match `AyahEntity.id`; no missing/extra/empty).
@@ -201,6 +205,21 @@ bismillah QUL folds into the name banner gets a basmalah synthesised onto its he
 
 Re-generate/validate any time with `python3 nimaz-pro-data/scripts/download_indopak_mushaf_data.py`
 (pages cache under `$INDOPAK_CACHE_DIR`, default `/tmp/indopak_pages`).
+
+**Fidelity verification (sub-task 7/7 of #263, #271).** The shipped assets are now pinned by
+`MushafLayoutFidelityTest` (`app/src/test/.../data/local/quran/`), which reads
+`assets/quran/mushaf_layout_indopak16.json` + `ayahs_indopak.json` directly and re-asserts every
+acceptance criterion above on the bytes that actually ship — plus the strong invariant that **each
+ayah's words are covered exactly once, in reading order, with no gaps, duplicates, or reordering**
+across its line-segments (a single wrong line break would fail the test). The human-readable
+per-page pass/fail sheet is generated at
+[`docs/quran/16-line-fidelity-sheet.md`](quran/16-line-fidelity-sheet.md). Two known-good
+structural quirks are documented there rather than "fixed": the decorative **opening two-page
+spread** (page 2's first printed line is line 10, mirroring page 1) and a spacer line on page 290.
+One limitation: the IndoPak text/layout carry **no sajda (۩) or rukūʿ (۞) markers**, so the 16-line
+view does not overlay them (sajda metadata still lives on `ayahs.sajda_type`; see the sajda ayah
+list under "ayahs.json Format" above and `ARCHITECTURE.md` §9 Open). If the assets are ever
+regenerated, re-run `:app:testDebugUnitTest` and regenerate the sheet.
 
 ### DB schema, migration & distribution (sub-task 2/7 of #263)
 
