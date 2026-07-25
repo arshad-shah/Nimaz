@@ -36,6 +36,7 @@ character-level: concatenating every segment's text reconstructs the source
 text exactly (tags and verse markers removed), so no character is ever lost.
 """
 
+import difflib
 import json
 import re
 from pathlib import Path
@@ -240,13 +241,109 @@ def preparse_tajweed(html_text, key=None):
     return segments
 
 
-def preparse_tajweed_file(input_path, output_path=None):
+# ── Orthography normalisation (issue #290) ────────────────────────────
+# The quran.com tajweed markup and the app's canonical `ayahs.text_arabic`
+# are two different Uthmani transcriptions of the same verse — they disagree
+# on 87% of ayahs (tatweel carriers, ZWNJ, pause-mark encodings, tanween
+# forms, alef variants, …). If the two disagree, toggling "Show Tajweed
+# Colors" changes the glyphs on screen (word widths, line breaks), not just
+# their colour, and no single string can back search / bookmarks / audio
+# highlighting.
+#
+# Rather than hand-reconcile 60+ context-dependent substitutions (fragile,
+# and it would risk silently mis-colouring letters), we keep `text_arabic`
+# as the single canonical text and *re-derive* the coloured segments by
+# aligning the stripped tajweed text onto it and transferring rule labels.
+# This guarantees ``strip(text_tajweed) == normalise_uthmani(text_arabic)``
+# byte-for-byte, by construction.
+
+# Non-semantic marks removed from the canonical text. Only the BOM appears in
+# the shipped ayahs.json (on 1:1), but strip the common zero-width marks too
+# so a stray one can never leak into a string comparison / share action.
+_NON_SEMANTIC = str.maketrans({
+    '﻿': None,  # ZERO WIDTH NO-BREAK SPACE / BOM
+    '​': None,  # ZERO WIDTH SPACE
+    '‌': None,  # ZERO WIDTH NON-JOINER
+    '‍': None,  # ZERO WIDTH JOINER
+})
+
+
+def normalise_uthmani(text):
+    """
+    Normalise a canonical Uthmani ayah string.
+
+    Strips the BOM and stray zero-width marks (non-semantic here) and trims
+    the outer whitespace. ``text_arabic`` is treated as canonical, so this is
+    intentionally light — it must not alter the glyphs the app already renders
+    for search, bookmarks and non-tajweed display.
+    """
+    if not text:
+        return text
+    return text.translate(_NON_SEMANTIC).strip()
+
+
+def align_segments_to_canonical(segments, canonical_text):
+    """
+    Re-derive coloured segments over ``canonical_text`` from ``segments``.
+
+    The returned segments are built out of ``canonical_text``'s own characters
+    (so their concatenation equals ``canonical_text`` exactly) while carrying
+    the tajweed rule of the aligned source character. A character-level diff
+    aligns the stripped source text to the canonical text:
+
+    * **equal** run → copy each character's rule across;
+    * **replace** run → the canonical characters inherit the last non-null
+      rule in the replaced source region (the rule usually sits on a mark that
+      differs in encoding, e.g. a small-yeh madd), else null;
+    * **insert** run (canonical has extra characters, e.g. a pause mark absent
+      from the tajweed source) → inherit the preceding canonical rule, since
+      such characters are combining marks attached to the base before them;
+    * **delete** run (source-only characters — tatweel, ZWNJ, or a small-waw
+      madd with no canonical glyph) → nothing to place.
+
+    Adjacent characters with the same rule are merged into one segment.
+    """
+    source_text = ''.join(seg['t'] for seg in segments)
+    source_rules = []
+    for seg in segments:
+        source_rules.extend([seg['r']] * len(seg['t']))
+
+    canon_rules = [None] * len(canonical_text)
+    matcher = difflib.SequenceMatcher(None, source_text, canonical_text, autojunk=False)
+    for op, i1, i2, j1, j2 in matcher.get_opcodes():
+        if op == 'equal':
+            for offset in range(j2 - j1):
+                canon_rules[j1 + offset] = source_rules[i1 + offset]
+        elif op == 'replace':
+            region = [r for r in source_rules[i1:i2] if r is not None]
+            chosen = region[-1] if region else None
+            for k in range(j1, j2):
+                canon_rules[k] = chosen
+        elif op == 'insert':
+            for k in range(j1, j2):
+                canon_rules[k] = canon_rules[k - 1] if k > 0 else None
+        # 'delete': source-only characters, nothing to place.
+
+    merged = []
+    for ch, rule in zip(canonical_text, canon_rules):
+        if merged and merged[-1]['r'] == rule:
+            merged[-1]['t'] += ch
+        else:
+            merged.append({'t': ch, 'r': rule})
+    return merged
+
+
+def preparse_tajweed_file(input_path, output_path=None, ayahs_path=None):
     """
     Pre-parse an entire tajweed.json file.
 
     Args:
         input_path: Path to tajweed.json (dict with "surah:ayah" keys)
         output_path: Optional output path (defaults to tajweed_parsed.json)
+        ayahs_path: Optional path to ayahs.json. When given, each ayah's
+            segments are re-derived over the normalised canonical
+            ``text_arabic`` (issue #290) so the reference artifact matches the
+            shipped DB (``strip(text_tajweed) == normalise_uthmani(text_arabic)``).
     """
     input_path = Path(input_path)
     if output_path is None:
@@ -258,10 +355,20 @@ def preparse_tajweed_file(input_path, output_path=None):
     with open(input_path, 'r', encoding='utf-8') as f:
         tajweed_data = json.load(f)
 
+    canonical_by_key = {}
+    if ayahs_path is not None:
+        with open(ayahs_path, 'r', encoding='utf-8') as f:
+            for a in json.load(f):
+                canonical_by_key[f"{a['surah_id']}:{a['number_in_surah']}"] = a['text_arabic']
+        print(f"Loaded {len(canonical_by_key)} canonical ayah texts from {ayahs_path}")
+
     print(f"Pre-parsing {len(tajweed_data)} entries...")
     parsed_data = {}
     for key, html_text in tajweed_data.items():
         segments = preparse_tajweed(html_text, key=key)
+        canonical = canonical_by_key.get(key)
+        if canonical is not None:
+            segments = align_segments_to_canonical(segments, normalise_uthmani(canonical))
         # Store as JSON string for direct insertion into database
         parsed_data[key] = json.dumps(segments, ensure_ascii=False)
 
@@ -273,24 +380,36 @@ def preparse_tajweed_file(input_path, output_path=None):
     return parsed_data
 
 
-def preparse_single(html_text, key=None):
+def preparse_single(html_text, key=None, canonical_text=None):
     """
     Pre-parse a single HTML tajweed string and return JSON string.
     Used by generate_database.py for inline conversion.
 
     Pass ``key`` ("surah:ayah") so SOURCE_FIXUPS are applied on the actual
     shipped-DB generation path.
+
+    Pass ``canonical_text`` (the ayah's ``text_arabic``) to re-derive the
+    coloured segments over the normalised canonical text (issue #290), so the
+    stored segments round-trip to ``normalise_uthmani(text_arabic)`` exactly.
+    When omitted, the raw tag-parsed segments are returned unchanged.
     """
     segments = preparse_tajweed(html_text, key=key)
+    if canonical_text is not None:
+        segments = align_segments_to_canonical(segments, normalise_uthmani(canonical_text))
     return json.dumps(segments, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-    # Run standalone to pre-parse the entire tajweed.json file
+    # Run standalone to pre-parse the entire tajweed.json file, re-deriving
+    # against the canonical ayah text when ayahs.json is available.
     json_dir = Path(__file__).parent.parent / "json"
     tajweed_path = json_dir / "tajweed.json"
+    ayahs_path = json_dir / "ayahs.json"
 
     if tajweed_path.exists():
-        preparse_tajweed_file(tajweed_path)
+        preparse_tajweed_file(
+            tajweed_path,
+            ayahs_path=ayahs_path if ayahs_path.exists() else None,
+        )
     else:
         print(f"Error: {tajweed_path} not found")

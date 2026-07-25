@@ -92,7 +92,7 @@ nimaz-pro-data/
 **Sajda Verses** (mark `sajda: true`):
 - 7:206, 13:15, 16:50, 17:109, 19:58, 22:18, 22:77, 25:60, 27:26, 32:15, 38:24, 41:38, 53:62, 84:21, 96:19
 
-## Tajweed colouring pipeline (`text_tajweed`, issue #288 — sub-task 1/8 of #287)
+## Tajweed colouring pipeline (`text_tajweed`, issues #288 + #290 of epic #287)
 
 The `ayahs.text_tajweed` column holds a compact JSON array of segments
 (`[{"t": "…", "r": "code"}]`, `r = null` for plain text) that the Android
@@ -118,17 +118,60 @@ has a `slnt` span inside a `madda_obligatory` span). The parser is a
   `madda_normal` tag was corrupted to a stray `>`. Keying by fragment means a
   corrected upstream re-fetch simply no-ops.
 
+**Orthography normalisation (issue #290).** The quran.com tajweed markup and
+the app's canonical `ayahs.text_arabic` are two *different* Uthmani
+transcriptions of the same verse — stripping the tags leaves them disagreeing on
+**87% of ayahs** (tatweel carriers for the dagger alef, ZWNJ, pause-mark
+encodings U+06DF/06E2/06ED, tanween forms, alef variants). If they disagree,
+toggling "Show Tajweed Colors" changes the **glyphs** on screen — word widths,
+line breaks — not just their colour, and no single string can back search,
+bookmarks and audio highlighting.
+
+`text_arabic` is treated as the **single canonical text** (it is what the app
+already renders everywhere else). The coloured segments are **re-derived over
+it** rather than shipped in the quran.com encoding:
+
+1. `normalise_uthmani(text)` strips the BOM / zero-width marks and trims — light
+   by design, so it never alters the glyphs the app already renders.
+2. `align_segments_to_canonical(segments, canonical)` runs a character-level
+   diff (`difflib`) of the stripped tajweed text against the canonical text and
+   transfers each rule label across: *equal* runs copy per-char; *replace* runs
+   take the region's last non-null rule (the rule usually sits on a re-encoded
+   mark, e.g. a small-yeh madd); *insert* runs (canonical-only combining marks)
+   inherit the preceding rule; *delete* runs (tatweel/ZWNJ, or a small-waw madd
+   with no canonical glyph) drop out.
+
+Because the segments are rebuilt from `text_arabic`'s **own** characters, the
+invariant `strip(text_tajweed) == normalise_uthmani(text_arabic)` holds
+**byte-for-byte for all 6 236 ayahs** by construction. `generate_database.py`
+passes `canonical_text=text_arabic` into `preparse_single`, and also stores the
+**normalised** `text_arabic` (BOM removed). Verify with:
+
+```bash
+python3 nimaz-pro-data/scripts/verify_tajweed_orthography.py   # exits non-zero on drift
+```
+
+> **DB regeneration note.** These pipeline changes only affect the shipped DB
+> when `nimaz_prepopulated.db` is regenerated; the `text_arabic` column changes
+> (BOM removed on 1:1) so a regeneration is required for the fix to reach the
+> app, and — like all prepackaged-DB edits — it does **not** reach existing
+> installs on update (see `docs/SUBSYSTEMS.md` §5/§7; a runtime seeding path, if
+> needed, would be decided with the renderer work in #293).
+
 `scripts/preparse_tajweed.py` can also be run standalone to regenerate the
 `json/tajweed_parsed.json` reference artifact (not consumed by the build —
-`generate_database.py` parses inline). Tests live in
+`generate_database.py` parses inline); run standalone it loads `ayahs.json` and
+applies the same normalisation so the artifact matches the DB. Tests live in
 `scripts/tests/test_preparse_tajweed.py` (`python3 -m unittest`), covering the
-nested/malformed/unknown/whitespace cases plus the whole-corpus round-trip
-invariant.
+nested/malformed/unknown/whitespace cases, the normalisation/alignment helpers,
+and the whole-corpus round-trip invariants.
 
-> The rule taxonomy (Madd Munfasil/Muttasil/'Aarid split), orthography
-> normalisation against `text_arabic`, extended rules, the renderer, the
-> in-app legend, and CI validation are handled in the sibling sub-issues
-> #289–#295 of the tajweed overhaul epic (#287).
+> The rule taxonomy (Madd Munfasil/Muttasil/'Aarid split), extended rules, the
+> renderer, the in-app legend, and full CI validation are handled in the sibling
+> sub-issues #289 and #291–#295 of the tajweed overhaul epic (#287). Aligning
+> the independent `tajweed_cpfair.json` dataset (which indexes a *different*
+> ayah segmentation — e.g. `2:1` "الم" has cpfair offsets up to 44) belongs with
+> #289, where that dataset is actually consumed for the taxonomy split.
 
 ## translations.json Format
 

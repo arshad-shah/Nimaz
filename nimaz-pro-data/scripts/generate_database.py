@@ -7,7 +7,7 @@ Converts JSON files to pre-populated Room database
 import sqlite3
 import json
 from pathlib import Path
-from preparse_tajweed import preparse_single
+from preparse_tajweed import preparse_single, normalise_uthmani
 
 JSON_DIR = Path(__file__).parent.parent / "json"
 OUTPUT_DB = Path(__file__).parent.parent / "output" / "nimaz_prepopulated.db"
@@ -732,17 +732,25 @@ def populate_database(conn):
         # The JSON uses string keys, so convert to string
         transliteration = transliterations.get(str(a['number_global'])) if transliterations else None
 
+        # Canonical Arabic text — strip BOM / zero-width marks (issue #290).
+        text_arabic = normalise_uthmani(a['text_arabic'])
+
         # Get tajweed text using "surah:ayah" key format and pre-parse it
         tajweed_key = f"{a['surah_id']}:{a['number_in_surah']}"
         raw_tajweed = tajweed_data.get(tajweed_key) if tajweed_data else None
         # Pre-parse HTML tajweed to JSON format for efficient rendering.
-        # Pass the key so SOURCE_FIXUPS (e.g. the malformed 32:3 source) apply.
-        text_tajweed = preparse_single(raw_tajweed, key=tajweed_key) if raw_tajweed else None
+        # Pass the key so SOURCE_FIXUPS (e.g. the malformed 32:3 source) apply,
+        # and the canonical text so the coloured segments are re-derived over
+        # text_arabic — guaranteeing strip(text_tajweed) == text_arabic (#290).
+        text_tajweed = (
+            preparse_single(raw_tajweed, key=tajweed_key, canonical_text=text_arabic)
+            if raw_tajweed else None
+        )
 
         cursor.execute('''
             INSERT OR REPLACE INTO ayahs VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
         ''', (a['id'], a['surah_id'], a['number_in_surah'], a['number_global'],
-              a['text_arabic'], a['text_uthmani'], a['juz'], a['hizb'],
+              text_arabic, a['text_uthmani'], a['juz'], a['hizb'],
               a['page'], 1 if a.get('sajda') else 0, a.get('sajda_type'),
               transliteration, text_tajweed))
     print(f"Inserted {len(ayahs)} ayahs")

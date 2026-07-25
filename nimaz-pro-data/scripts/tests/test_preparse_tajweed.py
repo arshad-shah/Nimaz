@@ -26,7 +26,9 @@ from preparse_tajweed import (  # noqa: E402
     TAG_CLOSE,
     TAG_OPEN_PATTERN,
     END_SPAN_PATTERN,
+    align_segments_to_canonical,
     apply_source_fixups,
+    normalise_uthmani,
     preparse_tajweed,
 )
 
@@ -206,6 +208,89 @@ class TestFullSourceInvariants(unittest.TestCase):
                     seg[s["r"]] += 1
         self.assertEqual(seg["g"], raw["ghunnah"])
         self.assertEqual(seg["sl"], raw["slnt"])
+
+
+class TestNormaliseUthmani(unittest.TestCase):
+    def test_strips_bom(self):
+        self.assertEqual(normalise_uthmani("﻿بِسْمِ"), "بِسْمِ")
+
+    def test_strips_zero_width_marks(self):
+        self.assertEqual(normalise_uthmani("a‌b‍b​c"), "abbc")
+
+    def test_trims_outer_whitespace_only(self):
+        self.assertEqual(normalise_uthmani("  فِى سَبِيلِ  "), "فِى سَبِيلِ")
+
+    def test_empty_and_none(self):
+        self.assertEqual(normalise_uthmani(""), "")
+        self.assertIsNone(normalise_uthmani(None))
+
+
+class TestAlignSegmentsToCanonical(unittest.TestCase):
+    def _strip(self, segs):
+        return "".join(s["t"] for s in segs)
+
+    def test_roundtrips_to_canonical_exactly(self):
+        # tajweed uses tatweel+superscript-alef; canonical uses bare superscript.
+        segs = [{"t": "رَحْمَ", "r": None}, {"t": "ـٰ", "r": "mn"}, {"t": "ن", "r": None}]
+        canonical = "رَحْمَٰن"  # dagger alef as a single U+0670, no tatweel
+        out = align_segments_to_canonical(segs, canonical)
+        self.assertEqual(self._strip(out), canonical)
+
+    def test_rule_transfers_onto_canonical_mark(self):
+        segs = [{"t": "مَ", "r": None}, {"t": "ـٰ", "r": "mn"}]
+        out = align_segments_to_canonical(segs, "مَٰ")
+        # the surviving dagger alef keeps the madd rule
+        self.assertEqual(out, [{"t": "مَ", "r": None}, {"t": "ٰ", "r": "mn"}])
+
+    def test_replace_region_takes_last_non_null_rule(self):
+        # source region 'AB' (A plain, B ruled) replaced by canonical 'x'
+        segs = [{"t": "A", "r": None}, {"t": "B", "r": "mn"}]
+        out = align_segments_to_canonical(segs, "x")
+        self.assertEqual(out, [{"t": "x", "r": "mn"}])
+
+    def test_inserted_mark_inherits_previous_rule(self):
+        # canonical has an extra combining mark the source lacked.
+        segs = [{"t": "ن", "r": "g"}]
+        out = align_segments_to_canonical(segs, "نۨ")  # extra small high noon
+        self.assertEqual(self._strip(out), "نۨ")
+        self.assertTrue(all(s["r"] == "g" for s in out))
+
+    def test_zwnj_removed_between_words_preserves_rules(self):
+        segs = [{"t": "a‌ b", "r": "dg"}]
+        out = align_segments_to_canonical(segs, "a b")
+        self.assertEqual(self._strip(out), "a b")
+        self.assertEqual({s["r"] for s in out}, {"dg"})
+
+
+class TestFullSourceOrthography(unittest.TestCase):
+    """Whole-corpus #290 guarantee: re-derived tajweed round-trips to text_arabic."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(JSON_DIR / "tajweed.json", encoding="utf-8") as fh:
+            cls.taj = json.load(fh)
+        with open(JSON_DIR / "ayahs.json", encoding="utf-8") as fh:
+            cls.ayahs = json.load(fh)
+
+    def test_all_ayahs_roundtrip_to_canonical(self):
+        mismatches = []
+        for a in self.ayahs:
+            key = f"{a['surah_id']}:{a['number_in_surah']}"
+            canonical = normalise_uthmani(a["text_arabic"])
+            segs = align_segments_to_canonical(
+                preparse_tajweed(self.taj[key], key=key), canonical
+            )
+            if "".join(s["t"] for s in segs) != canonical:
+                mismatches.append(key)
+        self.assertEqual(mismatches, [])
+
+    def test_no_forbidden_marks_in_canonical(self):
+        offenders = []
+        for a in self.ayahs:
+            canonical = normalise_uthmani(a["text_arabic"])
+            if any(ch in canonical for ch in ("﻿", "​", "‌", "‍")):
+                offenders.append(f"{a['surah_id']}:{a['number_in_surah']}")
+        self.assertEqual(offenders, [])
 
 
 if __name__ == "__main__":
