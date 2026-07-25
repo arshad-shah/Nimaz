@@ -1,6 +1,8 @@
 package com.arshadshah.nimaz.presentation.components.atoms
 
+import androidx.compose.ui.graphics.Color
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -36,6 +38,21 @@ class QuranTextFormatTest {
     fun `formatAyahWithEndMarker appends marker after a space`() {
         val result = formatAyahWithEndMarker("نص", 3)
         assertThat(result).isEqualTo("نص ﴿٣﴾")
+    }
+
+    @Test
+    fun `annotatedAyahEndMarker pins every span to Amiri so the number never inherits a font without the bracket glyphs`() {
+        // Regression guard for the IndoPak (Nastaʿlīq) font on the Madani layout:
+        // the ornamental brackets ﴿﴾ only exist in the naskh fonts, so the marker
+        // must render in its own font regardless of the selected verse font.
+        val marker = annotatedAyahEndMarker(
+            ayahNumber = 5,
+            bracketColor = Color.Yellow,
+            numberColor = Color.Cyan,
+        )
+        assertThat(marker.text).isEqualTo("﴿٥﴾")
+        assertThat(marker.spanStyles).isNotEmpty()
+        assertThat(marker.spanStyles.all { it.item.fontFamily == AmiriFontFamily }).isTrue()
     }
 
     @Test

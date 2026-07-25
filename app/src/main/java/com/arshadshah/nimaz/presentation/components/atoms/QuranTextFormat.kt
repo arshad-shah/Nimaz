@@ -4,8 +4,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 import com.arshadshah.nimaz.domain.model.Ayah
+import com.arshadshah.nimaz.presentation.theme.AmiriFontFamily
 
 /**
  * Shared, non-Compose helpers for formatting Quran Arabic text.
@@ -37,15 +39,25 @@ fun formatAyahWithEndMarker(arabicText: String, ayahNumber: Int): String {
  * Appends the ornamental end-marker with the brackets and the number tinted
  * separately — gold brackets + a teal number, matching the Quran ornament
  * language. Use inside a [buildAnnotatedString] block.
+ *
+ * The marker is pinned to [markerFontFamily] (Amiri by default) rather than
+ * inheriting the surrounding verse font: the ornamental brackets `﴿﴾`
+ * (U+FD3F / U+FD3E) only exist in the naskh fonts. The IndoPak Nastaʿlīq font
+ * has no glyphs for them — its ayah numbers live in its Private Use Area and
+ * are only emitted by the 16-line IndoPak source text — so a Madani-layout
+ * verse drawn in that font would otherwise render the end-marker as nothing
+ * (the ayah number vanishes). Pinning a font that owns those glyphs keeps the
+ * number visible for every font × layout combination.
  */
 fun AnnotatedString.Builder.appendAyahEndMarker(
     ayahNumber: Int,
     bracketColor: Color,
     numberColor: Color,
+    markerFontFamily: FontFamily = AmiriFontFamily,
 ) {
-    withStyle(SpanStyle(color = bracketColor)) { append(AYAH_END_OPEN) }
-    withStyle(SpanStyle(color = numberColor)) { append(toArabicNumber(ayahNumber)) }
-    withStyle(SpanStyle(color = bracketColor)) { append(AYAH_END_CLOSE) }
+    withStyle(SpanStyle(color = bracketColor, fontFamily = markerFontFamily)) { append(AYAH_END_OPEN) }
+    withStyle(SpanStyle(color = numberColor, fontFamily = markerFontFamily)) { append(toArabicNumber(ayahNumber)) }
+    withStyle(SpanStyle(color = bracketColor, fontFamily = markerFontFamily)) { append(AYAH_END_CLOSE) }
 }
 
 /** The coloured end-marker as a standalone [AnnotatedString]. */
@@ -53,8 +65,9 @@ fun annotatedAyahEndMarker(
     ayahNumber: Int,
     bracketColor: Color,
     numberColor: Color,
+    markerFontFamily: FontFamily = AmiriFontFamily,
 ): AnnotatedString = buildAnnotatedString {
-    appendAyahEndMarker(ayahNumber, bracketColor, numberColor)
+    appendAyahEndMarker(ayahNumber, bracketColor, numberColor, markerFontFamily)
 }
 
 /**
