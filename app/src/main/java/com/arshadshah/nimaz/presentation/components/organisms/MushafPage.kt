@@ -72,6 +72,7 @@ fun MushafPage(
     highlightedAyahId: Int? = null,
     favoriteAyahIds: Set<Int> = emptySet(),
     showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
     showTranslation: Boolean = true,
     showTransliteration: Boolean = false,
     onBookmarkClick: (Ayah) -> Unit = {},
@@ -179,6 +180,7 @@ fun MushafPage(
                             arabicFontSize = arabicFontSize,
                             arabicFontFamily = arabicFontFamily,
                             showTajweed = showTajweed,
+                            tajweedUnderline = tajweedUnderline,
                             onRuleTap = { code -> tappedRuleCode = code },
                             textColor = QuranSurfaceColors.ayahInk,
                             modifier = Modifier.padding(horizontal = 4.dp)

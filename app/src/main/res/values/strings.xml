@@ -1018,6 +1018,8 @@
     <string name="show_tajweed_colors">Show Tajweed Colors</string>
     <string name="show_tajweed_colors_subtitle">Color-coded pronunciation rules</string>
     <string name="show_tajweed_colors_unavailable">Available in the Madani layout</string>
+    <string name="tajweed_underline">Colour-blind friendly</string>
+    <string name="tajweed_underline_subtitle">Underline rules so they don\'t rely on colour alone</string>
     <string name="tajweed_legend_title">Tajweed colour guide</string>
     <string name="tajweed_legend_subtitle">What each colour means</string>
     <string name="tajweed_colour_guide">Tajweed colour guide</string>

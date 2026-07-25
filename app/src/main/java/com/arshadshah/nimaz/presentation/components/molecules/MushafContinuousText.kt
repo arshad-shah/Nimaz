@@ -72,6 +72,7 @@ fun MushafContinuousText(
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
     onRuleTap: (String) -> Unit = {}
 ) {
     val isDarkTheme = isSystemInDarkTheme()
@@ -85,7 +86,7 @@ fun MushafContinuousText(
     // selection changes then rebuild only the cheap assembly below, without
     // re-parsing the whole page's JSON (#293).
     val tajweedByAyahId: Map<Int, AnnotatedString> = remember(
-        ayahs, showTajweed, isDarkTheme, textColor
+        ayahs, showTajweed, isDarkTheme, textColor, tajweedUnderline
     ) {
         if (!showTajweed) {
             emptyMap()
@@ -97,7 +98,8 @@ fun MushafContinuousText(
                         isDarkTheme = isDarkTheme,
                         defaultColor = textColor,
                         stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
-                        annotateRules = true  // enable tap-to-explain (#294)
+                        annotateRules = true,  // enable tap-to-explain (#294)
+                        underlineRules = tajweedUnderline  // colour-blind mode (#294)
                     )
                 }
             }.toMap()
@@ -203,6 +205,7 @@ fun MushafContinuousText(
     selectedColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
     textColor: Color = MaterialTheme.colorScheme.onBackground,
     showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
     onRuleTap: (String) -> Unit = {}
 ) {
     MushafContinuousText(
@@ -219,6 +222,7 @@ fun MushafContinuousText(
         selectedColor = selectedColor,
         textColor = textColor,
         showTajweed = showTajweed,
+        tajweedUnderline = tajweedUnderline,
         onRuleTap = onRuleTap
     )
 }

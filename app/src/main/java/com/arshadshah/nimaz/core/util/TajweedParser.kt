@@ -4,6 +4,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.TextDecoration
 import com.arshadshah.nimaz.core.monitoring.CrashReporter
 import com.arshadshah.nimaz.presentation.theme.NimazColors.TajweedColors
 import kotlinx.serialization.Serializable
@@ -192,7 +193,8 @@ object TajweedParser {
         isDarkTheme: Boolean,
         defaultColor: Color = Color.Unspecified,
         stripPrefix: String? = null,
-        annotateRules: Boolean = false
+        annotateRules: Boolean = false,
+        underlineRules: Boolean = false
     ): AnnotatedString {
         return try {
             var segments = json.decodeFromString<List<TajweedSegment>>(tajweedText)
@@ -216,8 +218,17 @@ object TajweedParser {
                         }
 
                         if (color != Color.Unspecified) {
+                            // Colour-blind-friendly mode adds an underline so a rule
+                            // is marked by a non-hue channel too, not colour alone
+                            // (#294) — critical for the near-neighbour madd/idgham
+                            // families that can't be separated by hue.
                             addStyle(
-                                style = SpanStyle(color = color),
+                                style = SpanStyle(
+                                    color = color,
+                                    textDecoration = if (underlineRules) {
+                                        TextDecoration.Underline
+                                    } else null
+                                ),
                                 start = startIdx,
                                 end = length
                             )

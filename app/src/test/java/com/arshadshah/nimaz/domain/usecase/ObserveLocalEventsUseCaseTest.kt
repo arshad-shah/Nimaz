@@ -166,6 +166,8 @@ private class FakeSettings(private val offset: Int) : SettingsRepository {
     override suspend fun setKeepScreenOn(enabled: Boolean) {}
     override val showTajweed: Flow<Boolean> = flowOf(false)
     override suspend fun setShowTajweed(enabled: Boolean) {}
+    override val tajweedUnderline: Flow<Boolean> = flowOf(false)
+    override suspend fun setTajweedUnderline(enabled: Boolean) {}
     override val duaArabicFont: Flow<String> = flowOf("default")
     override suspend fun setDuaArabicFont(fontId: String) {}
     override val duaArabicFontSize: Flow<Float> = flowOf(24f)

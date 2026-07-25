@@ -157,6 +157,7 @@ class PreferencesDataStore @Inject constructor(
         val CONTINUOUS_READING = booleanPreferencesKey("continuous_reading")
         val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
         val SHOW_TAJWEED = booleanPreferencesKey("show_tajweed")
+        val TAJWEED_UNDERLINE = booleanPreferencesKey("tajweed_underline")
 
         // Dua Settings
         val DUA_ARABIC_FONT = stringPreferencesKey("dua_arabic_font")
@@ -620,6 +621,12 @@ class PreferencesDataStore @Inject constructor(
 
     override suspend fun setShowTajweed(enabled: Boolean) =
         put(PreferencesKeys.SHOW_TAJWEED, enabled)
+
+    override val tajweedUnderline: Flow<Boolean> =
+        preference(PreferencesKeys.TAJWEED_UNDERLINE, false)
+
+    override suspend fun setTajweedUnderline(enabled: Boolean) =
+        put(PreferencesKeys.TAJWEED_UNDERLINE, enabled)
 
     // Dua Settings
     override val duaArabicFont: Flow<String> = preference(PreferencesKeys.DUA_ARABIC_FONT, "amiri")

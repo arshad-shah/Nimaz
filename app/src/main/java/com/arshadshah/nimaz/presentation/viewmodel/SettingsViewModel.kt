@@ -147,6 +147,7 @@ data class QuranSettingsUiState(
     val keepScreenOn: Boolean = true,
     val selectedReciterId: String? = null,
     val showTajweed: Boolean = false,
+    val tajweedUnderline: Boolean = false,
     /** The Mushaf edition/layout for the page reader (default Uthmani/604 vs 16-line IndoPak/548). */
     val mushafScript: MushafScript = MushafScript.DEFAULT
 )
@@ -239,6 +240,7 @@ sealed interface SettingsEvent {
     data class SetKeepScreenOn(val enabled: Boolean) : SettingsEvent
     data class SetReciter(val reciterId: String?) : SettingsEvent
     data class SetShowTajweed(val enabled: Boolean) : SettingsEvent
+    data class SetTajweedUnderline(val enabled: Boolean) : SettingsEvent
     data class SetMushafScript(val script: MushafScript) : SettingsEvent
 
     // Dua
@@ -736,6 +738,11 @@ class SettingsViewModel @Inject constructor(
                 viewModelScope.launch { settingsRepository.setShowTajweed(event.enabled) }
             }
 
+            is SettingsEvent.SetTajweedUnderline -> {
+                _quranState.update { it.copy(tajweedUnderline = event.enabled) }
+                viewModelScope.launch { settingsRepository.setTajweedUnderline(event.enabled) }
+            }
+
             is SettingsEvent.SetMushafScript -> {
                 _quranState.update { it.copy(mushafScript = event.script) }
                 viewModelScope.launch { settingsRepository.setQuranMushafScript(event.script.name) }
@@ -1006,6 +1013,7 @@ class SettingsViewModel @Inject constructor(
             val keepScreenOn = settingsRepository.keepScreenOn.first()
             val reciterId = settingsRepository.selectedReciterId.first()
             val showTajweed = settingsRepository.showTajweed.first()
+            val tajweedUnderline = settingsRepository.tajweedUnderline.first()
             val mushafScript = MushafScript.fromName(settingsRepository.quranMushafScript.first())
 
             _quranState.update {
@@ -1020,6 +1028,7 @@ class SettingsViewModel @Inject constructor(
                     keepScreenOn = keepScreenOn,
                     selectedReciterId = reciterId,
                     showTajweed = showTajweed,
+                    tajweedUnderline = tajweedUnderline,
                     mushafScript = mushafScript
                 )
             }

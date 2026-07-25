@@ -144,6 +144,8 @@ interface SettingsRepository {
     suspend fun setKeepScreenOn(enabled: Boolean)
     val showTajweed: Flow<Boolean>
     suspend fun setShowTajweed(enabled: Boolean)
+    val tajweedUnderline: Flow<Boolean>
+    suspend fun setTajweedUnderline(enabled: Boolean)
     val duaArabicFont: Flow<String>
     suspend fun setDuaArabicFont(fontId: String)
     val duaArabicFontSize: Flow<Float>

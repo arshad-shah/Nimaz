@@ -92,6 +92,7 @@ internal fun AyahItem(
     isKhatamRead: Boolean = false,
     isKhatamMode: Boolean = false,
     showTajweed: Boolean = false,
+    tajweedUnderline: Boolean = false,
     onBookmarkClick: () -> Unit,
     onFavoriteClick: () -> Unit = {},
     onPlayAyahClick: () -> Unit = {},
@@ -216,13 +217,14 @@ internal fun AyahItem(
             // Render with tajweed colors using BasicText
             val tajweedAnnotated = remember(
                 ayah.textTajweed, isDarkTheme, ayah.numberInSurah,
-                textColor, markerBracketColor, markerNumberColor
+                textColor, markerBracketColor, markerNumberColor, tajweedUnderline
             ) {
                 val parsed = TajweedParser.parse(
                     tajweedText = ayah.textTajweed,
                     isDarkTheme = isDarkTheme,
                     defaultColor = textColor,
-                    stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null
+                    stripPrefix = if (ayah.hasLeadingBismillah) BISMILLAH_TEXT else null,
+                    underlineRules = tajweedUnderline
                 )
                 // Append the coloured end marker to the tajweed text
                 buildAnnotatedString {

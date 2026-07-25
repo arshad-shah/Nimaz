@@ -299,6 +299,16 @@ fun QuranSettingsScreen(
                         onCheckedChange = { viewModel.onEvent(SettingsEvent.SetShowTajweed(!quranState.showTajweed)) }
                     )
                     NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                    // Colour-blind-friendly mode: underline rule spans so they are
+                    // marked by a non-hue channel too (#294).
+                    NimazSettingsItem(
+                        title = stringResource(R.string.tajweed_underline),
+                        subtitle = stringResource(R.string.tajweed_underline_subtitle),
+                        checked = quranState.tajweedUnderline,
+                        enabled = tajweedAvailable && quranState.showTajweed,
+                        onCheckedChange = { viewModel.onEvent(SettingsEvent.SetTajweedUnderline(!quranState.tajweedUnderline)) }
+                    )
+                    NimazDivider(modifier = Modifier.padding(horizontal = 16.dp))
                     // Colour legend — reachable regardless of script so users can
                     // learn what the colours mean (#294).
                     NimazSettingsItem(

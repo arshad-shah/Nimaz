@@ -886,6 +886,8 @@
     <string name="show_tajweed_colors">Tadschwid-Farben anzeigen</string>
     <string name="show_tajweed_colors_subtitle">Farbcodierte Ausspracheregeln</string>
     <string name="show_tajweed_colors_unavailable">Verfügbar im Madani-Layout</string>
+        <string name="tajweed_underline">Farbenblind-freundlich</string>
+    <string name="tajweed_underline_subtitle">Regeln unterstreichen, statt nur Farbe zu nutzen</string>
     <string name="tajweed_legend_title">Tadschwid-Farbführer</string>
     <string name="tajweed_legend_subtitle">Was jede Farbe bedeutet</string>
     <string name="tajweed_colour_guide">Tadschwid-Farbführer</string>

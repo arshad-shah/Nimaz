@@ -126,6 +126,16 @@ class TajweedParserTest {
     }
 
     @Test
+    fun `underlineRules adds an underline decoration to coloured spans`() {
+        val json = """[{"t":"ن","r":"g"}]"""
+        val plain = TajweedParser.parse(json, isDarkTheme = false)
+        val underlined = TajweedParser.parse(json, isDarkTheme = false, underlineRules = true)
+        assertThat(plain.spanStyles[0].item.textDecoration).isNull()
+        assertThat(underlined.spanStyles[0].item.textDecoration)
+            .isEqualTo(androidx.compose.ui.text.style.TextDecoration.Underline)
+    }
+
+    @Test
     fun `every v3 rule code resolves to a colour`() {
         val codes = listOf("g", "if", "is", "dg", "dn", "ds", "dj", "dk", "dm",
             "qs", "qk", "mn", "mf", "mt", "ma", "ml", "my", "l", "ls", "sl", "hw", "wq")
