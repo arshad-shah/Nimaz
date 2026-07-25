@@ -1,7 +1,7 @@
-Yang baru sejak 3.0.56:
+Yang baru:
 
-• Pola latar Islami kini tampil di seluruh aplikasi — pilih dari lima gaya, atau Tidak ada, di Tampilan.
-• Tampilan disegarkan: bilah judul mengambang dan kartu yang lebih jelas terpisah, terang dan gelap.
-• Al-Qur'an: beranda ditata ulang, info surah didesain ulang, dan pembaca yang kini cocok mode terang.
-• Ringkasan Zakat baru dan widget Khatam yang lebih kaya.
-• Perbaikan: progres bacaan tidak lagi macet di 0%, dan kalender berpindah bulan dengan benar.
+• BARU: Pengingat ibadah opsional — Tahajud, Sahur & Buka, Tarawih, Lailatul Qadar, zikir pagi & petang, dan hari puasa sunnah. Aktifkan yang Anda mau saja.
+• Kartu "Ibadah Berikutnya" di Beranda menampilkan yang akan datang.
+• Pengaturan notifikasi ditata ulang menjadi bagian yang jelas.
+• Al-Qur'an: kartu rekomendasi di beranda.
+• Pemolesan dan perbaikan.
