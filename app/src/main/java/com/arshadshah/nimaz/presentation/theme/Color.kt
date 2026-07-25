@@ -188,30 +188,31 @@ object NimazColors {
     // Each rule has a light and a dark (OLED-brighter) tone; pairs are consumed
     // by TajweedParser.
     object TajweedColors {
-        // ── Light theme ──
-        val GhunnahLight = P.Emerald600
-        val IkhfaLight = P.Teal600
+        // ── Light theme ── all ≥ 4.5:1 vs the reader background (#FAFAFA);
+        // verified by scripts/check_tajweed_contrast.py.
+        val GhunnahLight = P.Emerald700        // was Emerald600 (3.61:1)
+        val IkhfaLight = P.Teal700             // was Teal600 (3.59:1)
         val IkhfaShafawiLight = P.Cyan700
-        val IdghamGhunnahLight = P.Amber600
-        val IdghamNoGhunnahLight = P.Amber800
+        val IdghamGhunnahLight = P.Amber800    // was Amber600 (3.05:1)
+        val IdghamNoGhunnahLight = P.Brown700  // freed Amber800 for IdghamGhunnah
         val IdghamShafawiLight = P.Amber700
         val IdghamMutajanisaynLight = P.Orange700
-        val IdghamMutaqaribayLight = P.Orange600
+        val IdghamMutaqaribayLight = P.Orange800  // was Orange600 (3.41:1)
         // Qalqalah — blue family, kubra deeper than sughra
         val QalqalahSughraLight = P.Blue600
         val QalqalahKubraLight = P.Blue700
         // Madd — one warm hue family (rose→red→pink), distinct lightness so the
         // six sub-rules read as related. See TajweedParser KDoc for beat counts.
         val MaddNormalLight = P.Rose600        // mn — natural, 2
-        val MaddMunfasilLight = P.Pink600      // mf — jaiz munfasil, 2/4/5
+        val MaddMunfasilLight = P.Pink700      // mf — jaiz munfasil (was Pink600 4.40:1)
         val MaddMuttasilLight = P.Red600       // mt — wajib muttasil, 4/5
         val MaddAaridLight = P.Rose800         // ma — 'aarid lis-sukun, 2/4/6
-        val MaddLinLight = P.Pink700           // ml — lin, 2/4/6
+        val MaddLinLight = P.Fuchsia700        // ml — lin (freed Pink700 for munfasil)
         val MaddNecessaryLight = P.Red700      // my — lazim, 6
         val IqlabLight = P.Violet600
         val LamShamsiyyahLight = P.Indigo600
         val SilentLight = P.Slate500
-        val HamzaWaslLight = P.Slate400
+        val HamzaWaslLight = P.Slate600        // was Slate400 (2.46:1) — 22% of all spans
 
         // ── Dark theme (brighter for OLED readability) ──
         val GhunnahDark = P.Emerald300

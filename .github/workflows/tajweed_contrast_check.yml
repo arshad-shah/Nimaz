@@ -1,0 +1,29 @@
+name: Tajweed Contrast Check
+
+# Verifies every tajweed rule colour keeps >= 4.5:1 contrast against the reader
+# background in both themes (issue #294). Pure Python — no Android toolchain —
+# so it runs fast on any PR that touches the theme colours.
+on:
+  push:
+    branches: [ dev ]
+    paths:
+      - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Palette.kt'
+      - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Color.kt'
+      - 'scripts/check_tajweed_contrast.py'
+  pull_request:
+    paths:
+      - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Palette.kt'
+      - 'app/src/main/java/com/arshadshah/nimaz/presentation/theme/Color.kt'
+      - 'scripts/check_tajweed_contrast.py'
+
+jobs:
+  contrast:
+    name: Tajweed colour contrast
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Check tajweed colour contrast (>= 4.5:1)
+        run: python3 scripts/check_tajweed_contrast.py

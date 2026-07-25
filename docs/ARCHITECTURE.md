@@ -428,6 +428,42 @@ typed route object.
     the `theme/` package (a `NimazPalette`/`NimazColors` token, or the relevant art object) and
     reference the name. The only permitted `Color(0x…)` calls outside `theme/` are *computed* ARGB
     from runtime values (e.g. `Color(0xFF000000 or rgbLong)`), not static literals.
+- **Tajweed rule colours & contrast (issue #294).** `NimazColors.TajweedColors` holds a
+  light + dark tone for each of the 20 v3 tajweed rules (consumed by `TajweedParser`; the rule
+  names/explanations live in `TajweedParser.rules`, the single source of truth for the legend).
+  Every colour is held to **≥ 4.5:1 WCAG contrast** against the reader background it renders on
+  (`#FAFAFA` light / `#1C1917` dark). `scripts/check_tajweed_contrast.py` reads the hex values
+  straight from `Palette.kt`/`Color.kt`, verifies the ratios, and fails CI
+  (`tajweed_contrast_check.yml`) on any regression — so this table cannot silently drift
+  (regenerate with `--markdown`):
+
+  | Rule | Light | vs #FAFAFA | Dark | vs #1C1917 |
+  |---|---|---|---|---|
+  | Ghunnah | `#047857` | 5.25:1 | `#34D399` | 9.10:1 |
+  | Ikhfa | `#0F766E` | 5.24:1 | `#2DD4BF` | 9.39:1 |
+  | Ikhfa Shafawi | `#0E7490` | 5.13:1 | `#22D3EE` | 9.68:1 |
+  | Idgham w/ Ghunnah | `#92400E` | 6.79:1 | `#FBBF24` | 10.48:1 |
+  | Idgham w/o Ghunnah | `#795548` | 6.28:1 | `#F59E0B` | 8.14:1 |
+  | Idgham Shafawi | `#B45309` | 4.81:1 | `#FCD34D` | 12.13:1 |
+  | Idgham Mutajanisayn | `#C2410C` | 4.96:1 | `#FB923C` | 7.73:1 |
+  | Idgham Mutaqaribayn | `#9A3412` | 7.00:1 | `#FDBA74` | 10.37:1 |
+  | Qalqalah Sughra | `#2563EB` | 4.95:1 | `#60A5FA` | 6.88:1 |
+  | Qalqalah Kubra | `#1D4ED8` | 6.42:1 | `#93C5FD` | 9.70:1 |
+  | Madd Tabee'i | `#E11D48` | 4.50:1 | `#FB7185` | 6.50:1 |
+  | Madd Munfasil | `#BE185D` | 5.78:1 | `#F472B6` | 6.60:1 |
+  | Madd Muttasil | `#DC2626` | 4.63:1 | `#F87171` | 6.32:1 |
+  | Madd 'Aarid | `#9F1239` | 7.68:1 | `#FDA4AF` | 9.25:1 |
+  | Madd Lin | `#A21CAF` | 6.06:1 | `#F9A8D4` | 9.64:1 |
+  | Madd Lazim | `#B91C1C` | 6.20:1 | `#FCA5A5` | 9.21:1 |
+  | Iqlab | `#7C3AED` | 5.46:1 | `#A78BFA` | 6.43:1 |
+  | Lam Shamsiyyah | `#4F46E5` | 6.02:1 | `#818CF8` | 5.86:1 |
+  | Silent | `#64748B` | 4.56:1 | `#94A3B8` | 6.82:1 |
+  | Hamza al-Wasl | `#475569` | 7.26:1 | `#CBD5E1` | 11.78:1 |
+
+  Because all 20 colours must sit in a dark band to clear 4.5:1 against a near-white background,
+  same-hue **near-neighbours** (the six madd rules; the five idgham rules) have low pairwise
+  contrast (~1.0:1) — they are told apart by position, the in-app legend, and (future work in
+  #294) an optional decoration channel / colour-blind-safe mode rather than by hue alone.
 - **Theme entry:** `NimazTheme { ... }` wraps the app in `MainActivity`; it supplies the
   Material 3 color scheme, `NimazTypography`, and shapes, and honors `ThemeMode`. It also
   provides the appearance CompositionLocals (`LocalIsDarkTheme`, `LocalHapticEnabled`,
